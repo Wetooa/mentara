@@ -11,7 +11,7 @@ export const LIST_OF_QUESTIONNAIRES = [
   "Phobia",
   "Burnout",
   "Binge eating/ eating disorders",
-  "ADD/ ADHD",
+  "ADD / ADHD",
   "Substance or Alcohol Use Issues",
 ];
 
