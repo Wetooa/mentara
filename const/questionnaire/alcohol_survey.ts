@@ -1,0 +1,53 @@
+const AUDIT = {
+  description:
+    "The Alcohol Use Disorders Identification Test (AUDIT) is a 10-item screening tool developed by the World Health Organization (WHO) to assess alcohol consumption, drinking behaviors, and alcohol-related problems. A score of 8 or more is considered to indicate hazardous or harmful alcohol use.",
+  questions: [
+    "How often do you have a drink containing alcohol?",
+    "How many drinks containing alcohol do you have on a typical day when you are drinking?",
+    "How often do you have six or more drinks on one occasion?",
+    "How often during the last year have you found that you were not able to stop drinking once you had started?",
+    "How often during the last year have you failed to do what was normally expected from you because of drinking?",
+    "How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session?",
+    "How often during the last year have you had a feeling of guilt or remorse after drinking?",
+    "How often during the last year have you been unable to remember what happened the night before because you had been drinking?",
+    "Have you or someone else been injured as a result of your drinking?",
+    "Has a relative, friend, doctor, or other health worker been concerned about your drinking or suggested you cut down?",
+  ],
+  scoring: {
+    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    riskLevels: {
+      lowRisk: { range: [0, 7], label: "Low Risk" },
+      hazardous: { range: [8, 15], label: "Hazardous Use" },
+      harmful: { range: [16, 19], label: "Harmful Use" },
+      dependent: { range: [20, 40], label: "Possible Alcohol Dependence" },
+    },
+    getRiskLevel: (score: number) => {
+      if (score >= 0 && score <= 7) return "Low Risk";
+      if (score >= 8 && score <= 15) return "Hazardous Use";
+      if (score >= 16 && score <= 19) return "Harmful Use";
+      if (score >= 20 && score <= 40) return "Possible Alcohol Dependence";
+      return "Invalid score";
+    },
+  },
+  standardDrinks: {
+    beer: { "12oz (~5%)": 1, "16oz": 1.3, "22oz": 2, "40oz": 3.3 },
+    maltLiquor: {
+      "8-9oz (~7%)": 1,
+      "12oz": 1.5,
+      "16oz": 2,
+      "22oz": 2.5,
+      "40oz": 4.5,
+    },
+    wine: { "5oz (~12%)": 1, "750mL (25oz) bottle": 5 },
+    spirits: {
+      "1.5oz (~40%)": 1,
+      "pint (16oz)": 11,
+      "fifth (25oz)": 17,
+      "1.75L (59oz)": 39,
+    },
+  },
+  disclaimer:
+    "This questionnaire is a screening tool to assess alcohol use disorder risk. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your alcohol consumption, please consult a healthcare professional.",
+};
+
+export default AUDIT;
