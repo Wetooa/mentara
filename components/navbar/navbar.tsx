@@ -3,7 +3,7 @@ import NavbarButton from "./navbar-button";
 
 export default function Navbar() {
   return (
-    <nav className="flex justify-between py-2 px-4 shadow-lg items-center">
+    <nav className="sticky w-full flex justify-between py-2 px-4 shadow-lg items-center">
       <div className="flex items-center gap-2">
         <Image
           width={50}
