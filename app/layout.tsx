@@ -28,7 +28,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html suppressHydrationWarning lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-w-screen min-h-screen`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-w-screen min-h-screen w-screen h-screen`}
         >
           <ThemeProvider
             attribute="class"
@@ -37,7 +37,7 @@ export default function RootLayout({
             storageKey="mentara-theme"
             disableTransitionOnChange
           >
-            {children}
+            <div className="w-full h-full">{children}</div>
           </ThemeProvider>
         </body>
       </html>
