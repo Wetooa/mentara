@@ -1,53 +1,106 @@
-import {
-  LIST_OF_QUESTIONNAIRES,
-  ListOfQuestionnaires,
-} from "@/const/list-of-questionnaires";
-import React from "react";
-import { Checkbox } from "../ui/checkbox";
+import { LIST_OF_QUESTIONNAIRES } from "@/const/list-of-questionnaires";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+
+const InitialCheckListFormSchema = z.object({
+  items: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: "You have to select at least one item.",
+  }),
+});
 
 export default function PreAssessmentInitialCheckList() {
-  const [checked, setChecked] = React.useState<ListOfQuestionnaires[]>([]);
+  const form = useForm<z.infer<typeof InitialCheckListFormSchema>>({
+    resolver: zodResolver(InitialCheckListFormSchema),
+    defaultValues: {
+      items: [],
+    },
+  });
 
-  function handleCheckboxChange(key: ListOfQuestionnaires, value: boolean) {
-    if (value === true) {
-      setChecked((prev) => [...prev, key]);
-    } else {
-      setChecked((prev) => prev.filter((item) => item !== key));
-    }
+  function onSubmit(data: z.infer<typeof InitialCheckListFormSchema>) {
+    console.log(data);
   }
 
   return (
     <div className="">
-      <div>
-        <h3 className="text-secondary font-semibold">
-          What can we help you with today?
-        </h3>
-        <p className="text-black/70 font-xs">Select all that apply</p>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-6">
+            <div className="mb-4">
+              <FormLabel className="text-secondary text-xl font-bold">
+                What can we help you with today?
+              </FormLabel>
+              <FormDescription>Select all that apply</FormDescription>
+            </div>
 
-        <div className="space-y-2">
-          {LIST_OF_QUESTIONNAIRES.map((item) => {
-            const isChecked = checked.includes(item);
+            <FormField
+              control={form.control}
+              name="items"
+              render={() => (
+                <FormItem className="space-y-1">
+                  {LIST_OF_QUESTIONNAIRES.map((item) => (
+                    <FormField
+                      key={item}
+                      control={form.control}
+                      name="items"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={item}
+                            className="flex flex-row items-center w-full h-full px-4 py-1.5 space-x-3 space-y-0 rounded-full bg-white shadow-lg"
+                          >
+                            {/* FIX: Later adjust entire thing to be clickable */}
 
-            return (
-              <div
-                key={item}
-                className="flex items-center gap-4 bg-white py-2 px-6 rounded-full"
-              >
-                <Checkbox
-                  onCheckedChange={() => handleCheckboxChange(item, !isChecked)}
-                />
-                <label>{item}</label>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div>
-        <Button className="w-full" variant={"secondary"}>
-          Next
-        </Button>
-      </div>
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, item])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item,
+                                        ),
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              {item}
+                            </FormLabel>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="bg-white p-6">
+            <Button
+              className="w-full font-bold"
+              variant={"secondary"}
+              type="submit"
+            >
+              Next
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
