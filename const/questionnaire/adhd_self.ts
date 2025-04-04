@@ -77,8 +77,8 @@ const ASRS_V1_1 = {
         part === "A"
           ? ASRS_V1_1.scoring.partA.severityLevels
           : part === "B"
-          ? ASRS_V1_1.scoring.partB.severityLevels
-          : ASRS_V1_1.scoring.totalScore.severityLevels;
+            ? ASRS_V1_1.scoring.partB.severityLevels
+            : ASRS_V1_1.scoring.totalScore.severityLevels;
 
       for (const key of Object.keys(ranges) as (keyof SeverityLevels)[]) {
         if (score >= ranges[key].range[0] && score <= ranges[key].range[1]) {

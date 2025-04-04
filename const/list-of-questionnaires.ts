@@ -10,7 +10,7 @@ export const LIST_OF_QUESTIONNAIRES = [
   "Social anxiety",
   "Phobia",
   "Burnout",
-  "Binge eating / eating disorders",
+  "Binge eating / Eating disorders",
   "ADD / ADHD",
   "Substance or Alcohol Use Issues",
 ];

@@ -12,7 +12,7 @@ interface MBIScoring {
   };
   getScaleScore: (
     answers: number[],
-    scale: keyof MBIScoring["scales"]
+    scale: keyof MBIScoring["scales"],
   ) => number;
   getSeverity: (section: keyof MBIScoring["scales"], score: number) => string;
 }
@@ -81,7 +81,7 @@ const MBI: MBIType = {
 
       return scaleItems.reduce(
         (total, index) => total + (answers[index] || 0),
-        0
+        0,
       );
     },
     getSeverity: (section, score) => {
