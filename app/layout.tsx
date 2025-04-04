@@ -38,7 +38,7 @@ export default function RootLayout({
             storageKey="mentara-theme"
             disableTransitionOnChange
           >
-            <div className="w-full h-full">{children}</div>
+            {children}
             <Toaster />
           </ThemeProvider>
         </body>
