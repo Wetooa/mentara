@@ -1,4 +1,4 @@
-const PERCEIVED_STRESS_SCALE = {
+export const PERCEIVED_STRESS_SCALE = {
   title: "Perceived Stress Scale",
   description:
     "The Perceived Stress Scale (PSS) is a classic stress assessment instrument designed to measure individual stress levels over the past month. Answer each question based on how often you experienced the described feelings or thoughts.",

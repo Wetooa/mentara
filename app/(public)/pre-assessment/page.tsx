@@ -1,12 +1,16 @@
 "use client";
 
 import Logo from "@/components/logo";
-import PreAssessmentChecklist from "@/components/pre-assessment/checklist";
+import PreAssessmentChecklist, {
+  usePreAssessmentChecklistStore,
+} from "@/components/pre-assessment/preassessment";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
 export default function PreAssessmentPage() {
+  const { decreaseStep } = usePreAssessmentChecklistStore();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -15,7 +19,10 @@ export default function PreAssessmentPage() {
       className="bg-gradient-to-b from-tertiary to-transparent w-full h-full"
     >
       <nav className="flex justify-between p-4">
-        <Button className="rounded-full aspect-square font-bold">
+        <Button
+          onClick={decreaseStep}
+          className="rounded-full aspect-square font-bold"
+        >
           <ArrowLeft />
         </Button>
         <Logo />
