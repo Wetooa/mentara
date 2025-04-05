@@ -1,7 +1,7 @@
 import { ListOfQuestionnaires } from "@/const/list-of-questionnaires";
 import { create } from "zustand";
 
-const inProd = process.env.NODE_ENV === "production";
+const inProd = true;
 
 export interface PreAssessmentChecklistState {
   step: number;
@@ -90,3 +90,24 @@ export const usePreAssessmentChecklistStore =
     setPrevDisabled: (disabled) =>
       set((state) => ({ ...state, isPrevDisabled: disabled })),
   }));
+
+export interface SignUpState {
+  details: {
+    nickName: string;
+    email: string;
+    password: string;
+  };
+
+  setDetails: (to: SignUpState["details"]) => void;
+}
+
+export const useSignUpStore = create<SignUpState>()((set) => ({
+  details: {
+    nickName: "",
+    email: "",
+    password: "",
+  },
+
+  setDetails: (to: SignUpState["details"]) =>
+    set((state) => ({ ...state, details: to })),
+}));

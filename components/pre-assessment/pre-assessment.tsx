@@ -5,7 +5,8 @@ import { Button } from "../ui/button";
 import PreAssessmentProgressBar from "./progress-bar";
 import PreAssessmentInitialCheckList from "./questionnaire/initial";
 import QuestionnaireForm from "./questionnaire/questionnaire-form";
-import PreAssessmentSignUp from "./sign-up";
+import PreAssessmentSignUp, { PreAssessmentSignUpRef } from "./sign-up";
+import { useRef } from "react";
 
 export default function PreAssessmentChecklist({
   animationControls,
@@ -18,6 +19,8 @@ export default function PreAssessmentChecklist({
   // const QUESTIONNAIRE_MAP: Record<ListOfQuestionnaires, React.ReactNode> = {
   //   Stress: <StressForm />,
   // };
+  //
+  const formRef = useRef<PreAssessmentSignUpRef>(null);
 
   let form = null;
   if (step === 0) {
@@ -27,8 +30,14 @@ export default function PreAssessmentChecklist({
     const questionnaire = QUESTIONNAIRE_MAP[title];
     form = <QuestionnaireForm questions={questionnaire.questions} />;
   } else {
-    form = <PreAssessmentSignUp />;
+    form = <PreAssessmentSignUp ref={formRef} />;
   }
+
+  const handleExternalSubmit = () => {
+    if (formRef.current) {
+      formRef.current.submit();
+    }
+  };
 
   const formIndex = step;
   const questionIndex = miniStep;
@@ -36,8 +45,14 @@ export default function PreAssessmentChecklist({
     formIndex === 0 ||
     formIndex === questionnaires.length + 1 ||
     questionnaires[step - 1].length - 1 == questionIndex;
+  const isSignUp = formIndex === questionnaires.length + 1;
 
   function handleButtonOnClick() {
+    if (isSignUp) {
+      handleExternalSubmit();
+      return;
+    }
+
     animationControls
       .start({
         x: -10,
@@ -89,7 +104,7 @@ export default function PreAssessmentChecklist({
             disabled={isNextDisabled}
             onClick={handleButtonOnClick}
           >
-            {isLastQuestion ? "Next Form" : "Continue"}
+            {isLastQuestion ? "Submit" : "Continue"}
           </Button>
         </div>
       </div>
