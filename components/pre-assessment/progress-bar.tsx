@@ -1,6 +1,6 @@
 import React from "react";
 import { Progress } from "../ui/progress";
-import { usePreAssessmentChecklistStore } from "./preassessment";
+import { usePreAssessmentChecklistStore } from "./pre-assessment";
 
 export default function PreAssessmentProgressBar() {
   const { step, questionnaires } = usePreAssessmentChecklistStore();

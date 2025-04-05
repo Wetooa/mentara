@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { usePreAssessmentChecklistStore } from "./preassessment";
+import { usePreAssessmentChecklistStore } from "./pre-assessment";
 
 const InitialCheckListFormSchema = z.object({
   items: z.array(z.string()).refine((value) => value.some((item) => item), {
@@ -22,7 +22,7 @@ const InitialCheckListFormSchema = z.object({
 });
 
 export default function PreAssessmentInitialCheckList() {
-  const { setQuestionnaires, increaseStep } = usePreAssessmentChecklistStore();
+  const { setQuestionnaires, nextStep } = usePreAssessmentChecklistStore();
 
   const form = useForm<z.infer<typeof InitialCheckListFormSchema>>({
     resolver: zodResolver(InitialCheckListFormSchema),
@@ -33,14 +33,14 @@ export default function PreAssessmentInitialCheckList() {
 
   function onSubmit(data: z.infer<typeof InitialCheckListFormSchema>) {
     setQuestionnaires(data.items);
-    increaseStep();
+    nextStep();
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] px-10 py-4">
-          <div className="mb-4">
+        <div className="shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
+          <div className="mb-8">
             <FormLabel className="text-secondary text-xl font-bold">
               What can we help you with today?
             </FormLabel>

@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
-import { usePreAssessmentChecklistStore } from "./preassessment";
-import PreAssessmentInitialCheckList from "./checklist-initial";
 import { ListOfQuestionnaires } from "@/const/list-of-questionnaires";
+import { motion } from "framer-motion";
+import SignIn from "../sign-up/sign-up";
+import PreAssessmentInitialCheckList from "./checklist-initial";
+import { usePreAssessmentChecklistStore } from "./pre-assessment";
 import StressForm from "./questionnaire/stress";
 
 export default function PreAssessmentBaseForm() {
@@ -15,8 +16,10 @@ export default function PreAssessmentBaseForm() {
 
   if (step === 0) {
     form = <PreAssessmentInitialCheckList />;
-  } else {
+  } else if (step < questionnaires.length + 1) {
     form = QUESTIONNAIRE_MAP[questionnaires[step - 1]] || null;
+  } else {
+    form = <SignIn />;
   }
 
   return (
