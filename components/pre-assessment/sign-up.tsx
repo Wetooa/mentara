@@ -1,5 +1,6 @@
 import React from "react";
 import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
 
 export default function PreAssessmentSignUp() {
   return (
@@ -22,6 +23,14 @@ export default function PreAssessmentSignUp() {
         <Input placeholder="Confirm Email" />
         <Input placeholder="Password" />
         <Input placeholder="Confirm Password" />
+
+        <div className="flex justify-center items-center gap-2">
+          <Separator className="flex-1" />
+          <p className="px-2 text-black/60 text-xs">or</p>
+          <Separator className="flex-1" />
+        </div>
+
+        <div>mga other stuff</div>
       </div>
     </>
   );
