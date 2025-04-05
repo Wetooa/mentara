@@ -139,3 +139,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: "Futura";
+  src: url("/fonts/Futura Md BT Medium.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kollektif";
+  src: url("/fonts/Kollektif.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

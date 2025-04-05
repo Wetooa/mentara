@@ -10,7 +10,7 @@ export default function Logo() {
         src={"/mentara-icon.png"}
         alt={"Mentara Icon"}
       />
-      <h1 className="font-bold text-3xl leading-none -mt-1 text-primary ">
+      <h1 className="font-[Kollektif] font-bold text-3xl leading-none -mt-1 text-primary ">
         mentara
       </h1>
     </div>

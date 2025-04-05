@@ -2,21 +2,18 @@
 
 import PreAssessmentNavbar from "@/components/pre-assessment/navbar";
 import PreAssessmentChecklist from "@/components/pre-assessment/pre-assessment";
-import { motion } from "framer-motion";
+import { useAnimationControls } from "framer-motion";
 
 export default function PreAssessmentPage() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1, ease: "easeIn" }}
-      className="bg-gradient-to-b from-tertiary to-transparent w-full h-full"
-    >
-      <PreAssessmentNavbar />
+  const animationControls = useAnimationControls();
 
-      <main className="flex flex-col items-center justify-center ">
-        <PreAssessmentChecklist />
+  return (
+    <div className="bg-gradient-to-b from-tertiary to-transparent w-full h-full">
+      <PreAssessmentNavbar animationControls={animationControls} />
+
+      <main className="flex flex-col items-center justify-center h-full">
+        <PreAssessmentChecklist animationControls={animationControls} />
       </main>
-    </motion.div>
+    </div>
   );
 }
