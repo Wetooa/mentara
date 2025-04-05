@@ -46,7 +46,7 @@ export default function QuestionnaireForm({
           {question.question}
         </p>
       </div>
-      <div className="w-full space-y-2">
+      <div className="w-full flex flex-col gap-2">
         {question.options.map((option, index) => {
           return (
             <Button

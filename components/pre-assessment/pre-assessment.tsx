@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import PreAssessmentProgressBar from "./progress-bar";
 import PreAssessmentInitialCheckList from "./questionnaire/initial";
 import QuestionnaireForm from "./questionnaire/questionnaire-form";
-import SignUp from "./sign-up";
+import PreAssessmentSignUp from "./sign-up";
 
 export default function PreAssessmentChecklist() {
   const { step, miniStep, questionnaires, nextStep, isNextDisabled } =
@@ -23,7 +23,7 @@ export default function PreAssessmentChecklist() {
     const questionnaire = QUESTIONNAIRE_MAP[title];
     form = <QuestionnaireForm questions={questionnaire.questions} />;
   } else {
-    form = <SignUp />;
+    form = <PreAssessmentSignUp />;
   }
 
   const formIndex = step;

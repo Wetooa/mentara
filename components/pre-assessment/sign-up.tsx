@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "../ui/input";
 
-export default function SignUp() {
+export default function PreAssessmentSignUp() {
   return (
     <>
       <div className="mb-8 text-center">
@@ -10,18 +10,17 @@ export default function SignUp() {
         </p>
       </div>
       <div className="w-full space-y-4">
-        <Input placeholder="First name or (nickname)" />
-
-        <label className="text-[9px] w-full text-center text-black/60">
-          For added privacy you can provide nickname instead of your first name
-        </label>
+        <div className="w-full flex flex-col gap-2">
+          <Input placeholder="First name or (nickname)" />
+          <p className="text-[9px] w-full text-center text-black/60">
+            For added privacy you can provide nickname instead of your first
+            name
+          </p>
+        </div>
 
         <Input placeholder="Email" />
-
         <Input placeholder="Confirm Email" />
-
         <Input placeholder="Password" />
-
         <Input placeholder="Confirm Password" />
       </div>
     </>

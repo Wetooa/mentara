@@ -18,7 +18,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html suppressHydrationWarning lang="en">
         <body
-          className={`font-[Futura MD] antialiased min-w-screen min-h-screen w-screen h-screen`}
+          className={`font-[Futura] antialiased min-w-screen min-h-screen w-screen h-screen`}
         >
           <ThemeProvider
             attribute="class"

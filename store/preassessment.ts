@@ -77,7 +77,7 @@ export const usePreAssessmentChecklistStore =
         // Moving to previous questionnaire
         return {
           ...state,
-          miniStep: state.questionnaires[state.step - 1].length - 1,
+          miniStep: state.questionnaires[state.step - 2].length - 1,
           step: state.step - 1,
         };
       }),

@@ -25,7 +25,7 @@ export default function PreAssessmentInitialCheckList() {
         </h4>
         <p className="text-xs text-black/80">Select all that apply</p>
       </div>
-      <div className="w-full space-y-2">
+      <div className="w-full flex flex-col gap-2">
         {LIST_OF_QUESTIONNAIRES.map((item) => {
           const isSelected = questionnaires.includes(item);
 
