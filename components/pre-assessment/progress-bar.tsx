@@ -3,9 +3,17 @@ import { Progress } from "../ui/progress";
 import { usePreAssessmentChecklistStore } from "./pre-assessment";
 
 export default function PreAssessmentProgressBar() {
-  const { step, questionnaires } = usePreAssessmentChecklistStore();
-  const totalSteps = questionnaires.length + 1;
-  const value = step / totalSteps;
+  const { step, miniStep, questionnaires } = usePreAssessmentChecklistStore();
+
+  const questionnaireLength =
+    1 <= step && step <= questionnaires.length
+      ? questionnaires[step - 1].length
+      : 1;
+  const totalSteps = questionnaires.length + 2;
+
+  const stepValue = step / totalSteps;
+  const miniStepValue = miniStep / questionnaireLength;
+  const value = (stepValue + miniStepValue / totalSteps) * 100;
 
   return (
     <div className="p-6">
