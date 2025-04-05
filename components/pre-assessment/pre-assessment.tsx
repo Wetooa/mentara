@@ -1,92 +1,94 @@
-"use client";
-import { create } from "zustand";
 import { ListOfQuestionnaires } from "@/const/list-of-questionnaires";
-import PreAssessmentBaseForm from "./base-form";
+import { usePreAssessmentChecklistStore } from "@/store/preassessment";
+import { SignIn } from "@clerk/nextjs";
+import { motion, useAnimationControls } from "framer-motion";
+import { Button } from "../ui/button";
 import PreAssessmentProgressBar from "./progress-bar";
-
-const inProd = process.env.NODE_ENV === "production";
-
-interface PreAssessmentChecklistState {
-  step: number;
-  miniStep: number;
-
-  nextStep: () => void;
-  prevStep: () => void;
-
-  questionnaires: ListOfQuestionnaires[];
-  setQuestionnaires: (to: ListOfQuestionnaires[]) => void;
-
-  answers: number[][];
-  setAnswers: (index: number, to: number[]) => void;
-}
-
-export const usePreAssessmentChecklistStore =
-  create<PreAssessmentChecklistState>()((set) => ({
-    questionnaires: inProd ? [] : ["Stress"],
-    answers: inProd ? [] : [[]],
-
-    setQuestionnaires: (to) =>
-      set((state) => ({
-        ...state,
-        questionnaires: to,
-        answers: Array(to.length).fill([]),
-      })),
-
-    setAnswers: (index, to) =>
-      set((state) => ({
-        ...state,
-        answers: [
-          ...state.answers.slice(0, index),
-          to,
-          ...state.answers.slice(index + 1),
-        ],
-      })),
-
-    step: inProd ? 0 : 1,
-    miniStep: inProd ? 0 : 0,
-
-    nextStep: () =>
-      set((state) => {
-        // Initial Form
-        if (state.step === 0) {
-          return { ...state, step: state.step + 1, miniStep: 0 };
-        }
-
-        // Moving to next step
-        if (state.miniStep < state.questionnaires[state.step - 1].length - 1) {
-          return { ...state, miniStep: state.miniStep + 1 };
-        }
-
-        // Moving to next questionnaire
-        return { ...state, step: state.step + 1, miniStep: 0 };
-      }),
-
-    prevStep: () =>
-      set((state) => {
-        // Initial Form or First Questionnaire
-        if (state.step <= 1) {
-          return { ...state, step: 0, miniStep: 0 };
-        }
-
-        // Moving to previous question
-        if (state.miniStep > 0) {
-          return { ...state, miniStep: state.miniStep - 1 };
-        }
-
-        // Moving to previous questionnaire
-        return {
-          ...state,
-          miniStep: state.questionnaires[state.step - 1].length - 1,
-          step: state.step - 1,
-        };
-      }),
-  }));
+import PreAssessmentInitialCheckList from "./questionnaire/initial";
+import StressForm from "./questionnaire/stress";
 
 export default function PreAssessmentChecklist() {
+  const { step, miniStep, questionnaires, nextStep } =
+    usePreAssessmentChecklistStore();
+
+  const QUESTIONNAIRE_MAP: Record<ListOfQuestionnaires, React.ReactNode> = {
+    Stress: <StressForm />,
+  };
+
+  let form = null;
+
+  if (step === 0) {
+    form = <PreAssessmentInitialCheckList />;
+  } else if (step < questionnaires.length + 1) {
+    form = QUESTIONNAIRE_MAP[questionnaires[step - 1]] || null;
+  } else {
+    form = <SignIn />;
+  }
+
+  const formIndex = step;
+  const questionIndex = miniStep;
+  const isLastQuestion =
+    formIndex === 0 ||
+    formIndex === questionnaires.length + 1 ||
+    questionnaires[step - 1].length - 1 == questionIndex;
+
+  const animationControls = useAnimationControls();
+
+  function handleButtonOnClick() {
+    animationControls
+      .start({
+        x: -10,
+        opacity: 0, // Fade out
+        transition: { duration: 0.5, ease: "easeIn" },
+      })
+      .then(() => {
+        nextStep(); // Move to the next question
+
+        animationControls
+          .start({
+            x: 10, // Start new question from the right
+            opacity: 0, // Start invisible
+            transition: { duration: 0.5 },
+          })
+          .then(() => {
+            animationControls.start({
+              x: 0, // Move new question to the center
+              opacity: 1, // Fade in
+              transition: { duration: 0.5, ease: "easeOut" },
+            });
+          });
+      });
+  }
+
   return (
-    <div className="bg-primary-foreground rounded-3xl shadow-lg overflow-hidden max-w-[500px] max-h-[1000px] w-full h-full">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, ease: "easeIn" }}
+      className="bg-primary-foreground rounded-3xl shadow-lg overflow-hidden max-w-[400px] w-full"
+    >
       <PreAssessmentProgressBar />
-      <PreAssessmentBaseForm />
-    </div>
+
+      <div className="w-full">
+        <motion.div
+          animate={animationControls}
+          initial={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeIn" }}
+          className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8"
+        >
+          {form}
+        </motion.div>
+
+        <div className="bg-white px-10 py-3">
+          <Button
+            className="w-full font-bold"
+            variant={"secondary"}
+            onClick={handleButtonOnClick}
+          >
+            {isLastQuestion ? "Next Form" : "Next"}
+          </Button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
