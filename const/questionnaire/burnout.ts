@@ -1,3 +1,5 @@
+import { Question } from ".";
+
 interface MBIScale {
   items: number[];
   label: string;
@@ -20,7 +22,7 @@ interface MBIScoring {
 interface MBIType {
   description: string;
   sections: {
-    [key: string]: string[];
+    [key: string]: Question[];
   };
   scoring: MBIScoring;
   disclaimer: string;
@@ -31,32 +33,132 @@ const MBI: MBIType = {
     "The Maslach Burnout Inventory (MBI) is a self-assessment tool used to measure burnout risk. It evaluates three key components: Emotional Exhaustion, Depersonalization, and Personal Achievement. This tool should not be used as a formal diagnosis but as an awareness tool.",
   sections: {
     burnout: [
-      "I feel emotionally drained by my work.",
-      "Working with people all day long requires a great deal of effort.",
-      "I feel like my work is breaking me down.",
-      "I feel frustrated by my work.",
-      "I feel I work too hard at my job.",
-      "It stresses me too much to work in direct contact with people.",
-      "I feel like I’m at the end of my rope.",
+      {
+        prefix: "",
+        question: "I feel emotionally drained by my work.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "Working with people all day long requires a great deal of effort.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I feel like my work is breaking me down.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I feel frustrated by my work.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I feel I work too hard at my job.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "It stresses me too much to work in direct contact with people.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I feel like I’m at the end of my rope.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
     ],
     depersonalization: [
-      "I feel I look after certain patients/clients impersonally, as if they are objects.",
-      "I feel tired when I get up in the morning and have to face another day at work.",
-      "I have the impression that my patients/clients make me responsible for some of their problems.",
-      "I am at the end of my patience at the end of my work day.",
-      "I really don’t care about what happens to some of my patients/clients.",
-      "I have become more insensitive to people since I’ve been working.",
-      "I’m afraid that this job is making me uncaring.",
+      {
+        prefix: "",
+        question:
+          "I feel I look after certain patients/clients impersonally, as if they are objects.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I feel tired when I get up in the morning and have to face another day at work.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I have the impression that my patients/clients make me responsible for some of their problems.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I am at the end of my patience at the end of my work day.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I really don’t care about what happens to some of my patients/clients.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I have become more insensitive to people since I’ve been working.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I’m afraid that this job is making me uncaring.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
     ],
     personalAchievement: [
-      "I accomplish many worthwhile things in this job.",
-      "I feel full of energy.",
-      "I am easily able to understand what my patients/clients feel.",
-      "I look after my patients’/clients’ problems very effectively.",
-      "In my work, I handle emotional problems very calmly.",
-      "Through my work, I feel that I have a positive influence on people.",
-      "I am easily able to create a relaxed atmosphere with my patients/clients.",
-      "I feel refreshed when I have been close to my patients/clients at work.",
+      {
+        prefix: "",
+        question: "I accomplish many worthwhile things in this job.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "I feel full of energy.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I am easily able to understand what my patients/clients feel.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I look after my patients’/clients’ problems very effectively.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question: "In my work, I handle emotional problems very calmly.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "Through my work, I feel that I have a positive influence on people.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I am easily able to create a relaxed atmosphere with my patients/clients.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
+      {
+        prefix: "",
+        question:
+          "I feel refreshed when I have been close to my patients/clients at work.",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      },
     ],
   },
   scoring: {

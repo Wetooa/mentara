@@ -2,15 +2,103 @@ const PHQ_9 = {
   description:
     "The PHQ-9 is a self-administered questionnaire used to assess the severity of depressive symptoms over the past two weeks. It is commonly used for diagnosing and monitoring depression.",
   questions: [
-    "Little interest or pleasure in doing things",
-    "Feeling down, depressed, or hopeless",
-    "Trouble falling or staying asleep, or sleeping too much",
-    "Feeling tired or having little energy",
-    "Poor appetite or overeating",
-    "Feeling bad about yourself or that you are a failure or have let yourself or your family down",
-    "Trouble concentrating on things, such as reading the newspaper or watching television",
-    "Moving or speaking so slowly that other people could have noticed. Or the opposite being so fidgety or restless that you have been moving around a lot more than usual",
-    "Thoughts that you would be better off dead, or of hurting yourself",
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you had little interest or pleasure in doing things?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question: "how often have you been feeling down, depressed, or hopeless?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you had trouble falling or staying asleep, or sleeping too much?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you been feeling tired or having little energy?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question: "how often have you had poor appetite or been overeating?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you been feeling bad about yourself — or that you are a failure or have let yourself or your family down?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you had trouble concentrating on things, such as reading the newspaper or watching television?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you been moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the last two weeks",
+      question:
+        "how often have you had thoughts that you would be better off dead, or of hurting yourself?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
   ],
   scoring: {
     scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3 },

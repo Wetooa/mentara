@@ -23,24 +23,104 @@ const ASRS_V1_1 = {
     "The Adult ADHD Self-Report Scale (ASRS v1.1) is a self-administered questionnaire used to screen for ADHD symptoms in adults over the past 6 months. It assesses inattentiveness, hyperactivity, and impulsivity based on DSM-5 criteria.",
 
   questions: [
-    "Trouble wrapping up final details of a project after the challenging parts are done",
-    "Difficulty getting things in order when a task requires organization",
-    "Problems remembering appointments or obligations",
-    "Avoiding or delaying starting tasks that require a lot of thought",
-    "Fidgeting or squirming when sitting for a long time",
-    "Feeling overly active and compelled to do things, like being driven by a motor",
-    "Making careless mistakes when working on a boring or difficult project",
-    "Difficulty keeping attention during boring or repetitive tasks",
-    "Difficulty concentrating on conversations, even when spoken to directly",
-    "Misplacing or having difficulty finding things at home or work",
-    "Being easily distracted by activity or noise",
-    "Leaving seat in situations where remaining seated is expected",
-    "Feeling restless or fidgety",
-    "Difficulty unwinding and relaxing when having free time",
-    "Talking too much in social situations",
-    "Finishing other people’s sentences before they can finish",
-    "Difficulty waiting turn in situations requiring turn-taking",
-    "Interrupting others when they are busy",
+    {
+      prefix: "",
+      question:
+        "Trouble wrapping up final details of a project after the challenging parts are done",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Difficulty getting things in order when a task requires organization",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Problems remembering appointments or obligations",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Avoiding or delaying starting tasks that require a lot of thought",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Fidgeting or squirming when sitting for a long time",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Feeling overly active and compelled to do things, like being driven by a motor",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Making careless mistakes when working on a boring or difficult project",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Difficulty keeping attention during boring or repetitive tasks",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Difficulty concentrating on conversations, even when spoken to directly",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question:
+        "Misplacing or having difficulty finding things at home or work",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Being easily distracted by activity or noise",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Leaving seat in situations where remaining seated is expected",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Feeling restless or fidgety",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Difficulty unwinding and relaxing when having free time",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Talking too much in social situations",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Finishing other people’s sentences before they can finish",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Difficulty waiting turn in situations requiring turn-taking",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "",
+      question: "Interrupting others when they are busy",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
   ],
 
   scoring: {

@@ -2,21 +2,95 @@ const MDQ = {
   description:
     "The Mood Disorder Questionnaire (MDQ) is a self-administered screening tool used to help assess bipolar disorder. It is designed to evaluate the presence of symptoms of mania or hypomania over a period of time.",
   questions: [
-    "In the past, have you felt so good or so hyper that other people thought you were not your normal self or you were so hyper that you got into trouble?",
-    "In the past, have you been so irritable that you shouted at people or started fights or arguments?",
-    "In the past, have you felt much more self-confident than usual?",
-    "In the past, did you get much less sleep than usual and found you didn’t really miss it?",
-    "In the past, have you been much more talkative or spoke faster than usual?",
-    "In the past, have thoughts raced through your head or you couldn’t slow your mind down?",
-    "In the past, have you been so easily distracted by things around you that you had trouble concentrating or staying on track?",
-    "In the past, have you had much more energy than usual?",
-    "In the past, were you much more active or did many more things than usual?",
-    "In the past, were you much more social or outgoing than usual, for example, you telephoned friends in the middle of the night?",
-    "In the past, were you much more interested in sex than usual?",
-    "In the past, did you do things that were unusual for you or that other people might have thought were excessive, foolish, or risky?",
-    "In the past, did spending money get you or your family into trouble?",
-    "If you answered YES to more than one of the above, have several of these ever happened during the same period of time?",
-    "How much of a problem did any of these cause you, such as being unable to work; having family, money, or legal troubles; getting into arguments or fights?",
+    {
+      prefix: "In the past",
+      question:
+        "have you felt so good or so hyper that other people thought you were not your normal self or you were so hyper that you got into trouble?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question:
+        "have you been so irritable that you shouted at people or started fights or arguments?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question: "have you felt much more self-confident than usual?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question:
+        "did you get much less sleep than usual and found you didn’t really miss it?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question: "have you been much more talkative or spoke faster than usual?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question:
+        "have thoughts raced through your head or you couldn’t slow your mind down?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question:
+        "have you been so easily distracted by things around you that you had trouble concentrating or staying on track?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question: "have you had much more energy than usual?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question: "were you much more active or did many more things than usual?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question:
+        "were you much more social or outgoing than usual, for example, you telephoned friends in the middle of the night?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question: "were you much more interested in sex than usual?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question:
+        "did you do things that were unusual for you or that other people might have thought were excessive, foolish, or risky?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "In the past",
+      question: "did spending money get you or your family into trouble?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "If you answered YES to more than one of the above",
+      question:
+        "have several of these ever happened during the same period of time?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question:
+        "How much of a problem did any of these cause you, such as being unable to work; having family, money, or legal troubles; getting into arguments or fights?",
+      options: [
+        "No problem",
+        "Minor problem",
+        "Moderate problem",
+        "Serious problem",
+      ],
+    },
   ],
   scoring: {
     scoreOptions: { 0: 0, 1: 1 },

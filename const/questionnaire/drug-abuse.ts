@@ -2,16 +2,62 @@ const DAST_10 = {
   description:
     "The Drug Abuse Screening Test (DAST-10) is a self-administered questionnaire designed to assess drug use and its potential consequences over the past 12 months. It is used for screening and evaluating substance use disorders.",
   questions: [
-    "Have you used drugs other than those required for medical reasons?",
-    "Do you use more than one drug at a time?",
-    "Are you always able to stop using drugs when you want to?",
-    "Have you had 'blackouts' or 'flashbacks' as a result of drug use?",
-    "Do you ever feel bad or guilty about your drug use?",
-    "Does your spouse (or parents) ever complain about your involvement with drugs?",
-    "Have you neglected your family because of your use of drugs?",
-    "Have you engaged in illegal activities in order to obtain drugs?",
-    "Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?",
-    "Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?",
+    {
+      prefix: "",
+      question:
+        "Have you used drugs other than those required for medical reasons?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question: "Do you use more than one drug at a time?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question: "Are you always able to stop using drugs when you want to?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question:
+        "Have you had 'blackouts' or 'flashbacks' as a result of drug use?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question: "Do you ever feel bad or guilty about your drug use?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question:
+        "Does your spouse (or parents) ever complain about your involvement with drugs?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question: "Have you neglected your family because of your use of drugs?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question:
+        "Have you engaged in illegal activities in order to obtain drugs?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question:
+        "Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?",
+      options: ["Yes", "No"],
+    },
+    {
+      prefix: "",
+      question:
+        "Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?",
+      options: ["Yes", "No"],
+    },
   ],
   scoring: {
     scoreOptions: { yes: 1, no: 0 },

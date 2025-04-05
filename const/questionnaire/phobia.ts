@@ -1,3 +1,5 @@
+import { Question } from ".";
+
 interface PHQScale {
   items: number[];
   label: string;
@@ -13,14 +15,14 @@ interface PHQScoring {
   };
   getScaleScore: (
     answers: number[],
-    scale: keyof PHQScoring["scales"]
+    scale: keyof PHQScoring["scales"],
   ) => number;
   getSeverity: (score: number) => string;
 }
 
 interface PHQType {
   description: string;
-  questions: string[];
+  questions: Question[];
   scoring: PHQScoring;
   disclaimer: string;
 }
@@ -29,21 +31,171 @@ const PHQ: PHQType = {
   description:
     "The PHQ is a self-administered questionnaire used to assess the extent to which individuals avoid specific situations due to fear or other unpleasant feelings. It is commonly used for diagnosing and monitoring phobic symptoms.",
   questions: [
-    "Injections or minor surgery",
-    "Eating or drinking with other people",
-    "Hospitals",
-    "Traveling alone on public transportation (e.g., bus or train)",
-    "Walking alone in busy streets",
-    "Being watched or stared at",
-    "Going in to crowded shops",
-    "Talking to people in authority",
-    "Sight of blood",
-    "Being criticized",
-    "Going alone far from home",
-    "Thought of injury or illness",
-    "Speaking or acting to an audience",
-    "Large open spaces",
-    "Going to the dentist",
+    {
+      prefix: "",
+      question: "Injections or minor surgery",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Eating or drinking with other people",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Hospitals",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Traveling alone on public transportation (e.g., bus or train)",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Walking alone in busy streets",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Being watched or stared at",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Going in to crowded shops",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Talking to people in authority",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Sight of blood",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Being criticized",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Going alone far from home",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Thought of injury or illness",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Speaking or acting to an audience",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Large open spaces",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
+    {
+      prefix: "",
+      question: "Going to the dentist",
+      options: [
+        "Not at all",
+        "A little",
+        "Moderately",
+        "Quite a bit",
+        "Extremely",
+      ],
+    },
   ],
   scoring: {
     scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 },
@@ -71,7 +223,7 @@ const PHQ: PHQType = {
 
       return scaleItems.reduce(
         (total, index) => total + (answers[index] || 0),
-        0
+        0,
       );
     },
     getSeverity: (score) => {

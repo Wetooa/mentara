@@ -2,13 +2,79 @@ const GAD_7_ANXIETY = {
   description:
     "The GAD-7 Anxiety Assessment helps measure anxiety severity over the past two weeks. It assigns scores based on how often the respondent has been bothered by specific anxiety-related problems.",
   questions: [
-    "Feeling nervous, anxious, or on edge?",
-    "Not being able to stop or control worrying?",
-    "Worrying too much about different things?",
-    "Trouble relaxing?",
-    "Being so restless that it is hard to sit still?",
-    "Becoming easily annoyed or irritable?",
-    "Feeling afraid, as if something awful might happen?",
+    {
+      prefix: "Over the past two weeks",
+      question: "how often have you been feeling nervous, anxious, or on edge?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question: "how often have you been unable to stop or control worrying?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question:
+        "how often have you been worrying too much about different things?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question: "how often have you had trouble relaxing?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question:
+        "how often have you been so restless that it is hard to sit still?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question: "how often have you become easily annoyed or irritable?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
+    {
+      prefix: "Over the past two weeks",
+      question:
+        "how often have you felt afraid, as if something awful might happen?",
+      options: [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day",
+      ],
+    },
   ],
   scoring: {
     scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3 },
