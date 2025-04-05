@@ -12,7 +12,7 @@ export default function Navbar() {
         <NavbarButton content="Treatment" redirect="/treatment" />
         <NavbarButton content="For Therapists" redirect="/for-therapists" />
 
-        <NavbarButton content="Log In" redirect="/login" />
+        <NavbarButton content="Log In" redirect="/pre-assessment" />
       </ul>
     </nav>
   );
