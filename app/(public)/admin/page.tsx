@@ -5,7 +5,6 @@ import React from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTableColumns, faUser } from "@fortawesome/free-solid-svg-icons";
-
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -35,6 +34,15 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CoSidebar({ setShowTherapistApplication }: any) {
   return (
@@ -46,7 +54,7 @@ export function CoSidebar({ setShowTherapistApplication }: any) {
             onClick={() => setShowTherapistApplication(false)}
           >
             <FontAwesomeIcon icon={faTableColumns} className="w-5 h-5" />
-            <p className="text-base">Help</p>
+            <p className="text-base">Therapist</p>
             <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
           </CollapsibleTrigger>
         </SidebarGroupLabel>
@@ -55,7 +63,7 @@ export function CoSidebar({ setShowTherapistApplication }: any) {
           <SidebarGroupContent>
             <p
               className="flex items-center gap-2 cursor-pointer"
-              onClick={() => setShowTherapistApplication((prev: any) => !prev)} // Toggle Therapist Table visibility
+              onClick={() => setShowTherapistApplication(true)}
             >
               <FontAwesomeIcon icon={faUser} className="w-4 h-4" />
               Therapist Application
@@ -80,6 +88,15 @@ export function TherapistTable() {
 
   //     fetchTherapists();
   //   }, []);
+
+  const [selectedValue, setSelectedValue] = useState<string>("");
+
+  const triggerClasses =
+    selectedValue === "approved"
+      ? "bg-lime-600 text-white"
+      : selectedValue === "rejected"
+        ? "bg-red-600 text-white"
+        : "bg-gray-100 text-white";
 
   return (
     <Table>
@@ -136,47 +153,39 @@ export function TherapistTable() {
           <TableCell>Last Name Query</TableCell>
           <TableCell>First Name Query</TableCell>
           <TableCell>Submission Date timestamp query</TableCell>
-          <TableCell>Approved</TableCell>
           <TableCell>
-            <select
-              defaultValue=""
-              className={`border px-2 py-1 rounded font-semibold bg-white text-gray-700 focus:bg-white focus:outline-none`}
-              onChange={(e) => {
-                const selected = e.target.value;
-
-                let baseClass =
-                  "border px-2 py-1 rounded font-semibold focus:bg-white focus:outline-none";
-
-                if (selected === "approved") {
-                  e.target.className =
-                    baseClass + " bg-green-600 text-white hover:bg-green-600  ";
-                } else if (selected === "rejected") {
-                  e.target.className =
-                    baseClass +
-                    " bg-red-600 text-white hover:bg-red-600 hover:text-white";
-                } else {
-                  e.target.className =
-                    baseClass +
-                    " bg-white text-gray-700 hover:bg-green-600 hover:text-white";
-                }
-              }}
-            >
-              <option value="" disabled>
-                Select
-              </option>
-              <option
-                value="approved"
-                className="hover:bg-green-600 hover:text-white"
+            {selectedValue === "approved" ? (
+              <p className="text-green-600 font-medium">Approved</p>
+            ) : selectedValue === "rejected" ? (
+              <p className="text-red-600 font-medium">Rejected</p>
+            ) : (
+              <p className="text-yellow-600 font-medium">Pending</p>
+            )}
+          </TableCell>
+          <TableCell>
+            <Select value={selectedValue} onValueChange={setSelectedValue}>
+              <SelectTrigger
+                className={`w-[180px] ${triggerClasses} [&_svg]:hidden`}
               >
-                Approve
-              </option>
-              <option
-                value="rejected"
-                className="hover:bg-red-600 hover:text-white"
-              >
-                Reject
-              </option>
-            </select>
+                <SelectValue placeholder="Select action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem
+                    value="approved"
+                    className="hover:bg-lime-600 hover:text-white focus:bg-lime-600 focus:text-white data-[state=checked]:bg-lime-600 data-[state=checked]:text-white"
+                  >
+                    Approve
+                  </SelectItem>
+                  <SelectItem
+                    value="rejected"
+                    className="hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white data-[state=checked]:bg-red-600 data-[state=checked]:text-white"
+                  >
+                    Reject
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </TableCell>
         </TableRow>
       </TableBody>
