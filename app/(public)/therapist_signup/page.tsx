@@ -19,6 +19,7 @@ import {
 import PHILIPPINE_PROVINCES from "@/const/provinces";
 import PROVIDER_TYPE from "@/const/provider";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
 
 interface FormInputProps {
   PlaceHolder: string;
@@ -115,12 +116,12 @@ export default function TherapistSignUp() {
 
 function FormInput(props: FormInputProps) {
   return (
-    <input
-      className={`w-full h-full bg-input rounded-4xl p-4 col-start-${
+    <Input
+      className={`w-full h-full text-md data-[placeholder]:text-white-background border-0 bg-input rounded-4xl p-6 col-start-${
         props.ColumnStart
       } row-start-${props.RowStart} ${props.Span ? "col-span-2" : ""}`}
       placeholder={props.PlaceHolder}
-    ></input>
+    ></Input>
   );
 }
 
