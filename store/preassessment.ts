@@ -43,7 +43,7 @@ export const usePreAssessmentChecklistStore =
         ],
       })),
 
-    step: inProd ? 0 : 0,
+    step: inProd ? 0 : 1,
     miniStep: inProd ? 0 : 0,
 
     nextStep: () =>
