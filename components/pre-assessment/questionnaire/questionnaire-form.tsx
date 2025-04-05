@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Question } from "@/const/questionnaire";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
+import { useEffect } from "react";
 
 export default function QuestionnaireForm({
   questions,
 }: {
   questions: Question[];
 }) {
-  const { step, miniStep, answers, setAnswers } =
+  const { step, miniStep, answers, setAnswers, setNextDisabled } =
     usePreAssessmentChecklistStore();
 
   const formIndex = step - 1;
@@ -28,6 +29,14 @@ export default function QuestionnaireForm({
 
     setAnswers(formIndex, formAnswers);
   }
+
+  useEffect(() => {
+    if (currentAnswer === undefined) {
+      setNextDisabled(true);
+    } else {
+      setNextDisabled(false);
+    }
+  }, [currentAnswer, setNextDisabled]);
 
   return (
     <>

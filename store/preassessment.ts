@@ -14,6 +14,11 @@ export interface PreAssessmentChecklistState {
 
   answers: number[][];
   setAnswers: (index: number, to: number[]) => void;
+
+  isNextDisabled: boolean;
+  isPrevDisabled: boolean;
+  setNextDisabled: (disabled: boolean) => void;
+  setPrevDisabled: (disabled: boolean) => void;
 }
 
 export const usePreAssessmentChecklistStore =
@@ -76,4 +81,12 @@ export const usePreAssessmentChecklistStore =
           step: state.step - 1,
         };
       }),
+
+    isNextDisabled: false,
+    isPrevDisabled: true,
+
+    setNextDisabled: (disabled) =>
+      set((state) => ({ ...state, isNextDisabled: disabled })),
+    setPrevDisabled: (disabled) =>
+      set((state) => ({ ...state, isPrevDisabled: disabled })),
   }));

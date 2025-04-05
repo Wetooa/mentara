@@ -1,26 +1,27 @@
-import { ListOfQuestionnaires } from "@/const/list-of-questionnaires";
+import { QUESTIONNAIRE_MAP } from "@/const/list-of-questionnaires";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
 import { SignIn } from "@clerk/nextjs";
 import { motion, useAnimationControls } from "framer-motion";
 import { Button } from "../ui/button";
 import PreAssessmentProgressBar from "./progress-bar";
 import PreAssessmentInitialCheckList from "./questionnaire/initial";
-import StressForm from "./questionnaire/stress";
+import QuestionnaireForm from "./questionnaire/questionnaire-form";
 
 export default function PreAssessmentChecklist() {
-  const { step, miniStep, questionnaires, nextStep } =
+  const { step, miniStep, questionnaires, nextStep, isNextDisabled } =
     usePreAssessmentChecklistStore();
 
-  const QUESTIONNAIRE_MAP: Record<ListOfQuestionnaires, React.ReactNode> = {
-    Stress: <StressForm />,
-  };
+  // const QUESTIONNAIRE_MAP: Record<ListOfQuestionnaires, React.ReactNode> = {
+  //   Stress: <StressForm />,
+  // };
 
   let form = null;
-
   if (step === 0) {
     form = <PreAssessmentInitialCheckList />;
   } else if (step < questionnaires.length + 1) {
-    form = QUESTIONNAIRE_MAP[questionnaires[step - 1]] || null;
+    const title = questionnaires[step - 1];
+    const questionnaire = QUESTIONNAIRE_MAP[title];
+    form = <QuestionnaireForm questions={questionnaire.questions} />;
   } else {
     form = <SignIn />;
   }
@@ -83,6 +84,7 @@ export default function PreAssessmentChecklist() {
           <Button
             className="w-full font-bold"
             variant={"secondary"}
+            disabled={isNextDisabled}
             onClick={handleButtonOnClick}
           >
             {isLastQuestion ? "Next Form" : "Next"}

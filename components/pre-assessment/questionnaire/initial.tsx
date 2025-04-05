@@ -3,10 +3,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { LIST_OF_QUESTIONNAIRES } from "@/const/list-of-questionnaires";
 import { cn } from "@/lib/utils";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
+import { useEffect } from "react";
 
 export default function PreAssessmentInitialCheckList() {
-  const { questionnaires, setQuestionnaires } =
+  const { questionnaires, setQuestionnaires, setNextDisabled } =
     usePreAssessmentChecklistStore();
+
+  useEffect(() => {
+    if (questionnaires.length === 0) {
+      setNextDisabled(true);
+    } else {
+      setNextDisabled(false);
+    }
+  }, [questionnaires, setNextDisabled]);
 
   return (
     <>

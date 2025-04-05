@@ -1,4 +1,4 @@
-const InsomniaSurvey = {
+const INSOMNIA_SURVEY = {
   description:
     "The Insomnia Severity Index (ISI) is a self-administered questionnaire used to assess the severity of insomnia symptoms over the past two weeks. It helps determine the impact of sleep difficulties on daily life.",
   questions: [
@@ -81,4 +81,4 @@ const InsomniaSurvey = {
     "This questionnaire is a screening tool to assess the severity of insomnia symptoms. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your sleep health, please consult a healthcare professional.",
 };
 
-export default InsomniaSurvey;
+export default INSOMNIA_SURVEY;
