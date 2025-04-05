@@ -2,11 +2,15 @@ import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-import { motion } from "framer-motion";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
+import { AnimationControls, motion } from "framer-motion";
 import { useEffect } from "react";
 
-export default function PreAssessmentNavbar() {
+export default function PreAssessmentNavbar({
+  animationControls,
+}: {
+  animationControls: AnimationControls;
+}) {
   const { step, prevStep, isPrevDisabled, setPrevDisabled } =
     usePreAssessmentChecklistStore();
 
@@ -18,6 +22,32 @@ export default function PreAssessmentNavbar() {
     }
   }, [setPrevDisabled, step]);
 
+  function handleButtonOnClick() {
+    animationControls
+      .start({
+        x: 10,
+        opacity: 0, // Fade out
+        transition: { duration: 0.5, ease: "easeIn" },
+      })
+      .then(() => {
+        prevStep(); // Move to the next question
+
+        animationControls
+          .start({
+            x: -10, // Start new question from the right
+            opacity: 0, // Start invisible
+            transition: { duration: 0.5 },
+          })
+          .then(() => {
+            animationControls.start({
+              x: 0, // Move new question to the center
+              opacity: 1, // Fade in
+              transition: { duration: 0.5, ease: "easeOut" },
+            });
+          });
+      });
+  }
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
@@ -27,7 +57,7 @@ export default function PreAssessmentNavbar() {
     >
       <Button
         disabled={isPrevDisabled}
-        onClick={prevStep}
+        onClick={handleButtonOnClick}
         className="rounded-full aspect-square font-bold"
       >
         <ArrowLeft />

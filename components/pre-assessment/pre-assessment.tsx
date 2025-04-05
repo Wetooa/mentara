@@ -1,13 +1,17 @@
 import { QUESTIONNAIRE_MAP } from "@/const/list-of-questionnaires";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
-import { motion, useAnimationControls } from "framer-motion";
+import { AnimationControls, motion } from "framer-motion";
 import { Button } from "../ui/button";
 import PreAssessmentProgressBar from "./progress-bar";
 import PreAssessmentInitialCheckList from "./questionnaire/initial";
 import QuestionnaireForm from "./questionnaire/questionnaire-form";
 import PreAssessmentSignUp from "./sign-up";
 
-export default function PreAssessmentChecklist() {
+export default function PreAssessmentChecklist({
+  animationControls,
+}: {
+  animationControls: AnimationControls;
+}) {
   const { step, miniStep, questionnaires, nextStep, isNextDisabled } =
     usePreAssessmentChecklistStore();
 
@@ -32,8 +36,6 @@ export default function PreAssessmentChecklist() {
     formIndex === 0 ||
     formIndex === questionnaires.length + 1 ||
     questionnaires[step - 1].length - 1 == questionIndex;
-
-  const animationControls = useAnimationControls();
 
   function handleButtonOnClick() {
     animationControls
@@ -87,7 +89,7 @@ export default function PreAssessmentChecklist() {
             disabled={isNextDisabled}
             onClick={handleButtonOnClick}
           >
-            {isLastQuestion ? "Next Form" : "Next"}
+            {isLastQuestion ? "Next Form" : "Continue"}
           </Button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
+import { useSignUp } from "@clerk/nextjs";
 
 export default function PreAssessmentSignUp() {
   return (

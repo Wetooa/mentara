@@ -64,14 +64,14 @@ export const usePreAssessmentChecklistStore =
 
     prevStep: () =>
       set((state) => {
-        // Initial Form or First Questionnaire
-        if (state.step <= 1) {
-          return { ...state, step: 0, miniStep: 0 };
-        }
-
         // Moving to previous question
         if (state.miniStep > 0) {
           return { ...state, miniStep: state.miniStep - 1 };
+        }
+
+        // Initial Form or First Questionnaire
+        if (state.step <= 1) {
+          return { ...state, step: 0, miniStep: 0 };
         }
 
         // Moving to previous questionnaire
