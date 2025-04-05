@@ -1,5 +1,4 @@
 import { ListOfQuestionnaires } from "@/const/list-of-questionnaires";
-import { motion } from "framer-motion";
 import SignIn from "../sign-up/sign-up";
 import PreAssessmentInitialCheckList from "./checklist-initial";
 import { usePreAssessmentChecklistStore } from "./pre-assessment";
@@ -22,13 +21,5 @@ export default function PreAssessmentBaseForm() {
     form = <SignIn />;
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, ease: "easeIn" }}
-    >
-      {form}
-    </motion.div>
-  );
+  return form;
 }
