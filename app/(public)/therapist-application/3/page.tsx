@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Mail, Phone, Clock } from "lucide-react";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
 import useTherapistForm from "@/store/therapistform";
+import emailjs from "@emailjs/browser";
+import Image from "next/image";
 
 const ApplicationConfirmation = () => {
   // Steps for the sidebar - all completed now
@@ -18,15 +20,55 @@ const ApplicationConfirmation = () => {
 
   console.log(formValues);
 
+  var templateParams = {
+    name: `${formValues.firstName} ${formValues.lastName} `,
+    email: `${formValues.email}`,
+  };
+
+  emailjs.init({
+    publicKey: String(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY),
+    // Do not allow headless browsers
+    blockHeadless: true,
+    blockList: {
+      // Block the suspended emails
+      list: ["foo@emailjs.com", "bar@emailjs.com"],
+      // The variable contains the email address
+      watchVariable: "userEmail",
+    },
+    limitRate: {
+      // Set the limit rate for the application
+      id: "app",
+      // Allow 1 request per 10s
+      throttle: 10000,
+    },
+  });
+
+  console.log(String(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY));
+  emailjs
+    .send(
+      String(process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID),
+      String(process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID),
+      templateParams
+    )
+    .then(
+      () => {
+        console.log("SUCCESS!");
+      },
+      (error) => {
+        console.log("FAILED...", error.text);
+      }
+    );
+
   return (
     <div className="w-full min-h-screen flex bg-gray-50">
       {/* Left sidebar */}
       <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
         <div className="mb-8">
-          <img
-            src="/api/placeholder/250/50" // Replace with actual logo
+          <Image
+            src="/mentara-landscape.png"
             alt="Mentara logo"
-            className="w-32 h-auto"
+            width={250}
+            height={100}
           />
         </div>
         <div className="mt-4 mb-8">
