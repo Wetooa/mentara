@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Mail, Phone, Clock } from "lucide-react";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
+import useTherapistForm from "@/store/therapistform";
 
 const ApplicationConfirmation = () => {
   // Steps for the sidebar - all completed now
@@ -12,6 +13,10 @@ const ApplicationConfirmation = () => {
     { label: "Document Upload", completed: true },
     { label: "Verification", completed: true },
   ];
+
+  const { formValues } = useTherapistForm();
+
+  console.log(formValues);
 
   return (
     <div className="w-full min-h-screen flex bg-gray-50">

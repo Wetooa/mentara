@@ -1,11 +1,12 @@
-"use client"; // Add this if not already present
+"use client";
 
 import * as React from "react";
-import { useState } from "react"; // Import useState
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import useTherapistForm from "@/store/therapistform";
 
-// Assuming components are correctly imported from their paths
+// Import components
 import {
   Select,
   SelectContent,
@@ -16,44 +17,42 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-// Assuming constants are correctly imported
+// Import constants
 import PHILIPPINE_PROVINCES from "@/const/provinces";
 import PROVIDER_TYPE from "@/const/provider";
 
-// --- Child Component Interfaces (Corrected) ---
+// Component interfaces
 interface FormInputProps {
   PlaceHolder: string;
-  ColumnStart: number; // Keep for clarity, though className handles layout now
-  RowStart: number; // Keep for clarity
-  Span: boolean; // Keep for clarity
+  ColumnStart: number;
+  RowStart: number;
+  Span: boolean;
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string | null;
   type?: string;
   name: string;
-  className?: string; // **** Added className property ****
+  className?: string;
 }
+
 interface DropdownProps {
   PlaceHolder: string;
-  ColumnStart: number; // Keep for clarity
-  RowStart: number; // Keep for clarity
-  Span: boolean; // Keep for clarity
+  ColumnStart: number;
+  RowStart: number;
+  Span: boolean;
   List: string[];
   value: string;
   onValueChange: (value: string) => void;
   error?: string | null;
   name: string;
-  className?: string; // **** Added className property ****
+  className?: string;
 }
 
-// --- Re-declare child components here or import them ---
-// Using the corrected interfaces and implementation from previous step
+// Form components
 function FormInput(props: FormInputProps) {
   const hasError = !!props.error;
   return (
     <div className={`w-full h-fit flex flex-col ${props.className}`}>
-      {" "}
-      {/* Apply grid classes passed via props.className */}
       <Input
         id={props.name}
         name={props.name}
@@ -78,40 +77,35 @@ function FormInput(props: FormInputProps) {
     </div>
   );
 }
+
 function FormDropdown(props: DropdownProps) {
   const hasError = !!props.error;
   return (
     <div className={`w-full h-fit flex flex-col ${props.className}`}>
-      {" "}
-      {/* Apply grid classes passed via props.className */}
       <Select
-        value={props.value} // Bind value (will be "" initially)
-        onValueChange={props.onValueChange} // Bind onValueChange
+        value={props.value}
+        onValueChange={props.onValueChange}
         name={props.name}
       >
         <SelectTrigger
           id={props.name}
           className={`w-full h-full text-md border-0 bg-input rounded-4xl p-6 text-left justify-start ${
-            // Ensure text aligns left
-            !props.value ? "text-gray-400" : "text-secondary" // Use placeholder color if value is empty
+            !props.value ? "text-gray-400" : "text-secondary"
           } ${
             hasError ? "ring-2 ring-red-500 ring-inset" : ""
           } focus:ring-2 focus:ring-primary focus:ring-offset-1`}
           aria-invalid={hasError}
           aria-describedby={hasError ? `${props.name}-error` : undefined}
         >
-          {/* This component handles showing the placeholder when value is "" */}
           <SelectValue placeholder={props.PlaceHolder} />
         </SelectTrigger>
         <SelectContent className="rounded-2xl bg-input border-gray-300 text-secondary">
           <SelectGroup>
-            {/* REMOVED the <SelectItem value="" disabled...> item */}
             {props.List.map((item) => (
-              // Ensure 'item' itself is never an empty string in your constants
               <SelectItem
                 className="text-secondary data-[highlighted]:bg-primary data-[highlighted]:text-white cursor-pointer"
                 key={item}
-                value={item} // Use the actual string value (must not be "")
+                value={item}
               >
                 {item}
               </SelectItem>
@@ -119,7 +113,6 @@ function FormDropdown(props: DropdownProps) {
           </SelectGroup>
         </SelectContent>
       </Select>
-      {/* Display error message */}
       {hasError && (
         <p
           id={`${props.name}-error`}
@@ -131,113 +124,81 @@ function FormDropdown(props: DropdownProps) {
     </div>
   );
 }
-// --- Main TherapistSignUp Component ---
+
 export default function TherapistSignUp() {
-  const router = useRouter(); // Initialize router
+  // Access Zustand store
+  const { formValues, updateField, resetForm } = useTherapistForm();
 
-  // --- State for Form Fields ---
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    mobile: "",
-    email: "",
-    province: "",
-    providerType: "",
-  });
+  const router = useRouter();
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
 
-  // --- State for Errors ---
-  const [errors, setErrors] = useState<Record<string, string | null>>({}); // Type the error state
+  // Add useEffect to reset form on component mount (optional)
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
-  // --- Handle Input Change ---
+  // Add this reset handler function
+  const handleReset = () => {
+    resetForm();
+    setErrors({});
+  };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error on change
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
+    updateField(name, value);
   };
 
-  // --- Handle Dropdown Change ---
   const handleDropdownChange = (name: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error on change
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
+    updateField(name, value);
   };
 
-  // --- Validation Logic ---
   const validateForm = (): Record<string, string | null> => {
     const newErrors: Record<string, string | null> = {};
     const phoneRegex = /^(09|\+639)\d{9}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!formData.firstName.trim()) {
+    if (!formValues?.firstName?.trim()) {
       newErrors.firstName = "First name is required.";
     }
-    if (!formData.lastName.trim()) {
+    if (!formValues?.lastName?.trim()) {
       newErrors.lastName = "Last name is required.";
     }
-    if (!formData.mobile.trim()) {
+    if (!formValues?.mobile?.trim()) {
       newErrors.mobile = "Mobile number is required.";
-    } else if (!phoneRegex.test(formData.mobile.trim())) {
+    } else if (!phoneRegex.test(formValues.mobile.trim())) {
       newErrors.mobile =
         "Invalid PH mobile number (e.g., 09xxxxxxxxx or +639xxxxxxxxx).";
     }
-    if (!formData.email.trim()) {
+    if (!formValues?.email?.trim()) {
       newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(formData.email.trim())) {
+    } else if (!emailRegex.test(formValues.email.trim())) {
       newErrors.email = "Invalid email format.";
     }
-    if (!formData.province) {
-      // Check for empty string from dropdown default
+    if (!formValues?.province) {
       newErrors.province = "Province is required.";
     }
-    if (!formData.providerType) {
-      // Check for empty string from dropdown default
+    if (!formValues?.providerType) {
       newErrors.providerType = "Provider type is required.";
     }
-
-    // Ensure all keys have a value (null if no error) for the Object.values check
-    Object.keys(formData).forEach((key) => {
-      if (!(key in newErrors)) {
-        newErrors[key] = null;
-      }
-    });
 
     return newErrors;
   };
 
-  // --- Handle Form Submit ---
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default page reload
-    setErrors({}); // Clear previous errors visually immediately
+    e.preventDefault();
+    setErrors({});
 
     const validationErrors = validateForm();
-    setErrors(validationErrors); // Set new errors (or nulls)
+    setErrors(validationErrors);
 
-    const isValid = Object.values(validationErrors).every(
-      (error) => error === null
+    const hasErrors = Object.values(validationErrors).some(
+      (error) => error !== null
     );
 
-    if (isValid) {
-      // Validation passed
-      console.log("Form Submitted Successfully:", formData);
-      // TODO: Add API call logic here to submit data
-
-      // Navigate to the next step
+    if (!hasErrors) {
+      console.log("Form Submitted Successfully:", formValues);
       router.push("/therapist-application/1");
     } else {
-      // Validation failed
       console.log("Validation Errors:", validationErrors);
-      // Optional: Find the first error and scroll to it
       const firstErrorKey = Object.keys(validationErrors).find(
         (key) => validationErrors[key] !== null
       );
@@ -245,8 +206,6 @@ export default function TherapistSignUp() {
         const errorElement = document.getElementById(firstErrorKey);
         if (errorElement) {
           errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          // Optionally focus, but SelectTrigger might not behave as expected with .focus()
-          // errorElement.focus({ preventScroll: true });
         }
       }
     }
@@ -257,19 +216,16 @@ export default function TherapistSignUp() {
       {/* Header */}
       <div className="w-full flex items-center justify-center bg-white h-20 md:h-24 lg:h-28 drop-shadow-lg">
         <Image
-          src="/mentara-landscape.png" // Ensure this path is correct
-          width={280} // Adjust size as needed
-          height={60} // Adjust size as needed
+          src="/mentara-landscape.png"
+          width={280}
+          height={60}
           alt="mentara landscape logo"
-          priority // Load logo faster
+          priority
         />
       </div>
 
       {/* Form Section */}
       <div className="container mx-auto px-4 h-full flex flex-col items-center gap-8 md:gap-12 scroll-mt-20">
-        {" "}
-        {/* Added scroll-mt */}
-        {/* Intro Text */}
         <div className="flex flex-col gap-2 items-center justify-center text-center max-w-3xl">
           <h1 className="text-3xl md:text-4xl font-semibold text-secondary">
             Join Our Community of Compassionate Therapists
@@ -279,11 +235,10 @@ export default function TherapistSignUp() {
             steps to connect with those who need your support.
           </p>
         </div>
-        {/* Form Card */}
-        {/* Wrap with form element */}
+
         <form
           onSubmit={handleSubmit}
-          noValidate // Prevent browser default validation
+          noValidate
           className="w-full max-w-2xl lg:max-w-3xl bg-card p-8 md:p-12 drop-shadow-2xl flex flex-col gap-8 rounded-2xl"
         >
           <span className="text-xl text-secondary font-bold border-b border-gray-200 pb-2">
@@ -291,25 +246,23 @@ export default function TherapistSignUp() {
           </span>
 
           <div className="w-full h-fit grid gap-x-6 gap-y-4 md:gap-y-6 grid-cols-1 md:grid-cols-2">
-            {" "}
-            {/* Adjusted gaps and layout */}
             <FormInput
               PlaceHolder="First Name"
               ColumnStart={1}
               RowStart={1}
-              Span={false} // Kept for reference
-              value={formData.firstName}
+              Span={false}
+              value={formValues?.firstName || ""}
               onChange={handleInputChange}
               error={errors.firstName}
               name="firstName"
-              className="md:col-span-1" // Tailwind grid classes applied here
+              className="md:col-span-1"
             />
             <FormInput
               PlaceHolder="Last Name"
               ColumnStart={2}
               RowStart={1}
-              Span={false} // Kept for reference
-              value={formData.lastName}
+              Span={false}
+              value={formValues?.lastName || ""}
               onChange={handleInputChange}
               error={errors.lastName}
               name="lastName"
@@ -319,8 +272,8 @@ export default function TherapistSignUp() {
               PlaceHolder="Mobile Phone Number (e.g., 09xxxxxxxxx)"
               ColumnStart={1}
               RowStart={2}
-              Span={true} // Kept for reference
-              value={formData.mobile}
+              Span={true}
+              value={formValues?.mobile || ""}
               onChange={handleInputChange}
               error={errors.mobile}
               name="mobile"
@@ -331,8 +284,8 @@ export default function TherapistSignUp() {
               PlaceHolder="Email Address"
               ColumnStart={1}
               RowStart={3}
-              Span={true} // Kept for reference
-              value={formData.email}
+              Span={true}
+              value={formValues?.email || ""}
               onChange={handleInputChange}
               error={errors.email}
               name="email"
@@ -343,9 +296,9 @@ export default function TherapistSignUp() {
               PlaceHolder="Province"
               ColumnStart={1}
               RowStart={4}
-              Span={false} // Kept for reference
+              Span={false}
               List={PHILIPPINE_PROVINCES}
-              value={formData.province}
+              value={formValues?.province || ""}
               onValueChange={(value) => handleDropdownChange("province", value)}
               error={errors.province}
               name="province"
@@ -355,9 +308,9 @@ export default function TherapistSignUp() {
               PlaceHolder="Provider Type"
               ColumnStart={2}
               RowStart={4}
-              Span={false} // Kept for reference
+              Span={false}
               List={PROVIDER_TYPE}
-              value={formData.providerType}
+              value={formValues?.providerType || ""}
               onValueChange={(value) =>
                 handleDropdownChange("providerType", value)
               }
@@ -367,9 +320,8 @@ export default function TherapistSignUp() {
             />
           </div>
 
-          {/* Submit Button */}
           <button
-            type="submit" // Change to type="submit"
+            type="submit"
             className="w-full md:w-1/2 lg:w-1/3 h-12 bg-secondary text-white drop-shadow-xl rounded-full self-center hover:bg-opacity-90 transition-opacity duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             Submit

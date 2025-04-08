@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react"; // Added useEffect
-import { useRouter } from "next/navigation"; // Import useRouter
+import React, { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,15 +10,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
-  // AlertDialogCancel, // Can remove if not used
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Upload, FileText, X } from "lucide-react"; // Removed unused icons
+import { Upload, FileText, X } from "lucide-react";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
+import Image from "next/image";
+import useTherapistForm from "@/store/therapistform";
 
 // --- Document Upload Card Component (Handles error display) ---
 const DocumentUpload = ({
@@ -28,7 +29,7 @@ const DocumentUpload = ({
   onFileChange,
   files,
   onRemoveFile,
-  hasError, // Added hasError prop
+  hasError,
 }) => {
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -41,7 +42,6 @@ const DocumentUpload = ({
       e.stopPropagation();
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         onFileChange(e.dataTransfer.files);
-        // Clear error visually if needed immediately, though state handles it
       }
     },
     [onFileChange]
@@ -53,12 +53,9 @@ const DocumentUpload = ({
         hasError ? "border-red-500" : "border-gray-200"
       }`}
     >
-      {" "}
-      {/* Error border */}
       <CardContent className="p-0">
         <div className="p-5 border-b border-gray-100">
           <div className="flex items-center justify-between">
-            {/* Apply error styling to title */}
             <h3
               className={`text-lg font-medium ${
                 hasError ? "text-red-700" : "text-green-800"
@@ -91,18 +88,12 @@ const DocumentUpload = ({
                   className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200"
                 >
                   <div className="flex items-center min-w-0">
-                    {" "}
-                    {/* Added min-w-0 for truncation */}
                     <FileText
                       size={18}
                       className="text-green-600 mr-3 flex-shrink-0"
                     />
                     <div className="flex-grow min-w-0">
-                      {" "}
-                      {/* Added flex-grow and min-w-0 */}
                       <p className="text-sm font-medium truncate">
-                        {" "}
-                        {/* Removed max-w-xs */}
                         {file.name}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -113,9 +104,9 @@ const DocumentUpload = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="flex-shrink-0 ml-2" // Prevent button from shrinking/affecting layout
+                    className="flex-shrink-0 ml-2"
                     onClick={() => onRemoveFile(index)}
-                    aria-label={`Remove ${file.name}`} // Accessibility
+                    aria-label={`Remove ${file.name}`}
                   >
                     <X size={16} className="text-gray-500 hover:text-red-500" />
                   </Button>
@@ -124,7 +115,7 @@ const DocumentUpload = ({
               {/* Allow adding more files */}
               <Button
                 variant="outline"
-                type="button" // Ensure it doesn't submit form
+                type="button"
                 className="w-full mt-3 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-600"
                 onClick={() =>
                   document.getElementById(`file-input-${title}`).click()
@@ -142,7 +133,7 @@ const DocumentUpload = ({
                 hasError
                   ? "border-red-400 hover:border-red-500 bg-red-50"
                   : "border-gray-300 hover:border-green-400 bg-white"
-              }`} // Error styling for drop zone
+              }`}
               onClick={() =>
                 document.getElementById(`file-input-${title}`).click()
               }
@@ -165,7 +156,7 @@ const DocumentUpload = ({
                 </p>
               </div>
               <Button
-                type="button" // Ensure it doesn't submit form
+                type="button"
                 variant="outline"
                 className={`mt-4 ${
                   hasError
@@ -184,7 +175,7 @@ const DocumentUpload = ({
             className="hidden"
             onChange={(e) => onFileChange(e.target.files)}
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            multiple // Allow multiple file selection from browse dialog
+            multiple
           />
         </div>
       </CardContent>
@@ -194,31 +185,30 @@ const DocumentUpload = ({
 
 // --- Main Application Component ---
 const DocumentUploadPage = () => {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
-  // State for document files
-  const [documents, setDocuments] = useState({
-    prcLicense: [],
-    nbiClearance: [],
-    resumeCV: [],
-    liabilityInsurance: [],
-    birForm: [],
-  });
+  // Get Zustand store methods and state
+  const {
+    documents,
+    consentChecked,
+    updateDocuments,
+    removeDocument,
+    updateConsent,
+    errors: storeErrors,
+    setErrors,
+  } = useTherapistForm();
 
-  // State for consent checkbox
-  const [consentChecked, setConsentChecked] = useState(false);
-  // State for validation errors
-  const [errors, setErrors] = useState({});
-
-  // State for showing alert dialog for missing files
+  // Local state for alert dialog
   const [alertOpen, setAlertOpen] = useState(false);
   const [incompleteFields, setIncompleteFields] = useState([]);
+  // Local validation errors (UI-specific)
+  const [errors, setLocalErrors] = useState({});
 
   // Handler for file change
   const handleFileChange = (docType, files) => {
     if (!files || files.length === 0) return;
 
-    // Basic file type validation (example)
+    // Basic file type validation
     const allowedTypes = [
       "application/pdf",
       "image/jpeg",
@@ -232,21 +222,19 @@ const DocumentUploadPage = () => {
         allowedTypes.includes(file.type) && file.size <= maxSizeMB * 1024 * 1024
     );
 
-    // Optional: Provide feedback for invalid files (e.g., using a toast notification)
+    // Optional: Provide feedback for invalid files
     if (validFiles.length !== files.length) {
       console.warn(
         "Some files were invalid (type or size) and were not added."
       );
-      // Add user feedback here
     }
 
-    setDocuments((prev) => ({
-      ...prev,
-      [docType]: [...prev[docType], ...validFiles],
-    }));
+    // Update Zustand store with new files
+    updateDocuments(docType, [...documents[docType], ...validFiles]);
+
     // Clear error for this doc type when files are added
     if (errors[docType]) {
-      setErrors((prev) => {
+      setLocalErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[docType];
         return newErrors;
@@ -256,20 +244,16 @@ const DocumentUploadPage = () => {
 
   // Handler for file removal
   const handleRemoveFile = (docType, index) => {
-    setDocuments((prev) => ({
-      ...prev,
-      [docType]: prev[docType].filter((_, i) => i !== index),
-    }));
-    // Optional: Re-validate required status if last file was removed?
-    // Or wait until submit. Let's wait until submit.
+    removeDocument(docType, index);
   };
 
   // Handler for consent checkbox change
   const handleConsentChange = (checked) => {
-    setConsentChecked(checked);
+    updateConsent(checked);
+
     // Clear error on change
     if (errors.consent) {
-      setErrors((prev) => {
+      setLocalErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors.consent;
         return newErrors;
@@ -280,14 +264,14 @@ const DocumentUploadPage = () => {
   // Steps for the sidebar
   const steps = [
     { label: "Therapist Profile", completed: true },
-    { label: "Document Upload", completed: true }, // Mark current step visually
+    { label: "Document Upload", completed: true },
     { label: "Verification", completed: false },
   ];
 
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    setErrors({}); // Clear previous errors
+    setLocalErrors({}); // Clear previous errors
     setIncompleteFields([]); // Clear previous missing fields
 
     let validationPassed = true;
@@ -304,7 +288,7 @@ const DocumentUploadPage = () => {
     Object.entries(requiredDocs).forEach(([key, name]) => {
       if (documents[key].length === 0) {
         validationPassed = false;
-        currentErrors[key] = `${name} is required.`; // Add specific error message
+        currentErrors[key] = `${name} is required.`;
         missingDocs.push(name);
       }
     });
@@ -318,23 +302,26 @@ const DocumentUploadPage = () => {
 
     // 3. Handle validation results
     if (validationPassed) {
-      // Submit the form data (e.g., upload files)
+      // Save errors to store (empty in this case)
+      setErrors({});
+
       console.log("Validation successful!");
       console.log("Documents to submit:", documents);
       // TODO: Implement actual file upload logic here
 
       // Navigate to the next page
-      router.push("/therapist-application/3"); // Assuming '/3' is the next step
+      router.push("/therapist-application/3");
     } else {
       console.log("Validation failed:", currentErrors);
-      setErrors(currentErrors); // Set errors to display inline
+      setLocalErrors(currentErrors); // Set local errors for UI
+      setErrors(currentErrors); // Also update store errors
 
-      // If there were missing documents, prepare for and show the dialog
+      // If there were missing documents, show the dialog
       if (missingDocs.length > 0) {
         setIncompleteFields(missingDocs);
-        setAlertOpen(true); // Show dialog specifically for missing docs
+        setAlertOpen(true);
       } else if (currentErrors.consent) {
-        // If *only* the consent is missing, scroll to it
+        // If only the consent is missing, scroll to it
         const consentElement = document.getElementById("consent-section");
         if (consentElement) {
           consentElement.scrollIntoView({
@@ -342,26 +329,17 @@ const DocumentUploadPage = () => {
             block: "center",
           });
         }
-      } else {
-        // If other errors exist (maybe file type/size in future), scroll to first doc error
-        const firstErrorKey = Object.keys(currentErrors)[0];
-        const errorElement = document
-          .getElementById(`file-input-${firstErrorKey}`)
-          ?.closest("div.p-5"); // Find parent container
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
       }
     }
   };
 
   return (
     <div className="w-full min-h-screen flex bg-gray-50">
-      {/* Left sidebar (Improved Stepper) */}
+      {/* Left sidebar */}
       <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
         <div className="mb-8">
           <Image
-            src="/mentara-landscape.png" // Replace with actual logo
+            src="/mentara-landscape.png"
             alt="Mentara logo"
             width={250}
             height={100}
@@ -371,7 +349,7 @@ const DocumentUploadPage = () => {
           <p className="text-sm text-gray-600 mb-1">You're working on</p>
           <h1 className="text-2xl font-bold text-green-900">Application</h1>
         </div>
-        <OnboardingStepper steps={steps}></OnboardingStepper>
+        <OnboardingStepper steps={steps} />
         <div className="mt-auto text-xs text-gray-500">
           © {new Date().getFullYear()} Mentara. All rights reserved.
         </div>
@@ -399,9 +377,8 @@ const DocumentUploadPage = () => {
                 onFileChange={(files) => handleFileChange("prcLicense", files)}
                 files={documents.prcLicense}
                 onRemoveFile={(index) => handleRemoveFile("prcLicense", index)}
-                hasError={!!errors.prcLicense} // Pass error status
+                hasError={!!errors.prcLicense}
               />
-              {/* Display inline error message */}
               {errors.prcLicense && (
                 <p className="text-red-600 text-sm -mt-4 mb-4 ml-1">
                   {errors.prcLicense}
@@ -419,7 +396,7 @@ const DocumentUploadPage = () => {
                 onRemoveFile={(index) =>
                   handleRemoveFile("nbiClearance", index)
                 }
-                hasError={!!errors.nbiClearance} // Pass error status
+                hasError={!!errors.nbiClearance}
               />
               {errors.nbiClearance && (
                 <p className="text-red-600 text-sm -mt-4 mb-4 ml-1">
@@ -434,7 +411,7 @@ const DocumentUploadPage = () => {
                 onFileChange={(files) => handleFileChange("resumeCV", files)}
                 files={documents.resumeCV}
                 onRemoveFile={(index) => handleRemoveFile("resumeCV", index)}
-                hasError={!!errors.resumeCV} // Pass error status
+                hasError={!!errors.resumeCV}
               />
               {errors.resumeCV && (
                 <p className="text-red-600 text-sm -mt-4 mb-4 ml-1">
@@ -460,9 +437,8 @@ const DocumentUploadPage = () => {
                 onRemoveFile={(index) =>
                   handleRemoveFile("liabilityInsurance", index)
                 }
-                hasError={!!errors.liabilityInsurance} // Can have errors even if optional (e.g., file type)
+                hasError={!!errors.liabilityInsurance}
               />
-              {/* Display error if any (e.g., invalid file type) */}
               {errors.liabilityInsurance && (
                 <p className="text-red-600 text-sm -mt-4 mb-4 ml-1">
                   {errors.liabilityInsurance}
@@ -490,8 +466,6 @@ const DocumentUploadPage = () => {
               id="consent-section"
               className="mb-8 p-5 border border-gray-200 rounded-xl bg-white shadow-sm scroll-mt-20"
             >
-              {" "}
-              {/* Added ID and scroll-mt */}
               <h2 className="text-xl font-semibold text-green-800 mb-4">
                 Certification
               </h2>
@@ -506,10 +480,10 @@ const DocumentUploadPage = () => {
                     errors.consent ? "border-red-400" : ""
                   }`}
                   checked={consentChecked}
-                  onCheckedChange={handleConsentChange} // Use specific handler
+                  onCheckedChange={handleConsentChange}
                   aria-describedby={
                     errors.consent ? "consent-error" : undefined
-                  } // Link error msg
+                  }
                 />
                 <Label
                   htmlFor="consent"
@@ -522,7 +496,6 @@ const DocumentUploadPage = () => {
                   the rejection of my application.
                 </Label>
               </div>
-              {/* Display consent error inline */}
               {errors.consent && (
                 <p
                   id="consent-error"
@@ -539,7 +512,7 @@ const DocumentUploadPage = () => {
                 type="button"
                 variant="outline"
                 className="px-8 py-3 rounded-full text-gray-700 border-gray-300 hover:bg-gray-100"
-                onClick={() => router.back()} // Go back to previous page
+                onClick={() => router.back()}
               >
                 Back
               </Button>
@@ -555,7 +528,7 @@ const DocumentUploadPage = () => {
         </div>
       </div>
 
-      {/* Alert Dialog for Incomplete *Required Files* */}
+      {/* Alert Dialog for Incomplete Files */}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

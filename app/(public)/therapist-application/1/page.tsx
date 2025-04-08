@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react"; // Added useRef
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
 import { therapistProfileFormFields } from "@/const/therapist_application";
 import Image from "next/image";
+import useTherapistForm from "@/store/therapistform";
 
 // --- Validation Helper ---
-// (You could move this to a separate utility file)
 const validateField = (value, rules, allValues) => {
   if (!rules) return null; // No rules to check
 
@@ -116,7 +116,6 @@ const validateField = (value, rules, allValues) => {
 };
 
 // --- Custom Components (Updated for error display) ---
-
 const CustomCheckbox = ({
   id,
   label,
@@ -125,9 +124,7 @@ const CustomCheckbox = ({
   disabled,
   hasError,
 }) => {
-  // Added hasError
   return (
-    // Add visual indicator for error on the container
     <div
       className={`flex items-center w-full p-3 rounded-lg border mb-2 bg-white has-[:disabled]:opacity-60 has-[:disabled]:bg-gray-50 ${
         hasError ? "border-red-500" : "border-gray-200"
@@ -146,7 +143,7 @@ const CustomCheckbox = ({
         htmlFor={id}
         className={`w-full text-sm font-medium ${
           disabled ? "cursor-not-allowed" : "cursor-pointer"
-        } ${hasError ? "text-red-700" : ""}`} // Optional: Change label color on error
+        } ${hasError ? "text-red-700" : ""}`}
       >
         {label}
       </Label>
@@ -155,7 +152,6 @@ const CustomCheckbox = ({
 };
 
 const CustomRadio = ({ id, label, value, checked, hasError }) => {
-  // Added hasError
   return (
     <Label
       htmlFor={id}
@@ -163,8 +159,8 @@ const CustomRadio = ({ id, label, value, checked, hasError }) => {
         hasError
           ? "border-red-500 bg-red-50"
           : checked
-          ? "bg-green-600 text-white border-green-700"
-          : "bg-white border-gray-200 hover:bg-green-50 hover:border-green-300"
+            ? "bg-green-600 text-white border-green-700"
+            : "bg-white border-gray-200 hover:bg-green-50 hover:border-green-300"
       }`}
     >
       <RadioGroupItem
@@ -174,8 +170,8 @@ const CustomRadio = ({ id, label, value, checked, hasError }) => {
           hasError
             ? "border-red-500"
             : checked
-            ? "border-white text-white"
-            : "border-gray-400 text-green-600"
+              ? "border-white text-white"
+              : "border-gray-400 text-green-600"
         } focus:ring-green-500 focus:ring-offset-1`}
       />
       <span
@@ -197,18 +193,17 @@ const CustomInput = ({
   value,
   onChange,
   className = "",
-  hasError, // Added hasError
+  hasError,
   ...props
 }) => {
   return (
-    // mb-1 already exists on Label, so keep mb-3 on div for overall spacing
     <div className="mb-1 w-full">
       {label && (
         <Label
           htmlFor={id}
           className={`block text-sm font-medium mb-1 ${
             hasError ? "text-red-700" : "text-gray-700"
-          }`} // Label color change on error
+          }`}
         >
           {label}
         </Label>
@@ -219,7 +214,6 @@ const CustomInput = ({
         type={type}
         value={value || ""}
         onChange={onChange || (() => {})}
-        // Apply red border on error
         className={`w-full p-3 rounded-lg border focus:ring-green-500 focus:border-green-500 shadow-sm ${
           hasError ? "border-red-500" : "border-gray-300"
         } ${className}`}
@@ -229,7 +223,6 @@ const CustomInput = ({
   );
 };
 
-// Textarea Component (Add hasError prop)
 const CustomTextarea = ({
   id,
   label,
@@ -268,22 +261,30 @@ const CustomTextarea = ({
 
 // --- Main Application Component ---
 const MentaraApplication = () => {
-  const router = useRouter(); // Initialize router
-  const formRef = useRef(null); // Ref for the form element
+  const router = useRouter();
+  const formRef = useRef(null);
 
   const steps = [
-    { label: "Therapist Profile", completed: true }, // Mark current step as completed visually
+    { label: "Therapist Profile", completed: true },
     { label: "Document Upload", completed: false },
     { label: "Verification", completed: false },
   ];
 
-  const [formValues, setFormValues] = useState({});
-  const [otherSpecify, setOtherSpecify] = useState({});
-  const [errors, setErrors] = useState({}); // State to hold validation errors
+  // Get Zustand store methods and state
+  const {
+    formValues,
+    otherSpecify,
+    updateField,
+    updateOtherSpecify,
+    resetForm,
+  } = useTherapistForm();
+
+  // Keep errors as local state since they're UI-specific
+  const [errors, setErrors] = useState({});
 
   // --- Handlers ---
   const handleInputChange = (fieldKey, value) => {
-    setFormValues((prev) => ({ ...prev, [fieldKey]: value }));
+    updateField(fieldKey, value);
     // Clear error on change
     if (errors[fieldKey]) {
       setErrors((prev) => {
@@ -295,54 +296,44 @@ const MentaraApplication = () => {
   };
 
   const handleCheckboxChange = (fieldKey, optionValue, checked) => {
-    let newSelection;
-    setFormValues((prev) => {
-      const currentSelection = prev[fieldKey] || {};
-      newSelection = { ...currentSelection, [optionValue]: checked };
-      return { ...prev, [fieldKey]: newSelection };
-    });
-    // 'accepts' logic moved inside the callback to ensure it runs after state update is queued
-    React.useEffect(() => {
-      if (fieldKey === "accepts" && newSelection) {
-        const updatedSelection = { ...newSelection }; // Work with the latest selection
-        if (optionValue === "all" && checked) {
-          const allChecked =
-            therapistProfileFormFields.availabilityAndPayment.accepts.options.reduce(
-              (acc, opt) => {
-                if (opt.value !== "all") acc[opt.value] = true;
-                return acc;
-              },
-              { all: true }
-            );
-          setFormValues((prev) => ({ ...prev, [fieldKey]: allChecked }));
-        } else if (optionValue === "all" && !checked) {
-          // Handled by base logic
-        } else if (optionValue !== "all" && !checked) {
-          if (updatedSelection.all) {
-            updatedSelection.all = false;
-            setFormValues((prev) => ({
-              ...prev,
-              [fieldKey]: updatedSelection,
-            }));
-          }
-        } else if (optionValue !== "all" && checked) {
-          const allOtherOptions =
-            therapistProfileFormFields.availabilityAndPayment.accepts.options.filter(
-              (opt) => opt.value !== "all"
-            );
-          const allOthersChecked = allOtherOptions.every(
-            (opt) => updatedSelection[opt.value]
+    const currentSelection = formValues?.[fieldKey] || {};
+    const newSelection = { ...currentSelection, [optionValue]: checked };
+    updateField(fieldKey, newSelection);
+
+    // 'accepts' logic for checkbox groups
+    if (fieldKey === "accepts") {
+      const updatedSelection = { ...newSelection };
+      if (optionValue === "all" && checked) {
+        const allChecked =
+          therapistProfileFormFields.availabilityAndPayment.accepts.options.reduce(
+            (acc, opt) => {
+              if (opt.value !== "all") acc[opt.value] = true;
+              return acc;
+            },
+            { all: true }
           );
-          if (allOthersChecked && !updatedSelection.all) {
-            updatedSelection.all = true;
-            setFormValues((prev) => ({
-              ...prev,
-              [fieldKey]: updatedSelection,
-            }));
-          }
+        updateField(fieldKey, allChecked);
+      } else if (optionValue !== "all" && !checked) {
+        if (updatedSelection.all) {
+          updatedSelection.all = false;
+          updateField(fieldKey, updatedSelection);
+        }
+      } else if (optionValue !== "all" && checked) {
+        const allOtherOptions =
+          therapistProfileFormFields.availabilityAndPayment.accepts.options.filter(
+            (opt) => opt.value !== "all"
+          );
+
+        const allOthersChecked = allOtherOptions.every(
+          (opt) => updatedSelection[opt.value]
+        );
+
+        if (allOthersChecked && !updatedSelection.all) {
+          updatedSelection.all = true;
+          updateField(fieldKey, updatedSelection);
         }
       }
-    }, [formValues[fieldKey]]); // Rerun effect when this specific field value changes
+    }
 
     // Clear error on change
     if (errors[fieldKey]) {
@@ -355,7 +346,7 @@ const MentaraApplication = () => {
   };
 
   const handleOtherSpecify = (specifyKey, value) => {
-    setOtherSpecify((prev) => ({ ...prev, [specifyKey]: value }));
+    updateOtherSpecify(specifyKey, value);
     // Clear error on change
     if (errors[specifyKey]) {
       setErrors((prev) => {
@@ -408,7 +399,7 @@ const MentaraApplication = () => {
         "isLicenseActive",
       ].includes(fieldKey);
       const shouldValidateMainField = !(
-        isPrcDependent && formValues.isPRCLicensed !== "yes"
+        isPrcDependent && formValues?.isPRCLicensed !== "yes"
       );
 
       if (shouldValidateMainField && fieldConfig.validation) {
@@ -425,7 +416,7 @@ const MentaraApplication = () => {
       // --- Validate the 'specify' field if applicable ---
       const specifyInputKey = `${fieldKey}_specify`;
       const specifyConfig = fieldConfig.specifyField; // The config for the specify input itself
-      const specifyValue = otherSpecify[specifyInputKey]; // Get value from otherSpecify state
+      const specifyValue = otherSpecify?.[specifyInputKey]; // Get value from otherSpecify state
 
       // Determine if the specify field *should* be validated based on parent selection
       let shouldValidateSpecify = false;
@@ -531,8 +522,6 @@ const MentaraApplication = () => {
           id={fieldKey}
           className="mb-8 p-5 border border-gray-200 rounded-xl bg-gradient-to-br from-white via-gray-50 to-white shadow-sm scroll-mt-20"
         >
-          {" "}
-          {/* Added scroll-mt */}
           <h2 className="text-xl font-semibold text-green-800 mb-5 border-b pb-2 border-gray-100">
             {groupTitle}
           </h2>
@@ -554,7 +543,7 @@ const MentaraApplication = () => {
       "expirationDateOfLicense",
       "isLicenseActive",
     ].includes(fieldKey);
-    if (isPrcDependent && formValues.isPRCLicensed !== "yes") return null;
+    if (isPrcDependent && formValues?.isPRCLicensed !== "yes") return null;
 
     // --- 4. Determine Specify Logic ---
     const specifyInputKey = `${fieldKey}_specify`;
@@ -568,11 +557,11 @@ const MentaraApplication = () => {
     ) {
       if (fieldConfig.type === "radio") {
         requiresSpecifyOption = fieldConfig.options.find(
-          (opt) => opt.hasSpecify && formValues[fieldKey] === opt.value
+          (opt) => opt.hasSpecify && formValues?.[fieldKey] === opt.value
         );
       } else {
         // checkbox
-        const currentSelection = formValues[fieldKey] || {};
+        const currentSelection = formValues?.[fieldKey] || {};
         requiresSpecifyOption = fieldConfig.options.find(
           (opt) => opt.hasSpecify && currentSelection[opt.value]
         );
@@ -589,7 +578,7 @@ const MentaraApplication = () => {
     const specifyError = errors[specifyInputKey];
 
     // --- 6. Render Based on Type ---
-    const commonWrapperClass = "mb-4"; // Reduced bottom margin slightly for error space
+    const commonWrapperClass = "mb-4";
 
     switch (fieldConfig.type) {
       case "radio":
@@ -599,8 +588,6 @@ const MentaraApplication = () => {
             id={fieldKey}
             className={`${commonWrapperClass} scroll-mt-20`}
           >
-            {" "}
-            {/* Added ID and scroll-mt */}
             <Label
               className={`block text-lg font-medium mb-3 ${
                 fieldError ? "text-red-700" : "text-green-800"
@@ -609,7 +596,7 @@ const MentaraApplication = () => {
               {fieldConfig.question}
             </Label>
             <RadioGroup
-              value={formValues[fieldKey] || ""}
+              value={formValues?.[fieldKey] || ""}
               onValueChange={(value) => handleInputChange(fieldKey, value)}
               name={fieldKey}
             >
@@ -619,7 +606,7 @@ const MentaraApplication = () => {
                   id={`${fieldKey}-${option.value}`}
                   label={option.label}
                   value={option.value}
-                  checked={formValues[fieldKey] === option.value}
+                  checked={formValues?.[fieldKey] === option.value}
                   hasError={!!fieldError}
                 />
               ))}
@@ -630,15 +617,13 @@ const MentaraApplication = () => {
             {/* Specify Input */}
             {showSpecifyInput && (
               <div className="mt-2">
-                {" "}
-                {/* Wrapper for specify input + error */}
                 {specifyConfig.type === "textarea" ? (
                   <CustomTextarea
-                    id={specifyInputKey} // Use specify key for ID
+                    id={specifyInputKey}
                     placeholder={
                       specifyConfig.placeholder || "Please provide details..."
                     }
-                    value={otherSpecify[specifyInputKey] || ""}
+                    value={otherSpecify?.[specifyInputKey] || ""}
                     onChange={(e) =>
                       handleOtherSpecify(specifyInputKey, e.target.value)
                     }
@@ -646,9 +631,9 @@ const MentaraApplication = () => {
                   />
                 ) : (
                   <CustomInput
-                    id={specifyInputKey} // Use specify key for ID
+                    id={specifyInputKey}
                     placeholder={specifyConfig.placeholder || "Please specify"}
-                    value={otherSpecify[specifyInputKey] || ""}
+                    value={otherSpecify?.[specifyInputKey] || ""}
                     onChange={(e) =>
                       handleOtherSpecify(specifyInputKey, e.target.value)
                     }
@@ -665,15 +650,13 @@ const MentaraApplication = () => {
         );
 
       case "checkbox":
-        const currentSelection = formValues[fieldKey] || {};
+        const currentSelection = formValues?.[fieldKey] || {};
         return (
           <div
             key={fieldKey}
             id={fieldKey}
             className={`${commonWrapperClass} scroll-mt-20`}
           >
-            {" "}
-            {/* Added ID and scroll-mt */}
             <Label
               className={`block text-lg font-medium mb-3 ${
                 fieldError ? "text-red-700" : "text-green-800"
@@ -695,19 +678,18 @@ const MentaraApplication = () => {
                   currentSelection["all"] &&
                   option.value !== "all"
                 }
-                hasError={!!fieldError} // Error applies to the whole group
+                hasError={!!fieldError}
               />
             ))}
             {fieldError && (
               <p className="text-red-600 text-sm mt-1">{fieldError}</p>
             )}
-            {/* Specify Input */}
             {showSpecifyInput && (
               <div className="mt-2">
                 <CustomInput
-                  id={specifyInputKey} // Use specify key for ID
+                  id={specifyInputKey}
                   placeholder={specifyConfig.placeholder || "Please specify"}
-                  value={otherSpecify[specifyInputKey] || ""}
+                  value={otherSpecify?.[specifyInputKey] || ""}
                   onChange={(e) =>
                     handleOtherSpecify(specifyInputKey, e.target.value)
                   }
@@ -732,18 +714,16 @@ const MentaraApplication = () => {
             id={fieldKey}
             className={`${commonWrapperClass} scroll-mt-20`}
           >
-            {" "}
-            {/* Added ID and scroll-mt */}
             <CustomInput
-              id={fieldKey} // Use fieldKey as ID
+              id={fieldKey}
               label={fieldConfig.question}
               placeholder={fieldConfig.placeholder || ""}
               type={fieldConfig.type}
-              value={formValues[fieldKey] || ""}
+              value={formValues?.[fieldKey] || ""}
               onChange={(e) => handleInputChange(fieldKey, e.target.value)}
               step={fieldKey === "standardSessionRate" ? "0.01" : undefined}
               min={fieldKey === "standardSessionRate" ? "0" : undefined}
-              hasError={!!fieldError} // Pass error status
+              hasError={!!fieldError}
             />
             {fieldError && (
               <p className="text-red-600 text-sm mt-1">{fieldError}</p>
@@ -764,11 +744,11 @@ const MentaraApplication = () => {
   // --- Component Return ---
   return (
     <div className="w-full min-h-screen flex bg-gray-50">
-      {/* Left sidebar ... (no changes needed here) ... */}
+      {/* Left sidebar */}
       <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
         <div className="mb-8">
           <Image
-            src="/mentara-landscape.png" // Replace with actual logo
+            src="/mentara-landscape.png"
             alt="Mentara logo"
             width={250}
             height={100}
@@ -788,8 +768,6 @@ const MentaraApplication = () => {
       <div className="w-4/5 flex justify-center p-8">
         <div className="w-full max-w-3xl h-full">
           <form ref={formRef} onSubmit={handleSubmit} noValidate>
-            {" "}
-            {/* Added ref and noValidate */}
             <div className="space-y-8">
               {Object.entries(therapistProfileFormFields).map(
                 ([fieldKey, fieldConfig]) =>

@@ -7,7 +7,9 @@ export const OnboardingStepper = ({ steps }) => {
           <div className="flex items-center gap-2 z-10 relative">
             <div
               className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                step.completed ? "bg-green-600" : "border border-gray-300"
+                step.completed
+                  ? "bg-green-600"
+                  : "bg-white border border-gray-300"
               }`}
             >
               {step.completed && (
@@ -32,13 +34,14 @@ export const OnboardingStepper = ({ steps }) => {
           {/* Connection line (don't show for last item) */}
           {index < steps.length - 1 && (
             <div
-              className={`absolute left-3 top-6 w-[2px] h-[calc(100%-6px)] ${
+              className={`absolute left-3 top-6 w-[2px] h-[calc(100%-6px)] -translate-x-1/2 ${
                 steps[index].completed && steps[index + 1]?.completed // Check next step safely
                   ? "bg-green-600"
                   : steps[index].completed
-                  ? "bg-gradient-to-b from-green-600 to-gray-300"
-                  : "bg-gray-300"
+                    ? "bg-gradient-to-b from-green-600 to-gray-300"
+                    : "bg-gray-300"
               }`}
+              style={{ zIndex: 0 }}
             />
           )}
 
