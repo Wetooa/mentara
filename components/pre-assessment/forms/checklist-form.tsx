@@ -32,9 +32,7 @@ export default function PreAssessmentInitialCheckList() {
           const handleSelect = () => {
             if (isSelected) {
               setQuestionnaires(
-                questionnaires.filter(
-                  (questionnaire) => questionnaire !== item,
-                ),
+                questionnaires.filter((questionnaire) => questionnaire !== item)
               );
             } else {
               setQuestionnaires([...questionnaires, item]);
@@ -47,7 +45,7 @@ export default function PreAssessmentInitialCheckList() {
               key={item}
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "justify-start px-6 gap-4",
+                "justify-start px-6 gap-4"
               )}
             >
               <Checkbox onClick={handleSelect} checked={isSelected} />

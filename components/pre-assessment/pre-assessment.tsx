@@ -1,12 +1,12 @@
 import { QUESTIONNAIRE_MAP } from "@/const/list-of-questionnaires";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
 import { AnimationControls, motion } from "framer-motion";
-import { Button } from "../ui/button";
-import PreAssessmentProgressBar from "./progress-bar";
-import PreAssessmentInitialCheckList from "./questionnaire/initial";
-import QuestionnaireForm from "./questionnaire/questionnaire-form";
-import PreAssessmentSignUp, { PreAssessmentSignUpRef } from "./sign-up";
 import { useRef } from "react";
+import { Button } from "../ui/button";
+import PreAssessmentInitialCheckList from "./forms/checklist-form";
+import QuestionnaireForm from "./forms/questionnaire-form";
+import PreAssessmentSignUp, { PreAssessmentSignUpRef } from "./forms/sign-up";
+import PreAssessmentProgressBar from "./progress-bar";
 
 export default function PreAssessmentChecklist({
   animationControls,
@@ -57,7 +57,7 @@ export default function PreAssessmentChecklist({
       .start({
         x: -10,
         opacity: 0, // Fade out
-        transition: { duration: 0.5, ease: "easeIn" },
+        transition: { duration: 0.2, ease: "easeIn" },
       })
       .then(() => {
         nextStep(); // Move to the next question
@@ -66,13 +66,13 @@ export default function PreAssessmentChecklist({
           .start({
             x: 10, // Start new question from the right
             opacity: 0, // Start invisible
-            transition: { duration: 0.5 },
+            transition: { duration: 0.2 },
           })
           .then(() => {
             animationControls.start({
               x: 0, // Move new question to the center
               opacity: 1, // Fade in
-              transition: { duration: 0.5, ease: "easeOut" },
+              transition: { duration: 0.2, ease: "easeOut" },
             });
           });
       });
@@ -82,7 +82,7 @@ export default function PreAssessmentChecklist({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1, ease: "easeIn" }}
+      transition={{ duration: 0.5, ease: "easeIn" }}
       className="bg-primary-foreground rounded-3xl shadow-lg overflow-hidden max-w-[400px] w-full"
     >
       <PreAssessmentProgressBar />

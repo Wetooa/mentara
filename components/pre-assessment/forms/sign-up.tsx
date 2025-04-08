@@ -1,7 +1,7 @@
 import React, { useImperativeHandle, forwardRef } from "react";
 import { z } from "zod";
-import { Input } from "../ui/input";
-import { Separator } from "../ui/separator";
+import { Input } from "../../ui/input";
+import { Separator } from "../../ui/separator";
 import { useSignUp } from "@clerk/nextjs";
 import { useSignUpStore } from "@/store/preassessment";
 import { zodResolver } from "@hookform/resolvers/zod";

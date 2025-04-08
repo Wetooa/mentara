@@ -27,7 +27,7 @@ export default function PreAssessmentNavbar({
       .start({
         x: 10,
         opacity: 0, // Fade out
-        transition: { duration: 0.5, ease: "easeIn" },
+        transition: { duration: 0.2, ease: "easeIn" },
       })
       .then(() => {
         prevStep(); // Move to the next question
@@ -36,13 +36,13 @@ export default function PreAssessmentNavbar({
           .start({
             x: -10, // Start new question from the right
             opacity: 0, // Start invisible
-            transition: { duration: 0.5 },
+            transition: { duration: 0.2 },
           })
           .then(() => {
             animationControls.start({
               x: 0, // Move new question to the center
               opacity: 1, // Fade in
-              transition: { duration: 0.5, ease: "easeOut" },
+              transition: { duration: 0.2, ease: "easeOut" },
             });
           });
       });
@@ -52,7 +52,7 @@ export default function PreAssessmentNavbar({
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1, ease: "easeIn" }}
+      transition={{ duration: 0.3, ease: "easeIn" }}
       className="flex justify-between p-4 fixed w-full"
     >
       <Button
