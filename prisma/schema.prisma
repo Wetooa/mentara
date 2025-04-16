@@ -54,19 +54,36 @@ model Membership {
   community Community @relation(fields: [communityId], references: [id])
 }
 
-model Post {
-  id          String   @id @default(uuid())
-  title       String
-  content     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  communityId String
-  userId      String
+model PostFile {
+  id     String @id @default(uuid())
+  url    String
+  postId String
 
-  // Relations
-  community Community @relation(fields: [communityId], references: [id])
-  user      User      @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model CommentFile {
+  id        String @id @default(uuid())
+  url       String
+  commentId String
+
+  comment Comment @relation(fields: [commentId], references: [id])
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId      String
+  communityId String
+
+  user      User       @relation(fields: [userId], references: [id])
+  community Community  @relation(fields: [communityId], references: [id])
   comments  Comment[]
+  files     PostFile[]
 }
 
 model Comment {
@@ -74,13 +91,15 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  postId    String
-  userId    String
-  parentId  String?
 
-  // Relations
+  postId   String
+  userId   String
+  parentId String?
+
   post    Post      @relation(fields: [postId], references: [id])
   user    User      @relation(fields: [userId], references: [id])
-  parent  Comment?  @relation("CommentParent", fields: [parentId], references: [id])
-  replies Comment[] @relation("CommentParent")
+  parent  Comment?  @relation("CommentHierarchy", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentHierarchy")
+
+  files CommentFile[]
 }
