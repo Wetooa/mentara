@@ -15,15 +15,72 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-
+  id         String   @id @default(uuid())
   firstName  String
   middleName String
   lastName   String
+  birthDate  DateTime
+  address    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  birthDate DateTime
-  address   String
+  // Relations
+  posts       Post[]
+  comments    Comment[]
+  memberships Membership[]
+}
 
+model Community {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members Membership[]
+  posts   Post[]
+}
+
+model Membership {
+  id          String   @id @default(uuid())
+  userId      String
+  communityId String
+  role        String // You can add roles like 'Member', 'Admin', etc.
+  joinedAt    DateTime @default(now())
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  communityId String
+  userId      String
+
+  // Relations
+  community Community @relation(fields: [communityId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  comments  Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  postId    String
+  userId    String
+  parentId  String?
+
+  // Relations
+  post    Post      @relation(fields: [postId], references: [id])
+  user    User      @relation(fields: [userId], references: [id])
+  parent  Comment?  @relation("CommentParent", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentParent")
 }
