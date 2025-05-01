@@ -6,7 +6,6 @@ export const therapistProfileFormFields = {
       { label: "RPsy (Registered Psychologist)", value: "rpsy" },
       { label: "RPm (Registered Psychometrician)", value: "rpm" },
       { label: "RGC (Registered Guidance Counselor)", value: "rgc" },
-      { label: "LPT (Licensed Professional Teacher)", value: "lpt" },
       { label: "Others (Please specify)", value: "other", hasSpecify: true },
     ],
     specifyField: {
