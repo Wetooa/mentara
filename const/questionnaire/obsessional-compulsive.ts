@@ -1,6 +1,7 @@
 import { QuestionnaireProps } from "../questionnaires";
 
 const OCI_R: QuestionnaireProps = {
+  title: "Obsessive-Compulsive Inventory - Revised (OCI-R)",
   description:
     "The Obsessive-Compulsive Inventory - Revised (OCI-R) is a self-administered questionnaire used to assess the severity of obsessive-compulsive disorder (OCD) symptoms. It is commonly used for diagnosing and monitoring OCD, focusing on obsessive thoughts and compulsive behaviors.",
   questions: [
@@ -102,7 +103,7 @@ const OCI_R: QuestionnaireProps = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     OCDComponentScoreRange: [0, 60],
     HoardingSubscaleScoreRange: [0, 12],
     OCDSubscaleScores: {
