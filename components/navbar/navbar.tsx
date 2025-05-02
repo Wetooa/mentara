@@ -7,16 +7,20 @@ export default function Navbar() {
       <Logo />
 
       <ul className="text-xs">
-        <NavbarButton content="About" redirect="/about" />
-        <NavbarButton content="Community" redirect="/community" />
-        <NavbarButton content="Treatment" redirect="/treatment" />
-        {/* <NavbarButton content="For Therapists" redirect="/for-therapists" /> */}
-        <NavbarButton
-          content="Therapist Application"
-          redirect="/therapist_signup"
-        />
-
-        <NavbarButton content="Log In" redirect="/pre-assessment" />
+        {[
+          { content: "About", redirect: "/about" },
+          { content: "Community", redirect: "/community" },
+          { content: "Treatment", redirect: "/treatment" },
+          // { content: "For Therapists", redirect: "/for-therapists" },
+          { content: "Therapist Application", redirect: "/therapist_signup" },
+          { content: "Log In", redirect: "/sign-in" },
+        ].map((link, index) => (
+          <NavbarButton
+            key={index}
+            content={link.content}
+            redirect={link.redirect}
+          />
+        ))}
       </ul>
     </nav>
   );

@@ -13,6 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 const Therapists: TherapistProps[] = [
   {
@@ -55,7 +56,13 @@ const Therapists: TherapistProps[] = [
 const Navbar = () => (
   <nav className="bg-white text-white w-full sticky top-0 z-50 shadow-md">
     <div className="flex justify-center p-4">
-      <img src="mentara-landscape.png" className="w-52 h-12" />
+      <Image
+        width={50}
+        height={50}
+        alt="Mentara Logo"
+        src="mentara-landscape.png"
+        className="w-52 h-12"
+      />
     </div>
   </nav>
 );

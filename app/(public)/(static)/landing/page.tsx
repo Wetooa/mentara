@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -23,15 +24,24 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 rounded-lg text-lg shadow-md transition-all">
+                <Link
+                  href="/pre-assessment"
+                  className={cn(
+                    buttonVariants(),
+                    "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 rounded-lg text-lg shadow-md transition-all"
+                  )}
+                >
                   Get Started
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-tertiary text-primary hover:bg-tertiary/10"
+                </Link>
+                <Link
+                  href="/about"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "border-tertiary text-primary hover:bg-tertiary/10"
+                  )}
                 >
                   Learn More
-                </Button>
+                </Link>
               </div>
             </div>
             <div className="relative md:w-[500px] h-[400px] md:h-auto overflow-hidden">
@@ -56,8 +66,8 @@ export default function LandingPage() {
             </h2>
             <div className="w-20 h-1 bg-tertiary mx-auto"></div>
             <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg">
-              We're committed to making mental wellness accessible to everyone
-              through compassionate care and innovative approaches.
+              We&apos;re committed to making mental wellness accessible to
+              everyone through compassionate care and innovative approaches.
             </p>
           </div>
 
@@ -98,9 +108,15 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-16 text-center">
-            <Button className="bg-secondary hover:bg-secondary/90 text-white font-bold px-8 py-3 rounded-lg text-lg">
+            <Link
+              href="/community"
+              className={cn(
+                buttonVariants(),
+                "bg-secondary hover:bg-secondary/90 text-white font-bold px-8 py-3 rounded-lg text-lg"
+              )}
+            >
               Join Our Community
-            </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -117,12 +133,20 @@ export default function LandingPage() {
               personalized support from our expert team.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button className="bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3">
+              <Button
+                className={cn(
+                  buttonVariants(),
+                  "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3"
+                )}
+              >
                 Get Started Now
               </Button>
               <Link
                 href="/about"
-                className="text-primary hover:text-primary/80 font-medium flex items-center justify-center"
+                className={cn(
+                  buttonVariants({ variant: "link" }),
+                  "text-primary hover:text-primary/80 font-medium flex items-center justify-center"
+                )}
               >
                 Learn More About Our Approach →
               </Link>

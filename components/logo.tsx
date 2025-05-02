@@ -1,9 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 export default function Logo() {
   return (
-    <div className="flex items-center gap-2">
+    <Link href="/" className="flex items-center gap-2">
       <Image
         width={50}
         height={25}
@@ -13,6 +14,6 @@ export default function Logo() {
       <h1 className="font-[Kollektif] font-bold text-3xl leading-none -mt-1 text-primary ">
         mentara
       </h1>
-    </div>
+    </Link>
   );
 }
