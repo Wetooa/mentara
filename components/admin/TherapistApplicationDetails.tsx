@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import emailjs from "@emailjs/browser";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -166,151 +166,64 @@ export function TherapistApplicationDetails({
     setConfirmationOpen(true);
   };
 
-  // Empty function for EmailJS approval notification
-  const sendApprovalEmail = async () => {
-    setIsEmailSending(true);
-    emailjs.init({
-      publicKey: String(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY),
-      blockHeadless: true,
-      blockList: {
-        list: ["foo@emailjs.com", "bar@emailjs.com"],
-        watchVariable: "userEmail",
-      },
-      limitRate: {
-        id: "app",
-        throttle: 10000,
-      },
-    });
-
-    try {
-      // This will be implemented with EmailJS
-      console.log(`Sending approval email to ${application.email}`);
-
-      // EmailJS implementation will go here
-      const templateParams = {
-        name: `${application.firstName} ${application.lastName}`,
-        email: application.email,
-        status: "approved",
-        message: "Your application has been approved!",
-        password: application.generatedPassword, // This will be included in the API response
-        loginUrl: `${window.location.origin}/therapist-welcome`,
-      };
-
-      try {
-        await emailjs.send(
-          String(process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID),
-          String(process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_APPROVED),
-          templateParams
-        );
-        console.log("Email notification sent successfully");
-        return true;
-      } catch (error) {
-        console.error("Failed to send email notification:", error);
-        return false;
-      }
-
-      /* 
-      await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
-        process.env.NEXT_PUBLIC_EMAILJS_APPROVAL_TEMPLATE_ID,
-        templateParams
-      );
-      */
-
-      // For now just simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return true;
-    } catch (error) {
-      console.error("Failed to send approval email:", error);
-      return false;
-    } finally {
-      setIsEmailSending(false);
-    }
-  };
-
-  // Empty function for EmailJS rejection notification
-  const sendRejectionEmail = async () => {
-    setIsEmailSending(true);
-    emailjs.init({
-      publicKey: String(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY),
-      blockHeadless: true,
-      blockList: {
-        list: ["foo@emailjs.com", "bar@emailjs.com"],
-        watchVariable: "userEmail",
-      },
-      limitRate: {
-        id: "app",
-        throttle: 10000,
-      },
-    });
-    try {
-      // This will be implemented with EmailJS
-      console.log(`Sending rejection email to ${application.email}`);
-
-      // EmailJS implementation will go here
-      const templateParams = {
-        name: `${application.firstName} ${application.lastName}`,
-        email: application.email,
-        status: "rejected",
-        message:
-          "Unfortunately, your application was not approved at this time.",
-      };
-
-      try {
-        await emailjs.send(
-          String(process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID),
-          String(process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_REJECTED),
-          templateParams
-        );
-        console.log("Email notification sent successfully");
-        return true;
-      } catch (error) {
-        console.error("Failed to send email notification:", error);
-        return false;
-      }
-
-      /*
-      await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
-        process.env.NEXT_PUBLIC_EMAILJS_REJECTION_TEMPLATE_ID,
-        templateParams
-      );
-      */
-
-      // For now just simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return true;
-    } catch (error) {
-      console.error("Failed to send rejection email:", error);
-      return false;
-    } finally {
-      setIsEmailSending(false);
-    }
-  };
-
   // Handler for confirming action and updating status
   const confirmAction = async () => {
     if (!actionType || !onStatusChange) return;
 
-    let emailSent = false;
+    setIsEmailSending(true);
 
-    if (actionType === "approve") {
-      emailSent = await sendApprovalEmail();
-    } else if (actionType === "reject") {
-      emailSent = await sendRejectionEmail();
-    }
+    try {
+      // Call the API to update status - emails are sent server-side now
+      const response = await fetch(
+        `/api/therapist/application/${application.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: actionType === "approve" ? "approved" : "rejected",
+          }),
+        }
+      );
 
-    if (emailSent) {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to update application status"
+        );
+      }
+
+      const data = await response.json();
+
+      // For approvals, save the generated password for potential future use
+      if (actionType === "approve" && data.generatedPassword) {
+        application.generatedPassword = data.generatedPassword;
+      }
+
+      // Update the UI
       onStatusChange(
         application.id,
         actionType === "approve" ? "approved" : "rejected"
       );
-    }
 
-    setConfirmationOpen(false);
-    setActionType(null);
+      // Show success message
+      toast.success(
+        `Application ${actionType === "approve" ? "approved" : "rejected"} successfully. Email notification sent to the applicant.`
+      );
+    } catch (error) {
+      console.error(
+        `Error ${actionType === "approve" ? "approving" : "rejecting"} application:`,
+        error
+      );
+      toast.error(
+        `Failed to ${actionType === "approve" ? "approve" : "reject"} application. Please try again.`
+      );
+    } finally {
+      setIsEmailSending(false);
+      setConfirmationOpen(false);
+      setActionType(null);
+    }
   };
 
   return (

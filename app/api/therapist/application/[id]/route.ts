@@ -3,8 +3,69 @@ import { auth } from "@clerk/nextjs/server";
 import db from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
 import { generateSecurePassword } from "@/lib/utils";
+// Add emailjs-com for server-side email sending
+import * as emailjs from "@emailjs/nodejs";
 
-export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+// Configure EmailJS with service credentials
+const emailjsConfig = {
+  publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "",
+  privateKey: process.env.EMAILJS_PRIVATE_KEY || "",
+};
+
+// Helper function to send approval email
+async function sendApprovalEmail(application: any, generatedPassword: string) {
+  try {
+    const templateParams = {
+      name: `${application.firstName} ${application.lastName}`,
+      email: application.email,
+      status: "approved",
+      message: "Your application has been approved!",
+      password: generatedPassword,
+      loginUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://mentara.app"}/therapist-welcome`,
+    };
+
+    await emailjs.send(
+      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "",
+      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_APPROVED || "",
+      templateParams,
+      emailjsConfig
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Failed to send approval email:", error);
+    return false;
+  }
+}
+
+// Helper function to send rejection email
+async function sendRejectionEmail(application: any) {
+  try {
+    const templateParams = {
+      name: `${application.firstName} ${application.lastName}`,
+      email: application.email,
+      status: "rejected",
+      message: "Unfortunately, your application was not approved at this time.",
+    };
+
+    await emailjs.send(
+      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "",
+      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_REJECTED || "",
+      templateParams,
+      emailjsConfig
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Failed to send rejection email:", error);
+    return false;
+  }
+}
+
+export async function GET(
+  req: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   try {
     const { userId } = await auth();
@@ -67,7 +128,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   }
 }
 
-export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   try {
     const { userId } = await auth();
@@ -129,10 +193,13 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
 
         const client = await clerkClient();
 
+        // console.log(application);
+
         // Create the user in Clerk
         const clerkUser = await client.users.createUser({
           emailAddress: [application.email],
           password: generatedPassword,
+          phoneNumber: application.phoneNumber
           firstName: application.firstName,
           lastName: application.lastName,
           publicMetadata: {
@@ -178,6 +245,9 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
             },
           },
         });
+
+        // Send approval email
+        await sendApprovalEmail(application, generatedPassword);
       } catch (error) {
         console.error("Error creating therapist account:", error);
 
@@ -196,6 +266,9 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
           { status: 500 }
         );
       }
+    } else if (status === "rejected") {
+      // Send rejection email
+      await sendRejectionEmail(application);
     }
 
     return NextResponse.json({
