@@ -1,5 +1,6 @@
-import Logo from "../logo";
-import NavbarButton from "./navbar-button";
+import Logo from "@/components/logo";
+import { buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -14,12 +15,14 @@ export default function Navbar() {
           // { content: "For Therapists", redirect: "/for-therapists" },
           { content: "Therapist Application", redirect: "/therapist_signup" },
           { content: "Log In", redirect: "/sign-in" },
-        ].map((link, index) => (
-          <NavbarButton
+        ].map(({ content, redirect }, index) => (
+          <Link
             key={index}
-            content={link.content}
-            redirect={link.redirect}
-          />
+            href={redirect}
+            className={buttonVariants({ variant: "link" })}
+          >
+            {content}
+          </Link>
         ))}
       </ul>
     </nav>
