@@ -1,18 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, X, ChevronRight, Search, Filter, Clock } from "lucide-react";
-import Link from "next/link";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -21,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TherapistApplicationsTable } from "@/components/admin/TherapistApplicationsTable";
+import { toast } from "sonner";
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -29,118 +22,87 @@ const APPLICATION_STATUS = {
   REJECTED: "rejected",
 };
 
-// Sample therapist applications data
-const mockTherapistApplications = [
-  {
-    id: "1",
-    firstName: "Tristan James",
-    lastName: "Tolentino",
-    email: "tristanjamestolentino56@gmail.com",
-    mobile: "09472546834",
-    province: "Cebu",
-    providerType: "Psychologist",
-    professionalLicenseType: "rpsy",
-    status: APPLICATION_STATUS.PENDING,
-    dateApplied: "2025-04-28T09:30:00.000Z",
-  },
-  {
-    id: "2",
-    firstName: "Maria",
-    lastName: "Santos",
-    email: "maria.santos@example.com",
-    mobile: "09123456789",
-    province: "Manila",
-    providerType: "Psychiatrist",
-    professionalLicenseType: "md",
-    status: APPLICATION_STATUS.APPROVED,
-    dateApplied: "2025-04-25T14:15:00.000Z",
-  },
-  {
-    id: "3",
-    firstName: "Juan",
-    lastName: "Dela Cruz",
-    email: "juan.delacruz@example.com",
-    mobile: "09987654321",
-    province: "Davao",
-    providerType: "Licensed Professional Counselor",
-    professionalLicenseType: "lpc",
-    status: APPLICATION_STATUS.REJECTED,
-    dateApplied: "2025-04-22T11:00:00.000Z",
-  },
-  {
-    id: "4",
-    firstName: "Anna",
-    lastName: "Garcia",
-    email: "anna.garcia@example.com",
-    mobile: "09456789123",
-    province: "Iloilo",
-    providerType: "Clinical Psychologist",
-    professionalLicenseType: "rpsy",
-    status: APPLICATION_STATUS.PENDING,
-    dateApplied: "2025-04-26T16:45:00.000Z",
-  },
-];
+interface TherapistApplication {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  province: string;
+  providerType: string;
+  professionalLicenseType: string;
+  status: string;
+  submissionDate: string;
+  [key: string]: any; // For other properties
+}
 
 export default function TherapistApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [applications, setApplications] = useState(mockTherapistApplications);
+  const [applications, setApplications] = useState<TherapistApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Filter applications based on search query and status filter
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      app.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.providerType.toLowerCase().includes(searchQuery.toLowerCase());
+  // Fetch applications from the API
+  const fetchApplications = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Build the query parameters
+      const params = new URLSearchParams();
+      if (statusFilter) {
+        params.append("status", statusFilter);
+      }
 
-    const matchesStatus = statusFilter === null || app.status === statusFilter;
+      // Call the API
+      const response = await fetch(
+        `/api/therapist/application?${params.toString()}`
+      );
 
-    return matchesSearch && matchesStatus;
-  });
+      if (!response.ok) {
+        throw new Error("Failed to fetch applications");
+      }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(date);
+      const data = await response.json();
+      setApplications(data.applications);
+    } catch (err) {
+      console.error("Error fetching therapist applications:", err);
+      setError("Failed to load applications. Please try again.");
+      toast.error("Error loading applications");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case APPLICATION_STATUS.PENDING:
-        return (
-          <Badge
-            variant="outline"
-            className="bg-yellow-50 text-yellow-700 border-yellow-200"
-          >
-            Pending
-          </Badge>
-        );
-      case APPLICATION_STATUS.APPROVED:
-        return (
-          <Badge
-            variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
-          >
-            Approved
-          </Badge>
-        );
-      case APPLICATION_STATUS.REJECTED:
-        return (
-          <Badge
-            variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            Rejected
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
+  // Fetch applications on initial load and when status filter changes
+  useEffect(() => {
+    fetchApplications();
+  }, [statusFilter]);
+
+  // Filter applications based on search query
+  const filteredApplications = applications.filter((app) => {
+    if (!searchQuery) return true;
+
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      app.firstName.toLowerCase().includes(searchLower) ||
+      app.lastName.toLowerCase().includes(searchLower) ||
+      app.email.toLowerCase().includes(searchLower) ||
+      app.providerType.toLowerCase().includes(searchLower) ||
+      app.province.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Handle status change
+  const handleStatusChange = async (
+    id: string,
+    status: "approved" | "rejected" | "pending"
+  ) => {
+    // This is called after the API request succeeds in the TherapistApplicationsTable component
+    // Update the local state to reflect the change
+    setApplications((prevApplications) =>
+      prevApplications.map((app) => (app.id === id ? { ...app, status } : app))
+    );
   };
 
   return (
@@ -182,78 +144,46 @@ export default function TherapistApplicationsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+          <Button variant="outline" onClick={() => fetchApplications()}>
+            Refresh
+          </Button>
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Provider Type</TableHead>
-              <TableHead>Province</TableHead>
-              <TableHead>Date Applied</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredApplications.length > 0 ? (
-              filteredApplications.map((application) => (
-                <TableRow key={application.id}>
-                  <TableCell className="font-medium">
-                    {application.firstName} {application.lastName}
-                  </TableCell>
-                  <TableCell>{application.email}</TableCell>
-                  <TableCell>{application.providerType}</TableCell>
-                  <TableCell>{application.province}</TableCell>
-                  <TableCell>{formatDate(application.dateApplied)}</TableCell>
-                  <TableCell>{getStatusBadge(application.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button asChild variant="ghost" size="sm">
-                        <Link
-                          href={`/admin/therapist-applications/${application.id}`}
-                        >
-                          <Clock className="mr-1 h-4 w-4" />
-                          <span>View</span>
-                        </Link>
-                      </Button>
-                      {application.status === APPLICATION_STATUS.PENDING && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-green-600 hover:bg-green-50 hover:text-green-700"
-                          >
-                            <Check className="mr-1 h-4 w-4" />
-                            <span>Approve</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                          >
-                            <X className="mr-1 h-4 w-4" />
-                            <span>Reject</span>
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  No therapist applications found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <p className="mt-4 text-gray-500">Loading applications...</p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="py-8 text-center">
+          <p className="text-red-500">{error}</p>
+          <Button
+            onClick={() => fetchApplications()}
+            variant="outline"
+            className="mt-4"
+          >
+            Try Again
+          </Button>
+        </div>
+      ) : (
+        <div className="rounded-md border">
+          <TherapistApplicationsTable
+            applications={filteredApplications}
+            onStatusChange={handleStatusChange}
+          />
+
+          {filteredApplications.length === 0 && (
+            <div className="py-8 text-center text-gray-500">
+              {searchQuery || statusFilter
+                ? "No applications match your filters."
+                : "No therapist applications found."}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

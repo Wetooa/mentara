@@ -9,12 +9,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import emailjs from "@emailjs/browser";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Import icons
 import {
@@ -24,19 +35,31 @@ import {
   FileArchiveIcon,
   ExternalLinkIcon,
   DownloadIcon,
+  XIcon,
+  CheckIcon,
 } from "lucide-react";
 
 interface TherapistApplicationDetailsProps {
   application: TherapistApplication;
+  onStatusChange?: (
+    id: string,
+    status: "approved" | "rejected" | "pending"
+  ) => void;
 }
 
 export function TherapistApplicationDetails({
   application,
+  onStatusChange,
 }: TherapistApplicationDetailsProps) {
   const [selectedFile, setSelectedFile] = useState<{
     name: string;
     url: string;
   } | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [actionType, setActionType] = useState<"approve" | "reject" | null>(
+    null
+  );
+  const [isEmailSending, setIsEmailSending] = useState(false);
 
   const formatDate = (dateString: string) => {
     try {
@@ -76,27 +99,218 @@ export function TherapistApplicationDetails({
     );
   };
 
-  // Mock uploaded files (in a real app, these would come from your database)
-  const uploadedFiles = [
-    { name: "License Certificate.pdf", url: "#", type: "pdf" },
-    { name: "Professional ID Card.jpg", url: "#", type: "image" },
-    { name: "CV Resume.pdf", url: "#", type: "pdf" },
-    { name: "Certification Documents.zip", url: "#", type: "archive" },
-    { name: "Professional Insurance Certificate.pdf", url: "#", type: "pdf" },
-  ];
-
   // Get appropriate icon for file type
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case "pdf":
-        return <FileTextIcon className="w-5 h-5 text-red-500" />;
-      case "image":
-        return <ImageIcon className="w-5 h-5 text-blue-500" />;
-      case "archive":
-        return <FileArchiveIcon className="w-5 h-5 text-yellow-500" />;
-      default:
-        return <FileIcon className="w-5 h-5 text-gray-500" />;
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes("pdf")) {
+      return <FileTextIcon className="w-5 h-5 text-red-500" />;
+    } else if (fileType.includes("image")) {
+      return <ImageIcon className="w-5 h-5 text-blue-500" />;
+    } else if (fileType.includes("zip") || fileType.includes("archive")) {
+      return <FileArchiveIcon className="w-5 h-5 text-yellow-500" />;
+    } else {
+      return <FileIcon className="w-5 h-5 text-gray-500" />;
     }
+  };
+
+  // Modify renderUploadedDocuments to use real data instead of mock data
+  const renderUploadedDocuments = () => {
+    if (
+      !application.uploadedDocuments ||
+      !Array.isArray(application.uploadedDocuments) ||
+      application.uploadedDocuments.length === 0
+    ) {
+      return <p className="text-gray-500 italic">No documents uploaded</p>;
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-2">
+        {application.uploadedDocuments.map((file, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              {getFileIcon(file.fileType)}
+              <span>{file.fileName}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => window.open(file.fileUrl, "_blank")}
+              >
+                <ExternalLinkIcon className="w-4 h-4" />
+                <span>View</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => window.open(file.fileUrl, "_blank", "download")}
+              >
+                <DownloadIcon className="w-4 h-4" />
+                <span>Download</span>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Handler for initiating approval/rejection
+  const handleAction = (action: "approve" | "reject") => {
+    setActionType(action);
+    setConfirmationOpen(true);
+  };
+
+  // Empty function for EmailJS approval notification
+  const sendApprovalEmail = async () => {
+    setIsEmailSending(true);
+    emailjs.init({
+      publicKey: String(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY),
+      blockHeadless: true,
+      blockList: {
+        list: ["foo@emailjs.com", "bar@emailjs.com"],
+        watchVariable: "userEmail",
+      },
+      limitRate: {
+        id: "app",
+        throttle: 10000,
+      },
+    });
+
+    try {
+      // This will be implemented with EmailJS
+      console.log(`Sending approval email to ${application.email}`);
+
+      // EmailJS implementation will go here
+      const templateParams = {
+        name: `${application.firstName} ${application.lastName}`,
+        email: application.email,
+        status: "approved",
+        message: "Your application has been approved!",
+        password: application.generatedPassword, // This will be included in the API response
+        loginUrl: `${window.location.origin}/therapist-welcome`,
+      };
+
+      try {
+        await emailjs.send(
+          String(process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID),
+          String(process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_APPROVED),
+          templateParams
+        );
+        console.log("Email notification sent successfully");
+        return true;
+      } catch (error) {
+        console.error("Failed to send email notification:", error);
+        return false;
+      }
+
+      /* 
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_APPROVAL_TEMPLATE_ID,
+        templateParams
+      );
+      */
+
+      // For now just simulate a delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      return true;
+    } catch (error) {
+      console.error("Failed to send approval email:", error);
+      return false;
+    } finally {
+      setIsEmailSending(false);
+    }
+  };
+
+  // Empty function for EmailJS rejection notification
+  const sendRejectionEmail = async () => {
+    setIsEmailSending(true);
+    emailjs.init({
+      publicKey: String(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY),
+      blockHeadless: true,
+      blockList: {
+        list: ["foo@emailjs.com", "bar@emailjs.com"],
+        watchVariable: "userEmail",
+      },
+      limitRate: {
+        id: "app",
+        throttle: 10000,
+      },
+    });
+    try {
+      // This will be implemented with EmailJS
+      console.log(`Sending rejection email to ${application.email}`);
+
+      // EmailJS implementation will go here
+      const templateParams = {
+        name: `${application.firstName} ${application.lastName}`,
+        email: application.email,
+        status: "rejected",
+        message:
+          "Unfortunately, your application was not approved at this time.",
+      };
+
+      try {
+        await emailjs.send(
+          String(process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID),
+          String(process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_REJECTED),
+          templateParams
+        );
+        console.log("Email notification sent successfully");
+        return true;
+      } catch (error) {
+        console.error("Failed to send email notification:", error);
+        return false;
+      }
+
+      /*
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_REJECTION_TEMPLATE_ID,
+        templateParams
+      );
+      */
+
+      // For now just simulate a delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      return true;
+    } catch (error) {
+      console.error("Failed to send rejection email:", error);
+      return false;
+    } finally {
+      setIsEmailSending(false);
+    }
+  };
+
+  // Handler for confirming action and updating status
+  const confirmAction = async () => {
+    if (!actionType || !onStatusChange) return;
+
+    let emailSent = false;
+
+    if (actionType === "approve") {
+      emailSent = await sendApprovalEmail();
+    } else if (actionType === "reject") {
+      emailSent = await sendRejectionEmail();
+    }
+
+    if (emailSent) {
+      onStatusChange(
+        application.id,
+        actionType === "approve" ? "approved" : "rejected"
+      );
+    }
+
+    setConfirmationOpen(false);
+    setActionType(null);
   };
 
   return (
@@ -141,7 +355,7 @@ export function TherapistApplicationDetails({
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[calc(100vh-380px)] mt-4 pr-4">
+          <ScrollArea className="h-[calc(100vh-450px)] mt-4 pr-4">
             <TabsContent value="personal" className="space-y-4 mt-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -346,71 +560,104 @@ export function TherapistApplicationDetails({
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-4 mt-2">
-              <div className="grid grid-cols-1 gap-2">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Uploaded Documents
-                </h3>
-
-                {uploadedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      {getFileIcon(file.type)}
-                      <span>{file.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1"
-                            onClick={() => setSelectedFile(file)}
-                          >
-                            <ExternalLinkIcon className="w-4 h-4" />
-                            <span>View</span>
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
-                          <DialogTitle>
-                            {selectedFile?.name || "Document Preview"}
-                          </DialogTitle>
-                          <div className="mt-4 flex flex-col items-center justify-center bg-gray-100 border rounded-md p-6 min-h-[400px]">
-                            {/* This would be replaced with an actual document viewer in production */}
-                            {getFileIcon(file.type)}
-                            <p className="mt-4 text-center">
-                              Document preview would appear here.
-                            </p>
-                            <p className="text-sm text-gray-500 mt-2">
-                              In a production environment, this would display
-                              the actual file.
-                            </p>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-1"
-                      >
-                        <DownloadIcon className="w-4 h-4" />
-                        <span>Download</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-
-                {uploadedFiles.length === 0 && (
-                  <p className="text-gray-500 italic">No documents uploaded</p>
-                )}
-              </div>
+              {renderUploadedDocuments()}
             </TabsContent>
           </ScrollArea>
         </Tabs>
       </CardContent>
+
+      {/* Add Card Footer with approval/rejection buttons */}
+      {application.status === "pending" && onStatusChange && (
+        <div className="border-t pt-4 px-6 pb-6">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500">
+              <p>
+                Please review the application carefully before making a
+                decision.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => handleAction("reject")}
+                disabled={isEmailSending}
+              >
+                <XIcon className="w-4 h-4 mr-2" />
+                Reject Application
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => handleAction("approve")}
+                disabled={isEmailSending}
+              >
+                <CheckIcon className="w-4 h-4 mr-2" />
+                Approve Application
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {actionType === "approve"
+                ? "Approve Application"
+                : "Reject Application"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionType === "approve"
+                ? `Are you sure you want to approve ${application.firstName} ${application.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.firstName} ${application.lastName}'s application? They will be notified via email.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isEmailSending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmAction}
+              disabled={isEmailSending}
+              className={
+                actionType === "approve"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }
+            >
+              {isEmailSending ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                <span>{actionType === "approve" ? "Approve" : "Reject"}</span>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

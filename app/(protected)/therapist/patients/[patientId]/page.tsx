@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, use } from "react";
 import Image from "next/image";
 import { Video, MessageSquare, Edit, Calendar } from "lucide-react";
 import PatientInfoCard from "@/components/therapist/patient/PatientInfoCard";
@@ -8,11 +8,12 @@ import PatientSessionNotes from "@/components/therapist/patient/PatientSessionNo
 import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets";
 import { usePatientData } from "@/hooks/usePatientData";
 
-export default function PatientDetailPage({
-  params,
-}: {
-  params: { patientId: string };
-}) {
+export default function PatientDetailPage(
+  props: {
+    params: Promise<{ patientId: string }>;
+  }
+) {
+  const params = use(props.params);
   const { patientId } = params;
   const { patient, isLoading, error } = usePatientData(patientId);
   const [activeTab, setActiveTab] = useState<"notes" | "worksheets">("notes");
