@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Bell, Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Bell, Search, User, LogOut, ChevronDown } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 
 export default function TherapistLayout({
   children,
@@ -12,6 +13,19 @@ export default function TherapistLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useClerk();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   // Navigation menu items for therapist
   const navItems = [
@@ -303,16 +317,45 @@ export default function TherapistLayout({
               </span>
             </button>
 
-            <div className="flex items-center">
-              <span className="mr-2 text-white">Therafi</span>
-              <div className="h-8 w-8 overflow-hidden rounded-full bg-white">
-                <Image
-                  src="/avatar-placeholder.png"
-                  alt="User Avatar"
-                  width={32}
-                  height={32}
-                />
-              </div>
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <button
+                className="flex items-center text-white focus:outline-none"
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+              >
+                <span className="mr-2 text-white">Therafi</span>
+                <div className="h-8 w-8 overflow-hidden rounded-full bg-white">
+                  <Image
+                    src="/avatar-placeholder.png"
+                    alt="User Avatar"
+                    width={32}
+                    height={32}
+                  />
+                </div>
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="py-1" onClick={() => setIsProfileOpen(false)}>
+                    <Link
+                      href="/therapist/profile"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
