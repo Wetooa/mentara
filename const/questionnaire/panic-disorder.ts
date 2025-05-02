@@ -1,4 +1,7 @@
-const PDSS = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const PDSS: QuestionnaireProps = {
+  title: "Panic Disorder Severity Scale (PDSS)",
   description:
     "The Panic Disorder Severity Scale (PDSS) is a self-administered questionnaire used to assess the severity of panic disorder symptoms, including panic attacks, avoidance behaviors, and the impact on daily functioning.",
   questions: [
@@ -69,23 +72,15 @@ const PDSS = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
-    compositeScoreRange: [0, 28],
-    getCompositeScore: (scores: number[]) => {
-      const sum = scores.reduce((acc, score) => acc + score, 0);
-      return sum / scores.length;
-    },
-    getSeverity: (compositeScore: number) => {
-      if (compositeScore >= 0 && compositeScore <= 1.5)
-        return "Minimal Panic Disorder";
-      if (compositeScore > 1.5 && compositeScore <= 3.0)
-        return "Mild Panic Disorder";
-      if (compositeScore > 3.0 && compositeScore <= 4.5)
-        return "Moderate Panic Disorder";
-      if (compositeScore > 4.5 && compositeScore <= 6.0)
-        return "Severe Panic Disorder";
-      if (compositeScore > 6.0) return "Extreme Panic Disorder";
-      return "Invalid score";
+    ...QUESTIONNAIRE_SCORING,
+
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    severityLevels: {
+      minimal: { range: [0, 1.5], label: "Minimal Panic Disorder" },
+      mild: { range: [1.5, 3.0], label: "Mild Panic Disorder" },
+      moderate: { range: [3.0, 4.5], label: "Moderate Panic Disorder" },
+      severe: { range: [4.5, 6.0], label: "Severe Panic Disorder" },
+      extreme: { range: [6.0, 28], label: "Extreme Panic Disorder" },
     },
   },
   disclaimer:

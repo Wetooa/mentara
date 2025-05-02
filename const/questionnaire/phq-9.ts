@@ -1,4 +1,7 @@
-const PHQ_9 = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const PHQ_9: QuestionnaireProps = {
+  title: "Patient Health Questionnaire-9 (PHQ-9)",
   description:
     "The PHQ-9 is a self-administered questionnaire used to assess the severity of depressive symptoms over the past two weeks. It is commonly used for diagnosing and monitoring depression.",
   questions: [
@@ -101,7 +104,9 @@ const PHQ_9 = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3 },
+    ...QUESTIONNAIRE_SCORING,
+
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
       minimal: { range: [1, 4], label: "Minimal Depression" },
       mild: { range: [5, 9], label: "Mild Depression" },
@@ -111,14 +116,6 @@ const PHQ_9 = {
         label: "Moderately Severe Depression",
       },
       severe: { range: [20, 27], label: "Severe Depression" },
-    },
-    getSeverity: (score: number) => {
-      if (score >= 1 && score <= 4) return "Minimal Depression";
-      if (score >= 5 && score <= 9) return "Mild Depression";
-      if (score >= 10 && score <= 14) return "Moderate Depression";
-      if (score >= 15 && score <= 19) return "Moderately Severe Depression";
-      if (score >= 20 && score <= 27) return "Severe Depression";
-      return "Invalid score";
     },
   },
   disclaimer:

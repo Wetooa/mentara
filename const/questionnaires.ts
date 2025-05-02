@@ -49,6 +49,27 @@ export interface QuestionnaireProps {
   disclaimer: string;
 }
 
+export const QUESTIONNAIRE_SCORING: QuestionnaireProps["scoring"] = {
+  scoreMapping: {},
+  severityLevels: {},
+  getScore: function (answers: number[]): number {
+    return answers.reduce(
+      (total, answer) => total + this.scoreMapping[answer],
+      0
+    );
+  },
+  getSeverity: function (score: number): string {
+    for (const level in this.severityLevels) {
+      const { range, label } = this.severityLevels[level];
+      if (score >= range[0] && score <= range[1]) {
+        return label;
+      }
+    }
+
+    return "Invalid score";
+  },
+};
+
 export const QUESTIONNAIRE_MAP: Record<
   ListOfQuestionnaires,
   QuestionnaireProps

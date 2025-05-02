@@ -1,4 +1,7 @@
-const INSOMNIA_SURVEY = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const INSOMNIA_SURVEY: QuestionnaireProps = {
+  title: "Insomnia Severity Index (ISI)",
   description:
     "The Insomnia Severity Index (ISI) is a self-administered questionnaire used to assess the severity of insomnia symptoms over the past two weeks. It helps determine the impact of sleep difficulties on daily life.",
   questions: [
@@ -55,7 +58,9 @@ const INSOMNIA_SURVEY = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    ...QUESTIONNAIRE_SCORING,
+
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
       noInsomnia: {
         range: [0, 7],
@@ -67,14 +72,6 @@ const INSOMNIA_SURVEY = {
         label: "Clinical insomnia (moderate severity)",
       },
       severe: { range: [22, 28], label: "Clinical insomnia (severe)" },
-    },
-    getSeverity: (score: number) => {
-      if (score >= 0 && score <= 7) return "No clinically significant insomnia";
-      if (score >= 8 && score <= 14) return "Subthreshold insomnia";
-      if (score >= 15 && score <= 21)
-        return "Clinical insomnia (moderate severity)";
-      if (score >= 22 && score <= 28) return "Clinical insomnia (severe)";
-      return "Invalid score";
     },
   },
   disclaimer:

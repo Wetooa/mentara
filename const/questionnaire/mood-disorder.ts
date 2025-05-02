@@ -1,4 +1,6 @@
-const MDQ = {
+import { QuestionnaireProps } from "../questionnaires";
+
+const MDQ: QuestionnaireProps = {
   description:
     "The Mood Disorder Questionnaire (MDQ) is a self-administered screening tool used to help assess bipolar disorder. It is designed to evaluate the presence of symptoms of mania or hypomania over a period of time.",
   questions: [
@@ -93,7 +95,7 @@ const MDQ = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1 },
+    scoreMapping: { 0: 0, 1: 1 },
     scoreThreshold: 7, // Score threshold for questions 1-13
     severityLevels: {
       low: { range: [0, 6], label: "No significant symptoms" },

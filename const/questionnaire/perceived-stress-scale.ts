@@ -1,4 +1,4 @@
-import { QuestionnaireProps } from "../list-of-questionnaires";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
 
 const PERCEIVED_STRESS_SCALE: QuestionnaireProps & {
   scoring: {
@@ -129,6 +129,8 @@ const PERCEIVED_STRESS_SCALE: QuestionnaireProps & {
     },
   ],
   scoring: {
+    ...QUESTIONNAIRE_SCORING,
+
     reverseScoredQuestions: [3, 4, 6, 7],
     scoreMapping: { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0 },
     reversedScoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
@@ -148,28 +150,6 @@ const PERCEIVED_STRESS_SCALE: QuestionnaireProps & {
 
         return total + score;
       }, 0);
-    },
-    getSeverity: (score: number): string => {
-      const { severityLevels } = PERCEIVED_STRESS_SCALE.scoring;
-
-      if (
-        score >= severityLevels.low.range[0] &&
-        score <= severityLevels.low.range[1]
-      ) {
-        return severityLevels.low.label;
-      } else if (
-        score >= severityLevels.moderate.range[0] &&
-        score <= severityLevels.moderate.range[1]
-      ) {
-        return severityLevels.moderate.label;
-      } else if (
-        score >= severityLevels.high.range[0] &&
-        score <= severityLevels.high.range[1]
-      ) {
-        return severityLevels.high.label;
-      }
-
-      return "Invalid score";
     },
   },
   disclaimer:

@@ -1,6 +1,9 @@
-import { QuestionnaireProps } from "../list-of-questionnaires";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
 
-const AUDIT: QuestionnaireProps = {
+const AUDIT: {
+  standardDrinks: Record<string, Record<string, number>>;
+} & QuestionnaireProps = {
+  title: "Alcohol Use Disorders Identification Test (AUDIT)",
   description:
     "The Alcohol Use Disorders Identification Test (AUDIT) is a 10-item screening tool developed by the World Health Organization (WHO) to assess alcohol consumption, drinking behaviors, and alcohol-related problems. A score of 8 or more is considered to indicate hazardous or harmful alcohol use.",
   questions: [
@@ -114,19 +117,14 @@ const AUDIT: QuestionnaireProps = {
     },
   ],
   scoring: {
+    ...QUESTIONNAIRE_SCORING,
+
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
-    riskLevels: {
+    severityLevels: {
       lowRisk: { range: [0, 7], label: "Low Risk" },
       hazardous: { range: [8, 15], label: "Hazardous Use" },
       harmful: { range: [16, 19], label: "Harmful Use" },
       dependent: { range: [20, 40], label: "Possible Alcohol Dependence" },
-    },
-    getSeverity: (score: number) => {
-      if (score >= 0 && score <= 7) return "Low Risk";
-      if (score >= 8 && score <= 15) return "Hazardous Use";
-      if (score >= 16 && score <= 19) return "Harmful Use";
-      if (score >= 20 && score <= 40) return "Possible Alcohol Dependence";
-      return "Invalid score";
     },
   },
   standardDrinks: {

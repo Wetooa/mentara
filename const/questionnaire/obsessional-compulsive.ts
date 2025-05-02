@@ -1,4 +1,6 @@
-const OCI_R = {
+import { QuestionnaireProps } from "../questionnaires";
+
+const OCI_R: QuestionnaireProps = {
   description:
     "The Obsessive-Compulsive Inventory - Revised (OCI-R) is a self-administered questionnaire used to assess the severity of obsessive-compulsive disorder (OCD) symptoms. It is commonly used for diagnosing and monitoring OCD, focusing on obsessive thoughts and compulsive behaviors.",
   questions: [
