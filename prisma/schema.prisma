@@ -103,3 +103,16 @@ model Comment {
 
   files CommentFile[]
 }
+
+// Admin user model to store admin privileges
+model AdminUser {
+  id          String   @id @default(uuid())
+  clerkUserId String   @unique // The ID from Clerk
+  email       String   @unique
+  role        String   @default("admin") // Could be "admin", "super_admin", etc.
+  permissions String[] // Array of permissions
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clerkUserId])
+}
