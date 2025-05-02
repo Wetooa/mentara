@@ -1,4 +1,11 @@
-export const PERCEIVED_STRESS_SCALE = {
+import { QuestionnaireProps } from "../list-of-questionnaires";
+
+const PERCEIVED_STRESS_SCALE: QuestionnaireProps & {
+  scoring: {
+    reverseScoredQuestions: number[];
+    reversedScoreMapping: Record<number, number>;
+  } & QuestionnaireProps["scoring"];
+} = {
   title: "Perceived Stress Scale",
   description:
     "The Perceived Stress Scale (PSS) is a classic stress assessment instrument designed to measure individual stress levels over the past month. Answer each question based on how often you experienced the described feelings or thoughts.",
@@ -124,10 +131,45 @@ export const PERCEIVED_STRESS_SCALE = {
   scoring: {
     reverseScoredQuestions: [3, 4, 6, 7],
     scoreMapping: { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0 },
-    stressLevels: {
+    reversedScoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    severityLevels: {
       low: { range: [0, 13], label: "Low Stress" },
       moderate: { range: [14, 26], label: "Moderate Stress" },
       high: { range: [27, 40], label: "High Perceived Stress" },
+    },
+    getScore: (answers: number[]): number => {
+      return answers.reduce((total, answer, index) => {
+        const isReversed =
+          PERCEIVED_STRESS_SCALE.scoring.reverseScoredQuestions.includes(index);
+
+        const score = isReversed
+          ? PERCEIVED_STRESS_SCALE.scoring.scoreMapping[answer]
+          : PERCEIVED_STRESS_SCALE.scoring.reversedScoreMapping[answer];
+
+        return total + score;
+      }, 0);
+    },
+    getSeverity: (score: number): string => {
+      const { severityLevels } = PERCEIVED_STRESS_SCALE.scoring;
+
+      if (
+        score >= severityLevels.low.range[0] &&
+        score <= severityLevels.low.range[1]
+      ) {
+        return severityLevels.low.label;
+      } else if (
+        score >= severityLevels.moderate.range[0] &&
+        score <= severityLevels.moderate.range[1]
+      ) {
+        return severityLevels.moderate.label;
+      } else if (
+        score >= severityLevels.high.range[0] &&
+        score <= severityLevels.high.range[1]
+      ) {
+        return severityLevels.high.label;
+      }
+
+      return "Invalid score";
     },
   },
   disclaimer:

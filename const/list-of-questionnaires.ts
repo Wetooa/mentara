@@ -33,12 +33,19 @@ export const LIST_OF_QUESTIONNAIRES = [
 export type ListOfQuestionnaires = (typeof LIST_OF_QUESTIONNAIRES)[number];
 
 export interface QuestionnaireProps {
+  title: string;
   description: string;
   questions: {
     prefix: string;
     question: string;
     options: string[];
   }[];
+  scoring: {
+    scoreMapping: Record<number, number>;
+    severityLevels: Record<string, { range: [number, number]; label: string }>;
+    getScore: (answers: number[]) => number;
+    getSeverity: (score: number) => string;
+  };
   disclaimer: string;
 }
 

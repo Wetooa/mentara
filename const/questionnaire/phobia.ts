@@ -1,5 +1,3 @@
-import { Question } from ".";
-
 interface PHQScale {
   items: number[];
   label: string;
@@ -15,7 +13,7 @@ interface PHQScoring {
   };
   getScaleScore: (
     answers: number[],
-    scale: keyof PHQScoring["scales"],
+    scale: keyof PHQScoring["scales"]
   ) => number;
   getSeverity: (score: number) => string;
 }
@@ -223,7 +221,7 @@ const PHQ: PHQType = {
 
       return scaleItems.reduce(
         (total, index) => total + (answers[index] || 0),
-        0,
+        0
       );
     },
     getSeverity: (score) => {
