@@ -1,3 +1,5 @@
+import { QuestionnaireProps } from "../list-of-questionnaires";
+
 interface SeverityLevel {
   range: number[];
   label: string;
@@ -18,7 +20,7 @@ interface Scoring {
   getSeverity: (score: number, part: "A" | "B" | "Total") => string;
 }
 
-const ASRS_V1_1 = {
+const ASRS_V1_1: QuestionnaireProps & Scoring = {
   description:
     "The Adult ADHD Self-Report Scale (ASRS v1.1) is a self-administered questionnaire used to screen for ADHD symptoms in adults over the past 6 months. It assesses inattentiveness, hyperactivity, and impulsivity based on DSM-5 criteria.",
 

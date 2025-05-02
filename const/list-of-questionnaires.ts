@@ -32,7 +32,20 @@ export const LIST_OF_QUESTIONNAIRES = [
 
 export type ListOfQuestionnaires = (typeof LIST_OF_QUESTIONNAIRES)[number];
 
-export const QUESTIONNAIRE_MAP: Record<ListOfQuestionnaires, unknown> = {
+export interface QuestionnaireProps {
+  description: string;
+  questions: {
+    prefix: string;
+    question: string;
+    options: string[];
+  }[];
+  disclaimer: string;
+}
+
+export const QUESTIONNAIRE_MAP: Record<
+  ListOfQuestionnaires,
+  QuestionnaireProps
+> = {
   Stress: PERCEIVED_STRESS_SCALE,
   Anxiety: GAD_7_ANXIETY,
   Depression: PHQ_9,

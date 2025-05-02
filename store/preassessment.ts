@@ -1,4 +1,7 @@
-import { ListOfQuestionnaires } from "@/const/list-of-questionnaires";
+import {
+  ListOfQuestionnaires,
+  QUESTIONNAIRE_MAP,
+} from "@/const/list-of-questionnaires";
 import { create } from "zustand";
 
 const inProd = true;
@@ -14,11 +17,6 @@ export interface PreAssessmentChecklistState {
 
   answers: number[][];
   setAnswers: (index: number, to: number[]) => void;
-
-  isNextDisabled: boolean;
-  isPrevDisabled: boolean;
-  setNextDisabled: (disabled: boolean) => void;
-  setPrevDisabled: (disabled: boolean) => void;
 }
 
 export const usePreAssessmentChecklistStore =
@@ -30,7 +28,9 @@ export const usePreAssessmentChecklistStore =
       set((state) => ({
         ...state,
         questionnaires: to,
-        answers: Array(to.length).fill([]),
+        answers: Array(to.length).fill([
+          ...Array(QUESTIONNAIRE_MAP[to[0]].questions.length).fill(-1),
+        ]),
       })),
 
     setAnswers: (index, to) =>
@@ -81,14 +81,6 @@ export const usePreAssessmentChecklistStore =
           step: state.step - 1,
         };
       }),
-
-    isNextDisabled: false,
-    isPrevDisabled: true,
-
-    setNextDisabled: (disabled) =>
-      set((state) => ({ ...state, isNextDisabled: disabled })),
-    setPrevDisabled: (disabled) =>
-      set((state) => ({ ...state, isPrevDisabled: disabled })),
   }));
 
 export interface SignUpState {

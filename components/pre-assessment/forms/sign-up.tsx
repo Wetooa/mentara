@@ -6,6 +6,7 @@ import { useSignUp } from "@clerk/nextjs";
 import { useSignUpStore } from "@/store/preassessment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { PreAssessmentPageFormProps } from "@/app/(public)/(user)/pre-assessment/page";
 
 // Form validation schema
 const formSchema = z
@@ -35,14 +36,9 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-// Define a type for the exposed methods
-export type PreAssessmentSignUpRef = {
-  submit: () => void;
-  isValid: () => boolean;
-  getValues: () => z.infer<typeof formSchema>;
-};
-
-const PreAssessmentSignUp = forwardRef<PreAssessmentSignUpRef>((props, ref) => {
+export default function PreAssessmentSignUp({
+  handleNextButtonOnClick,
+}: PreAssessmentPageFormProps) {
   const { isLoaded, signUp } = useSignUp();
   const { setDetails } = useSignUpStore();
 
@@ -56,15 +52,8 @@ const PreAssessmentSignUp = forwardRef<PreAssessmentSignUpRef>((props, ref) => {
       password: "",
       confirmPassword: "",
     },
-    mode: "onChange", // Validate on change for real-time feedback
+    mode: "onChange",
   });
-
-  // Expose methods to parent component through ref
-  useImperativeHandle(ref, () => ({
-    submit: () => form.handleSubmit(onSubmit)(),
-    isValid: () => form.formState.isValid,
-    getValues: () => form.getValues(),
-  }));
 
   if (!signUp) {
     return;
@@ -255,8 +244,4 @@ const PreAssessmentSignUp = forwardRef<PreAssessmentSignUpRef>((props, ref) => {
       </div>
     </>
   );
-});
-
-PreAssessmentSignUp.displayName = "PreAssessmentSignUp";
-
-export default PreAssessmentSignUp;
+}
