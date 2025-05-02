@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function AboutPage() {
   return (
@@ -14,9 +16,9 @@ export default function AboutPage() {
             </h1>
             <div className="w-20 h-1 bg-tertiary mx-auto mb-8"></div>
             <p className="text-gray-600 text-lg mb-8">
-              We're dedicated to breaking barriers in mental health support,
-              providing expert guidance in a safe environment for everyone
-              seeking a stronger, healthier life.
+              We&apos;re dedicated to breaking barriers in mental health
+              support, providing expert guidance in a safe environment for
+              everyone seeking a stronger, healthier life.
             </p>
           </div>
         </div>
@@ -52,9 +54,9 @@ export default function AboutPage() {
                 compassionate care and innovative approaches to mental health.
               </p>
               <p className="text-gray-600 mb-6">
-                Today, we're proud to support thousands of individuals on their
-                journey to wellness, combining evidence-based practices with a
-                deeply personalized approach.
+                Today, we&apos;re proud to support thousands of individuals on
+                their journey to wellness, combining evidence-based practices
+                with a deeply personalized approach.
               </p>
               <Button
                 variant="outline"
@@ -193,9 +195,15 @@ export default function AboutPage() {
               Take the first step toward a stronger, healthier you. Our team is
               ready to provide the support you need on your wellness journey.
             </p>
-            <Button className="bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 text-lg">
+            <Link
+              href="/landing"
+              className={cn(
+                buttonVariants(),
+                "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 text-lg"
+              )}
+            >
               Get Started Today
-            </Button>
+            </Link>
           </div>
         </div>
       </section>
