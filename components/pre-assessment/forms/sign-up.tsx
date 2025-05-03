@@ -86,8 +86,7 @@ export default function PreAssessmentSignUp({
         const protocol = window.location.protocol;
         const host = window.location.host;
 
-        toast.loading("Sending verification email...");
-
+        toast.info("Sending verification email...");
         await startEmailLinkFlow({
           redirectUrl: `${protocol}//${host}/sign-up/verify`,
         });
@@ -102,96 +101,90 @@ export default function PreAssessmentSignUp({
   }
 
   return (
-    <>
-      <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
-        <div className="mb-8 text-center">
-          <p className="text-lg text-center text-secondary">
-            You&apos;ve completed the pre-assessment!
-          </p>
-        </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="space-y-4 w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
+          <div className="mb-8 text-center">
+            <p className="text-lg text-center text-secondary">
+              You&apos;ve completed the pre-assessment!
+            </p>
+          </div>
 
-        <div className="w-full space-y-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="nickname"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="Firstname (or nickname)" {...field} />
-                    </FormControl>
-                    <FormDescription className="text-[10px] text-center">
-                      For added privacy you can provide nickname instead of your
-                      first name
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="nickname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Firstname (or nickname)" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-[10px] text-center">
+                    For added privacy you can provide nickname instead of your
+                    first name
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input type="email" placeholder="Email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Confirm Email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input type="email" placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Confirm Email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input type="password" placeholder="Password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Confirm Password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex justify-center items-center gap-2">
             <Separator className="flex-1" />
@@ -261,24 +254,24 @@ export default function PreAssessmentSignUp({
               </svg>
               Continue with Microsoft
             </Button>
-
-            {/* CAPTCHA Widget */}
-            <div id="clerk-captcha"></div>
           </div>
-        </div>
-      </div>
 
-      <div className="bg-white px-10 py-3">
-        <Button
-          className="w-full font-bold"
-          variant={"secondary"}
-          onClick={() => {
-            form.handleSubmit(onSubmit)();
-          }}
-        >
-          Submit
-        </Button>
-      </div>
-    </>
+          {/* CAPTCHA Widget */}
+          <div id="clerk-captcha"></div>
+        </div>
+
+        <div className="bg-white px-10 py-3">
+          <Button
+            className="w-full font-bold"
+            variant={"secondary"}
+            onClick={() => {
+              form.handleSubmit(onSubmit)();
+            }}
+          >
+            Submit
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

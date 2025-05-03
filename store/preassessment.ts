@@ -21,7 +21,7 @@ export interface PreAssessmentChecklistState {
 
 export const usePreAssessmentChecklistStore =
   create<PreAssessmentChecklistState>()((set) => ({
-    step: inProd ? 0 : 2,
+    step: inProd ? 0 : 1,
     miniStep: inProd ? 0 : 0,
     nextStep: () =>
       set((state) => {

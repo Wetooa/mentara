@@ -4,7 +4,7 @@ import React from "react";
 
 export default function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2">
+    <Link href="/" className="w-full flex justify-center items-center gap-2">
       <Image
         width={50}
         height={25}
