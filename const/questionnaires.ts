@@ -12,6 +12,7 @@ import PHQ from "./questionnaire/phobia";
 import PHQ_9 from "./questionnaire/phq-9";
 import PCL_5 from "./questionnaire/ptsd";
 import SPIN from "./questionnaire/social-phobia";
+import { QuestionnaireProps } from "./scoring";
 
 export const LIST_OF_QUESTIONNAIRES = [
   "Stress",
@@ -31,44 +32,6 @@ export const LIST_OF_QUESTIONNAIRES = [
 ];
 
 export type ListOfQuestionnaires = (typeof LIST_OF_QUESTIONNAIRES)[number];
-
-export interface QuestionnaireProps {
-  title: string;
-  description: string;
-  questions: {
-    prefix: string;
-    question: string;
-    options: string[];
-  }[];
-  scoring: {
-    scoreMapping: Record<number, number>;
-    severityLevels: Record<string, { range: [number, number]; label: string }>;
-    getScore: (answers: number[]) => number;
-    getSeverity: (score: number) => string;
-  };
-  disclaimer: string;
-}
-
-export const QUESTIONNAIRE_SCORING: QuestionnaireProps["scoring"] = {
-  scoreMapping: {},
-  severityLevels: {},
-  getScore: function (answers: number[]): number {
-    return answers.reduce(
-      (total, answer) => total + this.scoreMapping[answer],
-      0
-    );
-  },
-  getSeverity: function (score: number): string {
-    for (const level in this.severityLevels) {
-      const { range, label } = this.severityLevels[level];
-      if (score >= range[0] && score <= range[1]) {
-        return label;
-      }
-    }
-
-    return "Invalid score";
-  },
-};
 
 export const QUESTIONNAIRE_MAP: Record<
   ListOfQuestionnaires,

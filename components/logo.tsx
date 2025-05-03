@@ -8,7 +8,7 @@ export default function Logo() {
       <Image
         width={50}
         height={25}
-        src={"/mentara-icon.png"}
+        src={"/icons/mentara/mentara-icon.png"}
         alt={"Mentara Icon"}
       />
       <h1 className="font-[Kollektif] font-bold text-3xl leading-none -mt-1 text-primary ">

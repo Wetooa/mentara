@@ -98,9 +98,12 @@ export default function Home() {
       </Carousel>
       <div className="w-full max-w-5xl border border-[#436B00] rounded-[10px] h-42 bg-white flex items-center">
         <div className="w-1/3 h-full flex justify-center pt-4">
-          <img
-            src="brain.png"
+          <Image
+            src="/brain.png"
+            width={100}
+            height={100}
             className="max-h-full max-w-full object-contain"
+            alt="brain"
           />
         </div>
 

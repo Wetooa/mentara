@@ -1,10 +1,10 @@
 import {
   ListOfQuestionnaires,
   QUESTIONNAIRE_MAP,
-} from "@/const/list-of-questionnaires";
+} from "@/const/questionnaires";
 import { create } from "zustand";
 
-const inProd = true;
+const inProd = process.env.NODE_ENV === "production";
 
 export interface PreAssessmentChecklistState {
   step: number;
@@ -21,31 +21,8 @@ export interface PreAssessmentChecklistState {
 
 export const usePreAssessmentChecklistStore =
   create<PreAssessmentChecklistState>()((set) => ({
-    questionnaires: inProd ? [] : [],
-    answers: inProd ? [] : [],
-
-    setQuestionnaires: (to) =>
-      set((state) => ({
-        ...state,
-        questionnaires: to,
-        answers: Array(to.length).fill([
-          ...Array(QUESTIONNAIRE_MAP[to[0]].questions.length).fill(-1),
-        ]),
-      })),
-
-    setAnswers: (index, to) =>
-      set((state) => ({
-        ...state,
-        answers: [
-          ...state.answers.slice(0, index),
-          to,
-          ...state.answers.slice(index + 1),
-        ],
-      })),
-
-    step: inProd ? 0 : 1,
+    step: inProd ? 0 : 2,
     miniStep: inProd ? 0 : 0,
-
     nextStep: () =>
       set((state) => {
         // Initial Form
@@ -61,7 +38,6 @@ export const usePreAssessmentChecklistStore =
         // Moving to next questionnaire
         return { ...state, step: state.step + 1, miniStep: 0 };
       }),
-
     prevStep: () =>
       set((state) => {
         // Moving to previous question
@@ -74,6 +50,11 @@ export const usePreAssessmentChecklistStore =
           return { ...state, step: 0, miniStep: 0 };
         }
 
+        // Last Questionnaire
+        if (state.step === state.questionnaires.length + 2) {
+          return { ...state, step: state.step - 1, miniStep: 0 };
+        }
+
         // Moving to previous questionnaire
         return {
           ...state,
@@ -81,6 +62,26 @@ export const usePreAssessmentChecklistStore =
           step: state.step - 1,
         };
       }),
+
+    questionnaires: inProd ? [] : [],
+    answers: inProd ? [] : [],
+    setQuestionnaires: (to) =>
+      set((state) => ({
+        ...state,
+        questionnaires: to,
+        answers: Array(to.length).fill([
+          ...Array(QUESTIONNAIRE_MAP[to[0]].questions.length).fill(-1),
+        ]),
+      })),
+    setAnswers: (index, to) =>
+      set((state) => ({
+        ...state,
+        answers: [
+          ...state.answers.slice(0, index),
+          to,
+          ...state.answers.slice(index + 1),
+        ],
+      })),
   }));
 
 export interface SignUpState {

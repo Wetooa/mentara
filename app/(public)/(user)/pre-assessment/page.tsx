@@ -4,9 +4,9 @@ import Logo from "@/components/logo";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/checklist-form";
 import QuestionnaireForm from "@/components/pre-assessment/forms/questionnaire-form";
 import PreAssessmentSignUp from "@/components/pre-assessment/forms/sign-up";
+import VerifyAccount from "@/components/pre-assessment/forms/verify-account";
 import PreAssessmentProgressBar from "@/components/pre-assessment/progress-bar";
 import { Button } from "@/components/ui/button";
-import { QUESTIONNAIRE_MAP } from "@/const/list-of-questionnaires";
 import { fade, fadeDown, reset, slide, start } from "@/lib/animations";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
 import { motion, useAnimationControls } from "framer-motion";
@@ -79,12 +79,14 @@ export default function PreAssessmentPage() {
                       handleNextButtonOnClick={handleNextButtonOnClick}
                     />
                   );
-                } else {
+                } else if (step === questionnaires.length + 1) {
                   return (
                     <PreAssessmentSignUp
                       handleNextButtonOnClick={handleNextButtonOnClick}
                     />
                   );
+                } else {
+                  return <VerifyAccount />;
                 }
               })()}
             </motion.div>

@@ -1,7 +1,6 @@
 import { PreAssessmentPageFormProps } from "@/app/(public)/(user)/pre-assessment/page";
 import { Button } from "@/components/ui/button";
-import { QUESTIONNAIRE_MAP } from "@/const/list-of-questionnaires";
-import { Question } from "@/const/questionnaire";
+import { QUESTIONNAIRE_MAP } from "@/const/questionnaires";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
 
 export default function QuestionnaireForm({
@@ -14,7 +13,7 @@ export default function QuestionnaireForm({
   const questionIndex = miniStep;
 
   const questionnaire = questionnaires[formIndex];
-  const questions: Question[] = QUESTIONNAIRE_MAP[questionnaire].questions;
+  const questions = QUESTIONNAIRE_MAP[questionnaire].questions;
   const question = questions[questionIndex];
   const currentAnswer = answers[formIndex][questionIndex];
   const isLastQuestion = questions.length - 1 === questionIndex;
@@ -60,7 +59,7 @@ export default function QuestionnaireForm({
         <Button
           className="w-full font-bold"
           variant={"secondary"}
-          disabled={!currentAnswer}
+          disabled={currentAnswer === undefined}
           onClick={handleNextButtonOnClick}
         >
           {isLastQuestion ? "Next form..." : "Continue"}
