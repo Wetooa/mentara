@@ -1,6 +1,5 @@
 "use client";
 
-import Logo from "@/components/logo";
 import TherapistCard, {
   TherapistProps,
 } from "@/components/recommended-therapists/therapist";
@@ -57,10 +56,10 @@ const Navbar = () => (
   <nav className="bg-white text-white w-full sticky top-0 z-50 shadow-md">
     <div className="flex justify-center p-4">
       <Image
-        width={50}
-        height={50}
+        width={200}
+        height={200}
         alt="Mentara Logo"
-        src="mentara-landscape.png"
+        src="/icons/mentara/mentara-landscape.png"
         className="w-52 h-12"
       />
     </div>
@@ -69,10 +68,11 @@ const Navbar = () => (
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F2FFDD] via-white to-[#F2FFDD] flex flex-col gap-12 items-center">
+    <div className="min-h-screen bg-gradient-to-b from-tertiary via-white to-tertiary flex flex-col gap-12 items-center">
       <Navbar />
+
       <div className="flex flex-col gap-2 w-full max-w-6xl p-2">
-        <h1 className="text-3xl font-bold text-[#564500]">Welcome, User!</h1>
+        <h1 className="text-3xl font-bold text-secondary">Welcome, User!</h1>
         <p className="text-xl text-neutral-600">
           You’ve taken a great first step. Let’s find the right therapist to
           support you from here. These are some personalized recommendations to
@@ -96,10 +96,11 @@ export default function Home() {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-      <div className="w-full max-w-5xl border border-[#436B00] rounded-[10px] h-42 bg-white flex items-center">
+
+      <div className="w-full max-w-5xl border border-secondary rounded-[10px] h-42 bg-white flex items-center">
         <div className="w-1/3 h-full flex justify-center pt-4">
           <Image
-            src="/brain.png"
+            src="/icons/brain.png"
             width={100}
             height={100}
             className="max-h-full max-w-full object-contain"
