@@ -55,9 +55,9 @@ export default function MainLayout({
   ];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white">
+    <div className="flex h-full w-full overflow-hidden bg-white">
       {/* Left Sidebar Navigation */}
-      <nav className="flex w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
+      <nav className="h-full flex w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
         {/* Logo */}
         <Link href="/dashboard" className="mb-8 px-2">
           <Image
@@ -70,9 +70,9 @@ export default function MainLayout({
         </Link>
 
         {/* Navigation Items */}
-        <div className="flex flex-1 flex-col items-center gap-6">
+        <div className="h-full flex flex-1 flex-col items-center gap-6">
           {navItems.map((item) => {
-            const isActive = pathname.includes(item.path);
+            const isActive = pathname === item.path;
             return (
               <Link
                 key={item.id}
@@ -102,7 +102,7 @@ export default function MainLayout({
       </nav>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="w-full h-full flex flex-1 flex-col overflow-hidden">
         {/* Top Header */}
         <header className="flex h-[50px] items-center justify-between border-b border-gray-200 bg-white px-4">
           {/* Logo for mobile */}
@@ -163,7 +163,9 @@ export default function MainLayout({
         </header>
 
         {/* Main Content - Grey Area for Children */}
-        <main className="flex-1 overflow-auto bg-gray-100">{children}</main>
+        <main className="w-full h-full flex-1 overflow-auto bg-gray-100">
+          {children}
+        </main>
       </div>
     </div>
   );
