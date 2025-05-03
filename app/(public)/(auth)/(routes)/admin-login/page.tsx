@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import FormFooter from "@/components/footer/form-footer";
+import Logo from "@/components/logo";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,12 +12,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Shield, AlertCircle } from "lucide-react";
-import Logo from "@/components/logo";
-import { useSignIn } from "@clerk/nextjs";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSignIn } from "@clerk/nextjs";
+import { AlertCircle, Eye, EyeOff, Shield } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -94,7 +95,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+    <div className="w-full max-w-[500px] rounded-3xl shadow-lg overflow-hidden flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center">
           <Logo />
@@ -188,9 +189,7 @@ export default function AdminLoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-xs text-center text-gray-500">
-          © {new Date().getFullYear()} Mentara. All rights reserved.
-        </p>
+        <FormFooter />
       </div>
     </div>
   );

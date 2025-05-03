@@ -1,4 +1,5 @@
 "use client";
+import FormFooter from "@/components/footer/form-footer";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
