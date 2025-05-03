@@ -1,16 +1,19 @@
 "use client";
+import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { fadeDown } from "@/lib/animations";
 import { useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -72,11 +75,16 @@ export default function SignIn() {
   }
 
   return (
-    <>
-      <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
+    <motion.div
+      variants={fadeDown}
+      className="bg-primary-foreground rounded-3xl shadow-lg overflow-hidden max-w-[400px] w-full"
+    >
+      <div className="flex flex-col items-center gap-4 w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
+        <Logo />
+
         <div className="mb-8 text-center">
-          <p className="text-lg text-center text-secondary">
-            You&apos;ve completed the pre-assessment!
+          <p className="text-xl text-center text-secondary">
+            Sign in to your account
           </p>
         </div>
 
@@ -200,6 +208,6 @@ export default function SignIn() {
           Submit
         </Button>
       </div>
-    </>
+    </motion.div>
   );
 }
