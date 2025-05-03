@@ -48,7 +48,7 @@ export default function LandingPage() {
               <Image
                 fill
                 className="object-cover object-center"
-                src="/landing/woman-flower-crown.png"
+                src="/pages/landing/woman-flower-crown.png"
                 alt="Woman with flower crown"
                 priority
               />
