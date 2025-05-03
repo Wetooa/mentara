@@ -25,7 +25,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html suppressHydrationWarning lang="en">
-        <body className={`font-[Futura] antialiased`}>
+        <body
+          className={`font-[Futura] antialiased min-h-screen min-w-screen h-screen w-screen`}
+        >
           <QueryProvider>
             <ThemeProvider
               attribute="class"
@@ -34,7 +36,7 @@ export default function RootLayout({
               storageKey="mentara-theme"
               disableTransitionOnChange
             >
-              <div className="min-w-screen min-h-screen">{children}</div>
+              {children}
               <Toaster />
             </ThemeProvider>
           </QueryProvider>

@@ -5,7 +5,9 @@ import Link from "next/link";
 export default function Navbar() {
   return (
     <nav className="sticky w-full flex justify-between py-2 px-4 shadow-lg items-center">
-      <Logo />
+      <div>
+        <Logo />
+      </div>
 
       <ul className="text-xs">
         {[
