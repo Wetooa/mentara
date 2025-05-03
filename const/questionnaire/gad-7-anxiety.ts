@@ -1,4 +1,7 @@
-const GAD_7_ANXIETY = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const GAD_7_ANXIETY: QuestionnaireProps = {
+  title: "Anxiety Assessment (GAD-7)",
   description:
     "The GAD-7 Anxiety Assessment helps measure anxiety severity over the past two weeks. It assigns scores based on how often the respondent has been bothered by specific anxiety-related problems.",
   questions: [
@@ -77,20 +80,15 @@ const GAD_7_ANXIETY = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3 },
-    anxietyLevels: {
+    ...QUESTIONNAIRE_SCORING,
+
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
+    severityLevels: {
       minimal: { range: [0, 4], label: "Minimal Anxiety" },
       mild: { range: [5, 9], label: "Mild Anxiety" },
       moderate: { range: [10, 14], label: "Moderate Anxiety" },
       severe: { range: [15, 21], label: "Severe Anxiety" },
     },
-  },
-  getAnxietyLevel: (score: number) => {
-    if (score >= 0 && score <= 4) return "Minimal Anxiety";
-    if (score >= 5 && score <= 9) return "Mild Anxiety";
-    if (score >= 10 && score <= 14) return "Moderate Anxiety";
-    if (score >= 15 && score <= 21) return "Severe Anxiety";
-    return "Invalid score";
   },
   disclaimer:
     "The GAD-7 scores do not reflect any particular diagnosis or treatment course. They are designed to assess your anxiety level. If you have concerns about your mental health, please consult a medical professional.",

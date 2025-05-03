@@ -1,4 +1,7 @@
-const SPIN = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const SPIN: QuestionnaireProps = {
+  title: "Social Phobia Inventory (SPIN)",
   description:
     "The Social Phobia Inventory (SPIN) is a self-administered questionnaire developed by Duke University's Psychiatry and Behavioral Sciences Department. It is used to screen for and measure the severity of social anxiety disorder.",
   questions: [
@@ -192,21 +195,14 @@ const SPIN = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    ...QUESTIONNAIRE_SCORING,
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
       minimal: { range: [0, 20], label: "Minimal or No Social Phobia" },
       mild: { range: [21, 30], label: "Mild Social Phobia" },
       moderate: { range: [31, 40], label: "Moderate Social Phobia" },
       severe: { range: [41, 50], label: "Severe Social Phobia" },
       verySevere: { range: [51, 68], label: "Very Severe Social Phobia" },
-    },
-    getSeverity: (score: number): string => {
-      if (score >= 0 && score <= 20) return "Minimal or No Social Phobia";
-      if (score >= 21 && score <= 30) return "Mild Social Phobia";
-      if (score >= 31 && score <= 40) return "Moderate Social Phobia";
-      if (score >= 41 && score <= 50) return "Severe Social Phobia";
-      if (score >= 51 && score <= 68) return "Very Severe Social Phobia";
-      return "Invalid score";
     },
   },
   disclaimer:

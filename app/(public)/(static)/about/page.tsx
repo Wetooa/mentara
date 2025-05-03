@@ -31,7 +31,7 @@ export default function AboutPage() {
             <div className="md:w-1/2">
               <div className="relative h-[400px] md:h-[500px] w-full rounded-lg overflow-hidden shadow-lg">
                 <Image
-                  src="/about/our-story.jpg"
+                  src="/pages/about/our-story.jpg"
                   alt="Our story"
                   fill
                   className="object-cover"
@@ -147,17 +147,17 @@ export default function AboutPage() {
               {
                 name: "Adrian T. Sajulga",
                 role: "Developer",
-                image: "/team/placeholder-1.jpg",
+                image: "/team/sajulga.jpg",
               },
               {
                 name: "Julia Laine Segundo",
                 role: "Developer",
-                image: "/team/placeholder-2.jpg",
+                image: "/team/segundo.jpg",
               },
               {
                 name: "Tristan James Tolentino",
                 role: "Developer",
-                image: "/team/placeholder-3.jpg",
+                image: "/team/tolentino.jpg",
               },
             ].map((member, index) => (
               <div

@@ -24,16 +24,16 @@ export default function TherapistCard({
         <Button
           size="icon"
           aria-label="Add"
-          className="absolute top-2 right-2 z-20 bg-[#608128] text-white hover:bg-white hover:text-[#436B00] transition-colors"
+          className="absolute top-2 right-2 z-20 bg-primary text-white hover:bg-white hover:text-primary transition-colors"
         >
           <Plus className="w-10 h-10 stroke-[4]" />
         </Button>
 
-        <Card className="relative overflow-hidden h-80">
+        <Card className="relative overflow-hidden h-80 z-0">
           {/* Background image */}
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${photo})` }}
+            style={{ backgroundImage: `url(/${photo})` }}
           />
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
@@ -45,11 +45,11 @@ export default function TherapistCard({
                 {tags.map((tag, i) => (
                   <div
                     key={tag}
-                    className="border-2 border-[#436B00] bg-white flex justify-center items-center rounded-sm"
+                    className="border-2 border-primary bg-white flex justify-center items-center rounded-sm"
                   >
                     <span
                       key={i}
-                      className="text-[#436B00] text-xs font-bold bg-opacity-20 px-2 py-0.5"
+                      className="text-primary text-xs font-bold bg-opacity-20 px-2 py-0.5"
                     >
                       {tag}
                     </span>

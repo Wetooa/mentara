@@ -1,4 +1,7 @@
-const PCL_5 = {
+import { QuestionnaireProps } from "../questionnaires";
+
+const PCL_5: QuestionnaireProps = {
+  title: "Post-traumatic Stress Disorder Checklist",
   description:
     "The PCL-5 is a self-administered questionnaire used to assess the severity of PTSD symptoms over the past month. It helps in diagnosing and monitoring PTSD.",
   questions: [
@@ -238,7 +241,7 @@ const PCL_5 = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
       normal: { range: [0, 33], label: "Normal" },
       mild: { range: [34, 43], label: "Mild PTSD" },
@@ -252,42 +255,44 @@ const PCL_5 = {
       if (score >= 54) return "Severe PTSD";
       return "Invalid score";
     },
-    subscaleScores: {
-      reExperiencing: { range: [0, 20], label: "Re-experiencing" },
-      avoidance: { range: [0, 8], label: "Avoidance" },
-      negativeAlterations: {
-        range: [0, 28],
-        label: "Negative Alterations in Cognition and Mood",
-      },
-      hyperArousal: { range: [0, 24], label: "Hyper-arousal" },
-    },
-    getSubscaleSeverity: (score: number, subscale: string) => {
-      if (subscale === "reExperiencing") {
-        if (score <= 5) return "Normal";
-        if (score > 5 && score <= 10) return "Mild";
-        if (score > 10 && score <= 15) return "Moderate";
-        return "Severe";
-      }
-      if (subscale === "avoidance") {
-        if (score <= 2) return "Normal";
-        if (score > 2 && score <= 4) return "Mild";
-        if (score > 4 && score <= 6) return "Moderate";
-        return "Severe";
-      }
-      if (subscale === "negativeAlterations") {
-        if (score <= 7) return "Normal";
-        if (score > 7 && score <= 14) return "Mild";
-        if (score > 14 && score <= 21) return "Moderate";
-        return "Severe";
-      }
-      if (subscale === "hyperArousal") {
-        if (score <= 6) return "Normal";
-        if (score > 6 && score <= 12) return "Mild";
-        if (score > 12 && score <= 18) return "Moderate";
-        return "Severe";
-      }
-      return "Invalid subscale";
-    },
+
+    // FIX: The subscale scores are not used in the current implementation.
+    // subscaleScores: {
+    //   reExperiencing: { range: [0, 20], label: "Re-experiencing" },
+    //   avoidance: { range: [0, 8], label: "Avoidance" },
+    //   negativeAlterations: {
+    //     range: [0, 28],
+    //     label: "Negative Alterations in Cognition and Mood",
+    //   },
+    //   hyperArousal: { range: [0, 24], label: "Hyper-arousal" },
+    // },
+    // getSubscaleSeverity: (score: number, subscale: string) => {
+    //   if (subscale === "reExperiencing") {
+    //     if (score <= 5) return "Normal";
+    //     if (score > 5 && score <= 10) return "Mild";
+    //     if (score > 10 && score <= 15) return "Moderate";
+    //     return "Severe";
+    //   }
+    //   if (subscale === "avoidance") {
+    //     if (score <= 2) return "Normal";
+    //     if (score > 2 && score <= 4) return "Mild";
+    //     if (score > 4 && score <= 6) return "Moderate";
+    //     return "Severe";
+    //   }
+    //   if (subscale === "negativeAlterations") {
+    //     if (score <= 7) return "Normal";
+    //     if (score > 7 && score <= 14) return "Mild";
+    //     if (score > 14 && score <= 21) return "Moderate";
+    //     return "Severe";
+    //   }
+    //   if (subscale === "hyperArousal") {
+    //     if (score <= 6) return "Normal";
+    //     if (score > 6 && score <= 12) return "Mild";
+    //     if (score > 12 && score <= 18) return "Moderate";
+    //     return "Severe";
+    //   }
+    //   return "Invalid subscale";
+    // },
   },
   disclaimer:
     "This questionnaire is a screening tool to assess the severity of PTSD symptoms. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your mental health, please consult a healthcare professional.",

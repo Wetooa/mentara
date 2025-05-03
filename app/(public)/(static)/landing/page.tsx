@@ -48,7 +48,7 @@ export default function LandingPage() {
               <Image
                 fill
                 className="object-cover object-center"
-                src="/landing/woman-flower-crown.png"
+                src="/pages/landing/woman-flower-crown.png"
                 alt="Woman with flower crown"
                 priority
               />
@@ -133,14 +133,15 @@ export default function LandingPage() {
               personalized support from our expert team.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
+              <Link
+                href="/pre-assessment"
                 className={cn(
                   buttonVariants(),
                   "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3"
                 )}
               >
                 Get Started Now
-              </Button>
+              </Link>
               <Link
                 href="/about"
                 className={cn(

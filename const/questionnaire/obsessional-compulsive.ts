@@ -1,4 +1,7 @@
-const OCI_R = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const OCI_R: QuestionnaireProps = {
+  title: "Obsessive-Compulsive Inventory - Revised (OCI-R)",
   description:
     "The Obsessive-Compulsive Inventory - Revised (OCI-R) is a self-administered questionnaire used to assess the severity of obsessive-compulsive disorder (OCD) symptoms. It is commonly used for diagnosing and monitoring OCD, focusing on obsessive thoughts and compulsive behaviors.",
   questions: [
@@ -100,30 +103,38 @@ const OCI_R = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
-    OCDComponentScoreRange: [0, 60],
-    HoardingSubscaleScoreRange: [0, 12],
-    OCDSubscaleScores: {
-      washing: [5, 11, 17],
-      obsessing: [6, 12, 18],
-      ordering: [3, 9, 15],
-      checking: [2, 8, 14],
-      neutralising: [4, 10, 16],
+    ...QUESTIONNAIRE_SCORING,
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+    severityLevels: {
+      minimal: { range: [0, 12], label: "Minimal OCD Symptoms" },
+      mild: { range: [13, 24], label: "Mild OCD Symptoms" },
+      moderate: { range: [25, 36], label: "Moderate OCD Symptoms" },
+      severe: { range: [37, 48], label: "Severe OCD Symptoms" },
+      extreme: { range: [49, 60], label: "Extreme OCD Symptoms" },
     },
-    getSeverity: (score: number) => {
-      if (score >= 0 && score <= 12) return "Minimal OCD Symptoms";
-      if (score > 12 && score <= 24) return "Mild OCD Symptoms";
-      if (score > 24 && score <= 36) return "Moderate OCD Symptoms";
-      if (score > 36 && score <= 48) return "Severe OCD Symptoms";
-      if (score > 48) return "Extreme OCD Symptoms";
-      return "Invalid score";
-    },
-    getHoardingSeverity: (score: number) => {
-      if (score >= 0 && score <= 6) return "Minimal Hoarding Symptoms";
-      if (score > 6 && score <= 9) return "Mild Hoarding Symptoms";
-      if (score > 9 && score <= 12) return "Severe Hoarding Symptoms";
-      return "Invalid score";
-    },
+
+    // FIX: Add the following properties to the scoring object
+    // OCDComponentScoreRange: [0, 60],
+    // HoardingSubscaleScoreRange: [0, 12],
+    // OCDSubscaleScores: {
+    //   washing: [5, 11, 17],
+    //   obsessing: [6, 12, 18],
+    //   ordering: [3, 9, 15],
+    //   checking: [2, 8, 14],
+    //   neutralising: [4, 10, 16],
+    // },
+    // getSubscaleScore: (answers: number[], indices: number[]) => {
+    //   return indices.reduce((sum, index) => {
+    //     const ans = answers[index];
+    //     return sum + (OCI_R.scoring.scoreMapping[ans] ?? 0);
+    //   }, 0);
+    // },
+    // getHoardingSeverity: (score: number) => {
+    //   if (score >= 0 && score <= 6) return "Minimal Hoarding Symptoms";
+    //   if (score > 6 && score <= 9) return "Mild Hoarding Symptoms";
+    //   if (score > 9 && score <= 12) return "Severe Hoarding Symptoms";
+    //   return "Invalid score";
+    // },
   },
   disclaimer:
     "This questionnaire is a screening tool to assess the severity of obsessive-compulsive disorder (OCD) and hoarding disorder symptoms. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your mental health, please consult a healthcare professional.",
