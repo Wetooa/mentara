@@ -24,31 +24,31 @@ export default function MainLayout({
   const navItems = [
     {
       name: "Dashboard",
-      path: "/dashboard",
+      path: "/user",
       icon: "/icons/dashboard.svg",
       id: "dashboard",
     },
     {
       name: "Therapist",
-      path: "/therapist",
+      path: "/user/therapist",
       icon: "/icons/therapist.svg",
       id: "therapist",
     },
     {
       name: "Community",
-      path: "/community",
+      path: "/user/community",
       icon: "/icons/community.svg",
       id: "community",
     },
     {
       name: "Messages",
-      path: "/messages",
+      path: "/user/messages",
       icon: "/icons/messages.svg",
       id: "messages",
     },
     {
       name: "Worksheets",
-      path: "/worksheets",
+      path: "/user/worksheets",
       icon: "/icons/worksheets.svg",
       id: "worksheets",
     },
