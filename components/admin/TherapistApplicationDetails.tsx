@@ -1,0 +1,576 @@
+"use client";
+
+import React, { useState } from "react";
+import { TherapistApplication } from "@/data/mockTherapistApplicationData";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+// Import icons
+import {
+  FileIcon,
+  FileTextIcon,
+  ImageIcon,
+  FileArchiveIcon,
+  ExternalLinkIcon,
+  DownloadIcon,
+  XIcon,
+  CheckIcon,
+} from "lucide-react";
+
+interface TherapistApplicationDetailsProps {
+  application: TherapistApplication;
+  onStatusChange?: (
+    id: string,
+    status: "approved" | "rejected" | "pending"
+  ) => void;
+}
+
+export function TherapistApplicationDetails({
+  application,
+  onStatusChange,
+}: TherapistApplicationDetailsProps) {
+  const [selectedFile, setSelectedFile] = useState<{
+    name: string;
+    url: string;
+  } | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [actionType, setActionType] = useState<"approve" | "reject" | null>(
+    null
+  );
+  const [isEmailSending, setIsEmailSending] = useState(false);
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "MMM dd, yyyy");
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Helper function to render Yes/No responses with appropriate styling
+  const renderYesNo = (value: string) => {
+    if (value.toLowerCase() === "yes") {
+      return <span className="text-green-600 font-medium">Yes</span>;
+    } else if (value.toLowerCase() === "no") {
+      return <span className="text-red-600 font-medium">No</span>;
+    }
+    return value;
+  };
+
+  // Helper function to render object with boolean values
+  const renderObjectItems = (obj: { [key: string]: boolean }) => {
+    const items = Object.entries(obj)
+      .filter(([, value]) => value)
+      .map(([key]) => key.replace(/-/g, " "));
+
+    if (items.length === 0)
+      return <span className="text-gray-500 italic">None</span>;
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {items.map((item, index) => (
+          <Badge key={index} variant="outline" className="capitalize">
+            {item}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
+  // Get appropriate icon for file type
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes("pdf")) {
+      return <FileTextIcon className="w-5 h-5 text-red-500" />;
+    } else if (fileType.includes("image")) {
+      return <ImageIcon className="w-5 h-5 text-blue-500" />;
+    } else if (fileType.includes("zip") || fileType.includes("archive")) {
+      return <FileArchiveIcon className="w-5 h-5 text-yellow-500" />;
+    } else {
+      return <FileIcon className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
+  // Modify renderUploadedDocuments to use real data instead of mock data
+  const renderUploadedDocuments = () => {
+    if (
+      !application.uploadedDocuments ||
+      !Array.isArray(application.uploadedDocuments) ||
+      application.uploadedDocuments.length === 0
+    ) {
+      return <p className="text-gray-500 italic">No documents uploaded</p>;
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-2">
+        {application.uploadedDocuments.map((file, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              {getFileIcon(file.fileType)}
+              <span>{file.fileName}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => window.open(file.fileUrl, "_blank")}
+              >
+                <ExternalLinkIcon className="w-4 h-4" />
+                <span>View</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => window.open(file.fileUrl, "_blank", "download")}
+              >
+                <DownloadIcon className="w-4 h-4" />
+                <span>Download</span>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Handler for initiating approval/rejection
+  const handleAction = (action: "approve" | "reject") => {
+    setActionType(action);
+    setConfirmationOpen(true);
+  };
+
+  // Handler for confirming action and updating status
+  const confirmAction = async () => {
+    if (!actionType || !onStatusChange) return;
+
+    setIsEmailSending(true);
+
+    try {
+      // Call the API to update status - emails are sent server-side now
+      const response = await fetch(
+        `/api/therapist/application/${application.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: actionType === "approve" ? "approved" : "rejected",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to update application status"
+        );
+      }
+
+      const data = await response.json();
+
+      // For approvals, save the generated password for potential future use
+      if (actionType === "approve" && data.generatedPassword) {
+        application.generatedPassword = data.generatedPassword;
+      }
+
+      // Update the UI
+      onStatusChange(
+        application.id,
+        actionType === "approve" ? "approved" : "rejected"
+      );
+
+      // Show success message
+      toast.success(
+        `Application ${actionType === "approve" ? "approved" : "rejected"} successfully. Email notification sent to the applicant.`
+      );
+    } catch (error) {
+      console.error(
+        `Error ${actionType === "approve" ? "approving" : "rejecting"} application:`,
+        error
+      );
+      toast.error(
+        `Failed to ${actionType === "approve" ? "approve" : "reject"} application. Please try again.`
+      );
+    } finally {
+      setIsEmailSending(false);
+      setConfirmationOpen(false);
+      setActionType(null);
+    }
+  };
+
+  return (
+    <Card className="w-full shadow-sm">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl">Application Details</CardTitle>
+          <Badge
+            className={
+              application.status === "approved"
+                ? "bg-green-100 text-green-700 hover:bg-green-100"
+                : application.status === "rejected"
+                  ? "bg-red-100 text-red-700 hover:bg-red-100"
+                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+            }
+          >
+            {application.status.charAt(0).toUpperCase() +
+              application.status.slice(1)}
+          </Badge>
+        </div>
+        <p className="text-sm text-gray-500">
+          Submitted on {formatDate(application.submissionDate)}
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="personal">
+          <TabsList className="w-full">
+            <TabsTrigger value="personal" className="flex-1">
+              Personal Info
+            </TabsTrigger>
+            <TabsTrigger value="professional" className="flex-1">
+              Professional Info
+            </TabsTrigger>
+            <TabsTrigger value="practice" className="flex-1">
+              Practice Details
+            </TabsTrigger>
+            <TabsTrigger value="compliance" className="flex-1">
+              Compliance
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex-1">
+              Documents
+            </TabsTrigger>
+          </TabsList>
+
+          <ScrollArea className="h-[calc(100vh-450px)] mt-4 pr-4">
+            <TabsContent value="personal" className="space-y-4 mt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    First Name
+                  </h3>
+                  <p className="mt-1">{application.firstName}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Last Name
+                  </h3>
+                  <p className="mt-1">{application.lastName}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Email</h3>
+                  <p className="mt-1">{application.email}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Mobile</h3>
+                  <p className="mt-1">{application.mobile}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Province
+                  </h3>
+                  <p className="mt-1">{application.province}</p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="professional" className="space-y-4 mt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Provider Type
+                  </h3>
+                  <p className="mt-1">{application.providerType}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Professional License Type
+                  </h3>
+                  <p className="mt-1">{application.professionalLicenseType}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    PRC Licensed
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.isPRCLicensed)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    PRC License Number
+                  </h3>
+                  <p className="mt-1">{application.prcLicenseNumber}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    License Expiration Date
+                  </h3>
+                  <p className="mt-1">
+                    {formatDate(application.expirationDateOfLicense)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    License Active
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.isLicenseActive)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Years of Experience
+                  </h3>
+                  <p className="mt-1">{application.yearsOfExperience}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Areas of Expertise
+                </h3>
+                {renderObjectItems(application.areasOfExpertise)}
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Assessment Tools
+                </h3>
+                {renderObjectItems(application.assessmentTools)}
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Therapeutic Approaches
+                </h3>
+                {renderObjectItems(application.therapeuticApproachesUsedList)}
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Languages Offered
+                </h3>
+                {renderObjectItems(application.languagesOffered)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="practice" className="space-y-4 mt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Provided Online Therapy Before
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.providedOnlineTherapyBefore)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Comfortable Using Video Conferencing
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.comfortableUsingVideoConferencing)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Weekly Availability (hours)
+                  </h3>
+                  <p className="mt-1">{application.weeklyAvailability}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Preferred Session Length (minutes)
+                  </h3>
+                  <p className="mt-1">{application.preferredSessionLength}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Accepts
+                </h3>
+                {renderObjectItems(application.accepts)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="compliance" className="space-y-4 mt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Has Private Confidential Space
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.privateConfidentialSpace)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Complies With Data Privacy Act
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.compliesWithDataPrivacyAct)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Professional Liability Insurance
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.professionalLiabilityInsurance)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Complaints Or Disciplinary Actions
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(application.complaintsOrDisciplinaryActions)}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Willing To Abide By Platform Guidelines
+                  </h3>
+                  <p className="mt-1">
+                    {renderYesNo(
+                      application.willingToAbideByPlatformGuidelines
+                    )}
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="documents" className="space-y-4 mt-2">
+              {renderUploadedDocuments()}
+            </TabsContent>
+          </ScrollArea>
+        </Tabs>
+      </CardContent>
+
+      {/* Add Card Footer with approval/rejection buttons */}
+      {application.status === "pending" && onStatusChange && (
+        <div className="border-t pt-4 px-6 pb-6">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500">
+              <p>
+                Please review the application carefully before making a
+                decision.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => handleAction("reject")}
+                disabled={isEmailSending}
+              >
+                <XIcon className="w-4 h-4 mr-2" />
+                Reject Application
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => handleAction("approve")}
+                disabled={isEmailSending}
+              >
+                <CheckIcon className="w-4 h-4 mr-2" />
+                Approve Application
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {actionType === "approve"
+                ? "Approve Application"
+                : "Reject Application"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionType === "approve"
+                ? `Are you sure you want to approve ${application.firstName} ${application.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.firstName} ${application.lastName}'s application? They will be notified via email.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isEmailSending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmAction}
+              disabled={isEmailSending}
+              className={
+                actionType === "approve"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }
+            >
+              {isEmailSending ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                <span>{actionType === "approve" ? "Approve" : "Reject"}</span>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Card>
+  );
+}

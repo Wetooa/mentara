@@ -1,0 +1,61 @@
+export const mockTherapistData = {
+  therapist: {
+    id: "th-001",
+    name: "Therafi",
+    avatar: "/therapist-avatar.png",
+  },
+  stats: {
+    activePatients: 12,
+    rescheduled: 4,
+    cancelled: 0,
+    income: 15.4,
+    patientStats: {
+      total: 136,
+      percentage: 12,
+      months: 6,
+      chartData: [
+        { month: "Jan 1", value: 100 },
+        { month: "Feb 1", value: 105 },
+        { month: "Mar 1", value: 115 },
+        { month: "Apr 1", value: 125 },
+        { month: "May 1", value: 130 },
+        { month: "May 15", value: 136 },
+      ],
+    },
+  },
+  upcomingAppointments: [
+    {
+      id: "apt-001",
+      patientId: "pat-001",
+      patientName: "John Doe",
+      patientAvatar: "/patient-1.png",
+      time: "10:15 - 11:00 am",
+      condition: "Panic Disorder, Schizophrenia",
+      reportId: "rep-001",
+    },
+    {
+      id: "apt-002",
+      patientId: "pat-002",
+      patientName: "John Doe",
+      patientAvatar: "/patient-2.png",
+      time: "10:15 - 11:00 am",
+      condition: "Trauma",
+    },
+    {
+      id: "apt-003",
+      patientId: "pat-003",
+      patientName: "John Doe",
+      patientAvatar: "/patient-3.png",
+      time: "10:15 - 11:00 am",
+      condition: "Alcohol Abuse",
+    },
+    {
+      id: "apt-004",
+      patientId: "pat-004",
+      patientName: "John Doe",
+      patientAvatar: "/patient-4.png",
+      time: "10:15 - 11:00 am",
+      condition: "Insomnia",
+    },
+  ],
+};
