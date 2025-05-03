@@ -1,4 +1,7 @@
-const BES = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+
+const BES: QuestionnaireProps = {
+  title: "Binge-Eating Scale (BES)",
   description:
     "The Binge-Eating Scale (BES) is a self-assessment tool designed to evaluate the severity of binge-eating behaviors. It helps individuals understand their eating patterns and whether they may indicate symptoms consistent with binge-eating disorder.",
   questions: [
@@ -94,17 +97,12 @@ const BES = {
     },
   ],
   scoring: {
-    scoreOptions: { 0: 0, 1: 1, 2: 2, 3: 3 },
+    ...QUESTIONNAIRE_SCORING,
+    scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
     severityLevels: {
       minimal: { range: [0, 17], label: "No or Minimal Binge-Eating" },
       mildModerate: { range: [18, 26], label: "Mild to Moderate Binge-Eating" },
       severe: { range: [27, 46], label: "Severe Binge-Eating" },
-    },
-    getSeverity: (score: number) => {
-      if (score >= 0 && score <= 17) return "No or Minimal Binge-Eating";
-      if (score >= 18 && score <= 26) return "Mild to Moderate Binge-Eating";
-      if (score >= 27 && score <= 46) return "Severe Binge-Eating";
-      return "Invalid score";
     },
   },
   disclaimer:
