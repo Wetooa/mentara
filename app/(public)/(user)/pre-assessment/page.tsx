@@ -19,7 +19,7 @@ export interface PreAssessmentPageFormProps {
 export default function PreAssessmentPage() {
   const animationControls = useAnimationControls();
 
-  const { step, nextStep, prevStep, questionnaires } =
+  const { step, nextStep, prevStep, questionnaires, answers } =
     usePreAssessmentChecklistStore();
 
   function handlePrevButtonOnClick() {
@@ -38,6 +38,27 @@ export default function PreAssessmentPage() {
         animationControls.start({ ...fade.in, ...reset });
       });
     });
+  }
+
+  console.log(answers);
+
+  let form = null;
+  if (step === 0) {
+    form = (
+      <PreAssessmentInitialCheckList
+        handleNextButtonOnClick={handleNextButtonOnClick}
+      />
+    );
+  } else if (step < questionnaires.length + 1) {
+    form = (
+      <QuestionnaireForm handleNextButtonOnClick={handleNextButtonOnClick} />
+    );
+  } else if (step === questionnaires.length + 1) {
+    form = (
+      <PreAssessmentSignUp handleNextButtonOnClick={handleNextButtonOnClick} />
+    );
+  } else {
+    form = <VerifyAccount />;
   }
 
   return (
@@ -66,29 +87,7 @@ export default function PreAssessmentPage() {
 
           <div className="w-full">
             <motion.div animate={animationControls} variants={fadeDown}>
-              {(() => {
-                if (step === 0) {
-                  return (
-                    <PreAssessmentInitialCheckList
-                      handleNextButtonOnClick={handleNextButtonOnClick}
-                    />
-                  );
-                } else if (step < questionnaires.length + 1) {
-                  return (
-                    <QuestionnaireForm
-                      handleNextButtonOnClick={handleNextButtonOnClick}
-                    />
-                  );
-                } else if (step === questionnaires.length + 1) {
-                  return (
-                    <PreAssessmentSignUp
-                      handleNextButtonOnClick={handleNextButtonOnClick}
-                    />
-                  );
-                } else {
-                  return <VerifyAccount />;
-                }
-              })()}
+              {form}
             </motion.div>
           </div>
         </motion.div>

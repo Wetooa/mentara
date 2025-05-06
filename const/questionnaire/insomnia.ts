@@ -1,4 +1,4 @@
-import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
 const INSOMNIA_SURVEY: QuestionnaireProps = {
   title: "Insomnia Severity Index (ISI)",

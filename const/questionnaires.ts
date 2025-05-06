@@ -29,7 +29,7 @@ export const LIST_OF_QUESTIONNAIRES = [
   "Binge eating / Eating disorders",
   "ADD / ADHD",
   "Substance or Alcohol Use Issues",
-];
+] as const;
 
 export type ListOfQuestionnaires = (typeof LIST_OF_QUESTIONNAIRES)[number];
 
@@ -40,7 +40,7 @@ export const QUESTIONNAIRE_MAP: Record<
   Stress: PERCEIVED_STRESS_SCALE,
   Anxiety: GAD_7_ANXIETY,
   Depression: PHQ_9,
-  Insomia: INSOMNIA_SURVEY,
+  Insomnia: INSOMNIA_SURVEY,
   Panic: PDSS,
   "Bipolar disorder (BD)": MDQ,
   "Obsessive compulsive disorder (OCD)": OCI_R,

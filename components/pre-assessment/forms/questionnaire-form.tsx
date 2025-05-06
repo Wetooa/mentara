@@ -15,7 +15,9 @@ export default function QuestionnaireForm({
   const questionnaire = questionnaires[formIndex];
   const questions = QUESTIONNAIRE_MAP[questionnaire].questions;
   const question = questions[questionIndex];
+
   const currentAnswer = answers[formIndex][questionIndex];
+
   const isLastQuestion = questions.length - 1 === questionIndex;
 
   function handleSelectAnswer(answer: number) {
@@ -59,7 +61,7 @@ export default function QuestionnaireForm({
         <Button
           className="w-full font-bold"
           variant={"secondary"}
-          disabled={currentAnswer === undefined}
+          disabled={currentAnswer === -1}
           onClick={handleNextButtonOnClick}
         >
           {isLastQuestion ? "Next form..." : "Continue"}
