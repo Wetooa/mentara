@@ -1,4 +1,4 @@
-import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+import { QuestionnaireProps, QUESTIONNAIRE_SCORING } from "../scoring";
 
 const PHQ_9: QuestionnaireProps = {
   title: "Patient Health Questionnaire-9 (PHQ-9)",

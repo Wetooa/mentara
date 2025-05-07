@@ -1,4 +1,4 @@
-import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+import { QuestionnaireProps, QUESTIONNAIRE_SCORING } from "../scoring";
 
 // interface PHQScale {
 //   items: number[];

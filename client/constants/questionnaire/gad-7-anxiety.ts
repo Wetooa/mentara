@@ -1,4 +1,4 @@
-import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+import { QuestionnaireProps } from "../scoring";
 
 const GAD_7_ANXIETY: QuestionnaireProps = {
   title: "Anxiety Assessment (GAD-7)",
