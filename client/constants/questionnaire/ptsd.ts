@@ -1,4 +1,4 @@
-import { QuestionnaireProps, QUESTIONNAIRE_SCORING } from "../scoring";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
 const PCL_5: QuestionnaireProps = {
   title: "Post-traumatic Stress Disorder Checklist",
@@ -241,6 +241,8 @@ const PCL_5: QuestionnaireProps = {
     },
   ],
   scoring: {
+    ...QUESTIONNAIRE_SCORING,
+
     scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
     severityLevels: {
       normal: { range: [0, 33], label: "Normal" },

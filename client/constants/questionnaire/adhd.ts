@@ -176,7 +176,7 @@
 //     "This questionnaire is a screening tool and does not provide a definitive diagnosis. A clinical evaluation by a healthcare professional is necessary for a formal ADHD diagnosis.",
 // };
 
-import { QuestionnaireProps } from "../scoring";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
 const ASRS_V1_1: QuestionnaireProps = {
   title: "Adult ADHD Self-Report Scale (ASRS v1.1)",

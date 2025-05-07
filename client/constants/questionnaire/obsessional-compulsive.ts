@@ -1,4 +1,4 @@
-import { QuestionnaireProps } from "../scoring";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
 const OCI_R: QuestionnaireProps = {
   title: "Obsessive-Compulsive Inventory - Revised (OCI-R)",

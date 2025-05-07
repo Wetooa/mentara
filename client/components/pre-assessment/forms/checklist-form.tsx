@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LIST_OF_QUESTIONNAIRES } from "@/const/questionnaires";
+import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaires";
 import { cn } from "@/lib/utils";
 import { usePreAssessmentChecklistStore } from "@/store/preassessment";
 
