@@ -1,6 +1,35 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# === BACKEND ===
+# Virtual Environment - all possible locations
+venv/
+*/venv/
+**/venv/
+env/
+*/env/
+**/env/
+ENV/
+*/ENV/
+**/ENV/
+virtualenv/
+*/virtualenv/
+**/virtualenv/
+.venv/
+*/.venv/
+**/.venv/
+.env/
+*/.env/
+**/.env/
+.ENV/
+*/.ENV/
+**/.ENV/
+.virtualenv/
+*/.virtualenv/
+**/.virtualenv/
+
+# === FRONTEND ===
 # dependencies
+/client/node_modules
 /node_modules
 /.pnp
 .pnp.*
@@ -11,13 +40,17 @@
 !.yarn/versions
 
 # testing
+/client/coverage
 /coverage
 
 # next.js
+/client/.next/
+/client/out/
 /.next/
 /out/
 
 # production
+/client/build
 /build
 
 # misc
@@ -35,13 +68,17 @@ yarn-error.log*
 
 # vercel
 .vercel
+/client/.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/client/*.tsbuildinfo
+/client/next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+/client/.clerk/
 
 # Flask
 flask/venv
