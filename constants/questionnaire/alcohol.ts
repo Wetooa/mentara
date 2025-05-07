@@ -1,4 +1,4 @@
-import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+import { QuestionnaireProps } from "../scoring";
 
 const AUDIT: {
   standardDrinks: Record<string, Record<string, number>>;

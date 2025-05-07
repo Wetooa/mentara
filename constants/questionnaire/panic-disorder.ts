@@ -1,4 +1,4 @@
-import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../questionnaires";
+import { QuestionnaireProps, QUESTIONNAIRE_SCORING } from "../scoring";
 
 const PDSS: QuestionnaireProps = {
   title: "Panic Disorder Severity Scale (PDSS)",

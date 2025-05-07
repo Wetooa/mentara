@@ -1,4 +1,4 @@
-import { QuestionnaireProps } from "../questionnaires";
+import { QuestionnaireProps, QUESTIONNAIRE_SCORING } from "../scoring";
 
 const PCL_5: QuestionnaireProps = {
   title: "Post-traumatic Stress Disorder Checklist",
