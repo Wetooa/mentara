@@ -72,5 +72,8 @@
     "prisma": "^6.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "trustedDependencies": [
+    "@clerk/shared"
+  ]
 }

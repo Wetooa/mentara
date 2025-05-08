@@ -10,6 +10,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { ClerkAuthGuard } from './auth/clerk-auth.guard';
 import { UsersModule } from './users/users.module';
 import { PrismaService } from './providers/prisma-client.provider';
+import { CommunitiesModule } from './communities/communities.module';
+import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
+import { TherapistModule } from './therapist/therapist.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -18,6 +23,11 @@ import { PrismaService } from './providers/prisma-client.provider';
       isGlobal: true,
     }),
     UsersModule,
+    CommunitiesModule,
+    PostsModule,
+    CommentsModule,
+    TherapistModule,
+    WebhooksModule,
   ],
   controllers: [AppController, AuthController],
   providers: [

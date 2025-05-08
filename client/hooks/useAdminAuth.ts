@@ -1,6 +1,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useApi } from "@/lib/api";
 
 interface AdminAuth {
   isAdmin: boolean;
@@ -17,6 +18,7 @@ export function useAdminAuth(): AdminAuth {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [adminData, setAdminData] = useState(null);
+  const api = useApi();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -27,23 +29,11 @@ export function useAdminAuth(): AdminAuth {
       }
 
       try {
-        // Call our admin authentication endpoint
-        const response = await fetch("/api/admin/auth", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        // Use the API client to check admin status
+        const data = await api.admin.checkAdmin();
 
-        if (response.ok) {
-          const data = await response.json();
-          setIsAdmin(true);
-          setAdminData(data.admin);
-        } else {
-          // If not authorized as admin, set admin status to false
-          setIsAdmin(false);
-          setAdminData(null);
-        }
+        setIsAdmin(true);
+        setAdminData(data.admin);
       } catch (error) {
         console.error("Error checking admin status:", error);
         setIsAdmin(false);
@@ -54,7 +44,7 @@ export function useAdminAuth(): AdminAuth {
     };
 
     checkAdminStatus();
-  }, [isLoaded, userId]);
+  }, [isLoaded, userId, api]);
 
   return { isAdmin, isLoading, adminData };
 }

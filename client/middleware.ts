@@ -13,24 +13,56 @@ const isUserRoute = createRouteMatcher(["/user(.*)"]);
 const isTherapistRoute = createRouteMatcher(["/therapist(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
+export function middleware(req) {
+  // Handle OPTIONS request for CORS preflight
+  if (req.method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Origin": "http://localhost:5000", // Backend origin
+        "Access-Control-Allow-Methods": "GET,DELETE,PATCH,POST,PUT",
+        "Access-Control-Allow-Headers":
+          "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+      },
+    });
+  }
+
+  // For non-OPTIONS requests
+  const res = NextResponse.next();
+
+  // Add the CORS headers to the response
+  res.headers.append("Access-Control-Allow-Credentials", "true");
+  res.headers.append("Access-Control-Allow-Origin", "http://localhost:5000"); // Backend origin
+  res.headers.append(
+    "Access-Control-Allow-Methods",
+    "GET,DELETE,PATCH,POST,PUT"
+  );
+  res.headers.append(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
+  );
+
+  return res;
+}
+
 export default clerkMiddleware(async (auth, req) => {
   const { userId, sessionClaims } = await auth();
 
   // if (!isProd) {
   //   return NextResponse.next();
   // }
-  
-  const role = (await auth()).sessionClaims?.metadata?.role
-  
-  if (isUserRoute(req) && ) {
 
-  }
+  const role = (await auth()).sessionClaims?.metadata?.role;
+
+  // if (isUserRoute(req) && ) {
+
+  // }
 
   // Protect non-public routes
   // if (!isPublicRoute(req)) {
   //   await auth.protect();
   // }
-
 
   // FIX: adjusting this for faster load times
   // if (userId) {

@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
         await setActive({ session: result.createdSessionId });
 
         // Verify if the user has admin privileges
-        const adminResponse = await fetch("/api/admin/auth", {
+        const adminResponse = await fetch("http://localhost:5000/auth/admin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
