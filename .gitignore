@@ -84,9 +84,12 @@ virtualenv/
 */.virtualenv/
 **/.virtualenv/
 
+mentara-api/node_modules
+
+
 # === FRONTEND ===
 # dependencies
-/client/node_modules
+/mentara-client/node_modules
 /node_modules
 /.pnp
 .pnp.*
@@ -97,17 +100,17 @@ virtualenv/
 !.yarn/versions
 
 # testing
-/client/coverage
+/mentara-client/coverage
 /coverage
 
 # next.js
-/client/.next/
-/client/out/
+/mentara-client/.next/
+/mentara-client/out/
 /.next/
 /out/
 
 # production
-/client/build
+/mentara-client/build
 /build
 
 # misc
@@ -125,17 +128,17 @@ yarn-error.log*
 
 # vercel
 .vercel
-/client/.vercel
+/mentara-client/.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/client/*.tsbuildinfo
-/client/next-env.d.ts
+/mentara-client/*.tsbuildinfo
+/mentara-client/next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
-/client/.clerk/
+/mentara-client/.clerk/
 
 # Flask
 flask/venv
