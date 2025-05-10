@@ -1,4 +1,7 @@
-const DAST_10 = {
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
+
+const DAST_10: QuestionnaireProps = {
+  title: "Drug Abuse Screening Test (DAST-10)",
   description:
     "The Drug Abuse Screening Test (DAST-10) is a self-administered questionnaire designed to assess drug use and its potential consequences over the past 12 months. It is used for screening and evaluating substance use disorders.",
   questions: [
@@ -60,9 +63,10 @@ const DAST_10 = {
     },
   ],
   scoring: {
-    scoreOptions: { yes: 1, no: 0 },
+    ...QUESTIONNAIRE_SCORING,
+    scoreMapping: { 0: 1, 1: 0 },
     severityLevels: {
-      none: { range: [0], label: "No problems reported" },
+      none: { range: [0, 0], label: "No problems reported" },
       low: { range: [1, 2], label: "Low level - Monitor, reassess later" },
       moderate: {
         range: [3, 5],

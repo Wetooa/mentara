@@ -1,4 +1,4 @@
-import { QuestionnaireProps } from "../scoring";
+import { QUESTIONNAIRE_SCORING, QuestionnaireProps } from "../scoring";
 
 const BES: QuestionnaireProps = {
   title: "Binge-Eating Scale (BES)",
