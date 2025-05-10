@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 
 export async function GET(req: NextRequest, props: Props) {
   try {
+    await auth.protect();
     const params = await props.params;
     const communities = await prisma.community.findMany({
       where: {
