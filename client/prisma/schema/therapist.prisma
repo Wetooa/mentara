@@ -1,0 +1,113 @@
+// Therapist application model
+model TherapistApplication {
+  id              String    @id @default(uuid())
+  clerkUserId     String?   @unique // Optional: Will be assigned if created from an authenticated user
+  status          String    @default("pending") // pending, approved, rejected
+  submissionDate  DateTime  @default(now())
+  processingDate  DateTime? // When the application was processed (approved/rejected)
+  processedBy     String? // Admin who processed the application
+  applicationData Json // Store all application form data as JSON
+
+  // Personal Info
+  firstName String
+  lastName  String
+  email     String
+  mobile    String
+  province  String
+
+  // Professional Info
+  providerType                  String
+  professionalLicenseType       String
+  isPRCLicensed                 String
+  prcLicenseNumber              String
+  expirationDateOfLicense       DateTime?
+  isLicenseActive               String
+  yearsOfExperience             String
+  areasOfExpertise              Json
+  assessmentTools               Json
+  therapeuticApproachesUsedList Json
+  languagesOffered              Json
+
+  // Practice Details
+  providedOnlineTherapyBefore       String
+  comfortableUsingVideoConferencing String
+  weeklyAvailability                String
+  preferredSessionLength            String
+  accepts                           Json
+
+  // Compliance
+  privateConfidentialSpace           String
+  compliesWithDataPrivacyAct         String
+  professionalLiabilityInsurance     String
+  complaintsOrDisciplinaryActions    String
+  willingToAbideByPlatformGuidelines String
+
+  // Documents - Store file references
+  uploadedDocuments Json?
+
+  // If approved, reference to created therapist account
+  therapist Therapist?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([email])
+}
+
+// Therapist model
+model Therapist {
+  id                      String                @id @default(uuid())
+  clerkUserId             String                @unique
+  email                   String                @unique
+  firstName               String
+  lastName                String
+  mobile                  String
+  province                String
+  providerType            String
+  professionalLicenseType String
+  prcLicenseNumber        String?
+  licensedSince           DateTime?
+  licenseExpiration       DateTime?
+  yearsOfExperience       Int?
+  areasOfExpertise        Json
+  therapeuticApproaches   Json
+  languages               Json
+  weeklyAvailability      String?
+  sessionLength           String?
+  accepts                 Json?
+  profileComplete         Boolean               @default(false)
+  applicationId           String?               @unique
+  application             TherapistApplication? @relation(fields: [applicationId], references: [id])
+
+  bio             String?  @db.Text
+  profileImageUrl String?
+  hourlyRate      Decimal? @db.Decimal(10, 2)
+  isActive        Boolean  @default(true)
+  isVerified      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clerkUserId])
+}
+
+// File upload model for storing uploaded file information
+model TherapistFileUpload {
+  id         String  @id @default(uuid())
+  fileName   String
+  fileSize   Int
+  fileType   String
+  fileUrl    String
+  docType    String
+  uploadedBy String? // Optional: Clerk user ID who uploaded the file
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Reference to therapist application if applicable
+  therapistApplicationId String?
+
+  @@index([docType])
+  @@index([uploadedBy])
+}
