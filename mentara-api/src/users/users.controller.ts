@@ -1,19 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
-  Put,
+  Controller,
   Delete,
+  Get,
   HttpException,
   HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { User, Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
+import { UsersService } from './users.service';
 
 @Controller('users')
+@UseGuards(ClerkAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -39,7 +42,7 @@ export class UsersController {
       return user;
     } catch (error) {
       throw new HttpException(
-        `Failed to fetch user: ${error.message}`,
+        `Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -51,7 +54,7 @@ export class UsersController {
       return await this.usersService.create(userData);
     } catch (error) {
       throw new HttpException(
-        `Failed to create user: ${error.message}`,
+        `Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -66,7 +69,7 @@ export class UsersController {
       return await this.usersService.update(id, userData);
     } catch (error) {
       throw new HttpException(
-        `Failed to update user: ${error.message}`,
+        `Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -78,7 +81,7 @@ export class UsersController {
       return await this.usersService.remove(id);
     } catch (error) {
       throw new HttpException(
-        `Failed to delete user: ${error.message}`,
+        `Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -94,7 +97,7 @@ export class UsersController {
       return { isFirstSignIn };
     } catch (error) {
       throw new HttpException(
-        `Failed to check first sign in: ${error.message}`,
+        `Failed to check first sign in: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

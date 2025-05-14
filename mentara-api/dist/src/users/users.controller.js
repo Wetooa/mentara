@@ -14,9 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
-const users_service_1 = require("./users.service");
 const client_1 = require("@prisma/client");
+const clerk_auth_guard_1 = require("../clerk-auth.guard");
 const public_decorator_1 = require("../decorators/public.decorator");
+const users_service_1 = require("./users.service");
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
@@ -39,7 +40,7 @@ let UsersController = class UsersController {
             return user;
         }
         catch (error) {
-            throw new common_1.HttpException(`Failed to fetch user: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException(`Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async create(userData) {
@@ -47,7 +48,7 @@ let UsersController = class UsersController {
             return await this.usersService.create(userData);
         }
         catch (error) {
-            throw new common_1.HttpException(`Failed to create user: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException(`Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async update(id, userData) {
@@ -55,7 +56,7 @@ let UsersController = class UsersController {
             return await this.usersService.update(id, userData);
         }
         catch (error) {
-            throw new common_1.HttpException(`Failed to update user: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException(`Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async remove(id) {
@@ -63,7 +64,7 @@ let UsersController = class UsersController {
             return await this.usersService.remove(id);
         }
         catch (error) {
-            throw new common_1.HttpException(`Failed to delete user: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async isFirstSignIn(userId) {
@@ -72,7 +73,7 @@ let UsersController = class UsersController {
             return { isFirstSignIn };
         }
         catch (error) {
-            throw new common_1.HttpException(`Failed to check first sign in: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException(`Failed to check first sign in: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 };
@@ -122,6 +123,7 @@ __decorate([
 ], UsersController.prototype, "isFirstSignIn", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
+    (0, common_1.UseGuards)(clerk_auth_guard_1.ClerkAuthGuard),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

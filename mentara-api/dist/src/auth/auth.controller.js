@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const clerk_auth_guard_1 = require("../clerk-auth.guard");
-const current_user_decorator_1 = require("../decorators/current-user.decorator");
+const current_user_decorator_1 = require("src/decorators/current-user.decorator");
 const auth_service_1 = require("./auth.service");
 let AuthController = class AuthController {
     authService;

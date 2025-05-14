@@ -16,7 +16,7 @@ exports.AuthService = void 0;
 const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
 const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../lib/prisma");
-const current_user_decorator_1 = require("../decorators/current-user.decorator");
+const current_user_decorator_1 = require("src/decorators/current-user.decorator");
 let AuthService = class AuthService {
     async getUsers() {
         return clerk_sdk_node_1.clerkClient.users.getUserList();
