@@ -16,10 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import PROVIDER_TYPE from "@/constants/provider";
+import PHILIPPINE_PROVINCES from "@/constants/provinces";
 
 // Import constants
-import PHILIPPINE_PROVINCES from "@/const/provinces";
-import PROVIDER_TYPE from "@/const/provider";
 
 // Component interfaces
 interface FormInputProps {

@@ -21,7 +21,7 @@ export interface PreAssessmentChecklistState {
 
 export const usePreAssessmentChecklistStore =
   create<PreAssessmentChecklistState>()((set) => ({
-    step: inProd ? 0 : 0,
+    step: inProd ? 0 : 1,
     miniStep: inProd ? 0 : 0,
     nextStep: () =>
       set((state) => {
@@ -65,6 +65,7 @@ export const usePreAssessmentChecklistStore =
 
     questionnaires: inProd ? [] : [],
     answers: inProd ? [] : [],
+
     setQuestionnaires: (to) =>
       set((state) => ({
         ...state,
@@ -73,6 +74,7 @@ export const usePreAssessmentChecklistStore =
           Array(QUESTIONNAIRE_MAP[questionnaireId].questions.length).fill(-1)
         ),
       })),
+
     setAnswers: (index, to) =>
       set((state) => ({
         ...state,
