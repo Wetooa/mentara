@@ -1,33 +1,33 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ForbiddenException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { User } from '@clerk/backend';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { clerkClient } from '@clerk/clerk-sdk-node';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import prisma from 'lib/prisma';
+import { CurrentUserId } from 'src/decorators/current-user.decorator';
 
 @Injectable()
 export class AuthService {
-  async checkAdmin(@CurrentUser() currentUser: User) {
-    try {
-      // If no user is authenticated, return unauthorized
-      if (!currentUser) {
-        throw new UnauthorizedException('Authentication required');
-      }
+  async getUsers() {
+    return clerkClient.users.getUserList();
+  }
 
-      // Query Prisma to check if the user has admin privileges
+  async getUser(userId: string) {
+    return clerkClient.users.getUser(userId);
+  }
+
+  async checkAdmin(@CurrentUserId() userId: string) {
+    try {
       const adminUser = await prisma.adminUser.findUnique({
-        where: { clerkUserId: currentUser.id },
+        where: { id: userId },
       });
 
       if (!adminUser) {
         throw new ForbiddenException('Not authorized as admin');
       }
 
-      // User is authenticated and has admin privileges
       return {
         success: true,
         admin: {
@@ -50,9 +50,5 @@ export class AuthService {
       // For other errors, throw an internal server error
       throw new InternalServerErrorException('Authentication failed');
     }
-  }
-
-  async getUsers() {
-    return clerkClient.users.getUserList();
   }
 }

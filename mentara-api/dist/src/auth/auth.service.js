@@ -13,18 +13,21 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
-const common_1 = require("@nestjs/common");
-const current_user_decorator_1 = require("../decorators/current-user.decorator");
 const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
+const common_1 = require("@nestjs/common");
 const prisma_1 = require("../../lib/prisma");
+const current_user_decorator_1 = require("../decorators/current-user.decorator");
 let AuthService = class AuthService {
-    async checkAdmin(currentUser) {
+    async getUsers() {
+        return clerk_sdk_node_1.clerkClient.users.getUserList();
+    }
+    async getUser(userId) {
+        return clerk_sdk_node_1.clerkClient.users.getUser(userId);
+    }
+    async checkAdmin(userId) {
         try {
-            if (!currentUser) {
-                throw new common_1.UnauthorizedException('Authentication required');
-            }
             const adminUser = await prisma_1.default.adminUser.findUnique({
-                where: { clerkUserId: currentUser.id },
+                where: { id: userId },
             });
             if (!adminUser) {
                 throw new common_1.ForbiddenException('Not authorized as admin');
@@ -47,15 +50,12 @@ let AuthService = class AuthService {
             throw new common_1.InternalServerErrorException('Authentication failed');
         }
     }
-    async getUsers() {
-        return clerk_sdk_node_1.clerkClient.users.getUserList();
-    }
 };
 exports.AuthService = AuthService;
 __decorate([
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(0, (0, current_user_decorator_1.CurrentUserId)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Function]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthService.prototype, "checkAdmin", null);
 exports.AuthService = AuthService = __decorate([

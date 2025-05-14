@@ -1,6 +1,7 @@
-import { User } from '@clerk/backend';
 export declare class AuthService {
-    checkAdmin(currentUser: User): Promise<{
+    getUsers(): Promise<import("@clerk/backend/dist/api/resources/Deserializer").PaginatedResourceResponse<import("@clerk/clerk-sdk-node").User[]>>;
+    getUser(userId: string): Promise<import("@clerk/clerk-sdk-node").User>;
+    checkAdmin(userId: string): Promise<{
         success: boolean;
         admin: {
             id: string;
@@ -8,5 +9,4 @@ export declare class AuthService {
             permissions: string[];
         };
     }>;
-    getUsers(): Promise<import("@clerk/backend/dist/api/resources/Deserializer").PaginatedResourceResponse<User[]>>;
 }

@@ -18,13 +18,14 @@ let ClerkAuthGuard = class ClerkAuthGuard {
             return false;
         }
         try {
-            await clerk_sdk_node_1.clerkClient.verifyToken(token);
+            const session = await clerk_sdk_node_1.clerkClient.verifyToken(token);
+            request.userId = session.sub;
+            return true;
         }
         catch (error) {
             this.logger.error('Error verifying token', error);
             return false;
         }
-        return true;
     }
 };
 exports.ClerkAuthGuard = ClerkAuthGuard;

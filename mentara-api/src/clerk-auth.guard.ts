@@ -5,16 +5,20 @@ import {
   ExecutionContext,
   Logger,
 } from '@nestjs/common';
+import { Request } from 'express';
+
+declare module 'express' {
+  interface Request {
+    userId: string;
+  }
+}
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
   private readonly logger = new Logger();
 
   async canActivate(context: ExecutionContext) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const request = context.switchToHttp().getRequest();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const request = context.switchToHttp().getRequest<Request>();
     const token = request?.cookies?.__session as string | undefined;
 
     if (!token) {
@@ -22,12 +26,14 @@ export class ClerkAuthGuard implements CanActivate {
     }
 
     try {
-      await clerkClient.verifyToken(token);
+      const session = await clerkClient.verifyToken(token);
+
+      request.userId = session.sub;
+
+      return true;
     } catch (error) {
       this.logger.error('Error verifying token', error);
       return false;
     }
-
-    return true;
   }
 }
