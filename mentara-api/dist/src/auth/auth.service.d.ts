@@ -9,4 +9,5 @@ export declare class AuthService {
             permissions: string[];
         };
     }>;
+    getUsers(): Promise<import("@clerk/backend/dist/api/resources/Deserializer").PaginatedResourceResponse<User[]>>;
 }

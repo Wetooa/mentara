@@ -27,7 +27,7 @@ let UsersController = class UsersController {
             return await this.usersService.findAll();
         }
         catch (error) {
-            throw new common_1.HttpException(`Failed to fetch users: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException(`Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async findOne(id) {

@@ -94,16 +94,15 @@ model Therapist {
 
 // File upload model for storing uploaded file information
 model TherapistFileUpload {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   fileName   String
   fileSize   Int
   fileType   String
   fileUrl    String
   docType    String
   uploadedBy String? // Optional: Clerk user ID who uploaded the file
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Reference to therapist application if applicable
   therapistApplicationId String?

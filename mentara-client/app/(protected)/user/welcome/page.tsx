@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useAuth } from "@clerk/nextjs";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 
@@ -67,6 +68,9 @@ const Navbar = () => (
 );
 
 export default function Home() {
+  const authDetails = useAuth();
+  console.log(authDetails);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-tertiary via-white to-tertiary flex flex-col gap-12 items-center">
       <Navbar />

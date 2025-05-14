@@ -37,7 +37,7 @@ export class UsersService {
 
   async isFirstSignIn(userId: string): Promise<boolean> {
     const user = await this.prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { id: userId },
     });
     return !user;
   }

@@ -16,6 +16,7 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const current_user_decorator_1 = require("../decorators/current-user.decorator");
 const prisma_client_provider_1 = require("../providers/prisma-client.provider");
+const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
 let AuthService = class AuthService {
     async checkAdmin(currentUser, prisma) {
         try {
@@ -45,6 +46,9 @@ let AuthService = class AuthService {
             }
             throw new common_1.InternalServerErrorException('Authentication failed');
         }
+    }
+    async getUsers() {
+        return clerk_sdk_node_1.clerkClient.users.getUserList();
     }
 };
 exports.AuthService = AuthService;

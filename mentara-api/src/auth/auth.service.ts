@@ -7,6 +7,7 @@ import {
 import { User } from '@clerk/backend';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { PrismaService } from 'src/providers/prisma-client.provider';
+import { clerkClient } from '@clerk/clerk-sdk-node';
 
 @Injectable()
 export class AuthService {
@@ -49,5 +50,9 @@ export class AuthService {
       // For other errors, throw an internal server error
       throw new InternalServerErrorException('Authentication failed');
     }
+  }
+
+  async getUsers() {
+    return clerkClient.users.getUserList();
   }
 }

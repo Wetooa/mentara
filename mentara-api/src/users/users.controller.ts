@@ -21,9 +21,9 @@ export class UsersController {
   async findAll(): Promise<User[]> {
     try {
       return await this.usersService.findAll();
-    } catch (error) {
+    } catch (error: unknown) {
       throw new HttpException(
-        `Failed to fetch users: ${error.message}`,
+        `Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
