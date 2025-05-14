@@ -35,7 +35,7 @@ export function answersToAnswerMatrix(
 
     // Fill answers for this questionnaire
     for (let j = 0; j < questionCount; j++) {
-      result[startIndex + i] = answers[i][j];
+      result[startIndex + j] = answers[i][j];
     }
   }
 
