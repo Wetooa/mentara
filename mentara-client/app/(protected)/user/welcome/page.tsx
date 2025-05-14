@@ -11,7 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 
@@ -67,9 +67,14 @@ const Navbar = () => (
   </nav>
 );
 
+import { authFetch } from "@/lib/authFetch";
+
 export default function Home() {
-  const authDetails = useAuth();
-  console.log(authDetails);
+  // NOTE: sample usage here
+  // const { isPending, error, data } = useQuery({
+  //   queryKey: ["users"],
+  //   queryFn: () => authFetch("/auth/users"),
+  // });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-tertiary via-white to-tertiary flex flex-col gap-12 items-center">

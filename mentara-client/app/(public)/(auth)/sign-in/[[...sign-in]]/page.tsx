@@ -128,13 +128,16 @@ export default function SignInPage() {
 
             <div className="space-y-3">
               <Button
-                onClick={() =>
+                onClick={() => {
+                  toast.info("Redirecting to Google SSO...");
+
                   signIn.authenticateWithRedirect({
                     strategy: "oauth_google",
                     redirectUrl: "/sso-callback",
                     redirectUrlComplete: "/user/dashboard",
-                  })
-                }
+                  });
+                }}
+                type="button"
                 className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 p-2 rounded-md hover:bg-gray-50 transition-colors"
               >
                 <ContinueWithGoogle />
@@ -142,13 +145,15 @@ export default function SignInPage() {
 
               {/* FIX: not working for now */}
               <Button
-                onClick={() =>
+                onClick={() => {
+                  toast.info("Redirecting to Microsoft SSO...");
                   signIn.authenticateWithRedirect({
                     strategy: "oauth_microsoft",
                     redirectUrl: "/sso-callback",
                     redirectUrlComplete: "/user/dashboard",
-                  })
-                }
+                  });
+                }}
+                type="button"
                 className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 p-2 rounded-md hover:bg-gray-50 transition-colors"
               >
                 <ContinueWithMicrosoft />

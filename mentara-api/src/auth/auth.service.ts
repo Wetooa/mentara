@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { User } from '@clerk/backend';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { PrismaService } from 'src/providers/prisma-client.provider';
 import { clerkClient } from '@clerk/clerk-sdk-node';
+import prisma from 'lib/prisma';
 
 @Injectable()
 export class AuthService {
-  async checkAdmin(@CurrentUser() currentUser: User, prisma: PrismaService) {
+  async checkAdmin(@CurrentUser() currentUser: User) {
     try {
       // If no user is authenticated, return unauthorized
       if (!currentUser) {

@@ -15,15 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const current_user_decorator_1 = require("../decorators/current-user.decorator");
-const prisma_client_provider_1 = require("../providers/prisma-client.provider");
 const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
+const prisma_1 = require("../../lib/prisma");
 let AuthService = class AuthService {
-    async checkAdmin(currentUser, prisma) {
+    async checkAdmin(currentUser) {
         try {
             if (!currentUser) {
                 throw new common_1.UnauthorizedException('Authentication required');
             }
-            const adminUser = await prisma.adminUser.findUnique({
+            const adminUser = await prisma_1.default.adminUser.findUnique({
                 where: { clerkUserId: currentUser.id },
             });
             if (!adminUser) {
@@ -55,7 +55,7 @@ exports.AuthService = AuthService;
 __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Function, prisma_client_provider_1.PrismaService]),
+    __metadata("design:paramtypes", [Function]),
     __metadata("design:returntype", Promise)
 ], AuthService.prototype, "checkAdmin", null);
 exports.AuthService = AuthService = __decorate([
