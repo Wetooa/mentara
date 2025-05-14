@@ -40,8 +40,6 @@ export default function PreAssessmentPage() {
     });
   }
 
-  console.log(answers);
-
   let form = null;
   if (step === 0) {
     form = (

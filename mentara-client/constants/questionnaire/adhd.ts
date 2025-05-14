@@ -185,101 +185,108 @@ const ASRS_V1_1: QuestionnaireProps = {
 
   questions: [
     {
-      prefix: "",
+      prefix: "Daily Tasks",
       question:
-        "Trouble wrapping up final details of a project after the challenging parts are done",
+        "How often do you have trouble wrapping up the final details of a project once the challenging parts have been done?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
+      prefix: "Organization",
       question:
-        "Difficulty getting things in order when a task requires organization",
+        "How often do you have difficulty getting things in order when you have to do a task that requires organization?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Problems remembering appointments or obligations",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
-    },
-    {
-      prefix: "",
+      prefix: "Memory",
       question:
-        "Avoiding or delaying starting tasks that require a lot of thought",
+        "How often do you have problems remembering appointments or obligations?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Fidgeting or squirming when sitting for a long time",
-      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
-    },
-    {
-      prefix: "",
+      prefix: "Task Initiation",
       question:
-        "Feeling overly active and compelled to do things, like being driven by a motor",
+        "How often do you avoid or delay getting started on a task that requires a lot of thought?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
+      prefix: "Motor Activity",
       question:
-        "Making careless mistakes when working on a boring or difficult project",
+        "How often do you fidget or squirm with your hands or feet when you have to sit still for a long time?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
+      prefix: "Hyperactivity",
       question:
-        "Difficulty keeping attention during boring or repetitive tasks",
+        "How often do you feel overly active and compelled to do things, like you were driven by a motor?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
+      prefix: "Attention to Detail",
       question:
-        "Difficulty concentrating on conversations, even when spoken to directly",
+        "How often do you make careless mistakes when working on a boring or difficult project?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
+      prefix: "Sustained Attention",
       question:
-        "Misplacing or having difficulty finding things at home or work",
+        "How often do you have difficulty maintaining your attention when doing boring or repetitive work?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Being easily distracted by activity or noise",
+      prefix: "Listening",
+      question:
+        "How often do you have difficulty concentrating on what people say to you, even when they are speaking to you directly?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Leaving seat in situations where remaining seated is expected",
+      prefix: "Organization",
+      question:
+        "How often do you misplace or have difficulty finding things at home or at work?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Feeling restless or fidgety",
+      prefix: "Distractibility",
+      question: "How often are you distracted by activity or noise around you?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Difficulty unwinding and relaxing when having free time",
+      prefix: "Restlessness",
+      question:
+        "How often do you leave your seat in meetings or other situations in which you are expected to remain seated?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Talking too much in social situations",
+      prefix: "Inner Restlessness",
+      question: "How often do you feel restless or fidgety?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Finishing other people’s sentences before they can finish",
+      prefix: "Relaxation",
+      question:
+        "How often do you have difficulty unwinding and relaxing when you have time to yourself?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Difficulty waiting turn in situations requiring turn-taking",
+      prefix: "Social Interaction",
+      question:
+        "How often do you find yourself talking too much when you are in social situations?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
     {
-      prefix: "",
-      question: "Interrupting others when they are busy",
+      prefix: "Impulsivity",
+      question:
+        "How often do you finish other people's sentences before they can finish them themselves?",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "Patience",
+      question:
+        "How often do you have difficulty waiting your turn in situations when turn-taking is required?",
+      options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
+    },
+    {
+      prefix: "Social Boundaries",
+      question: "How often do you interrupt others when they are busy?",
       options: ["Never", "Rarely", "Sometimes", "Often", "Very often"],
     },
   ],

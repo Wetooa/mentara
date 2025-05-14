@@ -12,8 +12,8 @@ export default function QuestionnaireForm({
   const formIndex = step - 1;
   const questionIndex = miniStep;
 
-  const questionnaire = questionnaires[formIndex];
-  const questions = QUESTIONNAIRE_MAP[questionnaire].questions;
+  const questionnaireId = questionnaires[formIndex];
+  const questions = QUESTIONNAIRE_MAP[questionnaireId].questions;
   const question = questions[questionIndex];
 
   const currentAnswer = answers[formIndex][questionIndex];

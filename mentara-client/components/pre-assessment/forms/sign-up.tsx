@@ -82,13 +82,13 @@ export default function PreAssessmentSignUp({
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    storeAssessmentAnswersInLocalStorage();
-    setDetails({
-      nickName: values.nickname,
-      email: values.email,
-    });
-
     if (isLoaded) {
+      storeAssessmentAnswersInLocalStorage();
+      setDetails({
+        nickName: values.nickname,
+        email: values.email,
+      });
+
       try {
         await signUp.create({
           emailAddress: values.email,
@@ -99,7 +99,7 @@ export default function PreAssessmentSignUp({
         const host = window.location.host;
 
         toast.info("Sending verification email...");
-        await startEmailLinkFlow({
+        startEmailLinkFlow({
           redirectUrl: `${protocol}//${host}/sign-up/verify`,
         });
 
@@ -239,7 +239,7 @@ export default function PreAssessmentSignUp({
             </Button>
 
             {/* FIX: Implement this */}
-            <GoogleOneTap />
+            {/* <GoogleOneTap /> */}
           </div>
 
           {/* CAPTCHA Widget */}
@@ -250,9 +250,7 @@ export default function PreAssessmentSignUp({
           <Button
             className="w-full font-bold"
             variant={"secondary"}
-            onClick={() => {
-              form.handleSubmit(onSubmit)();
-            }}
+            type="submit"
           >
             Submit
           </Button>

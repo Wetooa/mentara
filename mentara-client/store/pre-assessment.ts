@@ -21,17 +21,25 @@ export interface PreAssessmentChecklistState {
 
 export const usePreAssessmentChecklistStore =
   create<PreAssessmentChecklistState>()((set) => ({
-    step: inProd ? 0 : 1,
+    step: inProd ? 0 : 0,
     miniStep: inProd ? 0 : 0,
     nextStep: () =>
       set((state) => {
         // Initial Form
-        if (state.step === 0) {
+        if (
+          state.step === 0 ||
+          state.step === state.questionnaires.length + 1
+        ) {
           return { ...state, step: state.step + 1, miniStep: 0 };
         }
 
         // Moving to next step
-        if (state.miniStep < state.questionnaires[state.step - 1].length - 1) {
+        if (
+          state.miniStep <
+          QUESTIONNAIRE_MAP[state.questionnaires[state.step - 1]].questions
+            .length -
+            1
+        ) {
           return { ...state, miniStep: state.miniStep + 1 };
         }
 
@@ -58,7 +66,9 @@ export const usePreAssessmentChecklistStore =
         // Moving to previous questionnaire
         return {
           ...state,
-          miniStep: state.questionnaires[state.step - 2].length - 1,
+          miniStep:
+            QUESTIONNAIRE_MAP[state.questionnaires[state.step - 2]].questions
+              .length - 1,
           step: state.step - 1,
         };
       }),
@@ -70,8 +80,8 @@ export const usePreAssessmentChecklistStore =
       set((state) => ({
         ...state,
         questionnaires: to,
-        answers: to.map((questionnaireId) =>
-          Array(QUESTIONNAIRE_MAP[questionnaireId].questions.length).fill(-1)
+        answers: to.map((questionnaire) =>
+          Array(QUESTIONNAIRE_MAP[questionnaire].questions.length).fill(-1)
         ),
       })),
 

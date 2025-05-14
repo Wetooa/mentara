@@ -42,7 +42,7 @@ export default function VerifyAccount() {
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="relative h-40 w-40 mb-2">
             <Image
-              src="/mentara-icon.png"
+              src="/icons/mentara/mentara-icon.png"
               alt="mentara icon"
               fill
               className="object-contain"

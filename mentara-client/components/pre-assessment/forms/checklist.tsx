@@ -25,6 +25,7 @@ export default function PreAssessmentInitialCheckList({
         <div className="w-full flex flex-col gap-2">
           {LIST_OF_QUESTIONNAIRES.map((item) => {
             const isSelected = questionnaires.includes(item);
+
             const handleSelect = () => {
               if (isSelected) {
                 setQuestionnaires(

@@ -1,13 +1,14 @@
 import React from "react";
 import { Progress } from "../ui/progress";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { QUESTIONNAIRE_MAP } from "@/constants/questionnaires";
 
 export default function PreAssessmentProgressBar() {
   const { step, miniStep, questionnaires } = usePreAssessmentChecklistStore();
 
   const questionnaireLength =
     1 <= step && step <= questionnaires.length
-      ? questionnaires[step - 1].length
+      ? QUESTIONNAIRE_MAP[questionnaires[step - 1]].questions.length
       : 1;
   const totalSteps = questionnaires.length + 2;
 
