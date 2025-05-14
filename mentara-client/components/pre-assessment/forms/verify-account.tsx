@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSignUpStore } from "@/store/preassessment";
+import { useSignUpStore } from "@/store/pre-assessment";
 import { useSignUp } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";

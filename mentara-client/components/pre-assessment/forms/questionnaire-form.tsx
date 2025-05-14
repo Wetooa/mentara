@@ -1,7 +1,7 @@
 import { PreAssessmentPageFormProps } from "@/app/(public)/(user)/pre-assessment/page";
 import { Button } from "@/components/ui/button";
 import { QUESTIONNAIRE_MAP } from "@/constants/questionnaires";
-import { usePreAssessmentChecklistStore } from "@/store/preassessment";
+import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 
 export default function QuestionnaireForm({
   handleNextButtonOnClick,

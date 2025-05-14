@@ -85,3 +85,18 @@ export const usePreAssessmentChecklistStore =
         ],
       })),
   }));
+
+interface Details {
+  email: string;
+  nickName: string;
+}
+
+export interface SignUpStore {
+  details: Details;
+  setDetails: (details: Details) => void;
+}
+
+export const useSignUpStore = create<SignUpStore>()((set) => ({
+  details: { email: "", nickName: "" },
+  setDetails: (details) => set({ details }),
+}));

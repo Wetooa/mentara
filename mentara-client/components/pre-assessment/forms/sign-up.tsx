@@ -8,7 +8,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { useSignUpStore } from "@/store/preassessment";
 import { GoogleOneTap, useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -18,6 +17,11 @@ import { Separator } from "../../ui/separator";
 import { toast } from "sonner";
 import ContinueWithGoogle from "@/components/auth/continue-with-google";
 import ContinueWithMicrosoft from "@/components/auth/continue-with-microsoft";
+import {
+  usePreAssessmentChecklistStore,
+  useSignUpStore,
+} from "@/store/pre-assessment";
+import { answersToAnswerMatrix } from "@/lib/questionnaire";
 
 // Form validation schema
 const formSchema = z
@@ -50,6 +54,8 @@ const formSchema = z
 export default function PreAssessmentSignUp({
   handleNextButtonOnClick,
 }: PreAssessmentPageFormProps) {
+  const { questionnaires, answers } = usePreAssessmentChecklistStore();
+  const { setDetails } = useSignUpStore();
   const { isLoaded, signUp } = useSignUp();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,7 +76,18 @@ export default function PreAssessmentSignUp({
 
   const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
 
+  function storeAssessmentAnswersInLocalStorage() {
+    const answersList = answersToAnswerMatrix(questionnaires, answers);
+    localStorage.setItem("assessmentAnswers", JSON.stringify(answersList));
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    storeAssessmentAnswersInLocalStorage();
+    setDetails({
+      nickName: values.nickname,
+      email: values.email,
+    });
+
     if (isLoaded) {
       try {
         await signUp.create({
@@ -189,6 +206,7 @@ export default function PreAssessmentSignUp({
           <div className="space-y-3 ">
             <Button
               onClick={() => {
+                storeAssessmentAnswersInLocalStorage();
                 toast.info("Signing in with Google...");
 
                 signUp.authenticateWithRedirect({
@@ -219,6 +237,9 @@ export default function PreAssessmentSignUp({
             >
               <ContinueWithMicrosoft />
             </Button>
+
+            {/* FIX: Implement this */}
+            <GoogleOneTap />
           </div>
 
           {/* CAPTCHA Widget */}
