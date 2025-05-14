@@ -15,6 +15,7 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { TherapistModule } from './therapist/therapist.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { WorksheetsModule } from './worksheets/worksheets.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     CommentsModule,
     TherapistModule,
     WebhooksModule,
+    WorksheetsModule,
   ],
   controllers: [AppController, AuthController],
   providers: [

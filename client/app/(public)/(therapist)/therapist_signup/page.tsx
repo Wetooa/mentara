@@ -18,8 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 // Import constants
-import PHILIPPINE_PROVINCES from "@/const/provinces";
-import PROVIDER_TYPE from "@/const/provider";
+import PHILIPPINE_PROVINCES from "@/constants/provinces";
+import PROVIDER_TYPE from "@/constants/provider";
 
 // Component interfaces
 interface FormInputProps {

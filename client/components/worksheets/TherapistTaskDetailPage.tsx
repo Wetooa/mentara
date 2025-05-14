@@ -1,5 +1,12 @@
-import React from "react";
-import { ArrowLeft, Download, CheckCircle, FileText } from "lucide-react";
+import React, { useState } from "react";
+import {
+  ArrowLeft,
+  MoreHorizontal,
+  CheckCircle,
+  FileText,
+  Download,
+  Send,
+} from "lucide-react";
 import Link from "next/link";
 import { Task } from "./types";
 
@@ -8,7 +15,12 @@ interface TaskDetailPageProps {
   onBack: () => void;
 }
 
-export default function TaskDetailPage({ task, onBack }: TaskDetailPageProps) {
+export default function TherapistTaskDetailPage({
+  task,
+  onBack,
+}: TaskDetailPageProps) {
+  const [feedback, setFeedback] = useState(task?.feedback || "");
+
   if (!task) {
     return (
       <div className="flex flex-col h-full bg-white text-gray-900 p-6">
@@ -37,6 +49,11 @@ export default function TaskDetailPage({ task, onBack }: TaskDetailPageProps) {
       hour: "numeric",
       minute: "numeric",
     });
+  };
+
+  const handleSendFeedback = () => {
+    // In a real application, this would save the feedback to the database
+    alert("Feedback saved successfully!");
   };
 
   const dueDate = formatDate(task.date);
@@ -70,10 +87,8 @@ export default function TaskDetailPage({ task, onBack }: TaskDetailPageProps) {
         <div className="max-w-3xl mx-auto">
           {/* Task Title */}
           <div className="mb-4">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {task.title}
-            </h1>
-            <p className="text-gray-600 mt-1">From: {task.therapistName}</p>
+            <h1 className="text-2xl font-semibold">{task.title}</h1>
+            <p className="text-gray-600 mt-1">Patient: {task.patientName}</p>
           </div>
 
           {/* Due Date */}
@@ -115,9 +130,9 @@ export default function TaskDetailPage({ task, onBack }: TaskDetailPageProps) {
             )}
           </div>
 
-          {/* My Work */}
+          {/* Patient's Work */}
           <div className="mb-6">
-            <h2 className="text-lg font-medium mb-2">My work</h2>
+            <h2 className="text-lg font-medium mb-2">Patient's work</h2>
             {task.myWork && task.myWork.length > 0 ? (
               <div className="space-y-2">
                 {task.myWork.map((work, index) => (
@@ -138,12 +153,31 @@ export default function TaskDetailPage({ task, onBack }: TaskDetailPageProps) {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 bg-[#129316]/15 rounded-lg border border-gray-200">
-                <p className="mb-3 text-gray-700">No work submitted yet</p>
-                <button className="px-4 py-2 bg-[#436B00] text-white rounded-md hover:bg-[#129316]">
-                  Add Work
-                </button>
+                <p className="mb-2 text-gray-500">No work submitted yet</p>
               </div>
             )}
+          </div>
+
+          {/* Feedback Section */}
+          <div className="mb-6">
+            <h2 className="text-lg font-medium mb-2">Your feedback</h2>
+            <div className="bg-[#129316]/15 p-4 rounded-md border border-gray-200">
+              <textarea
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="Provide feedback on the patient's work..."
+                className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#436B00]"
+              ></textarea>
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={handleSendFeedback}
+                  className="flex items-center px-4 py-2 bg-[#436B00] text-white rounded-md hover:bg-[#129316]"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Feedback
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

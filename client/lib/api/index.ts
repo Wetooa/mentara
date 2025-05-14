@@ -1,7 +1,7 @@
 // API service for making requests to the NestJS backend
 import { useAuth } from "@clerk/nextjs";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // Create a reusable API client with authentication
 export const createApiClient = (getToken: () => Promise<string | null>) => {
@@ -158,6 +158,76 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
     // Admin API methods
     admin: {
       checkAdmin: () => api.request<any>("/auth/admin", { method: "POST" }),
+    },
+
+    // Worksheet API methods
+    worksheets: {
+      getAll: (
+        params: { userId?: string; therapistId?: string; status?: string } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.userId) queryParams.append("userId", params.userId);
+        if (params.therapistId)
+          queryParams.append("therapistId", params.therapistId);
+        if (params.status) queryParams.append("status", params.status);
+
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return api.request<any[]>(`/worksheets${queryString}`);
+      },
+      getById: (id: string) => api.request<any>(`/worksheets/${id}`),
+      create: (data: any) =>
+        api.request<any>("/worksheets", { method: "POST", body: data }),
+      update: (id: string, data: any) =>
+        api.request<any>(`/worksheets/${id}`, { method: "PUT", body: data }),
+      delete: (id: string) =>
+        api.request<any>(`/worksheets/${id}`, { method: "DELETE" }),
+      addSubmission: (data: any) =>
+        api.request<any>("/worksheets/submissions", {
+          method: "POST",
+          body: data,
+        }),
+      submitWorksheet: (id: string, data: any) =>
+        api.request<any>(`/worksheets/${id}/submit`, {
+          method: "POST",
+          body: data,
+        }),
+      deleteSubmission: (id: string) =>
+        api.request<any>(`/worksheets/submissions/${id}`, { method: "DELETE" }),
+      // File upload method with special handling for FormData
+      uploadFile: async (
+        file: File,
+        worksheetId: string,
+        type: "material" | "submission"
+      ) => {
+        const token = await getToken();
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("worksheetId", worksheetId);
+        formData.append("type", type);
+
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/worksheets/upload`, {
+          method: "POST",
+          headers,
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error ||
+              `API request failed with status ${response.status}`
+          );
+        }
+
+        return response.json();
+      },
     },
   };
 };
