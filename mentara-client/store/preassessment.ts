@@ -85,24 +85,3 @@ export const usePreAssessmentChecklistStore =
         ],
       })),
   }));
-
-export interface SignUpState {
-  details: {
-    nickName: string;
-    email: string;
-    password: string;
-  };
-
-  setDetails: (to: SignUpState["details"]) => void;
-}
-
-export const useSignUpStore = create<SignUpState>()((set) => ({
-  details: {
-    nickName: "",
-    email: "",
-    password: "",
-  },
-
-  setDetails: (to: SignUpState["details"]) =>
-    set((state) => ({ ...state, details: to })),
-}));

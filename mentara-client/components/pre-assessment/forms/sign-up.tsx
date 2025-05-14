@@ -51,7 +51,6 @@ export default function PreAssessmentSignUp({
   handleNextButtonOnClick,
 }: PreAssessmentPageFormProps) {
   const { isLoaded, signUp } = useSignUp();
-  const { setDetails } = useSignUpStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,12 +71,6 @@ export default function PreAssessmentSignUp({
   const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setDetails({
-      nickName: values.nickname,
-      email: values.email,
-      password: values.password,
-    });
-
     if (isLoaded) {
       try {
         await signUp.create({
