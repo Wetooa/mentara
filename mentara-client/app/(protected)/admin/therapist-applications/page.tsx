@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { TherapistApplicationsTable } from "@/components/admin/TherapistApplicationsTable";
 import { toast } from "sonner";
+import { useApi } from "@/lib/api"; // Import the API client
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -42,29 +43,20 @@ export default function TherapistApplicationsPage() {
   const [applications, setApplications] = useState<TherapistApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const api = useApi(); // Use the API client
 
   // Fetch applications from the API
   const fetchApplications = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Build the query parameters
-      const params = new URLSearchParams();
-      if (statusFilter) {
-        params.append("status", statusFilter);
-      }
+      // Use the API client to fetch applications instead of fetch directly
+      const data = await api.therapist.getApplications({
+        status: statusFilter || undefined,
+      });
 
-      // Call the API
-      const response = await fetch(
-        `/api/therapist/application?${params.toString()}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch applications");
-      }
-
-      const data = await response.json();
-      setApplications(data.applications);
+      // Make sure we're handling the data structure correctly
+      setApplications(data.applications || []);
     } catch (err) {
       console.error("Error fetching therapist applications:", err);
       setError("Failed to load applications. Please try again.");
