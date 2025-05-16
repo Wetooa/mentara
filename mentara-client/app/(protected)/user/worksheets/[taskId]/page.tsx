@@ -14,8 +14,10 @@ import {
   Upload as UploadIcon,
 } from "lucide-react";
 import { Task, TaskFile } from "@/components/worksheets/types";
+import { worksheetsApi } from "@/lib/api/worksheets";
+import { useAuth } from "@clerk/nextjs";
 
-// Mock data - in a real app, you would fetch this from your API
+// Mock data - fallback if API fails
 const getMockTask = (taskId: string): Task | undefined => {
   const mockTasks: Task[] = [
     {
@@ -60,7 +62,6 @@ const getMockTask = (taskId: string): Task | undefined => {
       ],
       myWork: [],
     },
-    // Add more mock tasks as needed
   ];
 
   return mockTasks.find((task) => task.id === taskId);
@@ -72,15 +73,39 @@ export default function TaskDetailPage() {
   const [task, setTask] = useState<Task | undefined>(undefined);
   const [showFileOptions, setShowFileOptions] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const taskId = params.taskId as string;
+  const { userId } = useAuth();
 
   // Determine if task is editable based on submission status
-  const isTaskEditable = task && !task.isCompleted && task.status !== "past_due";
+  const isTaskEditable =
+    task && !task.isCompleted && task.status !== "past_due";
 
+  // Fetch task data from API
   useEffect(() => {
-    const fetchedTask = getMockTask(taskId);
-    setTask(fetchedTask);
+    async function fetchTask() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Call the API to get worksheet details
+        const worksheetData = await worksheetsApi.getById(taskId);
+        setTask(worksheetData);
+      } catch (err) {
+        console.error("Error fetching worksheet:", err);
+        setError("Failed to load worksheet details. Using mock data instead.");
+
+        // Fallback to mock data
+        const mockData = getMockTask(taskId);
+        setTask(mockData);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTask();
   }, [taskId]);
 
   useEffect(() => {
@@ -120,26 +145,36 @@ export default function TaskDetailPage() {
     }
   };
 
-  const handleFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
+  const handleFileSelection = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files.length > 0 && task) {
       const file = e.target.files[0];
       console.log("Selected file:", file.name);
 
-      // In a real application, you would upload this file to your server
-      // and then update the task with the new file information
+      try {
+        // Upload the file to the server
+        const uploadedFile = await worksheetsApi.uploadFile(
+          file,
+          task.id,
+          "submission"
+        );
 
-      // Mock update of the task state
-      if (task) {
-        const newWork: TaskFile = {
-          id: `work-${Date.now()}`,
-          filename: file.name,
-          url: URL.createObjectURL(file),
-        };
-
+        // Update the task with the new file
         setTask({
           ...task,
-          myWork: [...(task.myWork || []), newWork],
+          myWork: [
+            ...(task.myWork || []),
+            {
+              id: uploadedFile.id,
+              filename: uploadedFile.filename,
+              url: uploadedFile.url,
+            },
+          ],
         });
+      } catch (err) {
+        console.error("Error uploading file:", err);
+        alert("Failed to upload file. Please try again.");
       }
 
       // Reset the file input
@@ -151,7 +186,6 @@ export default function TaskDetailPage() {
 
   const handleDownload = (file: TaskFile) => {
     console.log("Downloading file:", file.filename);
-    // In a real app, you would initiate a download here
 
     // Create an anchor element and trigger download
     const link = document.createElement("a");
@@ -162,14 +196,21 @@ export default function TaskDetailPage() {
     document.body.removeChild(link);
   };
 
-  const handleDeleteAttachment = (fileId: string) => {
-    console.log("Deleting file with ID:", fileId);
+  const handleDeleteAttachment = async (fileId: string) => {
+    if (!task) return;
 
-    if (task) {
+    try {
+      // Delete the file from the server
+      await worksheetsApi.deleteSubmission(fileId);
+
+      // Update the local state
       setTask({
         ...task,
         myWork: task.myWork?.filter((work) => work.id !== fileId) || [],
       });
+    } catch (err) {
+      console.error("Error deleting file:", err);
+      alert("Failed to delete file. Please try again.");
     }
 
     // Close dropdown
@@ -181,37 +222,40 @@ export default function TaskDetailPage() {
     setShowFileOptions((prevId) => (prevId === fileId ? null : fileId));
   };
 
-  const handleSubmitWork = () => {
+  const handleSubmitWork = async () => {
     if (!task) return;
-    
+
     // Start submitting process
     setSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
       if (task.isCompleted) {
         // Unsubmit work
-        setTask({
-          ...task,
+        const updatedWorksheet = await worksheetsApi.update(task.id, {
           isCompleted: false,
           status: "upcoming",
           submittedAt: undefined,
         });
+
+        setTask(updatedWorksheet);
       } else {
         // Submit work
-        const now = new Date();
-        setTask({
-          ...task,
-          isCompleted: true,
-          status: "completed",
-          submittedAt: now.toISOString(),
+        const updatedWorksheet = await worksheetsApi.submitWorksheet(task.id, {
+          complete: true,
+          submissions: [], // We've already uploaded the files individually
         });
+
+        setTask(updatedWorksheet);
       }
+    } catch (err) {
+      console.error("Error submitting worksheet:", err);
+      alert("Failed to submit worksheet. Please try again.");
+    } finally {
       setSubmitting(false);
-    }, 1000); // Simulate a 1-second API call
+    }
   };
 
-  if (!task) {
+  if (isLoading) {
     return (
       <div className="h-full bg-white p-6">
         <div className="flex items-center mb-6">
@@ -224,7 +268,26 @@ export default function TaskDetailPage() {
           </button>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-secondary">Loading task or task not found...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !task) {
+    return (
+      <div className="h-full bg-white p-6">
+        <div className="flex items-center mb-6">
+          <button
+            onClick={handleBack}
+            className="flex items-center text-primary hover:text-primary/80"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            Back
+          </button>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-secondary">{error || "Worksheet not found"}</p>
         </div>
       </div>
     );
@@ -462,36 +525,54 @@ export default function TaskDetailPage() {
           </div>
 
           {/* Submit/Unsubmit button - only show if task has attachments */}
-          {task.myWork && task.myWork.length > 0 && task.status !== "past_due" && (
-            <div className="flex flex-col items-end">
-              {task.submittedAt && !submitting && (
-                <p className="text-sm text-gray-500 mb-2">
-                  Submitted on {formatDate(task.submittedAt)}
-                </p>
-              )}
-              <button 
-                onClick={handleSubmitWork}
-                disabled={submitting}
-                className={`px-6 py-2 rounded-md transition ${
-                  task.isCompleted 
-                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300" 
-                    : "bg-primary text-white hover:bg-primary/90"
-                } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
-              >
-                {submitting ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {task.isCompleted ? "Unsubmitting..." : "Submitting..."}
-                  </span>
-                ) : (
-                  <>{task.isCompleted ? "Unsubmit Work" : "Submit Work"}</>
+          {task.myWork &&
+            task.myWork.length > 0 &&
+            task.status !== "past_due" && (
+              <div className="flex flex-col items-end">
+                {task.submittedAt && !submitting && (
+                  <p className="text-sm text-gray-500 mb-2">
+                    Submitted on {formatDate(task.submittedAt)}
+                  </p>
                 )}
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={handleSubmitWork}
+                  disabled={submitting}
+                  className={`px-6 py-2 rounded-md transition ${
+                    task.isCompleted
+                      ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      : "bg-primary text-white hover:bg-primary/90"
+                  } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
+                >
+                  {submitting ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      {task.isCompleted ? "Unsubmitting..." : "Submitting..."}
+                    </span>
+                  ) : (
+                    <>{task.isCompleted ? "Unsubmit Work" : "Submit Work"}</>
+                  )}
+                </button>
+              </div>
+            )}
         </div>
       </div>
     </div>

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
 import { Task } from "@/components/worksheets/types";
+import { worksheetsApi } from "@/lib/api/worksheets";
+import { useAuth } from "@clerk/nextjs";
 
-// Mock data for worksheets tasks with more detailed information
+// Fallback mock data in case API is not available
 const mockTasks: Task[] = [
   {
     id: "task-2",
@@ -15,7 +17,6 @@ const mockTasks: Task[] = [
     status: "upcoming",
     isCompleted: true,
     instructions: "None",
-    points: 30,
     materials: [
       {
         id: "mat-1",
@@ -40,7 +41,6 @@ const mockTasks: Task[] = [
     status: "upcoming",
     isCompleted: false,
     instructions: "Complete the worksheet on cognitive restructuring",
-    points: 20,
   },
   {
     id: "task-3",
@@ -51,7 +51,6 @@ const mockTasks: Task[] = [
     isCompleted: false,
     instructions:
       "Reflect on your week and identify three challenging situations and how you responded to them.",
-    points: 15,
   },
   {
     id: "task-4",
@@ -62,7 +61,6 @@ const mockTasks: Task[] = [
     isCompleted: true,
     instructions:
       "Complete the 15-minute mindfulness exercise and write about your experience.",
-    points: 10,
     myWork: [
       {
         id: "work-2",
@@ -77,44 +75,85 @@ const mockTasks: Task[] = [
 export default function WorksheetsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
   const [therapistFilter, setTherapistFilter] = useState<string>("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const { userId } = useAuth();
+
+  // Fetch worksheets from API
+  useEffect(() => {
+    async function fetchWorksheets() {
+      if (!userId) return;
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Convert activeFilter to status filter for API
+        let statusFilter: string | undefined;
+        if (activeFilter !== "everything") {
+          statusFilter = activeFilter;
+        }
+
+        // Call the API to get worksheets
+        const worksheets = await worksheetsApi.getAll(
+          userId,
+          undefined,
+          statusFilter
+        );
+        setTasks(worksheets);
+      } catch (err) {
+        console.error("Error fetching worksheets:", err);
+        setError("Failed to load worksheets. Using mock data instead.");
+        setTasks(mockTasks);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchWorksheets();
+  }, [userId, activeFilter]);
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {
-    let filtered = [...mockTasks];
+    // If still loading, return empty array
+    if (isLoading) return [];
+
+    // Use tasks from API or fallback to mock data
+    let filtered = [...tasks];
 
     // Apply therapist filter if selected
     if (therapistFilter) {
       filtered = filtered.filter((task) =>
-        task.therapistName.toLowerCase().includes(therapistFilter.toLowerCase())
+        task.therapistName
+          ?.toLowerCase()
+          .includes(therapistFilter.toLowerCase())
       );
-    }
-
-    // Apply status filter
-    switch (activeFilter) {
-      case "upcoming":
-        filtered = filtered.filter((task) => task.status === "upcoming");
-        break;
-      case "past_due":
-        filtered = filtered.filter((task) => task.status === "past_due");
-        break;
-      case "completed":
-        filtered = filtered.filter((task) => task.status === "completed");
-        break;
-      // "everything" returns all tasks
     }
 
     return filtered;
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full min-h-screen overflow-hidden">
       <WorksheetsSidebar
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
         therapistFilter={therapistFilter}
         setTherapistFilter={setTherapistFilter}
       />
-      <WorksheetsList tasks={getFilteredTasks()} />
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : error ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-red-500">
+          <p>{error}</p>
+        </div>
+      ) : (
+        <WorksheetsList tasks={getFilteredTasks()} />
+      )}
     </div>
   );
 }

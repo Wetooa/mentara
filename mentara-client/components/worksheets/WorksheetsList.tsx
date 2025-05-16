@@ -57,36 +57,38 @@ export default function WorksheetsList({ tasks }: WorksheetsListProps) {
   };
 
   const handleSelectTask = (task: Task) => {
-    router.push(`/main/worksheets/${task.id}`);
+    router.push(`/user/worksheets/${task.id}`);
   };
 
   const taskGroups = groupTasksByDate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
+    <div className="flex-1 overflow-y-auto p-6 bg-gray-50 h-full">
       {taskGroups.length > 0 ? (
         taskGroups.map((group) => (
-          <div key={group.date} className="mb-6">
-            <h3 className="text-md font-medium text-secondary mb-2">
+          <div key={group.date} className="mb-8">
+            <h3 className="text-md font-medium text-gray-700 mb-3">
               {group.formattedDate}
             </h3>
 
-            {group.tasks.map((task) => (
-              <div
-                key={task.id}
-                onClick={() => handleSelectTask(task)}
-                className="cursor-pointer"
-              >
-                <TaskCard task={task} />
-              </div>
-            ))}
+            <div className="space-y-3">
+              {group.tasks.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => handleSelectTask(task)}
+                  className="cursor-pointer"
+                >
+                  <TaskCard task={task} />
+                </div>
+              ))}
+            </div>
           </div>
         ))
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-gray-500">
           <FileText className="h-12 w-12 mb-2 text-gray-400" />
-          <p>No worksheets found</p>
-          <p className="text-sm">Try adjusting your filters</p>
+          <p className="text-lg font-medium">No worksheets found</p>
+          <p className="text-sm mt-1">Try adjusting your filters</p>
         </div>
       )}
     </div>

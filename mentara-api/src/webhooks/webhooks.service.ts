@@ -46,39 +46,59 @@ export class WebhooksService {
       (email) => email.id === eventData.data.primary_email_address_id,
     )?.email_address;
 
-    // Upsert (Create or update) user in the database
-    await this.prisma.user.upsert({
-      where: { clerkId: id },
-      update: {
-        firstName: first_name || '',
-        lastName: last_name || '',
-        email: primaryEmail || '',
-        avatarUrl: image_url || '',
-        updatedAt: new Date(),
-      },
-      create: {
-        clerkId: id,
-        firstName: first_name || '',
-        lastName: last_name || '',
-        email: primaryEmail || '',
-        avatarUrl: image_url || '',
-      },
-    });
+    // Find the user by a unique identifier like email from Clerk
+    const existingUser = primaryEmail
+      ? await this.prisma.user.findUnique({
+          where: { id: primaryEmail }, // Using primary email as a fallback identifier
+        })
+      : null;
+
+    if (existingUser) {
+      // Update existing user
+      await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          firstName: first_name || '',
+          lastName: last_name || '',
+          // Store other Clerk data in existing fields or just update the fields you can
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new user with required fields
+      await this.prisma.user.create({
+        data: {
+          firstName: first_name || '',
+          lastName: last_name || '',
+          middleName: '', // Optional in our updated schema
+          birthDate: new Date(), // Required field, default to current date
+          address: 'Not provided', // Required field, default placeholder
+          // Other required fields from your schema
+        },
+      });
+    }
   }
 
   async handleUserDeleted(eventData: any): Promise<void> {
-    const { id } = eventData.data;
+    const { id, email_addresses } = eventData.data;
 
-    // Delete the user from the database
-    await this.prisma.user
-      .delete({
-        where: { clerkId: id },
-      })
-      .catch((error) => {
-        if (error.code !== 'P2025') {
-          // Not found error code
-          throw error;
-        }
+    // Try to find a user by email if available
+    if (email_addresses && email_addresses.length > 0) {
+      const primaryEmail = email_addresses[0].email_address;
+
+      // Find the user by email
+      const user = await this.prisma.user.findFirst({
+        where: {
+          firstName: { contains: primaryEmail, mode: 'insensitive' },
+        },
       });
+
+      if (user) {
+        // Delete the user from the database
+        await this.prisma.user.delete({
+          where: { id: user.id },
+        });
+      }
+    }
   }
 }

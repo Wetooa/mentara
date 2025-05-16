@@ -9,7 +9,6 @@ export class PostsService {
   async findAll(): Promise<Post[]> {
     return this.prisma.post.findMany({
       include: {
-        author: true,
         community: true,
       },
     });
@@ -19,7 +18,6 @@ export class PostsService {
     return this.prisma.post.findUnique({
       where: { id },
       include: {
-        author: true,
         community: true,
         comments: true,
       },
@@ -30,7 +28,6 @@ export class PostsService {
     return this.prisma.post.create({
       data,
       include: {
-        author: true,
         community: true,
       },
     });
@@ -41,7 +38,6 @@ export class PostsService {
       where: { id },
       data,
       include: {
-        author: true,
         community: true,
       },
     });
@@ -56,10 +52,9 @@ export class PostsService {
   async findByUserId(userId: string): Promise<Post[]> {
     return this.prisma.post.findMany({
       where: {
-        authorId: userId,
+        userId,
       },
       include: {
-        author: true,
         community: true,
       },
     });
@@ -71,7 +66,6 @@ export class PostsService {
         communityId,
       },
       include: {
-        author: true,
         community: true,
       },
     });

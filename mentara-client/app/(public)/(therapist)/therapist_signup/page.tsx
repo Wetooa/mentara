@@ -19,8 +19,6 @@ import { Input } from "@/components/ui/input";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
 
-// Import constants
-
 // Component interfaces
 interface FormInputProps {
   PlaceHolder: string;

@@ -20,19 +20,23 @@ export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
     const token = req.headers.authorization?.split(' ').pop();
 
     if (!token) {
+      console.log('Authentication failed: No token provided in headers');
+      console.log('Headers received:', req.headers);
       throw new UnauthorizedException('No token provided');
     }
 
     try {
+      console.log('Attempting to verify token...');
       const tokenPayload = await verifyToken(token, {
         secretKey: this.configService.get('CLERK_SECRET_KEY'),
       });
 
       const user = await this.clerkClient.users.getUser(tokenPayload.sub);
+      console.log('Token verified successfully for user:', tokenPayload.sub);
 
       return user;
     } catch (error) {
-      console.error(error);
+      console.error('Token validation error:', error);
       throw new UnauthorizedException('Invalid token');
     }
   }

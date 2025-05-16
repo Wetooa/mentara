@@ -34,7 +34,7 @@ __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Function]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "checkAdmin", null);
 exports.AuthController = AuthController = __decorate([

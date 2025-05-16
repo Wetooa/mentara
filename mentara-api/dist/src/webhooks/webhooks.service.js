@@ -42,35 +42,48 @@ let WebhooksService = class WebhooksService {
     async handleUserCreatedOrUpdated(eventData) {
         const { id, first_name, last_name, email_addresses, image_url } = eventData.data;
         const primaryEmail = email_addresses?.find((email) => email.id === eventData.data.primary_email_address_id)?.email_address;
-        await this.prisma.user.upsert({
-            where: { clerkId: id },
-            update: {
-                firstName: first_name || '',
-                lastName: last_name || '',
-                email: primaryEmail || '',
-                avatarUrl: image_url || '',
-                updatedAt: new Date(),
-            },
-            create: {
-                clerkId: id,
-                firstName: first_name || '',
-                lastName: last_name || '',
-                email: primaryEmail || '',
-                avatarUrl: image_url || '',
-            },
-        });
+        const existingUser = primaryEmail
+            ? await this.prisma.user.findUnique({
+                where: { id: primaryEmail },
+            })
+            : null;
+        if (existingUser) {
+            await this.prisma.user.update({
+                where: { id: existingUser.id },
+                data: {
+                    firstName: first_name || '',
+                    lastName: last_name || '',
+                    updatedAt: new Date(),
+                },
+            });
+        }
+        else {
+            await this.prisma.user.create({
+                data: {
+                    firstName: first_name || '',
+                    lastName: last_name || '',
+                    middleName: '',
+                    birthDate: new Date(),
+                    address: 'Not provided',
+                },
+            });
+        }
     }
     async handleUserDeleted(eventData) {
-        const { id } = eventData.data;
-        await this.prisma.user
-            .delete({
-            where: { clerkId: id },
-        })
-            .catch((error) => {
-            if (error.code !== 'P2025') {
-                throw error;
+        const { id, email_addresses } = eventData.data;
+        if (email_addresses && email_addresses.length > 0) {
+            const primaryEmail = email_addresses[0].email_address;
+            const user = await this.prisma.user.findFirst({
+                where: {
+                    firstName: { contains: primaryEmail, mode: 'insensitive' },
+                },
+            });
+            if (user) {
+                await this.prisma.user.delete({
+                    where: { id: user.id },
+                });
             }
-        });
+        }
     }
 };
 exports.WebhooksService = WebhooksService;

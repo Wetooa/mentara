@@ -15,93 +15,100 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  firstName  String
-  middleName String
-  lastName   String
-  birthDate  DateTime
-  address    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
+  id          String       @id @default(uuid())
+  clerkId     String?      @unique
+  firstName   String
+  middleName  String?
+  lastName    String
+  email       String?
+  birthDate   DateTime
+  address     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  avatarUrl   String?
+  
   // Relations
   posts       Post[]
   comments    Comment[]
   memberships Membership[]
+  worksheets  Worksheet[]
+
+  @@index([clerkId])
 }
 
 model Community {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
   description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
   // Relations
-  members Membership[]
-  posts   Post[]
+  members     Membership[]
+  posts       Post[]
 }
 
 model Membership {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   userId      String
   communityId String
   role        String // You can add roles like 'Member', 'Admin', etc.
-  joinedAt    DateTime @default(now())
-
+  joinedAt    DateTime  @default(now())
+  
   // Relations
-  user      User      @relation(fields: [userId], references: [id])
-  community Community @relation(fields: [communityId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model PostFile {
   id     String @id @default(uuid())
   url    String
   postId String
-
-  post Post @relation(fields: [postId], references: [id])
+  
+  // Relations
+  post   Post   @relation(fields: [postId], references: [id])
 }
 
 model CommentFile {
-  id        String @id @default(uuid())
+  id        String  @id @default(uuid())
   url       String
   commentId String
-
-  comment Comment @relation(fields: [commentId], references: [id])
+  
+  // Relations
+  comment   Comment @relation(fields: [commentId], references: [id])
 }
 
 model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id          String     @id @default(uuid())
+  title       String
+  content     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   userId      String
   communityId String
-
-  user      User       @relation(fields: [userId], references: [id])
-  community Community  @relation(fields: [communityId], references: [id])
-  comments  Comment[]
-  files     PostFile[]
+  
+  // Relations
+  comments    Comment[]
+  community   Community  @relation(fields: [communityId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+  files       PostFile[]
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  postId   String
-  userId   String
-  parentId String?
-
-  post    Post      @relation(fields: [postId], references: [id])
-  user    User      @relation(fields: [userId], references: [id])
-  parent  Comment?  @relation("CommentHierarchy", fields: [parentId], references: [id])
-  replies Comment[] @relation("CommentHierarchy")
-
-  files CommentFile[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  postId    String
+  userId    String
+  parentId  String?
+  
+  // Relations
+  parent    Comment?      @relation("CommentHierarchy", fields: [parentId], references: [id])
+  replies   Comment[]     @relation("CommentHierarchy")
+  post      Post          @relation(fields: [postId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+  files     CommentFile[]
 }
 
 // Admin user model to store admin privileges
@@ -119,40 +126,40 @@ model AdminUser {
 
 // Therapist application model
 model TherapistApplication {
-  id              String    @id @default(uuid())
-  clerkUserId     String?   @unique // Optional: Will be assigned if created from an authenticated user
-  status          String    @default("pending") // pending, approved, rejected
-  submissionDate  DateTime  @default(now())
-  processingDate  DateTime? // When the application was processed (approved/rejected)
-  processedBy     String? // Admin who processed the application
-  applicationData Json // Store all application form data as JSON
+  id                                 String     @id @default(uuid())
+  clerkUserId                        String?    @unique // Optional: Will be assigned if created from an authenticated user
+  status                             String     @default("pending") // pending, approved, rejected
+  submissionDate                     DateTime   @default(now())
+  processingDate                     DateTime? // When the application was processed (approved/rejected)
+  processedBy                        String? // Admin who processed the application
+  applicationData                    Json // Store all application form data as JSON
 
   // Personal Info
-  firstName String
-  lastName  String
-  email     String
-  mobile    String
-  province  String
+  firstName                          String
+  lastName                           String
+  email                              String
+  mobile                             String
+  province                           String
 
   // Professional Info
-  providerType                  String
-  professionalLicenseType       String
-  isPRCLicensed                 String
-  prcLicenseNumber              String
-  expirationDateOfLicense       DateTime?
-  isLicenseActive               String
-  yearsOfExperience             String
-  areasOfExpertise              Json
-  assessmentTools               Json
-  therapeuticApproachesUsedList Json
-  languagesOffered              Json
+  providerType                       String
+  professionalLicenseType            String
+  isPRCLicensed                      String
+  prcLicenseNumber                   String
+  expirationDateOfLicense            DateTime?
+  isLicenseActive                    String
+  yearsOfExperience                  String
+  areasOfExpertise                   Json
+  assessmentTools                    Json
+  therapeuticApproachesUsedList      Json
+  languagesOffered                   Json
 
   // Practice Details
-  providedOnlineTherapyBefore       String
-  comfortableUsingVideoConferencing String
-  weeklyAvailability                String
-  preferredSessionLength            String
-  accepts                           Json
+  providedOnlineTherapyBefore        String
+  comfortableUsingVideoConferencing  String
+  weeklyAvailability                 String
+  preferredSessionLength             String
+  accepts                            Json
 
   // Compliance
   privateConfidentialSpace           String
@@ -162,13 +169,13 @@ model TherapistApplication {
   willingToAbideByPlatformGuidelines String
 
   // Documents - Store file references
-  uploadedDocuments Json?
+  uploadedDocuments                  Json?
 
   // If approved, reference to created therapist account
-  therapist Therapist?
+  therapist                          Therapist?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt                          DateTime   @default(now())
+  updatedAt                          DateTime   @updatedAt
 
   @@index([status])
   @@index([email])
@@ -197,35 +204,92 @@ model Therapist {
   accepts                 Json?
   profileComplete         Boolean               @default(false)
   applicationId           String?               @unique
+  bio                     String?               @db.Text
+  profileImageUrl         String?
+  hourlyRate              Decimal?              @db.Decimal(10, 2)
+  isActive                Boolean               @default(true)
+  isVerified              Boolean               @default(false)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  
+  // Relations
   application             TherapistApplication? @relation(fields: [applicationId], references: [id])
-
-  bio             String?  @db.Text
-  profileImageUrl String?
-  hourlyRate      Decimal? @db.Decimal(10, 2)
-  isActive        Boolean  @default(true)
-  isVerified      Boolean  @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  worksheets              Worksheet[]
 
   @@index([clerkUserId])
 }
 
 // File upload model for storing uploaded file information
 model FileUpload {
-  id         String   @id @default(uuid())
-  fileName   String
-  fileSize   Int
-  fileType   String
-  fileUrl    String
-  docType    String
-  uploadedBy String? // Optional: Clerk user ID who uploaded the file
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Reference to therapist application if applicable
+  id                     String   @id @default(uuid())
+  fileName               String
+  fileSize               Int
+  fileType               String
+  fileUrl                String
+  docType                String
+  uploadedBy             String? // Optional: Clerk user ID who uploaded the file
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
   therapistApplicationId String?
 
   @@index([docType])
   @@index([uploadedBy])
+}
+
+model Worksheet {
+  id           String                @id @default(uuid())
+  title        String
+  instructions String?
+  assignedDate DateTime              @default(now())
+  dueDate      DateTime
+  status       String                @default("upcoming")
+  isCompleted  Boolean               @default(false)
+  submittedAt  DateTime?
+  feedback     String?
+  userId       String
+  therapistId  String
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  
+  // Relations
+  therapist    Therapist             @relation(fields: [therapistId], references: [id])
+  user         User                  @relation(fields: [userId], references: [id])
+  materials    WorksheetMaterial[]
+  submissions  WorksheetSubmission[]
+
+  @@index([userId])
+  @@index([therapistId])
+  @@index([status])
+}
+
+model WorksheetMaterial {
+  id          String    @id @default(uuid())
+  filename    String
+  url         String
+  fileSize    Int?
+  fileType    String?
+  worksheetId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+
+  @@index([worksheetId])
+}
+
+model WorksheetSubmission {
+  id          String    @id @default(uuid())
+  filename    String
+  url         String
+  fileSize    Int?
+  fileType    String?
+  worksheetId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+
+  @@index([worksheetId])
 }

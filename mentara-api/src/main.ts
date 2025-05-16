@@ -1,10 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import * as fs from 'fs';
 
 async function bootstrap() {
   // Create with raw body parsing for webhooks
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
 
@@ -29,6 +32,21 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders:
       'Content-Type, Accept, Authorization, X-Requested-With, svix-id, svix-signature, svix-timestamp',
+  });
+
+  // Ensure uploads directory exists
+  const uploadsDir = join(__dirname, '..', 'uploads');
+  const worksheetsDir = join(uploadsDir, 'worksheets');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+  if (!fs.existsSync(worksheetsDir)) {
+    fs.mkdirSync(worksheetsDir);
+  }
+
+  // Serve static files from the uploads directory
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
   });
 
   // Global prefix for all API routes
