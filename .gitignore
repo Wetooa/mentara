@@ -84,6 +84,9 @@ virtualenv/
 */.virtualenv/
 **/.virtualenv/
 
+mentara-api/node_modules
+
+
 # === FRONTEND ===
 # dependencies
 /mentara-client/node_modules

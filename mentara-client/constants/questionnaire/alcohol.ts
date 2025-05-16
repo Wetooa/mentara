@@ -8,7 +8,7 @@ const AUDIT: {
     "The Alcohol Use Disorders Identification Test (AUDIT) is a 10-item screening tool developed by the World Health Organization (WHO) to assess alcohol consumption, drinking behaviors, and alcohol-related problems. A score of 8 or more is considered to indicate hazardous or harmful alcohol use.",
   questions: [
     {
-      prefix: "",
+      prefix: "Frequency",
       question: "How often do you have a drink containing alcohol?",
       options: [
         "Never",
@@ -19,13 +19,13 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Quantity",
       question:
         "How many drinks containing alcohol do you have on a typical day when you are drinking?",
       options: ["1 or 2", "3 or 4", "5 or 6", "7 to 9", "10 or more"],
     },
     {
-      prefix: "",
+      prefix: "Binge Drinking",
       question: "How often do you have six or more drinks on one occasion?",
       options: [
         "Never",
@@ -36,7 +36,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Loss of Control",
       question:
         "How often during the last year have you found that you were not able to stop drinking once you had started?",
       options: [
@@ -48,7 +48,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Neglected Responsibilities",
       question:
         "How often during the last year have you failed to do what was normally expected from you because of drinking?",
       options: [
@@ -60,7 +60,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Morning Drinking",
       question:
         "How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session?",
       options: [
@@ -72,7 +72,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Guilt",
       question:
         "How often during the last year have you had a feeling of guilt or remorse after drinking?",
       options: [
@@ -84,7 +84,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Blackouts",
       question:
         "How often during the last year have you been unable to remember what happened the night before because you had been drinking?",
       options: [
@@ -96,7 +96,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Injuries",
       question:
         "Have you or someone else been injured as a result of your drinking?",
       options: [
@@ -106,7 +106,7 @@ const AUDIT: {
       ],
     },
     {
-      prefix: "",
+      prefix: "Concerns from Others",
       question:
         "Has a relative, friend, doctor, or other health worker been concerned about your drinking or suggested you cut down?",
       options: [

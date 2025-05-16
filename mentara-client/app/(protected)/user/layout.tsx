@@ -61,7 +61,7 @@ export default function MainLayout({
         {/* Logo */}
         <Link href="/dashboard" className="mb-8 px-2">
           <Image
-            src="/mentara-icon.png"
+            src="/icons/mentara/mentara-icon.png"
             alt="Mentara Logo"
             width={50}
             height={50}

@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSignUpStore } from "@/store/preassessment";
+import { useSignUpStore } from "@/store/pre-assessment";
 import { useSignUp } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,7 +42,7 @@ export default function VerifyAccount() {
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="relative h-40 w-40 mb-2">
             <Image
-              src="/mentara-icon.png"
+              src="/icons/mentara/mentara-icon.png"
               alt="mentara icon"
               fill
               className="object-contain"
