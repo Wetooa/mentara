@@ -142,7 +142,7 @@ __decorate([
     __param(2, (0, common_1.Query)('limit')),
     __param(3, (0, common_1.Query)('offset')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Function, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], TherapistApplicationController.prototype, "findAll", null);
 __decorate([
@@ -157,7 +157,7 @@ __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Function, Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], TherapistApplicationController.prototype, "create", null);
 __decorate([

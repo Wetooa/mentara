@@ -34,8 +34,8 @@ export default function WorksheetsSidebar({
   ];
 
   return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
-      <h2 className="text-lg font-medium text-gray-700 mb-3">Filters</h2>
+    <div className="w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto h-full min-h-screen flex flex-col sticky top-0">
+      <h2 className="text-lg font-medium text-gray-700 mb-4">Filters</h2>
 
       {/* Filter buttons */}
       <div className="space-y-2">
@@ -45,11 +45,15 @@ export default function WorksheetsSidebar({
             onClick={() => setActiveFilter(filter.id)}
             className={`flex items-center w-full px-3 py-2 text-left rounded-md ${
               activeFilter === filter.id
-                ? "bg-green-100 text-green-800"
+                ? "bg-[#129316]/15 text-[#436B00]"
                 : "text-gray-700 hover:bg-gray-100"
             }`}
           >
-            <span className="mr-3 text-green-600">{filter.icon}</span>
+            <span
+              className={`mr-3 ${activeFilter === filter.id ? "text-[#436B00]" : "text-gray-500"}`}
+            >
+              {filter.icon}
+            </span>
             <span>{filter.name}</span>
           </button>
         ))}
@@ -59,7 +63,7 @@ export default function WorksheetsSidebar({
       <div className="mt-6">
         <label
           htmlFor="therapistFilter"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700 mb-2"
         >
           From Therapist:
         </label>
@@ -69,7 +73,7 @@ export default function WorksheetsSidebar({
           value={therapistFilter}
           onChange={(e) => setTherapistFilter(e.target.value)}
           placeholder="Type therapist name..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#436B00]"
         />
       </div>
     </div>

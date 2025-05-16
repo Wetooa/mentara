@@ -1,11 +1,13 @@
 // API service for making requests to the NestJS backend
 import { useAuth } from "@clerk/nextjs";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Create a reusable API client with authentication
 export const createApiClient = (getToken: () => Promise<string | null>) => {
-  return {
+  // Create the client instance
+  const client = {
     // Generic request method
     async request<T>(
       endpoint: string,
@@ -32,8 +34,11 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
       // Add auth token if required
       if (requireAuth) {
         const token = await getToken();
+        console.log("Token for request:", token ? "Token exists" : "No token");
         if (token) {
           requestHeaders.Authorization = `Bearer ${token}`;
+        } else {
+          console.warn("No auth token available for request to:", endpoint);
         }
       }
 
@@ -41,12 +46,15 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
       const requestOptions: RequestInit = {
         method,
         headers: requestHeaders,
+        credentials: "include", // Include credentials for cross-origin requests
       };
 
       // Add body if provided
       if (body) {
         requestOptions.body = JSON.stringify(body);
       }
+
+      console.log(`Making ${method} request to ${API_BASE_URL}${endpoint}`);
 
       // Make the request
       const response = await fetch(
@@ -57,6 +65,12 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
       // Handle error responses
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error("API Error Response:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          endpoint,
+        });
         throw new Error(
           errorData.error || `API request failed with status ${response.status}`
         );
@@ -68,16 +82,16 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
 
     // User-related API methods
     users: {
-      getAll: () => api.request<any[]>("/users"),
-      getOne: (id: string) => api.request<any>(`/users/${id}`),
+      getAll: () => client.request<any[]>("/users"),
+      getOne: (id: string) => client.request<any>(`/users/${id}`),
       create: (data: any) =>
-        api.request<any>("/users", { method: "POST", body: data }),
+        client.request<any>("/users", { method: "POST", body: data }),
       update: (id: string, data: any) =>
-        api.request<any>(`/users/${id}`, { method: "PUT", body: data }),
+        client.request<any>(`/users/${id}`, { method: "PUT", body: data }),
       delete: (id: string) =>
-        api.request<any>(`/users/${id}`, { method: "DELETE" }),
+        client.request<any>(`/users/${id}`, { method: "DELETE" }),
       isFirstSignIn: (userId: string) =>
-        api.request<{ isFirstSignIn: boolean }>(
+        client.request<{ isFirstSignIn: boolean }>(
           `/users/is-first-signin/${userId}`,
           { requireAuth: false }
         ),
@@ -85,50 +99,53 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
 
     // Community-related API methods
     communities: {
-      getAll: () => api.request<any[]>("/communities"),
-      getOne: (id: string) => api.request<any>(`/communities/${id}`),
+      getAll: () => client.request<any[]>("/communities"),
+      getOne: (id: string) => client.request<any>(`/communities/${id}`),
       create: (data: any) =>
-        api.request<any>("/communities", { method: "POST", body: data }),
+        client.request<any>("/communities", { method: "POST", body: data }),
       update: (id: string, data: any) =>
-        api.request<any>(`/communities/${id}`, { method: "PUT", body: data }),
+        client.request<any>(`/communities/${id}`, {
+          method: "PUT",
+          body: data,
+        }),
       delete: (id: string) =>
-        api.request<any>(`/communities/${id}`, { method: "DELETE" }),
+        client.request<any>(`/communities/${id}`, { method: "DELETE" }),
       getByUserId: (userId: string) =>
-        api.request<any[]>(`/communities/user/${userId}`),
+        client.request<any[]>(`/communities/user/${userId}`),
     },
 
     // Post-related API methods
     posts: {
-      getAll: () => api.request<any[]>("/posts"),
-      getOne: (id: string) => api.request<any>(`/posts/${id}`),
+      getAll: () => client.request<any[]>("/posts"),
+      getOne: (id: string) => client.request<any>(`/posts/${id}`),
       create: (data: any) =>
-        api.request<any>("/posts", { method: "POST", body: data }),
+        client.request<any>("/posts", { method: "POST", body: data }),
       update: (id: string, data: any) =>
-        api.request<any>(`/posts/${id}`, { method: "PUT", body: data }),
+        client.request<any>(`/posts/${id}`, { method: "PUT", body: data }),
       delete: (id: string) =>
-        api.request<any>(`/posts/${id}`, { method: "DELETE" }),
+        client.request<any>(`/posts/${id}`, { method: "DELETE" }),
       getByUserId: (userId: string) =>
-        api.request<any[]>(`/posts/user/${userId}`),
+        client.request<any[]>(`/posts/user/${userId}`),
       getByCommunityId: (communityId: string) =>
-        api.request<any[]>(`/posts/community/${communityId}`),
+        client.request<any[]>(`/posts/community/${communityId}`),
     },
 
     // Comment-related API methods
     comments: {
-      getAll: () => api.request<any[]>("/comments"),
-      getOne: (id: string) => api.request<any>(`/comments/${id}`),
+      getAll: () => client.request<any[]>("/comments"),
+      getOne: (id: string) => client.request<any>(`/comments/${id}`),
       create: (data: any) =>
-        api.request<any>("/comments", { method: "POST", body: data }),
+        client.request<any>("/comments", { method: "POST", body: data }),
       update: (id: string, data: any) =>
-        api.request<any>(`/comments/${id}`, { method: "PUT", body: data }),
+        client.request<any>(`/comments/${id}`, { method: "PUT", body: data }),
       delete: (id: string) =>
-        api.request<any>(`/comments/${id}`, { method: "DELETE" }),
+        client.request<any>(`/comments/${id}`, { method: "DELETE" }),
     },
 
     // Therapist application API methods
     therapist: {
       submitApplication: (data: any) =>
-        api.request<any>("/therapist/application", {
+        client.request<any>("/therapist/application", {
           method: "POST",
           body: data,
         }),
@@ -144,12 +161,12 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
         const queryString = queryParams.toString()
           ? `?${queryParams.toString()}`
           : "";
-        return api.request<any>(`/therapist/application${queryString}`);
+        return client.request<any>(`/therapist/application${queryString}`);
       },
       getApplicationById: (id: string) =>
-        api.request<any>(`/therapist/application/${id}`),
+        client.request<any>(`/therapist/application/${id}`),
       updateApplication: (id: string, data: any) =>
-        api.request<any>(`/therapist/application/${id}`, {
+        client.request<any>(`/therapist/application/${id}`, {
           method: "PUT",
           body: data,
         }),
@@ -157,9 +174,11 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
 
     // Admin API methods
     admin: {
-      checkAdmin: () => api.request<any>("/auth/admin", { method: "POST" }),
+      checkAdmin: () => client.request<any>("/auth/admin", { method: "POST" }),
     },
   };
+
+  return client;
 };
 
 // Hook to use the API client in components
@@ -174,7 +193,3 @@ export const createStandaloneApiClient = (
 ) => {
   return createApiClient(getTokenFn);
 };
-
-// Create a default instance for non-component usage
-const api = createApiClient(async () => null);
-export default api;

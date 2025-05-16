@@ -7,12 +7,14 @@ export interface TaskFile {
 export interface Task {
   id: string;
   title: string;
-  therapistName: string;
+  therapistName?: string;
+  patientName?: string;
   date: string;
-  status: "upcoming" | "past_due" | "completed";
+  status: "upcoming" | "past_due" | "completed" | "assigned";
   isCompleted: boolean;
   instructions?: string;
   materials?: TaskFile[];
   myWork?: TaskFile[];
   submittedAt?: string;
+  feedback?: string;
 }

@@ -2,58 +2,58 @@
 
 # === BACKEND ===
 # compiled output
-/backend/mentara-api/dist
-/backend/mentara-api/node_modules
+/mentara-api/dist
+/mentara-api/node_modules
 /build
 
 # Logs
-/backend/mentara-api/logs
-/backend/mentara-api/*.log
-/backend/mentara-api/npm-debug.log*
-/backend/mentara-api/pnpm-debug.log*
-/backend/mentara-api/yarn-debug.log*
-/backend/mentara-api/yarn-error.log*
-/backend/mentara-api/lerna-debug.log*
+/mentara-api/logs
+/mentara-api/*.log
+/mentara-api/npm-debug.log*
+/mentara-api/pnpm-debug.log*
+/mentara-api/yarn-debug.log*
+/mentara-api/yarn-error.log*
+/mentara-api/lerna-debug.log*
 
 # OS
-/backend/mentara-api/.DS_Store
+/mentara-api/.DS_Store
 
 # Tests
-/backend/mentara-api//coverage
-/backend/mentara-api//.nyc_output
+/mentara-api/coverage
+/mentara-api/.nyc_output
 
 # IDEs and editors
-/backend/mentara-api//.idea
-/backend/mentara-api/.project
-/backend/mentara-api/.classpath
-/backend/mentara-api/.c9/
-/backend/mentara-api/*.launch
-/backend/mentara-api/.settings/
-/backend/mentara-api/*.sublime-workspace
+/mentara-api/.idea
+/mentara-api/.project
+/mentara-api/.classpath
+/mentara-api/.c9/
+/mentara-api/*.launch
+/mentara-api/.settings/
+/mentara-api/*.sublime-workspace
 
 # IDE - VSCode
-/backend/mentara-api/.vscode/*
-!/backend/mentara-api/.vscode/settings.json
-!/backend/mentara-api/.vscode/tasks.json
-!/backend/mentara-api/.vscode/launch.json
-!/backend/mentara-api/.vscode/extensions.json
+/mentara-api/.vscode/*
+!/mentara-api/.vscode/settings.json
+!/mentara-api/.vscode/tasks.json
+!/mentara-api/.vscode/launch.json
+!/mentara-api/.vscode/extensions.json
 
 # dotenv environment variable files
-/backend/mentara-api/.env
-/backend/mentara-api/.env.development.local
-/backend/mentara-api/.env.test.local
-/backend/mentara-api/.env.production.local
-/backend/mentara-api/.env.local
+/mentara-api/.env
+/mentara-api/.env.development.local
+/mentara-api/.env.test.local
+/mentara-api/.env.production.local
+/mentara-api/.env.local
 
 # temp directory
-/backend/mentara-api/.temp
-/backend/mentara-api/.tmp
+/mentara-api/.temp
+/mentara-api/.tmp
 
 # Runtime data
-/backend/mentara-api/pids
-/backend/mentara-api/*.pid
-/backend/mentara-api/*.seed
-/backend/mentara-api/*.pid.lock
+/mentara-api/pids
+/mentara-api/*.pid
+/mentara-api/*.seed
+/mentara-api/*.pid.lock
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

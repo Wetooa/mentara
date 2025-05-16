@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
-import { therapistProfileFormFields } from "@/const/therapist_application";
+import { therapistProfileFormFields } from "@/constants/therapist_application";
 import Image from "next/image";
 import useTherapistForm from "@/store/therapistform";
 
@@ -748,7 +748,7 @@ const MentaraApplication = () => {
       <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
         <div className="mb-8">
           <Image
-            src="/mentara-landscape.png"
+            src="/icons/mentara/mentara-landscape.png"
             alt="Mentara logo"
             width={250}
             height={100}

@@ -24,6 +24,7 @@ const posts_module_1 = require("./posts/posts.module");
 const comments_module_1 = require("./comments/comments.module");
 const therapist_module_1 = require("./therapist/therapist.module");
 const webhooks_module_1 = require("./webhooks/webhooks.module");
+const worksheets_module_1 = require("./worksheets/worksheets.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -40,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
             comments_module_1.CommentsModule,
             therapist_module_1.TherapistModule,
             webhooks_module_1.WebhooksModule,
+            worksheets_module_1.WorksheetsModule,
         ],
         controllers: [app_controller_1.AppController, auth_controller_1.AuthController],
         providers: [
