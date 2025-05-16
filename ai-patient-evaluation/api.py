@@ -26,14 +26,16 @@ Expected input: List[float] of length 201
 """
 
 from flask import Flask, request, jsonify
-from model import MultiLabelNN 
+from model import MultiLabelNN
 import torch
 
 app = Flask(__name__)
 
 # Same architecture and hyperparameters used during training
 model = MultiLabelNN(201, 512, 256, 0.4, 19)
-model.load_state_dict(torch.load("mental_model_config2.pt", map_location=torch.device("cpu")))
+model.load_state_dict(
+    torch.load("mental_model_config2.pt", map_location=torch.device("cpu"))
+)
 model.eval()
 
 
@@ -58,24 +60,40 @@ def predict():
 
     # Define condition names in the order they appear in model output
     condition_names = [
-        "Has_Phobia", "Has_Agoraphobia", "Has_BloodPhobia", "Has_SocialPhobia", 
-        "Has_ADHD", "Has_Alcohol_Problem", "Has_Binge_Eating", "Has_Drug_Problem", 
-        "Has_Anxiety", "Has_Insomnia", "Has_Burnout", "Has_Bipolar", "Has_OCD", 
-        "Has_Hoarding", "Has_PTSD", "Has_Panic_Disorder", "Has_Depression", 
-        "Has_High_Stress", "Has_Social_Anxiety"
+        "Has_Phobia",
+        "Has_Agoraphobia",
+        "Has_BloodPhobia",
+        "Has_SocialPhobia",
+        "Has_ADHD",
+        "Has_Alcohol_Problem",
+        "Has_Binge_Eating",
+        "Has_Drug_Problem",
+        "Has_Anxiety",
+        "Has_Insomnia",
+        "Has_Burnout",
+        "Has_Bipolar",
+        "Has_OCD",
+        "Has_Hoarding",
+        "Has_PTSD",
+        "Has_Panic_Disorder",
+        "Has_Depression",
+        "Has_High_Stress",
+        "Has_Social_Anxiety",
     ]
 
     with torch.no_grad():
         output = model(input_tensor)
         prediction_values = output.squeeze().tolist()
-        
-        
+
         # Apply threshold to convert to boolean (true/false)
         # Assuming 0.5 as the threshold for positive classification
         normalized_values = [value >= 90 for value in prediction_values]
-        
+
         # Combine condition names with their normalized boolean values
-        prediction = {condition: bool_val for condition, bool_val in zip(condition_names, normalized_values)}
+        prediction = {
+            condition: bool_val
+            for condition, bool_val in zip(condition_names, normalized_values)
+        }
 
     return jsonify(prediction)
 
