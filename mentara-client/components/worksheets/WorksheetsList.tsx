@@ -63,7 +63,7 @@ export default function WorksheetsList({ tasks }: WorksheetsListProps) {
   const taskGroups = groupTasksByDate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+    <div className="flex-1 overflow-y-auto p-6 bg-gray-50 h-full">
       {taskGroups.length > 0 ? (
         taskGroups.map((group) => (
           <div key={group.date} className="mb-8">

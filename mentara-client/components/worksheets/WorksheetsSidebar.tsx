@@ -34,7 +34,7 @@ export default function WorksheetsSidebar({
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto">
+    <div className="w-64 bg-white border-r border-gray-200 p-4 overflow-y-auto h-full min-h-screen flex flex-col sticky top-0">
       <h2 className="text-lg font-medium text-gray-700 mb-4">Filters</h2>
 
       {/* Filter buttons */}

@@ -1,0 +1,45 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserDashboardData } from "@/data/mockUserDashboardData";
+
+interface DashboardHeaderProps {
+  user: UserDashboardData["user"];
+}
+
+export default function DashboardHeader({ user }: DashboardHeaderProps) {
+  // Get current time to display appropriate greeting
+  const currentHour = new Date().getHours();
+  let greeting = "Good morning";
+
+  if (currentHour >= 12 && currentHour < 18) {
+    greeting = "Good afternoon";
+  } else if (currentHour >= 18) {
+    greeting = "Good evening";
+  }
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
+        <Avatar className="h-16 w-16 border-2 border-primary">
+          <AvatarImage src={user.avatar} />
+          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div>
+          <h1 className="text-2xl font-bold">
+            {greeting}, {user.name}
+          </h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your mental health journey
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+          Book Session
+        </button>
+        <button className="px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary/10 transition-colors">
+          View Profile
+        </button>
+      </div>
+    </div>
+  );
+}

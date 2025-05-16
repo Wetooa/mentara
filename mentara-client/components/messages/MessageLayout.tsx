@@ -8,16 +8,20 @@ export default function MessageLayout() {
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden">
       {/* Messages Sidebar */}
-      <MessageSidebar
-        onSelectContact={(contactId) => setSelectedContact(contactId)}
-        selectedContactId={selectedContact}
-      />
+      <div className="h-full w-full md:w-72 lg:w-80 flex-shrink-0">
+        <MessageSidebar
+          onSelectContact={(contactId) => setSelectedContact(contactId)}
+          selectedContactId={selectedContact}
+        />
+      </div>
 
       {/* Message Chat Area */}
       {selectedContact ? (
-        <MessageChatArea contactId={selectedContact} />
+        <div className="h-full flex-grow overflow-hidden">
+          <MessageChatArea contactId={selectedContact} />
+        </div>
       ) : (
         <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
           <div className="text-center">

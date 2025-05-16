@@ -121,9 +121,9 @@ export default function MessageSidebar({
     : mockContacts;
 
   return (
-    <div className="w-full md:w-72 lg:w-80 border-r border-gray-200 bg-white flex flex-col h-full">
-      {/* Search Area */}
-      <div className="p-3 border-b border-gray-200">
+    <div className="w-full bg-white flex flex-col h-full">
+      {/* Search Area - Fixed at top */}
+      <div className="p-3 border-b border-gray-200 bg-white sticky top-0 z-10">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
@@ -136,7 +136,7 @@ export default function MessageSidebar({
         </div>
       </div>
 
-      {/* Contacts List */}
+      {/* Contacts List - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         {filteredContacts.map((contact) => (
           <MessageContactItem

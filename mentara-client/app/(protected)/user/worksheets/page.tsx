@@ -17,7 +17,6 @@ const mockTasks: Task[] = [
     status: "upcoming",
     isCompleted: true,
     instructions: "None",
-    points: 30,
     materials: [
       {
         id: "mat-1",
@@ -42,7 +41,6 @@ const mockTasks: Task[] = [
     status: "upcoming",
     isCompleted: false,
     instructions: "Complete the worksheet on cognitive restructuring",
-    points: 20,
   },
   {
     id: "task-3",
@@ -53,7 +51,6 @@ const mockTasks: Task[] = [
     isCompleted: false,
     instructions:
       "Reflect on your week and identify three challenging situations and how you responded to them.",
-    points: 15,
   },
   {
     id: "task-4",
@@ -64,7 +61,6 @@ const mockTasks: Task[] = [
     isCompleted: true,
     instructions:
       "Complete the 15-minute mindfulness exercise and write about your experience.",
-    points: 10,
     myWork: [
       {
         id: "work-2",
@@ -139,7 +135,7 @@ export default function WorksheetsPage() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full min-h-screen overflow-hidden">
       <WorksheetsSidebar
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}

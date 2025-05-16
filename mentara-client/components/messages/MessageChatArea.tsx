@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Paperclip, Smile, Send, X } from "lucide-react";
-// Make sure to import ChatHeader from the correct path
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
 import { Message } from "./types";
@@ -66,6 +65,7 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -82,6 +82,15 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Scroll to bottom of messages when component mounts or messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [mockConversation]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleSend = () => {
     if (message.trim() || selectedFile) {
       console.log("Sending message:", message);
@@ -89,6 +98,9 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
       setMessage("");
       setSelectedFile(null);
       // In a real app, you'd add the message to the conversation
+
+      // Scroll to bottom after sending a message
+      setTimeout(scrollToBottom, 100);
     }
   };
 
@@ -118,12 +130,14 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full relative">
-      {/* Chat Header */}
-      <ChatHeader contactId={contactId} />
+    <div className="flex flex-col h-screen w-full bg-gray-50">
+      {/* Chat Header - Fixed at top with z-index to ensure it stays above content */}
+      <div className="sticky top-0 z-10 bg-white shadow-sm">
+        <ChatHeader contactId={contactId} />
+      </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+      {/* Messages Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto p-4 pb-2">
         {/* Time Divider */}
         <div className="text-center my-4">
           <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
@@ -139,87 +153,96 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
             isOwn={msg.sender === "me"}
           />
         ))}
+
+        {/* Invisible element to scroll to */}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Selected File Display - Fixed positioning relative to the message input */}
-      {selectedFile && (
-        <div className="border-t border-gray-200 bg-white p-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Paperclip className="h-4 w-4 text-gray-500 mr-2" />
-              <span className="text-sm text-gray-700 truncate">
-                {selectedFile.name}
-              </span>
-            </div>
-            <button
-              className="text-gray-500 hover:text-gray-700"
-              onClick={() => setSelectedFile(null)}
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Message Input Area */}
-      <div className="border-t border-gray-200 bg-white p-3">
-        <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
-          {/* Hidden File Input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleFileSelect}
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-          />
-
-          {/* Attachment Button */}
-          <button
-            className="text-gray-500 hover:text-gray-700 mr-2"
-            onClick={handleAttachmentClick}
-          >
-            <Paperclip className="h-5 w-5" />
-          </button>
-
-          {/* Text Input */}
-          <input
-            type="text"
-            className="flex-1 bg-transparent border-none focus:outline-none text-gray-700 py-1"
-            placeholder="Your message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-
-          {/* Emoji Button */}
-          <div className="relative">
-            <button
-              className="text-gray-500 hover:text-gray-700 ml-2"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              <Smile className="h-5 w-5" />
-            </button>
-
-            {/* Emoji Picker */}
-            {showEmojiPicker && (
-              <div ref={emojiPickerRef} className="absolute bottom-10 right-0">
-                <Picker onEmojiClick={handleEmojiClick} />
+      {/* Input Area - Fixed at bottom */}
+      <div className="sticky bottom-0 z-10 bg-white border-t border-gray-200">
+        {/* Selected File Display */}
+        {selectedFile && (
+          <div className="bg-white p-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Paperclip className="h-4 w-4 text-gray-500 mr-2" />
+                <span className="text-sm text-gray-700 truncate">
+                  {selectedFile.name}
+                </span>
               </div>
-            )}
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setSelectedFile(null)}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+        )}
 
-          {/* Send Button */}
-          <button
-            className={`ml-2 ${
-              message.trim() || selectedFile
-                ? "text-green-600 hover:text-green-700"
-                : "text-gray-400"
-            }`}
-            onClick={handleSend}
-            disabled={!message.trim() && !selectedFile}
-          >
-            <Send className="h-5 w-5" />
-          </button>
+        {/* Message Input Area */}
+        <div className="bg-white p-3">
+          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileSelect}
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+            />
+
+            {/* Attachment Button */}
+            <button
+              className="text-gray-500 hover:text-gray-700 mr-2"
+              onClick={handleAttachmentClick}
+            >
+              <Paperclip className="h-5 w-5" />
+            </button>
+
+            {/* Text Input */}
+            <input
+              type="text"
+              className="flex-1 bg-transparent border-none focus:outline-none text-gray-700 py-1"
+              placeholder="Your message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+
+            {/* Emoji Button */}
+            <div className="relative">
+              <button
+                className="text-gray-500 hover:text-gray-700 ml-2"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                <Smile className="h-5 w-5" />
+              </button>
+
+              {/* Emoji Picker */}
+              {showEmojiPicker && (
+                <div
+                  ref={emojiPickerRef}
+                  className="absolute bottom-10 right-0 z-20"
+                >
+                  <Picker onEmojiClick={handleEmojiClick} />
+                </div>
+              )}
+            </div>
+
+            {/* Send Button */}
+            <button
+              className={`ml-2 ${
+                message.trim() || selectedFile
+                  ? "text-green-600 hover:text-green-700"
+                  : "text-gray-400"
+              }`}
+              onClick={handleSend}
+              disabled={!message.trim() && !selectedFile}
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
