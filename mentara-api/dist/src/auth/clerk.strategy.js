@@ -53,6 +53,6 @@ exports.ClerkStrategy = ClerkStrategy;
 exports.ClerkStrategy = ClerkStrategy = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)('ClerkClient')),
-    __metadata("design:paramtypes", [typeof (_a = typeof backend_2.ClerkClient !== "undefined" && backend_2.ClerkClient) === "function" ? _a : Object, config_1.ConfigService])
+    __metadata("design:paramtypes", [typeof (_a = typeof backend_1.ClerkClient !== "undefined" && backend_1.ClerkClient) === "function" ? _a : Object, config_1.ConfigService])
 ], ClerkStrategy);
 //# sourceMappingURL=clerk.strategy.js.map
