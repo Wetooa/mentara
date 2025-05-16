@@ -3,7 +3,12 @@ import Image from "next/image";
 import { Paperclip, Smile, Send, X } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
-import { Message } from "./types";
+import { Attachment, Conversation, Message } from "./types";
+import {
+  fetchConversation,
+  sendMessage,
+  groupMessagesByDate,
+} from "@/data/mockMessagesData";
 
 // Import a simple emoji picker or use a library like emoji-mart
 import dynamic from "next/dynamic";
@@ -11,61 +16,59 @@ const Picker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 interface MessageChatAreaProps {
   contactId: string;
+  conversation?: Conversation;
 }
 
-// Mock conversation data
-const mockConversation: Message[] = [
-  {
-    id: "1",
-    sender: "them",
-    text: "Hi there! How are you?",
-    time: "20:30",
-    status: "read",
-  },
-  {
-    id: "2",
-    sender: "me",
-    text: "I'm good, thanks for asking! How about you?",
-    time: "20:45",
-    status: "read",
-  },
-  {
-    id: "3",
-    sender: "them",
-    text: "I've been doing well. Working on some projects, keeping busy.",
-    time: "20:47",
-    status: "read",
-  },
-  {
-    id: "4",
-    sender: "me",
-    text: "That's great to hear. Anything exciting?",
-    time: "20:50",
-    status: "read",
-  },
-  {
-    id: "5",
-    sender: "them",
-    text: "Just started a new health initiative for young adults. It's challenging but very rewarding.",
-    time: "20:55",
-    status: "read",
-  },
-  {
-    id: "6",
-    sender: "me",
-    text: "That sounds amazing! I'd love to hear more about it.",
-    time: "21:00",
-    status: "delivered",
-  },
-];
-
-export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
+export default function MessageChatArea({
+  contactId,
+  conversation: propConversation,
+}: MessageChatAreaProps) {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [messageGroups, setMessageGroups] = useState<
+    { date: string; messages: Message[] }[]
+  >([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation if not provided in props
+  useEffect(() => {
+    if (propConversation) {
+      setMessages(propConversation.messages);
+    } else {
+      const loadConversation = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const fetchedConversation = await fetchConversation(contactId);
+          if (fetchedConversation) {
+            setMessages(fetchedConversation.messages);
+          } else {
+            // Create an empty conversation if none exists yet
+            setMessages([]);
+          }
+        } catch (err) {
+          console.error("Error fetching conversation:", err);
+          setError("Failed to load messages. Please try again later.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadConversation();
+    }
+  }, [contactId, propConversation]);
+
+  // Group messages by date whenever messages change
+  useEffect(() => {
+    setMessageGroups(groupMessagesByDate(messages));
+  }, [messages]);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -85,22 +88,48 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
   // Scroll to bottom of messages when component mounts or messages change
   useEffect(() => {
     scrollToBottom();
-  }, [mockConversation]);
+  }, [messageGroups]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (message.trim() || selectedFile) {
-      console.log("Sending message:", message);
-      console.log("With file:", selectedFile?.name || "none");
-      setMessage("");
-      setSelectedFile(null);
-      // In a real app, you'd add the message to the conversation
+      try {
+        // In a real app, you'd upload the file first and get a URL
 
-      // Scroll to bottom after sending a message
-      setTimeout(scrollToBottom, 100);
+        let fileAttachments: { name: string; url: string; type: string }[] = [];
+        if (selectedFile) {
+          // Simulate file upload by creating a dummy URL
+          const fakeUrl = `/files/${selectedFile.name}`;
+          fileAttachments.push({
+            name: selectedFile.name,
+            url: fakeUrl,
+            type: selectedFile.type.startsWith("image/") ? "image" : "document",
+          });
+        }
+
+        // Send message to API
+        const newMessage = await sendMessage(
+          contactId,
+          message,
+          fileAttachments
+        );
+
+        // Update local state with new message
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+        // Clear input
+        setMessage("");
+        setSelectedFile(null);
+
+        // Scroll to bottom after sending a message
+        setTimeout(scrollToBottom, 100);
+      } catch (err) {
+        console.error("Error sending message:", err);
+        alert("Failed to send message. Please try again.");
+      }
     }
   };
 
@@ -114,8 +143,6 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
-      // For a real app, you would upload this file to your server
-      console.log("File selected:", e.target.files[0].name);
     }
   };
 
@@ -125,8 +152,42 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
     }
   };
 
-  const handleEmojiClick = (emojiData: any, event: MouseEvent) => {
+  const handleEmojiClick = (emojiData: any) => {
     setMessage((prev) => prev + emojiData.emoji);
+  };
+
+  // Format date string for display
+  const formatDateLabel = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+
+    // Compare year, month, day
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return "Today";
+    }
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return "Yesterday";
+    }
+
+    // Default to date format
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
   };
 
   return (
@@ -138,21 +199,37 @@ export default function MessageChatArea({ contactId }: MessageChatAreaProps) {
 
       {/* Messages Area - Scrollable */}
       <div className="flex-1 overflow-y-auto p-4 pb-2">
-        {/* Time Divider */}
-        <div className="text-center my-4">
-          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
-            Today
-          </span>
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-40">
+            <div className="animate-spin h-8 w-8 border-2 border-green-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center p-4 text-red-500">{error}</div>
+        ) : messageGroups.length === 0 ? (
+          <div className="text-center p-4 text-gray-500">
+            No messages yet. Start the conversation!
+          </div>
+        ) : (
+          messageGroups.map((group, index) => (
+            <div key={group.date} className="mb-6">
+              {/* Date Divider */}
+              <div className="text-center my-4">
+                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
+                  {formatDateLabel(group.date)}
+                </span>
+              </div>
 
-        {/* Messages */}
-        {mockConversation.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            message={msg}
-            isOwn={msg.sender === "me"}
-          />
-        ))}
+              {/* Messages for this date */}
+              {group.messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  isOwn={msg.sender === "me"}
+                />
+              ))}
+            </div>
+          ))
+        )}
 
         {/* Invisible element to scroll to */}
         <div ref={messagesEndRef} />

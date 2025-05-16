@@ -1,129 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import MessageContactItem from "./MessageContactItem";
 import { Contact } from "./types";
+import { fetchContacts } from "@/data/mockMessagesData";
 
 interface MessageSidebarProps {
   onSelectContact: (contactId: string) => void;
   selectedContactId: string | null;
+  contacts?: Contact[]; // Make it optional to support both passing data and loading from API
 }
-
-// Mock data for demonstration
-const mockContacts: Contact[] = [
-  {
-    id: "1",
-    name: "Julia Laine Segundo",
-    status: "online",
-    lastMessage: "Sure, I'll be there!",
-    time: "21:45",
-    unread: 0,
-  },
-  {
-    id: "2",
-    name: "Julia Laine Segundo",
-    status: "offline",
-    lastMessage: "Let me check my schedule",
-    time: "17:30",
-    unread: 2,
-  },
-  {
-    id: "3",
-    name: "Julia Laine Segundo",
-    status: "online",
-    lastMessage: "Thanks for your help!",
-    time: "15:12",
-    unread: 0,
-  },
-  {
-    id: "4",
-    name: "Julia Laine Segundo",
-    status: "away",
-    lastMessage: "Can we discuss this later?",
-    time: "14:55",
-    unread: 0,
-  },
-  {
-    id: "5",
-    name: "Julia Laine Segundo",
-    status: "online",
-    lastMessage: "I'll send you the files soon",
-    time: "Yesterday",
-    unread: 0,
-  },
-  {
-    id: "6",
-    name: "Julia Laine Segundo",
-    status: "offline",
-    lastMessage: "See you tomorrow!",
-    time: "Yesterday",
-    unread: 0,
-  },
-  {
-    id: "7",
-    name: "Julia Laine Segundo",
-    status: "offline",
-    lastMessage: "That sounds great!",
-    time: "Monday",
-    unread: 0,
-  },
-  {
-    id: "8",
-    name: "Julia Laine Segundo",
-    status: "online",
-    lastMessage: "Perfect, looking forward to it",
-    time: "Monday",
-    unread: 0,
-  },
-  {
-    id: "9",
-    name: "Julia Laine Segundo",
-    status: "away",
-    lastMessage: "I'll let you know",
-    time: "Sunday",
-    unread: 0,
-  },
-  {
-    id: "10",
-    name: "Julia Laine Segundo",
-    status: "offline",
-    lastMessage: "How's everything going?",
-    time: "Saturday",
-    unread: 0,
-  },
-  {
-    id: "11",
-    name: "Julia Laine Segundo",
-    status: "online",
-    lastMessage: "Did you receive my email?",
-    time: "14/04",
-    unread: 0,
-  },
-  {
-    id: "12",
-    name: "Julia Laine Segundo",
-    status: "offline",
-    lastMessage: "Have a great weekend!",
-    time: "12/04",
-    unread: 0,
-  },
-];
 
 export default function MessageSidebar({
   onSelectContact,
   selectedContactId,
+  contacts: propContacts,
 }: MessageSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load contacts if they weren't passed as props
+  useEffect(() => {
+    if (propContacts) {
+      setContacts(propContacts);
+    } else {
+      const loadContacts = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const fetchedContacts = await fetchContacts();
+          setContacts(fetchedContacts);
+        } catch (err) {
+          console.error("Error fetching contacts:", err);
+          setError("Failed to load contacts. Please try again later.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadContacts();
+    }
+  }, [propContacts]);
 
   const filteredContacts = searchQuery
-    ? mockContacts.filter((c) =>
+    ? contacts.filter((c) =>
         c.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : mockContacts;
+    : contacts;
 
   return (
     <div className="w-full bg-white flex flex-col h-full">
       {/* Search Area - Fixed at top */}
-      <div className="p-3 border-b border-gray-200 bg-white sticky top-0 z-10">
+      <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
@@ -138,14 +67,24 @@ export default function MessageSidebar({
 
       {/* Contacts List - Scrollable */}
       <div className="flex-1 overflow-y-auto">
-        {filteredContacts.map((contact) => (
-          <MessageContactItem
-            key={contact.id}
-            contact={contact}
-            isSelected={selectedContactId === contact.id}
-            onClick={() => onSelectContact(contact.id)}
-          />
-        ))}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-40">
+            <div className="animate-spin h-6 w-6 border-2 border-green-500 border-t-transparent rounded-full"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center p-4 text-red-500">{error}</div>
+        ) : filteredContacts.length === 0 ? (
+          <div className="text-center p-4 text-gray-500">No contacts found</div>
+        ) : (
+          filteredContacts.map((contact) => (
+            <MessageContactItem
+              key={contact.id}
+              contact={contact}
+              isSelected={selectedContactId === contact.id}
+              onClick={() => onSelectContact(contact.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,26 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MessageSidebar from "./MessageSidebar";
 import MessageChatArea from "./MessageChatArea";
+import { initialMessagesState } from "@/data/mockMessagesData";
+import { MessagesState } from "./types";
 
-export default function MessageLayout() {
-  const [selectedContact, setSelectedContact] = useState<string | null>(null);
+interface MessageLayoutProps {
+  // Optional initial data to override the defaults
+  initialData?: MessagesState;
+}
+
+export default function MessageLayout({ initialData }: MessageLayoutProps) {
+  const [messagesState, setMessagesState] = useState<MessagesState>(
+    initialData || initialMessagesState
+  );
+
+  const handleSelectContact = (contactId: string) => {
+    setMessagesState((prevState) => ({
+      ...prevState,
+      selectedContactId: contactId,
+    }));
+  };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden">
+    <div className="flex h-[calc(100vh-50px)] w-full overflow-hidden">
       {/* Messages Sidebar */}
-      <div className="h-full w-full md:w-72 lg:w-80 flex-shrink-0">
+      <div className="w-full md:w-[300px] lg:w-[320px] md:min-w-[300px] lg:min-w-[320px] h-full border-r border-gray-200 overflow-hidden">
         <MessageSidebar
-          onSelectContact={(contactId) => setSelectedContact(contactId)}
-          selectedContactId={selectedContact}
+          onSelectContact={handleSelectContact}
+          selectedContactId={messagesState.selectedContactId}
+          contacts={messagesState.contacts}
         />
       </div>
 
       {/* Message Chat Area */}
-      {selectedContact ? (
+      {messagesState.selectedContactId ? (
         <div className="h-full flex-grow overflow-hidden">
-          <MessageChatArea contactId={selectedContact} />
+          <MessageChatArea
+            contactId={messagesState.selectedContactId}
+            conversation={messagesState.conversations.find(
+              (conv) => conv.contactId === messagesState.selectedContactId
+            )}
+          />
         </div>
       ) : (
         <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
