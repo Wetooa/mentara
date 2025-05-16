@@ -55,9 +55,9 @@ export default function MainLayout({
   ];
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-white">
-      {/* Left Sidebar Navigation */}
-      <nav className="h-full flex w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
+    <div className="flex h-screen w-full bg-white">
+      {/* Left Sidebar Navigation - Now fixed */}
+      <nav className="fixed left-0 top-0 z-10 flex h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
         {/* Logo */}
         <Link href="/dashboard" className="mb-8 px-2">
           <Image
@@ -70,7 +70,7 @@ export default function MainLayout({
         </Link>
 
         {/* Navigation Items */}
-        <div className="h-full flex flex-1 flex-col items-center gap-6">
+        <div className="flex flex-1 flex-col items-center gap-6">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
             return (
@@ -101,10 +101,10 @@ export default function MainLayout({
         </div>
       </nav>
 
-      {/* Main Content Area */}
-      <div className="w-full h-full flex flex-1 flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="flex h-[50px] items-center justify-between border-b border-gray-200 bg-white px-4">
+      {/* Main Content Area - With left padding to account for fixed sidebar */}
+      <div className="flex flex-1 flex-col w-full h-screen pl-[70px]">
+        {/* Top Header - Now fixed */}
+        <header className="fixed top-0 right-0 z-10 flex h-[50px] w-[calc(100%-70px)] items-center justify-between border-b border-gray-200 bg-white px-4">
           {/* Logo for mobile */}
           <div className="flex items-center gap-2 md:hidden">
             <Image
@@ -162,8 +162,8 @@ export default function MainLayout({
           </div>
         </header>
 
-        {/* Main Content - Grey Area for Children */}
-        <main className="w-full h-full flex-1 overflow-auto bg-gray-100">
+        {/* Main Content - With top padding to account for fixed header */}
+        <main className="flex-1 w-full h-full pt-[50px] overflow-y-auto bg-gray-100">
           {children}
         </main>
       </div>

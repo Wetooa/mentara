@@ -51,7 +51,7 @@ exports.AuthService = AuthService;
 __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Function, prisma_client_provider_1.PrismaService]),
+    __metadata("design:paramtypes", [Object, prisma_client_provider_1.PrismaService]),
     __metadata("design:returntype", Promise)
 ], AuthService.prototype, "checkAdmin", null);
 exports.AuthService = AuthService = __decorate([
