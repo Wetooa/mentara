@@ -1,8 +1,7 @@
-import { User } from '@clerk/backend';
+import { ClerkClient, User } from '@clerk/backend';
 import { ConfigService } from '@nestjs/config';
 import { Strategy } from 'passport-custom';
 import { Request } from 'express';
-import { ClerkClient } from '@clerk/backend';
 declare const ClerkStrategy_base: new () => Strategy & {
     validate(...args: any[]): unknown;
 };

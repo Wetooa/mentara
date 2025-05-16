@@ -1,10 +1,9 @@
-import { User, verifyToken } from '@clerk/backend';
+import { ClerkClient, User, verifyToken } from '@clerk/backend';
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-custom';
 import { Request } from 'express';
-import { ClerkClient } from '@clerk/backend';
 
 @Injectable()
 export class ClerkStrategy extends PassportStrategy(Strategy, 'clerk') {
