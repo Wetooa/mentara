@@ -1,81 +1,68 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isProd = process.env.NODE_ENV === "production";
-const isPublicRoute = createRouteMatcher(["/(public)(.*)"]);
+// Define protected routes and their required roles
+const protectedRoutes: Record<string, string[]> = {
+  "/user": ["user"],
+  "/therapist": ["therapist"],
+  "/admin": ["admin"],
+};
 
-const isUserRoute = createRouteMatcher(["/user(.*)"]);
-const isTherapistRoute = createRouteMatcher(["/therapist(.*)"]);
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
-const isModerator = createRouteMatcher(["/moderator(.*)"]);
+// Define public routes that don't require authentication
+const publicRoutes = [
+  "/",
+  "/sign-in",
+  "/sign-up",
+  "/pre-assessment",
+  "/therapist_signup",
+  "/about",
+  "/community",
+  "/for-therapists",
+];
 
-export function middleware(req) {
-  // Handle OPTIONS request for CORS preflight
-  if (req.method === "OPTIONS") {
-    return new NextResponse(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Origin": "http://localhost:5000", // Backend origin
-        "Access-Control-Allow-Methods": "GET,DELETE,PATCH,POST,PUT",
-        "Access-Control-Allow-Headers":
-          "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
-      },
-    });
+// Helper to get required role for a path
+function getRequiredRole(pathname: string): string | null {
+  for (const [route, roles] of Object.entries(protectedRoutes)) {
+    if (pathname.startsWith(route)) {
+      return roles[0]; // Only one role per route in your config
+    }
   }
-
-  // For non-OPTIONS requests
-  const res = NextResponse.next();
-
-  // Add the CORS headers to the response
-  res.headers.append("Access-Control-Allow-Credentials", "true");
-  res.headers.append("Access-Control-Allow-Origin", "http://localhost:5000"); // Backend origin
-  res.headers.append(
-    "Access-Control-Allow-Methods",
-    "GET,DELETE,PATCH,POST,PUT"
-  );
-  res.headers.append(
-    "Access-Control-Allow-Headers",
-    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
-  );
-
-  return res;
+  return null;
 }
 
-export default clerkMiddleware(async (auth, req) => {
-  const { sessionClaims } = await auth();
-
-  // if (!isProd) {
-  //   return NextResponse.next();
-  // }
-
-  const role = sessionClaims?.metadata?.role;
-
-  if (isUserRoute(req) && role === "user") {
-    return NextResponse.next();
-  }
-  if (isTherapistRoute(req) && role === "therapist") {
-    return NextResponse.next();
-  }
-  if (isAdminRoute(req) && role === "admin") {
-    return NextResponse.next();
-  }
-  if (isModerator(req) && role === "moderator") {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  // Allow all public routes
+  if (publicRoutes.includes(req.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
-  if (isPublicRoute(req)) {
-    return NextResponse.next();
+  console.log(await auth());
+
+  // If not authenticated, redirect to sign-in
+  if (!auth().userId) {
+    const signInUrl = new URL("/sign-in", req.url);
+    signInUrl.searchParams.set("redirect_url", req.url);
+    return NextResponse.redirect(signInUrl);
   }
 
-  await auth.protect();
+  // Role-based access control
+  const requiredRole = getRequiredRole(req.nextUrl.pathname);
+  if (requiredRole) {
+    const userRole = auth().sessionClaims?.publicMetadata?.role;
+    if (userRole !== requiredRole) {
+      // Redirect to the correct dashboard for their role, or home
+      let redirectPath = "/";
+      if (userRole === "user") redirectPath = "/user";
+      else if (userRole === "therapist") redirectPath = "/therapist";
+      else if (userRole === "admin") redirectPath = "/admin";
+      return NextResponse.redirect(new URL(redirectPath, req.url));
+    }
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

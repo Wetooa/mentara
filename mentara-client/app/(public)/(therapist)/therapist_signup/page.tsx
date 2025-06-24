@@ -56,7 +56,7 @@ function FormInput(props: FormInputProps) {
       <Input
         id={props.name}
         name={props.name}
-        className={`w-full h-full text-md border-0 bg-input rounded-4xl p-6 ${
+        className={`w-full h-12 text-base border border-[color:var(--color-border)] bg-[color:var(--color-input)] rounded-lg px-4 py-3 ${
           hasError ? "ring-2 ring-red-500 ring-inset" : ""
         } focus-visible:ring-primary focus-visible:ring-offset-1`}
         placeholder={props.PlaceHolder}
@@ -89,7 +89,8 @@ function FormDropdown(props: DropdownProps) {
       >
         <SelectTrigger
           id={props.name}
-          className={`w-full h-full text-md border-0 bg-input rounded-4xl p-6 text-left justify-start ${
+          size="lg"
+          className={`w-full text-left justify-start ${
             !props.value ? "text-gray-400" : "text-secondary"
           } ${
             hasError ? "ring-2 ring-red-500 ring-inset" : ""
@@ -137,11 +138,6 @@ export default function TherapistSignUp() {
     resetForm();
   }, [resetForm]);
 
-  // Add this reset handler function
-  const handleReset = () => {
-    resetForm();
-    setErrors({});
-  };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateField(name, value);
@@ -216,10 +212,10 @@ export default function TherapistSignUp() {
       {/* Header */}
       <div className="w-full flex items-center justify-center bg-white h-20 md:h-24 lg:h-28 drop-shadow-lg">
         <Image
-          src="/mentara-landscape.png"
+          src="/icons/mentara/mentara-landscape.png"
           width={280}
           height={60}
-          alt="mentara landscape logo"
+          alt="Mentara landscape logo"
           priority
         />
       </div>
@@ -231,8 +227,8 @@ export default function TherapistSignUp() {
             Join Our Community of Compassionate Therapists
           </h1>
           <p className="text-sm md:text-md text-secondary">
-            Tell us a bit about yourself, and we'll guide you through the next
-            steps to connect with those who need your support.
+            Tell us a bit about yourself, and we&apos;ll guide you through the
+            next steps to connect with those who need your support.
           </p>
         </div>
 
