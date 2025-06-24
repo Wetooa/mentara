@@ -12,4 +12,6 @@ model User {
   posts       Post[]
   comments    Comment[]
   memberships Membership[]
+
+  Worksheet Worksheet[]
 }
