@@ -57,9 +57,9 @@ model TherapistApplication {
 
 // Therapist model
 model Therapist {
-  id                      String                @id @default(uuid())
-  clerkUserId             String                @unique
-  email                   String                @unique
+  id                      String    @id @default(uuid())
+  clerkUserId             String    @unique
+  email                   String    @unique
   firstName               String
   lastName                String
   mobile                  String
@@ -76,38 +76,96 @@ model Therapist {
   weeklyAvailability      String?
   sessionLength           String?
   accepts                 Json?
-  profileComplete         Boolean               @default(false)
-  applicationId           String?               @unique
-  application             TherapistApplication? @relation(fields: [applicationId], references: [id])
+  profileComplete         Boolean   @default(false)
+  applicationId           String?   @unique
+  bio                     String?   @db.Text
+  profileImageUrl         String?
+  hourlyRate              Decimal?  @db.Decimal(10, 2)
+  isActive                Boolean   @default(true)
+  isVerified              Boolean   @default(false)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
-  bio             String?  @db.Text
-  profileImageUrl String?
-  hourlyRate      Decimal? @db.Decimal(10, 2)
-  isActive        Boolean  @default(true)
-  isVerified      Boolean  @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Relations
+  application TherapistApplication? @relation(fields: [applicationId], references: [id])
+  worksheets  Worksheet[]
 
   @@index([clerkUserId])
 }
 
 // File upload model for storing uploaded file information
 model TherapistFileUpload {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   fileName   String
   fileSize   Int
   fileType   String
   fileUrl    String
   docType    String
   uploadedBy String? // Optional: Clerk user ID who uploaded the file
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Reference to therapist application if applicable
   therapistApplicationId String?
 
   @@index([docType])
   @@index([uploadedBy])
+}
+
+model Worksheet {
+  id           String    @id @default(uuid())
+  title        String
+  instructions String?
+  assignedDate DateTime  @default(now())
+  dueDate      DateTime
+  status       String    @default("upcoming")
+  isCompleted  Boolean   @default(false)
+  submittedAt  DateTime?
+  feedback     String?
+  userId       String
+  therapistId  String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  therapist   Therapist             @relation(fields: [therapistId], references: [id])
+  user        User                  @relation(fields: [userId], references: [id])
+  materials   WorksheetMaterial[]
+  submissions WorksheetSubmission[]
+
+  @@index([userId])
+  @@index([therapistId])
+  @@index([status])
+}
+
+model WorksheetMaterial {
+  id          String   @id @default(uuid())
+  filename    String
+  url         String
+  fileSize    Int?
+  fileType    String?
+  worksheetId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+
+  @@index([worksheetId])
+}
+
+model WorksheetSubmission {
+  id          String   @id @default(uuid())
+  filename    String
+  url         String
+  fileSize    Int?
+  fileType    String?
+  worksheetId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+
+  @@index([worksheetId])
 }

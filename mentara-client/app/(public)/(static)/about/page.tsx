@@ -1,14 +1,26 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-tertiary/5">
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="min-h-screen bg-gradient-to-b from-white to-tertiary/5"
+    >
       {/* Hero Section */}
-      <section className="py-16 md:py-24">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+        className="py-16 md:py-24"
+      >
         <div className="container px-4 mx-auto">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-6">
@@ -22,10 +34,15 @@ export default function AboutPage() {
             </p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Our Story */}
-      <section className="py-16 bg-white">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="py-16 bg-white"
+      >
         <div className="container px-4 mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
             <div className="md:w-1/2">
@@ -67,10 +84,15 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Our Values */}
-      <section className="py-16 bg-gray-50">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="py-16 bg-gray-50"
+      >
         <div className="container px-4 mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="text-3xl font-bold text-secondary mb-4">
@@ -115,22 +137,31 @@ export default function AboutPage() {
                   "We believe in giving you the tools, knowledge, and support to take control of your wellness journey.",
               },
             ].map((value, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: 0.1 * index, duration: 0.5 }}
                 className="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
               >
                 <h3 className="text-xl font-semibold text-secondary mb-3">
                   {value.title}
                 </h3>
                 <p className="text-gray-600">{value.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Team Section */}
-      <section className="py-16">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        className="py-16"
+      >
         <div className="container px-4 mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="text-3xl font-bold text-secondary mb-4">
@@ -160,8 +191,12 @@ export default function AboutPage() {
                 image: "/team/tolentino.jpg",
               },
             ].map((member, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: 0.1 * index, duration: 0.5 }}
                 className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100"
               >
                 <div className="relative h-64 w-full">
@@ -178,14 +213,19 @@ export default function AboutPage() {
                   </h3>
                   <p className="text-primary">{member.role}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-tertiary/10">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="py-16 bg-tertiary/10"
+      >
         <div className="container px-4 mx-auto">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-secondary mb-6">
@@ -206,7 +246,7 @@ export default function AboutPage() {
             </Link>
           </div>
         </div>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
 }

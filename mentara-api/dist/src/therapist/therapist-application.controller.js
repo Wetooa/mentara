@@ -16,7 +16,7 @@ exports.TherapistApplicationController = void 0;
 const common_1 = require("@nestjs/common");
 const therapist_application_service_1 = require("./therapist-application.service");
 const client_1 = require("@prisma/client");
-const current_user_decorator_1 = require("../decorators/current-user.decorator");
+const current_user_decorator_1 = require("src/decorators/current-user.decorator");
 let TherapistApplicationController = class TherapistApplicationController {
     therapistApplicationService;
     constructor(therapistApplicationService) {

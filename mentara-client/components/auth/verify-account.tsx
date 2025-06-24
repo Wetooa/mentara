@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSignUpStore } from "@/store/pre-assessment";
@@ -5,6 +7,8 @@ import { useSignUp } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { fadeDown } from "@/lib/animations";
 
 export default function VerifyAccount() {
   const { isLoaded, signUp } = useSignUp();
@@ -37,7 +41,12 @@ export default function VerifyAccount() {
   }
 
   return (
-    <>
+    <motion.div
+      variants={fadeDown}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="w-full shadow-[inset_0_-4px_4px_-2px_rgba(0,0,0,0.2)] p-8">
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="relative h-40 w-40 mb-2">
@@ -89,6 +98,6 @@ export default function VerifyAccount() {
           Done
         </Link>
       </div>
-    </>
+    </motion.div>
   );
 }

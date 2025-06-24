@@ -14,7 +14,6 @@ export default function Navbar() {
           { content: "About", redirect: "/about" },
           { content: "Community", redirect: "/community" },
           { content: "Treatment", redirect: "/pre-assessment" },
-          // { content: "For Therapists", redirect: "/for-therapists" },
           { content: "Therapist Application", redirect: "/therapist_signup" },
           { content: "Log In", redirect: "/sign-in" },
         ].map(({ content, redirect }, index) => (

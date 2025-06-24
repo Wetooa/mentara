@@ -1,7 +1,7 @@
-import { User } from '@clerk/backend';
-import { PrismaService } from 'src/providers/prisma-client.provider';
 export declare class AuthService {
-    checkAdmin(currentUser: User, prisma: PrismaService): Promise<{
+    getUsers(): Promise<import("@clerk/backend/dist/api/resources/Deserializer").PaginatedResourceResponse<import("@clerk/clerk-sdk-node").User[]>>;
+    getUser(userId: string): Promise<import("@clerk/clerk-sdk-node").User>;
+    checkAdmin(userId: string): Promise<{
         success: boolean;
         admin: {
             id: string;
