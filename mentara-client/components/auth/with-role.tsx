@@ -1,3 +1,5 @@
+"use client";
+
 import { useRole } from "@/hooks/useRole";
 import { UserRole } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -44,4 +46,4 @@ export function withRole<P extends object>(
       </WithRole>
     );
   };
-} 
+}

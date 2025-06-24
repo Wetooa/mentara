@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { TherapistApplicationsTable } from "@/components/admin/TherapistApplicationsTable";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { fadeDown } from "@/lib/animations";
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -106,84 +108,91 @@ export default function TherapistApplicationsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Therapist Applications
-        </h1>
-        <div className="flex items-center gap-2">
-          <Select
-            value={statusFilter || "all"}
-            onValueChange={(value) =>
-              setStatusFilter(value === "all" ? null : value)
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value={APPLICATION_STATUS.PENDING}>
-                Pending
-              </SelectItem>
-              <SelectItem value={APPLICATION_STATUS.APPROVED}>
-                Approved
-              </SelectItem>
-              <SelectItem value={APPLICATION_STATUS.REJECTED}>
-                Rejected
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input
-              type="search"
-              placeholder="Search applications..."
-              className="pl-9 w-[250px]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button variant="outline" onClick={() => fetchApplications()}>
-            Refresh
-          </Button>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            <p className="mt-4 text-gray-500">Loading applications...</p>
-          </div>
-        </div>
-      ) : error ? (
-        <div className="py-8 text-center">
-          <p className="text-red-500">{error}</p>
-          <Button
-            onClick={() => fetchApplications()}
-            variant="outline"
-            className="mt-4"
-          >
-            Try Again
-          </Button>
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <TherapistApplicationsTable
-            applications={filteredApplications}
-            onStatusChange={handleStatusChange}
-          />
-
-          {filteredApplications.length === 0 && (
-            <div className="py-8 text-center text-gray-500">
-              {searchQuery || statusFilter
-                ? "No applications match your filters."
-                : "No therapist applications found."}
+    <motion.div
+      variants={fadeDown}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Therapist Applications
+          </h1>
+          <div className="flex items-center gap-2">
+            <Select
+              value={statusFilter || "all"}
+              onValueChange={(value) =>
+                setStatusFilter(value === "all" ? null : value)
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value={APPLICATION_STATUS.PENDING}>
+                  Pending
+                </SelectItem>
+                <SelectItem value={APPLICATION_STATUS.APPROVED}>
+                  Approved
+                </SelectItem>
+                <SelectItem value={APPLICATION_STATUS.REJECTED}>
+                  Rejected
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                type="search"
+                placeholder="Search applications..."
+                className="pl-9 w-[250px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          )}
+            <Button variant="outline" onClick={() => fetchApplications()}>
+              Refresh
+            </Button>
+          </div>
         </div>
-      )}
-    </div>
+
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+              <p className="mt-4 text-gray-500">Loading applications...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="py-8 text-center">
+            <p className="text-red-500">{error}</p>
+            <Button
+              onClick={() => fetchApplications()}
+              variant="outline"
+              className="mt-4"
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <TherapistApplicationsTable
+              applications={filteredApplications}
+              onStatusChange={handleStatusChange}
+            />
+
+            {filteredApplications.length === 0 && (
+              <div className="py-8 text-center text-gray-500">
+                {searchQuery || statusFilter
+                  ? "No applications match your filters."
+                  : "No therapist applications found."}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }

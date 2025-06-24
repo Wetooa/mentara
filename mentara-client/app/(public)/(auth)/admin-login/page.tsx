@@ -18,6 +18,8 @@ import { AlertCircle, Eye, EyeOff, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { fadeDown } from "@/lib/animations";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -95,102 +97,109 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="w-full max-w-[500px] rounded-3xl shadow-lg overflow-hidden flex flex-col items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="flex flex-col items-center">
-          <Logo />
-          <h2 className="mt-6 text-2xl font-bold text-center text-gray-900">
-            Admin Portal
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Secure access for Mentara administrators
-          </p>
-        </div>
+    <motion.div
+      variants={fadeDown}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="w-full max-w-[500px] rounded-3xl shadow-lg overflow-hidden flex flex-col items-center justify-center bg-gray-50 p-4">
+        <div className="w-full max-w-md space-y-8">
+          <div className="flex flex-col items-center">
+            <Logo />
+            <h2 className="mt-6 text-2xl font-bold text-center text-gray-900">
+              Admin Portal
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Secure access for Mentara administrators
+            </p>
+          </div>
 
-        <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center mb-2">
-              <Shield className="h-8 w-8 text-blue-600" />
-            </div>
-            <CardTitle className="text-xl text-center">
-              Administrator Login
-            </CardTitle>
-            <CardDescription className="text-center">
-              Enter your credentials to access the admin dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@mentara.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+          <Card>
+            <CardHeader className="space-y-1">
+              <div className="flex items-center justify-center mb-2">
+                <Shield className="h-8 w-8 text-blue-600" />
               </div>
+              <CardTitle className="text-xl text-center">
+                Administrator Login
+              </CardTitle>
+              <CardDescription className="text-center">
+                Enter your credentials to access the admin dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
-                <div className="relative">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </label>
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="admin@mentara.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
                 </div>
-              </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={isLoading || !isLoaded || isCheckingAdmin}
-              >
-                {isLoading ? "Authenticating..." : "Sign In"}
-              </Button>
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-              <div className="text-sm text-center">
-                <Link
-                  href="/sign-in"
-                  className="text-blue-600 hover:text-blue-800"
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading || !isLoaded || isCheckingAdmin}
                 >
-                  Return to user login
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                  {isLoading ? "Authenticating..." : "Sign In"}
+                </Button>
 
-        <FormFooter />
+                <div className="text-sm text-center">
+                  <Link
+                    href="/sign-in"
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Return to user login
+                  </Link>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          <FormFooter />
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
