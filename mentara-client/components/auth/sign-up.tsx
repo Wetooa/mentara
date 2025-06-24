@@ -1,3 +1,5 @@
+// MOVE FILE to components/auth/sign-up.tsx
+
 import { PreAssessmentPageFormProps } from "@/app/(public)/(user)/pre-assessment/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,12 +10,12 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { GoogleOneTap, useSignUp } from "@clerk/nextjs";
+import { useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Input } from "../../ui/input";
-import { Separator } from "../../ui/separator";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import ContinueWithGoogle from "@/components/auth/continue-with-google";
 import ContinueWithMicrosoft from "@/components/auth/continue-with-microsoft";
@@ -23,7 +25,6 @@ import {
 } from "@/store/pre-assessment";
 import { answersToAnswerMatrix } from "@/lib/questionnaire";
 
-// Form validation schema
 const formSchema = z
   .object({
     nickname: z.string().min(2, {
@@ -41,6 +42,9 @@ const formSchema = z
     confirmPassword: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
+    role: z.enum(["user", "therapist", "moderator", "admin"], {
+      required_error: "Please select a role.",
+    }),
   })
   .refine((data) => data.email === data.confirmEmail, {
     message: "Emails do not match",
@@ -51,7 +55,7 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-export default function PreAssessmentSignUp({
+function PreAssessmentSignUp({
   handleNextButtonOnClick,
 }: PreAssessmentPageFormProps) {
   const { questionnaires, answers } = usePreAssessmentChecklistStore();
@@ -66,12 +70,13 @@ export default function PreAssessmentSignUp({
       confirmEmail: "",
       password: "",
       confirmPassword: "",
+      role: "user",
     },
     mode: "onChange",
   });
 
   if (!signUp) {
-    return;
+    return null;
   }
 
   const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
@@ -94,6 +99,11 @@ export default function PreAssessmentSignUp({
           emailAddress: values.email,
           password: values.password,
         });
+        await signUp.update({
+          unsafeMetadata: {
+            role: values.role,
+          },
+        });
 
         const protocol = window.location.protocol;
         const host = window.location.host;
@@ -103,7 +113,6 @@ export default function PreAssessmentSignUp({
           redirectUrl: `${protocol}//${host}/sign-up/verify`,
         });
 
-        // const verification = signUpAttempt.verifications.emailAddress;
         handleNextButtonOnClick();
       } catch (error) {
         toast.error(`Failed to resend verification email. ${error.message}`);
@@ -195,6 +204,26 @@ export default function PreAssessmentSignUp({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full h-12 px-4 py-3 rounded-lg border border-input bg-input text-base focus-visible:ring-primary focus-visible:ring-offset-1"
+                    >
+                      <option value="user">User</option>
+                      <option value="therapist">Therapist</option>
+                      <option value="moderator">Moderator</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="flex justify-center items-center gap-2">
@@ -259,3 +288,5 @@ export default function PreAssessmentSignUp({
     </Form>
   );
 }
+
+export default PreAssessmentSignUp;
