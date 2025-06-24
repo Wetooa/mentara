@@ -1,35 +1,39 @@
+"use client";
 import Logo from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function MainPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-tertiary/80 to-white">
-      <section className="py-20 flex items-center justify-center min-h-screen">
-        <div className="container px-4 mx-auto">
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden max-w-4xl mx-auto p-10 text-center">
-            <h1 className="text-4xl md:text-5xl font-semibold text-secondary leading-tight mb-6">
-              Welcome to <Logo />
-            </h1>
-            <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
-              Your journey to wellness begins here. Explore our services and
-              connect with experts who understand your needs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/landing"
-                className={cn(
-                  buttonVariants(),
-                  "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 rounded-lg text-lg shadow-md transition-all"
-                )}
-              >
-                Explore Our Services
-              </Link>
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-tertiary/60 via-white to-tertiary/10">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-10 flex flex-col items-center text-center"
+      >
+        <div className="mb-6">
+          <Logo />
         </div>
-      </section>
+        <h1 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          Welcome to Mentara
+        </h1>
+        <p className="text-gray-600 text-lg mb-8">
+          Your journey to wellness starts here. Continue to explore our platform
+          and discover how we can support you.
+        </p>
+        <Link
+          href="/landing"
+          className={cn(
+            buttonVariants(),
+            "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 rounded-lg text-lg shadow-md transition-all"
+          )}
+        >
+          Continue
+        </Link>
+      </motion.div>
     </div>
   );
 }

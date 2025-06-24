@@ -12,6 +12,7 @@ const protectedRoutes: Record<string, string[]> = {
 // Define public routes that don't require authentication
 const publicRoutes = [
   "/",
+  "/landing",
   "/sign-in",
   "/sign-up",
   "/pre-assessment",
