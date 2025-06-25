@@ -1,8 +1,8 @@
 import {
   IsString,
   IsOptional,
-  IsBoolean,
-  IsDateString,
+  IsEnum,
+  IsNumber,
   IsArray,
 } from 'class-validator';
 
@@ -11,80 +11,70 @@ export class CreateWorksheetDto {
   title: string;
 
   @IsString()
+  description: string;
+
+  @IsString()
+  content: string;
+
+  @IsEnum(['assessment', 'exercise', 'homework'])
+  type: 'assessment' | 'exercise' | 'homework';
+
+  @IsEnum(['easy', 'medium', 'hard'])
+  difficulty: 'easy' | 'medium' | 'hard';
+
+  @IsNumber()
+  estimatedDuration: number; // in minutes
+
   @IsOptional()
-  instructions?: string;
-
-  @IsDateString()
-  dueDate: string;
-
   @IsString()
-  userId: string;
+  therapistId?: string;
 
-  @IsString()
-  therapistId: string;
-
+  @IsOptional()
   @IsArray()
-  @IsOptional()
-  materials?: {
-    filename: string;
-    url: string;
-    fileSize?: number;
-    fileType?: string;
-  }[];
+  @IsString({ each: true })
+  tags?: string[];
 }
 
 export class UpdateWorksheetDto {
-  @IsString()
   @IsOptional()
+  @IsString()
   title?: string;
 
+  @IsOptional()
   @IsString()
-  @IsOptional()
-  instructions?: string;
+  description?: string;
 
-  @IsDateString()
   @IsOptional()
-  dueDate?: string;
-
   @IsString()
-  @IsOptional()
-  status?: 'upcoming' | 'past_due' | 'completed';
+  content?: string;
 
-  @IsBoolean()
   @IsOptional()
-  isCompleted?: boolean;
+  @IsEnum(['assessment', 'exercise', 'homework'])
+  type?: 'assessment' | 'exercise' | 'homework';
 
-  @IsDateString()
   @IsOptional()
-  submittedAt?: string;
+  @IsEnum(['easy', 'medium', 'hard'])
+  difficulty?: 'easy' | 'medium' | 'hard';
 
-  @IsString()
   @IsOptional()
-  feedback?: string;
+  @IsNumber()
+  estimatedDuration?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 }
 
 export class CreateSubmissionDto {
-  @IsString()
   worksheetId: string;
-
-  @IsString()
   filename: string;
-
-  @IsString()
   url: string;
-
-  @IsOptional()
   fileSize?: number;
-
-  @IsString()
-  @IsOptional()
   fileType?: string;
 }
 
 export class SubmitWorksheetDto {
-  @IsArray()
   submissions: CreateSubmissionDto[];
-
-  @IsBoolean()
   complete: boolean;
 }

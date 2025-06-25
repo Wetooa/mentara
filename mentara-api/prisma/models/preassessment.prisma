@@ -1,64 +1,15 @@
 model PreAssessment {
-    id             String                       @id @default(uuid())
-    createdAt      DateTime                     @default(now())
-    updatedAt      DateTime                     @updatedAt
-    questionnaires PreAssessmentQuestionnaire[]
-    answers        PreAssessmentAnswer[]
-    answerMatrix   PreAssessmentAnswerMatrix[]
-    scores         PreAssessmentScore[]
-    severityLevels PreAssessmentSeverityLevel[]
-    clientId       String @unique
-    client         Client                       @relation(fields: [clientId], references: [id])
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    clientId  String   @unique
+    client    Client   @relation(fields: [clientId], references: [userId])
+
+    questionnaires Json // Array of questionnaire objects
+    answers        Json // Array of answer objects
+    answerMatrix   Json // Array of answer matrix objects
+    scores         Json // Array of score objects
+    severityLevels Json // Array of severity level objects
 
     @@index([clientId])
-}
-
-model PreAssessmentQuestionnaire {
-    id              String        @id @default(uuid())
-    preAssessmentId String
-    name            String
-    preAssessment   PreAssessment @relation(fields: [preAssessmentId], references: [id])
-
-    @@index([preAssessmentId])
-}
-
-model PreAssessmentAnswer {
-    id              String        @id @default(uuid())
-    preAssessmentId String
-    questionnaire   String
-    answerIndex     Int
-    value           String
-    preAssessment   PreAssessment @relation(fields: [preAssessmentId], references: [id])
-
-    @@index([preAssessmentId])
-}
-
-model PreAssessmentAnswerMatrix {
-    id              String        @id @default(uuid())
-    preAssessmentId String
-    index           Int
-    value           String
-    preAssessment   PreAssessment @relation(fields: [preAssessmentId], references: [id])
-
-    @@index([preAssessmentId])
-}
-
-model PreAssessmentScore {
-    id              String        @id @default(uuid())
-    preAssessmentId String
-    questionnaire   String
-    score           Float
-    preAssessment   PreAssessment @relation(fields: [preAssessmentId], references: [id])
-
-    @@index([preAssessmentId])
-}
-
-model PreAssessmentSeverityLevel {
-    id              String        @id @default(uuid())
-    preAssessmentId String
-    questionnaire   String
-    level           String
-    preAssessment   PreAssessment @relation(fields: [preAssessmentId], references: [id])
-
-    @@index([preAssessmentId])
 }

@@ -1,27 +1,34 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
-  @IsNotEmpty()
   title: string;
 
   @IsString()
-  @IsNotEmpty()
   content: string;
 
-  @IsUUID()
-  @IsNotEmpty()
-  communityId: string;
+  @IsString()
+  authorId: string;
+
+  @IsOptional()
+  @IsString()
+  communityId?: string;
+
+  @IsOptional()
+  isAnonymous?: boolean;
 }
 
 export class UpdatePostDto {
-  @IsString()
   @IsOptional()
+  @IsString()
   title?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   content?: string;
+
+  @IsOptional()
+  isAnonymous?: boolean;
 }
 
 export class PostResponseDto {

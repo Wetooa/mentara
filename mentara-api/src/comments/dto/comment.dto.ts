@@ -1,23 +1,30 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreateCommentDto {
   @IsString()
-  @IsNotEmpty()
   content: string;
 
-  @IsUUID()
-  @IsNotEmpty()
+  @IsString()
+  authorId: string;
+
+  @IsString()
   postId: string;
 
-  @IsUUID()
   @IsOptional()
+  @IsString()
   parentId?: string;
+
+  @IsOptional()
+  isAnonymous?: boolean;
 }
 
 export class UpdateCommentDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  content: string;
+  content?: string;
+
+  @IsOptional()
+  isAnonymous?: boolean;
 }
 
 export class CommentResponseDto {

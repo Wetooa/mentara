@@ -8,15 +8,12 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PreAssessmentService } from './pre-assessment.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import {
-  CreatePreAssessmentDto,
-  PreAssessmentResponse,
-  ApiResponse,
-} from '../types';
+import { CreatePreAssessmentDto, PreAssessmentResponse } from '../types';
 
 @Controller('pre-assessment')
 @UseGuards(ClerkAuthGuard)
@@ -28,16 +25,28 @@ export class PreAssessmentController {
   async createPreAssessment(
     @CurrentUserId() id: string,
     @Body() data: CreatePreAssessmentDto,
-  ): Promise<ApiResponse<PreAssessmentResponse>> {
-    return this.preAssessmentService.createPreAssessment(id, data);
+  ): Promise<PreAssessmentResponse> {
+    try {
+      return await this.preAssessmentService.createPreAssessment(id, data);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   async getPreAssessment(
     @CurrentUserId() id: string,
-  ): Promise<ApiResponse<PreAssessmentResponse>> {
-    return this.preAssessmentService.getPreAssessmentByClerkId(id);
+  ): Promise<PreAssessmentResponse> {
+    try {
+      return await this.preAssessmentService.getPreAssessmentByUserId(id);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 
   @Put()
@@ -45,15 +54,25 @@ export class PreAssessmentController {
   async updatePreAssessment(
     @CurrentUserId() id: string,
     @Body() data: Partial<CreatePreAssessmentDto>,
-  ): Promise<ApiResponse<PreAssessmentResponse>> {
-    return this.preAssessmentService.updatePreAssessment(id, data);
+  ): Promise<PreAssessmentResponse> {
+    try {
+      return await this.preAssessmentService.updatePreAssessment(id, data);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 
   @Delete()
   @HttpCode(HttpStatus.OK)
-  async deletePreAssessment(
-    @CurrentUserId() id: string,
-  ): Promise<ApiResponse<null>> {
-    return this.preAssessmentService.deletePreAssessment(id);
+  async deletePreAssessment(@CurrentUserId() id: string): Promise<null> {
+    try {
+      return await this.preAssessmentService.deletePreAssessment(id);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 }

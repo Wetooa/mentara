@@ -9,7 +9,7 @@ model Post {
     comments    Comment[]
     hearts      PostHeart[]
     community   Community   @relation(fields: [communityId], references: [id])
-    User        User?       @relation(fields: [userId], references: [id])
+    user        User?       @relation(fields: [userId], references: [id])
     userId      String?
 
     @@index([userId])
@@ -86,7 +86,7 @@ model PostHeart {
     postId    String
     createdAt DateTime @default(now())
     post      Post     @relation(fields: [postId], references: [id])
-    User      User?    @relation(fields: [userId], references: [id])
+    user      User?    @relation(fields: [userId], references: [id])
     userId    String?
 
     @@unique([postId, userId])
@@ -99,7 +99,7 @@ model CommentHeart {
     commentId String
     createdAt DateTime @default(now())
     comment   Comment  @relation(fields: [commentId], references: [id])
-    User      User?    @relation(fields: [userId], references: [id])
+    user      User?    @relation(fields: [userId], references: [id])
     userId    String?
 
     @@unique([commentId, userId])

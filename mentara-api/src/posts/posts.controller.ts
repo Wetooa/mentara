@@ -14,7 +14,7 @@ import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
-import { CreatePostDto, UpdatePostDto } from 'src/types';
+import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 
 @Controller('posts')
 @UseGuards(ClerkAuthGuard)
@@ -22,9 +22,10 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async findAll(@CurrentUserId() clerkId: string): Promise<PostEntity[]> {
+  async findAll(@CurrentUserId() id: string): Promise<PostEntity[]> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
+      const user = await this.postsService.findUserById(id);
+
       return await this.postsService.findAll(user?.id);
     } catch (error) {
       throw new HttpException(
@@ -36,12 +37,12 @@ export class PostsController {
 
   @Get(':id')
   async findOne(
-    @Param('id') id: string,
-    @CurrentUserId() clerkId: string,
+    @Param('id') postId: string,
+    @CurrentUserId() userId: string,
   ): Promise<PostEntity> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
-      const post = await this.postsService.findOne(id, user?.id);
+      const post = await this.postsService.findOne(postId, userId);
+
       if (!post) {
         throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
       }
@@ -56,12 +57,12 @@ export class PostsController {
 
   @Post()
   async create(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() id: string,
     @Body() postData: CreatePostDto,
   ): Promise<PostEntity> {
     try {
-      // First get the user ID from clerkId
-      const user = await this.postsService.findUserByClerkId(clerkId);
+      const user = await this.postsService.findUserById(id);
+
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -85,17 +86,12 @@ export class PostsController {
 
   @Put(':id')
   async update(
-    @CurrentUserId() clerkId: string,
-    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
     @Body() postData: UpdatePostDto,
   ): Promise<PostEntity> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-
-      return await this.postsService.update(id, postData, user.id);
+      return await this.postsService.update(postId, postData, userId);
     } catch (error) {
       throw new HttpException(
         `Failed to update post: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -106,16 +102,11 @@ export class PostsController {
 
   @Delete(':id')
   async remove(
-    @CurrentUserId() clerkId: string,
-    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
   ): Promise<PostEntity> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-
-      return await this.postsService.remove(id, user.id);
+      return await this.postsService.remove(postId, userId);
     } catch (error) {
       throw new HttpException(
         `Failed to delete post: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -139,11 +130,10 @@ export class PostsController {
   @Get('community/:communityId')
   async findByCommunityId(
     @Param('communityId') communityId: string,
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
   ): Promise<PostEntity[]> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
-      return await this.postsService.findByCommunityId(communityId, user?.id);
+      return await this.postsService.findByCommunityId(communityId, userId);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch posts for community: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -155,16 +145,11 @@ export class PostsController {
   // Heart functionality
   @Post(':id/heart')
   async heartPost(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') postId: string,
   ): Promise<{ hearted: boolean }> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-
-      return await this.postsService.heartPost(postId, user.id);
+      return await this.postsService.heartPost(postId, userId);
     } catch (error) {
       throw new HttpException(
         `Failed to heart post: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -175,18 +160,13 @@ export class PostsController {
 
   @Get(':id/hearted')
   async isPostHearted(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') postId: string,
   ): Promise<{ hearted: boolean }> {
     try {
-      const user = await this.postsService.findUserByClerkId(clerkId);
-      if (!user) {
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-      }
-
       const hearted = await this.postsService.isPostHeartedByUser(
         postId,
-        user.id,
+        userId,
       );
       return { hearted };
     } catch (error) {

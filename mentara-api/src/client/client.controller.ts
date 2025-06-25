@@ -10,6 +10,8 @@ import {
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { ClientService } from './client.service';
+import { ClientWithUser } from 'src/types';
+import { Prisma } from '@prisma/client';
 
 @Controller('client')
 @UseGuards(ClerkAuthGuard)
@@ -17,7 +19,7 @@ export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   @Get('profile')
-  async getProfile(@CurrentUserId() id: string): Promise<any> {
+  async getProfile(@CurrentUserId() id: string): Promise<ClientWithUser> {
     try {
       return await this.clientService.getProfile(id);
     } catch (error) {
@@ -31,8 +33,8 @@ export class ClientController {
   @Put('profile')
   async updateProfile(
     @CurrentUserId() id: string,
-    @Body() data: Record<string, any>,
-  ): Promise<any> {
+    @Body() data: Prisma.ClientUpdateInput,
+  ): Promise<ClientWithUser> {
     try {
       return await this.clientService.updateProfile(id, data);
     } catch (error) {

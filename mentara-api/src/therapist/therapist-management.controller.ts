@@ -6,15 +6,13 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
-import {
-  TherapistManagementService,
-  UpdateTherapistSpecializationsDto,
-  TherapistProfileResponse,
-} from './therapist-management.service';
+import { TherapistManagementService } from './therapist-management.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { ApiResponse } from '../types';
+import { Prisma } from '@prisma/client';
+import { ClientWithUser, TherapistWithUser } from 'src/types';
 
 @Controller('therapist-management')
 @UseGuards(ClerkAuthGuard)
@@ -26,50 +24,49 @@ export class TherapistManagementController {
   @Get('profile')
   @HttpCode(HttpStatus.OK)
   async getTherapistProfile(
-    @CurrentUserId() id: string,
-  ): Promise<ApiResponse<TherapistProfileResponse>> {
-    return this.therapistManagementService.getTherapistProfile(id);
+    @CurrentUserId() therapistId: string,
+  ): Promise<TherapistWithUser> {
+    return this.therapistManagementService.getTherapistProfile(therapistId);
   }
 
   @Put('profile')
   @HttpCode(HttpStatus.OK)
   async updateTherapistProfile(
-    @CurrentUserId() id: string,
-    @Body() data: Partial<TherapistProfileResponse>,
-  ): Promise<ApiResponse<TherapistProfileResponse>> {
-    return this.therapistManagementService.updateTherapistProfile(id, data);
+    @CurrentUserId() therapistId: string,
+    @Body() data: Prisma.TherapistUpdateInput,
+  ): Promise<TherapistWithUser> {
+    return this.therapistManagementService.updateTherapistProfile(
+      therapistId,
+      data,
+    );
   }
 
   @Put('specializations')
   @HttpCode(HttpStatus.OK)
   async updateTherapistSpecializations(
-    @CurrentUserId() id: string,
-    @Body() data: UpdateTherapistSpecializationsDto,
-  ): Promise<ApiResponse<TherapistProfileResponse>> {
-    return this.therapistManagementService.updateTherapistSpecializations(
-      id,
+    @CurrentUserId() therapistId: string,
+    @Body() data: Prisma.TherapistUpdateInput,
+  ): Promise<TherapistWithUser> {
+    return this.therapistManagementService.updateTherapistProfile(
+      therapistId,
       data,
     );
-  }
-
-  @Get('available-illnesses')
-  @HttpCode(HttpStatus.OK)
-  async getAvailableIllnesses(): Promise<ApiResponse<string[]>> {
-    return this.therapistManagementService.getAvailableIllnesses();
   }
 
   @Get('assigned-patients')
   @HttpCode(HttpStatus.OK)
   async getAssignedPatients(
-    @CurrentUserId() clerkId: string,
-  ): Promise<ApiResponse<any[]>> {
-    return this.therapistManagementService.getAssignedPatients(clerkId);
+    @CurrentUserId() therapistId: string,
+  ): Promise<any[]> {
+    return this.therapistManagementService.getAssignedPatients(therapistId);
   }
 
   @Get('all-clients')
   @HttpCode(HttpStatus.OK)
-  async getAllClients(): Promise<ApiResponse<any[]>> {
-    return this.therapistManagementService.getAllClients();
+  async getAllClients(
+    @CurrentUserId() therapistId: string,
+  ): Promise<ClientWithUser[]> {
+    return this.therapistManagementService.getAllClients(therapistId);
   }
 
   @Get('client/:id')
@@ -77,7 +74,7 @@ export class TherapistManagementController {
   async getClientById(
     @CurrentUserId() therapistId: string,
     @Param('id') clientId: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ClientWithUser> {
     return this.therapistManagementService.getClientById(therapistId, clientId);
   }
 
@@ -85,7 +82,7 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async getProfile(
     @CurrentUserId() therapistId: string,
-  ): Promise<ApiResponse<TherapistProfileResponse>> {
+  ): Promise<TherapistWithUser> {
     return this.therapistManagementService.getProfile(therapistId);
   }
 
@@ -93,8 +90,8 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async updateProfile(
     @CurrentUserId() therapistId: string,
-    @Body() data: Partial<TherapistProfileResponse>,
-  ): Promise<ApiResponse<TherapistProfileResponse>> {
+    @Body() data: Prisma.TherapistUpdateInput,
+  ): Promise<TherapistWithUser> {
     return this.therapistManagementService.updateProfile(therapistId, data);
   }
 }

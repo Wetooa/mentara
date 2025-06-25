@@ -1,26 +1,24 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
   Query,
   UseGuards,
-  Request,
 } from '@nestjs/common';
-import { BookingService } from './booking.service';
-import {
-  CreateMeetingDto,
-  UpdateMeetingDto,
-  CreateAvailabilityDto,
-  UpdateAvailabilityDto,
-  GetAvailableSlotsDto,
-} from './dto/booking.dto';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
+import { BookingService } from './booking.service';
+import {
+  CreateAvailabilityDto,
+  CreateMeetingDto,
+  UpdateAvailabilityDto,
+  UpdateMeetingDto,
+} from './dto/booking.dto';
 
 @Controller('booking')
 @UseGuards(ClerkAuthGuard)

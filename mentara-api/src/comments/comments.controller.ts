@@ -14,22 +14,17 @@ import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CommentsService } from './comments.service';
 import { Comment, Prisma } from '@prisma/client';
-import { CreateCommentDto, UpdateCommentDto } from 'src/types';
+import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 
 @Controller('comments')
 @UseGuards(ClerkAuthGuard)
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  async findUserByClerkId(clerkId: string) {
-    return this.commentsService.findUserByClerkId(clerkId);
-  }
-
   @Get()
-  async findAll(@CurrentUserId() clerkId: string): Promise<Comment[]> {
+  async findAll(@CurrentUserId() id: string): Promise<Comment[]> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
-      return await this.commentsService.findAll(user?.id);
+      return await this.commentsService.findAll(id);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch comments: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -41,11 +36,10 @@ export class CommentsController {
   @Get(':id')
   async findOne(
     @Param('id') id: string,
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
   ): Promise<Comment> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
-      const comment = await this.commentsService.findOne(id, user?.id);
+      const comment = await this.commentsService.findOne(id, userId);
       if (!comment) {
         throw new HttpException('Comment not found', HttpStatus.NOT_FOUND);
       }
@@ -61,10 +55,10 @@ export class CommentsController {
   @Get('post/:postId')
   async findByPostId(
     @Param('postId') postId: string,
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
   ): Promise<Comment[]> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
+      const user = await this.commentsService.findUserById(userId);
       return await this.commentsService.findByPostId(postId, user?.id);
     } catch (error) {
       throw new HttpException(
@@ -76,12 +70,12 @@ export class CommentsController {
 
   @Post()
   async create(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Body() commentData: CreateCommentDto,
   ): Promise<Comment> {
     try {
       // First get the user ID from clerkId
-      const user = await this.findUserByClerkId(clerkId);
+      const user = await this.commentsService.findUserById(userId);
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -105,12 +99,12 @@ export class CommentsController {
 
   @Put(':id')
   async update(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') id: string,
     @Body() commentData: UpdateCommentDto,
   ): Promise<Comment> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
+      const user = await this.commentsService.findUserById(userId);
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -126,11 +120,11 @@ export class CommentsController {
 
   @Delete(':id')
   async remove(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') id: string,
   ): Promise<Comment> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
+      const user = await this.commentsService.findUserById(userId);
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -147,11 +141,11 @@ export class CommentsController {
   // Heart functionality
   @Post(':id/heart')
   async heartComment(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') commentId: string,
   ): Promise<{ hearted: boolean }> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
+      const user = await this.commentsService.findUserById(userId);
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -167,11 +161,11 @@ export class CommentsController {
 
   @Get(':id/hearted')
   async isCommentHearted(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') commentId: string,
   ): Promise<{ hearted: boolean }> {
     try {
-      const user = await this.findUserByClerkId(clerkId);
+      const user = await this.commentsService.findUserById(userId);
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }

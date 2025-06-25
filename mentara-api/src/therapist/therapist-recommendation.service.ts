@@ -1,226 +1,157 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  TherapistRecommendation,
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-  ApiResponse,
 } from '../types';
+import { PreAssessment } from '@prisma/client';
+import { TherapistWithUser } from 'src/types';
 
 @Injectable()
 export class TherapistRecommendationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
+
+  private calculateYearsOfExperience(startDate: Date): number {
+    const now = new Date();
+    let years = now.getFullYear() - startDate.getFullYear();
+    if (
+      now.getMonth() < startDate.getMonth() ||
+      (now.getMonth() === startDate.getMonth() &&
+        now.getDate() < startDate.getDate())
+    ) {
+      years--;
+    }
+    return years;
+  }
 
   async getRecommendedTherapists(
     request: TherapistRecommendationRequest,
-  ): Promise<ApiResponse<TherapistRecommendationResponse>> {
+  ): Promise<TherapistRecommendationResponse> {
     try {
       // Get user's pre-assessment results
-      const user = await this.prisma.user.findUnique({
-        where: { id: request.userId },
+      const user = await this.prisma.client.findUnique({
+        where: { userId: request.userId },
         include: {
           preAssessment: true,
         },
       });
+      if (!user) throw new NotFoundException('User not found');
+      if (!user.preAssessment)
+        throw new NotFoundException('No pre-assessment found for user');
 
-      if (!user) {
-        return {
-          success: false,
-          message: 'User not found',
-        };
-      }
-
-      if (!user.preAssessment) {
-        return {
-          success: false,
-          message: 'No pre-assessment found for user',
-        };
-      }
-
-      // Extract user's conditions and severity levels
+      // Extract user conditions and severity levels
       const userConditions = this.extractUserConditions(user.preAssessment);
       const severityLevels = user.preAssessment.severityLevels as Record<
         string,
         string
       >;
 
-      // Get all active therapists
+      // Fetch therapists
       const therapists = await this.prisma.therapist.findMany({
         where: {
-          isActive: true,
-          isVerified: true,
+          isActive: request.includeInactive ? undefined : true,
           ...(request.province && { province: request.province }),
           ...(request.maxHourlyRate && {
-            hourlyRate: {
-              lte: request.maxHourlyRate,
-            },
+            hourlyRate: { lte: request.maxHourlyRate },
           }),
         },
-        orderBy: {
-          patientSatisfaction: 'desc',
-        },
-        take: request.limit || 10,
+        orderBy: { patientSatisfaction: 'desc' },
+        take: request.limit ?? 10,
+        include: { user: true },
       });
 
-      // Calculate match scores and filter therapists
-      const recommendations = therapists
-        .map((therapist) =>
-          this.calculateTherapistMatch(
-            therapist,
-            userConditions,
-            severityLevels,
-          ),
-        )
-        .filter((rec) => rec.matchScore > 0)
-        .sort((a, b) => b.matchScore - a.matchScore);
+      // Calculate match scores
+      const therapistsWithScores = therapists.map((therapist) => {
+        const matchScore = this.calculateMatchScore(therapist, userConditions);
+        return { ...therapist, matchScore };
+      });
+
+      // Sort by matchScore descending
+      const sortedTherapists = therapistsWithScores.sort(
+        (a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0),
+      );
 
       // Determine primary and secondary conditions
-      const primaryConditions = this.getPrimaryConditions(
-        userConditions,
-        severityLevels,
-      );
-      const secondaryConditions = this.getSecondaryConditions(
-        userConditions,
-        severityLevels,
-      );
+      const primaryConditions = this.getPrimaryConditions(userConditions);
+      const secondaryConditions = this.getSecondaryConditions(userConditions);
 
       return {
-        success: true,
-        message: 'Therapist recommendations retrieved successfully',
-        data: {
-          recommendations,
-          totalCount: recommendations.length,
-          userConditions: Object.keys(userConditions),
-          matchCriteria: {
-            primaryConditions,
-            secondaryConditions,
-            severityLevels,
-          },
+        totalCount: sortedTherapists.length,
+        userConditions: Object.keys(userConditions),
+        therapists: sortedTherapists,
+        matchCriteria: {
+          primaryConditions,
+          secondaryConditions,
+          severityLevels,
         },
+        page: 1,
+        pageSize: request.limit ?? 10,
       };
     } catch (error) {
-      console.error(
-        'Error getting therapist recommendations:',
-        error instanceof Error ? error.message : error,
+      throw new InternalServerErrorException(
+        error instanceof Error
+          ? error.message
+          : 'Failed to get therapist recommendations',
       );
-      return {
-        success: false,
-        message: 'Failed to get therapist recommendations',
-      };
     }
   }
 
-  private extractUserConditions(preAssessment: any): Record<string, string> {
+  private extractUserConditions(
+    preAssessment: PreAssessment,
+  ): Record<string, string> {
     const conditions: Record<string, string> = {};
     const severityLevels = preAssessment.severityLevels as Record<
       string,
       string
     >;
-
-    // Map questionnaire names to condition names
-    const questionnaireToCondition: Record<string, string> = {
-      Stress: 'Stress',
-      Anxiety: 'Anxiety',
-      Depression: 'Depression',
-      Insomnia: 'Insomnia',
-      Panic: 'Panic Disorder',
-      'Bipolar disorder (BD)': 'Bipolar Disorder',
-      'Obsessive compulsive disorder (OCD)': 'OCD',
-      'Post-traumatic stress disorder (PTSD)': 'PTSD',
-      'Social anxiety': 'Social Anxiety',
-      Phobia: 'Phobias',
-      Burnout: 'Burnout',
-      'Binge eating / Eating disorders': 'Eating Disorders',
-      'ADD / ADHD': 'ADHD',
-      'Substance or Alcohol Use Issues': 'Substance Abuse',
-    };
-
-    // Extract conditions from questionnaires
     const questionnaires = preAssessment.questionnaires as string[];
-    questionnaires.forEach((questionnaire) => {
-      const condition = questionnaireToCondition[questionnaire];
-      if (condition && severityLevels[questionnaire]) {
-        conditions[condition] = severityLevels[questionnaire];
+    questionnaires.forEach((q) => {
+      if (severityLevels[q]) {
+        conditions[q] = severityLevels[q];
       }
     });
-
     return conditions;
   }
 
-  private calculateTherapistMatch(
-    therapist: any,
+  private calculateMatchScore(
+    therapist: TherapistWithUser,
     userConditions: Record<string, string>,
-    severityLevels: Record<string, string>,
-  ): TherapistRecommendation {
-    const illnessSpecializations =
-      (therapist.illnessSpecializations as string[]) || [];
-    const expertiseLevels =
-      (therapist.expertiseLevels as Record<string, number>) || {};
-    const therapeuticApproaches =
-      (therapist.therapeuticApproaches as string[]) || [];
-    const languages = (therapist.languages as string[]) || [];
-
-    let totalScore = 0;
-    let matchedConditions: string[] = [];
-    let maxPossibleScore = 0;
-
-    // Calculate match score based on condition specializations
-    Object.entries(userConditions).forEach(([condition, severity]) => {
-      if (illnessSpecializations.includes(condition)) {
-        const expertiseLevel = expertiseLevels[condition] || 1;
-        const severityWeight = this.getSeverityWeight(severity);
-
-        // Base score for condition match
-        const conditionScore = expertiseLevel * severityWeight * 10;
-        totalScore += conditionScore;
-        matchedConditions.push(condition);
-      }
-
-      // Maximum possible score for this condition
-      maxPossibleScore += 50; // 5 (max expertise) * 10 (max severity weight)
+  ): number {
+    let score = 0;
+    const expertise = (therapist.expertise as string[]) || [];
+    Object.keys(userConditions).forEach((condition) => {
+      if (expertise.includes(condition)) score += 20;
     });
+    score += Math.min(
+      this.calculateYearsOfExperience(therapist.practiceStartDate as Date) * 2,
+      20,
+    );
+    if (therapist.patientSatisfaction)
+      score += Number(therapist.patientSatisfaction) * 10;
+    return score;
+  }
 
-    // Bonus for therapist experience and ratings
-    if (therapist.yearsOfExperience) {
-      totalScore += Math.min(therapist.yearsOfExperience * 2, 20);
-    }
+  private getPrimaryConditions(
+    userConditions: Record<string, string>,
+  ): string[] {
+    return Object.entries(userConditions)
+      .filter(([, severity]) => this.getSeverityWeight(severity) >= 4)
+      .map(([condition]) => condition);
+  }
 
-    if (therapist.patientSatisfaction) {
-      totalScore += (therapist.patientSatisfaction as number) * 10;
-    }
-
-    // Calculate final match score as percentage
-    const matchScore =
-      maxPossibleScore > 0
-        ? Math.round((totalScore / maxPossibleScore) * 100)
-        : 0;
-
-    return {
-      id: therapist.id,
-      clerkUserId: therapist.clerkUserId,
-      firstName: therapist.firstName,
-      lastName: therapist.lastName,
-      email: therapist.email,
-      bio: therapist.bio,
-      profileImageUrl: therapist.profileImageUrl,
-      hourlyRate: therapist.hourlyRate
-        ? Number(therapist.hourlyRate)
-        : undefined,
-      patientSatisfaction: therapist.patientSatisfaction
-        ? Number(therapist.patientSatisfaction)
-        : undefined,
-      totalPatients: therapist.totalPatients,
-      province: therapist.province,
-      providerType: therapist.providerType,
-      yearsOfExperience: therapist.yearsOfExperience,
-      matchedConditions,
-      matchScore,
-      expertiseLevels,
-      therapeuticApproaches,
-      languages,
-      weeklyAvailability: therapist.weeklyAvailability,
-      sessionLength: therapist.sessionLength,
-    };
+  private getSecondaryConditions(
+    userConditions: Record<string, string>,
+  ): string[] {
+    return Object.entries(userConditions)
+      .filter(([, severity]) => {
+        const weight = this.getSeverityWeight(severity);
+        return weight >= 2 && weight < 4;
+      })
+      .map(([condition]) => condition);
   }
 
   private getSeverityWeight(severity: string): number {
@@ -242,31 +173,6 @@ export class TherapistRecommendationService {
       Positive: 4,
       Negative: 0,
     };
-
     return severityWeights[severity] || 1;
-  }
-
-  private getPrimaryConditions(
-    userConditions: Record<string, string>,
-    severityLevels: Record<string, string>,
-  ): string[] {
-    return Object.entries(userConditions)
-      .filter(([_, severity]) => {
-        const weight = this.getSeverityWeight(severity);
-        return weight >= 4; // High severity conditions
-      })
-      .map(([condition, _]) => condition);
-  }
-
-  private getSecondaryConditions(
-    userConditions: Record<string, string>,
-    severityLevels: Record<string, string>,
-  ): string[] {
-    return Object.entries(userConditions)
-      .filter(([_, severity]) => {
-        const weight = this.getSeverityWeight(severity);
-        return weight >= 2 && weight < 4; // Medium severity conditions
-      })
-      .map(([condition, _]) => condition);
   }
 }

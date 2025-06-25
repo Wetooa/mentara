@@ -13,8 +13,8 @@ model Meeting {
     // Relations
     clientId    String
     therapistId String
-    client      Client    @relation("ClientMeetings", fields: [clientId], references: [id])
-    therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [id])
+    client      Client    @relation("ClientMeetings", fields: [clientId], references: [userId])
+    therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId])
 
     // Duration reference
     durationId     String?
@@ -39,7 +39,7 @@ model TherapistAvailability {
     isAvailable Boolean @default(true)
     notes       String? // Optional notes
 
-    therapist Therapist @relation(fields: [therapistId], references: [id])
+    therapist Therapist @relation(fields: [therapistId], references: [userId])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

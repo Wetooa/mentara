@@ -33,7 +33,6 @@ model User {
 }
 
 model Client {
-    id     String @id @default(uuid())
     userId String @unique
     user   User   @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -63,8 +62,8 @@ model ClientTherapist {
     status      String   @default("active") // active, inactive, pending
     notes       String? // Optional notes about the relationship
 
-    client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-    therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+    client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
     @@unique([clientId, therapistId])
     @@index([clientId])
@@ -72,7 +71,6 @@ model ClientTherapist {
 }
 
 model Moderator {
-    id     String @id @default(uuid())
     userId String @unique
     user   User   @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -88,7 +86,6 @@ model Moderator {
 }
 
 model Admin {
-    id     String @id @default(uuid())
     userId String @unique
     user   User   @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -107,7 +104,7 @@ model ClientMedicalHistory {
     clientId  String
     condition String
     notes     String?
-    client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+    client    Client  @relation(fields: [clientId], references: [userId], onDelete: Cascade)
 
     @@index([clientId])
 }
@@ -117,7 +114,7 @@ model ClientPreference {
     clientId String
     key      String
     value    String
-    client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+    client   Client @relation(fields: [clientId], references: [userId], onDelete: Cascade)
 
     @@index([clientId])
 }
@@ -128,7 +125,7 @@ model ModeratorCommunity {
     communityId String
     assignedAt  DateTime @default(now())
 
-    moderator Moderator @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
+    moderator Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
     community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
     @@unique([moderatorId, communityId])

@@ -8,7 +8,7 @@ import { Post, Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findUserById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -313,9 +313,6 @@ export class PostsService {
               },
             },
           },
-          where: {
-            parentId: null, // Only top-level comments
-          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -366,16 +363,6 @@ export class PostsService {
         },
       });
 
-      // Decrease heart count
-      await this.prisma.post.update({
-        where: { id: postId },
-        data: {
-          heartCount: {
-            decrement: 1,
-          },
-        },
-      });
-
       return { hearted: false };
     } else {
       // Add heart
@@ -383,16 +370,6 @@ export class PostsService {
         data: {
           postId,
           userId,
-        },
-      });
-
-      // Increase heart count
-      await this.prisma.post.update({
-        where: { id: postId },
-        data: {
-          heartCount: {
-            increment: 1,
-          },
         },
       });
 

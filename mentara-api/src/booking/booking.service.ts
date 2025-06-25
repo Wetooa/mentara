@@ -15,7 +15,7 @@ import {
 
 @Injectable()
 export class BookingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // Meeting Management
   async createMeeting(createMeetingDto: CreateMeetingDto, clientId: string) {

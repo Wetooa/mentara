@@ -8,7 +8,7 @@ import { Comment, Prisma, User, Reply } from '@prisma/client';
 
 @Injectable()
 export class CommentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findUserById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({

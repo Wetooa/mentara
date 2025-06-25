@@ -6,7 +6,6 @@ import {
   HttpException,
   HttpStatus,
   Param,
-  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -42,18 +41,6 @@ export class UsersController {
     } catch (error) {
       throw new HttpException(
         `Failed to fetch user: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Post()
-  async create(@Body() userData: Prisma.UserCreateInput): Promise<User> {
-    try {
-      return await this.usersService.create(userData);
-    } catch (error) {
-      throw new HttpException(
-        `Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -8,8 +8,8 @@ model Worksheet {
     updatedAt   DateTime              @updatedAt
     materials   WorksheetMaterial[]
     submissions WorksheetSubmission[]
-    client      Client                @relation(fields: [clientId], references: [id])
-    therapist   Therapist?            @relation(fields: [therapistId], references: [id])
+    client      Client                @relation(fields: [clientId], references: [userId])
+    therapist   Therapist?            @relation(fields: [therapistId], references: [userId])
 
     @@index([clientId])
     @@index([therapistId])
@@ -32,7 +32,7 @@ model WorksheetSubmission {
     content     String    @db.Text
     createdAt   DateTime  @default(now())
     worksheet   Worksheet @relation(fields: [worksheetId], references: [id])
-    client      Client    @relation(fields: [clientId], references: [id])
+    client      Client    @relation(fields: [clientId], references: [userId])
 
     @@index([worksheetId])
     @@index([clientId])
