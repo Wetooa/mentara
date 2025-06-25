@@ -1,24 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { User, Prisma } from '@prisma/client';
+import { UserRole } from 'src/utils/role-utils';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
-  }
-
-  async findOne(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  async findById(id: string): Promise<User | null> {
+    return await this.prisma.user.findUnique({
       where: { id },
     });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data,
+  async findAll(): Promise<User[]> {
+    try {
+      return await this.prisma.user.findMany({
+        where: { isActive: true },
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async findOne(id: string): Promise<User | null> {
+    try {
+      return await this.prisma.user.findUnique({
+        where: { id },
+        include: { therapist: true },
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async findByRole(role: string): Promise<User[]> {
+    return await this.prisma.user.findMany({
+      where: { role },
     });
   }
 
@@ -30,15 +48,16 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<User> {
-    return this.prisma.user.delete({
+    return await this.prisma.user.delete({
       where: { id },
     });
   }
 
-  async isFirstSignIn(userId: string): Promise<boolean> {
+  async getUserRole(id: string): Promise<UserRole | null> {
     const user = await this.prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { id },
+      select: { role: true },
     });
-    return !user;
+    return (user?.role as UserRole) || null;
   }
 }

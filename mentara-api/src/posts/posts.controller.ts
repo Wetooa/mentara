@@ -8,49 +8,77 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
+import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 
 @Controller('posts')
+@UseGuards(ClerkAuthGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async findAll(): Promise<PostEntity[]> {
+  async findAll(@CurrentUserId() id: string): Promise<PostEntity[]> {
     try {
-      return await this.postsService.findAll();
+      const user = await this.postsService.findUserById(id);
+
+      return await this.postsService.findAll(user?.id);
     } catch (error) {
       throw new HttpException(
-        `Failed to fetch posts: ${error.message}`,
+        `Failed to fetch posts: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<PostEntity> {
+  async findOne(
+    @Param('id') postId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<PostEntity> {
     try {
-      const post = await this.postsService.findOne(id);
+      const post = await this.postsService.findOne(postId, userId);
+
       if (!post) {
         throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
       }
       return post;
     } catch (error) {
       throw new HttpException(
-        `Failed to fetch post: ${error.message}`,
+        `Failed to fetch post: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   @Post()
-  async create(@Body() postData: Prisma.PostCreateInput): Promise<PostEntity> {
+  async create(
+    @CurrentUserId() id: string,
+    @Body() postData: CreatePostDto,
+  ): Promise<PostEntity> {
     try {
-      return await this.postsService.create(postData);
+      const user = await this.postsService.findUserById(id);
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      const createData: Prisma.PostCreateInput = {
+        title: postData.title,
+        content: postData.content,
+        user: { connect: { id: user.id } },
+        community: {
+          connect: { id: postData.communityId },
+        },
+      };
+      return await this.postsService.create(createData);
     } catch (error) {
       throw new HttpException(
-        `Failed to create post: ${error.message}`,
+        `Failed to create post: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -58,26 +86,30 @@ export class PostsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
-    @Body() postData: Prisma.PostUpdateInput,
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
+    @Body() postData: UpdatePostDto,
   ): Promise<PostEntity> {
     try {
-      return await this.postsService.update(id, postData);
+      return await this.postsService.update(postId, postData, userId);
     } catch (error) {
       throw new HttpException(
-        `Failed to update post: ${error.message}`,
+        `Failed to update post: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<PostEntity> {
+  async remove(
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
+  ): Promise<PostEntity> {
     try {
-      return await this.postsService.remove(id);
+      return await this.postsService.remove(postId, userId);
     } catch (error) {
       throw new HttpException(
-        `Failed to delete post: ${error.message}`,
+        `Failed to delete post: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -89,7 +121,7 @@ export class PostsController {
       return await this.postsService.findByUserId(userId);
     } catch (error) {
       throw new HttpException(
-        `Failed to fetch posts for user: ${error.message}`,
+        `Failed to fetch posts for user: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -98,12 +130,48 @@ export class PostsController {
   @Get('community/:communityId')
   async findByCommunityId(
     @Param('communityId') communityId: string,
+    @CurrentUserId() userId: string,
   ): Promise<PostEntity[]> {
     try {
-      return await this.postsService.findByCommunityId(communityId);
+      return await this.postsService.findByCommunityId(communityId, userId);
     } catch (error) {
       throw new HttpException(
-        `Failed to fetch posts for community: ${error.message}`,
+        `Failed to fetch posts for community: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // Heart functionality
+  @Post(':id/heart')
+  async heartPost(
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
+  ): Promise<{ hearted: boolean }> {
+    try {
+      return await this.postsService.heartPost(postId, userId);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to heart post: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get(':id/hearted')
+  async isPostHearted(
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
+  ): Promise<{ hearted: boolean }> {
+    try {
+      const hearted = await this.postsService.isPostHeartedByUser(
+        postId,
+        userId,
+      );
+      return { hearted };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to check post heart status: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

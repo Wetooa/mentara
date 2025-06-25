@@ -12,13 +12,13 @@ async function bootstrap() {
   });
 
   // Parse JSON payloads
-  app.use(
-    bodyParser.json({
-      verify: (req: any, res, buf) => {
-        req.rawBody = buf;
-      },
-    }),
-  );
+  // app.use(
+  //   bodyParser.json({
+  //     verify: (req: any, res, buf) => {
+  //       req.rawBody = buf;
+  //     },
+  //   }),
+  // );
 
   // Enable CORS with proper configuration
   app.enableCors({
@@ -52,7 +52,8 @@ async function bootstrap() {
   // Global prefix for all API routes
   app.setGlobalPrefix('api');
 
-  await app.listen(process.env.PORT || 5000);
+  await app.listen(process.env.PORT ?? 5000);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
-bootstrap();
+
+void bootstrap();

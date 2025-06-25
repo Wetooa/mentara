@@ -8,9 +8,20 @@ import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
 import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
 import ProgressTracking from "@/components/dashboard/ProgressTracking";
 import NotificationsCenter from "@/components/dashboard/NotificationsCenter";
+import AssignedTherapist from "@/components/dashboard/AssignedTherapist";
 
 export default function DashboardPage() {
   const [dashboardData] = useState(mockUserDashboardData);
+
+  const handleMessageTherapist = () => {
+    // TODO: Navigate to messages page
+    console.log("Navigate to messages");
+  };
+
+  const handleScheduleSession = () => {
+    // TODO: Navigate to scheduling page
+    console.log("Navigate to scheduling");
+  };
 
   return (
     <div className="w-full h-full p-6 space-y-8">
@@ -30,6 +41,10 @@ export default function DashboardPage() {
 
         {/* Right Column */}
         <div className="space-y-6">
+          <AssignedTherapist
+            onMessageTherapist={handleMessageTherapist}
+            onScheduleSession={handleScheduleSession}
+          />
           <ProgressTracking progress={dashboardData.progress} />
           <NotificationsCenter notifications={dashboardData.notifications} />
         </div>

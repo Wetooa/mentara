@@ -3,8 +3,8 @@
 import Logo from "@/components/logo";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/checklist";
 import QuestionnaireForm from "@/components/pre-assessment/forms/questionnaire-form";
-import PreAssessmentSignUp from "@/components/pre-assessment/forms/sign-up";
-import VerifyAccount from "@/components/pre-assessment/forms/verify-account";
+import PreAssessmentSignUp from "@/components/auth/sign-up";
+import VerifyAccount from "@/components/auth/verify-account";
 import PreAssessmentProgressBar from "@/components/pre-assessment/progress-bar";
 import { Button } from "@/components/ui/button";
 import { fade, fadeDown, reset, slide, start } from "@/lib/animations";

@@ -9,25 +9,33 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { WorksheetsService } from './worksheets.service';
 import {
   CreateWorksheetDto,
   UpdateWorksheetDto,
   CreateSubmissionDto,
   SubmitWorksheetDto,
-} from './dto/worksheet.dto';
+  PaginationQuery,
+  FilterQuery,
+} from 'src/types';
 
 @Controller('worksheets')
+@UseGuards(ClerkAuthGuard)
 export class WorksheetsController {
   constructor(private readonly worksheetsService: WorksheetsService) {}
 
   @Get()
   findAll(
-    @Query('userId') userId?: string,
-    @Query('therapistId') therapistId?: string,
-    @Query('status') status?: string,
+    @CurrentUserId() clerkId: string,
+    @Query() query: PaginationQuery & FilterQuery,
   ) {
-    return this.worksheetsService.findAll(userId, therapistId, status);
+    return this.worksheetsService.findAll(
+      query.userId,
+      query.therapistId,
+      query.status,
+    );
   }
 
   @Get(':id')
@@ -36,12 +44,16 @@ export class WorksheetsController {
   }
 
   @Post()
-  create(@Body() createWorksheetDto: CreateWorksheetDto) {
+  create(
+    @CurrentUserId() clerkId: string,
+    @Body() createWorksheetDto: CreateWorksheetDto,
+  ) {
     return this.worksheetsService.create(createWorksheetDto);
   }
 
   @Put(':id')
   update(
+    @CurrentUserId() clerkId: string,
     @Param('id') id: string,
     @Body() updateWorksheetDto: UpdateWorksheetDto,
   ) {
@@ -49,17 +61,21 @@ export class WorksheetsController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
+  delete(@CurrentUserId() clerkId: string, @Param('id') id: string) {
     return this.worksheetsService.delete(id);
   }
 
   @Post('submissions')
-  addSubmission(@Body() createSubmissionDto: CreateSubmissionDto) {
+  addSubmission(
+    @CurrentUserId() clerkId: string,
+    @Body() createSubmissionDto: CreateSubmissionDto,
+  ) {
     return this.worksheetsService.addSubmission(createSubmissionDto);
   }
 
   @Post(':id/submit')
   submitWorksheet(
+    @CurrentUserId() clerkId: string,
     @Param('id') id: string,
     @Body() submitWorksheetDto: SubmitWorksheetDto,
   ) {
@@ -67,7 +83,7 @@ export class WorksheetsController {
   }
 
   @Delete('submissions/:id')
-  deleteSubmission(@Param('id') id: string) {
+  deleteSubmission(@CurrentUserId() clerkId: string, @Param('id') id: string) {
     return this.worksheetsService.deleteSubmission(id);
   }
 }

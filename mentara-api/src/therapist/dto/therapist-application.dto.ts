@@ -1,0 +1,30 @@
+export interface CreateTherapistApplicationDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  province: string;
+  providerType: string;
+  professionalLicenseType: string;
+  isPRCLicensed: string;
+  prcLicenseNumber: string;
+  expirationDateOfLicense?: Date;
+  isLicenseActive: string;
+  practiceStartDate: Date;
+  areasOfExpertise: Record<string, any>;
+  assessmentTools: Record<string, any>;
+  therapeuticApproachesUsedList: Record<string, any>;
+  languagesOffered: Record<string, any>;
+  providedOnlineTherapyBefore: string;
+  comfortableUsingVideoConferencing: string;
+  weeklyAvailability: string;
+  preferredSessionLength: string;
+  accepts: Record<string, any>;
+  privateConfidentialSpace: string;
+  compliesWithDataPrivacyAct: string;
+  professionalLiabilityInsurance: string;
+  complaintsOrDisciplinaryActions: string;
+  willingToAbideByPlatformGuidelines: string;
+  uploadedDocuments?: Record<string, any>;
+  applicationData?: Record<string, any>;
+}
