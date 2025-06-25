@@ -9,13 +9,17 @@
 - [x] Add filtering options (by provider type, specialty, etc.)
 - [x] Design therapist profile cards
 - [x] Create mock data structures for API implementation
-- [ ] Create detailed therapist profile view
-- [ ] Implement booking/appointment request functionality
-- [ ] Add therapist rating and review system
-- [ ] Create favorites/bookmarks for therapists
-- [ ] Implement API integration for therapist listings
-- [ ] Add pagination for therapist listings
-- [ ] Create loading states for API requests
+- [x] Create detailed therapist profile view
+- [x] Implement booking/appointment request functionality
+- [x] Add therapist rating and review system
+- [x] Create favorites/bookmarks for therapists
+- [x] Implement API integration for therapist listings
+- [x] Add pagination for therapist listings
+- [x] Create loading states for API requests
+- [x] Implement advanced filtering system (multi-select specialties, price range, availability)
+- [x] Create comprehensive review system with database schema and API endpoints
+- [x] Build review submission forms and display components
+- [x] Integrate rating display in therapist cards and profile modals
 
 ### User - Dashboard Tab
 
