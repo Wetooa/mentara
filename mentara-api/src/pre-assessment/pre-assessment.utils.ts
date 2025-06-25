@@ -153,7 +153,10 @@ export function calculateQuestionnaireScore(
   questionnaireName: string,
   answers: number[],
 ): QuestionnaireScore {
-  const config = QUESTIONNAIRE_SCORING[questionnaireName];
+  const config =
+    QUESTIONNAIRE_SCORING[
+      questionnaireName as keyof typeof QUESTIONNAIRE_SCORING
+    ];
   if (!config) {
     return { score: 0, severity: 'Unknown questionnaire' };
   }
@@ -165,12 +168,13 @@ export function calculateQuestionnaireScore(
     const answer = answers[i];
     if (answer === -1 || answer === undefined) continue; // Skip unanswered questions
 
-    let questionScore = config.scoreMapping[answer] || 0;
+    let questionScore =
+      config.scoreMapping[answer as keyof typeof config.scoreMapping] || 0;
 
     // Handle reverse scoring for specific questionnaires
     if (
       questionnaireName === 'Stress' &&
-      config.reverseScoredQuestions.includes(i)
+      (config as any).reverseScoredQuestions.includes(i)
     ) {
       questionScore = 4 - questionScore; // Reverse the score
     }
@@ -180,8 +184,8 @@ export function calculateQuestionnaireScore(
 
   // Determine severity level
   let severity = 'Unknown severity';
-  for (const [level, range] of Object.entries(config.severityLevels)) {
-    if (score >= range.range[0] && score <= range.range[1]) {
+  for (const [, range] of Object.entries(config.severityLevels)) {
+    if (score >= (range as any).range[0] && score <= (range as any).range[1]) {
       severity = range.label;
       break;
     }

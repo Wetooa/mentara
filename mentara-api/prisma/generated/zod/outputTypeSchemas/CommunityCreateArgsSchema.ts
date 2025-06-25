@@ -1,0 +1,33 @@
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { CommunityIncludeSchema } from '../inputTypeSchemas/CommunityIncludeSchema'
+import { CommunityCreateInputSchema } from '../inputTypeSchemas/CommunityCreateInputSchema'
+import { CommunityUncheckedCreateInputSchema } from '../inputTypeSchemas/CommunityUncheckedCreateInputSchema'
+import { MembershipFindManyArgsSchema } from "../outputTypeSchemas/MembershipFindManyArgsSchema"
+import { ModeratorCommunityFindManyArgsSchema } from "../outputTypeSchemas/ModeratorCommunityFindManyArgsSchema"
+import { RoomGroupFindManyArgsSchema } from "../outputTypeSchemas/RoomGroupFindManyArgsSchema"
+import { CommunityCountOutputTypeArgsSchema } from "../outputTypeSchemas/CommunityCountOutputTypeArgsSchema"
+// Select schema needs to be in file to prevent circular imports
+//------------------------------------------------------
+
+export const CommunitySelectSchema: z.ZodType<Prisma.CommunitySelect> = z.object({
+  id: z.boolean().optional(),
+  name: z.boolean().optional(),
+  slug: z.boolean().optional(),
+  description: z.boolean().optional(),
+  imageUrl: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  memberships: z.union([z.boolean(),z.lazy(() => MembershipFindManyArgsSchema)]).optional(),
+  moderatorCommunities: z.union([z.boolean(),z.lazy(() => ModeratorCommunityFindManyArgsSchema)]).optional(),
+  roomGroups: z.union([z.boolean(),z.lazy(() => RoomGroupFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => CommunityCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+export const CommunityCreateArgsSchema: z.ZodType<Prisma.CommunityCreateArgs> = z.object({
+  select: CommunitySelectSchema.optional(),
+  include: z.lazy(() => CommunityIncludeSchema).optional(),
+  data: z.union([ CommunityCreateInputSchema,CommunityUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export default CommunityCreateArgsSchema;

@@ -14,11 +14,11 @@ import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { BookingService } from './booking.service';
 import {
-  CreateAvailabilityDto,
-  CreateMeetingDto,
-  UpdateAvailabilityDto,
-  UpdateMeetingDto,
-} from './dto/booking.dto';
+  TherapistAvailabilityCreateDto,
+  TherapistAvailabilityUpdateDto,
+  MeetingCreateDto,
+  MeetingUpdateDto,
+} from 'src/schema/booking.schemas';
 
 @Controller('booking')
 @UseGuards(ClerkAuthGuard)
@@ -28,7 +28,7 @@ export class BookingController {
   // Meeting endpoints
   @Post('meetings')
   async createMeeting(
-    @Body() createMeetingDto: CreateMeetingDto,
+    @Body() createMeetingDto: MeetingCreateDto,
     @CurrentUserId() userId: string,
   ) {
     return this.bookingService.createMeeting(createMeetingDto, userId);
@@ -54,7 +54,7 @@ export class BookingController {
   @Put('meetings/:id')
   async updateMeeting(
     @Param('id') id: string,
-    @Body() updateMeetingDto: UpdateMeetingDto,
+    @Body() updateMeetingDto: MeetingUpdateDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
@@ -78,7 +78,7 @@ export class BookingController {
   // Availability endpoints (therapist only)
   @Post('availability')
   async createAvailability(
-    @Body() createAvailabilityDto: CreateAvailabilityDto,
+    @Body() createAvailabilityDto: TherapistAvailabilityCreateDto,
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
   ) {
@@ -105,7 +105,7 @@ export class BookingController {
   @Put('availability/:id')
   async updateAvailability(
     @Param('id') id: string,
-    @Body() updateAvailabilityDto: UpdateAvailabilityDto,
+    @Body() updateAvailabilityDto: TherapistAvailabilityUpdateDto,
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
   ) {

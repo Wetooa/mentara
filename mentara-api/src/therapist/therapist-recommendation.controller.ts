@@ -11,10 +11,6 @@ import { TherapistRecommendationService } from './therapist-recommendation.servi
 import { PrismaService } from '../providers/prisma-client.provider';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import {
-  TherapistRecommendationRequest,
-  TherapistRecommendationResponse,
-} from '../types';
 
 @Controller('therapist-recommendations')
 @UseGuards(ClerkAuthGuard)
@@ -34,13 +30,9 @@ export class TherapistRecommendationController {
     @Query('maxHourlyRate') maxHourlyRate?: string,
   ): Promise<TherapistRecommendationResponse> {
     try {
-      // Find user by clerkId
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.user.findUniqueOrThrow({
         where: { id: clerkId },
       });
-      if (!user) {
-        throw new InternalServerErrorException('User not found');
-      }
       const request: TherapistRecommendationRequest = {
         userId: user.id,
         limit: limit ? parseInt(limit) : 10,

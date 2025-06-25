@@ -1,0 +1,23 @@
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { WorksheetMaterialIncludeSchema } from '../inputTypeSchemas/WorksheetMaterialIncludeSchema'
+import { WorksheetMaterialWhereUniqueInputSchema } from '../inputTypeSchemas/WorksheetMaterialWhereUniqueInputSchema'
+import { WorksheetArgsSchema } from "../outputTypeSchemas/WorksheetArgsSchema"
+// Select schema needs to be in file to prevent circular imports
+//------------------------------------------------------
+
+export const WorksheetMaterialSelectSchema: z.ZodType<Prisma.WorksheetMaterialSelect> = z.object({
+  id: z.boolean().optional(),
+  worksheetId: z.boolean().optional(),
+  url: z.boolean().optional(),
+  type: z.boolean().optional(),
+  worksheet: z.union([z.boolean(),z.lazy(() => WorksheetArgsSchema)]).optional(),
+}).strict()
+
+export const WorksheetMaterialFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.WorksheetMaterialFindUniqueOrThrowArgs> = z.object({
+  select: WorksheetMaterialSelectSchema.optional(),
+  include: z.lazy(() => WorksheetMaterialIncludeSchema).optional(),
+  where: WorksheetMaterialWhereUniqueInputSchema,
+}).strict() ;
+
+export default WorksheetMaterialFindUniqueOrThrowArgsSchema;

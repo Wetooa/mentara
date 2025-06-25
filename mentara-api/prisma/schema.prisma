@@ -1,19 +1,16 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["prismaSchemaFolder"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+generator zod {
+  provider         = "npx zod-prisma-types"
+  output           = "./generated/zod" // default is ./generated/zod
+  useMultipleFiles = true // default is false
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
-
-// Multi-file schema imports
-// import ./models/user.prisma
-// import ./models/therapist.prisma
-// import ./models/community.prisma
-// import ./models/post.prisma
-// import ./models/worksheet.prisma
-// import ./models/preassessment.prisma
-// import ./models/booking.prisma

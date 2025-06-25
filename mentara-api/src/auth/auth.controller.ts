@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { RegisterClientDto, RegisterTherapistDto } from 'src/types';
 import { AuthService } from './auth.service';
+import { ClientCreateDto, TherapistCreateDto } from 'src/schema/auth.schemas';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +21,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async registerClient(
     @CurrentUserId() id: string,
-    @Body() registerUserDto: RegisterClientDto,
+    @Body() registerUserDto: ClientCreateDto,
   ) {
     return await this.authService.registerClient(id, registerUserDto);
   }
@@ -31,7 +31,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async registerTherapist(
     @CurrentUserId() id: string,
-    @Body() registerTherapistDto: RegisterTherapistDto,
+    @Body() registerTherapistDto: TherapistCreateDto,
   ) {
     return await this.authService.registerTherapist(id, registerTherapistDto);
   }
