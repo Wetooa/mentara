@@ -27,6 +27,7 @@ model User {
 
     replies     Reply[]
     replyHearts ReplyHeart[]
+    reviewsHelpful ReviewHelpful[]
 
     @@index([email])
     @@index([role])
@@ -44,6 +45,7 @@ model Client {
     clientPreferences    ClientPreference[]
     assignedTherapists   ClientTherapist[]
     meetings             Meeting[]              @relation("ClientMeetings")
+    reviews              Review[]               // Reviews written by this client
 
     hasSeenTherapistRecommendations Boolean @default(false)
 

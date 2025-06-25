@@ -4,6 +4,8 @@ import { PhoneCall, MessageSquare, Calendar, Eye, Heart } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/useFavorites";
+import StarRating from "@/components/reviews/StarRating";
+import { useTherapistReviewStats } from "@/hooks/useReviews";
 
 interface TherapistCardProps {
   therapist: TherapistCardData;
@@ -21,6 +23,9 @@ export default function TherapistCard({
   const nextAvailableTime = therapist.availableTimes[0];
   const { isFavorite, toggleFavorite } = useFavorites();
   const isTherapistFavorited = isFavorite(therapist.id);
+  
+  // Fetch review stats for this therapist
+  const { data: reviewStats } = useTherapistReviewStats(therapist.id);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -66,7 +71,18 @@ export default function TherapistCard({
           {/* Therapist Info */}
           <div className="flex flex-col">
             <h3 className="font-bold text-lg">{therapist.name}</h3>
-            <p className="text-sm font-medium mb-2">{therapist.title}</p>
+            <p className="text-sm font-medium mb-1">{therapist.title}</p>
+
+            {/* Rating */}
+            <div className="mb-2">
+              <StarRating 
+                rating={reviewStats?.averageRating || 0}
+                totalReviews={reviewStats?.totalReviews || 0}
+                size="sm"
+                showNumber={true}
+                showReviewCount={true}
+              />
+            </div>
 
             {/* Specialties */}
             <div className="flex flex-wrap gap-1 mb-3">

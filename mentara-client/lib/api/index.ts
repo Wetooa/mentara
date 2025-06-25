@@ -234,6 +234,99 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
       
       getDurations: () => client.request<any[]>("/booking/durations"),
     },
+
+    // Reviews API methods
+    reviews: {
+      create: (data: {
+        rating: number;
+        title?: string;
+        content?: string;
+        therapistId: string;
+        meetingId?: string;
+        isAnonymous?: boolean;
+      }) => client.request<any>("/reviews", { method: "POST", body: data }),
+      
+      update: (id: string, data: {
+        rating?: number;
+        title?: string;
+        content?: string;
+        isAnonymous?: boolean;
+      }) => client.request<any>(`/reviews/${id}`, { method: "PUT", body: data }),
+      
+      delete: (id: string) => 
+        client.request<any>(`/reviews/${id}`, { method: "DELETE" }),
+      
+      getAll: (params: {
+        therapistId?: string;
+        clientId?: string;
+        status?: string;
+        page?: number;
+        limit?: number;
+        sortBy?: string;
+        sortOrder?: string;
+        rating?: number;
+      } = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.therapistId) queryParams.append("therapistId", params.therapistId);
+        if (params.clientId) queryParams.append("clientId", params.clientId);
+        if (params.status) queryParams.append("status", params.status);
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+        if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+        if (params.rating) queryParams.append("rating", params.rating.toString());
+        
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/reviews${queryString}`);
+      },
+      
+      getTherapistReviews: (therapistId: string, params: {
+        page?: number;
+        limit?: number;
+        sortBy?: string;
+        sortOrder?: string;
+        rating?: number;
+      } = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+        if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+        if (params.rating) queryParams.append("rating", params.rating.toString());
+        
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/reviews/therapist/${therapistId}${queryString}`);
+      },
+      
+      getTherapistStats: (therapistId: string) => 
+        client.request<any>(`/reviews/therapist/${therapistId}/stats`),
+      
+      markHelpful: (reviewId: string) => 
+        client.request<any>(`/reviews/${reviewId}/helpful`, { method: "POST" }),
+      
+      moderate: (reviewId: string, data: {
+        status: string;
+        moderationNote?: string;
+      }) => client.request<any>(`/reviews/${reviewId}/moderate`, { method: "POST", body: data }),
+      
+      getPending: (params: {
+        page?: number;
+        limit?: number;
+      } = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/reviews/pending${queryString}`);
+      },
+    },
   };
 
   return client;

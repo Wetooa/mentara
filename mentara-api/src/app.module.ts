@@ -11,6 +11,7 @@ import { TherapistModule } from './therapist/therapist.module';
 import { WorksheetsModule } from './worksheets/worksheets.module';
 import { PreAssessmentModule } from './pre-assessment/pre-assessment.module';
 import { BookingModule } from './booking/booking.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { BookingModule } from './booking/booking.module';
     WorksheetsModule,
     PreAssessmentModule,
     BookingModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [

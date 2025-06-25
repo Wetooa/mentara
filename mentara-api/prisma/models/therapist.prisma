@@ -71,6 +71,9 @@ model Therapist {
 
     // Many-to-many with clients
     assignedClients ClientTherapist[]
+    
+    // Reviews received by this therapist
+    reviews Review[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

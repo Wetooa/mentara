@@ -29,6 +29,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
+import ReviewSection from "@/components/reviews/ReviewSection";
+import ReviewForm from "@/components/reviews/ReviewForm";
+import { useAuth } from "@clerk/nextjs";
 
 interface TherapistProfileModalProps {
   therapist: TherapistCardData | null;
@@ -46,6 +49,8 @@ export default function TherapistProfileModal({
   onMessage,
 }: TherapistProfileModalProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { userId } = useAuth();
+  const [isReviewFormOpen, setIsReviewFormOpen] = React.useState(false);
 
   if (!therapist) return null;
 
@@ -214,6 +219,18 @@ export default function TherapistProfileModal({
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Reviews Section */}
+                <Card>
+                  <CardContent className="p-6">
+                    <ReviewSection
+                      therapistId={therapist.id}
+                      currentUserId={userId || undefined}
+                      onWriteReview={() => setIsReviewFormOpen(true)}
+                      showWriteReviewButton={true}
+                    />
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Sidebar */}
@@ -297,6 +314,14 @@ export default function TherapistProfileModal({
           </div>
         </ScrollArea>
       </DialogContent>
+
+      {/* Review Form Modal */}
+      <ReviewForm
+        therapist={therapist}
+        isOpen={isReviewFormOpen}
+        onClose={() => setIsReviewFormOpen(false)}
+        onSuccess={() => setIsReviewFormOpen(false)}
+      />
     </Dialog>
   );
 }
