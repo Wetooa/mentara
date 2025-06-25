@@ -1,7 +1,9 @@
+"use client";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function LandingPage() {
   return (
@@ -9,7 +11,12 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-tertiary/80 to-white py-16 md:py-0 border-secondary/20 border-b min-h-screen flex items-center justify-center">
         <div className="container px-4 mx-auto">
-          <div className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row max-w-6xl mx-auto"
+          >
             <div className="flex-1 p-8 md:p-12 flex flex-col justify-center gap-8">
               <div>
                 <h1 className="text-secondary text-4xl md:text-5xl font-semibold leading-tight md:leading-tight">
@@ -43,7 +50,12 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            <div className="relative md:w-[500px] h-[400px] md:h-auto overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, x: 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="relative md:w-[500px] h-[400px] md:h-auto overflow-hidden"
+            >
               <Image
                 fill
                 className="object-cover object-center"
@@ -51,8 +63,8 @@ export default function LandingPage() {
                 alt="Woman with flower crown"
                 priority
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -70,7 +82,20 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={{
+              hidden: { opacity: 0, y: 40 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: { staggerChildren: 0.15 },
+              },
+            }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {[
               {
                 title: "Expert Guidance",
@@ -91,8 +116,12 @@ export default function LandingPage() {
                 icon: "✓",
               },
             ].map((item, index) => (
-              <div
+              <motion.div
                 key={index}
+                variants={{
+                  hidden: { opacity: 0, y: 40 },
+                  visible: { opacity: 1, y: 0 },
+                }}
                 className="bg-gray-50 p-8 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all"
               >
                 <div className="w-12 h-12 bg-tertiary/20 rounded-full flex items-center justify-center text-primary font-bold text-xl mb-4">
@@ -102,9 +131,9 @@ export default function LandingPage() {
                   {item.title}
                 </h3>
                 <p className="text-gray-600">{item.description}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           <div className="mt-16 text-center">
             <Link
@@ -123,7 +152,13 @@ export default function LandingPage() {
       {/* Testimonials or Call-to-Action Section */}
       <section className="py-20 bg-gradient-to-b from-white to-tertiary/10">
         <div className="container px-4 mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="bg-white rounded-xl shadow-lg p-8 md:p-12 max-w-4xl mx-auto"
+          >
             <h2 className="text-3xl font-bold text-secondary mb-6 text-center">
               Ready to Begin Your Journey?
             </h2>
@@ -151,7 +186,7 @@ export default function LandingPage() {
                 Learn More About Our Approach →
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

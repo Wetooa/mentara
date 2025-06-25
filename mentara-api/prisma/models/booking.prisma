@@ -1,0 +1,77 @@
+model Meeting {
+    id          String        @id @default(uuid())
+    title       String? // Optional meeting title
+    description String? // Optional meeting description
+    startTime   DateTime
+    endTime     DateTime
+    duration    Int // Duration in minutes
+    status      MeetingStatus @default(SCHEDULED)
+    meetingType String        @default("video") // video, audio, chat
+    meetingUrl  String? // Video call URL
+    notes       String? // Notes from therapist or client
+
+    // Relations
+    clientId    String
+    therapistId String
+    client      Client    @relation("ClientMeetings", fields: [clientId], references: [userId])
+    therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId])
+
+    // Duration reference
+    durationId     String?
+    durationConfig MeetingDuration? @relation(fields: [durationId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([clientId])
+    @@index([therapistId])
+    @@index([startTime])
+    @@index([status])
+    @@index([therapistId, startTime]) // For availability queries
+}
+
+model TherapistAvailability {
+    id          String  @id @default(uuid())
+    therapistId String
+    dayOfWeek   Int // 0 = Sunday, 1 = Monday, etc.
+    startTime   String // Time in HH:MM format (e.g., "09:00")
+    endTime     String // Time in HH:MM format (e.g., "17:00")
+    isAvailable Boolean @default(true)
+    notes       String? // Optional notes
+
+    therapist Therapist @relation(fields: [therapistId], references: [userId])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([therapistId, dayOfWeek, startTime, endTime])
+    @@index([therapistId])
+    @@index([dayOfWeek])
+}
+
+model MeetingDuration {
+    id        String  @id @default(uuid())
+    name      String // e.g., "30 minutes", "1 hour"
+    duration  Int // Duration in minutes
+    isActive  Boolean @default(true)
+    sortOrder Int     @default(0) // For ordering in UI
+
+    // Relations
+    meetings Meeting[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([duration])
+    @@index([isActive])
+    @@index([sortOrder])
+}
+
+enum MeetingStatus {
+    SCHEDULED
+    CONFIRMED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+    NO_SHOW
+}
