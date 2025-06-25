@@ -1,0 +1,9 @@
+{
+  "enabledMcpjsonServers": [
+    "supabase",
+    "Prisma-Local",
+    "clerk",
+    "puppeteer"
+  ],
+  "enableAllProjectMcpServers": true
+}

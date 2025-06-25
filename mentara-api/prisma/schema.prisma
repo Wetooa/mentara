@@ -14,3 +14,13 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// Multi-file schema imports
+// import ./models/user.prisma
+// import ./models/therapist.prisma
+// import ./models/community.prisma
+// import ./models/post.prisma
+// import ./models/worksheet.prisma
+// import ./models/preassessment.prisma
+// import ./models/booking.prisma
+// import ./models/review.prisma
