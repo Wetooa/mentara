@@ -14,6 +14,7 @@ import { Prisma, User } from '@prisma/client';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
 import { UsersService } from './users.service';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 
 @Controller('users')
 @UseGuards(ClerkAuthGuard)
@@ -88,16 +89,47 @@ export class UsersController {
   }
 
   @Public()
-  @Get('is-first-signin/:userId')
+  @Get('is-first-signin/:clerkId')
   async isFirstSignIn(
-    @Param('userId') userId: string,
+    @Param('clerkId') clerkId: string,
   ): Promise<{ isFirstSignIn: boolean }> {
     try {
-      const isFirstSignIn = await this.usersService.isFirstSignIn(userId);
+      const isFirstSignIn = await this.usersService.isFirstSignIn(clerkId);
       return { isFirstSignIn };
     } catch (error) {
       throw new HttpException(
         `Failed to check first sign in: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('me/profile')
+  async getMyProfile(@CurrentUserId() clerkId: string): Promise<User> {
+    try {
+      const user = await this.usersService.findByClerkId(clerkId);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        `Failed to fetch user profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put('me/profile')
+  async updateMyProfile(
+    @CurrentUserId() clerkId: string,
+    @Body() userData: Prisma.UserUpdateInput,
+  ): Promise<User> {
+    try {
+      return await this.usersService.updateByClerkId(clerkId, userData);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to update user profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

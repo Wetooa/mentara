@@ -4,12 +4,10 @@ import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
-import { PrismaService } from './providers/prisma-client.provider';
 import { CommunitiesModule } from './communities/communities.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { TherapistModule } from './therapist/therapist.module';
-import { WebhooksModule } from './webhooks/webhooks.module';
 import { WorksheetsModule } from './worksheets/worksheets.module';
 
 @Module({
@@ -21,7 +19,6 @@ import { WorksheetsModule } from './worksheets/worksheets.module';
     PostsModule,
     CommentsModule,
     TherapistModule,
-    WebhooksModule,
     WorksheetsModule,
   ],
   controllers: [AppController],

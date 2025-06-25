@@ -10,13 +10,15 @@ import {
   HttpStatus,
   Query,
   ForbiddenException,
+  UseGuards,
 } from '@nestjs/common';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { TherapistApplicationService } from './therapist-application.service';
 import { TherapistApplication, Prisma } from '@prisma/client';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { User } from '@clerk/backend';
 
 @Controller('therapist/application')
+@UseGuards(ClerkAuthGuard)
 export class TherapistApplicationController {
   constructor(
     private readonly therapistApplicationService: TherapistApplicationService,
@@ -24,7 +26,7 @@ export class TherapistApplicationController {
 
   @Get()
   async findAll(
-    @CurrentUser() user: User,
+    @CurrentUserId() clerkId: string,
     @Query('status') status?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
@@ -35,9 +37,8 @@ export class TherapistApplicationController {
     try {
       // Check if user is admin
       if (
-        !user ||
-        !user.id ||
-        !(await this.therapistApplicationService.isUserAdmin(user.id))
+        !clerkId ||
+        !(await this.therapistApplicationService.isUserAdmin(clerkId))
       ) {
         throw new ForbiddenException('Unauthorized: Admin access required');
       }
@@ -88,7 +89,7 @@ export class TherapistApplicationController {
 
   @Post()
   async create(
-    @CurrentUser() user: User,
+    @CurrentUserId() clerkId: string,
     @Body() applicationData: any,
   ): Promise<{ success: boolean; message: string; applicationId: string }> {
     try {
@@ -106,7 +107,7 @@ export class TherapistApplicationController {
 
       // Prepare data for database insertion
       const sanitizedData: Prisma.TherapistApplicationCreateInput = {
-        clerkUserId: user?.id || null,
+        clerkUserId: clerkId,
         status: 'pending',
 
         // Personal Info
@@ -191,6 +192,7 @@ export class TherapistApplicationController {
 
   @Put(':id')
   async update(
+    @CurrentUserId() clerkId: string,
     @Param('id') id: string,
     @Body() applicationData: Prisma.TherapistApplicationUpdateInput,
   ): Promise<TherapistApplication> {
@@ -205,7 +207,10 @@ export class TherapistApplicationController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<TherapistApplication> {
+  async remove(
+    @CurrentUserId() clerkId: string,
+    @Param('id') id: string,
+  ): Promise<TherapistApplication> {
     try {
       return await this.therapistApplicationService.remove(id);
     } catch (error) {

@@ -44,9 +44,6 @@ const formSchema = z
     confirmPassword: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
-    role: z.enum(["user", "therapist", "moderator", "admin"], {
-      required_error: "Please select a role.",
-    }),
   })
   .refine((data) => data.email === data.confirmEmail, {
     message: "Emails do not match",
@@ -72,7 +69,6 @@ function PreAssessmentSignUp({
       confirmEmail: "",
       password: "",
       confirmPassword: "",
-      role: "user",
     },
     mode: "onChange",
   });
@@ -102,8 +98,8 @@ function PreAssessmentSignUp({
           password: values.password,
         });
         await signUp.update({
-          unsafeMetadata: {
-            role: values.role,
+          publicMetadata: {
+            role: "user",
           },
         });
 
@@ -211,26 +207,6 @@ function PreAssessmentSignUp({
                         placeholder="Confirm Password"
                         {...field}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="w-full h-12 px-4 py-3 rounded-lg border border-input bg-input text-base focus-visible:ring-primary focus-visible:ring-offset-1"
-                      >
-                        <option value="user">User</option>
-                        <option value="therapist">Therapist</option>
-                        <option value="moderator">Moderator</option>
-                        <option value="admin">Admin</option>
-                      </select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

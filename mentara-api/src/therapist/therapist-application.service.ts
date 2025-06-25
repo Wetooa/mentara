@@ -1,31 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { TherapistApplication, Prisma } from '@prisma/client';
+import { RoleUtils } from 'src/utils/role-utils';
 
 @Injectable()
 export class TherapistApplicationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private roleUtils: RoleUtils,
+  ) {}
 
   async findAll(params: {
     status?: string;
     skip?: number;
     take?: number;
   }): Promise<{ applications: TherapistApplication[]; total: number }> {
-    const { status, skip, take } = params;
+    const { status, skip = 0, take = 100 } = params;
 
-    const where: any = {};
+    const where: Prisma.TherapistApplicationWhereInput = {};
     if (status) {
       where.status = status;
     }
 
-    const applications = await this.prisma.therapistApplication.findMany({
-      where,
-      orderBy: { submissionDate: 'desc' },
-      skip: skip || 0,
-      take: take || 100,
-    });
-
-    const total = await this.prisma.therapistApplication.count({ where });
+    const [applications, total] = await Promise.all([
+      this.prisma.therapistApplication.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.therapistApplication.count({ where }),
+    ]);
 
     return { applications, total };
   }
@@ -60,10 +65,7 @@ export class TherapistApplicationService {
     });
   }
 
-  async isUserAdmin(clerkUserId: string): Promise<boolean> {
-    const admin = await this.prisma.adminUser.findUnique({
-      where: { clerkUserId },
-    });
-    return !!admin;
+  async isUserAdmin(clerkId: string): Promise<boolean> {
+    return this.roleUtils.isUserAdmin(clerkId);
   }
 }

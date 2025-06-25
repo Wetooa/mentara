@@ -8,11 +8,15 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
 
 @Controller('posts')
+@UseGuards(ClerkAuthGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
@@ -45,7 +49,10 @@ export class PostsController {
   }
 
   @Post()
-  async create(@Body() postData: Prisma.PostCreateInput): Promise<PostEntity> {
+  async create(
+    @CurrentUserId() clerkId: string,
+    @Body() postData: Prisma.PostCreateInput,
+  ): Promise<PostEntity> {
     try {
       return await this.postsService.create(postData);
     } catch (error) {
@@ -58,6 +65,7 @@ export class PostsController {
 
   @Put(':id')
   async update(
+    @CurrentUserId() clerkId: string,
     @Param('id') id: string,
     @Body() postData: Prisma.PostUpdateInput,
   ): Promise<PostEntity> {
@@ -72,7 +80,10 @@ export class PostsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<PostEntity> {
+  async remove(
+    @CurrentUserId() clerkId: string,
+    @Param('id') id: string,
+  ): Promise<PostEntity> {
     try {
       return await this.postsService.remove(id);
     } catch (error) {

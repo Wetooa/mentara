@@ -8,11 +8,15 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CommentsService } from './comments.service';
 import { Comment, Prisma } from '@prisma/client';
 
 @Controller('comments')
+@UseGuards(ClerkAuthGuard)
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
@@ -46,6 +50,7 @@ export class CommentsController {
 
   @Post()
   async create(
+    @CurrentUserId() clerkId: string,
     @Body() commentData: Prisma.CommentCreateInput,
   ): Promise<Comment> {
     try {
@@ -60,6 +65,7 @@ export class CommentsController {
 
   @Put(':id')
   async update(
+    @CurrentUserId() clerkId: string,
     @Param('id') id: string,
     @Body() commentData: Prisma.CommentUpdateInput,
   ): Promise<Comment> {
@@ -74,7 +80,10 @@ export class CommentsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Comment> {
+  async remove(
+    @CurrentUserId() clerkId: string,
+    @Param('id') id: string,
+  ): Promise<Comment> {
     try {
       return await this.commentsService.remove(id);
     } catch (error) {

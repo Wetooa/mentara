@@ -1,12 +1,5 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { generateSecurePassword } from "./utils";
-import * as emailjs from "@emailjs/nodejs";
-
-// EmailJS configuration
-const emailjsConfig = {
-  publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "",
-  privateKey: process.env.EMAILJS_PRIVATE_KEY || "",
-};
 
 // Types
 export type UserRole = "user" | "therapist" | "admin";
@@ -21,25 +14,6 @@ export interface AuthUser {
 }
 
 // Helper functions
-export async function sendVerificationEmail(
-  email: string,
-  template: string,
-  params: Record<string, unknown>
-) {
-  try {
-    await emailjs.send(
-      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "",
-      template,
-      params,
-      emailjsConfig
-    );
-    return true;
-  } catch (error) {
-    console.error("Failed to send verification email:", error);
-    return false;
-  }
-}
-
 export async function createUserAccount({
   email,
   password,
@@ -124,4 +98,27 @@ export function hasRole(
 export function hasAnyRole(user: AuthUser | null, roles: UserRole[]): boolean {
   if (!user) return false;
   return roles.includes(user.role);
+}
+
+// Utility to extract role from Clerk sessionClaims or publicMetadata
+export function getUserRoleFromPublicMetadata(
+  sessionClaimsOrUser: any
+): UserRole | null {
+  if (!sessionClaimsOrUser) return null;
+  // Clerk sessionClaims: { publicMetadata: { role: ... } }
+  if (
+    sessionClaimsOrUser.publicMetadata &&
+    sessionClaimsOrUser.publicMetadata.role
+  ) {
+    return sessionClaimsOrUser.publicMetadata.role as UserRole;
+  }
+  // Clerk user object: { publicMetadata: { role: ... } }
+  if (
+    sessionClaimsOrUser.user &&
+    sessionClaimsOrUser.user.publicMetadata &&
+    sessionClaimsOrUser.user.publicMetadata.role
+  ) {
+    return sessionClaimsOrUser.user.publicMetadata.role as UserRole;
+  }
+  return null;
 }

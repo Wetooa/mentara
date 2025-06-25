@@ -8,11 +8,15 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CommunitiesService } from './communities.service';
 import { Community, Prisma } from '@prisma/client';
 
 @Controller('communities')
+@UseGuards(ClerkAuthGuard)
 export class CommunitiesController {
   constructor(private readonly communitiesService: CommunitiesService) {}
 
@@ -46,6 +50,7 @@ export class CommunitiesController {
 
   @Post()
   async create(
+    @CurrentUserId() clerkId: string,
     @Body() communityData: Prisma.CommunityCreateInput,
   ): Promise<Community> {
     try {
@@ -60,6 +65,7 @@ export class CommunitiesController {
 
   @Put(':id')
   async update(
+    @CurrentUserId() clerkId: string,
     @Param('id') id: string,
     @Body() communityData: Prisma.CommunityUpdateInput,
   ): Promise<Community> {
@@ -74,7 +80,10 @@ export class CommunitiesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Community> {
+  async remove(
+    @CurrentUserId() clerkId: string,
+    @Param('id') id: string,
+  ): Promise<Community> {
     try {
       return await this.communitiesService.remove(id);
     } catch (error) {
