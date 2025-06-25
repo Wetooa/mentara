@@ -176,6 +176,64 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
     admin: {
       checkAdmin: () => client.request<any>("/auth/admin", { method: "POST" }),
     },
+
+    // Therapist recommendation API methods
+    therapistRecommendations: {
+      getRecommendations: (params: {
+        limit?: number;
+        includeInactive?: boolean;
+        province?: string;
+        maxHourlyRate?: number;
+      } = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        if (params.includeInactive !== undefined) 
+          queryParams.append("includeInactive", params.includeInactive.toString());
+        if (params.province) queryParams.append("province", params.province);
+        if (params.maxHourlyRate) 
+          queryParams.append("maxHourlyRate", params.maxHourlyRate.toString());
+
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/therapist-recommendations${queryString}`);
+      },
+    },
+
+    // Booking API methods
+    booking: {
+      createMeeting: (data: {
+        therapistId: string;
+        startTime: string;
+        endTime: string;
+        duration: number;
+        title?: string;
+        description?: string;
+        meetingType?: string;
+      }) => client.request<any>("/booking/meetings", { method: "POST", body: data }),
+      
+      getMeetings: () => client.request<any[]>("/booking/meetings"),
+      
+      getMeeting: (id: string) => client.request<any>(`/booking/meetings/${id}`),
+      
+      updateMeeting: (id: string, data: {
+        status?: string;
+        notes?: string;
+        meetingUrl?: string;
+      }) => client.request<any>(`/booking/meetings/${id}`, { method: "PUT", body: data }),
+      
+      cancelMeeting: (id: string) => 
+        client.request<any>(`/booking/meetings/${id}/cancel`, { method: "DELETE" }),
+      
+      getAvailableSlots: (therapistId: string, date: string) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("therapistId", therapistId);
+        queryParams.append("date", date);
+        return client.request<any>(`/booking/slots?${queryParams.toString()}`);
+      },
+      
+      getDurations: () => client.request<any[]>("/booking/durations"),
+    },
   };
 
   return client;
