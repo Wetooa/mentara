@@ -9,49 +9,21 @@ import {
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { UserRole } from 'src/utils/role-utils';
-
-// Import DTOs from controller
-export class RegisterUserDto {
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'user' | 'therapist' | 'moderator' | 'admin';
-  middleName?: string;
-  birthDate?: Date;
-  address?: string;
-}
-
-export class RegisterTherapistDto extends RegisterUserDto {
-  mobile: string;
-  province: string;
-  providerType: string;
-  professionalLicenseType: string;
-  isPRCLicensed: string;
-  prcLicenseNumber: string;
-  expirationDateOfLicense?: Date;
-  isLicenseActive: string;
-  yearsOfExperience: string;
-  areasOfExpertise: any;
-  assessmentTools: any;
-  therapeuticApproachesUsedList: any;
-  languagesOffered: any;
-  providedOnlineTherapyBefore: string;
-  comfortableUsingVideoConferencing: string;
-  weeklyAvailability: string;
-  preferredSessionLength: string;
-  accepts: any;
-  privateConfidentialSpace: string;
-  compliesWithDataPrivacyAct: string;
-  professionalLiabilityInsurance: string;
-  complaintsOrDisciplinaryActions: string;
-  willingToAbideByPlatformGuidelines: string;
-}
+import {
+  RegisterUserDto,
+  RegisterTherapistDto,
+  ApiResponse,
+  User,
+} from 'src/types';
 
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService) {}
 
-  async registerUser(clerkId: string, registerUserDto: RegisterUserDto) {
+  async registerUser(
+    clerkId: string,
+    registerUserDto: RegisterUserDto,
+  ): Promise<ApiResponse<User>> {
     try {
       // Validate role
       if (!Object.values(UserRole).includes(registerUserDto.role as UserRole)) {
@@ -83,22 +55,17 @@ export class AuthService {
 
       return {
         success: true,
-        user: {
-          id: user.id,
-          clerkId: user.clerkId,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-        },
+        data: user as User,
+        message: 'User registered successfully',
       };
     } catch (error) {
-      console.error('User registration error:', error);
-
+      console.error(
+        'User registration error:',
+        error instanceof Error ? error.message : error,
+      );
       if (error instanceof ConflictException) {
         throw error;
       }
-
       throw new InternalServerErrorException('User registration failed');
     }
   }
@@ -106,7 +73,7 @@ export class AuthService {
   async registerTherapist(
     clerkId: string,
     registerTherapistDto: RegisterTherapistDto,
-  ) {
+  ): Promise<ApiResponse<{ user: User; therapist: any }>> {
     try {
       // Validate role
       if (
@@ -138,73 +105,55 @@ export class AuthService {
         },
       });
 
-      // Create therapist application
-      const therapistApplication =
-        await this.prisma.therapistApplication.create({
-          data: {
-            clerkUserId: clerkId,
-            firstName: registerTherapistDto.firstName,
-            lastName: registerTherapistDto.lastName,
-            email: registerTherapistDto.email,
-            mobile: registerTherapistDto.mobile,
-            province: registerTherapistDto.province,
-            providerType: registerTherapistDto.providerType,
-            professionalLicenseType:
-              registerTherapistDto.professionalLicenseType,
-            isPRCLicensed: registerTherapistDto.isPRCLicensed,
-            prcLicenseNumber: registerTherapistDto.prcLicenseNumber,
-            expirationDateOfLicense:
-              registerTherapistDto.expirationDateOfLicense,
-            isLicenseActive: registerTherapistDto.isLicenseActive,
-            yearsOfExperience: registerTherapistDto.yearsOfExperience,
-            areasOfExpertise: registerTherapistDto.areasOfExpertise,
-            assessmentTools: registerTherapistDto.assessmentTools,
-            therapeuticApproachesUsedList:
-              registerTherapistDto.therapeuticApproachesUsedList,
-            languagesOffered: registerTherapistDto.languagesOffered,
-            providedOnlineTherapyBefore:
-              registerTherapistDto.providedOnlineTherapyBefore,
-            comfortableUsingVideoConferencing:
-              registerTherapistDto.comfortableUsingVideoConferencing,
-            weeklyAvailability: registerTherapistDto.weeklyAvailability,
-            preferredSessionLength: registerTherapistDto.preferredSessionLength,
-            accepts: registerTherapistDto.accepts,
-            privateConfidentialSpace:
-              registerTherapistDto.privateConfidentialSpace,
-            compliesWithDataPrivacyAct:
-              registerTherapistDto.compliesWithDataPrivacyAct,
-            professionalLiabilityInsurance:
-              registerTherapistDto.professionalLiabilityInsurance,
-            complaintsOrDisciplinaryActions:
-              registerTherapistDto.complaintsOrDisciplinaryActions,
-            willingToAbideByPlatformGuidelines:
-              registerTherapistDto.willingToAbideByPlatformGuidelines,
-            applicationData: JSON.parse(JSON.stringify(registerTherapistDto)), // Store all data as JSON
-          },
-        });
+      // Create therapist
+      const therapist = await this.prisma.therapist.create({
+        data: {
+          user: { connect: { clerkId } },
+          approved: false,
+          status: 'pending',
+          firstName: registerTherapistDto.firstName,
+          lastName: registerTherapistDto.lastName,
+          email: registerTherapistDto.email,
+          mobile: registerTherapistDto.mobile,
+          province: registerTherapistDto.province,
+          providerType: registerTherapistDto.providerType,
+          professionalLicenseType: registerTherapistDto.professionalLicenseType,
+          isPRCLicensed: registerTherapistDto.isPRCLicensed,
+          prcLicenseNumber: registerTherapistDto.prcLicenseNumber,
+          expirationDateOfLicense: registerTherapistDto.expirationDateOfLicense,
+          isLicenseActive: registerTherapistDto.isLicenseActive,
+          yearsOfExperience: registerTherapistDto.yearsOfExperience,
+          areasOfExpertise: registerTherapistDto.areasOfExpertise,
+          assessmentTools: registerTherapistDto.assessmentTools,
+          therapeuticApproachesUsedList:
+            registerTherapistDto.therapeuticApproachesUsedList,
+          languagesOffered: registerTherapistDto.languagesOffered,
+          providedOnlineTherapyBefore:
+            registerTherapistDto.providedOnlineTherapyBefore,
+          comfortableUsingVideoConferencing:
+            registerTherapistDto.comfortableUsingVideoConferencing,
+          weeklyAvailability: registerTherapistDto.weeklyAvailability,
+          preferredSessionLength: registerTherapistDto.preferredSessionLength,
+          accepts: registerTherapistDto.accepts,
+        },
+      });
 
       return {
         success: true,
-        user: {
-          id: user.id,
-          clerkId: user.clerkId,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
+        data: {
+          user: user as User,
+          therapist: therapist,
         },
-        therapistApplication: {
-          id: therapistApplication.id,
-          status: therapistApplication.status,
-        },
+        message: 'Therapist registered successfully',
       };
     } catch (error) {
-      console.error('Therapist registration error:', error);
-
+      console.error(
+        'Therapist registration error:',
+        error instanceof Error ? error.message : error,
+      );
       if (error instanceof ConflictException) {
         throw error;
       }
-
       throw new InternalServerErrorException('Therapist registration failed');
     }
   }
@@ -217,7 +166,7 @@ export class AuthService {
     return clerkClient.users.getUser(userId);
   }
 
-  async checkAdmin(@CurrentUserId() userId: string) {
+  async checkAdmin(@CurrentUserId() userId: string): Promise<ApiResponse<any>> {
     try {
       const adminUser = await this.prisma.adminUser.findUnique({
         where: { id: userId },
@@ -229,24 +178,23 @@ export class AuthService {
 
       return {
         success: true,
-        admin: {
+        data: {
           id: adminUser.id,
           role: adminUser.role,
           permissions: adminUser.permissions,
         },
       };
     } catch (error) {
-      console.error('Admin authentication error:', error);
-
-      // Re-throw NestJS exceptions
+      console.error(
+        'Admin authentication error:',
+        error instanceof Error ? error.message : error,
+      );
       if (
         error instanceof UnauthorizedException ||
         error instanceof ForbiddenException
       ) {
         throw error;
       }
-
-      // For other errors, throw an internal server error
       throw new InternalServerErrorException('Authentication failed');
     }
   }

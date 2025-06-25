@@ -29,7 +29,10 @@ export class RoleUtils {
       });
       return (user?.role as UserRole) || null;
     } catch (error) {
-      console.error('Error getting user role:', error);
+      console.error(
+        'Error getting user role:',
+        error instanceof Error ? error.message : error,
+      );
       return null;
     }
   }

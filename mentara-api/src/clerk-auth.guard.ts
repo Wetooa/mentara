@@ -32,7 +32,10 @@ export class ClerkAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      this.logger.error('Error verifying token', error);
+      this.logger.error(
+        'Error verifying token',
+        error instanceof Error ? error.message : error,
+      );
       return false;
     }
   }

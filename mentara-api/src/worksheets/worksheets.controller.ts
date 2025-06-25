@@ -17,7 +17,9 @@ import {
   UpdateWorksheetDto,
   CreateSubmissionDto,
   SubmitWorksheetDto,
-} from './dto/worksheet.dto';
+  PaginationQuery,
+  FilterQuery,
+} from 'src/types';
 
 @Controller('worksheets')
 @UseGuards(ClerkAuthGuard)
@@ -27,11 +29,13 @@ export class WorksheetsController {
   @Get()
   findAll(
     @CurrentUserId() clerkId: string,
-    @Query('userId') userId?: string,
-    @Query('therapistId') therapistId?: string,
-    @Query('status') status?: string,
+    @Query() query: PaginationQuery & FilterQuery,
   ) {
-    return this.worksheetsService.findAll(userId, therapistId, status);
+    return this.worksheetsService.findAll(
+      query.userId,
+      query.therapistId,
+      query.status,
+    );
   }
 
   @Get(':id')

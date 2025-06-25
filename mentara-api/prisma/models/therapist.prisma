@@ -1,0 +1,155 @@
+model TherapistExpertise {
+    id          String    @id @default(uuid())
+    therapistId String
+    expertise   String // e.g., "CBT", "Anxiety"
+    level       Int? // Optional: expertise level
+    therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model TherapistApproach {
+    id          String    @id @default(uuid())
+    therapistId String
+    approach    String
+    therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model TherapistLanguage {
+    id          String    @id @default(uuid())
+    therapistId String
+    language    String
+    therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model TherapistIllnessSpecialization {
+    id          String    @id @default(uuid())
+    therapistId String
+    illness     String
+    level       Int?
+    therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model TherapistAccepts {
+    id          String    @id @default(uuid())
+    therapistId String
+    acceptType  String // e.g., "insurance", "self-pay"
+    therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model TherapistTreatmentSuccess {
+    id          String    @id @default(uuid())
+    therapistId String
+    illness     String
+    successRate Float
+    therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model TherapistFileUpload {
+    id          String     @id @default(uuid())
+    fileName    String
+    fileUrl     String
+    fileType    String?
+    uploadedAt  DateTime   @default(now())
+    therapistId String
+    therapist   Therapist? @relation(fields: [therapistId], references: [id])
+
+    @@index([therapistId])
+}
+
+model Therapist {
+    id     String @id @default(uuid())
+    userId String @unique
+    user   User   @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
+
+    // Application/approval
+    approved        Boolean   @default(false)
+    status          String    @default("pending") // pending, approved, rejected
+    submissionDate  DateTime  @default(now())
+    processingDate  DateTime?
+    processedBy     String?
+    applicationData Json?
+
+    // Personal Info
+    firstName String
+    lastName  String
+    email     String
+    mobile    String
+    province  String
+
+    // Professional Info
+    providerType                  String
+    professionalLicenseType       String
+    isPRCLicensed                 String
+    prcLicenseNumber              String
+    expirationDateOfLicense       DateTime?
+    isLicenseActive               String
+    yearsOfExperience             String
+    areasOfExpertise              Json
+    assessmentTools               Json
+    therapeuticApproachesUsedList Json
+    languagesOffered              Json
+
+    // Practice Details
+    providedOnlineTherapyBefore       String
+    comfortableUsingVideoConferencing String
+    weeklyAvailability                String
+    preferredSessionLength            String
+    accepts                           Json
+
+    // Existing fields/relations
+    // Specializations and approaches
+    therapistExpertise              TherapistExpertise[]
+    therapistApproaches             TherapistApproach[]
+    therapistLanguages              TherapistLanguage[]
+    therapistIllnessSpecializations TherapistIllnessSpecialization[]
+    therapistAccepts                TherapistAccepts[]
+    therapistTreatmentSuccess       TherapistTreatmentSuccess[]
+
+    // Practice details
+    sessionLength String?
+    hourlyRate    Decimal? @db.Decimal(10, 2)
+
+    // Profile and verification
+    bio             String? @db.Text
+    profileImageUrl String?
+    profileComplete Boolean @default(false)
+    isActive        Boolean @default(true)
+
+    // Performance metrics
+    treatmentSuccessRates Json?
+    patientSatisfaction   Decimal? @db.Decimal(3, 2)
+    totalPatients         Int      @default(0)
+
+    // Meetings (meetings with clients)
+    meetings Meeting[] @relation("TherapistMeetings")
+
+    // Therapist availabilities
+    therapistAvailabilities TherapistAvailability[]
+
+    // Therapist-specific relations
+    worksheets Worksheet[]
+
+    // Many-to-many with clients
+    assignedClients ClientTherapist[]
+
+    // Documents
+    therapistFileUploads TherapistFileUpload[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+    @@index([isActive])
+    @@index([approved])
+}

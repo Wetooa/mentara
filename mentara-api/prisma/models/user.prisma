@@ -1,0 +1,137 @@
+model User {
+    id         String    @id @unique // Clerk user ID for authentication
+    email      String    @unique // User's email address
+    firstName  String
+    middleName String?
+    lastName   String
+    birthDate  DateTime?
+    address    String?
+    avatarUrl  String? // Profile image URL
+    role       String    @default("client") // client, therapist, moderator, admin
+    isActive   Boolean   @default(true)
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+
+    // Community and content relations (available to all users)
+    memberships   Membership[]
+    posts         Post[]
+    comments      Comment[]
+    postHearts    PostHeart[]
+    commentHearts CommentHeart[]
+
+    // Role-specific relations
+    client    Client?    @relation("UserClient")
+    therapist Therapist? @relation("UserTherapist")
+    moderator Moderator? @relation("UserModerator")
+    admin     Admin?     @relation("UserAdmin")
+
+    replies     Reply[]
+    replyHearts ReplyHeart[]
+
+    @@index([email])
+    @@index([role])
+}
+
+model Client {
+    id     String @id @default(uuid())
+    userId String @unique
+    user   User   @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
+
+    // Patient-specific relations
+    worksheets           Worksheet[]
+    preAssessment        PreAssessment?
+    worksheetSubmissions WorksheetSubmission[]
+    clientMedicalHistory ClientMedicalHistory[]
+    clientPreferences    ClientPreference[]
+    assignedTherapists   ClientTherapist[]
+    meetings             Meeting[]              @relation("ClientMeetings")
+
+    hasSeenTherapistRecommendations Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+
+    @@index([userId])
+}
+
+// Many-to-many relationship between clients and therapists
+model ClientTherapist {
+    id          String   @id @default(uuid())
+    clientId    String
+    therapistId String
+    assignedAt  DateTime @default(now())
+    status      String   @default("active") // active, inactive, pending
+    notes       String? // Optional notes about the relationship
+
+    client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+    therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+    @@unique([clientId, therapistId])
+    @@index([clientId])
+    @@index([therapistId])
+}
+
+model Moderator {
+    id     String @id @default(uuid())
+    userId String @unique
+    user   User   @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)
+
+    // Moderator-specific fields
+    permissions         String[] // Array of moderator permissions
+    assignedCommunities Json? // Communities they moderate
+
+    createdAt            DateTime             @default(now())
+    updatedAt            DateTime             @updatedAt
+    moderatorCommunities ModeratorCommunity[]
+
+    @@index([userId])
+}
+
+model Admin {
+    id     String @id @default(uuid())
+    userId String @unique
+    user   User   @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
+
+    // Admin-specific fields
+    permissions String[] // Array of admin permissions
+    adminLevel  String   @default("admin") // admin, super_admin, etc.
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+}
+
+model ClientMedicalHistory {
+    id        String  @id @default(uuid())
+    clientId  String
+    condition String
+    notes     String?
+    client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+    @@index([clientId])
+}
+
+model ClientPreference {
+    id       String @id @default(uuid())
+    clientId String
+    key      String
+    value    String
+    client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+    @@index([clientId])
+}
+
+model ModeratorCommunity {
+    id          String   @id @default(uuid())
+    moderatorId String
+    communityId String
+    assignedAt  DateTime @default(now())
+
+    moderator Moderator @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
+    community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+    @@unique([moderatorId, communityId])
+    @@index([moderatorId])
+    @@index([communityId])
+}

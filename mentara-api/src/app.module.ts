@@ -9,6 +9,8 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { TherapistModule } from './therapist/therapist.module';
 import { WorksheetsModule } from './worksheets/worksheets.module';
+import { PreAssessmentModule } from './pre-assessment/pre-assessment.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { WorksheetsModule } from './worksheets/worksheets.module';
     CommentsModule,
     TherapistModule,
     WorksheetsModule,
+    PreAssessmentModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [

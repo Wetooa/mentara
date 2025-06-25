@@ -1,0 +1,39 @@
+model Worksheet {
+    id          String                @id @default(uuid())
+    clientId    String
+    therapistId String?
+    title       String
+    description String?
+    createdAt   DateTime              @default(now())
+    updatedAt   DateTime              @updatedAt
+    materials   WorksheetMaterial[]
+    submissions WorksheetSubmission[]
+    client      Client                @relation(fields: [clientId], references: [id])
+    therapist   Therapist?            @relation(fields: [therapistId], references: [id])
+
+    @@index([clientId])
+    @@index([therapistId])
+}
+
+model WorksheetMaterial {
+    id          String    @id @default(uuid())
+    worksheetId String
+    url         String
+    type        String?
+    worksheet   Worksheet @relation(fields: [worksheetId], references: [id])
+
+    @@index([worksheetId])
+}
+
+model WorksheetSubmission {
+    id          String    @id @default(uuid())
+    worksheetId String
+    clientId    String
+    content     String    @db.Text
+    createdAt   DateTime  @default(now())
+    worksheet   Worksheet @relation(fields: [worksheetId], references: [id])
+    client      Client    @relation(fields: [clientId], references: [id])
+
+    @@index([worksheetId])
+    @@index([clientId])
+}
