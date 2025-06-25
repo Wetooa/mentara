@@ -8,11 +8,13 @@ import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TherapistCardData } from "@/types/therapist";
+import { TherapistFilters } from "@/types/filters";
 import { toast } from "sonner";
 
 interface TherapistListingProps {
   searchQuery: string;
   filter: string;
+  advancedFilters?: TherapistFilters;
 }
 
 // Loading skeleton component
@@ -43,6 +45,7 @@ function TherapistCardSkeleton() {
 export default function TherapistListing({
   searchQuery,
   filter,
+  advancedFilters,
 }: TherapistListingProps) {
   const [selectedTherapist, setSelectedTherapist] = useState<TherapistCardData | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -60,13 +63,14 @@ export default function TherapistListing({
     refetch 
   } = useFilteredTherapists(searchQuery, filter, { 
     page: currentPage, 
-    pageSize: 12 
+    pageSize: 12,
+    advancedFilters 
   });
 
   // Reset page when search/filter changes
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filter]);
+  }, [searchQuery, filter, advancedFilters]);
 
   const handleViewProfile = (therapist: TherapistCardData) => {
     setSelectedTherapist(therapist);

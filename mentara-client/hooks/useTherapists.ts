@@ -6,6 +6,7 @@ import {
   TherapistCardData,
   transformTherapistForCard 
 } from '@/types/therapist';
+import { TherapistFilters } from '@/types/filters';
 
 // Hook for fetching therapist recommendations
 export function useTherapistRecommendations(params: TherapistSearchParams = {}) {
@@ -42,9 +43,13 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
 export function useFilteredTherapists(
   searchQuery: string,
   filter: string,
-  params: TherapistSearchParams & { page?: number; pageSize?: number } = {}
+  params: TherapistSearchParams & { 
+    page?: number; 
+    pageSize?: number; 
+    advancedFilters?: TherapistFilters;
+  } = {}
 ) {
-  const { page = 1, pageSize = 20, ...searchParams } = params;
+  const { page = 1, pageSize = 20, advancedFilters, ...searchParams } = params;
   
   const { therapists, isLoading, error, refetch, totalCount, userConditions, matchCriteria } = useTherapistCards({
     ...searchParams,
@@ -53,6 +58,7 @@ export function useFilteredTherapists(
 
   // Client-side filtering
   const filteredTherapists = therapists.filter((therapist) => {
+    // Basic search and filter
     const matchesSearch =
       searchQuery === "" ||
       therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,6 +70,60 @@ export function useFilteredTherapists(
     const matchesFilter =
       filter === "All" ||
       therapist.specialties.some((specialty) => specialty === filter);
+
+    // Advanced filters
+    if (advancedFilters) {
+      // Specialties filter
+      if (advancedFilters.specialties.length > 0) {
+        const hasMatchingSpecialty = advancedFilters.specialties.some(filterSpecialty =>
+          therapist.specialties.some(therapistSpecialty =>
+            therapistSpecialty.toLowerCase().includes(filterSpecialty.toLowerCase())
+          )
+        );
+        if (!hasMatchingSpecialty) return false;
+      }
+
+      // Price range filter
+      const therapistPrice = parseFloat(therapist.sessionPrice.replace('$', ''));
+      if (therapistPrice < advancedFilters.priceRange.min || 
+          therapistPrice > advancedFilters.priceRange.max) {
+        return false;
+      }
+
+      // Location filter
+      if (advancedFilters.location && therapist.location) {
+        if (!therapist.location.toLowerCase().includes(advancedFilters.location.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // Rating filter
+      if (advancedFilters.rating > 0 && therapist.rating < advancedFilters.rating) {
+        return false;
+      }
+
+      // Experience filter
+      if (therapist.experience < advancedFilters.experienceLevel.min || 
+          therapist.experience > advancedFilters.experienceLevel.max) {
+        return false;
+      }
+
+      // Language filter (if therapist has language data)
+      if (advancedFilters.languages.length > 0 && therapist.languages) {
+        const hasMatchingLanguage = advancedFilters.languages.some(filterLang =>
+          therapist.languages?.some((therapistLang: string) =>
+            therapistLang.toLowerCase().includes(filterLang.toLowerCase())
+          )
+        );
+        if (!hasMatchingLanguage) return false;
+      }
+
+      // Availability filter (basic implementation - could be enhanced)
+      if (Object.values(advancedFilters.availability).some(Boolean)) {
+        // For now, just check if therapist is active
+        if (!therapist.isActive) return false;
+      }
+    }
 
     return matchesSearch && matchesFilter;
   });

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import * as React from "react";
+import { useForm, FieldValues, ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Star, User, EyeOff } from "lucide-react";
@@ -52,7 +52,7 @@ export default function ReviewForm({
   onClose,
   onSuccess,
 }: ReviewFormProps) {
-  const [hoveredRating, setHoveredRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = React.useState(0);
   const createReviewMutation = useCreateReview();
 
   const form = useForm<ReviewFormData>({
@@ -143,7 +143,7 @@ export default function ReviewForm({
             <FormField
               control={form.control}
               name="rating"
-              render={({ field }) => (
+              render={({ field }: { field: ControllerRenderProps<ReviewFormData, "rating"> }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold">How would you rate your experience?</FormLabel>
                   <FormControl>
@@ -167,7 +167,7 @@ export default function ReviewForm({
             <FormField
               control={form.control}
               name="title"
-              render={({ field }) => (
+              render={({ field }: { field: ControllerRenderProps<ReviewFormData, "title"> }) => (
                 <FormItem>
                   <FormLabel>Review Title</FormLabel>
                   <FormControl>
@@ -185,7 +185,7 @@ export default function ReviewForm({
             <FormField
               control={form.control}
               name="content"
-              render={({ field }) => (
+              render={({ field }: { field: ControllerRenderProps<ReviewFormData, "content"> }) => (
                 <FormItem>
                   <FormLabel>Your Review</FormLabel>
                   <FormControl>
@@ -208,7 +208,7 @@ export default function ReviewForm({
             <FormField
               control={form.control}
               name="isAnonymous"
-              render={({ field }) => (
+              render={({ field }: { field: ControllerRenderProps<ReviewFormData, "isAnonymous"> }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
                     <Checkbox

@@ -199,7 +199,7 @@ export async function PATCH(
         const clerkUser = await client.users.createUser({
           emailAddress: [application.email],
           password: generatedPassword,
-          phoneNumber: application.phoneNumber
+          phoneNumber: application.phoneNumber,
           firstName: application.firstName,
           lastName: application.lastName,
           publicMetadata: {

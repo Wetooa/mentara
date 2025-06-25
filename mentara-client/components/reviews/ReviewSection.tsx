@@ -56,7 +56,7 @@ export default function ReviewSection({
   } = useTherapistReviewStats(therapistId);
 
   const reviews = reviewsData?.reviews || [];
-  const hasMoreReviews = reviewsData?.pagination.total > 6;
+  const hasMoreReviews = (reviewsData?.pagination?.total || 0) > 6;
 
   const renderStars = (rating: number, size: "sm" | "md" = "sm") => {
     const starSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
@@ -190,7 +190,7 @@ export default function ReviewSection({
           </div>
 
           <Badge variant="outline">
-            {reviewsData?.pagination.total || 0} review{(reviewsData?.pagination.total || 0) !== 1 ? 's' : ''}
+            {reviewsData?.pagination?.total || 0} review{(reviewsData?.pagination?.total || 0) !== 1 ? 's' : ''}
           </Badge>
         </div>
       )}
@@ -242,7 +242,7 @@ export default function ReviewSection({
               
               <CollapsibleTrigger asChild>
                 <Button variant="outline" className="w-full mt-4">
-                  {isExpanded ? 'Show Less' : `Show More Reviews (${(reviewsData?.pagination.total || 0) - 6} more)`}
+                  {isExpanded ? 'Show Less' : `Show More Reviews (${(reviewsData?.pagination?.total || 0) - 6} more)`}
                   <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                 </Button>
               </CollapsibleTrigger>
