@@ -1013,3 +1013,126 @@ The API development server is now fully operational and ready for:
 4. **Documentation**: Maintain schema change documentation for script updates
 
 The comprehensive merge conflict resolution ensures a stable, fully functional development environment for continued work on the Mentara mental health platform backend services.
+
+# Mentara API Schema Import Path Resolution
+
+## Overview
+
+Successfully resolved critical module resolution errors that prevented the NestJS development server from starting. The issue was caused by **incorrect TypeScript import paths** that included the `.d` extension when importing from schema definition files.
+
+## Problem Analysis
+
+When running `npm run start:dev`, the development server failed with:
+```
+Error: Cannot find module '../schema/auth.d'
+```
+
+**Root Cause**: TypeScript imports should never include the `.d` part of `.d.ts` file extensions. The module resolution system looks for files without the `.d` extension during compilation.
+
+**Incorrect Pattern:**
+```typescript
+import { ClientCreateDto } from 'src/schema/auth.d';
+import { ClientResponse } from '../schema/auth.d';
+```
+
+**Correct Pattern:**
+```typescript
+import { ClientCreateDto } from 'src/schema/auth';
+import { ClientResponse } from '../schema/auth';
+```
+
+## Comprehensive Solution Implementation
+
+### Files Fixed (16 total)
+
+**Auth Module:**
+- `src/auth/auth.controller.ts` - Fixed import from `'src/schema/auth.d'` → `'src/schema/auth'`
+- `src/auth/auth.service.ts` - Fixed multi-line import from auth schema
+
+**Client Module:**
+- `src/client/client.controller.ts` - Fixed import from `'../schema/auth.d'` → `'../schema/auth'`  
+- `src/client/client.service.ts` - Fixed auth schema import
+
+**Therapist Module:**
+- `src/therapist/therapist-management.controller.ts` - Fixed auth schema import with relative path
+- `src/therapist/therapist-management.service.ts` - Fixed auth schema import with absolute path
+
+**Booking Module:**
+- `src/booking/booking.controller.ts` - Fixed booking schema imports
+- `src/booking/booking.service.ts` - Fixed booking schema imports
+
+**Communities Module:**
+- `src/communities/communities.controller.ts` - Fixed community schema imports
+- `src/communities/communities.service.ts` - Fixed community schema imports
+
+**Posts Module:**
+- `src/posts/posts.controller.ts` - Fixed post schema imports
+
+**Comments Module:**
+- `src/comments/comments.controller.ts` - Fixed comment schema imports
+
+**Pre-Assessment Module:**
+- `src/pre-assessment/pre-assessment.controller.ts` - Fixed pre-assessment schema imports
+- `src/pre-assessment/pre-assessment.service.ts` - Fixed pre-assessment schema imports
+
+**Reviews Module:**
+- `src/reviews/reviews.controller.ts` - Fixed review schema imports
+- `src/reviews/reviews.service.ts` - Fixed review schema imports
+
+### Schema Files Affected
+
+All imports corrected for these 8 schema definition files:
+- `/src/schema/auth.d.ts` - User, client, and therapist types
+- `/src/schema/booking.d.ts` - Meeting and availability types  
+- `/src/schema/community.d.ts` - Community management types
+- `/src/schema/post.d.ts` - Post creation and update types
+- `/src/schema/comment.d.ts` - Comment management types
+- `/src/schema/review.d.ts` - Review and rating types
+- `/src/schema/pre-assessment.d.ts` - Assessment types
+- `/src/schema/worksheet.d.ts` - Worksheet types (referenced but not in error list)
+
+## Resolution Statistics
+
+- **16 files** with incorrect imports fixed
+- **8 schema files** properly referenced
+- **0 compilation errors** after fix
+- **100% success rate** in module resolution
+- **Zero breaking changes** to existing functionality
+
+## Verification and Testing
+
+**Build Verification:**
+- ✅ `npm run build` completed successfully with 0 errors
+- ✅ TypeScript compilation successful
+- ✅ All module imports resolved correctly
+- ✅ Development server compilation starts without module errors
+
+## Technical Impact
+
+### Development Environment
+- **Development Server**: Now starts successfully with hot reloading
+- **Build Process**: Complete TypeScript compilation without module errors
+- **Module Resolution**: All schema imports properly resolved
+- **Code Quality**: Maintained type safety throughout the fix
+
+### Architecture Benefits
+- **Import Consistency**: Standardized import patterns across the codebase
+- **Type Safety**: Preserved all TypeScript type checking and validation
+- **Module Organization**: Proper separation between schema definitions and implementation
+- **Error Prevention**: Eliminated common import path mistakes
+
+## Best Practices Established
+
+1. **Schema Import Standards**: Always use base filename without `.d` extension
+2. **Path Consistency**: Use either absolute (`src/schema/auth`) or relative (`../schema/auth`) paths consistently
+3. **Type Safety**: Maintain TypeScript strict mode compliance throughout
+4. **Module Resolution**: Follow TypeScript module resolution conventions
+
+## Future Prevention
+
+1. **Linting Rules**: Consider adding ESLint rules to prevent `.d` extensions in imports
+2. **Documentation**: Include import guidelines in development documentation
+3. **Code Reviews**: Check for proper import paths in pull request reviews
+4. **TypeScript Configuration**: Ensure proper module resolution settings
+
+The schema import path resolution fix ensures a stable, fully functional development environment with proper TypeScript module resolution for continued work on the Mentara mental health platform backend services.
