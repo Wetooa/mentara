@@ -17,6 +17,7 @@ import { Task, TaskFile } from "@/components/worksheets/types";
 import { worksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
+import { useToast } from "@/contexts/ToastContext";
 
 // Mock data - fallback if API fails
 const getMockTask = (taskId: string): Task | undefined => {
@@ -79,6 +80,7 @@ export default function TaskDetailPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const taskId = params.taskId as string;
   const { userId } = useAuth();
+  const { showToast } = useToast();
 
   // Determine if task is editable based on submission status
   const isTaskEditable =
@@ -153,7 +155,43 @@ export default function TaskDetailPage() {
       const file = e.target.files[0];
       console.log("Selected file:", file.name);
 
+      // File size validation (5MB limit)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        showToast("File size must be less than 5MB. Please choose a smaller file.", "error");
+        return;
+      }
+
+      // File type validation
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+        "image/jpeg",
+        "image/png",
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        showToast("Invalid file type. Please upload PDF, DOC, DOCX, TXT, JPG, or PNG files only.", "error");
+        return;
+      }
+
       try {
+        // Show uploading state
+        const tempFile = {
+          id: "uploading",
+          filename: file.name,
+          url: "",
+          uploading: true,
+        };
+
+        // Temporarily add the file to show upload progress
+        setTask({
+          ...task,
+          myWork: [...(task.myWork || []), tempFile],
+        });
+
         // Upload the file to the server
         const uploadedFile = await worksheetsApi.uploadFile(
           file,
@@ -161,11 +199,11 @@ export default function TaskDetailPage() {
           "submission"
         );
 
-        // Update the task with the new file
+        // Update the task with the uploaded file (remove temp file and add real one)
         setTask({
           ...task,
           myWork: [
-            ...(task.myWork || []),
+            ...(task.myWork || []).filter((work) => work.id !== "uploading"),
             {
               id: uploadedFile.id,
               filename: uploadedFile.filename,
@@ -173,9 +211,18 @@ export default function TaskDetailPage() {
             },
           ],
         });
+        
+        showToast(`Successfully uploaded ${file.name}`, "success");
       } catch (err) {
         console.error("Error uploading file:", err);
-        alert("Failed to upload file. Please try again.");
+        
+        // Remove the temporary file on error
+        setTask({
+          ...task,
+          myWork: (task.myWork || []).filter((work) => work.id !== "uploading"),
+        });
+        
+        showToast("Failed to upload file. Please try again.", "error");
       }
 
       // Reset the file input
@@ -205,13 +252,16 @@ export default function TaskDetailPage() {
       await worksheetsApi.deleteSubmission(fileId);
 
       // Update the local state
+      const deletedFile = task.myWork?.find((work) => work.id === fileId);
       setTask({
         ...task,
         myWork: task.myWork?.filter((work) => work.id !== fileId) || [],
       });
+      
+      showToast(`Successfully deleted ${deletedFile?.filename || "file"}`, "success");
     } catch (err) {
       console.error("Error deleting file:", err);
-      alert("Failed to delete file. Please try again.");
+      showToast("Failed to delete file. Please try again.", "error");
     }
 
     // Close dropdown
@@ -247,10 +297,14 @@ export default function TaskDetailPage() {
         });
 
         setTask(updatedWorksheet);
+        showToast(
+          task.isCompleted ? "Worksheet unsubmitted successfully" : "Worksheet submitted successfully",
+          "success"
+        );
       }
     } catch (err) {
       console.error("Error submitting worksheet:", err);
-      alert("Failed to submit worksheet. Please try again.");
+      showToast("Failed to submit worksheet. Please try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -435,65 +489,89 @@ export default function TaskDetailPage() {
                 {task.myWork.map((work) => (
                   <div
                     key={work.id}
-                    className="flex items-center justify-between bg-gray-100 p-3 rounded-md"
+                    className={`flex items-center justify-between p-3 rounded-md ${
+                      work.uploading
+                        ? "bg-blue-50 border border-blue-200"
+                        : "bg-gray-100"
+                    }`}
                   >
                     <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-primary mr-3" />
-                      <span className="text-secondary">{work.filename}</span>
+                      <FileText className={`h-5 w-5 mr-3 ${
+                        work.uploading ? "text-blue-500" : "text-primary"
+                      }`} />
+                      <div className="flex flex-col">
+                        <span className={`text-secondary ${
+                          work.uploading ? "text-blue-700" : ""
+                        }`}>
+                          {work.filename}
+                        </span>
+                        {work.uploading && (
+                          <span className="text-xs text-blue-600">
+                            Uploading...
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center">
-                      {/* Download button is always available */}
-                      <button
-                        className="text-gray-500 hover:text-primary p-1 mr-1"
-                        onClick={() => handleDownload(work)}
-                        title="Download"
-                      >
-                        <Download className="h-5 w-5" />
-                      </button>
-
-                      {/* More options button with dropdown */}
-                      <button
-                        className="text-gray-500 hover:text-secondary p-1 relative"
-                        onClick={(e) => toggleFileOptions(work.id, e)}
-                        title="More options"
-                      >
-                        <MoreHorizontal className="h-5 w-5" />
-
-                        {/* Dropdown menu for file */}
-                        {showFileOptions === work.id && (
-                          <div
-                            className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
-                            onClick={(e) => e.stopPropagation()}
+                      {work.uploading ? (
+                        // Show spinner for uploading files
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                      ) : (
+                        <>
+                          {/* Download button is always available */}
+                          <button
+                            className="text-gray-500 hover:text-primary p-1 mr-1"
+                            onClick={() => handleDownload(work)}
+                            title="Download"
                           >
-                            <ul className="py-1">
-                              <li>
-                                <button
-                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                  onClick={() => handleDownload(work)}
-                                >
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Download
-                                </button>
-                              </li>
+                            <Download className="h-5 w-5" />
+                          </button>
 
-                              {/* Delete option only if task is not completed */}
-                              {isTaskEditable && (
-                                <li>
-                                  <button
-                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                    onClick={() =>
-                                      handleDeleteAttachment(work.id)
-                                    }
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete
-                                  </button>
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        )}
-                      </button>
+                          {/* More options button with dropdown */}
+                          <button
+                            className="text-gray-500 hover:text-secondary p-1 relative"
+                            onClick={(e) => toggleFileOptions(work.id, e)}
+                            title="More options"
+                          >
+                            <MoreHorizontal className="h-5 w-5" />
+
+                            {/* Dropdown menu for file */}
+                            {showFileOptions === work.id && (
+                              <div
+                                className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ul className="py-1">
+                                  <li>
+                                    <button
+                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                      onClick={() => handleDownload(work)}
+                                    >
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Download
+                                    </button>
+                                  </li>
+
+                                  {/* Delete option only if task is not completed */}
+                                  {isTaskEditable && (
+                                    <li>
+                                      <button
+                                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                        onClick={() =>
+                                          handleDeleteAttachment(work.id)
+                                        }
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete
+                                      </button>
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
