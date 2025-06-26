@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { Prisma } from '@prisma/client';
-import { ClientWithUser } from 'src/types';
+import { ClientResponse, ClientUpdateDto } from 'src/schema/client.schemas';
 
 @Injectable()
 export class ClientService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getProfile(userId: string): Promise<ClientWithUser> {
+  async getProfile(userId: string): Promise<ClientResponse> {
     const client = await this.prisma.client.findUnique({
       where: { userId },
       include: { user: true },
@@ -20,8 +19,8 @@ export class ClientService {
 
   async updateProfile(
     userId: string,
-    data: Prisma.ClientUpdateInput,
-  ): Promise<ClientWithUser> {
+    data: ClientUpdateDto,
+  ): Promise<ClientResponse> {
     return await this.prisma.client.update({
       where: { userId },
       data,

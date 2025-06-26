@@ -32,15 +32,15 @@ model Therapist {
     languagesOffered              Json
 
     // Practice Details
-    providedOnlineTherapyBefore       String
-    comfortableUsingVideoConferencing String
-    weeklyAvailability                String
-    preferredSessionLength            String
-    accepts                           Json
-    privateConfidentialSpace          String?
-    compliesWithDataPrivacyAct        String?
-    professionalLiabilityInsurance    String?
-    complaintsOrDisciplinaryActions   String?
+    providedOnlineTherapyBefore        String
+    comfortableUsingVideoConferencing  String
+    weeklyAvailability                 String
+    preferredSessionLength             String
+    accepts                            Json
+    privateConfidentialSpace           String?
+    compliesWithDataPrivacyAct         String?
+    professionalLiabilityInsurance     String?
+    complaintsOrDisciplinaryActions    String?
     willingToAbideByPlatformGuidelines String?
 
     // Denormalized fields (moved from separate tables)
@@ -77,7 +77,7 @@ model Therapist {
 
     // Many-to-many with clients
     assignedClients ClientTherapist[]
-    
+
     // Reviews received by this therapist
     reviews Review[]
 

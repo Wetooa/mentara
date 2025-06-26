@@ -27,11 +27,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         comments: {
@@ -94,11 +93,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         comments: {
@@ -158,11 +156,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         files: true,
@@ -200,11 +197,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         files: true,
@@ -245,11 +241,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         files: true,
@@ -266,13 +261,10 @@ export class PostsService {
     });
   }
 
-  async findByCommunityId(
-    communityId: string,
-    userId?: string,
-  ): Promise<Post[]> {
+  async findByRoomId(roomId: string, userId?: string): Promise<Post[]> {
     return this.prisma.post.findMany({
       where: {
-        communityId,
+        roomId,
       },
       include: {
         user: {
@@ -283,11 +275,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         comments: {

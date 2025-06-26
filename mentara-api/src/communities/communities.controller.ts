@@ -15,13 +15,15 @@ import {
 } from '@nestjs/common';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { CommunityStats, CommunityWithMembers } from 'src/types';
 import { CommunitiesService } from './communities.service';
 import {
   CreateCommunityDto,
   UpdateCommunityDto,
   CommunityResponse,
-} from './dto/community.dto';
+  CommunityStatsResponse,
+  CommunityWithMembersResponse,
+  CommunityWithStructureResponse,
+} from 'src/schema/community.schemas';
 
 @Controller('communities')
 @UseGuards(ClerkAuthGuard)
@@ -43,20 +45,9 @@ export class CommunitiesController {
   }
 
   @Get('stats')
-  async getStats(): Promise<CommunityStats> {
+  async getStats(): Promise<CommunityStatsResponse> {
     try {
       return await this.communitiesService.getStats();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Unknown error',
-      );
-    }
-  }
-
-  @Get('illness/:illness')
-  async findByIllness(): Promise<CommunityResponse[]> {
-    try {
-      return await this.communitiesService.findByIllness();
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
@@ -95,7 +86,7 @@ export class CommunitiesController {
     @Param('id') id: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-  ): Promise<CommunityWithMembers> {
+  ): Promise<CommunityWithMembersResponse> {
     try {
       return await this.communitiesService.getMembers(
         id,
@@ -115,7 +106,7 @@ export class CommunitiesController {
     @Body() communityData: CreateCommunityDto,
   ): Promise<CommunityResponse> {
     try {
-      return await this.communitiesService.create(communityData);
+      return await this.communitiesService.createCommunity(communityData);
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
@@ -150,6 +141,7 @@ export class CommunitiesController {
     }
   }
 
+  // TODO: Implement membership logic
   @Post(':id/join')
   @HttpCode(HttpStatus.OK)
   joinCommunity(): void {
@@ -175,5 +167,44 @@ export class CommunitiesController {
         error instanceof Error ? error.message : 'Unknown error',
       );
     }
+  }
+
+  @Get('with-structure')
+  async getAllWithStructure(): Promise<CommunityWithStructureResponse[]> {
+    return await this.communitiesService.findAllWithStructure();
+  }
+
+  @Get(':id/with-structure')
+  async getOneWithStructure(@Param('id') id: string) {
+    return await this.communitiesService.findOneWithStructure(id);
+  }
+
+  @Post(':id/room-group')
+  async createRoomGroup(
+    @Param('id') communityId: string,
+    @Body() dto: { name: string; order: number },
+  ) {
+    return await this.communitiesService.createRoomGroup(
+      communityId,
+      dto.name,
+      dto.order,
+    );
+  }
+
+  @Post('room-group/:roomGroupId/room')
+  async createRoom(
+    @Param('roomGroupId') roomGroupId: string,
+    @Body() dto: { name: string; order: number },
+  ) {
+    return await this.communitiesService.createRoom(
+      roomGroupId,
+      dto.name,
+      dto.order,
+    );
+  }
+
+  @Get('room-group/:roomGroupId/rooms')
+  async getRoomsByGroup(@Param('roomGroupId') roomGroupId: string) {
+    return await this.communitiesService.findRoomsByGroup(roomGroupId);
   }
 }

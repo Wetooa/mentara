@@ -2,18 +2,13 @@ model Community {
     id                   String               @id @default(uuid())
     name                 String               @unique
     slug                 String               @unique
-    description          String?
-    illness              String?              // Associated illness/condition
-    imageUrl             String?
-    isActive             Boolean              @default(true)
-    isPrivate            Boolean              @default(false)
-    memberCount          Int                  @default(0)
-    postCount            Int                  @default(0)
+    description          String
+    imageUrl             String
     createdAt            DateTime             @default(now())
     updatedAt            DateTime             @updatedAt
     memberships          Membership[]
-    posts                Post[]
     moderatorCommunities ModeratorCommunity[]
+    roomGroups           RoomGroup[]
 
     @@index([name])
     @@index([slug])
@@ -32,4 +27,36 @@ model Membership {
     @@unique([userId, communityId])
     @@index([userId])
     @@index([communityId])
+}
+
+model ModeratorCommunity {
+    id          String   @id @default(uuid())
+    moderatorId String
+    communityId String
+    assignedAt  DateTime @default(now())
+
+    moderator Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
+    community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+    @@unique([moderatorId, communityId])
+    @@index([moderatorId])
+    @@index([communityId])
+}
+
+model RoomGroup {
+    id          String    @id @default(uuid())
+    name        String
+    order       Int // for UI ordering
+    community   Community @relation(fields: [communityId], references: [id])
+    communityId String
+    rooms       Room[]
+}
+
+model Room {
+    id          String    @id @default(uuid())
+    name        String
+    order       Int
+    roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id])
+    roomGroupId String
+    posts       Post[]
 }

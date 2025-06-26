@@ -19,7 +19,7 @@ model Meeting {
     // Duration reference
     durationId     String?
     durationConfig MeetingDuration? @relation(fields: [durationId], references: [id])
-    
+
     // Reviews for this meeting
     reviews Review[]
 

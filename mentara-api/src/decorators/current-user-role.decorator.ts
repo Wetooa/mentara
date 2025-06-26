@@ -19,7 +19,7 @@ export const CurrentUserRole = createParamDecorator(
       });
 
       await prisma.$disconnect();
-      return user?.role || null;
+      return user?.role ?? null;
     } catch (error) {
       console.error(
         'Error getting user role:',

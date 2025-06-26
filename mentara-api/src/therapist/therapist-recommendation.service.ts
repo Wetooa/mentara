@@ -4,12 +4,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
-  TherapistRecommendationRequest,
-  TherapistRecommendationResponse,
-} from '../types';
 import { PreAssessment } from '@prisma/client';
 import { TherapistWithUser } from 'src/types';
+import { TherapistRecommendationResponse } from 'shared-types';
+import { TherapistRecommendationRequest } from './therapist-application.dto';
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -71,7 +69,7 @@ export class TherapistRecommendationService {
       });
 
       // Sort by matchScore descending
-      const sortedTherapists = therapistsWithScores.sort(
+      const sortedTherapists = therapistsWithScores.toSorted(
         (a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0),
       );
 
@@ -127,7 +125,7 @@ export class TherapistRecommendationService {
       if (expertise.includes(condition)) score += 20;
     });
     score += Math.min(
-      this.calculateYearsOfExperience(therapist.practiceStartDate as Date) * 2,
+      this.calculateYearsOfExperience(therapist.practiceStartDate) * 2,
       20,
     );
     if (therapist.patientSatisfaction)

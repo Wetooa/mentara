@@ -1,12 +1,18 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["prismaSchemaFolder"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+generator zod {
+  provider         = "npx zod-prisma-types"
+  output           = "./generated/zod" // default is ./generated/zod
+  useMultipleFiles = true // default is false
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // Multi-file schema - models are automatically loaded from the models/ directory

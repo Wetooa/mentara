@@ -6,34 +6,25 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  CreateMeetingDto,
-  UpdateMeetingDto,
-  CreateAvailabilityDto,
-  UpdateAvailabilityDto,
-  MeetingStatus,
-} from './dto/booking.dto';
+  MeetingCreateDto,
+  MeetingUpdateDto,
+  TherapistAvailabilityCreateDto,
+  TherapistAvailabilityUpdateDto,
+} from 'src/schema/booking.schemas';
 
 @Injectable()
 export class BookingService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Meeting Management
-  async createMeeting(createMeetingDto: CreateMeetingDto, clientId: string) {
+  async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     try {
-      const {
-        therapistId,
-        startTime,
-        endTime,
-        duration,
-        title,
-        description,
-        meetingType,
-      } = createMeetingDto;
+      const { id, startTime, endTime } = createMeetingDto;
 
       // Verify therapist exists and is active
       const therapist = await this.prisma.user.findFirst({
         where: {
-          id: therapistId,
+          id,
           role: 'therapist',
           isActive: true,
           therapist: {
@@ -50,7 +41,7 @@ export class BookingService {
       const relationship = await this.prisma.clientTherapist.findFirst({
         where: {
           clientId,
-          therapistId,
+          therapistId: id,
         },
       });
 
@@ -65,7 +56,7 @@ export class BookingService {
         where: {
           OR: [
             {
-              therapistId,
+              therapistId: id,
               startTime: { lt: new Date(endTime) },
               endTime: { gt: new Date(startTime) },
               status: { in: ['SCHEDULED', 'CONFIRMED'] },
@@ -93,7 +84,7 @@ export class BookingService {
 
       const availability = await this.prisma.therapistAvailability.findFirst({
         where: {
-          therapistId,
+          therapistId: id,
           dayOfWeek,
           startTime: { lte: startTimeStr },
           endTime: { gte: endTimeStr },
@@ -110,20 +101,12 @@ export class BookingService {
       // Create the meeting
       const meeting = await this.prisma.meeting.create({
         data: {
-          title,
-          description,
-          startTime: new Date(startTime),
-          endTime: new Date(endTime),
-          duration,
-          meetingType,
-          clientId,
-          therapistId,
+          ...createMeetingDto,
           status: 'SCHEDULED',
         },
         include: {
           client: {
             select: {
-              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -135,7 +118,6 @@ export class BookingService {
           },
           therapist: {
             select: {
-              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -158,12 +140,11 @@ export class BookingService {
       const where =
         role === 'therapist' ? { therapistId: userId } : { clientId: userId };
 
-      return this.prisma.meeting.findMany({
+      return await this.prisma.meeting.findMany({
         where,
         include: {
           client: {
             select: {
-              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -175,7 +156,6 @@ export class BookingService {
           },
           therapist: {
             select: {
-              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -199,7 +179,6 @@ export class BookingService {
         include: {
           client: {
             select: {
-              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -211,7 +190,6 @@ export class BookingService {
           },
           therapist: {
             select: {
-              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -243,7 +221,7 @@ export class BookingService {
 
   async updateMeeting(
     id: string,
-    updateMeetingDto: UpdateMeetingDto,
+    updateMeetingDto: MeetingUpdateDto,
     userId: string,
     role: string,
   ) {
@@ -256,30 +234,12 @@ export class BookingService {
           'Cannot update completed or cancelled meetings',
         );
       }
-
-      const updateData: {
-        status?: MeetingStatus;
-        notes?: string;
-        meetingUrl?: string;
-      } = {};
-
-      if (updateMeetingDto.status) {
-        updateData.status = updateMeetingDto.status;
-      }
-      if (updateMeetingDto.notes) {
-        updateData.notes = updateMeetingDto.notes;
-      }
-      if (updateMeetingDto.meetingUrl) {
-        updateData.meetingUrl = updateMeetingDto.meetingUrl;
-      }
-
       return this.prisma.meeting.update({
         where: { id },
-        data: updateData,
+        data: updateMeetingDto,
         include: {
           client: {
             select: {
-              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -291,7 +251,6 @@ export class BookingService {
           },
           therapist: {
             select: {
-              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -325,7 +284,6 @@ export class BookingService {
         include: {
           client: {
             select: {
-              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -337,7 +295,6 @@ export class BookingService {
           },
           therapist: {
             select: {
-              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -355,7 +312,7 @@ export class BookingService {
 
   // Availability Management
   async createAvailability(
-    createAvailabilityDto: CreateAvailabilityDto,
+    createAvailabilityDto: TherapistAvailabilityCreateDto,
     therapistId: string,
   ) {
     try {
@@ -410,7 +367,7 @@ export class BookingService {
 
   async getAvailability(therapistId: string) {
     try {
-      return this.prisma.therapistAvailability.findMany({
+      return await this.prisma.therapistAvailability.findMany({
         where: { therapistId },
         orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
       });
@@ -423,7 +380,7 @@ export class BookingService {
 
   async updateAvailability(
     id: string,
-    updateAvailabilityDto: UpdateAvailabilityDto,
+    updateAvailabilityDto: TherapistAvailabilityUpdateDto,
     therapistId: string,
   ) {
     try {
@@ -435,29 +392,9 @@ export class BookingService {
         throw new NotFoundException('Availability slot not found');
       }
 
-      const updateData: {
-        startTime?: string;
-        endTime?: string;
-        isAvailable?: boolean;
-        notes?: string;
-      } = {};
-
-      if (updateAvailabilityDto.startTime !== undefined) {
-        updateData.startTime = updateAvailabilityDto.startTime;
-      }
-      if (updateAvailabilityDto.endTime !== undefined) {
-        updateData.endTime = updateAvailabilityDto.endTime;
-      }
-      if (updateAvailabilityDto.isAvailable !== undefined) {
-        updateData.isAvailable = updateAvailabilityDto.isAvailable;
-      }
-      if (updateAvailabilityDto.notes !== undefined) {
-        updateData.notes = updateAvailabilityDto.notes;
-      }
-
       return this.prisma.therapistAvailability.update({
         where: { id },
-        data: updateData,
+        data: updateAvailabilityDto,
       });
     } catch (error) {
       throw new BadRequestException(

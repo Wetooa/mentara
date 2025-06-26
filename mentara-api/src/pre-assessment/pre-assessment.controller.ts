@@ -13,7 +13,8 @@ import {
 import { PreAssessmentService } from './pre-assessment.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CreatePreAssessmentDto, PreAssessmentResponse } from '../types';
+import { CreatePreAssessmentDto } from 'src/schema/pre-assessment.schemas';
+import { PreAssessment } from '@prisma/client';
 
 @Controller('pre-assessment')
 @UseGuards(ClerkAuthGuard)
@@ -25,7 +26,7 @@ export class PreAssessmentController {
   async createPreAssessment(
     @CurrentUserId() id: string,
     @Body() data: CreatePreAssessmentDto,
-  ): Promise<PreAssessmentResponse> {
+  ): Promise<PreAssessment> {
     try {
       return await this.preAssessmentService.createPreAssessment(id, data);
     } catch (error) {
@@ -37,9 +38,7 @@ export class PreAssessmentController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getPreAssessment(
-    @CurrentUserId() id: string,
-  ): Promise<PreAssessmentResponse> {
+  async getPreAssessment(@CurrentUserId() id: string): Promise<PreAssessment> {
     try {
       return await this.preAssessmentService.getPreAssessmentByUserId(id);
     } catch (error) {
@@ -54,7 +53,7 @@ export class PreAssessmentController {
   async updatePreAssessment(
     @CurrentUserId() id: string,
     @Body() data: Partial<CreatePreAssessmentDto>,
-  ): Promise<PreAssessmentResponse> {
+  ): Promise<PreAssessment> {
     try {
       return await this.preAssessmentService.updatePreAssessment(id, data);
     } catch (error) {

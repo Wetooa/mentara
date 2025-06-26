@@ -11,180 +11,198 @@ export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findUserById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { id },
-    });
+    try {
+      return await this.prisma.user.findUnique({ where: { id } });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   async findAll(userId?: string): Promise<Comment[]> {
-    return this.prisma.comment.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-          },
-        },
-        post: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        replies: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
-              },
+    try {
+      return await this.prisma.comment.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
             },
           },
-          orderBy: {
-            createdAt: 'asc',
+          post: {
+            select: {
+              id: true,
+              title: true,
+            },
           },
-        },
-        files: true,
-        hearts: userId
-          ? {
-              where: {
-                userId,
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
               },
-            }
-          : false,
-        _count: {
-          select: {
-            replies: true,
-            hearts: true,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          },
+          files: true,
+          hearts: userId
+            ? {
+                where: {
+                  userId,
+                },
+              }
+            : false,
+          _count: {
+            select: {
+              replies: true,
+              hearts: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   async findOne(id: string, userId?: string): Promise<Comment | null> {
-    return this.prisma.comment.findUnique({
-      where: { id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+    try {
+      return await this.prisma.comment.findUnique({
+        where: { id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
           },
-        },
-        post: {
-          select: {
-            id: true,
-            title: true,
+          post: {
+            select: {
+              id: true,
+              title: true,
+            },
           },
-        },
-        replies: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
               },
             },
           },
-        },
-        files: true,
-        hearts: userId
-          ? {
-              where: {
-                userId,
-              },
-            }
-          : false,
-        _count: {
-          select: {
-            replies: true,
-            hearts: true,
+          files: true,
+          hearts: userId
+            ? {
+                where: {
+                  userId,
+                },
+              }
+            : false,
+          _count: {
+            select: {
+              replies: true,
+              hearts: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   async findByPostId(postId: string, userId?: string): Promise<Comment[]> {
-    return this.prisma.comment.findMany({
-      where: {
-        postId,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-          },
+    try {
+      return await this.prisma.comment.findMany({
+        where: {
+          postId,
         },
-        replies: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
               },
             },
           },
-        },
-        files: true,
-        hearts: userId
-          ? {
-              where: {
-                userId,
-              },
-            }
-          : false,
-        _count: {
-          select: {
-            replies: true,
-            hearts: true,
+          files: true,
+          hearts: userId
+            ? {
+                where: {
+                  userId,
+                },
+              }
+            : false,
+          _count: {
+            select: {
+              replies: true,
+              hearts: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   async create(data: Prisma.CommentCreateInput): Promise<Comment> {
-    return this.prisma.comment.create({
-      data,
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+    try {
+      return await this.prisma.comment.create({
+        data,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
           },
-        },
-        post: {
-          select: {
-            id: true,
-            title: true,
+          post: {
+            select: {
+              id: true,
+              title: true,
+            },
           },
+          files: true,
         },
-        files: true,
-      },
-    });
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   async update(
@@ -192,105 +210,117 @@ export class CommentsService {
     data: Prisma.CommentUpdateInput,
     userId: string,
   ): Promise<Comment> {
-    const comment = await this.prisma.comment.findUnique({
-      where: { id },
-      select: { userId: true },
-    });
+    try {
+      const comment = await this.prisma.comment.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
 
-    if (!comment) {
-      throw new NotFoundException('Comment not found');
-    }
+      if (!comment) {
+        throw new NotFoundException('Comment not found');
+      }
 
-    if (comment.userId !== userId) {
-      throw new ForbiddenException('You can only edit your own comments');
-    }
+      if (comment.userId !== userId) {
+        throw new ForbiddenException('You can only edit your own comments');
+      }
 
-    return this.prisma.comment.update({
-      where: { id },
-      data,
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+      return await this.prisma.comment.update({
+        where: { id },
+        data,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
           },
-        },
-        post: {
-          select: {
-            id: true,
-            title: true,
+          post: {
+            select: {
+              id: true,
+              title: true,
+            },
           },
+          files: true,
         },
-        files: true,
-      },
-    });
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   async remove(id: string, userId: string): Promise<Comment> {
-    const comment = await this.prisma.comment.findUnique({
-      where: { id },
-      select: { userId: true },
-    });
+    try {
+      const comment = await this.prisma.comment.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
 
-    if (!comment) {
-      throw new NotFoundException('Comment not found');
+      if (!comment) {
+        throw new NotFoundException('Comment not found');
+      }
+
+      if (comment.userId !== userId) {
+        throw new ForbiddenException('You can only delete your own comments');
+      }
+
+      return await this.prisma.comment.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
-
-    if (comment.userId !== userId) {
-      throw new ForbiddenException('You can only delete your own comments');
-    }
-
-    return this.prisma.comment.delete({
-      where: { id },
-    });
   }
 
   async findByUserId(userId: string): Promise<Comment[]> {
-    return this.prisma.comment.findMany({
-      where: {
-        userId,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
-          },
+    try {
+      return await this.prisma.comment.findMany({
+        where: {
+          userId,
         },
-        post: {
-          select: {
-            id: true,
-            title: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
           },
-        },
-        replies: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
+          post: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
               },
             },
           },
-        },
-        files: true,
-        _count: {
-          select: {
-            replies: true,
-            hearts: true,
+          files: true,
+          _count: {
+            select: {
+              replies: true,
+              hearts: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   // Heart functionality
@@ -298,18 +328,8 @@ export class CommentsService {
     commentId: string,
     userId: string,
   ): Promise<{ hearted: boolean }> {
-    const existingHeart = await this.prisma.commentHeart.findUnique({
-      where: {
-        commentId_userId: {
-          commentId,
-          userId,
-        },
-      },
-    });
-
-    if (existingHeart) {
-      // Remove heart
-      await this.prisma.commentHeart.delete({
+    try {
+      const existingHeart = await this.prisma.commentHeart.findUnique({
         where: {
           commentId_userId: {
             commentId,
@@ -318,17 +338,31 @@ export class CommentsService {
         },
       });
 
-      return { hearted: false };
-    } else {
-      // Add heart
-      await this.prisma.commentHeart.create({
-        data: {
-          commentId,
-          userId,
-        },
-      });
+      if (existingHeart) {
+        // Remove heart
+        await this.prisma.commentHeart.delete({
+          where: {
+            commentId_userId: {
+              commentId,
+              userId,
+            },
+          },
+        });
 
-      return { hearted: true };
+        return { hearted: false };
+      } else {
+        // Add heart
+        await this.prisma.commentHeart.create({
+          data: {
+            commentId,
+            userId,
+          },
+        });
+
+        return { hearted: true };
+      }
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -336,16 +370,20 @@ export class CommentsService {
     commentId: string,
     userId: string,
   ): Promise<boolean> {
-    const heart = await this.prisma.commentHeart.findUnique({
-      where: {
-        commentId_userId: {
-          commentId,
-          userId,
+    try {
+      const heart = await this.prisma.commentHeart.findUnique({
+        where: {
+          commentId_userId: {
+            commentId,
+            userId,
+          },
         },
-      },
-    });
+      });
 
-    return !!heart;
+      return !!heart;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
   }
 
   // Add reply creation
