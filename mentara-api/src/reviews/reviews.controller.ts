@@ -12,7 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { CreateReviewDto, UpdateReviewDto, ModerateReviewDto, GetReviewsDto } from './dto/review.dto';
+import { CreateReviewDto, UpdateReviewDto, ModerateReviewDto, GetReviewsDto, ReviewStatus } from './dto/review.dto';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
@@ -101,6 +101,6 @@ export class ReviewsController {
       throw new Error('Insufficient permissions');
     }
 
-    return this.reviewsService.getReviews({ ...query, status: 'PENDING' });
+    return this.reviewsService.getReviews({ ...query, status: ReviewStatus.PENDING });
   }
 }

@@ -8,48 +8,48 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
+const auth_module_1 = require("./auth/auth.module");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const auth_controller_1 = require("./auth/auth.controller");
-const auth_service_1 = require("./auth/auth.service");
-const auth_module_1 = require("./auth/auth.module");
-const config_1 = require("@nestjs/config");
-const clerk_client_provider_1 = require("./providers/clerk-client.provider");
-const core_1 = require("@nestjs/core");
-const clerk_auth_guard_1 = require("./auth/clerk-auth.guard");
 const users_module_1 = require("./users/users.module");
-const prisma_client_provider_1 = require("./providers/prisma-client.provider");
 const communities_module_1 = require("./communities/communities.module");
 const posts_module_1 = require("./posts/posts.module");
 const comments_module_1 = require("./comments/comments.module");
 const therapist_module_1 = require("./therapist/therapist.module");
-const webhooks_module_1 = require("./webhooks/webhooks.module");
 const worksheets_module_1 = require("./worksheets/worksheets.module");
+const pre_assessment_module_1 = require("./pre-assessment/pre-assessment.module");
+const booking_module_1 = require("./booking/booking.module");
+const reviews_module_1 = require("./reviews/reviews.module");
+const admin_module_1 = require("./admin/admin.module");
+const moderator_module_1 = require("./moderator/moderator.module");
+const client_module_1 = require("./client/client.module");
+const prisma_client_provider_1 = require("./providers/prisma-client.provider");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            config_1.ConfigModule.forRoot(),
             auth_module_1.AuthModule,
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-            }),
             users_module_1.UsersModule,
             communities_module_1.CommunitiesModule,
             posts_module_1.PostsModule,
             comments_module_1.CommentsModule,
             therapist_module_1.TherapistModule,
-            webhooks_module_1.WebhooksModule,
             worksheets_module_1.WorksheetsModule,
+            pre_assessment_module_1.PreAssessmentModule,
+            booking_module_1.BookingModule,
+            reviews_module_1.ReviewsModule,
+            admin_module_1.AdminModule,
+            moderator_module_1.ModeratorModule,
+            client_module_1.ClientModule,
         ],
-        controllers: [app_controller_1.AppController, auth_controller_1.AuthController],
+        controllers: [app_controller_1.AppController],
         providers: [
             app_service_1.AppService,
-            auth_service_1.AuthService,
             prisma_client_provider_1.PrismaService,
-            clerk_client_provider_1.ClerkClientProvider,
-            { provide: core_1.APP_GUARD, useClass: clerk_auth_guard_1.ClerkAuthGuard },
         ],
     })
 ], AppModule);

@@ -10,19 +10,19 @@ export class ModeratorService {
     return await this.prisma.moderator.findMany();
   }
 
-  async findOne(id: string) {
-    return this.prisma.moderator.findUnique({ where: { id } });
+  async findOne(userId: string) {
+    return this.prisma.moderator.findUnique({ where: { userId } });
   }
 
   async create(data: Prisma.ModeratorCreateInput) {
     return await this.prisma.moderator.create({ data });
   }
 
-  async update(id: string, data: Prisma.ModeratorUpdateInput) {
-    return await this.prisma.moderator.update({ where: { id }, data });
+  async update(userId: string, data: Prisma.ModeratorUpdateInput) {
+    return await this.prisma.moderator.update({ where: { userId }, data });
   }
 
-  async remove(id: string) {
-    return await this.prisma.moderator.delete({ where: { id } });
+  async remove(userId: string) {
+    return await this.prisma.moderator.delete({ where: { userId } });
   }
 }

@@ -10,8 +10,19 @@ export interface QuestionnaireScores {
   [questionnaireName: string]: QuestionnaireScore;
 }
 
+interface SeverityLevel {
+  range: [number, number];
+  label: string;
+}
+
+interface QuestionnaireConfig {
+  scoreMapping: Record<number, number>;
+  reverseScoredQuestions?: number[];
+  severityLevels: Record<string, SeverityLevel>;
+}
+
 // Questionnaire scoring configurations
-const QUESTIONNAIRE_SCORING = {
+const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
   Stress: {
     scoreMapping: { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0 },
     reverseScoredQuestions: [3, 4, 6, 7],

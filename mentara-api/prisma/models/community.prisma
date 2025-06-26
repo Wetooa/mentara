@@ -12,6 +12,7 @@ model Community {
 
     @@index([name])
     @@index([slug])
+    @@index([illness])
 }
 
 model Membership {
@@ -58,4 +59,4 @@ model Room {
     roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id])
     roomGroupId String
     posts       Post[]
-} 
+}

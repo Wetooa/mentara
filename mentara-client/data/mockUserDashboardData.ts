@@ -1,3 +1,5 @@
+import { Contact } from "@/components/messages/types";
+
 export interface UserDashboardData {
   user: {
     id: string;
@@ -50,6 +52,7 @@ export interface UserDashboardData {
     read: boolean;
     actionUrl?: string;
   }[];
+  recentCommunications: Contact[];
 }
 
 export const mockUserDashboardData: UserDashboardData = {
@@ -183,6 +186,44 @@ export const mockUserDashboardData: UserDashboardData = {
       message: "Your profile information was updated successfully",
       dateTime: "2025-05-14T11:20:00",
       read: true,
+    },
+  ],
+  recentCommunications: [
+    {
+      id: "1",
+      name: "Dr. Sarah Johnson",
+      status: "online",
+      lastMessage: "How did the breathing exercises work for you?",
+      time: "2025-05-16T14:30:00",
+      unread: 2,
+      avatar: "/therapist1.jpg",
+    },
+    {
+      id: "2", 
+      name: "Dr. Michael Chen",
+      status: "offline",
+      lastMessage: "I've uploaded your new worksheet. Please review it when you have time.",
+      time: "2025-05-16T10:15:00",
+      unread: 0,
+      avatar: "/therapist2.jpg",
+    },
+    {
+      id: "3",
+      name: "Dr. Olivia Rodriguez",
+      status: "away",
+      lastMessage: "Looking forward to our family therapy session tomorrow!",
+      time: "2025-05-15T16:45:00",
+      unread: 1,
+      avatar: "/therapist3.jpg",
+    },
+    {
+      id: "support",
+      name: "Support Team",
+      status: "online",
+      lastMessage: "Thanks for your feedback! We're always here to help.",
+      time: "2025-05-14T09:30:00",
+      unread: 0,
+      avatar: "/support-avatar.jpg",
     },
   ],
 };

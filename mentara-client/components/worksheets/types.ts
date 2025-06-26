@@ -2,6 +2,7 @@ export interface TaskFile {
   id: string;
   filename: string;
   url: string;
+  uploading?: boolean; // For showing upload progress
 }
 
 export interface Task {

@@ -17,7 +17,7 @@ async function testRegistrationEndpoints() {
       ORDER BY ordinal_position;
     `;
 
-    const requiredFields = ['clerkId', 'email', 'role', 'isActive'];
+    const requiredFields = ['id', 'email', 'role', 'isActive'];
     const existingFields = userFields.map((field) => field.column_name);
 
     console.log('   Found fields:', existingFields);
@@ -35,7 +35,7 @@ async function testRegistrationEndpoints() {
     console.log('\n2. Testing user creation...');
     const testUser = await prisma.user.create({
       data: {
-        clerkId: 'test_clerk_user_123',
+        id: 'test_clerk_user_123',
         email: 'testuser@example.com',
         firstName: 'Test',
         lastName: 'User',
@@ -46,16 +46,27 @@ async function testRegistrationEndpoints() {
 
     console.log('   ✅ Test user created:', {
       id: testUser.id,
-      clerkId: testUser.clerkId,
       email: testUser.email,
       role: testUser.role,
     });
 
     // Test 3: Test therapist application creation
     console.log('\n3. Testing therapist application creation...');
-    const testTherapistApp = await prisma.therapistApplication.create({
+    
+    // First create the user for the therapist
+    const therapistUser = await prisma.user.create({
       data: {
-        clerkUserId: 'test_clerk_therapist_123',
+        id: 'test_clerk_therapist_123',
+        email: 'testtherapist@example.com',
+        firstName: 'Test',
+        lastName: 'Therapist',
+        role: 'therapist',
+      },
+    });
+    
+    const testTherapistApp = await prisma.therapist.create({
+      data: {
+        userId: 'test_clerk_therapist_123',
         firstName: 'Test',
         lastName: 'Therapist',
         email: 'testtherapist@example.com',
@@ -66,6 +77,7 @@ async function testRegistrationEndpoints() {
         isPRCLicensed: 'Yes',
         prcLicenseNumber: '12345',
         isLicenseActive: 'Yes',
+        practiceStartDate: new Date('2019-01-01'),
         yearsOfExperience: '5',
         areasOfExpertise: ['Anxiety', 'Depression'],
         assessmentTools: ['PHQ-9', 'GAD-7'],
@@ -86,7 +98,7 @@ async function testRegistrationEndpoints() {
     });
 
     console.log('   ✅ Test therapist application created:', {
-      id: testTherapistApp.id,
+      id: testTherapistApp.userId,
       status: testTherapistApp.status,
       email: testTherapistApp.email,
     });
@@ -94,10 +106,10 @@ async function testRegistrationEndpoints() {
     // Clean up
     console.log('\n4. Cleaning up test data...');
     await prisma.user.delete({
-      where: { clerkId: 'test_clerk_user_123' },
+      where: { id: 'test_clerk_user_123' },
     });
-    await prisma.therapistApplication.delete({
-      where: { clerkUserId: 'test_clerk_therapist_123' },
+    await prisma.therapist.delete({
+      where: { userId: 'test_clerk_therapist_123' },
     });
     console.log('   ✅ Test data cleaned up');
 

@@ -15,7 +15,7 @@ export class WorksheetsService {
     const where = {};
 
     if (userId) {
-      where['userId'] = userId;
+      where['clientId'] = userId; // Use clientId for proper relation
     }
 
     if (therapistId) {
@@ -31,20 +31,28 @@ export class WorksheetsService {
       include: {
         materials: true,
         submissions: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+        client: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
         therapist: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profileImageUrl: true,
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
       },
@@ -57,8 +65,8 @@ export class WorksheetsService {
     return worksheets.map((worksheet) => ({
       id: worksheet.id,
       title: worksheet.title,
-      therapistName: `${worksheet.therapist.firstName} ${worksheet.therapist.lastName}`,
-      patientName: `${worksheet.user.firstName} ${worksheet.user.lastName}`,
+      therapistName: worksheet.therapist ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}` : 'Unknown Therapist',
+      patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
       date: worksheet.dueDate.toISOString(),
       status: worksheet.status,
       isCompleted: worksheet.isCompleted,
@@ -84,20 +92,28 @@ export class WorksheetsService {
       include: {
         materials: true,
         submissions: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+        client: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
         therapist: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profileImageUrl: true,
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
       },
@@ -111,8 +127,8 @@ export class WorksheetsService {
     return {
       id: worksheet.id,
       title: worksheet.title,
-      therapistName: `${worksheet.therapist.firstName} ${worksheet.therapist.lastName}`,
-      patientName: `${worksheet.user.firstName} ${worksheet.user.lastName}`,
+      therapistName: worksheet.therapist ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}` : 'Unknown Therapist',
+      patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
       date: worksheet.dueDate.toISOString(),
       status: worksheet.status,
       isCompleted: worksheet.isCompleted,
@@ -140,8 +156,9 @@ export class WorksheetsService {
         data: {
           title: data.title,
           instructions: data.instructions,
+          description: data.description,
           dueDate: new Date(data.dueDate),
-          userId: data.userId,
+          clientId: data.clientId, // Use clientId for proper relation
           therapistId: data.therapistId,
         },
       });
@@ -175,20 +192,22 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
+    // Prepare update data
+    const updateData: any = {};
+    
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.instructions !== undefined) updateData.instructions = data.instructions;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.dueDate !== undefined) updateData.dueDate = new Date(data.dueDate);
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.isCompleted !== undefined) updateData.isCompleted = data.isCompleted;
+    if (data.submittedAt !== undefined) updateData.submittedAt = new Date(data.submittedAt);
+    if (data.feedback !== undefined) updateData.feedback = data.feedback;
+
     // Update the worksheet
     await this.prisma.worksheet.update({
       where: { id },
-      data: {
-        ...(data.title && { title: data.title }),
-        ...(data.instructions && { instructions: data.instructions }),
-        ...(data.dueDate && { dueDate: new Date(data.dueDate) }),
-        ...(data.status && { status: data.status }),
-        ...(data.isCompleted !== undefined && {
-          isCompleted: data.isCompleted,
-        }),
-        ...(data.submittedAt && { submittedAt: new Date(data.submittedAt) }),
-        ...(data.feedback && { feedback: data.feedback }),
-      },
+      data: updateData,
     });
 
     // Return the updated worksheet
@@ -217,6 +236,7 @@ export class WorksheetsService {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id: data.worksheetId },
+      include: { client: true },
     });
 
     if (!worksheet) {
@@ -233,6 +253,7 @@ export class WorksheetsService {
         fileSize: data.fileSize,
         fileType: data.fileType,
         worksheetId: data.worksheetId,
+        clientId: worksheet.clientId, // Use the worksheet's clientId
       },
     });
 
@@ -262,6 +283,7 @@ export class WorksheetsService {
                 fileSize: submission.fileSize,
                 fileType: submission.fileType,
                 worksheetId: id,
+                clientId: worksheet.clientId, // Use the worksheet's clientId
               },
             }),
           ),

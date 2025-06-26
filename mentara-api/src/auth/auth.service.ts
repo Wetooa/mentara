@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/clerk-sdk-node';
+import { createClerkClient } from '@clerk/backend';
 import {
   ConflictException,
   Injectable,
@@ -10,6 +10,10 @@ import { ClientResponse, TherapistResponse } from 'src/schema/client.schemas';
 
 @Injectable()
 export class AuthService {
+  private readonly clerkClient = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY,
+  });
+
   constructor(private readonly prisma: PrismaService) {}
 
   async checkAdmin(id: string) {
@@ -126,10 +130,10 @@ export class AuthService {
   }
 
   async getUsers() {
-    return clerkClient.users.getUserList();
+    return this.clerkClient.users.getUserList();
   }
 
   async getUser(userId: string) {
-    return clerkClient.users.getUser(userId);
+    return this.clerkClient.users.getUser(userId);
   }
 }

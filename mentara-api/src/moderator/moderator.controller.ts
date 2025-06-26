@@ -34,8 +34,15 @@ export class ModeratorController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Moderator> {
     try {
-      return await this.moderatorService.findOne(id);
+      const moderator = await this.moderatorService.findOne(id);
+      if (!moderator) {
+        throw new HttpException('Moderator not found', HttpStatus.NOT_FOUND);
+      }
+      return moderator;
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         `Failed to fetch moderator: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -33,8 +33,10 @@ export async function createUserAccount({
     // Generate password if not provided
     const userPassword = password || generateSecurePassword(12);
 
+    const clerk = await clerkClient();
+
     // Create user in Clerk
-    const clerkUser = await clerkClient.users.createUser({
+    const clerkUser = await clerk.users.createUser({
       emailAddress: [email],
       password: userPassword,
       firstName,
@@ -64,7 +66,8 @@ export async function createUserAccount({
 
 export async function updateUserRole(userId: string, role: UserRole) {
   try {
-    await clerkClient.users.updateUser(userId, {
+    const clerk = await clerkClient();
+    await clerk.users.updateUser(userId, {
       publicMetadata: {
         role,
       },
@@ -78,7 +81,8 @@ export async function updateUserRole(userId: string, role: UserRole) {
 
 export async function deleteUserAccount(userId: string) {
   try {
-    await clerkClient.users.deleteUser(userId);
+    const clerk = await clerkClient();
+    await clerk.users.deleteUser(userId);
     return true;
   } catch (error) {
     console.error("Failed to delete user account:", error);

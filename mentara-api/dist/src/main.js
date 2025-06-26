@@ -2,18 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
-const bodyParser = require("body-parser");
 const path_1 = require("path");
 const fs = require("fs");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         rawBody: true,
     });
-    app.use(bodyParser.json({
-        verify: (req, res, buf) => {
-            req.rawBody = buf;
-        },
-    }));
     app.enableCors({
         origin: [
             'http://localhost:3000',
@@ -37,8 +31,8 @@ async function bootstrap() {
         prefix: '/uploads/',
     });
     app.setGlobalPrefix('api');
-    await app.listen(process.env.PORT || 5000);
+    await app.listen(process.env.PORT ?? 5000);
     console.log(`Application is running on: ${await app.getUrl()}`);
 }
-bootstrap();
+void bootstrap();
 //# sourceMappingURL=main.js.map

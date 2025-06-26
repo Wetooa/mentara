@@ -1,10 +1,11 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaClient, ReviewStatus } from '@prisma/client';
+import { ReviewStatus } from '@prisma/client';
+import { PrismaService } from '../providers/prisma-client.provider';
 import { CreateReviewDto, UpdateReviewDto, ModerateReviewDto, GetReviewsDto } from './dto/review.dto';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   async createReview(clientId: string, createReviewDto: CreateReviewDto) {
     const { therapistId, meetingId, ...reviewData } = createReviewDto;
@@ -24,13 +25,11 @@ export class ReviewsService {
     }
 
     // Check if review already exists for this client-therapist pair
-    const existingReview = await this.prisma.review.findUnique({
+    const existingReview = await this.prisma.review.findFirst({
       where: {
-        clientId_therapistId_meetingId: {
-          clientId,
-          therapistId,
-          meetingId: meetingId || null,
-        },
+        clientId,
+        therapistId,
+        meetingId: meetingId || null,
       },
     });
 

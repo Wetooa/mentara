@@ -39,7 +39,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // If user is authenticated and visits the root page, redirect to their dashboard
   if (authObj.userId && req.nextUrl.pathname === "/") {
     const userRole = getUserRoleFromPublicMetadata(authObj.sessionClaims);
-
     let redirectPath = "/";
     if (userRole === "user") redirectPath = "/user";
     else if (userRole === "therapist") redirectPath = "/therapist";

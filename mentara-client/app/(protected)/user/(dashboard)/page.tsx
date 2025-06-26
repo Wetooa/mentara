@@ -9,6 +9,7 @@ import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
 import ProgressTracking from "@/components/dashboard/ProgressTracking";
 import NotificationsCenter from "@/components/dashboard/NotificationsCenter";
 import AssignedTherapist from "@/components/dashboard/AssignedTherapist";
+import RecentCommunications from "@/components/dashboard/RecentCommunications";
 
 export default function DashboardPage() {
   const [dashboardData] = useState(mockUserDashboardData);
@@ -23,10 +24,28 @@ export default function DashboardPage() {
     console.log("Navigate to scheduling");
   };
 
+  const handleViewAllMessages = () => {
+    // TODO: Navigate to messages page
+    console.log("Navigate to messages page");
+  };
+
+  const handleContactSelect = (contactId: string) => {
+    // TODO: Navigate to specific conversation
+    console.log("Navigate to conversation with contact:", contactId);
+  };
+
+  const handleBookSession = () => {
+    // TODO: Navigate to booking page
+    console.log("Navigate to booking page");
+  };
+
   return (
     <div className="w-full h-full p-6 space-y-8">
       {/* Page Header */}
-      <DashboardHeader user={dashboardData.user} />
+      <DashboardHeader 
+        user={dashboardData.user} 
+        onBookSession={handleBookSession}
+      />
 
       {/* Stats Overview */}
       <StatsOverview stats={dashboardData.stats} />
@@ -44,6 +63,11 @@ export default function DashboardPage() {
           <AssignedTherapist
             onMessageTherapist={handleMessageTherapist}
             onScheduleSession={handleScheduleSession}
+          />
+          <RecentCommunications
+            recentContacts={dashboardData.recentCommunications}
+            onViewAllMessages={handleViewAllMessages}
+            onContactSelect={handleContactSelect}
           />
           <ProgressTracking progress={dashboardData.progress} />
           <NotificationsCenter notifications={dashboardData.notifications} />
