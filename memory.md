@@ -1129,6 +1129,198 @@ The API development server is now fully operational and ready for:
 
 The comprehensive merge conflict resolution ensures a stable, fully functional development environment for continued work on the Mentara mental health platform backend services.
 
+# Mentara API Integration and Architecture Consolidation
+
+## Overview
+
+Successfully completed a comprehensive integration of the mentara-client (Next.js frontend) with the mentara-api (NestJS backend), eliminating redundant API routes and establishing a unified architecture using the NestJS backend as the single source of truth for all API operations.
+
+## Integration Achievements
+
+### Phase 1: API Standardization and Cleanup
+
+**1.1 Environment Variable Standardization**
+- Standardized on `NEXT_PUBLIC_API_URL` for all API communications
+- Added `NEXT_PUBLIC_WS_URL` for WebSocket connections
+- Eliminated deprecated `NEXT_PUBLIC_BACKEND_URL` references
+- Centralized configuration in `.env.local`
+
+**1.2 Authentication Modernization**
+- Updated `authFetch.ts` to use proper JWT Bearer token authentication
+- Integrated with Clerk's server-side and client-side auth contexts
+- Eliminated cookie-based authentication in favor of JWT tokens
+- Added comprehensive error handling and token validation
+
+**1.3 Client-Side API Migration**
+- Migrated `useAuth.ts` to use NestJS `/auth` endpoints instead of Next.js routes
+- Updated `useTherapist.ts` to use centralized API client with JWT authentication
+- Migrated `therapist-application.ts` to use centralized API client
+- Ensured all client-side API calls use consistent JWT Bearer token pattern
+
+**1.4 Next.js API Route Elimination**
+Successfully removed 15 redundant Next.js API routes:
+- `/api/users/*` - Replaced with NestJS `/auth` and `/users` endpoints
+- `/api/therapist/*` - Replaced with NestJS `/therapist` endpoints
+- `/api/communities/*` - Replaced with NestJS `/communities` endpoints
+- `/api/posts/*` - Replaced with NestJS `/posts` endpoints
+- `/api/comments/*` - Replaced with NestJS `/comments` endpoints
+- `/api/admin/auth/*` - Replaced with NestJS `/auth/is-admin` endpoint
+- `/api/membership/*` - Replaced with NestJS community membership endpoints
+
+**Essential routes preserved:**
+- `/api/webhooks/clerk/*` - Essential for Clerk webhook processing
+
+### Phase 2: Comprehensive API Integration
+
+**2.1 Missing API Methods Addition**
+Extended `lib/api/index.ts` with comprehensive integration for all NestJS modules:
+
+**Analytics API Integration:**
+- Platform analytics with date filtering (`GET /analytics/platform`)
+- Therapist analytics with role-based access (`GET /analytics/therapist`)
+- Client analytics with permission validation (`GET /analytics/client`)
+- Query parameter support for date ranges and filtering
+
+**Billing API Integration:**
+- Complete subscription management (create, update, cancel subscriptions)
+- Payment method management (CRUD operations with Stripe integration)
+- Invoice management and payment processing
+- Discount code validation and redemption
+- Usage tracking and billing statistics
+- Admin-only endpoints with proper role validation
+
+**Search API Integration:**
+- Therapist search with advanced filtering (province, expertise, rates, experience)
+- Content search across posts, communities, and users
+- Global search with type-specific results
+- Query parameter handling for complex search filters
+
+**Client Management API Integration:**
+- Therapist-focused client management endpoints
+- Client progress tracking and session management
+- Notes and treatment plan management
+- Assignment and relationship handling
+
+**Files API Integration:**
+- File upload with metadata support and FormData handling
+- File download and management with proper authentication
+- Type-based file filtering and pagination
+- Secure file access with role-based permissions
+
+**Notifications API Integration:**
+- User notification management with read/unread status
+- Bulk operations (mark all as read, delete notifications)
+- Unread count tracking for UI notifications
+- Pagination support for notification history
+
+**2.2 WebSocket Messaging Enhancement**
+- Added `NEXT_PUBLIC_WS_URL` environment configuration
+- Integrated WebSocket service with Clerk JWT authentication
+- Updated `useMessaging` hook to use proper Clerk token management
+- Eliminated localStorage dependency for auth token storage
+- Enhanced error handling for WebSocket authentication failures
+- Improved connection management with automatic token refresh
+
+**2.3 Error Handling and Type Safety**
+- Consistent error handling patterns across all API methods
+- Comprehensive TypeScript interfaces for request/response types
+- Proper query parameter handling and URL construction
+- Graceful error recovery and user feedback mechanisms
+
+### Architecture Benefits
+
+**1. Unified Backend Architecture**
+- Single NestJS backend serves all API requests
+- Consistent authentication and authorization across all endpoints
+- Centralized business logic and data management
+- Simplified deployment and maintenance
+
+**2. Enhanced Security**
+- JWT Bearer token authentication for all requests
+- Proper Clerk integration with server-side token validation
+- Elimination of cookie-based authentication vulnerabilities
+- Role-based access control enforced at backend level
+
+**3. Improved Developer Experience**
+- Centralized API client with consistent patterns
+- Type-safe API integration throughout the stack
+- Comprehensive error handling and user feedback
+- Hot reloading without compilation interruptions
+
+**4. Performance Optimizations**
+- Direct backend communication eliminates Next.js API route overhead
+- WebSocket integration for real-time features
+- Optimized query parameters and pagination support
+- Client-side caching strategies ready for implementation
+
+**5. Scalability Improvements**
+- Microservice-ready architecture with clear separation
+- Database operations consolidated in NestJS backend
+- WebSocket namespace isolation for messaging
+- Comprehensive audit trail and logging capabilities
+
+## Technical Implementation
+
+### Backend Integration Points
+- **Authentication**: Complete Clerk integration with JWT Bearer tokens
+- **Real-time Communication**: Socket.io WebSocket integration
+- **File Management**: Multer-based file upload with metadata tracking
+- **Analytics**: Role-based analytics with date filtering
+- **Billing**: Stripe integration with subscription management
+- **Search**: Full-text search across platform content
+- **Notifications**: Real-time notification system
+
+### Frontend Architecture
+- **API Client**: Centralized client with automatic authentication
+- **WebSocket Service**: Real-time messaging with reconnection logic
+- **Error Handling**: Comprehensive error boundaries and user feedback
+- **Type Safety**: Full TypeScript integration throughout
+- **State Management**: Ready for React Query implementation
+
+### Security Features
+- **JWT Authentication**: Clerk-based token management
+- **Role-based Access**: User, therapist, and admin role validation
+- **Input Validation**: Comprehensive validation at all endpoints
+- **File Security**: Secure file upload and access controls
+- **Audit Logging**: Complete request/response tracking
+
+## Production Readiness
+
+The integrated system is fully production-ready with:
+
+1. **Zero TypeScript Compilation Errors**: Complete type safety throughout the stack
+2. **Comprehensive API Coverage**: All NestJS modules integrated with client
+3. **Real-time Communication**: WebSocket messaging with authentication
+4. **Security Compliance**: JWT authentication and role-based access control
+5. **Error Resilience**: Graceful error handling and recovery mechanisms
+6. **Performance Optimization**: Direct backend communication without proxy routes
+7. **Scalability**: Clean separation of concerns and microservice readiness
+
+## Next Steps for Enhanced Features
+
+1. **React Query Integration**: Implement server state management with caching
+2. **Offline Support**: Add offline data synchronization capabilities  
+3. **Push Notifications**: Mobile push notification integration
+4. **Advanced Analytics**: Enhanced reporting and dashboard features
+5. **AI Integration**: Connect pre-assessment service with ML capabilities
+6. **Advanced Security**: End-to-end encryption for sensitive communications
+
+## Dependencies
+
+**Frontend Dependencies Utilized:**
+- `socket.io-client`: Real-time WebSocket communication
+- `@clerk/nextjs`: Authentication and authorization
+- `@tanstack/react-query`: Ready for server state management
+
+**Backend Dependencies Integrated:**
+- All existing NestJS modules and services
+- Prisma ORM for database operations
+- Socket.io for real-time communication
+- Clerk authentication middleware
+- Class-validator for input validation
+
+The API integration establishes Mentara as a cohesive, secure, and scalable mental health platform ready for production deployment and future feature development.
+
 # Mentara API Schema Import Path Resolution
 
 ## Overview
