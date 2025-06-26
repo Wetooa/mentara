@@ -367,6 +367,307 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
         return client.request<any>(`/reviews/pending${queryString}`);
       },
     },
+
+    // Analytics API methods
+    analytics: {
+      getPlatformAnalytics: (
+        params: {
+          startDate?: string;
+          endDate?: string;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.startDate) queryParams.append("startDate", params.startDate);
+        if (params.endDate) queryParams.append("endDate", params.endDate);
+
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/analytics/platform${queryString}`);
+      },
+
+      getTherapistAnalytics: (
+        params: {
+          therapistId?: string;
+          startDate?: string;
+          endDate?: string;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.therapistId) queryParams.append("therapistId", params.therapistId);
+        if (params.startDate) queryParams.append("startDate", params.startDate);
+        if (params.endDate) queryParams.append("endDate", params.endDate);
+
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/analytics/therapist${queryString}`);
+      },
+
+      getClientAnalytics: (
+        params: {
+          clientId?: string;
+          startDate?: string;
+          endDate?: string;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.clientId) queryParams.append("clientId", params.clientId);
+        if (params.startDate) queryParams.append("startDate", params.startDate);
+        if (params.endDate) queryParams.append("endDate", params.endDate);
+
+        const queryString = queryParams.toString()
+          ? `?${queryParams.toString()}`
+          : "";
+        return client.request<any>(`/analytics/client${queryString}`);
+      },
+    },
+
+    // Billing API methods
+    billing: {
+      // Subscriptions
+      createSubscription: (data: {
+        planId: string;
+        billingCycle?: string;
+        defaultPaymentMethodId?: string;
+        trialStart?: string;
+        trialEnd?: string;
+      }) => client.request<any>("/billing/subscriptions", { method: "POST", body: data }),
+
+      getMySubscription: () => client.request<any>("/billing/subscriptions/me"),
+
+      updateMySubscription: (data: {
+        planId?: string;
+        billingCycle?: string;
+        defaultPaymentMethodId?: string;
+      }) => client.request<any>("/billing/subscriptions/me", { method: "PATCH", body: data }),
+
+      cancelMySubscription: (reason?: string) => 
+        client.request<any>("/billing/subscriptions/me/cancel", { 
+          method: "POST", 
+          body: { reason } 
+        }),
+
+      // Plans
+      getAllPlans: (isActive?: boolean) => {
+        const queryParams = new URLSearchParams();
+        if (isActive !== undefined) queryParams.append("isActive", isActive.toString());
+        
+        const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+        return client.request<any>(`/billing/plans${queryString}`);
+      },
+
+      createPlan: (data: {
+        name: string;
+        description?: string;
+        tier: string;
+        monthlyPrice: number;
+        yearlyPrice?: number;
+        features: any;
+        limits: any;
+        trialDays?: number;
+      }) => client.request<any>("/billing/plans", { method: "POST", body: data }),
+
+      updatePlan: (id: string, data: {
+        name?: string;
+        description?: string;
+        monthlyPrice?: number;
+        yearlyPrice?: number;
+        features?: any;
+        limits?: any;
+        trialDays?: number;
+        isActive?: boolean;
+      }) => client.request<any>(`/billing/plans/${id}`, { method: "PATCH", body: data }),
+
+      // Payment Methods
+      createPaymentMethod: (data: {
+        type: string;
+        cardLast4?: string;
+        cardBrand?: string;
+        cardExpMonth?: number;
+        cardExpYear?: number;
+        stripePaymentMethodId?: string;
+        isDefault?: boolean;
+      }) => client.request<any>("/billing/payment-methods", { method: "POST", body: data }),
+
+      getMyPaymentMethods: () => client.request<any>("/billing/payment-methods"),
+
+      updatePaymentMethod: (id: string, data: {
+        isDefault?: boolean;
+        isActive?: boolean;
+      }) => client.request<any>(`/billing/payment-methods/${id}`, { method: "PATCH", body: data }),
+
+      deletePaymentMethod: (id: string) => 
+        client.request<any>(`/billing/payment-methods/${id}`, { method: "DELETE" }),
+
+      // Invoices
+      getInvoices: (
+        params: {
+          subscriptionId?: string;
+          status?: string;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.subscriptionId) queryParams.append("subscriptionId", params.subscriptionId);
+        if (params.status) queryParams.append("status", params.status);
+
+        const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+        return client.request<any>(`/billing/invoices${queryString}`);
+      },
+
+      // Discounts
+      validateDiscount: (code: string, amount: number) =>
+        client.request<any>("/billing/discounts/validate", {
+          method: "POST",
+          body: { code, amount }
+        }),
+
+      redeemDiscount: (discountId: string, amountSaved: number) =>
+        client.request<any>(`/billing/discounts/${discountId}/redeem`, {
+          method: "POST",
+          body: { amountSaved }
+        }),
+    },
+
+    // Search API methods
+    search: {
+      searchTherapists: (
+        query: string,
+        filters: {
+          province?: string;
+          expertise?: string;
+          maxRate?: number;
+          minExp?: number;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("q", query);
+        if (filters.province) queryParams.append("province", filters.province);
+        if (filters.expertise) queryParams.append("expertise", filters.expertise);
+        if (filters.maxRate) queryParams.append("maxRate", filters.maxRate.toString());
+        if (filters.minExp) queryParams.append("minExp", filters.minExp.toString());
+
+        return client.request<any>(`/search/therapists?${queryParams.toString()}`);
+      },
+
+      searchPosts: (query: string, communityId?: string) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("q", query);
+        if (communityId) queryParams.append("community", communityId);
+
+        return client.request<any>(`/search/posts?${queryParams.toString()}`);
+      },
+
+      searchCommunities: (query: string) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("q", query);
+
+        return client.request<any>(`/search/communities?${queryParams.toString()}`);
+      },
+
+      searchUsers: (query: string, role?: string) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("q", query);
+        if (role) queryParams.append("role", role);
+
+        return client.request<any>(`/search/users?${queryParams.toString()}`);
+      },
+
+      globalSearch: (query: string, type?: string) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("q", query);
+        if (type) queryParams.append("type", type);
+
+        return client.request<any>(`/search/global?${queryParams.toString()}`);
+      },
+    },
+
+    // Client management API methods (for therapist use)
+    client: {
+      getAssignedClients: () => client.request<any>("/client/assigned"),
+      
+      getClientById: (clientId: string) => client.request<any>(`/client/${clientId}`),
+      
+      updateClientNotes: (clientId: string, notes: string) =>
+        client.request<any>(`/client/${clientId}/notes`, {
+          method: "PATCH",
+          body: { notes }
+        }),
+
+      getClientProgress: (clientId: string) => 
+        client.request<any>(`/client/${clientId}/progress`),
+
+      getClientSessions: (clientId: string) =>
+        client.request<any>(`/client/${clientId}/sessions`),
+    },
+
+    // Files API methods
+    files: {
+      uploadFile: (file: File, metadata?: any) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (metadata) {
+          formData.append("metadata", JSON.stringify(metadata));
+        }
+
+        return client.request<any>("/files/upload", {
+          method: "POST",
+          body: formData,
+          headers: {}, // Remove Content-Type to let browser set it for FormData
+        });
+      },
+
+      getFile: (fileId: string) => client.request<any>(`/files/${fileId}`),
+
+      deleteFile: (fileId: string) => 
+        client.request<any>(`/files/${fileId}`, { method: "DELETE" }),
+
+      getMyFiles: (
+        params: {
+          type?: string;
+          limit?: number;
+          offset?: number;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.type) queryParams.append("type", params.type);
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        if (params.offset) queryParams.append("offset", params.offset.toString());
+
+        const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+        return client.request<any>(`/files${queryString}`);
+      },
+    },
+
+    // Notifications API methods
+    notifications: {
+      getMyNotifications: (
+        params: {
+          limit?: number;
+          offset?: number;
+          isRead?: boolean;
+        } = {}
+      ) => {
+        const queryParams = new URLSearchParams();
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        if (params.offset) queryParams.append("offset", params.offset.toString());
+        if (params.isRead !== undefined) queryParams.append("isRead", params.isRead.toString());
+
+        const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+        return client.request<any>(`/notifications${queryString}`);
+      },
+
+      markAsRead: (notificationId: string) =>
+        client.request<any>(`/notifications/${notificationId}/read`, { method: "PATCH" }),
+
+      markAllAsRead: () =>
+        client.request<any>("/notifications/read-all", { method: "PATCH" }),
+
+      deleteNotification: (notificationId: string) =>
+        client.request<any>(`/notifications/${notificationId}`, { method: "DELETE" }),
+
+      getUnreadCount: () => client.request<any>("/notifications/unread-count"),
+    },
   };
 
   return client;
