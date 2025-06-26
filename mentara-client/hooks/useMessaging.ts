@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { Contact, Conversation, Message, MessagesState } from '@/components/messages/types';
 import { messagingApi } from '@/lib/messaging-api';
 import { messagingWebSocket } from '@/lib/messaging-websocket';
@@ -28,6 +29,9 @@ export interface UseMessagingReturn {
 }
 
 export function useMessaging(): UseMessagingReturn {
+  // Clerk authentication
+  const { getToken, isLoaded } = useAuth();
+  
   // State
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [conversations, setConversations] = useState<Map<string, Conversation>>(new Map());
@@ -274,19 +278,28 @@ export function useMessaging(): UseMessagingReturn {
     loadContacts();
   }, [loadContacts]);
   
-  // Connect to WebSocket
+  // Connect to WebSocket with Clerk authentication
   useEffect(() => {
-    // TODO: Get auth token from your auth context/store
-    const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!isLoaded) return;
     
-    if (authToken) {
-      messagingWebSocket.connect(authToken);
-    }
+    const initializeWebSocket = async () => {
+      try {
+        const token = await getToken();
+        if (token) {
+          messagingWebSocket.connect(token);
+        }
+      } catch (error) {
+        console.error('Failed to get auth token for WebSocket:', error);
+        setError('Failed to establish secure connection');
+      }
+    };
+    
+    initializeWebSocket();
     
     return () => {
       messagingWebSocket.cleanup();
     };
-  }, []);
+  }, [isLoaded, getToken]);
   
   return {
     // State
