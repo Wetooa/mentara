@@ -10,7 +10,7 @@ export class AdminService {
   }
 
   findOne(id: string) {
-    return this.prisma.admin.findUnique({ where: { id } });
+    return this.prisma.admin.findUnique({ where: { userId: id } });
   }
 
   create(data: any) {
@@ -18,10 +18,10 @@ export class AdminService {
   }
 
   update(id: string, data: any) {
-    return this.prisma.admin.update({ where: { id }, data });
+    return this.prisma.admin.update({ where: { userId: id }, data });
   }
 
   remove(id: string) {
-    return this.prisma.admin.delete({ where: { id } });
+    return this.prisma.admin.delete({ where: { userId: id } });
   }
 }
