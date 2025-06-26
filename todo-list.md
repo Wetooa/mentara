@@ -85,9 +85,9 @@
 - [x] Add comprehensive patient management with loading states and error handling
 - [x] Implement status filtering and advanced search capabilities
 - [x] Add patient status indicators and session progress tracking
-- [ ] Add session scheduling tools
-- [ ] Implement patient progress tracking dashboard
-- [ ] Create treatment notes functionality
+- [x] Add session scheduling tools
+- [x] Implement patient progress tracking dashboard
+- [x] Create treatment notes functionality
 - [x] Add worksheet assignment system (via existing worksheets API)
 - [x] Implement secure messaging with patients (via existing messaging system)
 
