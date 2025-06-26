@@ -16,6 +16,7 @@ import { UserUpdateOneRequiredWithoutTherapistNestedInputSchema } from './UserUp
 import { MeetingUpdateManyWithoutTherapistNestedInputSchema } from './MeetingUpdateManyWithoutTherapistNestedInputSchema';
 import { TherapistAvailabilityUpdateManyWithoutTherapistNestedInputSchema } from './TherapistAvailabilityUpdateManyWithoutTherapistNestedInputSchema';
 import { WorksheetUpdateManyWithoutTherapistNestedInputSchema } from './WorksheetUpdateManyWithoutTherapistNestedInputSchema';
+import { ReviewUpdateManyWithoutTherapistNestedInputSchema } from './ReviewUpdateManyWithoutTherapistNestedInputSchema';
 
 export const TherapistUpdateWithoutAssignedClientsInputSchema: z.ZodType<Prisma.TherapistUpdateWithoutAssignedClientsInput> = z.object({
   approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -63,7 +64,8 @@ export const TherapistUpdateWithoutAssignedClientsInputSchema: z.ZodType<Prisma.
   user: z.lazy(() => UserUpdateOneRequiredWithoutTherapistNestedInputSchema).optional(),
   meetings: z.lazy(() => MeetingUpdateManyWithoutTherapistNestedInputSchema).optional(),
   therapistAvailabilities: z.lazy(() => TherapistAvailabilityUpdateManyWithoutTherapistNestedInputSchema).optional(),
-  worksheets: z.lazy(() => WorksheetUpdateManyWithoutTherapistNestedInputSchema).optional()
+  worksheets: z.lazy(() => WorksheetUpdateManyWithoutTherapistNestedInputSchema).optional(),
+  reviews: z.lazy(() => ReviewUpdateManyWithoutTherapistNestedInputSchema).optional()
 }).strict();
 
 export default TherapistUpdateWithoutAssignedClientsInputSchema;

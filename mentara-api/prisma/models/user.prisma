@@ -25,8 +25,8 @@ model User {
     moderator Moderator? @relation("UserModerator")
     admin     Admin?     @relation("UserAdmin")
 
-    replies     Reply[]
-    replyHearts ReplyHeart[]
+    replies        Reply[]
+    replyHearts    ReplyHeart[]
     reviewsHelpful ReviewHelpful[]
 
     @@index([email])
@@ -45,7 +45,7 @@ model Client {
     clientPreferences    ClientPreference[]
     assignedTherapists   ClientTherapist[]
     meetings             Meeting[]              @relation("ClientMeetings")
-    reviews              Review[]               // Reviews written by this client
+    reviews              Review[] // Reviews written by this client
 
     hasSeenTherapistRecommendations Boolean @default(false)
 
@@ -122,6 +122,9 @@ model Therapist {
 
     // Many-to-many with clients
     assignedClients ClientTherapist[]
+
+    // Reviews received by this therapist
+    reviews Review[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

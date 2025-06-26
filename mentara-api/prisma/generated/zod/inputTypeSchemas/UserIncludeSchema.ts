@@ -11,6 +11,7 @@ import { ModeratorArgsSchema } from "../outputTypeSchemas/ModeratorArgsSchema"
 import { AdminArgsSchema } from "../outputTypeSchemas/AdminArgsSchema"
 import { ReplyFindManyArgsSchema } from "../outputTypeSchemas/ReplyFindManyArgsSchema"
 import { ReplyHeartFindManyArgsSchema } from "../outputTypeSchemas/ReplyHeartFindManyArgsSchema"
+import { ReviewHelpfulFindManyArgsSchema } from "../outputTypeSchemas/ReviewHelpfulFindManyArgsSchema"
 import { UserCountOutputTypeArgsSchema } from "../outputTypeSchemas/UserCountOutputTypeArgsSchema"
 
 export const UserIncludeSchema: z.ZodType<Prisma.UserInclude> = z.object({
@@ -25,6 +26,7 @@ export const UserIncludeSchema: z.ZodType<Prisma.UserInclude> = z.object({
   admin: z.union([z.boolean(),z.lazy(() => AdminArgsSchema)]).optional(),
   replies: z.union([z.boolean(),z.lazy(() => ReplyFindManyArgsSchema)]).optional(),
   replyHearts: z.union([z.boolean(),z.lazy(() => ReplyHeartFindManyArgsSchema)]).optional(),
+  reviewsHelpful: z.union([z.boolean(),z.lazy(() => ReviewHelpfulFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 

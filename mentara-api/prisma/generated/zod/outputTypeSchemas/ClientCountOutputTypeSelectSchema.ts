@@ -8,6 +8,7 @@ export const ClientCountOutputTypeSelectSchema: z.ZodType<Prisma.ClientCountOutp
   clientPreferences: z.boolean().optional(),
   assignedTherapists: z.boolean().optional(),
   meetings: z.boolean().optional(),
+  reviews: z.boolean().optional(),
 }).strict();
 
 export default ClientCountOutputTypeSelectSchema;

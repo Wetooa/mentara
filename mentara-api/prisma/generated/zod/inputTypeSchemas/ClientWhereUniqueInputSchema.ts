@@ -14,6 +14,7 @@ import { ClientMedicalHistoryListRelationFilterSchema } from './ClientMedicalHis
 import { ClientPreferenceListRelationFilterSchema } from './ClientPreferenceListRelationFilterSchema';
 import { ClientTherapistListRelationFilterSchema } from './ClientTherapistListRelationFilterSchema';
 import { MeetingListRelationFilterSchema } from './MeetingListRelationFilterSchema';
+import { ReviewListRelationFilterSchema } from './ReviewListRelationFilterSchema';
 
 export const ClientWhereUniqueInputSchema: z.ZodType<Prisma.ClientWhereUniqueInput> = z.object({
   userId: z.string()
@@ -33,7 +34,8 @@ export const ClientWhereUniqueInputSchema: z.ZodType<Prisma.ClientWhereUniqueInp
   clientMedicalHistory: z.lazy(() => ClientMedicalHistoryListRelationFilterSchema).optional(),
   clientPreferences: z.lazy(() => ClientPreferenceListRelationFilterSchema).optional(),
   assignedTherapists: z.lazy(() => ClientTherapistListRelationFilterSchema).optional(),
-  meetings: z.lazy(() => MeetingListRelationFilterSchema).optional()
+  meetings: z.lazy(() => MeetingListRelationFilterSchema).optional(),
+  reviews: z.lazy(() => ReviewListRelationFilterSchema).optional()
 }).strict());
 
 export default ClientWhereUniqueInputSchema;

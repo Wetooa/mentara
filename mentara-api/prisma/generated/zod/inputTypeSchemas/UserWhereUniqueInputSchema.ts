@@ -22,6 +22,7 @@ import { AdminNullableScalarRelationFilterSchema } from './AdminNullableScalarRe
 import { AdminWhereInputSchema } from './AdminWhereInputSchema';
 import { ReplyListRelationFilterSchema } from './ReplyListRelationFilterSchema';
 import { ReplyHeartListRelationFilterSchema } from './ReplyHeartListRelationFilterSchema';
+import { ReviewHelpfulListRelationFilterSchema } from './ReviewHelpfulListRelationFilterSchema';
 
 export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> = z.union([
   z.object({
@@ -61,7 +62,8 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   moderator: z.union([ z.lazy(() => ModeratorNullableScalarRelationFilterSchema),z.lazy(() => ModeratorWhereInputSchema) ]).optional().nullable(),
   admin: z.union([ z.lazy(() => AdminNullableScalarRelationFilterSchema),z.lazy(() => AdminWhereInputSchema) ]).optional().nullable(),
   replies: z.lazy(() => ReplyListRelationFilterSchema).optional(),
-  replyHearts: z.lazy(() => ReplyHeartListRelationFilterSchema).optional()
+  replyHearts: z.lazy(() => ReplyHeartListRelationFilterSchema).optional(),
+  reviewsHelpful: z.lazy(() => ReviewHelpfulListRelationFilterSchema).optional()
 }).strict());
 
 export default UserWhereUniqueInputSchema;

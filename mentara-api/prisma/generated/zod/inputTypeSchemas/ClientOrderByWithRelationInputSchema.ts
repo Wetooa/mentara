@@ -10,6 +10,7 @@ import { ClientMedicalHistoryOrderByRelationAggregateInputSchema } from './Clien
 import { ClientPreferenceOrderByRelationAggregateInputSchema } from './ClientPreferenceOrderByRelationAggregateInputSchema';
 import { ClientTherapistOrderByRelationAggregateInputSchema } from './ClientTherapistOrderByRelationAggregateInputSchema';
 import { MeetingOrderByRelationAggregateInputSchema } from './MeetingOrderByRelationAggregateInputSchema';
+import { ReviewOrderByRelationAggregateInputSchema } from './ReviewOrderByRelationAggregateInputSchema';
 
 export const ClientOrderByWithRelationInputSchema: z.ZodType<Prisma.ClientOrderByWithRelationInput> = z.object({
   userId: z.lazy(() => SortOrderSchema).optional(),
@@ -23,7 +24,8 @@ export const ClientOrderByWithRelationInputSchema: z.ZodType<Prisma.ClientOrderB
   clientMedicalHistory: z.lazy(() => ClientMedicalHistoryOrderByRelationAggregateInputSchema).optional(),
   clientPreferences: z.lazy(() => ClientPreferenceOrderByRelationAggregateInputSchema).optional(),
   assignedTherapists: z.lazy(() => ClientTherapistOrderByRelationAggregateInputSchema).optional(),
-  meetings: z.lazy(() => MeetingOrderByRelationAggregateInputSchema).optional()
+  meetings: z.lazy(() => MeetingOrderByRelationAggregateInputSchema).optional(),
+  reviews: z.lazy(() => ReviewOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export default ClientOrderByWithRelationInputSchema;

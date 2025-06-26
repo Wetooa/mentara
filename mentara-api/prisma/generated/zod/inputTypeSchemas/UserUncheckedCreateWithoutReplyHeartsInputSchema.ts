@@ -11,6 +11,7 @@ import { TherapistUncheckedCreateNestedOneWithoutUserInputSchema } from './Thera
 import { ModeratorUncheckedCreateNestedOneWithoutUserInputSchema } from './ModeratorUncheckedCreateNestedOneWithoutUserInputSchema';
 import { AdminUncheckedCreateNestedOneWithoutUserInputSchema } from './AdminUncheckedCreateNestedOneWithoutUserInputSchema';
 import { ReplyUncheckedCreateNestedManyWithoutUserInputSchema } from './ReplyUncheckedCreateNestedManyWithoutUserInputSchema';
+import { ReviewHelpfulUncheckedCreateNestedManyWithoutUserInputSchema } from './ReviewHelpfulUncheckedCreateNestedManyWithoutUserInputSchema';
 
 export const UserUncheckedCreateWithoutReplyHeartsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutReplyHeartsInput> = z.object({
   id: z.string(),
@@ -34,7 +35,8 @@ export const UserUncheckedCreateWithoutReplyHeartsInputSchema: z.ZodType<Prisma.
   therapist: z.lazy(() => TherapistUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
   moderator: z.lazy(() => ModeratorUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
   admin: z.lazy(() => AdminUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
-  replies: z.lazy(() => ReplyUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  replies: z.lazy(() => ReplyUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  reviewsHelpful: z.lazy(() => ReviewHelpfulUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
 
 export default UserUncheckedCreateWithoutReplyHeartsInputSchema;

@@ -16,6 +16,7 @@ import { TherapistUpdateOneWithoutUserNestedInputSchema } from './TherapistUpdat
 import { ModeratorUpdateOneWithoutUserNestedInputSchema } from './ModeratorUpdateOneWithoutUserNestedInputSchema';
 import { ReplyUpdateManyWithoutUserNestedInputSchema } from './ReplyUpdateManyWithoutUserNestedInputSchema';
 import { ReplyHeartUpdateManyWithoutUserNestedInputSchema } from './ReplyHeartUpdateManyWithoutUserNestedInputSchema';
+import { ReviewHelpfulUpdateManyWithoutUserNestedInputSchema } from './ReviewHelpfulUpdateManyWithoutUserNestedInputSchema';
 
 export const UserUpdateWithoutAdminInputSchema: z.ZodType<Prisma.UserUpdateWithoutAdminInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -39,7 +40,8 @@ export const UserUpdateWithoutAdminInputSchema: z.ZodType<Prisma.UserUpdateWitho
   therapist: z.lazy(() => TherapistUpdateOneWithoutUserNestedInputSchema).optional(),
   moderator: z.lazy(() => ModeratorUpdateOneWithoutUserNestedInputSchema).optional(),
   replies: z.lazy(() => ReplyUpdateManyWithoutUserNestedInputSchema).optional(),
-  replyHearts: z.lazy(() => ReplyHeartUpdateManyWithoutUserNestedInputSchema).optional()
+  replyHearts: z.lazy(() => ReplyHeartUpdateManyWithoutUserNestedInputSchema).optional(),
+  reviewsHelpful: z.lazy(() => ReviewHelpfulUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
 
 export default UserUpdateWithoutAdminInputSchema;

@@ -14,6 +14,7 @@ import { ModeratorOrderByWithRelationInputSchema } from './ModeratorOrderByWithR
 import { AdminOrderByWithRelationInputSchema } from './AdminOrderByWithRelationInputSchema';
 import { ReplyOrderByRelationAggregateInputSchema } from './ReplyOrderByRelationAggregateInputSchema';
 import { ReplyHeartOrderByRelationAggregateInputSchema } from './ReplyHeartOrderByRelationAggregateInputSchema';
+import { ReviewHelpfulOrderByRelationAggregateInputSchema } from './ReviewHelpfulOrderByRelationAggregateInputSchema';
 
 export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
@@ -38,7 +39,8 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   moderator: z.lazy(() => ModeratorOrderByWithRelationInputSchema).optional(),
   admin: z.lazy(() => AdminOrderByWithRelationInputSchema).optional(),
   replies: z.lazy(() => ReplyOrderByRelationAggregateInputSchema).optional(),
-  replyHearts: z.lazy(() => ReplyHeartOrderByRelationAggregateInputSchema).optional()
+  replyHearts: z.lazy(() => ReplyHeartOrderByRelationAggregateInputSchema).optional(),
+  reviewsHelpful: z.lazy(() => ReviewHelpfulOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export default UserOrderByWithRelationInputSchema;

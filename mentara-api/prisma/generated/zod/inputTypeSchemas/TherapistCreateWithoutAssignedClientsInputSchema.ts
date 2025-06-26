@@ -10,6 +10,7 @@ import { UserCreateNestedOneWithoutTherapistInputSchema } from './UserCreateNest
 import { MeetingCreateNestedManyWithoutTherapistInputSchema } from './MeetingCreateNestedManyWithoutTherapistInputSchema';
 import { TherapistAvailabilityCreateNestedManyWithoutTherapistInputSchema } from './TherapistAvailabilityCreateNestedManyWithoutTherapistInputSchema';
 import { WorksheetCreateNestedManyWithoutTherapistInputSchema } from './WorksheetCreateNestedManyWithoutTherapistInputSchema';
+import { ReviewCreateNestedManyWithoutTherapistInputSchema } from './ReviewCreateNestedManyWithoutTherapistInputSchema';
 
 export const TherapistCreateWithoutAssignedClientsInputSchema: z.ZodType<Prisma.TherapistCreateWithoutAssignedClientsInput> = z.object({
   approved: z.boolean().optional(),
@@ -57,7 +58,8 @@ export const TherapistCreateWithoutAssignedClientsInputSchema: z.ZodType<Prisma.
   user: z.lazy(() => UserCreateNestedOneWithoutTherapistInputSchema),
   meetings: z.lazy(() => MeetingCreateNestedManyWithoutTherapistInputSchema).optional(),
   therapistAvailabilities: z.lazy(() => TherapistAvailabilityCreateNestedManyWithoutTherapistInputSchema).optional(),
-  worksheets: z.lazy(() => WorksheetCreateNestedManyWithoutTherapistInputSchema).optional()
+  worksheets: z.lazy(() => WorksheetCreateNestedManyWithoutTherapistInputSchema).optional(),
+  reviews: z.lazy(() => ReviewCreateNestedManyWithoutTherapistInputSchema).optional()
 }).strict();
 
 export default TherapistCreateWithoutAssignedClientsInputSchema;

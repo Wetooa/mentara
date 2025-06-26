@@ -7,6 +7,7 @@ import { WorksheetSubmissionUncheckedCreateNestedManyWithoutClientInputSchema } 
 import { ClientMedicalHistoryUncheckedCreateNestedManyWithoutClientInputSchema } from './ClientMedicalHistoryUncheckedCreateNestedManyWithoutClientInputSchema';
 import { ClientTherapistUncheckedCreateNestedManyWithoutClientInputSchema } from './ClientTherapistUncheckedCreateNestedManyWithoutClientInputSchema';
 import { MeetingUncheckedCreateNestedManyWithoutClientInputSchema } from './MeetingUncheckedCreateNestedManyWithoutClientInputSchema';
+import { ReviewUncheckedCreateNestedManyWithoutClientInputSchema } from './ReviewUncheckedCreateNestedManyWithoutClientInputSchema';
 
 export const ClientUncheckedCreateWithoutClientPreferencesInputSchema: z.ZodType<Prisma.ClientUncheckedCreateWithoutClientPreferencesInput> = z.object({
   userId: z.string(),
@@ -18,7 +19,8 @@ export const ClientUncheckedCreateWithoutClientPreferencesInputSchema: z.ZodType
   worksheetSubmissions: z.lazy(() => WorksheetSubmissionUncheckedCreateNestedManyWithoutClientInputSchema).optional(),
   clientMedicalHistory: z.lazy(() => ClientMedicalHistoryUncheckedCreateNestedManyWithoutClientInputSchema).optional(),
   assignedTherapists: z.lazy(() => ClientTherapistUncheckedCreateNestedManyWithoutClientInputSchema).optional(),
-  meetings: z.lazy(() => MeetingUncheckedCreateNestedManyWithoutClientInputSchema).optional()
+  meetings: z.lazy(() => MeetingUncheckedCreateNestedManyWithoutClientInputSchema).optional(),
+  reviews: z.lazy(() => ReviewUncheckedCreateNestedManyWithoutClientInputSchema).optional()
 }).strict();
 
 export default ClientUncheckedCreateWithoutClientPreferencesInputSchema;

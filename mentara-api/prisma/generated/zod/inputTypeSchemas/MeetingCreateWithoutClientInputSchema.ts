@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { MeetingStatusSchema } from './MeetingStatusSchema';
 import { TherapistCreateNestedOneWithoutMeetingsInputSchema } from './TherapistCreateNestedOneWithoutMeetingsInputSchema';
 import { MeetingDurationCreateNestedOneWithoutMeetingsInputSchema } from './MeetingDurationCreateNestedOneWithoutMeetingsInputSchema';
+import { ReviewCreateNestedManyWithoutMeetingInputSchema } from './ReviewCreateNestedManyWithoutMeetingInputSchema';
 
 export const MeetingCreateWithoutClientInputSchema: z.ZodType<Prisma.MeetingCreateWithoutClientInput> = z.object({
   id: z.string().uuid().optional(),
@@ -19,7 +20,8 @@ export const MeetingCreateWithoutClientInputSchema: z.ZodType<Prisma.MeetingCrea
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   therapist: z.lazy(() => TherapistCreateNestedOneWithoutMeetingsInputSchema),
-  durationConfig: z.lazy(() => MeetingDurationCreateNestedOneWithoutMeetingsInputSchema).optional()
+  durationConfig: z.lazy(() => MeetingDurationCreateNestedOneWithoutMeetingsInputSchema).optional(),
+  reviews: z.lazy(() => ReviewCreateNestedManyWithoutMeetingInputSchema).optional()
 }).strict();
 
 export default MeetingCreateWithoutClientInputSchema;

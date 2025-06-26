@@ -10,6 +10,7 @@ import { ClientMedicalHistoryFindManyArgsSchema } from "../outputTypeSchemas/Cli
 import { ClientPreferenceFindManyArgsSchema } from "../outputTypeSchemas/ClientPreferenceFindManyArgsSchema"
 import { ClientTherapistFindManyArgsSchema } from "../outputTypeSchemas/ClientTherapistFindManyArgsSchema"
 import { MeetingFindManyArgsSchema } from "../outputTypeSchemas/MeetingFindManyArgsSchema"
+import { ReviewFindManyArgsSchema } from "../outputTypeSchemas/ReviewFindManyArgsSchema"
 import { ClientCountOutputTypeArgsSchema } from "../outputTypeSchemas/ClientCountOutputTypeArgsSchema"
 // Select schema needs to be in file to prevent circular imports
 //------------------------------------------------------
@@ -27,6 +28,7 @@ export const ClientSelectSchema: z.ZodType<Prisma.ClientSelect> = z.object({
   clientPreferences: z.union([z.boolean(),z.lazy(() => ClientPreferenceFindManyArgsSchema)]).optional(),
   assignedTherapists: z.union([z.boolean(),z.lazy(() => ClientTherapistFindManyArgsSchema)]).optional(),
   meetings: z.union([z.boolean(),z.lazy(() => MeetingFindManyArgsSchema)]).optional(),
+  reviews: z.union([z.boolean(),z.lazy(() => ReviewFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ClientCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 

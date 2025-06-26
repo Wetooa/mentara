@@ -9,6 +9,7 @@ import { DecimalJsLikeSchema } from './DecimalJsLikeSchema';
 import { MeetingUncheckedCreateNestedManyWithoutTherapistInputSchema } from './MeetingUncheckedCreateNestedManyWithoutTherapistInputSchema';
 import { TherapistAvailabilityUncheckedCreateNestedManyWithoutTherapistInputSchema } from './TherapistAvailabilityUncheckedCreateNestedManyWithoutTherapistInputSchema';
 import { ClientTherapistUncheckedCreateNestedManyWithoutTherapistInputSchema } from './ClientTherapistUncheckedCreateNestedManyWithoutTherapistInputSchema';
+import { ReviewUncheckedCreateNestedManyWithoutTherapistInputSchema } from './ReviewUncheckedCreateNestedManyWithoutTherapistInputSchema';
 
 export const TherapistUncheckedCreateWithoutWorksheetsInputSchema: z.ZodType<Prisma.TherapistUncheckedCreateWithoutWorksheetsInput> = z.object({
   userId: z.string(),
@@ -56,7 +57,8 @@ export const TherapistUncheckedCreateWithoutWorksheetsInputSchema: z.ZodType<Pri
   updatedAt: z.coerce.date().optional(),
   meetings: z.lazy(() => MeetingUncheckedCreateNestedManyWithoutTherapistInputSchema).optional(),
   therapistAvailabilities: z.lazy(() => TherapistAvailabilityUncheckedCreateNestedManyWithoutTherapistInputSchema).optional(),
-  assignedClients: z.lazy(() => ClientTherapistUncheckedCreateNestedManyWithoutTherapistInputSchema).optional()
+  assignedClients: z.lazy(() => ClientTherapistUncheckedCreateNestedManyWithoutTherapistInputSchema).optional(),
+  reviews: z.lazy(() => ReviewUncheckedCreateNestedManyWithoutTherapistInputSchema).optional()
 }).strict();
 
 export default TherapistUncheckedCreateWithoutWorksheetsInputSchema;

@@ -8,6 +8,7 @@ import { MeetingOrderByRelationAggregateInputSchema } from './MeetingOrderByRela
 import { TherapistAvailabilityOrderByRelationAggregateInputSchema } from './TherapistAvailabilityOrderByRelationAggregateInputSchema';
 import { WorksheetOrderByRelationAggregateInputSchema } from './WorksheetOrderByRelationAggregateInputSchema';
 import { ClientTherapistOrderByRelationAggregateInputSchema } from './ClientTherapistOrderByRelationAggregateInputSchema';
+import { ReviewOrderByRelationAggregateInputSchema } from './ReviewOrderByRelationAggregateInputSchema';
 
 export const TherapistOrderByWithRelationInputSchema: z.ZodType<Prisma.TherapistOrderByWithRelationInput> = z.object({
   userId: z.lazy(() => SortOrderSchema).optional(),
@@ -57,7 +58,8 @@ export const TherapistOrderByWithRelationInputSchema: z.ZodType<Prisma.Therapist
   meetings: z.lazy(() => MeetingOrderByRelationAggregateInputSchema).optional(),
   therapistAvailabilities: z.lazy(() => TherapistAvailabilityOrderByRelationAggregateInputSchema).optional(),
   worksheets: z.lazy(() => WorksheetOrderByRelationAggregateInputSchema).optional(),
-  assignedClients: z.lazy(() => ClientTherapistOrderByRelationAggregateInputSchema).optional()
+  assignedClients: z.lazy(() => ClientTherapistOrderByRelationAggregateInputSchema).optional(),
+  reviews: z.lazy(() => ReviewOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export default TherapistOrderByWithRelationInputSchema;

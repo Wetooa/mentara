@@ -9,6 +9,7 @@ import { MeetingStatusSchema } from './MeetingStatusSchema';
 import { EnumMeetingStatusFieldUpdateOperationsInputSchema } from './EnumMeetingStatusFieldUpdateOperationsInputSchema';
 import { ClientUpdateOneRequiredWithoutMeetingsNestedInputSchema } from './ClientUpdateOneRequiredWithoutMeetingsNestedInputSchema';
 import { MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema } from './MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema';
+import { ReviewUpdateManyWithoutMeetingNestedInputSchema } from './ReviewUpdateManyWithoutMeetingNestedInputSchema';
 
 export const MeetingUpdateWithoutTherapistInputSchema: z.ZodType<Prisma.MeetingUpdateWithoutTherapistInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -24,7 +25,8 @@ export const MeetingUpdateWithoutTherapistInputSchema: z.ZodType<Prisma.MeetingU
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   client: z.lazy(() => ClientUpdateOneRequiredWithoutMeetingsNestedInputSchema).optional(),
-  durationConfig: z.lazy(() => MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema).optional()
+  durationConfig: z.lazy(() => MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema).optional(),
+  reviews: z.lazy(() => ReviewUpdateManyWithoutMeetingNestedInputSchema).optional()
 }).strict();
 
 export default MeetingUpdateWithoutTherapistInputSchema;

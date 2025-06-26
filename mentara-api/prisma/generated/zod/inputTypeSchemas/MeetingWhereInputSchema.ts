@@ -13,6 +13,7 @@ import { TherapistScalarRelationFilterSchema } from './TherapistScalarRelationFi
 import { TherapistWhereInputSchema } from './TherapistWhereInputSchema';
 import { MeetingDurationNullableScalarRelationFilterSchema } from './MeetingDurationNullableScalarRelationFilterSchema';
 import { MeetingDurationWhereInputSchema } from './MeetingDurationWhereInputSchema';
+import { ReviewListRelationFilterSchema } from './ReviewListRelationFilterSchema';
 
 export const MeetingWhereInputSchema: z.ZodType<Prisma.MeetingWhereInput> = z.object({
   AND: z.union([ z.lazy(() => MeetingWhereInputSchema),z.lazy(() => MeetingWhereInputSchema).array() ]).optional(),
@@ -36,6 +37,7 @@ export const MeetingWhereInputSchema: z.ZodType<Prisma.MeetingWhereInput> = z.ob
   client: z.union([ z.lazy(() => ClientScalarRelationFilterSchema),z.lazy(() => ClientWhereInputSchema) ]).optional(),
   therapist: z.union([ z.lazy(() => TherapistScalarRelationFilterSchema),z.lazy(() => TherapistWhereInputSchema) ]).optional(),
   durationConfig: z.union([ z.lazy(() => MeetingDurationNullableScalarRelationFilterSchema),z.lazy(() => MeetingDurationWhereInputSchema) ]).optional().nullable(),
+  reviews: z.lazy(() => ReviewListRelationFilterSchema).optional()
 }).strict();
 
 export default MeetingWhereInputSchema;

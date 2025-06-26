@@ -15,6 +15,7 @@ import { NullableDecimalFieldUpdateOperationsInputSchema } from './NullableDecim
 import { MeetingUncheckedUpdateManyWithoutTherapistNestedInputSchema } from './MeetingUncheckedUpdateManyWithoutTherapistNestedInputSchema';
 import { TherapistAvailabilityUncheckedUpdateManyWithoutTherapistNestedInputSchema } from './TherapistAvailabilityUncheckedUpdateManyWithoutTherapistNestedInputSchema';
 import { ClientTherapistUncheckedUpdateManyWithoutTherapistNestedInputSchema } from './ClientTherapistUncheckedUpdateManyWithoutTherapistNestedInputSchema';
+import { ReviewUncheckedUpdateManyWithoutTherapistNestedInputSchema } from './ReviewUncheckedUpdateManyWithoutTherapistNestedInputSchema';
 
 export const TherapistUncheckedUpdateWithoutWorksheetsInputSchema: z.ZodType<Prisma.TherapistUncheckedUpdateWithoutWorksheetsInput> = z.object({
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -62,7 +63,8 @@ export const TherapistUncheckedUpdateWithoutWorksheetsInputSchema: z.ZodType<Pri
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   meetings: z.lazy(() => MeetingUncheckedUpdateManyWithoutTherapistNestedInputSchema).optional(),
   therapistAvailabilities: z.lazy(() => TherapistAvailabilityUncheckedUpdateManyWithoutTherapistNestedInputSchema).optional(),
-  assignedClients: z.lazy(() => ClientTherapistUncheckedUpdateManyWithoutTherapistNestedInputSchema).optional()
+  assignedClients: z.lazy(() => ClientTherapistUncheckedUpdateManyWithoutTherapistNestedInputSchema).optional(),
+  reviews: z.lazy(() => ReviewUncheckedUpdateManyWithoutTherapistNestedInputSchema).optional()
 }).strict();
 
 export default TherapistUncheckedUpdateWithoutWorksheetsInputSchema;

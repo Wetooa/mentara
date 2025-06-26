@@ -9,35 +9,21 @@ import { ClientMedicalHistoryCreateNestedManyWithoutClientInputSchema } from './
 import { ClientPreferenceCreateNestedManyWithoutClientInputSchema } from './ClientPreferenceCreateNestedManyWithoutClientInputSchema';
 import { ClientTherapistCreateNestedManyWithoutClientInputSchema } from './ClientTherapistCreateNestedManyWithoutClientInputSchema';
 import { MeetingCreateNestedManyWithoutClientInputSchema } from './MeetingCreateNestedManyWithoutClientInputSchema';
+import { ReviewCreateNestedManyWithoutClientInputSchema } from './ReviewCreateNestedManyWithoutClientInputSchema';
 
-export const ClientCreateInputSchema: z.ZodType<Prisma.ClientCreateInput> = z
-  .object({
-    hasSeenTherapistRecommendations: z.boolean().optional(),
-    createdAt: z.coerce.date().optional(),
-    updatedAt: z.coerce.date().optional(),
-    user: z.lazy(() => UserCreateNestedOneWithoutClientInputSchema),
-    worksheets: z
-      .lazy(() => WorksheetCreateNestedManyWithoutClientInputSchema)
-      .optional(),
-    preAssessment: z
-      .lazy(() => PreAssessmentCreateNestedOneWithoutClientInputSchema)
-      .optional(),
-    worksheetSubmissions: z
-      .lazy(() => WorksheetSubmissionCreateNestedManyWithoutClientInputSchema)
-      .optional(),
-    clientMedicalHistory: z
-      .lazy(() => ClientMedicalHistoryCreateNestedManyWithoutClientInputSchema)
-      .optional(),
-    clientPreferences: z
-      .lazy(() => ClientPreferenceCreateNestedManyWithoutClientInputSchema)
-      .optional(),
-    assignedTherapists: z
-      .lazy(() => ClientTherapistCreateNestedManyWithoutClientInputSchema)
-      .optional(),
-    meetings: z
-      .lazy(() => MeetingCreateNestedManyWithoutClientInputSchema)
-      .optional(),
-  })
-  .strict();
+export const ClientCreateInputSchema: z.ZodType<Prisma.ClientCreateInput> = z.object({
+  hasSeenTherapistRecommendations: z.boolean().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  user: z.lazy(() => UserCreateNestedOneWithoutClientInputSchema),
+  worksheets: z.lazy(() => WorksheetCreateNestedManyWithoutClientInputSchema).optional(),
+  preAssessment: z.lazy(() => PreAssessmentCreateNestedOneWithoutClientInputSchema).optional(),
+  worksheetSubmissions: z.lazy(() => WorksheetSubmissionCreateNestedManyWithoutClientInputSchema).optional(),
+  clientMedicalHistory: z.lazy(() => ClientMedicalHistoryCreateNestedManyWithoutClientInputSchema).optional(),
+  clientPreferences: z.lazy(() => ClientPreferenceCreateNestedManyWithoutClientInputSchema).optional(),
+  assignedTherapists: z.lazy(() => ClientTherapistCreateNestedManyWithoutClientInputSchema).optional(),
+  meetings: z.lazy(() => MeetingCreateNestedManyWithoutClientInputSchema).optional(),
+  reviews: z.lazy(() => ReviewCreateNestedManyWithoutClientInputSchema).optional()
+}).strict();
 
 export default ClientCreateInputSchema;

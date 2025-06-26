@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import { z } from 'zod';
 import { MeetingStatusSchema } from './MeetingStatusSchema';
+import { ReviewUncheckedCreateNestedManyWithoutMeetingInputSchema } from './ReviewUncheckedCreateNestedManyWithoutMeetingInputSchema';
 
 export const MeetingUncheckedCreateInputSchema: z.ZodType<Prisma.MeetingUncheckedCreateInput> = z.object({
   id: z.string().uuid().optional(),
@@ -18,7 +19,8 @@ export const MeetingUncheckedCreateInputSchema: z.ZodType<Prisma.MeetingUnchecke
   therapistId: z.string(),
   durationId: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional()
+  updatedAt: z.coerce.date().optional(),
+  reviews: z.lazy(() => ReviewUncheckedCreateNestedManyWithoutMeetingInputSchema).optional()
 }).strict();
 
 export default MeetingUncheckedCreateInputSchema;

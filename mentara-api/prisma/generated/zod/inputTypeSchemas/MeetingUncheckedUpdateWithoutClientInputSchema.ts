@@ -7,6 +7,7 @@ import { DateTimeFieldUpdateOperationsInputSchema } from './DateTimeFieldUpdateO
 import { IntFieldUpdateOperationsInputSchema } from './IntFieldUpdateOperationsInputSchema';
 import { MeetingStatusSchema } from './MeetingStatusSchema';
 import { EnumMeetingStatusFieldUpdateOperationsInputSchema } from './EnumMeetingStatusFieldUpdateOperationsInputSchema';
+import { ReviewUncheckedUpdateManyWithoutMeetingNestedInputSchema } from './ReviewUncheckedUpdateManyWithoutMeetingNestedInputSchema';
 
 export const MeetingUncheckedUpdateWithoutClientInputSchema: z.ZodType<Prisma.MeetingUncheckedUpdateWithoutClientInput> = z.object({
   id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -23,6 +24,7 @@ export const MeetingUncheckedUpdateWithoutClientInputSchema: z.ZodType<Prisma.Me
   durationId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  reviews: z.lazy(() => ReviewUncheckedUpdateManyWithoutMeetingNestedInputSchema).optional()
 }).strict();
 
 export default MeetingUncheckedUpdateWithoutClientInputSchema;

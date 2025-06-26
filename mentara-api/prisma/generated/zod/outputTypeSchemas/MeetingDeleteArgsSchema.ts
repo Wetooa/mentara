@@ -5,6 +5,8 @@ import { MeetingWhereUniqueInputSchema } from '../inputTypeSchemas/MeetingWhereU
 import { ClientArgsSchema } from "../outputTypeSchemas/ClientArgsSchema"
 import { TherapistArgsSchema } from "../outputTypeSchemas/TherapistArgsSchema"
 import { MeetingDurationArgsSchema } from "../outputTypeSchemas/MeetingDurationArgsSchema"
+import { ReviewFindManyArgsSchema } from "../outputTypeSchemas/ReviewFindManyArgsSchema"
+import { MeetingCountOutputTypeArgsSchema } from "../outputTypeSchemas/MeetingCountOutputTypeArgsSchema"
 // Select schema needs to be in file to prevent circular imports
 //------------------------------------------------------
 
@@ -27,6 +29,8 @@ export const MeetingSelectSchema: z.ZodType<Prisma.MeetingSelect> = z.object({
   client: z.union([z.boolean(),z.lazy(() => ClientArgsSchema)]).optional(),
   therapist: z.union([z.boolean(),z.lazy(() => TherapistArgsSchema)]).optional(),
   durationConfig: z.union([z.boolean(),z.lazy(() => MeetingDurationArgsSchema)]).optional(),
+  reviews: z.union([z.boolean(),z.lazy(() => ReviewFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => MeetingCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 export const MeetingDeleteArgsSchema: z.ZodType<Prisma.MeetingDeleteArgs> = z.object({

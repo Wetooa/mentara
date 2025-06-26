@@ -14,8 +14,8 @@ export const TherapistAvailabilitySchema = z.object({
   notes: z.string().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-});
+})
 
-export type TherapistAvailability = z.infer<typeof TherapistAvailabilitySchema>;
+export type TherapistAvailability = z.infer<typeof TherapistAvailabilitySchema>
 
 export default TherapistAvailabilitySchema;

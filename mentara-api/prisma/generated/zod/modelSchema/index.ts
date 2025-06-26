@@ -19,6 +19,8 @@ export * from './ReplySchema';
 export * from './ReplyFileSchema';
 export * from './ReplyHeartSchema';
 export * from './PreAssessmentSchema';
+export * from './ReviewSchema';
+export * from './ReviewHelpfulSchema';
 export * from './UserSchema';
 export * from './ClientSchema';
 export * from './TherapistSchema';

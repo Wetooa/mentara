@@ -9,8 +9,8 @@ export const ClientSchema = z.object({
   hasSeenTherapistRecommendations: z.boolean(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-});
+})
 
-export type Client = z.infer<typeof ClientSchema>;
+export type Client = z.infer<typeof ClientSchema>
 
 export default ClientSchema;

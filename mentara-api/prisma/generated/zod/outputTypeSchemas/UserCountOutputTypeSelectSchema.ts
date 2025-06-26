@@ -9,6 +9,7 @@ export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTy
   commentHearts: z.boolean().optional(),
   replies: z.boolean().optional(),
   replyHearts: z.boolean().optional(),
+  reviewsHelpful: z.boolean().optional(),
 }).strict();
 
 export default UserCountOutputTypeSelectSchema;
