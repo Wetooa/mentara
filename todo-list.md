@@ -29,8 +29,8 @@
 - [x] Add progress tracking visualization
 - [x] Create notifications center
 - [x] Implement worksheet completion status
-- [ ] Add quick access to recent therapist communications
-- [ ] Design and implement user profile settings section
+- [x] Add quick access to recent therapist communications
+- [x] Design and implement user profile settings section
 
 ### User - Worksheets Tab
 

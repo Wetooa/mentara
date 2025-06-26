@@ -3,6 +3,7 @@ model Post {
     communityId String
     title       String
     content     String      @db.Text
+    heartCount  Int         @default(0)
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
     files       PostFile[]
@@ -31,16 +32,21 @@ model Comment {
     postId    String
     userId    String
     content   String         @db.Text
+    heartCount Int           @default(0)
+    parentId  String?        // For hierarchical comments
     createdAt DateTime       @default(now())
     updatedAt DateTime       @updatedAt
     post      Post           @relation(fields: [postId], references: [id])
     user      User           @relation(fields: [userId], references: [id])
+    parent    Comment?       @relation("CommentParent", fields: [parentId], references: [id])
+    children  Comment[]      @relation("CommentParent")
     hearts    CommentHeart[]
     files     CommentFile[]
     replies   Reply[]
 
     @@index([postId])
     @@index([userId])
+    @@index([parentId])
 }
 
 model Reply {

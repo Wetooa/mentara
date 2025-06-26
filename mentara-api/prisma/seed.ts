@@ -38,21 +38,21 @@ async function main() {
   console.log('👥 Creating sample users...');
   const sampleUsers = [
     {
-      clerkId: 'sample_user_1',
+      id: 'sample_user_1',
       email: 'john.doe@example.com',
       firstName: 'John',
       lastName: 'Doe',
       role: 'user',
     },
     {
-      clerkId: 'sample_user_2',
+      id: 'sample_user_2',
       email: 'jane.smith@example.com',
       firstName: 'Jane',
       lastName: 'Smith',
       role: 'user',
     },
     {
-      clerkId: 'sample_therapist_1',
+      id: 'sample_therapist_1',
       email: 'dr.wilson@example.com',
       firstName: 'Dr. Sarah',
       lastName: 'Wilson',
@@ -62,7 +62,7 @@ async function main() {
 
   for (const userData of sampleUsers) {
     const existingUser = await prisma.user.findUnique({
-      where: { clerkId: userData.clerkId },
+      where: { id: userData.id },
     });
 
     if (!existingUser) {
@@ -82,13 +82,13 @@ async function main() {
   // Create sample therapist
   console.log('👨‍⚕️ Creating sample therapist...');
   const existingTherapist = await prisma.therapist.findUnique({
-    where: { clerkUserId: 'sample_therapist_1' },
+    where: { userId: 'sample_therapist_1' },
   });
 
   if (!existingTherapist) {
     await prisma.therapist.create({
       data: {
-        clerkUserId: 'sample_therapist_1',
+        userId: 'sample_therapist_1',
         email: 'dr.wilson@example.com',
         firstName: 'Dr. Sarah',
         lastName: 'Wilson',
@@ -96,11 +96,19 @@ async function main() {
         province: 'Metro Manila',
         providerType: 'Clinical Psychologist',
         professionalLicenseType: 'PRC Licensed',
+        isPRCLicensed: 'yes',
         prcLicenseNumber: 'PSY-12345',
-        yearsOfExperience: 8,
+        isLicenseActive: 'yes',
+        practiceStartDate: new Date('2015-06-01'),
         areasOfExpertise: ['Anxiety', 'Depression', 'Stress'],
-        therapeuticApproaches: ['CBT', 'Mindfulness', 'Solution-Focused'],
-        languages: ['English', 'Tagalog'],
+        therapeuticApproachesUsedList: ['CBT', 'Mindfulness', 'Solution-Focused'],
+        languagesOffered: ['English', 'Tagalog'],
+        providedOnlineTherapyBefore: 'yes',
+        comfortableUsingVideoConferencing: 'yes',
+        weeklyAvailability: '20-30 hours',
+        preferredSessionLength: '60 minutes',
+        accepts: ['Individual Therapy', 'Couples Therapy'],
+        assessmentTools: ['GAD-7', 'PHQ-9'],
         illnessSpecializations: [
           'Anxiety',
           'Depression',
@@ -108,17 +116,11 @@ async function main() {
           'Insomnia',
           'Burnout',
         ],
-        expertiseLevels: {
-          Anxiety: 5,
-          Depression: 4,
-          Stress: 5,
-          Insomnia: 3,
-          Burnout: 4,
-        },
         patientSatisfaction: 4.8,
         totalPatients: 150,
         isActive: true,
-        isVerified: true,
+        approved: true,
+        status: 'approved',
         profileComplete: true,
       },
     });
@@ -134,7 +136,7 @@ async function main() {
   });
 
   const sampleUser = await prisma.user.findUnique({
-    where: { clerkId: 'sample_user_1' },
+    where: { id: 'sample_user_1' },
   });
 
   if (sampleUser && communities.length > 0) {
@@ -230,7 +232,7 @@ async function main() {
   // Create posts with hearts and hierarchical comments
   console.log('💖 Creating posts with hearts and comments...');
   const sampleUser2 = await prisma.user.findUnique({
-    where: { clerkId: 'sample_user_2' },
+    where: { id: 'sample_user_2' },
   });
 
   if (sampleUser && sampleUser2 && communities.length > 0) {

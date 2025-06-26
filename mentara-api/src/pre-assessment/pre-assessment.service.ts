@@ -46,18 +46,15 @@ export class PreAssessmentService {
   ): PreAssessmentResponse {
     return {
       id: preAssessment.id,
-      userId: preAssessment.client.userId,
-      clerkId: preAssessment.client.user.id,
+      userId: preAssessment.client.user.id,
       questionnaires: (preAssessment.questionnaires as string[]) || [],
       answers: (preAssessment.answers as number[][]) || [],
       answerMatrix: (preAssessment.answerMatrix as number[]) || [],
       scores: (preAssessment.scores as Record<string, number>) || {},
       severityLevels:
         (preAssessment.severityLevels as Record<string, string>) || {},
-      completedAt: preAssessment.updatedAt ?? preAssessment.createdAt,
       createdAt: preAssessment.createdAt,
       updatedAt: preAssessment.updatedAt,
-      aiEstimate: aiEstimate || undefined,
     };
   }
 
@@ -93,7 +90,7 @@ export class PreAssessmentService {
       }
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
-          clientId: client.id,
+          clientId: client.userId,
           questionnaires: data.questionnaires,
           answers: data.answers,
           answerMatrix: data.answerMatrix,
@@ -129,7 +126,7 @@ export class PreAssessmentService {
         throw new NotFoundException('Client not found');
       }
       const preAssessment = await this.prisma.preAssessment.findUnique({
-        where: { clientId: client.id },
+        where: { clientId: client.userId },
         include: { client: { include: { user: true } } },
       });
       if (!preAssessment) {
@@ -217,7 +214,7 @@ export class PreAssessmentService {
         severityLevels = generateSeverityLevels(calculatedScores);
       }
       const preAssessment = await this.prisma.preAssessment.update({
-        where: { clientId: client.id },
+        where: { clientId: client.userId },
         data: {
           questionnaires: data.questionnaires,
           answers: data.answers,
@@ -257,7 +254,7 @@ export class PreAssessmentService {
         throw new NotFoundException('Client not found');
       }
       await this.prisma.preAssessment.delete({
-        where: { clientId: client.id },
+        where: { clientId: client.userId },
       });
       return null;
     } catch (error) {

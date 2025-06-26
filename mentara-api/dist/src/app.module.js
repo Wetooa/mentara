@@ -21,6 +21,10 @@ const worksheets_module_1 = require("./worksheets/worksheets.module");
 const pre_assessment_module_1 = require("./pre-assessment/pre-assessment.module");
 const booking_module_1 = require("./booking/booking.module");
 const reviews_module_1 = require("./reviews/reviews.module");
+const admin_module_1 = require("./admin/admin.module");
+const moderator_module_1 = require("./moderator/moderator.module");
+const client_module_1 = require("./client/client.module");
+const prisma_client_provider_1 = require("./providers/prisma-client.provider");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,10 +42,14 @@ exports.AppModule = AppModule = __decorate([
             pre_assessment_module_1.PreAssessmentModule,
             booking_module_1.BookingModule,
             reviews_module_1.ReviewsModule,
+            admin_module_1.AdminModule,
+            moderator_module_1.ModeratorModule,
+            client_module_1.ClientModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
             app_service_1.AppService,
+            prisma_client_provider_1.PrismaService,
         ],
     })
 ], AppModule);

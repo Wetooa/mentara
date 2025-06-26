@@ -123,7 +123,7 @@ export class BookingService {
         include: {
           client: {
             select: {
-              id: true,
+              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -135,7 +135,7 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
+              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -163,7 +163,7 @@ export class BookingService {
         include: {
           client: {
             select: {
-              id: true,
+              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -175,7 +175,7 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
+              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -199,7 +199,7 @@ export class BookingService {
         include: {
           client: {
             select: {
-              id: true,
+              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -211,7 +211,7 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
+              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -279,7 +279,7 @@ export class BookingService {
         include: {
           client: {
             select: {
-              id: true,
+              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -291,7 +291,7 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
+              userId: true,
               firstName: true,
               lastName: true,
               email: true,
@@ -325,7 +325,7 @@ export class BookingService {
         include: {
           client: {
             select: {
-              id: true,
+              userId: true,
               user: {
                 select: {
                   firstName: true,
@@ -337,7 +337,7 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
+              userId: true,
               firstName: true,
               lastName: true,
               email: true,

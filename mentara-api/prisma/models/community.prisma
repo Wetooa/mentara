@@ -3,7 +3,12 @@ model Community {
     name                 String               @unique
     slug                 String               @unique
     description          String?
+    illness              String?              // Associated illness/condition
     imageUrl             String?
+    isActive             Boolean              @default(true)
+    isPrivate            Boolean              @default(false)
+    memberCount          Int                  @default(0)
+    postCount            Int                  @default(0)
     createdAt            DateTime             @default(now())
     updatedAt            DateTime             @updatedAt
     memberships          Membership[]
@@ -12,6 +17,7 @@ model Community {
 
     @@index([name])
     @@index([slug])
+    @@index([illness])
 }
 
 model Membership {

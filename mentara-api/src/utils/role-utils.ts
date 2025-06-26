@@ -24,7 +24,7 @@ export class RoleUtils {
   async getUserRole(clerkId: string): Promise<UserRole | null> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { clerkId },
+        where: { id: clerkId },
         select: { role: true },
       });
       return (user?.role as UserRole) || null;

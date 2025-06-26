@@ -14,7 +14,7 @@ export const CurrentUserRole = createParamDecorator(
     try {
       const prisma = new PrismaService();
       const user = await prisma.user.findUnique({
-        where: { clerkId },
+        where: { id: clerkId },
         select: { role: true },
       });
 

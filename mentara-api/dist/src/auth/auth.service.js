@@ -10,11 +10,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
-const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
+const backend_1 = require("@clerk/backend");
 const common_1 = require("@nestjs/common");
 const prisma_client_provider_1 = require("../providers/prisma-client.provider");
 let AuthService = class AuthService {
     prisma;
+    clerkClient = (0, backend_1.createClerkClient)({
+        secretKey: process.env.CLERK_SECRET_KEY,
+    });
     constructor(prisma) {
         this.prisma = prisma;
     }
@@ -87,10 +90,10 @@ let AuthService = class AuthService {
         }
     }
     async getUsers() {
-        return clerk_sdk_node_1.clerkClient.users.getUserList();
+        return this.clerkClient.users.getUserList();
     }
     async getUser(userId) {
-        return clerk_sdk_node_1.clerkClient.users.getUser(userId);
+        return this.clerkClient.users.getUser(userId);
     }
 };
 exports.AuthService = AuthService;
