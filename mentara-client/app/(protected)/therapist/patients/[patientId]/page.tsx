@@ -2,7 +2,7 @@
 
 import React, { useState, use } from "react";
 import Image from "next/image";
-import { Video, MessageSquare, Edit, Calendar } from "lucide-react";
+import { Video, MessageSquare, Calendar } from "lucide-react";
 import PatientInfoCard from "@/components/therapist/patient/PatientInfoCard";
 import PatientSessionNotes from "@/components/therapist/patient/PatientSessionNotes";
 import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets";

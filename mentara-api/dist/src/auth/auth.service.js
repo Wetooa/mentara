@@ -27,7 +27,7 @@ let AuthService = class AuthService {
         });
         return !!admin;
     }
-    async registerClient(userId, registerUserDto) {
+    async registerClient(userId, registerClientDto) {
         try {
             const existingUser = await this.prisma.user.findUnique({
                 where: { id: userId },
@@ -35,13 +35,23 @@ let AuthService = class AuthService {
             if (existingUser) {
                 throw new common_1.ConflictException('User already exists');
             }
+            await this.prisma.user.create({
+                data: registerClientDto.user.create,
+            });
             const client = await this.prisma.client.create({
                 data: {
+                    ...registerClientDto,
                     user: { connect: { id: userId } },
-                    ...registerUserDto,
                 },
                 include: {
                     user: true,
+                    worksheets: true,
+                    preAssessment: true,
+                    worksheetSubmissions: true,
+                    clientMedicalHistory: true,
+                    clientPreferences: true,
+                    assignedTherapists: true,
+                    meetings: true,
                 },
             });
             return client;
@@ -63,23 +73,31 @@ let AuthService = class AuthService {
                 throw new common_1.ConflictException('User already exists');
             }
             await this.prisma.user.create({
-                data: {
-                    id: userId,
-                    ...registerTherapistDto,
-                },
+                data: registerTherapistDto.user.create,
             });
-            const therapist = await this.prisma.therapist.create({
+            await this.prisma.therapist.create({
                 data: {
-                    user: { connect: { id: userId } },
                     approved: false,
                     status: 'pending',
                     ...registerTherapistDto,
                 },
                 include: {
                     user: true,
+                    assignedClients: true,
+                    meetings: true,
+                    therapistAvailabilities: true,
                 },
             });
-            return therapist;
+            return await this.prisma.therapist.findUniqueOrThrow({
+                where: { userId },
+                include: {
+                    user: true,
+                    assignedClients: true,
+                    meetings: true,
+                    therapistAvailabilities: true,
+                    worksheets: true,
+                },
+            });
         }
         catch (error) {
             console.error('Therapist registration error:', error instanceof Error ? error.message : error);

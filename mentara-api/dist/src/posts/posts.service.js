@@ -33,11 +33,10 @@ let PostsService = class PostsService {
                         avatarUrl: true,
                     },
                 },
-                community: {
+                room: {
                     select: {
                         id: true,
                         name: true,
-                        slug: true,
                     },
                 },
                 comments: {
@@ -99,11 +98,10 @@ let PostsService = class PostsService {
                         avatarUrl: true,
                     },
                 },
-                community: {
+                room: {
                     select: {
                         id: true,
                         name: true,
-                        slug: true,
                     },
                 },
                 comments: {
@@ -162,11 +160,10 @@ let PostsService = class PostsService {
                         avatarUrl: true,
                     },
                 },
-                community: {
+                room: {
                     select: {
                         id: true,
                         name: true,
-                        slug: true,
                     },
                 },
                 files: true,
@@ -196,11 +193,10 @@ let PostsService = class PostsService {
                         avatarUrl: true,
                     },
                 },
-                community: {
+                room: {
                     select: {
                         id: true,
                         name: true,
-                        slug: true,
                     },
                 },
                 files: true,
@@ -236,11 +232,10 @@ let PostsService = class PostsService {
                         avatarUrl: true,
                     },
                 },
-                community: {
+                room: {
                     select: {
                         id: true,
                         name: true,
-                        slug: true,
                     },
                 },
                 files: true,
@@ -256,10 +251,10 @@ let PostsService = class PostsService {
             },
         });
     }
-    async findByCommunityId(communityId, userId) {
+    async findByRoomId(roomId, userId) {
         return this.prisma.post.findMany({
             where: {
-                communityId,
+                roomId,
             },
             include: {
                 user: {
@@ -270,11 +265,10 @@ let PostsService = class PostsService {
                         avatarUrl: true,
                     },
                 },
-                community: {
+                room: {
                     select: {
                         id: true,
                         name: true,
-                        slug: true,
                     },
                 },
                 comments: {
