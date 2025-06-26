@@ -14,7 +14,7 @@ import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
-import { PostCreateInputDto, PostUpdateInputDto } from '../schema/post.d';
+import { PostCreateInputDto, PostUpdateInputDto } from '../schema/post';
 
 @Controller('posts')
 @UseGuards(ClerkAuthGuard)

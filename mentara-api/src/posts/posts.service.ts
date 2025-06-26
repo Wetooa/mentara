@@ -4,8 +4,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Post, Prisma, User } from '@prisma/client';
-import { PostUpdateInputDto } from 'src/schema/post';
+import { Post, Prisma, User, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
+import { PostUpdateInputDto } from '../schema/post';
 
 @Injectable()
 export class PostsService {
@@ -61,7 +61,6 @@ export class PostsService {
             createdAt: 'desc',
           },
         },
-        files: true,
         hearts: userId
           ? {
               where: {
@@ -127,7 +126,6 @@ export class PostsService {
             createdAt: 'desc',
           },
         },
-        files: true,
         hearts: userId
           ? {
               where: {
@@ -163,7 +161,6 @@ export class PostsService {
             name: true,
           },
         },
-        files: true,
       },
     });
   }
@@ -208,7 +205,6 @@ export class PostsService {
             name: true,
           },
         },
-        files: true,
       },
     });
   }
@@ -252,7 +248,6 @@ export class PostsService {
             name: true,
           },
         },
-        files: true,
         _count: {
           select: {
             comments: true,
@@ -313,7 +308,6 @@ export class PostsService {
             createdAt: 'desc',
           },
         },
-        files: true,
         hearts: userId
           ? {
               where: {
@@ -384,5 +378,47 @@ export class PostsService {
     });
 
     return !!heart;
+  }
+
+  // File attachment methods
+  async attachFilesToPost(
+    postId: string, 
+    fileIds: string[], 
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA
+  ) {
+    const attachments = fileIds.map((fileId, index) => ({
+      fileId,
+      entityType: AttachmentEntityType.POST,
+      entityId: postId,
+      purpose,
+      order: index,
+    }));
+
+    return this.prisma.fileAttachment.createMany({
+      data: attachments,
+    });
+  }
+
+  async getPostAttachments(postId: string) {
+    return this.prisma.fileAttachment.findMany({
+      where: {
+        entityType: AttachmentEntityType.POST,
+        entityId: postId,
+      },
+      include: {
+        file: true,
+      },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async removePostAttachment(postId: string, fileId: string) {
+    return this.prisma.fileAttachment.deleteMany({
+      where: {
+        entityType: AttachmentEntityType.POST,
+        entityId: postId,
+        fileId,
+      },
+    });
   }
 }

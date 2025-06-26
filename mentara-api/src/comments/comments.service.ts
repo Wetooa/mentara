@@ -4,12 +4,12 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Comment, Prisma, User, Reply } from '@prisma/client';
+import { Comment, Prisma, User, Reply, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
 import {
   CommentCreateInputDto,
   CommentResponse,
   CommentUpdateInputDto,
-} from 'src/schema/comment';
+} from '../schema/comment';
 
 @Injectable()
 export class CommentsService {
@@ -56,7 +56,6 @@ export class CommentsService {
               createdAt: 'asc',
             },
           },
-          files: true,
           hearts: userId
             ? {
                 where: {
@@ -91,7 +90,6 @@ export class CommentsService {
               user: true,
             },
           },
-          files: true,
           hearts: true,
         },
       });
@@ -136,7 +134,6 @@ export class CommentsService {
               },
             },
           },
-          files: true,
           hearts: userId
             ? {
                 where: {
@@ -170,16 +167,9 @@ export class CommentsService {
           userId,
           postId: data.postId,
           content: data.content,
-          files: {
-            create: data.files?.map((file) => ({
-              url: file.url,
-              type: file.type,
-            })),
-          },
         },
         include: {
           user: true,
-          files: true,
           hearts: true,
         },
       });
@@ -228,7 +218,6 @@ export class CommentsService {
         },
         include: {
           user: true,
-          files: true,
           hearts: true,
         },
       });
@@ -298,7 +287,6 @@ export class CommentsService {
               },
             },
           },
-          files: true,
           _count: {
             select: {
               replies: true,
@@ -493,5 +481,89 @@ export class CommentsService {
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
+  }
+
+  // File attachment methods for comments
+  async attachFilesToComment(
+    commentId: string, 
+    fileIds: string[], 
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA
+  ) {
+    const attachments = fileIds.map((fileId, index) => ({
+      fileId,
+      entityType: AttachmentEntityType.COMMENT,
+      entityId: commentId,
+      purpose,
+      order: index,
+    }));
+
+    return this.prisma.fileAttachment.createMany({
+      data: attachments,
+    });
+  }
+
+  async getCommentAttachments(commentId: string) {
+    return this.prisma.fileAttachment.findMany({
+      where: {
+        entityType: AttachmentEntityType.COMMENT,
+        entityId: commentId,
+      },
+      include: {
+        file: true,
+      },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async removeCommentAttachment(commentId: string, fileId: string) {
+    return this.prisma.fileAttachment.deleteMany({
+      where: {
+        entityType: AttachmentEntityType.COMMENT,
+        entityId: commentId,
+        fileId,
+      },
+    });
+  }
+
+  // File attachment methods for replies
+  async attachFilesToReply(
+    replyId: string, 
+    fileIds: string[], 
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA
+  ) {
+    const attachments = fileIds.map((fileId, index) => ({
+      fileId,
+      entityType: AttachmentEntityType.REPLY,
+      entityId: replyId,
+      purpose,
+      order: index,
+    }));
+
+    return this.prisma.fileAttachment.createMany({
+      data: attachments,
+    });
+  }
+
+  async getReplyAttachments(replyId: string) {
+    return this.prisma.fileAttachment.findMany({
+      where: {
+        entityType: AttachmentEntityType.REPLY,
+        entityId: replyId,
+      },
+      include: {
+        file: true,
+      },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async removeReplyAttachment(replyId: string, fileId: string) {
+    return this.prisma.fileAttachment.deleteMany({
+      where: {
+        entityType: AttachmentEntityType.REPLY,
+        entityId: replyId,
+        fileId,
+      },
+    });
   }
 }

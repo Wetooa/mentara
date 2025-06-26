@@ -4,7 +4,6 @@ model Post {
     content   String      @db.Text
     createdAt DateTime    @default(now())
     updatedAt DateTime    @updatedAt
-    files     PostFile[]
     comments  Comment[]
     hearts    PostHeart[]
     user      User?       @relation(fields: [userId], references: [id])
@@ -16,15 +15,8 @@ model Post {
     @@index([roomId])
 }
 
-model PostFile {
-    id     String  @id @default(uuid())
-    postId String
-    url    String
-    type   String?
-    post   Post    @relation(fields: [postId], references: [id])
-
-    @@index([postId])
-}
+// Note: PostFile is now replaced by FileAttachment with entityType = POST
+// This model is kept for backward compatibility but should be migrated
 
 model Comment {
     id      String @id @default(uuid())
@@ -39,22 +31,14 @@ model Comment {
     user User @relation(fields: [userId], references: [id])
 
     hearts  CommentHeart[]
-    files   CommentFile[]
     replies Reply[]
 
     @@index([postId])
     @@index([userId])
 }
 
-model CommentFile {
-    id        String  @id @default(uuid())
-    commentId String
-    url       String
-    type      String?
-    comment   Comment @relation(fields: [commentId], references: [id])
-
-    @@index([commentId])
-}
+// Note: CommentFile is now replaced by FileAttachment with entityType = COMMENT
+// This model is kept for backward compatibility but should be migrated
 
 model CommentHeart {
     id        String   @id @default(uuid())
@@ -92,21 +76,13 @@ model Reply {
     comment   Comment      @relation(fields: [commentId], references: [id])
     user      User         @relation(fields: [userId], references: [id])
     hearts    ReplyHeart[]
-    files     ReplyFile[]
 
     @@index([commentId])
     @@index([userId])
 }
 
-model ReplyFile {
-    id      String  @id @default(uuid())
-    replyId String
-    url     String
-    type    String?
-    reply   Reply   @relation(fields: [replyId], references: [id])
-
-    @@index([replyId])
-}
+// Note: ReplyFile is now replaced by FileAttachment with entityType = REPLY
+// This model is kept for backward compatibility but should be migrated
 
 model ReplyHeart {
     id        String   @id @default(uuid())

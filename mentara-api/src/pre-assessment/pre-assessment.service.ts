@@ -10,7 +10,7 @@ import {
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
 import axios from 'axios';
-import { CreatePreAssessmentDto } from 'src/schema/pre-assessment.d';
+import { CreatePreAssessmentDto } from '../schema/pre-assessment';
 
 @Injectable()
 export class PreAssessmentService {

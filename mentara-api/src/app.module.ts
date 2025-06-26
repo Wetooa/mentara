@@ -16,6 +16,14 @@ import { AdminModule } from './admin/admin.module';
 import { ModeratorModule } from './moderator/moderator.module';
 import { ClientModule } from './client/client.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { FilesModule } from './files/files.module';
+import { SessionsModule } from './sessions/sessions.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { BillingModule } from './billing/billing.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { SearchModule } from './search/search.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { PrismaService } from './providers/prisma-client.provider';
 
 @Module({
@@ -35,6 +43,14 @@ import { PrismaService } from './providers/prisma-client.provider';
     ModeratorModule,
     ClientModule,
     MessagingModule,
+    FilesModule,
+    SessionsModule,
+    NotificationsModule,
+    AuditLogsModule,
+    BillingModule,
+    DashboardModule,
+    SearchModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -23,7 +23,7 @@ import {
   CommunityUpdateInputDto,
   CommunityWithMembersResponse,
   CommunityWithRoomGroupsResponse,
-} from '../schema/community.d';
+} from '../schema/community';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 
 @Controller('communities')

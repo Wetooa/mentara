@@ -17,6 +17,8 @@ model Meeting {
 
     // Reviews for this meeting
     reviews Review[]
+    sessionLogs SessionLog[]
+    payments Payment[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

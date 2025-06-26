@@ -20,7 +20,7 @@ import {
   ReviewStatusEnum,
   ReviewUpdateDto,
   ReviewStatusDto,
-} from '../schema/review.d';
+} from '../schema/review';
 
 @Controller('reviews')
 @UseGuards(ClerkAuthGuard)

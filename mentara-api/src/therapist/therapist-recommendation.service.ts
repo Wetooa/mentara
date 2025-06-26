@@ -4,17 +4,20 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-<<<<<<< HEAD
-import { PreAssessment } from '@prisma/client';
-import { TherapistWithUser } from 'src/types';
-import { TherapistRecommendationRequest, TherapistRecommendationResponse } from './therapist-application.dto';
-=======
 import { PreAssessment, Therapist } from '@prisma/client';
-import {
-  TherapistRecommendationRequestDto,
-  TherapistRecommendationResponseDto,
-} from 'src/schema/therapist-application.schemas';
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
+
+interface TherapistRecommendationRequest {
+  userId: string;
+  limit?: number;
+  includeInactive?: boolean;
+  province?: string;
+  maxHourlyRate?: number;
+}
+
+interface TherapistRecommendationResponse {
+  therapists: any[];
+  total: number;
+}
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -34,8 +37,8 @@ export class TherapistRecommendationService {
   }
 
   async getRecommendedTherapists(
-    request: TherapistRecommendationRequestDto,
-  ): Promise<TherapistRecommendationResponseDto> {
+    request: TherapistRecommendationRequest,
+  ): Promise<TherapistRecommendationResponse> {
     try {
       // Get user's pre-assessment results
       const user = await this.prisma.client.findUnique({
@@ -58,13 +61,13 @@ export class TherapistRecommendationService {
       // Fetch therapists
       const therapists = await this.prisma.therapist.findMany({
         where: {
-          isActive: request.includeInactive ? undefined : true,
+          status: 'approved',
           ...(request.province && { province: request.province }),
           ...(request.maxHourlyRate && {
             hourlyRate: { lte: request.maxHourlyRate },
           }),
         },
-        orderBy: { patientSatisfaction: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: request.limit ?? 10,
         include: {
           user: true,
@@ -125,7 +128,7 @@ export class TherapistRecommendationService {
   }
 
   private calculateMatchScore(
-    therapist: Therapist,
+    therapist: any,
     userConditions: Record<string, string>,
   ): number {
     let score = 0;
@@ -137,8 +140,8 @@ export class TherapistRecommendationService {
       this.calculateYearsOfExperience(therapist.practiceStartDate) * 2,
       20,
     );
-    if (therapist.patientSatisfaction)
-      score += Number(therapist.patientSatisfaction) * 10;
+    // Add base score for experience
+    score += therapist.yearsOfExperience ? therapist.yearsOfExperience * 2 : 0;
     return score;
   }
 

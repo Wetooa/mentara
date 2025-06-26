@@ -1,4 +1,10 @@
-import { IsString, IsArray, IsNumber, IsOptional, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
 
 export class CreatePreAssessmentDto {
   @IsString()

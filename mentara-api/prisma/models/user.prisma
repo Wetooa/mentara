@@ -15,6 +15,27 @@ model User {
     bio           String?
     coverImageUrl String?
     isActive      Boolean @default(true)
+    isVerified    Boolean @default(false)
+    
+    // Contact information
+    phoneNumber   String?
+    phoneVerified Boolean @default(false)
+    
+    // Preferences
+    timezone      String? @default("UTC")
+    language      String? @default("en")
+    theme         String? @default("light")
+    
+    // Privacy settings
+    profileVisibility String @default("private") // public, private, therapists_only
+    allowMessagesFrom String @default("therapists") // all, therapists, none
+    
+    // Account status
+    lastLoginAt   DateTime?
+    lastActiveAt  DateTime?
+    suspendedAt   DateTime?
+    suspendedBy   String?
+    suspensionReason String?
 
     // Community and content relations (available to all users)
     memberships   Membership[]
@@ -40,6 +61,25 @@ model User {
     messageReactions   MessageReaction[]        @relation("UserMessageReactions")
     blocking           UserBlock[]              @relation("UserBlocking")
     blockedBy          UserBlock[]              @relation("UserBlocked")
+    
+    // Notification relations
+    notifications      Notification[]           @relation("UserNotifications")
+    notificationSettings NotificationSettings?  @relation("UserNotificationSettings")
+    
+    // Audit and activity relations
+    auditLogs          AuditLog[]               @relation("UserAuditLogs")
+    activities         UserActivity[]           @relation("UserActivities")
+    
+    // File relations
+    uploadedFiles      File[]                   @relation("UserUploadedFiles")
+    fileVersions       FileVersion[]            @relation("UserFileVersions")
+    fileShares         FileShare[]              @relation("UserFileShares")
+    fileDownloads      FileDownload[]           @relation("UserFileDownloads")
+    
+    // Billing relations
+    subscription       Subscription?            @relation("UserSubscription")
+    paymentMethods     PaymentMethod[]          @relation("UserPaymentMethods")
+    discountRedemptions DiscountRedemption[]    @relation("UserDiscountRedemptions")
 
     @@index([email])
     @@index([role])
@@ -58,6 +98,10 @@ model Client {
     assignedTherapists   ClientTherapist[]
     meetings             Meeting[]              @relation("ClientMeetings")
     reviews              Review[] // Reviews written by this client
+    sessionLogs          SessionLog[]
+    therapyProgress      TherapyProgress[]
+    assessments          Assessment[]
+    mentalHealthIndicators MentalHealthIndicator[]
 
     hasSeenTherapistRecommendations Boolean @default(false)
 
@@ -67,10 +111,6 @@ model Client {
     @@index([userId])
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
 model Moderator {
     userId String @unique
     user   User   @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)

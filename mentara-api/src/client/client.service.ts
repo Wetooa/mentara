@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ClientResponse, ClientUpdateDto } from '../schema/auth.d';
+import { ClientResponse, ClientUpdateDto } from '../schema/auth';
 
 @Injectable()
 export class ClientService {
@@ -12,7 +12,7 @@ export class ClientService {
       include: { user: true },
     });
     if (!client) {
-      throw new Error('Client not found');
+      throw new NotFoundException('Client not found');
     }
     return client;
   }
