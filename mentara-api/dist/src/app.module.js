@@ -24,6 +24,7 @@ const reviews_module_1 = require("./reviews/reviews.module");
 const admin_module_1 = require("./admin/admin.module");
 const moderator_module_1 = require("./moderator/moderator.module");
 const client_module_1 = require("./client/client.module");
+const messaging_module_1 = require("./messaging/messaging.module");
 const prisma_client_provider_1 = require("./providers/prisma-client.provider");
 let AppModule = class AppModule {
 };
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             admin_module_1.AdminModule,
             moderator_module_1.ModeratorModule,
             client_module_1.ClientModule,
+            messaging_module_1.MessagingModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
