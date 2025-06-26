@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
-import { therapistProfileFormFields } from "@/const/therapist_application";
+import { therapistProfileFormFields } from "@/constants/therapist_application";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";

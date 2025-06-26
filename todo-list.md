@@ -39,10 +39,19 @@
 - [x] Design worksheet card components
 - [x] Add date-based grouping for worksheets
 - [x] Fix worksheets height to fill entire viewport
-- [ ] Implement worksheet detail view
-- [ ] Add file upload functionality for worksheet submissions
-- [ ] Create worksheet completion tracking
-- [ ] Implement worksheet API integration
+- [x] Implement worksheet detail view
+- [x] Add file upload functionality for worksheet submissions
+- [x] Create worksheet completion tracking
+- [x] Implement worksheet API integration
+- [x] Create comprehensive database schema for worksheets
+- [x] Build NestJS worksheets module with REST API and file upload support
+- [x] Implement progress tracking with visual indicators
+- [x] Add submit/unsubmit functionality with timestamp tracking
+- [x] Create file management system with upload/download/delete capabilities
+- [x] Implement file type validation and size limits
+- [x] Add therapist feedback system
+- [x] Create worksheet status management (upcoming, past_due, completed)
+- [x] Integrate with user authentication and role-based access control
 
 ### User - Messages Tab
 
@@ -85,7 +94,7 @@
 - [ ] Build API for therapist booking functionality
 - [ ] Develop meeting scheduling and management API
 - [ ] Create user dashboard data API endpoint
-- [ ] Build worksheet management API
+- [x] Build worksheet management API
 - [ ] Create API documentation with Swagger
 
 ## General Tasks
