@@ -16,6 +16,7 @@ import {
 import { Task, TaskFile } from "@/components/worksheets/types";
 import { worksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
+import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 
 // Mock data - fallback if API fails
 const getMockTask = (taskId: string): Task | undefined => {
@@ -343,6 +344,12 @@ export default function TaskDetailPage() {
           <div className="mb-6">
             <h2 className="font-medium text-secondary mb-2">Instructions</h2>
             <p className="text-gray-600">{task.instructions || "None"}</p>
+          </div>
+
+          {/* Progress Tracking */}
+          <div className="mb-6">
+            <h2 className="font-medium text-secondary mb-4">Progress</h2>
+            <WorksheetProgress task={task} />
           </div>
 
           {/* Reference Materials */}
