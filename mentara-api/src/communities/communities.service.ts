@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoomGroup, Room } from '@prisma/client';
 import {
@@ -8,7 +12,7 @@ import {
   CommunityWithRoomGroupsResponse,
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from '../schema/community';
+} from 'schema/community';
 
 @Injectable()
 export class CommunitiesService {
@@ -60,7 +64,9 @@ export class CommunitiesService {
         },
       });
     } catch (error) {
-      throw new ConflictException(error instanceof Error ? error.message : String(error));
+      throw new ConflictException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -167,11 +173,11 @@ export class CommunitiesService {
         userId,
       },
     });
-    
+
     if (existingMembership) {
       throw new ConflictException('User is already a member of this community');
     }
-    
+
     await this.prisma.membership.create({
       data: {
         userId,

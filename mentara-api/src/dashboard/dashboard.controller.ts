@@ -10,7 +10,10 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('user')
-  getUserDashboard(@CurrentUserId() userId: string, @CurrentUserRole() role: string) {
+  getUserDashboard(
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
     if (role !== 'user') {
       throw new Error('Access denied');
     }
@@ -18,7 +21,10 @@ export class DashboardController {
   }
 
   @Get('therapist')
-  getTherapistDashboard(@CurrentUserId() userId: string, @CurrentUserRole() role: string) {
+  getTherapistDashboard(
+    @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
+  ) {
     if (role !== 'therapist') {
       throw new Error('Access denied');
     }

@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Notification, NotificationType, NotificationPriority } from '@prisma/client';
+import {
+  Notification,
+  NotificationType,
+  NotificationPriority,
+} from '@prisma/client';
 
 @Injectable()
 export class NotificationsService {
@@ -48,10 +52,7 @@ export class NotificationsService {
 
     return this.prisma.notification.findMany({
       where,
-      orderBy: [
-        { priority: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
       take: 50, // Limit to recent notifications
     });
   }
@@ -224,16 +225,21 @@ export class NotificationsService {
     userId: string,
     status: 'approved' | 'rejected',
   ) {
-    const title = status === 'approved' ? 'Application Approved' : 'Application Update';
-    const message = status === 'approved' 
-      ? 'Congratulations! Your therapist application has been approved.'
-      : 'Your therapist application has been reviewed. Please check your application status.';
-    
+    const title =
+      status === 'approved' ? 'Application Approved' : 'Application Update';
+    const message =
+      status === 'approved'
+        ? 'Congratulations! Your therapist application has been approved.'
+        : 'Your therapist application has been reviewed. Please check your application status.';
+
     return this.create({
       userId,
       title,
       message,
-      type: status === 'approved' ? NotificationType.THERAPIST_APPROVED : NotificationType.THERAPIST_REJECTED,
+      type:
+        status === 'approved'
+          ? NotificationType.THERAPIST_APPROVED
+          : NotificationType.THERAPIST_REJECTED,
       priority: NotificationPriority.HIGH,
       actionUrl: '/therapist/application',
       data: { status },
@@ -276,7 +282,7 @@ export class NotificationsService {
 
   async sendScheduledNotifications() {
     const now = new Date();
-    
+
     const scheduledNotifications = await this.prisma.notification.findMany({
       where: {
         scheduledFor: {
@@ -289,7 +295,7 @@ export class NotificationsService {
     for (const notification of scheduledNotifications) {
       // In a real implementation, you would send the notification
       // via email, push notification, etc. here
-      
+
       await this.prisma.notification.update({
         where: { id: notification.id },
         data: { sentAt: now },

@@ -5,12 +5,15 @@ import { PrismaService } from '../providers/prisma-client.provider';
 export class SearchService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async searchTherapists(query: string, filters?: {
-    province?: string;
-    expertise?: string[];
-    maxHourlyRate?: number;
-    minExperience?: number;
-  }) {
+  async searchTherapists(
+    query: string,
+    filters?: {
+      province?: string;
+      expertise?: string[];
+      maxHourlyRate?: number;
+      minExperience?: number;
+    },
+  ) {
     try {
       const where: any = {
         status: 'approved',
@@ -65,7 +68,9 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(`Failed to search therapists: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to search therapists: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -112,7 +117,9 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(`Failed to search posts: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to search posts: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -137,7 +144,9 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(`Failed to search communities: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to search communities: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -170,11 +179,16 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(`Failed to search users: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to search users: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  async globalSearch(query: string, type?: 'therapists' | 'posts' | 'communities' | 'users') {
+  async globalSearch(
+    query: string,
+    type?: 'therapists' | 'posts' | 'communities' | 'users',
+  ) {
     try {
       const results: any = {};
 
@@ -196,7 +210,9 @@ export class SearchService {
 
       return results;
     } catch (error) {
-      throw new Error(`Failed to perform global search: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to perform global search: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

@@ -1,6 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { SessionLog, SessionStatus, SessionType, ActivityType, UserActionType } from '@prisma/client';
+import {
+  SessionLog,
+  SessionStatus,
+  SessionType,
+  ActivityType,
+  UserActionType,
+} from '@prisma/client';
 
 @Injectable()
 export class SessionsService {
@@ -131,7 +141,10 @@ export class SessionsService {
     });
   }
 
-  async updateSession(id: string, data: Partial<SessionLog>): Promise<SessionLog> {
+  async updateSession(
+    id: string,
+    data: Partial<SessionLog>,
+  ): Promise<SessionLog> {
     const session = await this.findSession(id);
     if (!session) {
       throw new NotFoundException(`Session with ID ${id} not found`);
@@ -169,7 +182,11 @@ export class SessionsService {
     });
   }
 
-  async endSession(id: string, notes?: string, quality?: number): Promise<SessionLog> {
+  async endSession(
+    id: string,
+    notes?: string,
+    quality?: number,
+  ): Promise<SessionLog> {
     const session = await this.findSession(id);
     if (!session) {
       throw new NotFoundException(`Session with ID ${id} not found`);
@@ -180,7 +197,9 @@ export class SessionsService {
     }
 
     const endTime = new Date();
-    const duration = Math.floor((endTime.getTime() - session.startTime.getTime()) / 60000); // minutes
+    const duration = Math.floor(
+      (endTime.getTime() - session.startTime.getTime()) / 60000,
+    ); // minutes
 
     return this.updateSession(id, {
       endTime,
@@ -320,8 +339,10 @@ export class SessionsService {
 
     if (clientId) where.clientId = clientId;
     if (therapistId) where.therapistId = therapistId;
-    if (startDate) where.assessmentDate = { ...where.assessmentDate, gte: startDate };
-    if (endDate) where.assessmentDate = { ...where.assessmentDate, lte: endDate };
+    if (startDate)
+      where.assessmentDate = { ...where.assessmentDate, gte: startDate };
+    if (endDate)
+      where.assessmentDate = { ...where.assessmentDate, lte: endDate };
 
     return this.prisma.therapyProgress.findMany({
       where,
@@ -360,33 +381,30 @@ export class SessionsService {
     if (clientId) where.clientId = clientId;
     if (therapistId) where.therapistId = therapistId;
 
-    const [
-      totalSessions,
-      completedSessions,
-      averageDuration,
-      sessionsByType,
-    ] = await Promise.all([
-      this.prisma.sessionLog.count({ where }),
-      this.prisma.sessionLog.count({
-        where: { ...where, status: SessionStatus.COMPLETED },
-      }),
-      this.prisma.sessionLog.aggregate({
-        where: { ...where, status: SessionStatus.COMPLETED },
-        _avg: { duration: true },
-      }),
-      this.prisma.sessionLog.groupBy({
-        by: ['sessionType'],
-        where,
-        _count: { sessionType: true },
-      }),
-    ]);
+    const [totalSessions, completedSessions, averageDuration, sessionsByType] =
+      await Promise.all([
+        this.prisma.sessionLog.count({ where }),
+        this.prisma.sessionLog.count({
+          where: { ...where, status: SessionStatus.COMPLETED },
+        }),
+        this.prisma.sessionLog.aggregate({
+          where: { ...where, status: SessionStatus.COMPLETED },
+          _avg: { duration: true },
+        }),
+        this.prisma.sessionLog.groupBy({
+          by: ['sessionType'],
+          where,
+          _count: { sessionType: true },
+        }),
+      ]);
 
     return {
       totalSessions,
       completedSessions,
       averageDuration: averageDuration._avg.duration || 0,
       sessionsByType,
-      completionRate: totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
+      completionRate:
+        totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
     };
   }
 }

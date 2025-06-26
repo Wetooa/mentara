@@ -4,8 +4,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Post, Prisma, User, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
-import { PostUpdateInputDto } from '../schema/post';
+import {
+  Post,
+  Prisma,
+  User,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
+import { PostUpdateInputDto } from 'schema/post';
 
 @Injectable()
 export class PostsService {
@@ -382,9 +388,9 @@ export class PostsService {
 
   // File attachment methods
   async attachFilesToPost(
-    postId: string, 
-    fileIds: string[], 
-    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA
+    postId: string,
+    fileIds: string[],
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
   ) {
     const attachments = fileIds.map((fileId, index) => ({
       fileId,

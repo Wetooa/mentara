@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { MeetingStatus, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ReviewCreateDto, ReviewUpdateDto } from '../schema/review';
+import { ReviewCreateDto, ReviewUpdateDto } from 'schema/review';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createReview(
     meetingId: string,

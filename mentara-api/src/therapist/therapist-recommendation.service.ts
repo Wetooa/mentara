@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { PreAssessment, Therapist } from '@prisma/client';
+import { PreAssessment } from '@prisma/client';
 
 interface TherapistRecommendationRequest {
   userId: string;

@@ -4,7 +4,7 @@ import {
   WorksheetCreateInputDto,
   WorksheetSubmissionCreateInputDto,
   WorksheetUpdateInputDto,
-} from '../schema/worksheet';
+} from 'schema/worksheet';
 
 @Injectable()
 export class WorksheetsService {
@@ -107,7 +107,11 @@ export class WorksheetsService {
     return worksheet;
   }
 
-  async create(data: WorksheetCreateInputDto, clientId: string, therapistId: string) {
+  async create(
+    data: WorksheetCreateInputDto,
+    clientId: string,
+    therapistId: string,
+  ) {
     // Start a transaction to create the worksheet and any materials
     return this.prisma.$transaction(async (prisma) => {
       // Create the worksheet
@@ -167,7 +171,10 @@ export class WorksheetsService {
     return { success: true, message: 'Worksheet deleted successfully' };
   }
 
-  async addSubmission(data: WorksheetSubmissionCreateInputDto, clientId: string) {
+  async addSubmission(
+    data: WorksheetSubmissionCreateInputDto,
+    clientId: string,
+  ) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id: data.worksheetId },
@@ -195,7 +202,11 @@ export class WorksheetsService {
     return submission;
   }
 
-  async submitWorksheet(id: string, data: WorksheetSubmissionCreateInputDto, clientId: string) {
+  async submitWorksheet(
+    id: string,
+    data: WorksheetSubmissionCreateInputDto,
+    clientId: string,
+  ) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },

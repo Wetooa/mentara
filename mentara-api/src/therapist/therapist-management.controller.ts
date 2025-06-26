@@ -15,7 +15,7 @@ import {
   ClientResponse,
   TherapistResponse,
   TherapistUpdateDto,
-} from '../schema/auth';
+} from 'schema/auth';
 
 @Controller('therapist-management')
 @UseGuards(ClerkAuthGuard)

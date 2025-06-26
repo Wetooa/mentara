@@ -1,6 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { File, FileStatus, ScanStatus, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
+import {
+  File,
+  FileStatus,
+  ScanStatus,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
 
 @Injectable()
 export class FilesService {
@@ -87,9 +97,13 @@ export class FilesService {
     return this.update(id, { status });
   }
 
-  async updateScanStatus(id: string, scanStatus: ScanStatus, scanResult?: string): Promise<File> {
-    return this.update(id, { 
-      scanStatus, 
+  async updateScanStatus(
+    id: string,
+    scanStatus: ScanStatus,
+    scanResult?: string,
+  ): Promise<File> {
+    return this.update(id, {
+      scanStatus,
       scanResult,
       scannedAt: new Date(),
     });
@@ -282,7 +296,9 @@ export class FilesService {
   }
 
   private generateShareToken(): string {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
   }
 }

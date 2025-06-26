@@ -76,12 +76,14 @@ export class DashboardService {
         },
         upcomingMeetings: client.meetings,
         pendingWorksheets: client.worksheets,
-        assignedTherapists: client.assignedTherapists.map(ct => ct.therapist),
+        assignedTherapists: client.assignedTherapists.map((ct) => ct.therapist),
         recentActivity: recentPosts,
         hasPreAssessment: !!client.preAssessment,
       };
     } catch (error) {
-      throw new Error(`Failed to get user dashboard data: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to get user dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -158,12 +160,14 @@ export class DashboardService {
           pendingWorksheets: pendingWorksheetsCount,
         },
         upcomingMeetings: therapist.meetings,
-        assignedClients: therapist.assignedClients.map(ct => ct.client),
+        assignedClients: therapist.assignedClients.map((ct) => ct.client),
         pendingWorksheets: therapist.worksheets,
         recentSessions,
       };
     } catch (error) {
-      throw new Error(`Failed to get therapist dashboard data: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to get therapist dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -214,7 +218,9 @@ export class DashboardService {
         pendingApplications: recentTherapistApplications,
       };
     } catch (error) {
-      throw new Error(`Failed to get admin dashboard data: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to get admin dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

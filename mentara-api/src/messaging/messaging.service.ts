@@ -1,6 +1,15 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { CreateConversationDto, SendMessageDto, UpdateMessageDto } from './dto/messaging.dto';
+import {
+  CreateConversationDto,
+  SendMessageDto,
+  UpdateMessageDto,
+} from './dto/messaging.dto';
 import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
 
 @Injectable()
@@ -8,17 +17,29 @@ export class MessagingService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Conversation Management
-  async createConversation(userId: string, createConversationDto: CreateConversationDto) {
-    const { participantIds, type = ConversationType.DIRECT, title } = createConversationDto;
+  async createConversation(
+    userId: string,
+    createConversationDto: CreateConversationDto,
+  ) {
+    const {
+      participantIds,
+      type = ConversationType.DIRECT,
+      title,
+    } = createConversationDto;
 
     // Validate conversation type and participants
     if (type === ConversationType.DIRECT && participantIds.length !== 1) {
-      throw new BadRequestException('Direct conversations must have exactly one other participant');
+      throw new BadRequestException(
+        'Direct conversations must have exactly one other participant',
+      );
     }
 
     // Check if direct conversation already exists
     if (type === ConversationType.DIRECT) {
-      const existingConversation = await this.findDirectConversation(userId, participantIds[0]);
+      const existingConversation = await this.findDirectConversation(
+        userId,
+        participantIds[0],
+      );
       if (existingConversation) {
         return existingConversation;
       }
@@ -138,11 +159,22 @@ export class MessagingService {
   }
 
   // Message Management
-  async sendMessage(userId: string, conversationId: string, sendMessageDto: SendMessageDto) {
+  async sendMessage(
+    userId: string,
+    conversationId: string,
+    sendMessageDto: SendMessageDto,
+  ) {
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
 
-    const { content, messageType = MessageType.TEXT, replyToId, attachmentUrl, attachmentName, attachmentSize } = sendMessageDto;
+    const {
+      content,
+      messageType = MessageType.TEXT,
+      replyToId,
+      attachmentUrl,
+      attachmentName,
+      attachmentSize,
+    } = sendMessageDto;
 
     const message = await this.prisma.message.create({
       data: {
@@ -198,7 +230,12 @@ export class MessagingService {
     return message;
   }
 
-  async getConversationMessages(userId: string, conversationId: string, page = 1, limit = 50) {
+  async getConversationMessages(
+    userId: string,
+    conversationId: string,
+    page = 1,
+    limit = 50,
+  ) {
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
 
@@ -260,7 +297,11 @@ export class MessagingService {
     return messages.reverse(); // Return in chronological order
   }
 
-  async updateMessage(userId: string, messageId: string, updateMessageDto: UpdateMessageDto) {
+  async updateMessage(
+    userId: string,
+    messageId: string,
+    updateMessageDto: UpdateMessageDto,
+  ) {
     const message = await this.prisma.message.findUnique({
       where: { id: messageId },
     });
@@ -420,7 +461,11 @@ export class MessagingService {
     return reaction;
   }
 
-  async removeMessageReaction(userId: string, messageId: string, emoji: string) {
+  async removeMessageReaction(
+    userId: string,
+    messageId: string,
+    emoji: string,
+  ) {
     await this.prisma.messageReaction.deleteMany({
       where: {
         messageId,
@@ -509,14 +554,22 @@ export class MessagingService {
     });
 
     if (!participant || !participant.isActive) {
-      throw new ForbiddenException('You are not a participant in this conversation');
+      throw new ForbiddenException(
+        'You are not a participant in this conversation',
+      );
     }
 
     return participant;
   }
 
   // Search Messages
-  async searchMessages(userId: string, query: string, conversationId?: string, page = 1, limit = 20) {
+  async searchMessages(
+    userId: string,
+    query: string,
+    conversationId?: string,
+    page = 1,
+    limit = 20,
+  ) {
     const skip = (page - 1) * limit;
 
     const whereClause: any = {

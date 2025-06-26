@@ -14,13 +14,12 @@ import {
 import { ReviewsService } from './reviews.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import {
   ReviewCreateDto,
   ReviewStatusEnum,
   ReviewUpdateDto,
   ReviewStatusDto,
-} from '../schema/review';
+} from 'schema/review';
 
 @Controller('reviews')
 @UseGuards(ClerkAuthGuard)

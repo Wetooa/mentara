@@ -9,7 +9,7 @@ import {
   ClientResponse,
   TherapistResponse,
   TherapistUpdateDto,
-} from '../schema/auth';
+} from 'schema/auth';
 
 @Injectable()
 export class TherapistManagementService {
@@ -60,33 +60,66 @@ export class TherapistManagementService {
       const therapistData: any = {};
       if (data.mobile !== undefined) therapistData.mobile = data.mobile;
       if (data.province !== undefined) therapistData.province = data.province;
-      if (data.providerType !== undefined) therapistData.providerType = data.providerType;
-      if (data.professionalLicenseType !== undefined) therapistData.professionalLicenseType = data.professionalLicenseType;
-      if (data.isPRCLicensed !== undefined) therapistData.isPRCLicensed = data.isPRCLicensed;
-      if (data.prcLicenseNumber !== undefined) therapistData.prcLicenseNumber = data.prcLicenseNumber;
-      if (data.expirationDateOfLicense !== undefined) therapistData.expirationDateOfLicense = data.expirationDateOfLicense;
-      if (data.practiceStartDate !== undefined) therapistData.practiceStartDate = data.practiceStartDate;
-      if (data.areasOfExpertise !== undefined) therapistData.areasOfExpertise = data.areasOfExpertise;
-      if (data.assessmentTools !== undefined) therapistData.assessmentTools = data.assessmentTools;
-      if (data.therapeuticApproachesUsedList !== undefined) therapistData.therapeuticApproachesUsedList = data.therapeuticApproachesUsedList;
-      if (data.languagesOffered !== undefined) therapistData.languagesOffered = data.languagesOffered;
-      if (data.providedOnlineTherapyBefore !== undefined) therapistData.providedOnlineTherapyBefore = data.providedOnlineTherapyBefore;
-      if (data.comfortableUsingVideoConferencing !== undefined) therapistData.comfortableUsingVideoConferencing = data.comfortableUsingVideoConferencing;
-      if (data.preferredSessionLength !== undefined) therapistData.preferredSessionLength = data.preferredSessionLength;
-      if (data.privateConfidentialSpace !== undefined) therapistData.privateConfidentialSpace = data.privateConfidentialSpace;
-      if (data.compliesWithDataPrivacyAct !== undefined) therapistData.compliesWithDataPrivacyAct = data.compliesWithDataPrivacyAct;
-      if (data.professionalLiabilityInsurance !== undefined) therapistData.professionalLiabilityInsurance = data.professionalLiabilityInsurance;
-      if (data.complaintsOrDisciplinaryActions !== undefined) therapistData.complaintsOrDisciplinaryActions = data.complaintsOrDisciplinaryActions;
-      if (data.willingToAbideByPlatformGuidelines !== undefined) therapistData.willingToAbideByPlatformGuidelines = data.willingToAbideByPlatformGuidelines;
-      if (data.expertise !== undefined) therapistData.expertise = data.expertise;
-      if (data.approaches !== undefined) therapistData.approaches = data.approaches;
-      if (data.languages !== undefined) therapistData.languages = data.languages;
-      if (data.illnessSpecializations !== undefined) therapistData.illnessSpecializations = data.illnessSpecializations;
-      if (data.acceptTypes !== undefined) therapistData.acceptTypes = data.acceptTypes;
-      if (data.treatmentSuccessRates !== undefined) therapistData.treatmentSuccessRates = data.treatmentSuccessRates;
-      if (data.sessionLength !== undefined) therapistData.sessionLength = data.sessionLength;
-      if (data.hourlyRate !== undefined) therapistData.hourlyRate = data.hourlyRate;
-      
+      if (data.providerType !== undefined)
+        therapistData.providerType = data.providerType;
+      if (data.professionalLicenseType !== undefined)
+        therapistData.professionalLicenseType = data.professionalLicenseType;
+      if (data.isPRCLicensed !== undefined)
+        therapistData.isPRCLicensed = data.isPRCLicensed;
+      if (data.prcLicenseNumber !== undefined)
+        therapistData.prcLicenseNumber = data.prcLicenseNumber;
+      if (data.expirationDateOfLicense !== undefined)
+        therapistData.expirationDateOfLicense = data.expirationDateOfLicense;
+      if (data.practiceStartDate !== undefined)
+        therapistData.practiceStartDate = data.practiceStartDate;
+      if (data.areasOfExpertise !== undefined)
+        therapistData.areasOfExpertise = data.areasOfExpertise;
+      if (data.assessmentTools !== undefined)
+        therapistData.assessmentTools = data.assessmentTools;
+      if (data.therapeuticApproachesUsedList !== undefined)
+        therapistData.therapeuticApproachesUsedList =
+          data.therapeuticApproachesUsedList;
+      if (data.languagesOffered !== undefined)
+        therapistData.languagesOffered = data.languagesOffered;
+      if (data.providedOnlineTherapyBefore !== undefined)
+        therapistData.providedOnlineTherapyBefore =
+          data.providedOnlineTherapyBefore;
+      if (data.comfortableUsingVideoConferencing !== undefined)
+        therapistData.comfortableUsingVideoConferencing =
+          data.comfortableUsingVideoConferencing;
+      if (data.preferredSessionLength !== undefined)
+        therapistData.preferredSessionLength = data.preferredSessionLength;
+      if (data.privateConfidentialSpace !== undefined)
+        therapistData.privateConfidentialSpace = data.privateConfidentialSpace;
+      if (data.compliesWithDataPrivacyAct !== undefined)
+        therapistData.compliesWithDataPrivacyAct =
+          data.compliesWithDataPrivacyAct;
+      if (data.professionalLiabilityInsurance !== undefined)
+        therapistData.professionalLiabilityInsurance =
+          data.professionalLiabilityInsurance;
+      if (data.complaintsOrDisciplinaryActions !== undefined)
+        therapistData.complaintsOrDisciplinaryActions =
+          data.complaintsOrDisciplinaryActions;
+      if (data.willingToAbideByPlatformGuidelines !== undefined)
+        therapistData.willingToAbideByPlatformGuidelines =
+          data.willingToAbideByPlatformGuidelines;
+      if (data.expertise !== undefined)
+        therapistData.expertise = data.expertise;
+      if (data.approaches !== undefined)
+        therapistData.approaches = data.approaches;
+      if (data.languages !== undefined)
+        therapistData.languages = data.languages;
+      if (data.illnessSpecializations !== undefined)
+        therapistData.illnessSpecializations = data.illnessSpecializations;
+      if (data.acceptTypes !== undefined)
+        therapistData.acceptTypes = data.acceptTypes;
+      if (data.treatmentSuccessRates !== undefined)
+        therapistData.treatmentSuccessRates = data.treatmentSuccessRates;
+      if (data.sessionLength !== undefined)
+        therapistData.sessionLength = data.sessionLength;
+      if (data.hourlyRate !== undefined)
+        therapistData.hourlyRate = data.hourlyRate;
+
       return await this.prisma.therapist.update({
         where: { userId },
         data: therapistData,

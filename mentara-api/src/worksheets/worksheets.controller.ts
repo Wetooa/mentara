@@ -17,7 +17,7 @@ import {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
   WorksheetSubmissionCreateInputDto,
-} from '../schema/worksheet';
+} from 'schema/worksheet';
 
 @Controller('worksheets')
 @UseGuards(ClerkAuthGuard)
@@ -44,9 +44,17 @@ export class WorksheetsController {
   @Post()
   create(
     @CurrentUserId() clerkId: string,
-    @Body() createWorksheetDto: WorksheetCreateInputDto & { clientId: string; therapistId: string },
+    @Body()
+    createWorksheetDto: WorksheetCreateInputDto & {
+      clientId: string;
+      therapistId: string;
+    },
   ) {
-    return this.worksheetsService.create(createWorksheetDto, createWorksheetDto.clientId, createWorksheetDto.therapistId);
+    return this.worksheetsService.create(
+      createWorksheetDto,
+      createWorksheetDto.clientId,
+      createWorksheetDto.therapistId,
+    );
   }
 
   @Put(':id')
@@ -77,7 +85,11 @@ export class WorksheetsController {
     @Param('id') id: string,
     @Body() submitWorksheetDto: WorksheetSubmissionCreateInputDto,
   ) {
-    return this.worksheetsService.submitWorksheet(id, submitWorksheetDto, clerkId);
+    return this.worksheetsService.submitWorksheet(
+      id,
+      submitWorksheetDto,
+      clerkId,
+    );
   }
 
   @Delete('submissions/:id')

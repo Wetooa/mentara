@@ -38,10 +38,7 @@ export class SearchController {
   }
 
   @Get('users')
-  searchUsers(
-    @Query('q') query: string,
-    @Query('role') role?: string,
-  ) {
+  searchUsers(@Query('q') query: string, @Query('role') role?: string) {
     return this.searchService.searchUsers(query, role);
   }
 

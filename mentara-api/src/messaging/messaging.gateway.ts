@@ -10,7 +10,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { JoinConversationDto, LeaveConversationDto, TypingIndicatorDto } from './dto/messaging.dto';
+import {
+  JoinConversationDto,
+  LeaveConversationDto,
+  TypingIndicatorDto,
+} from './dto/messaging.dto';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -24,7 +28,9 @@ interface AuthenticatedSocket extends Socket {
   },
   namespace: '/messaging',
 })
-export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MessagingGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 
@@ -37,8 +43,9 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
   async handleConnection(client: AuthenticatedSocket) {
     try {
       // Extract token from auth header or query
-      const token = client.handshake.auth?.token || client.handshake.query?.token;
-      
+      const token =
+        client.handshake.auth?.token || client.handshake.query?.token;
+
       if (!token) {
         this.logger.warn(`Client ${client.id} connected without token`);
         client.disconnect();
@@ -48,7 +55,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
       // Verify token with Clerk (you'll need to import and use your clerk client)
       // For now, we'll extract userId from token payload (implement proper verification)
       const userId = await this.verifyTokenAndGetUserId(token);
-      
+
       if (!userId) {
         this.logger.warn(`Client ${client.id} connected with invalid token`);
         client.disconnect();
@@ -56,7 +63,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
       }
 
       client.userId = userId;
-      
+
       // Add socket to user's socket set
       if (!this.userSockets.has(userId)) {
         this.userSockets.set(userId, new Set());
@@ -81,7 +88,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
       const userSockets = this.userSockets.get(client.userId);
       if (userSockets) {
         userSockets.delete(client.id);
-        
+
         // If no more sockets for this user, mark them as offline
         if (userSockets.size === 0) {
           this.userSockets.delete(client.userId);
@@ -113,7 +120,9 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
       });
 
       if (!participant || !participant.isActive) {
-        client.emit('error', { message: 'Not authorized to join this conversation' });
+        client.emit('error', {
+          message: 'Not authorized to join this conversation',
+        });
         return;
       }
 
@@ -214,7 +223,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   // Broadcast new message to conversation participants
-  async broadcastMessage(conversationId: string, message: any, senderId: string) {
+  async broadcastMessage(
+    conversationId: string,
+    message: any,
+    senderId: string,
+  ) {
     this.server.to(conversationId).emit('new_message', message);
 
     // Send push notification to offline users (implement as needed)
@@ -222,7 +235,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   // Broadcast message update (edit/delete)
-  async broadcastMessageUpdate(conversationId: string, messageId: string, update: any) {
+  async broadcastMessageUpdate(
+    conversationId: string,
+    messageId: string,
+    update: any,
+  ) {
     this.server.to(conversationId).emit('message_updated', {
       messageId,
       ...update,
@@ -230,7 +247,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   // Broadcast read receipt
-  async broadcastReadReceipt(conversationId: string, messageId: string, userId: string) {
+  async broadcastReadReceipt(
+    conversationId: string,
+    messageId: string,
+    userId: string,
+  ) {
     this.server.to(conversationId).emit('message_read', {
       messageId,
       userId,
@@ -239,7 +260,11 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   // Broadcast message reaction
-  async broadcastReaction(conversationId: string, messageId: string, reaction: any) {
+  async broadcastReaction(
+    conversationId: string,
+    messageId: string,
+    reaction: any,
+  ) {
     this.server.to(conversationId).emit('message_reaction', {
       messageId,
       reaction,
@@ -253,7 +278,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
       // For now, return a mock user ID (replace with actual verification)
       // const verifiedToken = await clerkClient.verifyJwt(token);
       // return verifiedToken.sub;
-      
+
       // Temporary mock implementation - replace with real Clerk verification
       return 'user_mock_id';
     } catch (error) {
@@ -262,7 +287,10 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     }
   }
 
-  private async joinUserConversations(client: AuthenticatedSocket, userId: string) {
+  private async joinUserConversations(
+    client: AuthenticatedSocket,
+    userId: string,
+  ) {
     try {
       // Get all active conversations for the user
       const conversations = await this.prisma.conversation.findMany({
@@ -283,7 +311,7 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
       // Join all conversation rooms
       for (const conversation of conversations) {
         client.join(conversation.id);
-        
+
         // Add to tracking
         if (!this.conversationParticipants.has(conversation.id)) {
           this.conversationParticipants.set(conversation.id, new Set());
@@ -291,13 +319,18 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
         this.conversationParticipants.get(conversation.id)!.add(userId);
       }
 
-      this.logger.log(`User ${userId} joined ${conversations.length} conversation rooms`);
+      this.logger.log(
+        `User ${userId} joined ${conversations.length} conversation rooms`,
+      );
     } catch (error) {
       this.logger.error('Error joining user conversations:', error);
     }
   }
 
-  private async broadcastUserStatus(userId: string, status: 'online' | 'offline') {
+  private async broadcastUserStatus(
+    userId: string,
+    status: 'online' | 'offline',
+  ) {
     // Get all conversations this user participates in
     const conversations = await this.prisma.conversation.findMany({
       where: {
@@ -323,16 +356,22 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     }
   }
 
-  private async sendPushNotifications(conversationId: string, message: any, senderId: string) {
+  private async sendPushNotifications(
+    conversationId: string,
+    message: any,
+    senderId: string,
+  ) {
     // TODO: Implement push notifications for offline users
     // This could integrate with FCM, APNS, or other push notification services
-    this.logger.log(`TODO: Send push notification for message ${message.id} in conversation ${conversationId}`);
+    this.logger.log(
+      `TODO: Send push notification for message ${message.id} in conversation ${conversationId}`,
+    );
   }
 
   // Clean up old typing indicators (call this periodically)
   async cleanupTypingIndicators() {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    
+
     await this.prisma.typingIndicator.deleteMany({
       where: {
         lastTypingAt: {

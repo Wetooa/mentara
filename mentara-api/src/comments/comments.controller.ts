@@ -14,10 +14,7 @@ import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CommentsService } from './comments.service';
 import { Comment } from '@prisma/client';
-import {
-  CommentCreateInputDto,
-  CommentUpdateInputDto,
-} from '../schema/comment';
+import { CommentCreateInputDto, CommentUpdateInputDto } from 'schema/comment';
 
 @Controller('comments')
 @UseGuards(ClerkAuthGuard)

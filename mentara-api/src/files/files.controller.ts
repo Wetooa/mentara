@@ -11,14 +11,16 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
-  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
 import { FilesService } from './files.service';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { FileStatus, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
+import {
+  FileStatus,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
 
 @Controller('files')
 @UseGuards(ClerkAuthGuard)
@@ -68,10 +70,7 @@ export class FilesController {
   }
 
   @Patch(':id/status')
-  updateStatus(
-    @Param('id') id: string,
-    @Body() body: { status: FileStatus },
-  ) {
+  updateStatus(@Param('id') id: string, @Body() body: { status: FileStatus }) {
     return this.filesService.updateStatus(id, body.status);
   }
 
@@ -83,7 +82,8 @@ export class FilesController {
   @Post(':id/attach')
   attachToEntity(
     @Param('id') fileId: string,
-    @Body() body: {
+    @Body()
+    body: {
       entityType: AttachmentEntityType;
       entityId: string;
       purpose?: AttachmentPurpose;
@@ -113,7 +113,8 @@ export class FilesController {
   createVersion(
     @Param('id') fileId: string,
     @CurrentUserId() userId: string,
-    @Body() body: {
+    @Body()
+    body: {
       filename: string;
       size: number;
       mimeType: string;
@@ -137,7 +138,8 @@ export class FilesController {
   createShare(
     @Param('id') fileId: string,
     @CurrentUserId() userId: string,
-    @Body() body: {
+    @Body()
+    body: {
       shareType: string;
       password?: string;
       maxDownloads?: number;
@@ -165,7 +167,7 @@ export class FilesController {
     @CurrentUserId() userId?: string,
   ) {
     const share = await this.filesService.getFileByShareToken(token);
-    
+
     await this.filesService.recordDownload(share.file.id, {
       shareId: share.id,
       downloadedBy: userId,

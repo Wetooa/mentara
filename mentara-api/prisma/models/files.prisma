@@ -2,57 +2,57 @@
 // This file contains models for unified file management across the platform
 
 model File {
-  id           String      @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // File identification
-  filename     String      // Original filename
-  displayName  String?     // User-friendly display name
-  mimeType     String      // MIME type (e.g., 'image/jpeg')
-  size         Int         // File size in bytes
-  hash         String?     // File hash for deduplication
-  
+  filename    String // Original filename
+  displayName String? // User-friendly display name
+  mimeType    String // MIME type (e.g., 'image/jpeg')
+  size        Int // File size in bytes
+  hash        String? // File hash for deduplication
+
   // Storage details
   storageProvider StorageProvider @default(LOCAL)
-  storagePath     String          // Path/key in storage system
-  storageUrl      String?         // Public access URL if available
-  bucketName      String?         // S3 bucket or storage container
-  
+  storagePath     String // Path/key in storage system
+  storageUrl      String? // Public access URL if available
+  bucketName      String? // S3 bucket or storage container
+
   // File metadata
-  width        Int?        // For images
-  height       Int?        // For images
-  duration     Int?        // For audio/video in seconds
-  encoding     String?     // File encoding
-  compression  String?     // Compression method used
-  
+  width       Int? // For images
+  height      Int? // For images
+  duration    Int? // For audio/video in seconds
+  encoding    String? // File encoding
+  compression String? // Compression method used
+
   // Security and access
-  isPublic     Boolean     @default(false)
-  isEncrypted  Boolean     @default(false)
-  accessLevel  AccessLevel @default(PRIVATE)
-  
+  isPublic    Boolean     @default(false)
+  isEncrypted Boolean     @default(false)
+  accessLevel AccessLevel @default(PRIVATE)
+
   // File status
-  status       FileStatus  @default(UPLOADING)
-  uploadedBy   String      // User who uploaded the file
-  
+  status     FileStatus @default(UPLOADING)
+  uploadedBy String // User who uploaded the file
+
   // Virus scanning
-  scanStatus   ScanStatus  @default(PENDING)
-  scanResult   String?     // Scan result details
-  scannedAt    DateTime?   // When file was scanned
-  
+  scanStatus ScanStatus @default(PENDING)
+  scanResult String? // Scan result details
+  scannedAt  DateTime? // When file was scanned
+
   // File lifecycle
-  expiresAt    DateTime?   // When file should be deleted
-  archivedAt   DateTime?   // When file was archived
-  deletedAt    DateTime?   // Soft delete timestamp
-  
+  expiresAt  DateTime? // When file should be deleted
+  archivedAt DateTime? // When file was archived
+  deletedAt  DateTime? // Soft delete timestamp
+
   // Relations
-  uploader     User        @relation("UserUploadedFiles", fields: [uploadedBy], references: [id], onDelete: Cascade)
-  attachments  FileAttachment[]
-  versions     FileVersion[]
-  shares       FileShare[] @relation("FileShares")
-  downloads    FileDownload[] @relation("FileDownloads")
-  
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  
+  uploader    User             @relation("UserUploadedFiles", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  attachments FileAttachment[]
+  versions    FileVersion[]
+  shares      FileShare[]      @relation("FileShares")
+  downloads   FileDownload[]   @relation("FileDownloads")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([uploadedBy])
   @@index([mimeType])
   @@index([status])
@@ -64,23 +64,23 @@ model File {
 }
 
 model FileAttachment {
-  id          String         @id @default(uuid())
-  fileId      String
-  
+  id     String @id @default(uuid())
+  fileId String
+
   // Polymorphic attachment
-  entityType  AttachmentEntityType
-  entityId    String
-  
+  entityType AttachmentEntityType
+  entityId   String
+
   // Attachment details
-  purpose     AttachmentPurpose @default(GENERAL)
-  order       Int?           // For ordering multiple attachments
-  caption     String?        // Optional caption or description
-  
+  purpose AttachmentPurpose @default(GENERAL)
+  order   Int? // For ordering multiple attachments
+  caption String? // Optional caption or description
+
   // Relations
-  file        File           @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime       @default(now())
-  
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@unique([entityType, entityId, fileId])
   @@index([fileId])
   @@index([entityType, entityId])
@@ -88,30 +88,30 @@ model FileAttachment {
 }
 
 model FileVersion {
-  id          String    @id @default(uuid())
-  fileId      String
-  
+  id     String @id @default(uuid())
+  fileId String
+
   // Version details
-  version     Int       @default(1)
-  description String?   // What changed in this version
-  
+  version     Int     @default(1)
+  description String? // What changed in this version
+
   // File details for this version
   filename    String
   size        Int
   mimeType    String
   storagePath String
   hash        String?
-  
+
   // Version metadata
-  createdBy   String    // User who created this version
-  isActive    Boolean   @default(false) // Is this the current version?
-  
+  createdBy String // User who created this version
+  isActive  Boolean @default(false) // Is this the current version?
+
   // Relations
-  file        File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  creator     User      @relation("UserFileVersions", fields: [createdBy], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime  @default(now())
-  
+  file    File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  creator User @relation("UserFileVersions", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@unique([fileId, version])
   @@index([fileId])
   @@index([isActive])
@@ -119,35 +119,35 @@ model FileVersion {
 }
 
 model FileShare {
-  id          String         @id @default(uuid())
-  fileId      String
-  
+  id     String @id @default(uuid())
+  fileId String
+
   // Share details
-  shareToken  String         @unique // Unique token for accessing shared file
-  shareType   FileShareType  @default(LINK)
-  
+  shareToken String        @unique // Unique token for accessing shared file
+  shareType  FileShareType @default(LINK)
+
   // Access control
-  password    String?        // Optional password protection
-  maxDownloads Int?          // Maximum number of downloads
-  currentDownloads Int       @default(0)
-  
+  password         String? // Optional password protection
+  maxDownloads     Int? // Maximum number of downloads
+  currentDownloads Int     @default(0)
+
   // Expiration
-  expiresAt   DateTime?      // When share expires
-  isActive    Boolean        @default(true)
-  
+  expiresAt DateTime? // When share expires
+  isActive  Boolean   @default(true)
+
   // Sharing context
-  sharedBy    String         // User who created the share
-  sharedWith  String[]       // Specific user IDs who can access (if not public)
-  message     String?        // Optional message with the share
-  
+  sharedBy   String // User who created the share
+  sharedWith String[] // Specific user IDs who can access (if not public)
+  message    String? // Optional message with the share
+
   // Relations
-  file        File           @relation("FileShares", fields: [fileId], references: [id], onDelete: Cascade)
-  sharer      User           @relation("UserFileShares", fields: [sharedBy], references: [id], onDelete: Cascade)
-  downloads   FileDownload[]
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  
+  file      File           @relation("FileShares", fields: [fileId], references: [id], onDelete: Cascade)
+  sharer    User           @relation("UserFileShares", fields: [sharedBy], references: [id], onDelete: Cascade)
+  downloads FileDownload[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([fileId])
   @@index([shareToken])
   @@index([sharedBy])
@@ -156,26 +156,26 @@ model FileShare {
 }
 
 model FileDownload {
-  id          String     @id @default(uuid())
-  fileId      String
-  shareId     String?    // If downloaded via share
-  
+  id      String  @id @default(uuid())
+  fileId  String
+  shareId String? // If downloaded via share
+
   // Download details
-  downloadedBy String?   // User who downloaded (null for anonymous)
-  ipAddress   String    // IP address of downloader
-  userAgent   String?   // Browser/client information
-  
+  downloadedBy String? // User who downloaded (null for anonymous)
+  ipAddress    String // IP address of downloader
+  userAgent    String? // Browser/client information
+
   // Download metadata
-  size        Int       // Bytes downloaded
-  completed   Boolean   @default(false)
-  
+  size      Int // Bytes downloaded
+  completed Boolean @default(false)
+
   // Relations
-  file        File      @relation("FileDownloads", fields: [fileId], references: [id], onDelete: Cascade)
-  share       FileShare? @relation(fields: [shareId], references: [id], onDelete: SetNull)
-  downloader  User?     @relation("UserFileDownloads", fields: [downloadedBy], references: [id], onDelete: SetNull)
-  
-  createdAt   DateTime  @default(now())
-  
+  file       File       @relation("FileDownloads", fields: [fileId], references: [id], onDelete: Cascade)
+  share      FileShare? @relation(fields: [shareId], references: [id], onDelete: SetNull)
+  downloader User?      @relation("UserFileDownloads", fields: [downloadedBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
   @@index([fileId])
   @@index([shareId])
   @@index([downloadedBy])
@@ -184,69 +184,69 @@ model FileDownload {
 
 // Enums
 enum StorageProvider {
-  LOCAL       // Local file system
-  AWS_S3      // Amazon S3
-  SUPABASE    // Supabase Storage
-  CLOUDINARY  // Cloudinary
+  LOCAL // Local file system
+  AWS_S3 // Amazon S3
+  SUPABASE // Supabase Storage
+  CLOUDINARY // Cloudinary
   GOOGLE_CLOUD // Google Cloud Storage
 }
 
 enum AccessLevel {
-  PRIVATE     // Only uploader and explicitly granted users
-  INTERNAL    // All platform users
-  PUBLIC      // Anyone with link
+  PRIVATE // Only uploader and explicitly granted users
+  INTERNAL // All platform users
+  PUBLIC // Anyone with link
 }
 
 enum FileStatus {
-  UPLOADING   // Upload in progress
-  UPLOADED    // Upload complete
-  PROCESSING  // Being processed (thumbnails, etc.)
-  READY       // Ready for use
-  FAILED      // Upload or processing failed
+  UPLOADING // Upload in progress
+  UPLOADED // Upload complete
+  PROCESSING // Being processed (thumbnails, etc.)
+  READY // Ready for use
+  FAILED // Upload or processing failed
   QUARANTINED // Flagged by security scan
-  ARCHIVED    // Moved to archive storage
-  DELETED     // Marked for deletion
+  ARCHIVED // Moved to archive storage
+  DELETED // Marked for deletion
 }
 
 enum ScanStatus {
-  PENDING     // Not yet scanned
-  SCANNING    // Scan in progress
-  CLEAN       // No threats detected
-  INFECTED    // Threats detected
-  FAILED      // Scan failed
-  SKIPPED     // Scan was skipped
+  PENDING // Not yet scanned
+  SCANNING // Scan in progress
+  CLEAN // No threats detected
+  INFECTED // Threats detected
+  FAILED // Scan failed
+  SKIPPED // Scan was skipped
 }
 
 enum AttachmentEntityType {
-  POST        // Community post
-  COMMENT     // Post comment
-  REPLY       // Comment reply
-  MESSAGE     // Chat message
-  WORKSHEET   // Worksheet material
-  SUBMISSION  // Worksheet submission
-  REVIEW      // Review attachment
-  PROFILE     // Profile image/document
+  POST // Community post
+  COMMENT // Post comment
+  REPLY // Comment reply
+  MESSAGE // Chat message
+  WORKSHEET // Worksheet material
+  SUBMISSION // Worksheet submission
+  REVIEW // Review attachment
+  PROFILE // Profile image/document
   THERAPIST_APPLICATION // Therapist application documents
   MEETING_NOTES // Meeting notes attachment
   PROGRESS_REPORT // Progress report attachment
 }
 
 enum AttachmentPurpose {
-  GENERAL     // General attachment
-  AVATAR      // Profile picture
-  COVER       // Cover image
-  DOCUMENT    // Document file
-  MEDIA       // Image/video content
-  AUDIO       // Audio recording
-  BACKUP      // Backup file
+  GENERAL // General attachment
+  AVATAR // Profile picture
+  COVER // Cover image
+  DOCUMENT // Document file
+  MEDIA // Image/video content
+  AUDIO // Audio recording
+  BACKUP // Backup file
   CERTIFICATE // Professional certificate
-  LICENSE     // License document
-  TRANSCRIPT  // Session transcript
+  LICENSE // License document
+  TRANSCRIPT // Session transcript
 }
 
 enum FileShareType {
-  LINK        // Public link sharing
-  EMAIL       // Email invitation
-  INTERNAL    // Internal platform sharing
-  TEMPORARY   // Temporary access
+  LINK // Public link sharing
+  EMAIL // Email invitation
+  INTERNAL // Internal platform sharing
+  TEMPORARY // Temporary access
 }

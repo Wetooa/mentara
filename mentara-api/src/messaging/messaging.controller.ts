@@ -35,7 +35,10 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Body() createConversationDto: CreateConversationDto,
   ) {
-    return this.messagingService.createConversation(userId, createConversationDto);
+    return this.messagingService.createConversation(
+      userId,
+      createConversationDto,
+    );
   }
 
   @Get('conversations')
@@ -46,7 +49,11 @@ export class MessagingController {
   ) {
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 20;
-    return this.messagingService.getUserConversations(userId, pageNum, limitNum);
+    return this.messagingService.getUserConversations(
+      userId,
+      pageNum,
+      limitNum,
+    );
   }
 
   @Get('conversations/:conversationId/messages')
@@ -58,7 +65,12 @@ export class MessagingController {
   ) {
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 50;
-    return this.messagingService.getConversationMessages(userId, conversationId, pageNum, limitNum);
+    return this.messagingService.getConversationMessages(
+      userId,
+      conversationId,
+      pageNum,
+      limitNum,
+    );
   }
 
   // Message endpoints
@@ -69,7 +81,11 @@ export class MessagingController {
     @Param('conversationId') conversationId: string,
     @Body() sendMessageDto: SendMessageDto,
   ) {
-    return this.messagingService.sendMessage(userId, conversationId, sendMessageDto);
+    return this.messagingService.sendMessage(
+      userId,
+      conversationId,
+      sendMessageDto,
+    );
   }
 
   @Put('messages/:messageId')
@@ -78,7 +94,11 @@ export class MessagingController {
     @Param('messageId') messageId: string,
     @Body() updateMessageDto: UpdateMessageDto,
   ) {
-    return this.messagingService.updateMessage(userId, messageId, updateMessageDto);
+    return this.messagingService.updateMessage(
+      userId,
+      messageId,
+      updateMessageDto,
+    );
   }
 
   @Delete('messages/:messageId')
@@ -108,7 +128,11 @@ export class MessagingController {
     @Param('messageId') messageId: string,
     @Body() addReactionDto: AddReactionDto,
   ) {
-    return this.messagingService.addMessageReaction(userId, messageId, addReactionDto.emoji);
+    return this.messagingService.addMessageReaction(
+      userId,
+      messageId,
+      addReactionDto.emoji,
+    );
   }
 
   @Delete('messages/:messageId/reactions/:emoji')
@@ -118,7 +142,11 @@ export class MessagingController {
     @Param('messageId') messageId: string,
     @Param('emoji') emoji: string,
   ) {
-    return this.messagingService.removeMessageReaction(userId, messageId, emoji);
+    return this.messagingService.removeMessageReaction(
+      userId,
+      messageId,
+      emoji,
+    );
   }
 
   // User blocking
@@ -128,7 +156,11 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Body() blockUserDto: BlockUserDto,
   ) {
-    return this.messagingService.blockUser(userId, blockUserDto.userId, blockUserDto.reason);
+    return this.messagingService.blockUser(
+      userId,
+      blockUserDto.userId,
+      blockUserDto.reason,
+    );
   }
 
   @Delete('block/:blockedUserId')
@@ -149,6 +181,12 @@ export class MessagingController {
     const { query, conversationId, page, limit } = searchDto;
     const pageNum = page ? parseInt(page) : 1;
     const limitNum = limit ? parseInt(limit) : 20;
-    return this.messagingService.searchMessages(userId, query, conversationId, pageNum, limitNum);
+    return this.messagingService.searchMessages(
+      userId,
+      query,
+      conversationId,
+      pageNum,
+      limitNum,
+    );
   }
 }

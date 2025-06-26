@@ -4,12 +4,19 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Comment, Prisma, User, Reply, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
+import {
+  Comment,
+  Prisma,
+  User,
+  Reply,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
 import {
   CommentCreateInputDto,
   CommentResponse,
   CommentUpdateInputDto,
-} from '../schema/comment';
+} from 'schema/comment';
 
 @Injectable()
 export class CommentsService {
@@ -485,9 +492,9 @@ export class CommentsService {
 
   // File attachment methods for comments
   async attachFilesToComment(
-    commentId: string, 
-    fileIds: string[], 
-    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA
+    commentId: string,
+    fileIds: string[],
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
   ) {
     const attachments = fileIds.map((fileId, index) => ({
       fileId,
@@ -527,9 +534,9 @@ export class CommentsService {
 
   // File attachment methods for replies
   async attachFilesToReply(
-    replyId: string, 
-    fileIds: string[], 
-    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA
+    replyId: string,
+    fileIds: string[],
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
   ) {
     const attachments = fileIds.map((fileId, index) => ({
       fileId,

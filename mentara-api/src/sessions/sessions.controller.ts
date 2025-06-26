@@ -12,7 +12,12 @@ import { SessionsService } from './sessions.service';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
-import { SessionType, SessionStatus, ActivityType, UserActionType } from '@prisma/client';
+import {
+  SessionType,
+  SessionStatus,
+  ActivityType,
+  UserActionType,
+} from '@prisma/client';
 
 @Controller('sessions')
 @UseGuards(ClerkAuthGuard)
@@ -21,7 +26,8 @@ export class SessionsController {
 
   @Post('logs')
   createSessionLog(
-    @Body() body: {
+    @Body()
+    body: {
       clientId: string;
       therapistId?: string;
       sessionType: SessionType;
@@ -44,12 +50,12 @@ export class SessionsController {
 
   @Get('logs')
   findAllSessions(
+    @CurrentUserRole() userRole: string,
+    @CurrentUserId() userId: string,
     @Query('clientId') clientId?: string,
     @Query('therapistId') therapistId?: string,
     @Query('status') status?: SessionStatus,
     @Query('sessionType') sessionType?: SessionType,
-    @CurrentUserId() userId: string,
-    @CurrentUserRole() userRole: string,
   ) {
     // Filter based on user role
     if (userRole === 'client') {
@@ -58,7 +64,12 @@ export class SessionsController {
       therapistId = userId;
     }
 
-    return this.sessionsService.findAllSessions(clientId, therapistId, status, sessionType);
+    return this.sessionsService.findAllSessions(
+      clientId,
+      therapistId,
+      status,
+      sessionType,
+    );
   }
 
   @Get('logs/:id')
@@ -69,7 +80,8 @@ export class SessionsController {
   @Patch('logs/:id')
   updateSession(
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       status?: SessionStatus;
       notes?: string;
       quality?: number;
@@ -91,7 +103,8 @@ export class SessionsController {
   @Post('logs/:id/activities')
   addSessionActivity(
     @Param('id') sessionId: string,
-    @Body() body: {
+    @Body()
+    body: {
       activityType: ActivityType;
       description?: string;
       duration?: number;
@@ -114,7 +127,8 @@ export class SessionsController {
 
   @Post('user-activities')
   logUserActivity(
-    @Body() body: {
+    @Body()
+    body: {
       action: UserActionType;
       page?: string;
       component?: string;
@@ -137,10 +151,10 @@ export class SessionsController {
 
   @Get('user-activities')
   getUserActivities(
+    @CurrentUserId() userId: string,
     @Query('action') action?: UserActionType,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserId() userId: string,
   ) {
     return this.sessionsService.getUserActivities(
       userId,
@@ -152,7 +166,8 @@ export class SessionsController {
 
   @Post('therapy-progress')
   createTherapyProgress(
-    @Body() body: {
+    @Body()
+    body: {
       clientId: string;
       therapistId: string;
       progressScore: number;
@@ -182,12 +197,12 @@ export class SessionsController {
 
   @Get('therapy-progress')
   getTherapyProgress(
+    @CurrentUserRole() userRole: string,
+    @CurrentUserId() userId: string,
     @Query('clientId') clientId?: string,
     @Query('therapistId') therapistId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserId() userId: string,
-    @CurrentUserRole() userRole: string,
   ) {
     // Filter based on user role
     if (userRole === 'client') {
@@ -206,10 +221,10 @@ export class SessionsController {
 
   @Get('statistics')
   getSessionStatistics(
+    @CurrentUserRole() userRole: string,
+    @CurrentUserId() userId: string,
     @Query('clientId') clientId?: string,
     @Query('therapistId') therapistId?: string,
-    @CurrentUserId() userId: string,
-    @CurrentUserRole() userRole: string,
   ) {
     // Filter based on user role
     if (userRole === 'client') {
