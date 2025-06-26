@@ -4,35 +4,54 @@ import {
   IsEnum,
   IsNumber,
   IsArray,
+  IsBoolean,
+  IsDateString,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateWorksheetMaterialDto {
+  @IsString()
+  filename: string;
+
+  @IsString()
+  url: string;
+
+  @IsOptional()
+  @IsNumber()
+  fileSize?: number;
+
+  @IsOptional()
+  @IsString()
+  fileType?: string;
+}
 
 export class CreateWorksheetDto {
   @IsString()
   title: string;
 
+  @IsOptional()
   @IsString()
-  description: string;
-
-  @IsString()
-  content: string;
-
-  @IsEnum(['assessment', 'exercise', 'homework'])
-  type: 'assessment' | 'exercise' | 'homework';
-
-  @IsEnum(['easy', 'medium', 'hard'])
-  difficulty: 'easy' | 'medium' | 'hard';
-
-  @IsNumber()
-  estimatedDuration: number; // in minutes
+  instructions?: string;
 
   @IsOptional()
   @IsString()
-  therapistId?: string;
+  description?: string;
+
+  @IsDateString()
+  dueDate: string;
+
+  @IsString()
+  clientId: string; // User ID for the client
+
+  @IsString()
+  therapistId: string;
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => CreateWorksheetMaterialDto)
+  materials?: CreateWorksheetMaterialDto[];
 }
 
 export class UpdateWorksheetDto {
@@ -42,39 +61,59 @@ export class UpdateWorksheetDto {
 
   @IsOptional()
   @IsString()
-  description?: string;
+  instructions?: string;
 
   @IsOptional()
   @IsString()
-  content?: string;
+  description?: string;
 
   @IsOptional()
-  @IsEnum(['assessment', 'exercise', 'homework'])
-  type?: 'assessment' | 'exercise' | 'homework';
+  @IsDateString()
+  dueDate?: string;
 
   @IsOptional()
-  @IsEnum(['easy', 'medium', 'hard'])
-  difficulty?: 'easy' | 'medium' | 'hard';
+  @IsEnum(['upcoming', 'past_due', 'completed', 'assigned'])
+  status?: 'upcoming' | 'past_due' | 'completed' | 'assigned';
 
   @IsOptional()
-  @IsNumber()
-  estimatedDuration?: number;
+  @IsBoolean()
+  isCompleted?: boolean;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @IsDateString()
+  submittedAt?: string;
+
+  @IsOptional()
+  @IsString()
+  feedback?: string;
 }
 
 export class CreateSubmissionDto {
+  @IsString()
   worksheetId: string;
+
+  @IsString()
   filename: string;
+
+  @IsString()
   url: string;
+
+  @IsOptional()
+  @IsNumber()
   fileSize?: number;
+
+  @IsOptional()
+  @IsString()
   fileType?: string;
 }
 
 export class SubmitWorksheetDto {
-  submissions: CreateSubmissionDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateSubmissionDto)
+  submissions?: CreateSubmissionDto[];
+
+  @IsBoolean()
   complete: boolean;
 }

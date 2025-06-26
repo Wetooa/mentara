@@ -63,6 +63,7 @@ export interface FilterQuery {
   postId?: string;
   type?: string;
   difficulty?: string;
+  status?: string;
 }
 
 // Therapist Specialization Types
@@ -93,3 +94,18 @@ export interface TherapistRecommendationResponse {
   page?: number;
   pageSize?: number;
 }
+
+// Worksheet types
+export interface PaginationQuery {
+  page?: number;
+  limit?: number;
+}
+
+// Re-export worksheet DTOs for easy importing
+export {
+  CreateWorksheetDto,
+  UpdateWorksheetDto,
+  CreateSubmissionDto,
+  SubmitWorksheetDto,
+  CreateWorksheetMaterialDto,
+} from '../worksheets/dto/worksheet.dto';

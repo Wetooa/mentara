@@ -8,53 +8,94 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
+const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
 const common_1 = require("@nestjs/common");
-const current_user_decorator_1 = require("../decorators/current-user.decorator");
 const prisma_client_provider_1 = require("../providers/prisma-client.provider");
 let AuthService = class AuthService {
-    async checkAdmin(currentUser, prisma) {
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async checkAdmin(id) {
+        const admin = await this.prisma.user.findUnique({
+            where: { role: 'admin', id },
+        });
+        return !!admin;
+    }
+    async registerClient(userId, registerUserDto) {
         try {
-            if (!currentUser) {
-                throw new common_1.UnauthorizedException('Authentication required');
-            }
-            const adminUser = await prisma.adminUser.findUnique({
-                where: { clerkUserId: currentUser.id },
+            const existingUser = await this.prisma.user.findUnique({
+                where: { id: userId },
             });
-            if (!adminUser) {
-                throw new common_1.ForbiddenException('Not authorized as admin');
+            if (existingUser) {
+                throw new common_1.ConflictException('User already exists');
             }
-            return {
-                success: true,
-                admin: {
-                    id: adminUser.id,
-                    role: adminUser.role,
-                    permissions: adminUser.permissions,
+            const client = await this.prisma.client.create({
+                data: {
+                    user: { connect: { id: userId } },
+                    ...registerUserDto,
                 },
-            };
+                include: {
+                    user: true,
+                },
+            });
+            return client;
         }
         catch (error) {
-            console.error('Admin authentication error:', error);
-            if (error instanceof common_1.UnauthorizedException ||
-                error instanceof common_1.ForbiddenException) {
+            console.error('User registration error:', error instanceof Error ? error.message : error);
+            if (error instanceof common_1.ConflictException) {
                 throw error;
             }
-            throw new common_1.InternalServerErrorException('Authentication failed');
+            throw new common_1.InternalServerErrorException('User registration failed');
         }
+    }
+    async registerTherapist(userId, registerTherapistDto) {
+        try {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { id: userId },
+            });
+            if (existingUser) {
+                throw new common_1.ConflictException('User already exists');
+            }
+            await this.prisma.user.create({
+                data: {
+                    id: userId,
+                    ...registerTherapistDto,
+                },
+            });
+            const therapist = await this.prisma.therapist.create({
+                data: {
+                    user: { connect: { id: userId } },
+                    approved: false,
+                    status: 'pending',
+                    ...registerTherapistDto,
+                },
+                include: {
+                    user: true,
+                },
+            });
+            return therapist;
+        }
+        catch (error) {
+            console.error('Therapist registration error:', error instanceof Error ? error.message : error);
+            if (error instanceof common_1.ConflictException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException('Therapist registration failed');
+        }
+    }
+    async getUsers() {
+        return clerk_sdk_node_1.clerkClient.users.getUserList();
+    }
+    async getUser(userId) {
+        return clerk_sdk_node_1.clerkClient.users.getUser(userId);
     }
 };
 exports.AuthService = AuthService;
-__decorate([
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, prisma_client_provider_1.PrismaService]),
-    __metadata("design:returntype", Promise)
-], AuthService.prototype, "checkAdmin", null);
 exports.AuthService = AuthService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_client_provider_1.PrismaService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
