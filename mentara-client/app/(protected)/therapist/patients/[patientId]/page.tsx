@@ -2,10 +2,12 @@
 
 import React, { useState, use } from "react";
 import Image from "next/image";
-import { Video, MessageSquare, Edit, Calendar } from "lucide-react";
+import { Video, MessageSquare, Calendar } from "lucide-react";
 import PatientInfoCard from "@/components/therapist/patient/PatientInfoCard";
 import PatientSessionNotes from "@/components/therapist/patient/PatientSessionNotes";
 import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets";
+import PatientProgressDashboard from "@/components/therapist/patient/PatientProgressDashboard";
+import SessionSchedulingModal from "@/components/therapist/patient/SessionSchedulingModal";
 import { usePatientData } from "@/hooks/usePatientData";
 
 export default function PatientDetailPage(
@@ -16,7 +18,8 @@ export default function PatientDetailPage(
   const params = use(props.params);
   const { patientId } = params;
   const { patient, isLoading, error } = usePatientData(patientId);
-  const [activeTab, setActiveTab] = useState<"notes" | "worksheets">("notes");
+  const [activeTab, setActiveTab] = useState<"notes" | "worksheets" | "progress">("notes");
+  const [isSchedulingModalOpen, setIsSchedulingModalOpen] = useState(false);
 
   if (isLoading) {
     return <div className="p-6">Loading patient data...</div>;
@@ -57,7 +60,11 @@ export default function PatientDetailPage(
             <button className="p-2 rounded-md bg-green-100 text-primary">
               <MessageSquare className="h-5 w-5" />
             </button>
-            <button className="p-2 rounded-md bg-green-100 text-primary">
+            <button 
+              className="p-2 rounded-md bg-green-100 text-primary hover:bg-green-200 transition-colors"
+              onClick={() => setIsSchedulingModalOpen(true)}
+              title="Schedule Session"
+            >
               <Calendar className="h-5 w-5" />
             </button>
           </div>
@@ -254,6 +261,16 @@ export default function PatientDetailPage(
           >
             Worksheets
           </button>
+          <button
+            onClick={() => setActiveTab("progress")}
+            className={`py-2 ${
+              activeTab === "progress"
+                ? "text-primary border-b-2 border-primary"
+                : "text-gray-500"
+            }`}
+          >
+            Progress
+          </button>
         </div>
       </div>
 
@@ -271,7 +288,24 @@ export default function PatientDetailPage(
             patientId={patientId}
           />
         )}
+        {activeTab === "progress" && (
+          <PatientProgressDashboard
+            patient={patient}
+            patientId={patientId}
+          />
+        )}
       </div>
+
+      {/* Session Scheduling Modal */}
+      <SessionSchedulingModal
+        patient={patient}
+        isOpen={isSchedulingModalOpen}
+        onClose={() => setIsSchedulingModalOpen(false)}
+        onSuccess={() => {
+          // Optionally refresh patient data or show success message
+          console.log('Session scheduled successfully');
+        }}
+      />
     </div>
   );
 }

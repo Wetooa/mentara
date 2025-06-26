@@ -15,6 +15,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { AdminModule } from './admin/admin.module';
 import { ModeratorModule } from './moderator/moderator.module';
 import { ClientModule } from './client/client.module';
+import { MessagingModule } from './messaging/messaging.module';
 import { PrismaService } from './providers/prisma-client.provider';
 
 @Module({
@@ -33,6 +34,7 @@ import { PrismaService } from './providers/prisma-client.provider';
     AdminModule,
     ModeratorModule,
     ClientModule,
+    MessagingModule,
   ],
   controllers: [AppController],
   providers: [

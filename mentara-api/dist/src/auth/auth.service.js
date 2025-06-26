@@ -35,11 +35,14 @@ let AuthService = class AuthService {
             if (existingUser) {
                 throw new common_1.ConflictException('User already exists');
             }
+<<<<<<< HEAD
             await this.clerkClient.users.updateUserMetadata(userId, {
                 publicMetadata: {
                     role: 'client',
                 },
             });
+=======
+>>>>>>> 60a18dc38f821d4b8b71e507ff93a23b879b3979
             await this.prisma.user.create({
                 data: registerClientDto.user.create,
             });
@@ -77,6 +80,7 @@ let AuthService = class AuthService {
             if (existingUser) {
                 throw new common_1.ConflictException('User already exists');
             }
+<<<<<<< HEAD
             await this.clerkClient.users.updateUserMetadata(userId, {
                 publicMetadata: {
                     role: 'therapist',
@@ -85,6 +89,11 @@ let AuthService = class AuthService {
             await this.prisma.user.create({
                 data: registerTherapistDto.user.create,
             });
+=======
+            await this.prisma.user.create({
+                data: registerTherapistDto.user.create,
+            });
+>>>>>>> 60a18dc38f821d4b8b71e507ff93a23b879b3979
             await this.prisma.therapist.create({
                 data: {
                     approved: false,

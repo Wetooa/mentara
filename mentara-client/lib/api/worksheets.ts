@@ -1,10 +1,6 @@
 import { Task, TaskFile } from "@/components/worksheets/types";
 
-// API endpoints for worksheets
-export const submitTherapistApplication = async (data: any) => {
-  // Implementation in another file
-  return {} as any;
-};
+// Worksheet API endpoints
 
 // Get API base URL from environment variable with fallback
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";

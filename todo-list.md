@@ -39,10 +39,19 @@
 - [x] Design worksheet card components
 - [x] Add date-based grouping for worksheets
 - [x] Fix worksheets height to fill entire viewport
-- [ ] Implement worksheet detail view
-- [ ] Add file upload functionality for worksheet submissions
-- [ ] Create worksheet completion tracking
-- [ ] Implement worksheet API integration
+- [x] Implement worksheet detail view
+- [x] Add file upload functionality for worksheet submissions
+- [x] Create worksheet completion tracking
+- [x] Implement worksheet API integration
+- [x] Create comprehensive database schema for worksheets
+- [x] Build NestJS worksheets module with REST API and file upload support
+- [x] Implement progress tracking with visual indicators
+- [x] Add submit/unsubmit functionality with timestamp tracking
+- [x] Create file management system with upload/download/delete capabilities
+- [x] Implement file type validation and size limits
+- [x] Add therapist feedback system
+- [x] Create worksheet status management (upcoming, past_due, completed)
+- [x] Integrate with user authentication and role-based access control
 
 ### User - Messages Tab
 
@@ -50,28 +59,37 @@
 - [x] Implement messaging sidebar with contacts list
 - [x] Design message chat area with input functionality
 - [x] Fix messages interface height to fill entire viewport
-- [ ] Implement real-time messaging functionality
-- [ ] Add file sharing capabilities
-- [ ] Create message notification system
-- [ ] Implement read receipts
-- [ ] Add typing indicators
-- [ ] Create message search functionality
-- [ ] Implement message grouping by date
-- [ ] Integrate with backend API for persistent messages
+- [x] Implement real-time messaging functionality
+- [x] Add file sharing capabilities (framework ready)
+- [x] Create message notification system (WebSocket based)
+- [x] Implement read receipts
+- [x] Add typing indicators
+- [x] Create message search functionality
+- [x] Implement message grouping by date
+- [x] Integrate with backend API for persistent messages
+- [x] Create comprehensive database schema for messaging
+- [x] Build NestJS messaging module with REST API and WebSocket support
+- [x] Implement user blocking and conversation management
+- [x] Add message reactions and interactive features
+- [x] Create frontend API integration layer with real-time updates
 
 ## Therapist Features
 
 ### Therapist - Patients Tab
 
-- [ ] Create patient listing interface
-- [ ] Implement patient search and filtering
-- [ ] Design patient profile cards
-- [ ] Create detailed patient view with history
-- [ ] Add session scheduling tools
-- [ ] Implement patient progress tracking
-- [ ] Create treatment notes functionality
-- [ ] Add worksheet assignment system
-- [ ] Implement secure messaging with patients
+- [x] Create patient listing interface
+- [x] Implement patient search and filtering
+- [x] Design patient profile cards
+- [x] Create detailed patient view with history
+- [x] Integrate with real backend APIs for patient data
+- [x] Add comprehensive patient management with loading states and error handling
+- [x] Implement status filtering and advanced search capabilities
+- [x] Add patient status indicators and session progress tracking
+- [x] Add session scheduling tools
+- [x] Implement patient progress tracking dashboard
+- [x] Create treatment notes functionality
+- [x] Add worksheet assignment system (via existing worksheets API)
+- [x] Implement secure messaging with patients (via existing messaging system)
 
 ## API Development
 
@@ -80,7 +98,7 @@
 - [ ] Build API for therapist booking functionality
 - [ ] Develop meeting scheduling and management API
 - [ ] Create user dashboard data API endpoint
-- [ ] Build worksheet management API
+- [x] Build worksheet management API
 - [ ] Create API documentation with Swagger
 
 ## General Tasks

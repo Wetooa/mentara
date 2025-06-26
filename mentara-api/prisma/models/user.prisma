@@ -33,6 +33,14 @@ model User {
     replyHearts    ReplyHeart[]
     reviewsHelpful ReviewHelpful[]
 
+    // Messaging relations
+    conversations      ConversationParticipant[] @relation("UserConversations")
+    sentMessages       Message[]                 @relation("UserMessages")
+    messageReadReceipts MessageReadReceipt[]    @relation("UserReadReceipts")
+    messageReactions   MessageReaction[]        @relation("UserMessageReactions")
+    blocking           UserBlock[]              @relation("UserBlocking")
+    blockedBy          UserBlock[]              @relation("UserBlocked")
+
     @@index([email])
     @@index([role])
 }

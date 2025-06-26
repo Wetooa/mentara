@@ -10,7 +10,6 @@ import {
   Download,
   Plus,
   Trash2,
-  X,
   Upload as UploadIcon,
 } from "lucide-react";
 import { Task, TaskFile } from "@/components/worksheets/types";
@@ -79,7 +78,7 @@ export default function TaskDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const taskId = params.taskId as string;
-  const { userId } = useAuth();
+  useAuth();
   const { showToast } = useToast();
 
   // Determine if task is editable based on submission status
@@ -113,7 +112,7 @@ export default function TaskDetailPage() {
 
   useEffect(() => {
     // Close dropdown when clicking outside
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = () => {
       setShowFileOptions(null);
     };
 
