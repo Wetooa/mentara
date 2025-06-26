@@ -22,7 +22,6 @@ export const ReviewOrderByWithRelationInputSchema: z.ZodType<Prisma.ReviewOrderB
   moderatedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   moderationNote: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   isVerified: z.lazy(() => SortOrderSchema).optional(),
-  helpfulCount: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   client: z.lazy(() => ClientOrderByWithRelationInputSchema).optional(),

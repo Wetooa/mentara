@@ -10,7 +10,7 @@ import {
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
 import axios from 'axios';
-import { CreatePreAssessmentDto } from 'src/schema/pre-assessment.schemas';
+import { CreatePreAssessmentDto } from 'src/schema/pre-assessment.d';
 
 @Injectable()
 export class PreAssessmentService {
@@ -80,9 +80,9 @@ export class PreAssessmentService {
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          questionnaires: data.questionnaires,
-          answers: data.answers,
-          answerMatrix: data.answerMatrix,
+          questionnaires: data.questionnaires as string[],
+          answers: data.answers as number[][],
+          answerMatrix: data.answerMatrix as number[][],
           scores,
           severityLevels,
           aiEstimate: aiEstimate || {},
@@ -99,21 +99,31 @@ export class PreAssessmentService {
     }
   }
 
+  private handleError(error: unknown, message: string): never {
+    if (error instanceof NotFoundException) {
+      throw error;
+    }
+    if (error instanceof Error) {
+      console.error(message, error.message);
+      throw new InternalServerErrorException(error.message);
+    }
+    console.error(message, error);
+    throw new InternalServerErrorException(message);
+  }
+
   async getPreAssessmentByUserId(userId: string): Promise<PreAssessment> {
     try {
-      const preAssessment = await this.prisma.preAssessment.findUniqueOrThrow({
+      const preAssessment = await this.prisma.preAssessment.findUnique({
         where: { clientId: userId },
       });
 
+      if (!preAssessment) {
+        throw new NotFoundException('Pre-assessment not found');
+      }
+
       return preAssessment;
-    } catch (error) {
-      console.error(
-        'Error retrieving pre-assessment:',
-        error instanceof Error ? error.message : error,
-      );
-      throw new InternalServerErrorException(
-        'Failed to retrieve pre-assessment',
-      );
+    } catch (error: unknown) {
+      this.handleError(error, 'Error retrieving pre-assessment');
     }
   }
 
@@ -123,20 +133,31 @@ export class PreAssessmentService {
         where: { clientId: clientId },
         include: { client: { include: { user: true } } },
       });
+
       if (!preAssessment) {
         throw new NotFoundException('Pre-assessment not found');
       }
 
       return preAssessment;
-    } catch (error) {
-      console.error(
-        'Error retrieving pre-assessment:',
-        error instanceof Error ? error.message : error,
-      );
-      throw new InternalServerErrorException(
-        'Failed to retrieve pre-assessment',
-      );
+    } catch (error: unknown) {
+      this.handleError(error, 'Error retrieving pre-assessment');
     }
+  }
+
+  private isValidScores(scores: unknown): scores is Record<string, number> {
+    if (typeof scores !== 'object' || scores === null) return false;
+    return Object.entries(scores).every(
+      ([key, value]) => typeof key === 'string' && typeof value === 'number',
+    );
+  }
+
+  private isValidSeverityLevels(
+    levels: unknown,
+  ): levels is Record<string, string> {
+    if (typeof levels !== 'object' || levels === null) return false;
+    return Object.entries(levels).every(
+      ([key, value]) => typeof key === 'string' && typeof value === 'string',
+    );
   }
 
   async updatePreAssessment(
@@ -150,20 +171,33 @@ export class PreAssessmentService {
       if (!client) {
         throw new NotFoundException('Client not found');
       }
-      let scores: Record<string, number> = data.scores as Record<
-        string,
-        number
-      >;
-      let severityLevels: Record<string, string> =
-        data.severityLevels as Record<string, string>;
+
+      let scores: Record<string, number>;
+      let severityLevels: Record<string, string>;
+
+      if (data.scores && this.isValidScores(data.scores)) {
+        scores = data.scores;
+      } else {
+        scores = {};
+      }
+
+      if (
+        data.severityLevels &&
+        this.isValidSeverityLevels(data.severityLevels)
+      ) {
+        severityLevels = data.severityLevels;
+      } else {
+        severityLevels = {};
+      }
+
       if (
         data.questionnaires &&
         data.answers &&
         (!data.scores || !data.severityLevels)
       ) {
         const calculatedScores = calculateAllScores(
-          data.questionnaires as string[],
-          data.answers as number[][],
+          data.questionnaires,
+          data.answers,
         );
         scores = Object.fromEntries(
           Object.entries(calculatedScores).map(([key, value]) => [
@@ -173,26 +207,25 @@ export class PreAssessmentService {
         );
         severityLevels = generateSeverityLevels(calculatedScores);
       }
+
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          questionnaires: data.questionnaires,
-          answers: data.answers,
-          answerMatrix: data.answerMatrix,
+          questionnaires: data.questionnaires as string[],
+          answers: data.answers as number[][],
+          answerMatrix: data.answerMatrix as number[][],
           scores,
           severityLevels,
         },
       });
+
       if (!preAssessment) {
         throw new NotFoundException('Pre-assessment not found');
       }
+
       return preAssessment;
-    } catch (error) {
-      console.error(
-        'Error updating pre-assessment:',
-        error instanceof Error ? error.message : error,
-      );
-      throw new InternalServerErrorException('Failed to update pre-assessment');
+    } catch (error: unknown) {
+      this.handleError(error, 'Error updating pre-assessment');
     }
   }
 
@@ -202,12 +235,8 @@ export class PreAssessmentService {
         where: { clientId: userId },
       });
       return null;
-    } catch (error) {
-      console.error(
-        'Error deleting pre-assessment:',
-        error instanceof Error ? error.message : error,
-      );
-      throw new InternalServerErrorException('Failed to delete pre-assessment');
+    } catch (error: unknown) {
+      this.handleError(error, 'Error deleting pre-assessment');
     }
   }
 }

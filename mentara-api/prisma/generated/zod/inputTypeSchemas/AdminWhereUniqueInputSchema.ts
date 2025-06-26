@@ -7,6 +7,7 @@ import { StringFilterSchema } from './StringFilterSchema';
 import { DateTimeFilterSchema } from './DateTimeFilterSchema';
 import { UserScalarRelationFilterSchema } from './UserScalarRelationFilterSchema';
 import { UserWhereInputSchema } from './UserWhereInputSchema';
+import { TherapistListRelationFilterSchema } from './TherapistListRelationFilterSchema';
 
 export const AdminWhereUniqueInputSchema: z.ZodType<Prisma.AdminWhereUniqueInput> = z.object({
   userId: z.string()
@@ -21,6 +22,7 @@ export const AdminWhereUniqueInputSchema: z.ZodType<Prisma.AdminWhereUniqueInput
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  processedTherapists: z.lazy(() => TherapistListRelationFilterSchema).optional()
 }).strict());
 
 export default AdminWhereUniqueInputSchema;

@@ -179,18 +179,23 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
 
     // Therapist recommendation API methods
     therapistRecommendations: {
-      getRecommendations: (params: {
-        limit?: number;
-        includeInactive?: boolean;
-        province?: string;
-        maxHourlyRate?: number;
-      } = {}) => {
+      getRecommendations: (
+        params: {
+          limit?: number;
+          includeInactive?: boolean;
+          province?: string;
+          maxHourlyRate?: number;
+        } = {}
+      ) => {
         const queryParams = new URLSearchParams();
         if (params.limit) queryParams.append("limit", params.limit.toString());
-        if (params.includeInactive !== undefined) 
-          queryParams.append("includeInactive", params.includeInactive.toString());
+        if (params.includeInactive !== undefined)
+          queryParams.append(
+            "includeInactive",
+            params.includeInactive.toString()
+          );
         if (params.province) queryParams.append("province", params.province);
-        if (params.maxHourlyRate) 
+        if (params.maxHourlyRate)
           queryParams.append("maxHourlyRate", params.maxHourlyRate.toString());
 
         const queryString = queryParams.toString()
@@ -205,33 +210,46 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
       createMeeting: (data: {
         therapistId: string;
         startTime: string;
-        endTime: string;
         duration: number;
         title?: string;
         description?: string;
         meetingType?: string;
-      }) => client.request<any>("/booking/meetings", { method: "POST", body: data }),
-      
+      }) =>
+        client.request<any>("/booking/meetings", {
+          method: "POST",
+          body: data,
+        }),
+
       getMeetings: () => client.request<any[]>("/booking/meetings"),
-      
-      getMeeting: (id: string) => client.request<any>(`/booking/meetings/${id}`),
-      
-      updateMeeting: (id: string, data: {
-        status?: string;
-        notes?: string;
-        meetingUrl?: string;
-      }) => client.request<any>(`/booking/meetings/${id}`, { method: "PUT", body: data }),
-      
-      cancelMeeting: (id: string) => 
-        client.request<any>(`/booking/meetings/${id}/cancel`, { method: "DELETE" }),
-      
+
+      getMeeting: (id: string) =>
+        client.request<any>(`/booking/meetings/${id}`),
+
+      updateMeeting: (
+        id: string,
+        data: {
+          status?: string;
+          notes?: string;
+          meetingUrl?: string;
+        }
+      ) =>
+        client.request<any>(`/booking/meetings/${id}`, {
+          method: "PUT",
+          body: data,
+        }),
+
+      cancelMeeting: (id: string) =>
+        client.request<any>(`/booking/meetings/${id}/cancel`, {
+          method: "DELETE",
+        }),
+
       getAvailableSlots: (therapistId: string, date: string) => {
         const queryParams = new URLSearchParams();
         queryParams.append("therapistId", therapistId);
         queryParams.append("date", date);
         return client.request<any>(`/booking/slots?${queryParams.toString()}`);
       },
-      
+
       getDurations: () => client.request<any[]>("/booking/durations"),
     },
 
@@ -245,82 +263,104 @@ export const createApiClient = (getToken: () => Promise<string | null>) => {
         meetingId?: string;
         isAnonymous?: boolean;
       }) => client.request<any>("/reviews", { method: "POST", body: data }),
-      
-      update: (id: string, data: {
-        rating?: number;
-        title?: string;
-        content?: string;
-        isAnonymous?: boolean;
-      }) => client.request<any>(`/reviews/${id}`, { method: "PUT", body: data }),
-      
-      delete: (id: string) => 
+
+      update: (
+        id: string,
+        data: {
+          rating?: number;
+          title?: string;
+          content?: string;
+          isAnonymous?: boolean;
+        }
+      ) => client.request<any>(`/reviews/${id}`, { method: "PUT", body: data }),
+
+      delete: (id: string) =>
         client.request<any>(`/reviews/${id}`, { method: "DELETE" }),
-      
-      getAll: (params: {
-        therapistId?: string;
-        clientId?: string;
-        status?: string;
-        page?: number;
-        limit?: number;
-        sortBy?: string;
-        sortOrder?: string;
-        rating?: number;
-      } = {}) => {
+
+      getAll: (
+        params: {
+          therapistId?: string;
+          clientId?: string;
+          status?: string;
+          page?: number;
+          limit?: number;
+          sortBy?: string;
+          sortOrder?: string;
+          rating?: number;
+        } = {}
+      ) => {
         const queryParams = new URLSearchParams();
-        if (params.therapistId) queryParams.append("therapistId", params.therapistId);
+        if (params.therapistId)
+          queryParams.append("therapistId", params.therapistId);
         if (params.clientId) queryParams.append("clientId", params.clientId);
         if (params.status) queryParams.append("status", params.status);
         if (params.page) queryParams.append("page", params.page.toString());
         if (params.limit) queryParams.append("limit", params.limit.toString());
         if (params.sortBy) queryParams.append("sortBy", params.sortBy);
         if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
-        if (params.rating) queryParams.append("rating", params.rating.toString());
-        
+        if (params.rating)
+          queryParams.append("rating", params.rating.toString());
+
         const queryString = queryParams.toString()
           ? `?${queryParams.toString()}`
           : "";
         return client.request<any>(`/reviews${queryString}`);
       },
-      
-      getTherapistReviews: (therapistId: string, params: {
-        page?: number;
-        limit?: number;
-        sortBy?: string;
-        sortOrder?: string;
-        rating?: number;
-      } = {}) => {
+
+      getTherapistReviews: (
+        therapistId: string,
+        params: {
+          page?: number;
+          limit?: number;
+          sortBy?: string;
+          sortOrder?: string;
+          rating?: number;
+        } = {}
+      ) => {
         const queryParams = new URLSearchParams();
         if (params.page) queryParams.append("page", params.page.toString());
         if (params.limit) queryParams.append("limit", params.limit.toString());
         if (params.sortBy) queryParams.append("sortBy", params.sortBy);
         if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
-        if (params.rating) queryParams.append("rating", params.rating.toString());
-        
+        if (params.rating)
+          queryParams.append("rating", params.rating.toString());
+
         const queryString = queryParams.toString()
           ? `?${queryParams.toString()}`
           : "";
-        return client.request<any>(`/reviews/therapist/${therapistId}${queryString}`);
+        return client.request<any>(
+          `/reviews/therapist/${therapistId}${queryString}`
+        );
       },
-      
-      getTherapistStats: (therapistId: string) => 
+
+      getTherapistStats: (therapistId: string) =>
         client.request<any>(`/reviews/therapist/${therapistId}/stats`),
-      
-      markHelpful: (reviewId: string) => 
+
+      markHelpful: (reviewId: string) =>
         client.request<any>(`/reviews/${reviewId}/helpful`, { method: "POST" }),
-      
-      moderate: (reviewId: string, data: {
-        status: string;
-        moderationNote?: string;
-      }) => client.request<any>(`/reviews/${reviewId}/moderate`, { method: "POST", body: data }),
-      
-      getPending: (params: {
-        page?: number;
-        limit?: number;
-      } = {}) => {
+
+      moderate: (
+        reviewId: string,
+        data: {
+          status: string;
+          moderationNote?: string;
+        }
+      ) =>
+        client.request<any>(`/reviews/${reviewId}/moderate`, {
+          method: "POST",
+          body: data,
+        }),
+
+      getPending: (
+        params: {
+          page?: number;
+          limit?: number;
+        } = {}
+      ) => {
         const queryParams = new URLSearchParams();
         if (params.page) queryParams.append("page", params.page.toString());
         if (params.limit) queryParams.append("limit", params.limit.toString());
-        
+
         const queryString = queryParams.toString()
           ? `?${queryParams.toString()}`
           : "";

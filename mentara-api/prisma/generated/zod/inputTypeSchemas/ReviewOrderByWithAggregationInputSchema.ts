@@ -23,7 +23,6 @@ export const ReviewOrderByWithAggregationInputSchema: z.ZodType<Prisma.ReviewOrd
   moderatedAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   moderationNote: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   isVerified: z.lazy(() => SortOrderSchema).optional(),
-  helpfulCount: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ReviewCountOrderByAggregateInputSchema).optional(),

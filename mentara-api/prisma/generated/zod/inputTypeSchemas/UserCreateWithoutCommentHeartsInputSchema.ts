@@ -14,7 +14,7 @@ import { ReplyHeartCreateNestedManyWithoutUserInputSchema } from './ReplyHeartCr
 import { ReviewHelpfulCreateNestedManyWithoutUserInputSchema } from './ReviewHelpfulCreateNestedManyWithoutUserInputSchema';
 
 export const UserCreateWithoutCommentHeartsInputSchema: z.ZodType<Prisma.UserCreateWithoutCommentHeartsInput> = z.object({
-  id: z.string(),
+  id: z.string().uuid().optional(),
   email: z.string(),
   firstName: z.string(),
   middleName: z.string().optional().nullable(),
@@ -23,9 +23,11 @@ export const UserCreateWithoutCommentHeartsInputSchema: z.ZodType<Prisma.UserCre
   address: z.string().optional().nullable(),
   avatarUrl: z.string().optional().nullable(),
   role: z.string().optional(),
-  isActive: z.boolean().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  bio: z.string().optional().nullable(),
+  coverImageUrl: z.string().optional().nullable(),
+  isActive: z.boolean().optional(),
   memberships: z.lazy(() => MembershipCreateNestedManyWithoutUserInputSchema).optional(),
   posts: z.lazy(() => PostCreateNestedManyWithoutUserInputSchema).optional(),
   comments: z.lazy(() => CommentCreateNestedManyWithoutUserInputSchema).optional(),

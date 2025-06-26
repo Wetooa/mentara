@@ -5,8 +5,12 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { ClientCreateDto, TherapistCreateDto } from 'src/schema/auth.schemas';
-import { ClientResponse, TherapistResponse } from 'src/schema/client.schemas';
+import {
+  ClientCreateDto,
+  ClientResponse,
+  TherapistCreateDto,
+  TherapistResponse,
+} from 'src/schema/auth.d';
 
 @Injectable()
 export class AuthService {
@@ -38,8 +42,14 @@ export class AuthService {
         throw new ConflictException('User already exists');
       }
 
+      await this.clerkClient.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          role: 'client',
+        },
+      });
+
       await this.prisma.user.create({
-        data: registerClientDto.user.create!,
+        data: registerClientDto.user,
       });
 
       // Create user
@@ -50,13 +60,6 @@ export class AuthService {
         },
         include: {
           user: true,
-          worksheets: true,
-          preAssessment: true,
-          worksheetSubmissions: true,
-          clientMedicalHistory: true,
-          clientPreferences: true,
-          assignedTherapists: true,
-          meetings: true,
         },
       });
 
@@ -87,36 +90,30 @@ export class AuthService {
         throw new ConflictException('User already exists');
       }
 
+      await this.clerkClient.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          role: 'therapist',
+        },
+      });
+
       // Create user first
       await this.prisma.user.create({
-        data: registerTherapistDto.user.create!,
+        data: registerTherapistDto.user,
       });
 
       // Create therapist
-      await this.prisma.therapist.create({
+      const therapist = await this.prisma.therapist.create({
         data: {
-          approved: false,
-          status: 'pending',
           ...registerTherapistDto,
+          user: { connect: { id: userId } },
+          status: 'pending',
         },
         include: {
           user: true,
-          assignedClients: true,
-          meetings: true,
-          therapistAvailabilities: true,
         },
       });
 
-      return await this.prisma.therapist.findUniqueOrThrow({
-        where: { userId },
-        include: {
-          user: true,
-          assignedClients: true,
-          meetings: true,
-          therapistAvailabilities: true,
-          worksheets: true,
-        },
-      });
+      return therapist;
     } catch (error) {
       console.error(
         'Therapist registration error:',

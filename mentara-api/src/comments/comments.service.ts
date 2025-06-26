@@ -5,6 +5,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Comment, Prisma, User, Reply } from '@prisma/client';
+import {
+  CommentCreateInputDto,
+  CommentResponse,
+  CommentUpdateInputDto,
+} from 'src/schema/comment';
 
 @Injectable()
 export class CommentsService {
@@ -75,53 +80,30 @@ export class CommentsService {
     }
   }
 
-  async findOne(id: string, userId?: string): Promise<Comment | null> {
+  async findOne(id: string): Promise<CommentResponse> {
     try {
-      return await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findUnique({
         where: { id },
         include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              avatarUrl: true,
-            },
-          },
-          post: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
+          user: true,
           replies: {
             include: {
-              user: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  avatarUrl: true,
-                },
-              },
+              user: true,
             },
           },
           files: true,
-          hearts: userId
-            ? {
-                where: {
-                  userId,
-                },
-              }
-            : false,
-          _count: {
-            select: {
-              replies: true,
-              hearts: true,
-            },
-          },
+          hearts: true,
         },
       });
+
+      if (!comment) {
+        throw new NotFoundException('Comment not found');
+      }
+
+      return {
+        ...comment,
+        hearts: comment.hearts.length,
+      };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
@@ -178,28 +160,34 @@ export class CommentsService {
     }
   }
 
-  async create(data: Prisma.CommentCreateInput): Promise<Comment> {
+  async create(
+    data: CommentCreateInputDto,
+    userId: string,
+  ): Promise<CommentResponse> {
     try {
-      return await this.prisma.comment.create({
-        data,
+      const comment = await this.prisma.comment.create({
+        data: {
+          userId,
+          postId: data.postId,
+          content: data.content,
+          files: {
+            create: data.files?.map((file) => ({
+              url: file.url,
+              type: file.type,
+            })),
+          },
+        },
         include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              avatarUrl: true,
-            },
-          },
-          post: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
+          user: true,
           files: true,
+          hearts: true,
         },
       });
+
+      return {
+        ...comment,
+        hearts: comment.hearts.length,
+      };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }
@@ -207,9 +195,9 @@ export class CommentsService {
 
   async update(
     id: string,
-    data: Prisma.CommentUpdateInput,
+    data: CommentUpdateInputDto,
     userId: string,
-  ): Promise<Comment> {
+  ): Promise<CommentResponse> {
     try {
       const comment = await this.prisma.comment.findUnique({
         where: { id },
@@ -224,27 +212,31 @@ export class CommentsService {
         throw new ForbiddenException('You can only edit your own comments');
       }
 
-      return await this.prisma.comment.update({
-        where: { id },
-        data,
+      const updatedComment = await this.prisma.comment.update({
+        where: { id, userId },
+        data: {
+          content: data.content,
+          files: {
+            update: data.files?.map((file) => ({
+              where: { id: file.commentId },
+              data: {
+                url: file.url,
+                type: file.type,
+              },
+            })),
+          },
+        },
         include: {
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              avatarUrl: true,
-            },
-          },
-          post: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
+          user: true,
           files: true,
+          hearts: true,
         },
       });
+
+      return {
+        ...updatedComment,
+        hearts: updatedComment.hearts.length,
+      };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
     }

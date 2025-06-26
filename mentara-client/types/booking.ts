@@ -18,7 +18,6 @@ export enum MeetingType {
 export interface CreateMeetingRequest {
   therapistId: string;
   startTime: string;
-  endTime: string;
   duration: number;
   title?: string;
   description?: string;
@@ -35,7 +34,6 @@ export interface MeetingDuration {
 
 export interface AvailableSlot {
   startTime: string;
-  endTime: string;
   availableDurations: MeetingDuration[];
 }
 
@@ -44,7 +42,6 @@ export interface Meeting {
   title?: string;
   description?: string;
   startTime: string;
-  endTime: string;
   duration: number;
   status: MeetingStatus;
   meetingType?: MeetingType;

@@ -8,14 +8,11 @@ export const MeetingCreateManyClientInputSchema: z.ZodType<Prisma.MeetingCreateM
   title: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  duration: z.number().int(),
+  duration: z.number().int().optional(),
   status: z.lazy(() => MeetingStatusSchema).optional(),
   meetingType: z.string().optional(),
   meetingUrl: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
   therapistId: z.string(),
-  durationId: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional()
 }).strict();

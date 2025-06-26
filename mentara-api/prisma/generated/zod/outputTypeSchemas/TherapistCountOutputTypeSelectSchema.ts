@@ -7,6 +7,7 @@ export const TherapistCountOutputTypeSelectSchema: z.ZodType<Prisma.TherapistCou
   worksheets: z.boolean().optional(),
   assignedClients: z.boolean().optional(),
   reviews: z.boolean().optional(),
+  therapistFiles: z.boolean().optional(),
 }).strict();
 
 export default TherapistCountOutputTypeSelectSchema;

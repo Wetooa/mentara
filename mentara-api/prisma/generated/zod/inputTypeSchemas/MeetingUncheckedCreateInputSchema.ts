@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import { z } from 'zod';
 import { MeetingStatusSchema } from './MeetingStatusSchema';
+import { MeetingNotesUncheckedCreateNestedManyWithoutMeetingInputSchema } from './MeetingNotesUncheckedCreateNestedManyWithoutMeetingInputSchema';
 import { ReviewUncheckedCreateNestedManyWithoutMeetingInputSchema } from './ReviewUncheckedCreateNestedManyWithoutMeetingInputSchema';
 
 export const MeetingUncheckedCreateInputSchema: z.ZodType<Prisma.MeetingUncheckedCreateInput> = z.object({
@@ -9,17 +10,15 @@ export const MeetingUncheckedCreateInputSchema: z.ZodType<Prisma.MeetingUnchecke
   title: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  duration: z.number().int(),
+  duration: z.number().int().optional(),
   status: z.lazy(() => MeetingStatusSchema).optional(),
   meetingType: z.string().optional(),
   meetingUrl: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
   clientId: z.string(),
   therapistId: z.string(),
-  durationId: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  meetingNotes: z.lazy(() => MeetingNotesUncheckedCreateNestedManyWithoutMeetingInputSchema).optional(),
   reviews: z.lazy(() => ReviewUncheckedCreateNestedManyWithoutMeetingInputSchema).optional()
 }).strict();
 

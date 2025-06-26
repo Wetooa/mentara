@@ -17,7 +17,6 @@ export const ReviewMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ReviewMaxOrd
   moderatedAt: z.lazy(() => SortOrderSchema).optional(),
   moderationNote: z.lazy(() => SortOrderSchema).optional(),
   isVerified: z.lazy(() => SortOrderSchema).optional(),
-  helpfulCount: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();

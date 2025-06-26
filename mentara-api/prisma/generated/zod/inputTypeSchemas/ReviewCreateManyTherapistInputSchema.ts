@@ -16,7 +16,6 @@ export const ReviewCreateManyTherapistInputSchema: z.ZodType<Prisma.ReviewCreate
   moderatedAt: z.coerce.date().optional().nullable(),
   moderationNote: z.string().optional().nullable(),
   isVerified: z.boolean().optional(),
-  helpfulCount: z.number().int().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional()
 }).strict();

@@ -11,6 +11,10 @@ import { TherapistRecommendationService } from './therapist-recommendation.servi
 import { PrismaService } from '../providers/prisma-client.provider';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
+import {
+  TherapistRecommendationRequestDto,
+  TherapistRecommendationResponseDto,
+} from 'src/schema/therapist-application.schemas';
 
 @Controller('therapist-recommendations')
 @UseGuards(ClerkAuthGuard)
@@ -28,12 +32,12 @@ export class TherapistRecommendationController {
     @Query('includeInactive') includeInactive?: string,
     @Query('province') province?: string,
     @Query('maxHourlyRate') maxHourlyRate?: string,
-  ): Promise<TherapistRecommendationResponse> {
+  ): Promise<TherapistRecommendationResponseDto> {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
         where: { id: clerkId },
       });
-      const request: TherapistRecommendationRequest = {
+      const request: TherapistRecommendationRequestDto = {
         userId: user.id,
         limit: limit ? parseInt(limit) : 10,
         includeInactive: includeInactive === 'true',

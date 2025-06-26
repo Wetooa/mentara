@@ -5,8 +5,11 @@ import { WorksheetCreateNestedOneWithoutMaterialsInputSchema } from './Worksheet
 
 export const WorksheetMaterialCreateInputSchema: z.ZodType<Prisma.WorksheetMaterialCreateInput> = z.object({
   id: z.string().uuid().optional(),
+  filename: z.string(),
   url: z.string(),
-  type: z.string().optional().nullable(),
+  fileSize: z.number().int().optional().nullable(),
+  fileType: z.string().optional().nullable(),
+  createdAt: z.coerce.date().optional(),
   worksheet: z.lazy(() => WorksheetCreateNestedOneWithoutMaterialsInputSchema)
 }).strict();
 

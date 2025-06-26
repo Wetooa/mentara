@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Post, Prisma, User } from '@prisma/client';
+import { PostUpdateInputDto } from 'src/schema/post';
 
 @Injectable()
 export class PostsService {
@@ -169,7 +170,7 @@ export class PostsService {
 
   async update(
     id: string,
-    data: Prisma.PostUpdateInput,
+    data: PostUpdateInputDto,
     userId: string,
   ): Promise<Post> {
     const post = await this.prisma.post.findUnique({
@@ -187,7 +188,11 @@ export class PostsService {
 
     return this.prisma.post.update({
       where: { id },
-      data,
+      data: {
+        title: data.title,
+        content: data.content,
+        room: { connect: { id: data.roomId } },
+      },
       include: {
         user: {
           select: {

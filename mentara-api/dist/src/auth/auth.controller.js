@@ -16,7 +16,6 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const clerk_auth_guard_1 = require("../clerk-auth.guard");
 const current_user_id_decorator_1 = require("../decorators/current-user-id.decorator");
-const types_1 = require("../types");
 const auth_service_1 = require("./auth.service");
 let AuthController = class AuthController {
     authService;
@@ -47,7 +46,7 @@ __decorate([
     __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, types_1.RegisterClientDto]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerClient", null);
 __decorate([
@@ -57,7 +56,7 @@ __decorate([
     __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, types_1.RegisterTherapistDto]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerTherapist", null);
 __decorate([

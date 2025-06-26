@@ -5,13 +5,15 @@ import { AdminUpdatepermissionsInputSchema } from './AdminUpdatepermissionsInput
 import { StringFieldUpdateOperationsInputSchema } from './StringFieldUpdateOperationsInputSchema';
 import { DateTimeFieldUpdateOperationsInputSchema } from './DateTimeFieldUpdateOperationsInputSchema';
 import { UserUpdateOneRequiredWithoutAdminNestedInputSchema } from './UserUpdateOneRequiredWithoutAdminNestedInputSchema';
+import { TherapistUpdateManyWithoutProcessedByAdminNestedInputSchema } from './TherapistUpdateManyWithoutProcessedByAdminNestedInputSchema';
 
 export const AdminUpdateInputSchema: z.ZodType<Prisma.AdminUpdateInput> = z.object({
   permissions: z.union([ z.lazy(() => AdminUpdatepermissionsInputSchema),z.string().array() ]).optional(),
   adminLevel: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  user: z.lazy(() => UserUpdateOneRequiredWithoutAdminNestedInputSchema).optional()
+  user: z.lazy(() => UserUpdateOneRequiredWithoutAdminNestedInputSchema).optional(),
+  processedTherapists: z.lazy(() => TherapistUpdateManyWithoutProcessedByAdminNestedInputSchema).optional()
 }).strict();
 
 export default AdminUpdateInputSchema;

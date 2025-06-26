@@ -2,19 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoomGroup, Room } from '@prisma/client';
 import {
-  CreateCommunityDto,
-  UpdateCommunityDto,
   CommunityResponse,
   CommunityWithMembersResponse,
-  CommunityWithStructureResponse,
   CommunityStatsResponse,
-} from 'src/schema/community.schemas';
+  CommunityWithRoomGroupsResponse,
+  CommunityCreateInputDto,
+  CommunityUpdateInputDto,
+} from '../schema/community.d';
 
 @Injectable()
 export class CommunitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllWithStructure(): Promise<CommunityWithStructureResponse[]> {
+  async findAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
     return await this.prisma.community.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
@@ -29,7 +29,7 @@ export class CommunitiesService {
 
   async findOneWithStructure(
     id: string,
-  ): Promise<CommunityWithStructureResponse | null> {
+  ): Promise<CommunityWithRoomGroupsResponse | null> {
     return await this.prisma.community.findUniqueOrThrow({
       where: { id },
       include: {
@@ -109,7 +109,9 @@ export class CommunitiesService {
     return community;
   }
 
-  async createCommunity(data: CreateCommunityDto): Promise<CommunityResponse> {
+  async createCommunity(
+    data: CommunityCreateInputDto,
+  ): Promise<CommunityResponse> {
     const community = await this.prisma.community.create({
       data: {
         name: data.name,
@@ -123,7 +125,7 @@ export class CommunitiesService {
 
   async update(
     id: string,
-    data: UpdateCommunityDto,
+    data: CommunityUpdateInputDto,
   ): Promise<CommunityResponse> {
     const community = await this.prisma.community.update({
       where: { id },
@@ -214,7 +216,13 @@ export class CommunitiesService {
     if (!community) {
       throw new Error('Community not found');
     }
-    return community;
+    return {
+      ...community,
+      members: community.memberships.map((membership) => ({
+        ...membership,
+        user: membership.user,
+      })),
+    };
   }
 
   async getStats(): Promise<CommunityStatsResponse> {

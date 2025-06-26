@@ -5,8 +5,8 @@ import { UserWhereInputSchema } from './UserWhereInputSchema';
 import { StringFilterSchema } from './StringFilterSchema';
 import { StringNullableFilterSchema } from './StringNullableFilterSchema';
 import { DateTimeNullableFilterSchema } from './DateTimeNullableFilterSchema';
-import { BoolFilterSchema } from './BoolFilterSchema';
 import { DateTimeFilterSchema } from './DateTimeFilterSchema';
+import { BoolFilterSchema } from './BoolFilterSchema';
 import { MembershipListRelationFilterSchema } from './MembershipListRelationFilterSchema';
 import { PostListRelationFilterSchema } from './PostListRelationFilterSchema';
 import { CommentListRelationFilterSchema } from './CommentListRelationFilterSchema';
@@ -26,18 +26,18 @@ import { ReviewHelpfulListRelationFilterSchema } from './ReviewHelpfulListRelati
 
 export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> = z.union([
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     email: z.string()
   }),
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
   }),
   z.object({
     email: z.string(),
   }),
 ])
 .and(z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   email: z.string().optional(),
   AND: z.union([ z.lazy(() => UserWhereInputSchema),z.lazy(() => UserWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => UserWhereInputSchema).array().optional(),
@@ -49,9 +49,11 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   address: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   avatarUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   role: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  bio: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  coverImageUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   memberships: z.lazy(() => MembershipListRelationFilterSchema).optional(),
   posts: z.lazy(() => PostListRelationFilterSchema).optional(),
   comments: z.lazy(() => CommentListRelationFilterSchema).optional(),

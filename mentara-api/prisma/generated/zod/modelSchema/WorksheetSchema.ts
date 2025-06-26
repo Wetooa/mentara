@@ -9,7 +9,13 @@ export const WorksheetSchema = z.object({
   clientId: z.string(),
   therapistId: z.string().nullable(),
   title: z.string(),
+  instructions: z.string().nullable(),
   description: z.string().nullable(),
+  dueDate: z.coerce.date(),
+  status: z.string(),
+  isCompleted: z.boolean(),
+  submittedAt: z.coerce.date().nullable(),
+  feedback: z.string().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 })

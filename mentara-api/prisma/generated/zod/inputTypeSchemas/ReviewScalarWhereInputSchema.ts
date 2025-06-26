@@ -27,7 +27,6 @@ export const ReviewScalarWhereInputSchema: z.ZodType<Prisma.ReviewScalarWhereInp
   moderatedAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   moderationNote: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   isVerified: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  helpfulCount: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
 }).strict();

@@ -17,7 +17,6 @@ export const ReviewCountOrderByAggregateInputSchema: z.ZodType<Prisma.ReviewCoun
   moderatedAt: z.lazy(() => SortOrderSchema).optional(),
   moderationNote: z.lazy(() => SortOrderSchema).optional(),
   isVerified: z.lazy(() => SortOrderSchema).optional(),
-  helpfulCount: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();

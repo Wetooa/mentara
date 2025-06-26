@@ -1,14 +1,13 @@
 model Meeting {
-    id          String        @id @default(uuid())
-    title       String? // Optional meeting title
-    description String? // Optional meeting description
-    startTime   DateTime
-    endTime     DateTime
-    duration    Int // Duration in minutes
-    status      MeetingStatus @default(SCHEDULED)
-    meetingType String        @default("video") // video, audio, chat
-    meetingUrl  String? // Video call URL
-    notes       String? // Notes from therapist or client
+    id           String         @id @default(uuid())
+    title        String? // Optional meeting title
+    description  String? // Optional meeting description
+    startTime    DateTime
+    duration     Int            @default(60)
+    status       MeetingStatus  @default(SCHEDULED)
+    meetingType  String         @default("video") // video, audio, chat
+    meetingUrl   String? // Video call URL
+    meetingNotes MeetingNotes[]
 
     // Relations
     clientId    String
@@ -16,21 +15,30 @@ model Meeting {
     client      Client    @relation("ClientMeetings", fields: [clientId], references: [userId])
     therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId])
 
-    // Duration reference
-    durationId     String?
-    durationConfig MeetingDuration? @relation(fields: [durationId], references: [id])
-
     // Reviews for this meeting
     reviews Review[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    // Add checks sometime later
+
     @@index([clientId])
     @@index([therapistId])
     @@index([startTime])
     @@index([status])
     @@index([therapistId, startTime]) // For availability queries
+}
+
+model MeetingNotes {
+    id        String   @id @unique
+    meetingId String
+    meeting   Meeting  @relation(fields: [meetingId], references: [id])
+    notes     String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([meetingId])
 }
 
 model TherapistAvailability {
@@ -50,24 +58,6 @@ model TherapistAvailability {
     @@unique([therapistId, dayOfWeek, startTime, endTime])
     @@index([therapistId])
     @@index([dayOfWeek])
-}
-
-model MeetingDuration {
-    id        String  @id @default(uuid())
-    name      String // e.g., "30 minutes", "1 hour"
-    duration  Int // Duration in minutes
-    isActive  Boolean @default(true)
-    sortOrder Int     @default(0) // For ordering in UI
-
-    // Relations
-    meetings Meeting[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@unique([duration])
-    @@index([isActive])
-    @@index([sortOrder])
 }
 
 enum MeetingStatus {

@@ -12,7 +12,6 @@ model Community {
 
     @@index([name])
     @@index([slug])
-    @@index([illness])
 }
 
 model Membership {
@@ -47,8 +46,8 @@ model RoomGroup {
     id          String    @id @default(uuid())
     name        String
     order       Int // for UI ordering
-    community   Community @relation(fields: [communityId], references: [id])
     communityId String
+    community   Community @relation(fields: [communityId], references: [id])
     rooms       Room[]
 }
 

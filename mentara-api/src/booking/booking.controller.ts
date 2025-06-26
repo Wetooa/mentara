@@ -18,7 +18,7 @@ import {
   TherapistAvailabilityUpdateDto,
   MeetingCreateDto,
   MeetingUpdateDto,
-} from 'src/schema/booking.schemas';
+} from '../schema/booking.d';
 
 @Controller('booking')
 @UseGuards(ClerkAuthGuard)
@@ -132,10 +132,10 @@ export class BookingController {
   }
 
   // Duration endpoints (public)
-  @Get('durations')
-  async getDurations() {
+  /* @Get('durations')
+  getDurations() {
     return this.bookingService.getDurations();
-  }
+  } */
 
   // Available slots endpoint
   @Get('slots')

@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { Prisma } from '@prisma/client';
-import { ClientResponse, TherapistResponse } from 'src/schema/client.schemas';
+import {
+  ClientResponse,
+  TherapistResponse,
+  TherapistUpdateDto,
+} from 'src/schema/auth.d';
 
 @Injectable()
 export class TherapistManagementService {
@@ -49,12 +53,18 @@ export class TherapistManagementService {
 
   async updateTherapistProfile(
     userId: string,
-    data: Prisma.TherapistUpdateInput,
+    data: TherapistUpdateDto,
   ): Promise<TherapistResponse> {
     try {
       return await this.prisma.therapist.update({
         where: { userId },
-        data,
+        data: {
+          status: data.status,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          userId: data.userId,
+          mobile: data.mobile,
+        },
         include: {
           user: true,
         },
