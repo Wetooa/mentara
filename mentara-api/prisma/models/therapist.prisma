@@ -25,6 +25,7 @@ model Therapist {
     expirationDateOfLicense       DateTime?
     isLicenseActive               String
     practiceStartDate             DateTime
+    yearsOfExperience             String? // Years of experience as string
     areasOfExpertise              Json
     assessmentTools               Json
     therapeuticApproachesUsedList Json
@@ -36,6 +37,11 @@ model Therapist {
     weeklyAvailability                String
     preferredSessionLength            String
     accepts                           Json
+    privateConfidentialSpace          String?
+    compliesWithDataPrivacyAct        String?
+    professionalLiabilityInsurance    String?
+    complaintsOrDisciplinaryActions   String?
+    willingToAbideByPlatformGuidelines String?
 
     // Denormalized fields (moved from separate tables)
     expertise              Json? // Array of expertise strings
