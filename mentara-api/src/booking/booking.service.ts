@@ -10,7 +10,7 @@ import {
   MeetingUpdateDto,
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
-} from '../schema/booking.d';
+} from '../schema/booking';
 
 @Injectable()
 export class BookingService {

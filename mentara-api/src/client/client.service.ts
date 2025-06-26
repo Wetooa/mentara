@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ClientResponse, ClientUpdateDto } from '../schema/auth.d';
+import { ClientResponse, ClientUpdateDto } from '../schema/auth';
 
 @Injectable()
 export class ClientService {

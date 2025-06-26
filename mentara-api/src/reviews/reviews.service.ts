@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { MeetingStatus, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ReviewCreateDto, ReviewUpdateDto } from '../schema/review.d';
+import { ReviewCreateDto, ReviewUpdateDto } from '../schema/review';
 
 @Injectable()
 export class ReviewsService {

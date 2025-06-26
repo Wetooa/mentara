@@ -8,7 +8,7 @@ import {
   CommunityWithRoomGroupsResponse,
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from '../schema/community.d';
+} from '../schema/community';
 
 @Injectable()
 export class CommunitiesService {

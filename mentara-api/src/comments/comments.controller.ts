@@ -17,7 +17,7 @@ import { Comment } from '@prisma/client';
 import {
   CommentCreateInputDto,
   CommentUpdateInputDto,
-} from '../schema/comment.d';
+} from '../schema/comment';
 
 @Controller('comments')
 @UseGuards(ClerkAuthGuard)
