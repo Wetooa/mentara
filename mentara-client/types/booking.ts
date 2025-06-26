@@ -1,18 +1,18 @@
 // Booking TypeScript interfaces
 
 export enum MeetingStatus {
-  SCHEDULED = 'SCHEDULED',
-  CONFIRMED = 'CONFIRMED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  NO_SHOW = 'NO_SHOW',
+  SCHEDULED = "SCHEDULED",
+  CONFIRMED = "CONFIRMED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  NO_SHOW = "NO_SHOW",
 }
 
 export enum MeetingType {
-  VIDEO = 'video',
-  AUDIO = 'audio',
-  CHAT = 'chat',
+  VIDEO = "video",
+  AUDIO = "audio",
+  CHAT = "chat",
 }
 
 export interface CreateMeetingRequest {
