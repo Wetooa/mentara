@@ -3,12 +3,6 @@ generator client {
   previewFeatures = ["prismaSchemaFolder"]
 }
 
-generator zod {
-  provider         = "npx zod-prisma-types"
-  output           = "./generated/zod" // default is ./generated/zod
-  useMultipleFiles = true // default is false
-}
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")

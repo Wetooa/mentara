@@ -5,8 +5,19 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PreAssessment, Therapist } from '@prisma/client';
-import { TherapistWithUser } from 'src/types';
-import { TherapistRecommendationRequest, TherapistRecommendationResponse } from './therapist-application.dto';
+
+interface TherapistRecommendationRequest {
+  userId: string;
+  limit?: number;
+  includeInactive?: boolean;
+  province?: string;
+  maxHourlyRate?: number;
+}
+
+interface TherapistRecommendationResponse {
+  therapists: any[];
+  total: number;
+}
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -56,7 +67,7 @@ export class TherapistRecommendationService {
             hourlyRate: { lte: request.maxHourlyRate },
           }),
         },
-        orderBy: { hourlyRate: 'asc' },
+        orderBy: { createdAt: 'desc' },
         take: request.limit ?? 10,
         include: {
           user: true,
@@ -117,7 +128,7 @@ export class TherapistRecommendationService {
   }
 
   private calculateMatchScore(
-    therapist: Therapist,
+    therapist: any,
     userConditions: Record<string, string>,
   ): number {
     let score = 0;
@@ -129,9 +140,8 @@ export class TherapistRecommendationService {
       this.calculateYearsOfExperience(therapist.practiceStartDate) * 2,
       20,
     );
-    // Use review data to calculate satisfaction score instead
-    // This would be calculated from the actual reviews
-    // For now, we'll use a default approach
+    // Add base score for experience
+    score += therapist.yearsOfExperience ? therapist.yearsOfExperience * 2 : 0;
     return score;
   }
 

@@ -1,9 +1,27 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm run:*)",
+      "Bash(z:*)",
+      "Bash(npx:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(for file in *.d.ts)",
+      "Bash(do mv \"$file\" \"$file%.d.ts.ts\")",
+      "Bash(done)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase",
     "Prisma-Local",
     "clerk",
     "puppeteer"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

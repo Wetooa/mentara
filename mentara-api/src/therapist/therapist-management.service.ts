@@ -9,7 +9,7 @@ import {
   ClientResponse,
   TherapistResponse,
   TherapistUpdateDto,
-} from 'src/schema/auth';
+} from '../schema/auth';
 
 @Injectable()
 export class TherapistManagementService {

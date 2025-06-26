@@ -10,7 +10,7 @@ import { ReviewCreateDto, ReviewUpdateDto } from '../schema/review';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createReview(
     meetingId: string,

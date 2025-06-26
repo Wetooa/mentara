@@ -11,7 +11,19 @@ import { TherapistRecommendationService } from './therapist-recommendation.servi
 import { PrismaService } from '../providers/prisma-client.provider';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { TherapistRecommendationRequest, TherapistRecommendationResponse } from './therapist-application.dto';
+
+interface TherapistRecommendationRequest {
+  userId: string;
+  limit?: number;
+  includeInactive?: boolean;
+  province?: string;
+  maxHourlyRate?: number;
+}
+
+interface TherapistRecommendationResponse {
+  therapists: any[];
+  total: number;
+}
 
 @Controller('therapist-recommendations')
 @UseGuards(ClerkAuthGuard)

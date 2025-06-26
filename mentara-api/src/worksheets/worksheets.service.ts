@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import {
-  WorksheetResponse,
   WorksheetCreateInputDto,
   WorksheetSubmissionCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'src/schema/worksheet';
+} from '../schema/worksheet';
 
 @Injectable()
 export class WorksheetsService {
@@ -15,7 +14,7 @@ export class WorksheetsService {
     userId?: string,
     therapistId?: string,
     status?: string,
-  ): Promise<WorksheetResponse[]> {
+  ): Promise<any[]> {
     const where = {};
 
     if (userId) {
@@ -65,31 +64,6 @@ export class WorksheetsService {
       },
     });
 
-    // Transform the data to match the expected format for the client
-    // return worksheets.map((worksheet) => ({
-    //   id: worksheet.id,
-    //   title: worksheet.title,
-    //   therapistName: worksheet.therapist
-    //     ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
-    //     : 'Unknown Therapist',
-    //   patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
-    //   date: worksheet.createdAt.toISOString(),
-    //   status: worksheet.status,
-    //   isCompleted: worksheet.isCompleted,
-    //   instructions: worksheet.instructions,
-    //   materials: worksheet.materials.map((material) => ({
-    //     id: material.id,
-    //     filename: material.filename,
-    //     url: material.url,
-    //   })),
-    //   myWork: worksheet.submissions.map((submission) => ({
-    //     id: submission.id,
-    //     filename: submission.filename,
-    //     url: submission.url,
-    //   })),
-    //   submittedAt: worksheet.submittedAt?.toISOString(),
-    //   feedback: worksheet.feedback,
-    // }));
     return worksheets;
   }
 
@@ -130,55 +104,25 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Transform to match expected client format
-    // return {
-    //   id: worksheet.id,
-    //   title: worksheet.title,
-    //   therapistName: worksheet.therapist
-    //     ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
-    //     : 'Unknown Therapist',
-    //   patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
-    //   date: worksheet.createdAt.toISOString(),
-    //   status: worksheet.status,
-    //   isCompleted: worksheet.isCompleted,
-    //   instructions: worksheet.instructions,
-    //   materials: worksheet.materials.map((material) => ({
-    //     id: material.id,
-    //     filename: material.filename,
-    //     url: material.url,
-    //   })),
-    //   myWork: worksheet.submissions.map((submission) => ({
-    //     id: submission.id,
-    //     filename: submission.filename,
-    //     url: submission.url,
-    //   })),
-    //   submittedAt: worksheet.submittedAt?.toISOString(),
-    //   feedback: worksheet.feedback,
-    // };
     return worksheet;
   }
 
-  async create(data: WorksheetCreateInputDto) {
+  async create(data: WorksheetCreateInputDto, clientId: string, therapistId: string) {
     // Start a transaction to create the worksheet and any materials
     return this.prisma.$transaction(async (prisma) => {
       // Create the worksheet
       const worksheet = await prisma.worksheet.create({
-        data,
+        data: {
+          title: data.title,
+          instructions: data.instructions,
+          description: data.description,
+          dueDate: data.dueDate,
+          status: data.status || 'assigned',
+          isCompleted: data.isCompleted || false,
+          clientId,
+          therapistId,
+        },
       });
-
-      // // Create materials if provided
-      // if (data.materials && data.materials.connect.length > 0) {
-      //   await Promise.all(
-      //     data.materials.map((material) =>
-      //       prisma.worksheetMaterial.create({
-      //         data: {
-      //           ...material,
-      //           worksheetId: worksheet.id,
-      //         },
-      //       }),
-      //     ),
-      //   );
-      // }
 
       // Return the newly created worksheet with materials
       return this.findById(worksheet.id);
@@ -223,7 +167,7 @@ export class WorksheetsService {
     return { success: true, message: 'Worksheet deleted successfully' };
   }
 
-  async addSubmission(data: WorksheetSubmissionCreateInputDto) {
+  async addSubmission(data: WorksheetSubmissionCreateInputDto, clientId: string) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id: data.worksheetId },
@@ -238,13 +182,20 @@ export class WorksheetsService {
 
     // Create the submission
     const submission = await this.prisma.worksheetSubmission.create({
-      data,
+      data: {
+        worksheetId: data.worksheetId,
+        clientId,
+        content: data.content,
+        filename: data.filename,
+        url: data.url,
+        fileType: data.fileType,
+      },
     });
 
     return submission;
   }
 
-  async submitWorksheet(id: string, data: WorksheetSubmissionCreateInputDto) {
+  async submitWorksheet(id: string, data: WorksheetSubmissionCreateInputDto, clientId: string) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -256,27 +207,14 @@ export class WorksheetsService {
 
     // Use transaction to ensure all operations succeed or fail together
     return this.prisma.$transaction(async (prisma) => {
-      // Add all submissions
-      // if (data.submissions && data.submissions.length > 0) {
-      //   await Promise.all(
-      //     data.submissions.map((submission) =>
-      //       prisma.worksheetSubmission.create({
-      //         data: {
-      //           filename: submission.filename,
-      //           url: submission.url,
-      //           fileSize: submission.fileSize,
-      //           fileType: submission.fileType,
-      //           worksheetId: id,
-      //           clientId: worksheet.clientId, // Use the worksheet's clientId
-      //         },
-      //       }),
-      //     ),
-      //   );
-      // }
       await prisma.worksheetSubmission.create({
         data: {
-          ...data,
           worksheetId: id,
+          clientId,
+          content: data.content,
+          filename: data.filename,
+          url: data.url,
+          fileType: data.fileType,
         },
       });
 

@@ -22,6 +22,24 @@ model Therapist {
     prcLicenseNumber        String
     expirationDateOfLicense DateTime
     practiceStartDate       DateTime
+    
+    // License verification
+    licenseVerified         Boolean   @default(false)
+    licenseVerifiedAt       DateTime?
+    licenseVerifiedBy       String?   // Admin who verified
+    
+    // Additional certifications
+    certifications          Json?     // Array of certification objects
+    
+    // Professional background
+    yearsOfExperience       Int?
+    educationBackground     String?   @db.Text
+    specialCertifications   String[]
+    
+    // Practice details
+    practiceLocation        String?
+    acceptsInsurance        Boolean   @default(false)
+    acceptedInsuranceTypes  String[]
 
     // Professional expertise
     areasOfExpertise              String[] // @db.JsonB
@@ -60,6 +78,8 @@ model Therapist {
     assignedClients         ClientTherapist[]
     reviews                 Review[]
     therapistFiles          TherapistFiles[]
+    sessionLogs             SessionLog[]
+    therapyProgress         TherapyProgress[]
 
     // Timestamps
     createdAt DateTime @default(now())
