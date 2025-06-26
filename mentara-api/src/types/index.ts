@@ -1,3 +1,5 @@
+import { Therapist, User } from '@prisma/client';
+
 export interface CommunityStats {
   totalMembers: number;
   totalPosts: number;
@@ -8,6 +10,12 @@ export interface CommunityStats {
     memberCount: number;
   }[];
 }
+
+// Therapist with User relationship type
+export type TherapistWithUser = Therapist & {
+  user: User;
+  matchScore?: number;
+};
 
 // Query parameters
 export interface FilterQuery {
