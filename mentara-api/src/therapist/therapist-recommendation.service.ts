@@ -5,19 +5,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PreAssessment } from '@prisma/client';
-
-interface TherapistRecommendationRequest {
-  userId: string;
-  limit?: number;
-  includeInactive?: boolean;
-  province?: string;
-  maxHourlyRate?: number;
-}
-
-interface TherapistRecommendationResponse {
-  therapists: any[];
-  total: number;
-}
+import {
+  TherapistRecommendationRequest,
+  TherapistRecommendationResponse,
+} from './therapist-application.dto';
 
 @Injectable()
 export class TherapistRecommendationService {

@@ -41,10 +41,10 @@ export class NotificationsController {
 
   @Get()
   findAll(
+    @CurrentUserId() userId: string,
     @Query('isRead') isRead?: string,
     @Query('type') type?: NotificationType,
     @Query('priority') priority?: NotificationPriority,
-    @CurrentUserId() userId: string,
   ) {
     const isReadBool = isRead !== undefined ? isRead === 'true' : undefined;
     return this.notificationsService.findAll(userId, isReadBool, type, priority);

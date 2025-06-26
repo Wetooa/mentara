@@ -1,4 +1,5 @@
 import { IsString, IsOptional } from 'class-validator';
+import { UserResponse } from './auth';
 
 export class CommentCreateInputDto {
   @IsString()
@@ -10,8 +11,6 @@ export class CommentCreateInputDto {
   @IsOptional()
   files?: CommentFileCreateInputDto[];
 }
-
-export class CommentUpdateInputDto extends CommentCreateInputDto {}
 
 export class CommentFileCreateInputDto {
   @IsString()
@@ -53,47 +52,47 @@ export class ReplyFileCreateInputDto {
 export class CommentUpdateInputDto extends CommentCreateInputDto {}
 
 export class CommentResponse {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id!: string;
+  content!: string;
+  createdAt!: Date;
+  updatedAt!: Date;
 
-  userId: string;
-  user: UserResponse;
+  userId!: string;
+  user!: UserResponse;
 
-  postId: string;
+  postId!: string;
 
-  hearts: number;
-  files: CommentFileResponse[];
+  hearts!: number;
+  files!: CommentFileResponse[];
 }
 
 export class CommentFileResponse {
-  id: string;
-  commentId: string;
-  url: string;
-  type: string | null;
+  id!: string;
+  commentId!: string;
+  url!: string;
+  type!: string | null;
 }
 
 export class ReplyResponse {
-  id: string;
-  commentId: string;
+  id!: string;
+  commentId!: string;
 
-  content: string;
+  content!: string;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt!: Date;
+  updatedAt!: Date;
 
-  userId: string;
-  user: UserResponse;
+  userId!: string;
+  user!: UserResponse;
 
-  hearts: number;
-  files: ReplyFileResponse[];
-  replies: ReplyResponse[];
+  hearts!: number;
+  files!: ReplyFileResponse[];
+  replies!: ReplyResponse[];
 }
 
 export class ReplyFileResponse {
-  id: string;
-  replyId: string;
-  url: string;
-  type: string | null;
+  id!: string;
+  replyId!: string;
+  url!: string;
+  type!: string | null;
 }

@@ -8,7 +8,9 @@ import {
   IsArray,
   IsJSON,
   IsNumber,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -53,13 +55,17 @@ export class UserCreateDto {
 }
 
 export class ClientCreateDto {
-  user: UserCreateDto;
+  @ValidateNested()
+  @Type(() => UserCreateDto)
+  user!: UserCreateDto;
 }
 
 export class ClientUpdateDto extends UserCreateDto {}
 
 export class TherapistCreateDto extends UserCreateDto {
-  user: UserCreateDto;
+  @ValidateNested()
+  @Type(() => UserCreateDto)
+  user!: UserCreateDto;
 
   @IsString()
   mobile!: string;
@@ -79,20 +85,25 @@ export class TherapistCreateDto extends UserCreateDto {
   @IsDate()
   practiceStartDate!: Date;
 
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   areasOfExpertise!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   assessmentTools!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   therapeuticApproachesUsedList!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   languagesOffered!: string[];
 
   @IsBoolean()
   providedOnlineTherapyBefore!: boolean;
   @IsBoolean()
   comfortableUsingVideoConferencing!: boolean;
-  @IsArray(IsNumber())
+  @IsArray()
+  @IsNumber({}, { each: true })
   preferredSessionLength!: number[];
 
   @IsString()
@@ -110,15 +121,20 @@ export class TherapistCreateDto extends UserCreateDto {
   @IsBoolean()
   willingToAbideByPlatformGuidelines!: boolean;
 
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   expertise!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   approaches!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   languages!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   illnessSpecializations!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   acceptTypes!: string[];
   @IsJSON()
   treatmentSuccessRates!: Record<string, number>;
@@ -163,18 +179,22 @@ export class TherapistUpdateDto {
   practiceStartDate?: Date;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   areasOfExpertise?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   assessmentTools?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   therapeuticApproachesUsedList?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   languagesOffered?: string[];
 
@@ -187,6 +207,7 @@ export class TherapistUpdateDto {
   comfortableUsingVideoConferencing?: boolean;
 
   @IsArray()
+  @IsNumber({}, { each: true })
   @IsOptional()
   preferredSessionLength?: number[];
 
@@ -211,22 +232,27 @@ export class TherapistUpdateDto {
   willingToAbideByPlatformGuidelines?: boolean;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   expertise?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   approaches?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   languages?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   illnessSpecializations?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   acceptTypes?: string[];
 

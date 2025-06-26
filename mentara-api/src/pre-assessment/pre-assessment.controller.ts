@@ -13,7 +13,7 @@ import {
 import { PreAssessmentService } from './pre-assessment.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CreatePreAssessmentDto } from '../schema/pre-assessment';
+import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { PreAssessment } from '@prisma/client';
 
 @Controller('pre-assessment')

@@ -18,7 +18,7 @@ import {
   TherapistAvailabilityUpdateDto,
   MeetingCreateDto,
   MeetingUpdateDto,
-} from '../schema/booking';
+} from '../../schema/booking';
 
 @Controller('booking')
 @UseGuards(ClerkAuthGuard)
