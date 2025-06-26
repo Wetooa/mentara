@@ -12,10 +12,10 @@ import { Type } from 'class-transformer';
 
 export class CreateWorksheetMaterialDto {
   @IsString()
-  filename: string;
+  filename!: string;
 
   @IsString()
-  url: string;
+  url!: string;
 
   @IsOptional()
   @IsNumber()
@@ -28,7 +28,7 @@ export class CreateWorksheetMaterialDto {
 
 export class CreateWorksheetDto {
   @IsString()
-  title: string;
+  title!: string;
 
   @IsOptional()
   @IsString()
@@ -39,13 +39,13 @@ export class CreateWorksheetDto {
   description?: string;
 
   @IsDateString()
-  dueDate: string;
+  dueDate!: string;
 
   @IsString()
-  clientId: string; // User ID for the client
+  clientId!: string; // User ID for the client
 
   @IsString()
-  therapistId: string;
+  therapistId!: string;
 
   @IsOptional()
   @IsArray()
@@ -90,13 +90,13 @@ export class UpdateWorksheetDto {
 
 export class CreateSubmissionDto {
   @IsString()
-  worksheetId: string;
+  worksheetId!: string;
 
   @IsString()
-  filename: string;
+  filename!: string;
 
   @IsString()
-  url: string;
+  url!: string;
 
   @IsOptional()
   @IsNumber()
@@ -115,5 +115,5 @@ export class SubmitWorksheetDto {
   submissions?: CreateSubmissionDto[];
 
   @IsBoolean()
-  complete: boolean;
+  complete!: boolean;
 }

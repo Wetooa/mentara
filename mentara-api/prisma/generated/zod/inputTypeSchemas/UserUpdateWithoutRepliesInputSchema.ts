@@ -17,6 +17,12 @@ import { ModeratorUpdateOneWithoutUserNestedInputSchema } from './ModeratorUpdat
 import { AdminUpdateOneWithoutUserNestedInputSchema } from './AdminUpdateOneWithoutUserNestedInputSchema';
 import { ReplyHeartUpdateManyWithoutUserNestedInputSchema } from './ReplyHeartUpdateManyWithoutUserNestedInputSchema';
 import { ReviewHelpfulUpdateManyWithoutUserNestedInputSchema } from './ReviewHelpfulUpdateManyWithoutUserNestedInputSchema';
+import { ConversationParticipantUpdateManyWithoutUserNestedInputSchema } from './ConversationParticipantUpdateManyWithoutUserNestedInputSchema';
+import { MessageUpdateManyWithoutSenderNestedInputSchema } from './MessageUpdateManyWithoutSenderNestedInputSchema';
+import { MessageReadReceiptUpdateManyWithoutUserNestedInputSchema } from './MessageReadReceiptUpdateManyWithoutUserNestedInputSchema';
+import { MessageReactionUpdateManyWithoutUserNestedInputSchema } from './MessageReactionUpdateManyWithoutUserNestedInputSchema';
+import { UserBlockUpdateManyWithoutBlockerNestedInputSchema } from './UserBlockUpdateManyWithoutBlockerNestedInputSchema';
+import { UserBlockUpdateManyWithoutBlockedNestedInputSchema } from './UserBlockUpdateManyWithoutBlockedNestedInputSchema';
 
 export const UserUpdateWithoutRepliesInputSchema: z.ZodType<Prisma.UserUpdateWithoutRepliesInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -41,7 +47,13 @@ export const UserUpdateWithoutRepliesInputSchema: z.ZodType<Prisma.UserUpdateWit
   moderator: z.lazy(() => ModeratorUpdateOneWithoutUserNestedInputSchema).optional(),
   admin: z.lazy(() => AdminUpdateOneWithoutUserNestedInputSchema).optional(),
   replyHearts: z.lazy(() => ReplyHeartUpdateManyWithoutUserNestedInputSchema).optional(),
-  reviewsHelpful: z.lazy(() => ReviewHelpfulUpdateManyWithoutUserNestedInputSchema).optional()
+  reviewsHelpful: z.lazy(() => ReviewHelpfulUpdateManyWithoutUserNestedInputSchema).optional(),
+  conversations: z.lazy(() => ConversationParticipantUpdateManyWithoutUserNestedInputSchema).optional(),
+  sentMessages: z.lazy(() => MessageUpdateManyWithoutSenderNestedInputSchema).optional(),
+  messageReadReceipts: z.lazy(() => MessageReadReceiptUpdateManyWithoutUserNestedInputSchema).optional(),
+  messageReactions: z.lazy(() => MessageReactionUpdateManyWithoutUserNestedInputSchema).optional(),
+  blocking: z.lazy(() => UserBlockUpdateManyWithoutBlockerNestedInputSchema).optional(),
+  blockedBy: z.lazy(() => UserBlockUpdateManyWithoutBlockedNestedInputSchema).optional()
 }).strict();
 
 export default UserUpdateWithoutRepliesInputSchema;

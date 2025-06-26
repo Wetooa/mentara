@@ -4,7 +4,7 @@ import { ConversationType, MessageType } from '@prisma/client';
 export class CreateConversationDto {
   @IsArray()
   @IsUUID('4', { each: true })
-  participantIds: string[];
+  participantIds!: string[];
 
   @IsEnum(ConversationType)
   @IsOptional()
@@ -18,7 +18,7 @@ export class CreateConversationDto {
 export class SendMessageDto {
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 
   @IsEnum(MessageType)
   @IsOptional()
@@ -45,18 +45,18 @@ export class SendMessageDto {
 export class UpdateMessageDto {
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 }
 
 export class AddReactionDto {
   @IsString()
   @IsNotEmpty()
-  emoji: string;
+  emoji!: string;
 }
 
 export class BlockUserDto {
   @IsUUID('4')
-  userId: string;
+  userId!: string;
 
   @IsString()
   @IsOptional()
@@ -66,7 +66,7 @@ export class BlockUserDto {
 export class SearchMessagesDto {
   @IsString()
   @IsNotEmpty()
-  query: string;
+  query!: string;
 
   @IsUUID('4')
   @IsOptional()
@@ -84,17 +84,17 @@ export class SearchMessagesDto {
 // WebSocket DTOs
 export class JoinConversationDto {
   @IsUUID('4')
-  conversationId: string;
+  conversationId!: string;
 }
 
 export class LeaveConversationDto {
   @IsUUID('4')
-  conversationId: string;
+  conversationId!: string;
 }
 
 export class TypingIndicatorDto {
   @IsUUID('4')
-  conversationId: string;
+  conversationId!: string;
 
   @IsOptional()
   isTyping?: boolean;

@@ -10,6 +10,12 @@ export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTy
   replies: z.boolean().optional(),
   replyHearts: z.boolean().optional(),
   reviewsHelpful: z.boolean().optional(),
+  conversations: z.boolean().optional(),
+  sentMessages: z.boolean().optional(),
+  messageReadReceipts: z.boolean().optional(),
+  messageReactions: z.boolean().optional(),
+  blocking: z.boolean().optional(),
+  blockedBy: z.boolean().optional(),
 }).strict();
 
 export default UserCountOutputTypeSelectSchema;

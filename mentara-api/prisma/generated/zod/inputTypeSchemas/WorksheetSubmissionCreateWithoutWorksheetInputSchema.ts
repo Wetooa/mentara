@@ -5,7 +5,11 @@ import { ClientCreateNestedOneWithoutWorksheetSubmissionsInputSchema } from './C
 
 export const WorksheetSubmissionCreateWithoutWorksheetInputSchema: z.ZodType<Prisma.WorksheetSubmissionCreateWithoutWorksheetInput> = z.object({
   id: z.string().uuid().optional(),
-  content: z.string(),
+  filename: z.string(),
+  url: z.string(),
+  fileSize: z.number().int().optional().nullable(),
+  fileType: z.string().optional().nullable(),
+  content: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   client: z.lazy(() => ClientCreateNestedOneWithoutWorksheetSubmissionsInputSchema)
 }).strict();

@@ -22,6 +22,11 @@ import { AdminWhereInputSchema } from './AdminWhereInputSchema';
 import { ReplyListRelationFilterSchema } from './ReplyListRelationFilterSchema';
 import { ReplyHeartListRelationFilterSchema } from './ReplyHeartListRelationFilterSchema';
 import { ReviewHelpfulListRelationFilterSchema } from './ReviewHelpfulListRelationFilterSchema';
+import { ConversationParticipantListRelationFilterSchema } from './ConversationParticipantListRelationFilterSchema';
+import { MessageListRelationFilterSchema } from './MessageListRelationFilterSchema';
+import { MessageReadReceiptListRelationFilterSchema } from './MessageReadReceiptListRelationFilterSchema';
+import { MessageReactionListRelationFilterSchema } from './MessageReactionListRelationFilterSchema';
+import { UserBlockListRelationFilterSchema } from './UserBlockListRelationFilterSchema';
 
 export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   AND: z.union([ z.lazy(() => UserWhereInputSchema),z.lazy(() => UserWhereInputSchema).array() ]).optional(),
@@ -50,7 +55,13 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   admin: z.union([ z.lazy(() => AdminNullableScalarRelationFilterSchema),z.lazy(() => AdminWhereInputSchema) ]).optional().nullable(),
   replies: z.lazy(() => ReplyListRelationFilterSchema).optional(),
   replyHearts: z.lazy(() => ReplyHeartListRelationFilterSchema).optional(),
-  reviewsHelpful: z.lazy(() => ReviewHelpfulListRelationFilterSchema).optional()
+  reviewsHelpful: z.lazy(() => ReviewHelpfulListRelationFilterSchema).optional(),
+  conversations: z.lazy(() => ConversationParticipantListRelationFilterSchema).optional(),
+  sentMessages: z.lazy(() => MessageListRelationFilterSchema).optional(),
+  messageReadReceipts: z.lazy(() => MessageReadReceiptListRelationFilterSchema).optional(),
+  messageReactions: z.lazy(() => MessageReactionListRelationFilterSchema).optional(),
+  blocking: z.lazy(() => UserBlockListRelationFilterSchema).optional(),
+  blockedBy: z.lazy(() => UserBlockListRelationFilterSchema).optional()
 }).strict();
 
 export default UserWhereInputSchema;

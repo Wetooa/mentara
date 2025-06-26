@@ -17,6 +17,12 @@ import { AdminUncheckedUpdateOneWithoutUserNestedInputSchema } from './AdminUnch
 import { ReplyUncheckedUpdateManyWithoutUserNestedInputSchema } from './ReplyUncheckedUpdateManyWithoutUserNestedInputSchema';
 import { ReplyHeartUncheckedUpdateManyWithoutUserNestedInputSchema } from './ReplyHeartUncheckedUpdateManyWithoutUserNestedInputSchema';
 import { ReviewHelpfulUncheckedUpdateManyWithoutUserNestedInputSchema } from './ReviewHelpfulUncheckedUpdateManyWithoutUserNestedInputSchema';
+import { ConversationParticipantUncheckedUpdateManyWithoutUserNestedInputSchema } from './ConversationParticipantUncheckedUpdateManyWithoutUserNestedInputSchema';
+import { MessageUncheckedUpdateManyWithoutSenderNestedInputSchema } from './MessageUncheckedUpdateManyWithoutSenderNestedInputSchema';
+import { MessageReadReceiptUncheckedUpdateManyWithoutUserNestedInputSchema } from './MessageReadReceiptUncheckedUpdateManyWithoutUserNestedInputSchema';
+import { MessageReactionUncheckedUpdateManyWithoutUserNestedInputSchema } from './MessageReactionUncheckedUpdateManyWithoutUserNestedInputSchema';
+import { UserBlockUncheckedUpdateManyWithoutBlockerNestedInputSchema } from './UserBlockUncheckedUpdateManyWithoutBlockerNestedInputSchema';
+import { UserBlockUncheckedUpdateManyWithoutBlockedNestedInputSchema } from './UserBlockUncheckedUpdateManyWithoutBlockedNestedInputSchema';
 
 export const UserUncheckedUpdateWithoutModeratorInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutModeratorInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -41,7 +47,13 @@ export const UserUncheckedUpdateWithoutModeratorInputSchema: z.ZodType<Prisma.Us
   admin: z.lazy(() => AdminUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
   replies: z.lazy(() => ReplyUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   replyHearts: z.lazy(() => ReplyHeartUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  reviewsHelpful: z.lazy(() => ReviewHelpfulUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  reviewsHelpful: z.lazy(() => ReviewHelpfulUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  conversations: z.lazy(() => ConversationParticipantUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  sentMessages: z.lazy(() => MessageUncheckedUpdateManyWithoutSenderNestedInputSchema).optional(),
+  messageReadReceipts: z.lazy(() => MessageReadReceiptUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  messageReactions: z.lazy(() => MessageReactionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  blocking: z.lazy(() => UserBlockUncheckedUpdateManyWithoutBlockerNestedInputSchema).optional(),
+  blockedBy: z.lazy(() => UserBlockUncheckedUpdateManyWithoutBlockedNestedInputSchema).optional()
 }).strict();
 
 export default UserUncheckedUpdateWithoutModeratorInputSchema;

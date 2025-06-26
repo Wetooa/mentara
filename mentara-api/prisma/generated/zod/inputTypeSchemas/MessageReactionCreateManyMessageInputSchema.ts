@@ -1,0 +1,12 @@
+import type { Prisma } from '@prisma/client';
+
+import { z } from 'zod';
+
+export const MessageReactionCreateManyMessageInputSchema: z.ZodType<Prisma.MessageReactionCreateManyMessageInput> = z.object({
+  id: z.string().uuid().optional(),
+  userId: z.string(),
+  emoji: z.string(),
+  createdAt: z.coerce.date().optional()
+}).strict();
+
+export default MessageReactionCreateManyMessageInputSchema;

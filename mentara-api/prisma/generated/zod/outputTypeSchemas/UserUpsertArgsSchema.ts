@@ -18,6 +18,11 @@ import { AdminArgsSchema } from "../outputTypeSchemas/AdminArgsSchema"
 import { ReplyFindManyArgsSchema } from "../outputTypeSchemas/ReplyFindManyArgsSchema"
 import { ReplyHeartFindManyArgsSchema } from "../outputTypeSchemas/ReplyHeartFindManyArgsSchema"
 import { ReviewHelpfulFindManyArgsSchema } from "../outputTypeSchemas/ReviewHelpfulFindManyArgsSchema"
+import { ConversationParticipantFindManyArgsSchema } from "../outputTypeSchemas/ConversationParticipantFindManyArgsSchema"
+import { MessageFindManyArgsSchema } from "../outputTypeSchemas/MessageFindManyArgsSchema"
+import { MessageReadReceiptFindManyArgsSchema } from "../outputTypeSchemas/MessageReadReceiptFindManyArgsSchema"
+import { MessageReactionFindManyArgsSchema } from "../outputTypeSchemas/MessageReactionFindManyArgsSchema"
+import { UserBlockFindManyArgsSchema } from "../outputTypeSchemas/UserBlockFindManyArgsSchema"
 import { UserCountOutputTypeArgsSchema } from "../outputTypeSchemas/UserCountOutputTypeArgsSchema"
 // Select schema needs to be in file to prevent circular imports
 //------------------------------------------------------
@@ -47,6 +52,12 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   replies: z.union([z.boolean(),z.lazy(() => ReplyFindManyArgsSchema)]).optional(),
   replyHearts: z.union([z.boolean(),z.lazy(() => ReplyHeartFindManyArgsSchema)]).optional(),
   reviewsHelpful: z.union([z.boolean(),z.lazy(() => ReviewHelpfulFindManyArgsSchema)]).optional(),
+  conversations: z.union([z.boolean(),z.lazy(() => ConversationParticipantFindManyArgsSchema)]).optional(),
+  sentMessages: z.union([z.boolean(),z.lazy(() => MessageFindManyArgsSchema)]).optional(),
+  messageReadReceipts: z.union([z.boolean(),z.lazy(() => MessageReadReceiptFindManyArgsSchema)]).optional(),
+  messageReactions: z.union([z.boolean(),z.lazy(() => MessageReactionFindManyArgsSchema)]).optional(),
+  blocking: z.union([z.boolean(),z.lazy(() => UserBlockFindManyArgsSchema)]).optional(),
+  blockedBy: z.union([z.boolean(),z.lazy(() => UserBlockFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 

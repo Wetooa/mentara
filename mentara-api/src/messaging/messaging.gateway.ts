@@ -26,7 +26,7 @@ interface AuthenticatedSocket extends Socket {
 })
 export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(MessagingGateway.name);
   private userSockets = new Map<string, Set<string>>(); // userId -> Set of socket IDs

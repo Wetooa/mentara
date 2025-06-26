@@ -6,7 +6,13 @@ export const WorksheetCreateManyTherapistInputSchema: z.ZodType<Prisma.Worksheet
   id: z.string().uuid().optional(),
   clientId: z.string(),
   title: z.string(),
+  instructions: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  dueDate: z.coerce.date(),
+  status: z.string().optional(),
+  isCompleted: z.boolean().optional(),
+  submittedAt: z.coerce.date().optional().nullable(),
+  feedback: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional()
 }).strict();

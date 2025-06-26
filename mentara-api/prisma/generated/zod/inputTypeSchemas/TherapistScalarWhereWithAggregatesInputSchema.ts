@@ -11,6 +11,7 @@ import { JsonWithAggregatesFilterSchema } from './JsonWithAggregatesFilterSchema
 import { DecimalNullableWithAggregatesFilterSchema } from './DecimalNullableWithAggregatesFilterSchema';
 import { isValidDecimalInput } from './isValidDecimalInput';
 import { DecimalJsLikeSchema } from './DecimalJsLikeSchema';
+import { IntWithAggregatesFilterSchema } from './IntWithAggregatesFilterSchema';
 
 export const TherapistScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.TherapistScalarWhereWithAggregatesInput> = z.object({
   AND: z.union([ z.lazy(() => TherapistScalarWhereWithAggregatesInputSchema),z.lazy(() => TherapistScalarWhereWithAggregatesInputSchema).array() ]).optional(),
@@ -35,6 +36,7 @@ export const TherapistScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.The
   expirationDateOfLicense: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
   isLicenseActive: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   practiceStartDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  yearsOfExperience: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   areasOfExpertise: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
   assessmentTools: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
   therapeuticApproachesUsedList: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
@@ -44,8 +46,11 @@ export const TherapistScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.The
   weeklyAvailability: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   preferredSessionLength: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   accepts: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
-  sessionLength: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  hourlyRate: z.union([ z.lazy(() => DecimalNullableWithAggregatesFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
+  privateConfidentialSpace: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  compliesWithDataPrivacyAct: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  professionalLiabilityInsurance: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  complaintsOrDisciplinaryActions: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  willingToAbideByPlatformGuidelines: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   expertise: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
   approaches: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
   languages: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
@@ -53,10 +58,14 @@ export const TherapistScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.The
   acceptTypes: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
   treatmentSuccessRates: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
   uploadedFiles: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
+  sessionLength: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  hourlyRate: z.union([ z.lazy(() => DecimalNullableWithAggregatesFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
   bio: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   profileImageUrl: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   profileComplete: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   isActive: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  patientSatisfaction: z.union([ z.lazy(() => DecimalNullableWithAggregatesFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
+  totalPatients: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
 }).strict();

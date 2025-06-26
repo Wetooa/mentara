@@ -12,7 +12,7 @@ export class CreateReviewDto {
   @IsInt()
   @Min(1)
   @Max(5)
-  rating: number;
+  rating!: number;
 
   @IsOptional()
   @IsString()
@@ -24,7 +24,7 @@ export class CreateReviewDto {
 
   @IsString()
   @IsUUID()
-  therapistId: string;
+  therapistId!: string;
 
   @IsOptional()
   @IsString()
@@ -58,7 +58,7 @@ export class UpdateReviewDto {
 
 export class ModerateReviewDto {
   @IsEnum(ReviewStatus)
-  status: ReviewStatus;
+  status!: ReviewStatus;
 
   @IsOptional()
   @IsString()
@@ -112,5 +112,5 @@ export class GetReviewsDto {
 export class ReviewStatsDto {
   @IsString()
   @IsUUID()
-  therapistId: string;
+  therapistId!: string;
 }

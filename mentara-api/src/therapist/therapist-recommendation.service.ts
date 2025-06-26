@@ -6,8 +6,7 @@ import {
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PreAssessment } from '@prisma/client';
 import { TherapistWithUser } from 'src/types';
-import { TherapistRecommendationResponse } from 'shared-types';
-import { TherapistRecommendationRequest } from './therapist-application.dto';
+import { TherapistRecommendationRequest, TherapistRecommendationResponse } from './therapist-application.dto';
 
 @Injectable()
 export class TherapistRecommendationService {

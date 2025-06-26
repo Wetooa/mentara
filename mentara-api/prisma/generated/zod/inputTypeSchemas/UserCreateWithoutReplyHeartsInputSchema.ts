@@ -12,6 +12,12 @@ import { ModeratorCreateNestedOneWithoutUserInputSchema } from './ModeratorCreat
 import { AdminCreateNestedOneWithoutUserInputSchema } from './AdminCreateNestedOneWithoutUserInputSchema';
 import { ReplyCreateNestedManyWithoutUserInputSchema } from './ReplyCreateNestedManyWithoutUserInputSchema';
 import { ReviewHelpfulCreateNestedManyWithoutUserInputSchema } from './ReviewHelpfulCreateNestedManyWithoutUserInputSchema';
+import { ConversationParticipantCreateNestedManyWithoutUserInputSchema } from './ConversationParticipantCreateNestedManyWithoutUserInputSchema';
+import { MessageCreateNestedManyWithoutSenderInputSchema } from './MessageCreateNestedManyWithoutSenderInputSchema';
+import { MessageReadReceiptCreateNestedManyWithoutUserInputSchema } from './MessageReadReceiptCreateNestedManyWithoutUserInputSchema';
+import { MessageReactionCreateNestedManyWithoutUserInputSchema } from './MessageReactionCreateNestedManyWithoutUserInputSchema';
+import { UserBlockCreateNestedManyWithoutBlockerInputSchema } from './UserBlockCreateNestedManyWithoutBlockerInputSchema';
+import { UserBlockCreateNestedManyWithoutBlockedInputSchema } from './UserBlockCreateNestedManyWithoutBlockedInputSchema';
 
 export const UserCreateWithoutReplyHeartsInputSchema: z.ZodType<Prisma.UserCreateWithoutReplyHeartsInput> = z.object({
   id: z.string(),
@@ -36,7 +42,13 @@ export const UserCreateWithoutReplyHeartsInputSchema: z.ZodType<Prisma.UserCreat
   moderator: z.lazy(() => ModeratorCreateNestedOneWithoutUserInputSchema).optional(),
   admin: z.lazy(() => AdminCreateNestedOneWithoutUserInputSchema).optional(),
   replies: z.lazy(() => ReplyCreateNestedManyWithoutUserInputSchema).optional(),
-  reviewsHelpful: z.lazy(() => ReviewHelpfulCreateNestedManyWithoutUserInputSchema).optional()
+  reviewsHelpful: z.lazy(() => ReviewHelpfulCreateNestedManyWithoutUserInputSchema).optional(),
+  conversations: z.lazy(() => ConversationParticipantCreateNestedManyWithoutUserInputSchema).optional(),
+  sentMessages: z.lazy(() => MessageCreateNestedManyWithoutSenderInputSchema).optional(),
+  messageReadReceipts: z.lazy(() => MessageReadReceiptCreateNestedManyWithoutUserInputSchema).optional(),
+  messageReactions: z.lazy(() => MessageReactionCreateNestedManyWithoutUserInputSchema).optional(),
+  blocking: z.lazy(() => UserBlockCreateNestedManyWithoutBlockerInputSchema).optional(),
+  blockedBy: z.lazy(() => UserBlockCreateNestedManyWithoutBlockedInputSchema).optional()
 }).strict();
 
 export default UserCreateWithoutReplyHeartsInputSchema;

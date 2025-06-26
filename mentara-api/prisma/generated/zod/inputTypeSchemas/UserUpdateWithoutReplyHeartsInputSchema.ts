@@ -17,6 +17,12 @@ import { ModeratorUpdateOneWithoutUserNestedInputSchema } from './ModeratorUpdat
 import { AdminUpdateOneWithoutUserNestedInputSchema } from './AdminUpdateOneWithoutUserNestedInputSchema';
 import { ReplyUpdateManyWithoutUserNestedInputSchema } from './ReplyUpdateManyWithoutUserNestedInputSchema';
 import { ReviewHelpfulUpdateManyWithoutUserNestedInputSchema } from './ReviewHelpfulUpdateManyWithoutUserNestedInputSchema';
+import { ConversationParticipantUpdateManyWithoutUserNestedInputSchema } from './ConversationParticipantUpdateManyWithoutUserNestedInputSchema';
+import { MessageUpdateManyWithoutSenderNestedInputSchema } from './MessageUpdateManyWithoutSenderNestedInputSchema';
+import { MessageReadReceiptUpdateManyWithoutUserNestedInputSchema } from './MessageReadReceiptUpdateManyWithoutUserNestedInputSchema';
+import { MessageReactionUpdateManyWithoutUserNestedInputSchema } from './MessageReactionUpdateManyWithoutUserNestedInputSchema';
+import { UserBlockUpdateManyWithoutBlockerNestedInputSchema } from './UserBlockUpdateManyWithoutBlockerNestedInputSchema';
+import { UserBlockUpdateManyWithoutBlockedNestedInputSchema } from './UserBlockUpdateManyWithoutBlockedNestedInputSchema';
 
 export const UserUpdateWithoutReplyHeartsInputSchema: z.ZodType<Prisma.UserUpdateWithoutReplyHeartsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -41,7 +47,13 @@ export const UserUpdateWithoutReplyHeartsInputSchema: z.ZodType<Prisma.UserUpdat
   moderator: z.lazy(() => ModeratorUpdateOneWithoutUserNestedInputSchema).optional(),
   admin: z.lazy(() => AdminUpdateOneWithoutUserNestedInputSchema).optional(),
   replies: z.lazy(() => ReplyUpdateManyWithoutUserNestedInputSchema).optional(),
-  reviewsHelpful: z.lazy(() => ReviewHelpfulUpdateManyWithoutUserNestedInputSchema).optional()
+  reviewsHelpful: z.lazy(() => ReviewHelpfulUpdateManyWithoutUserNestedInputSchema).optional(),
+  conversations: z.lazy(() => ConversationParticipantUpdateManyWithoutUserNestedInputSchema).optional(),
+  sentMessages: z.lazy(() => MessageUpdateManyWithoutSenderNestedInputSchema).optional(),
+  messageReadReceipts: z.lazy(() => MessageReadReceiptUpdateManyWithoutUserNestedInputSchema).optional(),
+  messageReactions: z.lazy(() => MessageReactionUpdateManyWithoutUserNestedInputSchema).optional(),
+  blocking: z.lazy(() => UserBlockUpdateManyWithoutBlockerNestedInputSchema).optional(),
+  blockedBy: z.lazy(() => UserBlockUpdateManyWithoutBlockedNestedInputSchema).optional()
 }).strict();
 
 export default UserUpdateWithoutReplyHeartsInputSchema;

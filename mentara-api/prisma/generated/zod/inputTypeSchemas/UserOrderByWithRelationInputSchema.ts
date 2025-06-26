@@ -15,6 +15,11 @@ import { AdminOrderByWithRelationInputSchema } from './AdminOrderByWithRelationI
 import { ReplyOrderByRelationAggregateInputSchema } from './ReplyOrderByRelationAggregateInputSchema';
 import { ReplyHeartOrderByRelationAggregateInputSchema } from './ReplyHeartOrderByRelationAggregateInputSchema';
 import { ReviewHelpfulOrderByRelationAggregateInputSchema } from './ReviewHelpfulOrderByRelationAggregateInputSchema';
+import { ConversationParticipantOrderByRelationAggregateInputSchema } from './ConversationParticipantOrderByRelationAggregateInputSchema';
+import { MessageOrderByRelationAggregateInputSchema } from './MessageOrderByRelationAggregateInputSchema';
+import { MessageReadReceiptOrderByRelationAggregateInputSchema } from './MessageReadReceiptOrderByRelationAggregateInputSchema';
+import { MessageReactionOrderByRelationAggregateInputSchema } from './MessageReactionOrderByRelationAggregateInputSchema';
+import { UserBlockOrderByRelationAggregateInputSchema } from './UserBlockOrderByRelationAggregateInputSchema';
 
 export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
@@ -40,7 +45,13 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   admin: z.lazy(() => AdminOrderByWithRelationInputSchema).optional(),
   replies: z.lazy(() => ReplyOrderByRelationAggregateInputSchema).optional(),
   replyHearts: z.lazy(() => ReplyHeartOrderByRelationAggregateInputSchema).optional(),
-  reviewsHelpful: z.lazy(() => ReviewHelpfulOrderByRelationAggregateInputSchema).optional()
+  reviewsHelpful: z.lazy(() => ReviewHelpfulOrderByRelationAggregateInputSchema).optional(),
+  conversations: z.lazy(() => ConversationParticipantOrderByRelationAggregateInputSchema).optional(),
+  sentMessages: z.lazy(() => MessageOrderByRelationAggregateInputSchema).optional(),
+  messageReadReceipts: z.lazy(() => MessageReadReceiptOrderByRelationAggregateInputSchema).optional(),
+  messageReactions: z.lazy(() => MessageReactionOrderByRelationAggregateInputSchema).optional(),
+  blocking: z.lazy(() => UserBlockOrderByRelationAggregateInputSchema).optional(),
+  blockedBy: z.lazy(() => UserBlockOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export default UserOrderByWithRelationInputSchema;
