@@ -21,16 +21,20 @@ async function bootstrap() {
 
   // Enable CORS with proper configuration
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://localhost:3000',
-      'http://localhost:4000',
-      'https://localhost:4000',
-    ],
+    origin: true, // Allow all origins in development
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    allowedHeaders:
-      'Content-Type, Accept, Authorization, X-Requested-With, svix-id, svix-signature, svix-timestamp',
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+      'svix-id',
+      'svix-signature', 
+      'svix-timestamp',
+      'x-clerk-auth-token'
+    ],
+    optionsSuccessStatus: 200,
   });
 
   // Ensure uploads directory exists
