@@ -4,9 +4,17 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+<<<<<<< HEAD
 import { PreAssessment } from '@prisma/client';
 import { TherapistWithUser } from 'src/types';
 import { TherapistRecommendationRequest, TherapistRecommendationResponse } from './therapist-application.dto';
+=======
+import { PreAssessment, Therapist } from '@prisma/client';
+import {
+  TherapistRecommendationRequestDto,
+  TherapistRecommendationResponseDto,
+} from 'src/schema/therapist-application.schemas';
+>>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -26,8 +34,8 @@ export class TherapistRecommendationService {
   }
 
   async getRecommendedTherapists(
-    request: TherapistRecommendationRequest,
-  ): Promise<TherapistRecommendationResponse> {
+    request: TherapistRecommendationRequestDto,
+  ): Promise<TherapistRecommendationResponseDto> {
     try {
       // Get user's pre-assessment results
       const user = await this.prisma.client.findUnique({
@@ -58,7 +66,9 @@ export class TherapistRecommendationService {
         },
         orderBy: { patientSatisfaction: 'desc' },
         take: request.limit ?? 10,
-        include: { user: true },
+        include: {
+          user: true,
+        },
       });
 
       // Calculate match scores
@@ -115,7 +125,7 @@ export class TherapistRecommendationService {
   }
 
   private calculateMatchScore(
-    therapist: TherapistWithUser,
+    therapist: Therapist,
     userConditions: Record<string, string>,
   ): number {
     let score = 0;

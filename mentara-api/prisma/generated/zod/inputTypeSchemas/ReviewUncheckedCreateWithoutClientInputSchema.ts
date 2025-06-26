@@ -17,7 +17,6 @@ export const ReviewUncheckedCreateWithoutClientInputSchema: z.ZodType<Prisma.Rev
   moderatedAt: z.coerce.date().optional().nullable(),
   moderationNote: z.string().optional().nullable(),
   isVerified: z.boolean().optional(),
-  helpfulCount: z.number().int().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   helpfulVotes: z.lazy(() => ReviewHelpfulUncheckedCreateNestedManyWithoutReviewInputSchema).optional()

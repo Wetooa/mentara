@@ -5,7 +5,7 @@ import { z } from 'zod';
 /////////////////////////////////////////
 
 export const UserSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   email: z.string(),
   firstName: z.string(),
   middleName: z.string().nullable(),
@@ -14,9 +14,11 @@ export const UserSchema = z.object({
   address: z.string().nullable(),
   avatarUrl: z.string().nullable(),
   role: z.string(),
-  isActive: z.boolean(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  bio: z.string().nullable(),
+  coverImageUrl: z.string().nullable(),
+  isActive: z.boolean(),
 })
 
 export type User = z.infer<typeof UserSchema>

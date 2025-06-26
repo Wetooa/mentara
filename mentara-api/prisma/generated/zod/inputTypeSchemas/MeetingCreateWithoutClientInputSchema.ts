@@ -2,8 +2,8 @@ import type { Prisma } from '@prisma/client';
 
 import { z } from 'zod';
 import { MeetingStatusSchema } from './MeetingStatusSchema';
+import { MeetingNotesCreateNestedManyWithoutMeetingInputSchema } from './MeetingNotesCreateNestedManyWithoutMeetingInputSchema';
 import { TherapistCreateNestedOneWithoutMeetingsInputSchema } from './TherapistCreateNestedOneWithoutMeetingsInputSchema';
-import { MeetingDurationCreateNestedOneWithoutMeetingsInputSchema } from './MeetingDurationCreateNestedOneWithoutMeetingsInputSchema';
 import { ReviewCreateNestedManyWithoutMeetingInputSchema } from './ReviewCreateNestedManyWithoutMeetingInputSchema';
 
 export const MeetingCreateWithoutClientInputSchema: z.ZodType<Prisma.MeetingCreateWithoutClientInput> = z.object({
@@ -11,16 +11,14 @@ export const MeetingCreateWithoutClientInputSchema: z.ZodType<Prisma.MeetingCrea
   title: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  duration: z.number().int(),
+  duration: z.number().int().optional(),
   status: z.lazy(() => MeetingStatusSchema).optional(),
   meetingType: z.string().optional(),
   meetingUrl: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  meetingNotes: z.lazy(() => MeetingNotesCreateNestedManyWithoutMeetingInputSchema).optional(),
   therapist: z.lazy(() => TherapistCreateNestedOneWithoutMeetingsInputSchema),
-  durationConfig: z.lazy(() => MeetingDurationCreateNestedOneWithoutMeetingsInputSchema).optional(),
   reviews: z.lazy(() => ReviewCreateNestedManyWithoutMeetingInputSchema).optional()
 }).strict();
 

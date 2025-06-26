@@ -7,6 +7,8 @@ import { AdminUncheckedCreateInputSchema } from '../inputTypeSchemas/AdminUnchec
 import { AdminUpdateInputSchema } from '../inputTypeSchemas/AdminUpdateInputSchema'
 import { AdminUncheckedUpdateInputSchema } from '../inputTypeSchemas/AdminUncheckedUpdateInputSchema'
 import { UserArgsSchema } from "../outputTypeSchemas/UserArgsSchema"
+import { TherapistFindManyArgsSchema } from "../outputTypeSchemas/TherapistFindManyArgsSchema"
+import { AdminCountOutputTypeArgsSchema } from "../outputTypeSchemas/AdminCountOutputTypeArgsSchema"
 // Select schema needs to be in file to prevent circular imports
 //------------------------------------------------------
 
@@ -17,6 +19,8 @@ export const AdminSelectSchema: z.ZodType<Prisma.AdminSelect> = z.object({
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  processedTherapists: z.union([z.boolean(),z.lazy(() => TherapistFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => AdminCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 export const AdminUpsertArgsSchema: z.ZodType<Prisma.AdminUpsertArgs> = z.object({

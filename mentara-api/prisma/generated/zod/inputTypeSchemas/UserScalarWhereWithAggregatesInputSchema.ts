@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { StringWithAggregatesFilterSchema } from './StringWithAggregatesFilterSchema';
 import { StringNullableWithAggregatesFilterSchema } from './StringNullableWithAggregatesFilterSchema';
 import { DateTimeNullableWithAggregatesFilterSchema } from './DateTimeNullableWithAggregatesFilterSchema';
-import { BoolWithAggregatesFilterSchema } from './BoolWithAggregatesFilterSchema';
 import { DateTimeWithAggregatesFilterSchema } from './DateTimeWithAggregatesFilterSchema';
+import { BoolWithAggregatesFilterSchema } from './BoolWithAggregatesFilterSchema';
 
 export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScalarWhereWithAggregatesInput> = z.object({
   AND: z.union([ z.lazy(() => UserScalarWhereWithAggregatesInputSchema),z.lazy(() => UserScalarWhereWithAggregatesInputSchema).array() ]).optional(),
@@ -20,9 +20,11 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   address: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   avatarUrl: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   role: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  isActive: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  bio: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  coverImageUrl: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  isActive: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export default UserScalarWhereWithAggregatesInputSchema;

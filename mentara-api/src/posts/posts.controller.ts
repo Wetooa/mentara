@@ -14,10 +14,7 @@ import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
-import {
-  PostCreateInputDto,
-  PostUpdateInputDto,
-} from 'src/schema/post.schemas';
+import { PostCreateInputDto, PostUpdateInputDto } from '../schema/post.d';
 
 @Controller('posts')
 @UseGuards(ClerkAuthGuard)
@@ -74,7 +71,7 @@ export class PostsController {
         title: postData.title,
         content: postData.content,
         user: { connect: { id: user.id } },
-        room: { connect: { id: postData.room?.connect?.id } },
+        room: { connect: { id: postData.roomId } },
       };
       return await this.postsService.create(createData);
     } catch (error) {

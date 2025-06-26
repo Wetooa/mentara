@@ -26,7 +26,6 @@ export const ReviewSelectSchema: z.ZodType<Prisma.ReviewSelect> = z.object({
   moderatedAt: z.boolean().optional(),
   moderationNote: z.boolean().optional(),
   isVerified: z.boolean().optional(),
-  helpfulCount: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
   client: z.union([z.boolean(),z.lazy(() => ClientArgsSchema)]).optional(),

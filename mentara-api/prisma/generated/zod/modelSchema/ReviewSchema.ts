@@ -19,7 +19,6 @@ export const ReviewSchema = z.object({
   moderatedAt: z.coerce.date().nullable(),
   moderationNote: z.string().nullable(),
   isVerified: z.boolean(),
-  helpfulCount: z.number().int(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 })

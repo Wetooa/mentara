@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ClientResponse, ClientUpdateDto } from 'src/schema/client.schemas';
+import { ClientResponse, ClientUpdateDto } from '../schema/auth.d';
 
 @Injectable()
 export class ClientService {
@@ -23,7 +23,11 @@ export class ClientService {
   ): Promise<ClientResponse> {
     return await this.prisma.client.update({
       where: { userId },
-      data,
+      data: {
+        user: {
+          update: data,
+        },
+      },
       include: { user: true },
     });
   }

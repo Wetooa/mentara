@@ -17,7 +17,7 @@ import { Comment } from '@prisma/client';
 import {
   CommentCreateInputDto,
   CommentUpdateInputDto,
-} from 'src/schema/comment.schemas';
+} from '../schema/comment.d';
 
 @Controller('comments')
 @UseGuards(ClerkAuthGuard)
@@ -37,12 +37,9 @@ export class CommentsController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @CurrentUserId() userId: string,
-  ): Promise<Comment> {
+  async findOne(@Param('id') id: string): Promise<Comment> {
     try {
-      const comment = await this.commentsService.findOne(id, userId);
+      const comment = await this.commentsService.findOne(id);
       if (!comment) {
         throw new HttpException('Comment not found', HttpStatus.NOT_FOUND);
       }
@@ -76,7 +73,7 @@ export class CommentsController {
     @Body() commentData: CommentCreateInputDto,
   ): Promise<Comment> {
     try {
-      return await this.commentsService.create(commentData);
+      return await this.commentsService.create(commentData, userId);
     } catch (error) {
       throw new HttpException(
         `Failed to create comment: ${error instanceof Error ? error.message : 'Unknown error'}`,

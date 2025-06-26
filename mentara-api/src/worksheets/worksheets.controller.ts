@@ -12,14 +12,12 @@ import {
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { WorksheetsService } from './worksheets.service';
+import { PaginationQuery, FilterQuery } from 'src/types';
 import {
-  CreateWorksheetDto,
-  UpdateWorksheetDto,
-  CreateSubmissionDto,
-  SubmitWorksheetDto,
-  PaginationQuery,
-  FilterQuery,
-} from 'src/types';
+  WorksheetCreateInputDto,
+  WorksheetUpdateInputDto,
+  WorksheetSubmissionCreateInputDto,
+} from 'src/schema/worksheet';
 
 @Controller('worksheets')
 @UseGuards(ClerkAuthGuard)
@@ -46,7 +44,7 @@ export class WorksheetsController {
   @Post()
   create(
     @CurrentUserId() clerkId: string,
-    @Body() createWorksheetDto: CreateWorksheetDto,
+    @Body() createWorksheetDto: WorksheetCreateInputDto,
   ) {
     return this.worksheetsService.create(createWorksheetDto);
   }
@@ -55,7 +53,7 @@ export class WorksheetsController {
   update(
     @CurrentUserId() clerkId: string,
     @Param('id') id: string,
-    @Body() updateWorksheetDto: UpdateWorksheetDto,
+    @Body() updateWorksheetDto: WorksheetUpdateInputDto,
   ) {
     return this.worksheetsService.update(id, updateWorksheetDto);
   }
@@ -68,7 +66,7 @@ export class WorksheetsController {
   @Post('submissions')
   addSubmission(
     @CurrentUserId() clerkId: string,
-    @Body() createSubmissionDto: CreateSubmissionDto,
+    @Body() createSubmissionDto: WorksheetSubmissionCreateInputDto,
   ) {
     return this.worksheetsService.addSubmission(createSubmissionDto);
   }
@@ -77,7 +75,7 @@ export class WorksheetsController {
   submitWorksheet(
     @CurrentUserId() clerkId: string,
     @Param('id') id: string,
-    @Body() submitWorksheetDto: SubmitWorksheetDto,
+    @Body() submitWorksheetDto: WorksheetSubmissionCreateInputDto,
   ) {
     return this.worksheetsService.submitWorksheet(id, submitWorksheetDto);
   }

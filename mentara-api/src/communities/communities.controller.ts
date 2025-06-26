@@ -17,13 +17,14 @@ import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import {
-  CreateCommunityDto,
-  UpdateCommunityDto,
+  CommunityCreateInputDto,
   CommunityResponse,
   CommunityStatsResponse,
+  CommunityUpdateInputDto,
   CommunityWithMembersResponse,
-  CommunityWithStructureResponse,
-} from 'src/schema/community.schemas';
+  CommunityWithRoomGroupsResponse,
+} from '../schema/community.d';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 
 @Controller('communities')
 @UseGuards(ClerkAuthGuard)
@@ -103,7 +104,7 @@ export class CommunitiesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @Body() communityData: CreateCommunityDto,
+    @Body() communityData: CommunityCreateInputDto,
   ): Promise<CommunityResponse> {
     try {
       return await this.communitiesService.createCommunity(communityData);
@@ -118,7 +119,7 @@ export class CommunitiesController {
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
-    @Body() communityData: UpdateCommunityDto,
+    @Body() communityData: CommunityUpdateInputDto,
   ): Promise<CommunityResponse> {
     try {
       return await this.communitiesService.update(id, communityData);
@@ -141,19 +142,36 @@ export class CommunitiesController {
     }
   }
 
-  // TODO: Implement membership logic
   @Post(':id/join')
   @HttpCode(HttpStatus.OK)
-  joinCommunity(): void {
-    // Membership logic would go here, if needed
-    return;
+  async joinCommunity(
+    @Param('id') communityId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<{ joined: boolean }> {
+    try {
+      await this.communitiesService.joinCommunity(communityId, userId);
+      return { joined: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
   }
 
   @Post(':id/leave')
   @HttpCode(HttpStatus.OK)
-  leaveCommunity(): void {
-    // Membership logic would go here, if needed
-    return;
+  async leaveCommunity(
+    @Param('id') communityId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<{ left: boolean }> {
+    try {
+      await this.communitiesService.leaveCommunity(communityId, userId);
+      return { left: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
   }
 
   @Get('user/:userId')
@@ -170,7 +188,7 @@ export class CommunitiesController {
   }
 
   @Get('with-structure')
-  async getAllWithStructure(): Promise<CommunityWithStructureResponse[]> {
+  async getAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
     return await this.communitiesService.findAllWithStructure();
   }
 

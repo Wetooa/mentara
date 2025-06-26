@@ -1,4 +1,4 @@
-import { createClerkClient } from '@clerk/backend';
+import { verifyToken } from '@clerk/backend';
 import {
   Injectable,
   CanActivate,
@@ -16,9 +16,6 @@ declare module 'express' {
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
   private readonly logger = new Logger();
-  private readonly clerkClient = createClerkClient({
-    secretKey: process.env.CLERK_SECRET_KEY,
-  });
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
@@ -29,7 +26,9 @@ export class ClerkAuthGuard implements CanActivate {
     }
 
     try {
-      const session = await this.clerkClient.verifyToken(token);
+      const session = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY ?? '',
+      });
 
       request.userId = session.sub;
 

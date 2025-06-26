@@ -1,5 +1,5 @@
 model User {
-    id         String    @id @unique // Clerk user ID for authentication
+    id         String    @id @unique @default(uuid()) // Clerk user ID for authentication
     email      String    @unique // User's email address
     firstName  String
     middleName String?
@@ -8,9 +8,13 @@ model User {
     address    String?
     avatarUrl  String? // Profile image URL
     role       String    @default("client") // client, therapist, moderator, admin
-    isActive   Boolean   @default(true)
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
+
+    // Profile and verification
+    bio           String?
+    coverImageUrl String?
+    isActive      Boolean @default(true)
 
     // Community and content relations (available to all users)
     memberships   Membership[]
@@ -63,7 +67,10 @@ model Client {
     @@index([userId])
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
 model Moderator {
     userId String @unique
     user   User   @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)
@@ -84,8 +91,9 @@ model Admin {
     user   User   @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
 
     // Admin-specific fields
-    permissions String[] // Array of admin permissions
-    adminLevel  String   @default("admin") // admin, super_admin, etc.
+    permissions         String[] // Array of admin permissions
+    adminLevel          String      @default("admin") // admin, super_admin, etc.
+    processedTherapists Therapist[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

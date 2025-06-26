@@ -1,24 +1,23 @@
 // Booking TypeScript interfaces
 
 export enum MeetingStatus {
-  SCHEDULED = 'SCHEDULED',
-  CONFIRMED = 'CONFIRMED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  NO_SHOW = 'NO_SHOW',
+  SCHEDULED = "SCHEDULED",
+  CONFIRMED = "CONFIRMED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  NO_SHOW = "NO_SHOW",
 }
 
 export enum MeetingType {
-  VIDEO = 'video',
-  AUDIO = 'audio',
-  CHAT = 'chat',
+  VIDEO = "video",
+  AUDIO = "audio",
+  CHAT = "chat",
 }
 
 export interface CreateMeetingRequest {
   therapistId: string;
   startTime: string;
-  endTime: string;
   duration: number;
   title?: string;
   description?: string;
@@ -35,7 +34,6 @@ export interface MeetingDuration {
 
 export interface AvailableSlot {
   startTime: string;
-  endTime: string;
   availableDurations: MeetingDuration[];
 }
 
@@ -44,7 +42,6 @@ export interface Meeting {
   title?: string;
   description?: string;
   startTime: string;
-  endTime: string;
   duration: number;
   status: MeetingStatus;
   meetingType?: MeetingType;

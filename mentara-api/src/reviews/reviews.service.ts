@@ -1,27 +1,39 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { ReviewStatus } from '@prisma/client';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { MeetingStatus, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { CreateReviewDto, UpdateReviewDto, ModerateReviewDto, GetReviewsDto } from './dto/review.dto';
+import { ReviewCreateDto, ReviewUpdateDto } from '../schema/review.d';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async createReview(clientId: string, createReviewDto: CreateReviewDto) {
-    const { therapistId, meetingId, ...reviewData } = createReviewDto;
+  async createReview(
+    meetingId: string,
+    clientId: string,
+    therapistId: string,
+    createReviewDto: ReviewCreateDto,
+  ) {
+    const { rating, title, content, isAnonymous } = createReviewDto;
 
     // Verify the client has had a completed session with this therapist
     const completedMeeting = await this.prisma.meeting.findFirst({
       where: {
         clientId,
         therapistId,
-        status: 'COMPLETED',
-        ...(meetingId && { id: meetingId }),
+        id: meetingId,
+        status: MeetingStatus.COMPLETED,
       },
     });
 
     if (!completedMeeting) {
-      throw new BadRequestException('You can only review therapists after completing a session with them');
+      throw new BadRequestException(
+        'You can only review therapists after completing a session with them',
+      );
     }
 
     // Check if review already exists for this client-therapist pair
@@ -29,21 +41,26 @@ export class ReviewsService {
       where: {
         clientId,
         therapistId,
-        meetingId: meetingId || null,
+        meetingId: meetingId,
       },
     });
 
     if (existingReview) {
-      throw new BadRequestException('You have already reviewed this therapist for this session');
+      throw new BadRequestException(
+        'You have already reviewed this therapist for this session',
+      );
     }
 
     // Create the review
     const review = await this.prisma.review.create({
       data: {
-        ...reviewData,
+        rating,
+        title,
+        content,
+        isAnonymous,
         clientId,
         therapistId,
-        meetingId,
+        meetingId: meetingId,
         status: ReviewStatus.PENDING,
       },
       include: {
@@ -60,8 +77,7 @@ export class ReviewsService {
         },
         therapist: {
           select: {
-            firstName: true,
-            lastName: true,
+            user: true,
           },
         },
         meeting: {
@@ -73,13 +89,20 @@ export class ReviewsService {
       },
     });
 
-    // Update therapist's average rating
-    await this.updateTherapistRating(therapistId);
-
-    return review;
+    return {
+      ...review,
+      therapist: {
+        ...review.therapist,
+        id: review.therapistId,
+      },
+    };
   }
 
-  async updateReview(reviewId: string, clientId: string, updateReviewDto: UpdateReviewDto) {
+  async updateReview(
+    reviewId: string,
+    clientId: string,
+    updateReviewDto: ReviewUpdateDto,
+  ) {
     const review = await this.prisma.review.findUnique({
       where: { id: reviewId },
     });
@@ -126,9 +149,6 @@ export class ReviewsService {
       },
     });
 
-    // Update therapist's average rating
-    await this.updateTherapistRating(review.therapistId);
-
     return updatedReview;
   }
 
@@ -149,73 +169,82 @@ export class ReviewsService {
       where: { id: reviewId },
     });
 
-    // Update therapist's average rating
-    await this.updateTherapistRating(review.therapistId);
-
     return { message: 'Review deleted successfully' };
   }
 
-  async getReviews(query: GetReviewsDto) {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', ...filters } = query;
-    const skip = (page - 1) * limit;
+  // async getReviews(paginationFilters: PaginationQuery, query: ReviewGetDto) {
+  //   const {
+  //     page = 1,
+  //     limit = 10,
+  //     sortBy = 'createdAt',
+  //     sortOrder = 'desc',
+  //     ...filters
+  //   } = paginationFilters;
+  //   const skip = (page - 1) * limit;
 
-    const where: any = {
-      status: ReviewStatus.APPROVED, // Only show approved reviews by default
-      ...filters,
-    };
+  //   const where: any = {
+  //     status: ReviewStatus.APPROVED, // Only show approved reviews by default
+  //     ...query,
+  //   };
 
-    const [reviews, total] = await Promise.all([
-      this.prisma.review.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { [sortBy]: sortOrder },
-        include: {
-          client: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  avatarUrl: true,
-                },
-              },
-            },
-          },
-          therapist: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profileImageUrl: true,
-            },
-          },
-          meeting: {
-            select: {
-              startTime: true,
-              duration: true,
-            },
-          },
-        },
-      }),
-      this.prisma.review.count({ where }),
-    ]);
+  //   const [reviews, total] = await Promise.all([
+  //     this.prisma.review.findMany({
+  //       where: {
+  //         ...query,
+  //         ...where,
+  //       },
+  //       skip,
+  //       take: limit,
+  //       orderBy: { [sortBy]: sortOrder },
+  //       include: {
+  //         client: {
+  //           select: {
+  //             user: {
+  //               select: {
+  //                 firstName: true,
+  //                 lastName: true,
+  //                 avatarUrl: true,
+  //               },
+  //             },
+  //           },
+  //         },
+  //         therapist: {
+  //           select: {
+  //             firstName: true,
+  //             lastName: true,
+  //             profileImageUrl: true,
+  //           },
+  //         },
+  //         meeting: {
+  //           select: {
+  //             startTime: true,
+  //             duration: true,
+  //           },
+  //         },
+  //       },
+  //     }),
+  //     this.prisma.review.count({ where }),
+  //   ]);
 
-    return {
-      reviews,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        hasNextPage: page < Math.ceil(total / limit),
-        hasPreviousPage: page > 1,
-      },
-    };
-  }
+  //   return {
+  //     reviews,
+  //     pagination: {
+  //       page,
+  //       limit,
+  //       total,
+  //       totalPages: Math.ceil(total / limit),
+  //       hasNextPage: page < Math.ceil(total / limit),
+  //       hasPreviousPage: page > 1,
+  //     },
+  //   };
+  // }
 
-  async getTherapistReviews(therapistId: string, query: Omit<GetReviewsDto, 'therapistId'>) {
-    return this.getReviews({ ...query, therapistId });
-  }
+  // async getTherapistReviews(
+  //   therapistId: string,
+  //   query: Omit<ReviewGetDto, 'therapistId'>,
+  // ) {
+  //   return this.getReviews({ ...query, therapistId });
+  // }
 
   async getReviewStats(therapistId: string) {
     const stats = await this.prisma.review.groupBy({
@@ -229,8 +258,14 @@ export class ReviewsService {
       },
     });
 
-    const totalReviews = stats.reduce((sum, stat) => sum + stat._count.rating, 0);
-    const totalRating = stats.reduce((sum, stat) => sum + (stat.rating * stat._count.rating), 0);
+    const totalReviews = stats.reduce(
+      (sum, stat) => sum + stat._count.rating,
+      0,
+    );
+    const totalRating = stats.reduce(
+      (sum, stat) => sum + stat.rating * stat._count.rating,
+      0,
+    );
     const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
 
     const ratingDistribution = {
@@ -241,7 +276,7 @@ export class ReviewsService {
       5: 0,
     };
 
-    stats.forEach(stat => {
+    stats.forEach((stat) => {
       ratingDistribution[stat.rating] = stat._count.rating;
     });
 
@@ -252,116 +287,112 @@ export class ReviewsService {
     };
   }
 
-  async moderateReview(reviewId: string, moderatorId: string, moderateReviewDto: ModerateReviewDto) {
-    const review = await this.prisma.review.findUnique({
-      where: { id: reviewId },
-    });
+  // async moderateReview(
+  //   reviewId: string,
+  //   moderatorId: string,
+  //   moderateReviewDto: ReviewStatusDto,
+  // ) {
+  //   const review = await this.prisma.review.findUnique({
+  //     where: { id: reviewId },
+  //   });
 
-    if (!review) {
-      throw new NotFoundException('Review not found');
-    }
+  //   if (!review) {
+  //     throw new NotFoundException('Review not found');
+  //   }
 
-    const moderatedReview = await this.prisma.review.update({
-      where: { id: reviewId },
-      data: {
-        status: moderateReviewDto.status,
-        moderatedBy: moderatorId,
-        moderatedAt: new Date(),
-        moderationNote: moderateReviewDto.moderationNote,
-      },
-      include: {
-        client: {
-          select: {
-            user: {
-              select: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-        therapist: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
-    });
+  //   const moderatedReview = await this.prisma.review.update({
+  //     where: { id: reviewId },
+  //     data: {
+  //       status: moderateReviewDto.status,
+  //       moderatedBy: moderatorId,
+  //       moderatedAt: new Date(),
+  //       moderationNote: moderateReviewDto.moderationNote,
+  //     },
+  //     include: {
+  //       client: {
+  //         select: {
+  //           user: {
+  //             select: {
+  //               firstName: true,
+  //               lastName: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //       therapist: {
+  //         select: {
+  //           firstName: true,
+  //           lastName: true,
+  //         },
+  //       },
+  //     },
+  //   });
 
-    // Update therapist's average rating if status changed to/from approved
-    if (moderateReviewDto.status === ReviewStatus.APPROVED || review.status === ReviewStatus.APPROVED) {
-      await this.updateTherapistRating(review.therapistId);
-    }
+  //   // Update therapist's average rating if status changed to/from approved
+  //   if (
+  //     moderateReviewDto.status === ReviewStatus.APPROVED ||
+  //     review.status === ReviewStatus.APPROVED
+  //   ) {
+  //     await this.updateTherapistRating(review.therapistId);
+  //   }
 
-    return moderatedReview;
-  }
+  //   return moderatedReview;
+  // }
 
-  async markReviewHelpful(reviewId: string, userId: string) {
-    const review = await this.prisma.review.findUnique({
-      where: { id: reviewId },
-    });
+  // async markReviewHelpful(reviewId: string, userId: string) {
+  //   const review = await this.prisma.review.findUnique({
+  //     where: { id: reviewId },
+  //   });
 
-    if (!review) {
-      throw new NotFoundException('Review not found');
-    }
+  //   if (!review) {
+  //     throw new NotFoundException('Review not found');
+  //   }
 
-    // Check if user already marked this review as helpful
-    const existingVote = await this.prisma.reviewHelpful.findUnique({
-      where: {
-        reviewId_userId: {
-          reviewId,
-          userId,
-        },
-      },
-    });
+  //   // Check if user already marked this review as helpful
+  //   const existingVote = await this.prisma.reviewHelpful.findUnique({
+  //     where: {
+  //       reviewId_userId: {
+  //         reviewId,
+  //         userId,
+  //       },
+  //     },
+  //   });
 
-    if (existingVote) {
-      // Remove the helpful vote
-      await this.prisma.reviewHelpful.delete({
-        where: { id: existingVote.id },
-      });
+  //   if (existingVote) {
+  //     // Remove the helpful vote
+  //     await this.prisma.reviewHelpful.delete({
+  //       where: { id: existingVote.id },
+  //     });
 
-      await this.prisma.review.update({
-        where: { id: reviewId },
-        data: {
-          helpfulCount: {
-            decrement: 1,
-          },
-        },
-      });
+  //     await this.prisma.review.update({
+  //       where: { id: reviewId },
+  //       data: {
+  //         helpfulCount: {
+  //           decrement: 1,
+  //         },
+  //       },
+  //     });
 
-      return { helpful: false, helpfulCount: review.helpfulCount - 1 };
-    } else {
-      // Add helpful vote
-      await this.prisma.reviewHelpful.create({
-        data: {
-          reviewId,
-          userId,
-        },
-      });
+  //     return { helpful: false, helpfulCount: review.helpfulCount - 1 };
+  //   } else {
+  //     // Add helpful vote
+  //     await this.prisma.reviewHelpful.create({
+  //       data: {
+  //         reviewId,
+  //         userId,
+  //       },
+  //     });
 
-      await this.prisma.review.update({
-        where: { id: reviewId },
-        data: {
-          helpfulCount: {
-            increment: 1,
-          },
-        },
-      });
+  //     await this.prisma.review.update({
+  //       where: { id: reviewId },
+  //       data: {
+  //         helpfulCount: {
+  //           increment: 1,
+  //         },
+  //       },
+  //     });
 
-      return { helpful: true, helpfulCount: review.helpfulCount + 1 };
-    }
-  }
-
-  private async updateTherapistRating(therapistId: string) {
-    const stats = await this.getReviewStats(therapistId);
-    
-    await this.prisma.therapist.update({
-      where: { userId: therapistId },
-      data: {
-        patientSatisfaction: stats.averageRating,
-      },
-    });
-  }
+  //     return { helpful: true, helpfulCount: review.helpfulCount + 1 };
+  //   }
+  // }
 }

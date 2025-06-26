@@ -1,17 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../providers/prisma-client.provider';
+import { PrismaService } from 'src/providers/prisma-client.provider';
 import {
-  CreateWorksheetDto,
-  UpdateWorksheetDto,
-  CreateSubmissionDto,
-  SubmitWorksheetDto,
-} from './dto/worksheet.dto';
+  WorksheetResponse,
+  WorksheetCreateInputDto,
+  WorksheetSubmissionCreateInputDto,
+  WorksheetUpdateInputDto,
+} from 'src/schema/worksheet';
 
 @Injectable()
 export class WorksheetsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(userId?: string, therapistId?: string, status?: string) {
+  async findAll(
+    userId?: string,
+    therapistId?: string,
+    status?: string,
+  ): Promise<WorksheetResponse[]> {
     const where = {};
 
     if (userId) {
@@ -57,33 +61,36 @@ export class WorksheetsService {
         },
       },
       orderBy: {
-        dueDate: 'desc',
+        createdAt: 'desc',
       },
     });
 
     // Transform the data to match the expected format for the client
-    return worksheets.map((worksheet) => ({
-      id: worksheet.id,
-      title: worksheet.title,
-      therapistName: worksheet.therapist ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}` : 'Unknown Therapist',
-      patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
-      date: worksheet.dueDate.toISOString(),
-      status: worksheet.status,
-      isCompleted: worksheet.isCompleted,
-      instructions: worksheet.instructions,
-      materials: worksheet.materials.map((material) => ({
-        id: material.id,
-        filename: material.filename,
-        url: material.url,
-      })),
-      myWork: worksheet.submissions.map((submission) => ({
-        id: submission.id,
-        filename: submission.filename,
-        url: submission.url,
-      })),
-      submittedAt: worksheet.submittedAt?.toISOString(),
-      feedback: worksheet.feedback,
-    }));
+    // return worksheets.map((worksheet) => ({
+    //   id: worksheet.id,
+    //   title: worksheet.title,
+    //   therapistName: worksheet.therapist
+    //     ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
+    //     : 'Unknown Therapist',
+    //   patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
+    //   date: worksheet.createdAt.toISOString(),
+    //   status: worksheet.status,
+    //   isCompleted: worksheet.isCompleted,
+    //   instructions: worksheet.instructions,
+    //   materials: worksheet.materials.map((material) => ({
+    //     id: material.id,
+    //     filename: material.filename,
+    //     url: material.url,
+    //   })),
+    //   myWork: worksheet.submissions.map((submission) => ({
+    //     id: submission.id,
+    //     filename: submission.filename,
+    //     url: submission.url,
+    //   })),
+    //   submittedAt: worksheet.submittedAt?.toISOString(),
+    //   feedback: worksheet.feedback,
+    // }));
+    return worksheets;
   }
 
   async findById(id: string) {
@@ -124,65 +131,61 @@ export class WorksheetsService {
     }
 
     // Transform to match expected client format
-    return {
-      id: worksheet.id,
-      title: worksheet.title,
-      therapistName: worksheet.therapist ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}` : 'Unknown Therapist',
-      patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
-      date: worksheet.dueDate.toISOString(),
-      status: worksheet.status,
-      isCompleted: worksheet.isCompleted,
-      instructions: worksheet.instructions,
-      materials: worksheet.materials.map((material) => ({
-        id: material.id,
-        filename: material.filename,
-        url: material.url,
-      })),
-      myWork: worksheet.submissions.map((submission) => ({
-        id: submission.id,
-        filename: submission.filename,
-        url: submission.url,
-      })),
-      submittedAt: worksheet.submittedAt?.toISOString(),
-      feedback: worksheet.feedback,
-    };
+    // return {
+    //   id: worksheet.id,
+    //   title: worksheet.title,
+    //   therapistName: worksheet.therapist
+    //     ? `${worksheet.therapist.user.firstName} ${worksheet.therapist.user.lastName}`
+    //     : 'Unknown Therapist',
+    //   patientName: `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`,
+    //   date: worksheet.createdAt.toISOString(),
+    //   status: worksheet.status,
+    //   isCompleted: worksheet.isCompleted,
+    //   instructions: worksheet.instructions,
+    //   materials: worksheet.materials.map((material) => ({
+    //     id: material.id,
+    //     filename: material.filename,
+    //     url: material.url,
+    //   })),
+    //   myWork: worksheet.submissions.map((submission) => ({
+    //     id: submission.id,
+    //     filename: submission.filename,
+    //     url: submission.url,
+    //   })),
+    //   submittedAt: worksheet.submittedAt?.toISOString(),
+    //   feedback: worksheet.feedback,
+    // };
+    return worksheet;
   }
 
-  async create(data: CreateWorksheetDto) {
+  async create(data: WorksheetCreateInputDto) {
     // Start a transaction to create the worksheet and any materials
     return this.prisma.$transaction(async (prisma) => {
       // Create the worksheet
       const worksheet = await prisma.worksheet.create({
-        data: {
-          title: data.title,
-          instructions: data.instructions,
-          description: data.description,
-          dueDate: new Date(data.dueDate),
-          clientId: data.clientId, // Use clientId for proper relation
-          therapistId: data.therapistId,
-        },
+        data,
       });
 
-      // Create materials if provided
-      if (data.materials && data.materials.length > 0) {
-        await Promise.all(
-          data.materials.map((material) =>
-            prisma.worksheetMaterial.create({
-              data: {
-                ...material,
-                worksheetId: worksheet.id,
-              },
-            }),
-          ),
-        );
-      }
+      // // Create materials if provided
+      // if (data.materials && data.materials.connect.length > 0) {
+      //   await Promise.all(
+      //     data.materials.map((material) =>
+      //       prisma.worksheetMaterial.create({
+      //         data: {
+      //           ...material,
+      //           worksheetId: worksheet.id,
+      //         },
+      //       }),
+      //     ),
+      //   );
+      // }
 
       // Return the newly created worksheet with materials
       return this.findById(worksheet.id);
     });
   }
 
-  async update(id: string, data: UpdateWorksheetDto) {
+  async update(id: string, data: WorksheetUpdateInputDto) {
     // Check if worksheet exists
     const exists = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -192,22 +195,10 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Prepare update data
-    const updateData: any = {};
-    
-    if (data.title !== undefined) updateData.title = data.title;
-    if (data.instructions !== undefined) updateData.instructions = data.instructions;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.dueDate !== undefined) updateData.dueDate = new Date(data.dueDate);
-    if (data.status !== undefined) updateData.status = data.status;
-    if (data.isCompleted !== undefined) updateData.isCompleted = data.isCompleted;
-    if (data.submittedAt !== undefined) updateData.submittedAt = new Date(data.submittedAt);
-    if (data.feedback !== undefined) updateData.feedback = data.feedback;
-
     // Update the worksheet
     await this.prisma.worksheet.update({
       where: { id },
-      data: updateData,
+      data,
     });
 
     // Return the updated worksheet
@@ -232,35 +223,28 @@ export class WorksheetsService {
     return { success: true, message: 'Worksheet deleted successfully' };
   }
 
-  async addSubmission(data: CreateSubmissionDto) {
+  async addSubmission(data: WorksheetSubmissionCreateInputDto) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
-      where: { id: data.worksheetId },
+      where: { id: data.worksheet.connect?.id },
       include: { client: true },
     });
 
     if (!worksheet) {
       throw new NotFoundException(
-        `Worksheet with ID ${data.worksheetId} not found`,
+        `Worksheet with ID ${data.worksheet.connect?.id} not found`,
       );
     }
 
     // Create the submission
     const submission = await this.prisma.worksheetSubmission.create({
-      data: {
-        filename: data.filename,
-        url: data.url,
-        fileSize: data.fileSize,
-        fileType: data.fileType,
-        worksheetId: data.worksheetId,
-        clientId: worksheet.clientId, // Use the worksheet's clientId
-      },
+      data,
     });
 
     return submission;
   }
 
-  async submitWorksheet(id: string, data: SubmitWorksheetDto) {
+  async submitWorksheet(id: string, data: WorksheetSubmissionCreateInputDto) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -273,34 +257,35 @@ export class WorksheetsService {
     // Use transaction to ensure all operations succeed or fail together
     return this.prisma.$transaction(async (prisma) => {
       // Add all submissions
-      if (data.submissions && data.submissions.length > 0) {
-        await Promise.all(
-          data.submissions.map((submission) =>
-            prisma.worksheetSubmission.create({
-              data: {
-                filename: submission.filename,
-                url: submission.url,
-                fileSize: submission.fileSize,
-                fileType: submission.fileType,
-                worksheetId: id,
-                clientId: worksheet.clientId, // Use the worksheet's clientId
-              },
-            }),
-          ),
-        );
-      }
+      // if (data.submissions && data.submissions.length > 0) {
+      //   await Promise.all(
+      //     data.submissions.map((submission) =>
+      //       prisma.worksheetSubmission.create({
+      //         data: {
+      //           filename: submission.filename,
+      //           url: submission.url,
+      //           fileSize: submission.fileSize,
+      //           fileType: submission.fileType,
+      //           worksheetId: id,
+      //           clientId: worksheet.clientId, // Use the worksheet's clientId
+      //         },
+      //       }),
+      //     ),
+      //   );
+      // }
+      await prisma.worksheetSubmission.create({
+        data,
+      });
 
       // Update worksheet status if completing submission
-      if (data.complete) {
-        await prisma.worksheet.update({
-          where: { id },
-          data: {
-            isCompleted: true,
-            status: 'completed',
-            submittedAt: new Date(),
-          },
-        });
-      }
+      await prisma.worksheet.update({
+        where: { id },
+        data: {
+          isCompleted: true,
+          status: 'completed',
+          submittedAt: new Date(),
+        },
+      });
 
       // Return the updated worksheet
       return this.findById(id);

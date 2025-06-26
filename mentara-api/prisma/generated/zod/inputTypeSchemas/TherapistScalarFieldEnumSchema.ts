@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+<<<<<<< HEAD
 export const TherapistScalarFieldEnumSchema = z.enum(['userId','approved','status','submissionDate','processingDate','processedBy','applicationData','firstName','lastName','email','mobile','province','providerType','professionalLicenseType','isPRCLicensed','prcLicenseNumber','expirationDateOfLicense','isLicenseActive','practiceStartDate','yearsOfExperience','areasOfExpertise','assessmentTools','therapeuticApproachesUsedList','languagesOffered','providedOnlineTherapyBefore','comfortableUsingVideoConferencing','weeklyAvailability','preferredSessionLength','accepts','privateConfidentialSpace','compliesWithDataPrivacyAct','professionalLiabilityInsurance','complaintsOrDisciplinaryActions','willingToAbideByPlatformGuidelines','expertise','approaches','languages','illnessSpecializations','acceptTypes','treatmentSuccessRates','uploadedFiles','sessionLength','hourlyRate','bio','profileImageUrl','profileComplete','isActive','patientSatisfaction','totalPatients','createdAt','updatedAt']);
+=======
+export const TherapistScalarFieldEnumSchema = z.enum(['userId','mobile','province','status','submissionDate','processingDate','processedByAdminId','providerType','professionalLicenseType','isPRCLicensed','prcLicenseNumber','expirationDateOfLicense','practiceStartDate','areasOfExpertise','assessmentTools','therapeuticApproachesUsedList','languagesOffered','providedOnlineTherapyBefore','comfortableUsingVideoConferencing','preferredSessionLength','privateConfidentialSpace','compliesWithDataPrivacyAct','professionalLiabilityInsurance','complaintsOrDisciplinaryActions','willingToAbideByPlatformGuidelines','expertise','approaches','languages','illnessSpecializations','acceptTypes','treatmentSuccessRates','sessionLength','hourlyRate','createdAt','updatedAt']);
+>>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
 
 export default TherapistScalarFieldEnumSchema;

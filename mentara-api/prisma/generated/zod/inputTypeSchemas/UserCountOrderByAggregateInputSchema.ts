@@ -13,9 +13,11 @@ export const UserCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserCountOrd
   address: z.lazy(() => SortOrderSchema).optional(),
   avatarUrl: z.lazy(() => SortOrderSchema).optional(),
   role: z.lazy(() => SortOrderSchema).optional(),
-  isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional()
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  bio: z.lazy(() => SortOrderSchema).optional(),
+  coverImageUrl: z.lazy(() => SortOrderSchema).optional(),
+  isActive: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export default UserCountOrderByAggregateInputSchema;

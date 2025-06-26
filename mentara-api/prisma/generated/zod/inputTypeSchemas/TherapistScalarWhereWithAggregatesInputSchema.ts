@@ -2,13 +2,13 @@ import { Prisma } from '@prisma/client';
 
 import { z } from 'zod';
 import { StringWithAggregatesFilterSchema } from './StringWithAggregatesFilterSchema';
-import { BoolWithAggregatesFilterSchema } from './BoolWithAggregatesFilterSchema';
 import { DateTimeWithAggregatesFilterSchema } from './DateTimeWithAggregatesFilterSchema';
-import { DateTimeNullableWithAggregatesFilterSchema } from './DateTimeNullableWithAggregatesFilterSchema';
 import { StringNullableWithAggregatesFilterSchema } from './StringNullableWithAggregatesFilterSchema';
-import { JsonNullableWithAggregatesFilterSchema } from './JsonNullableWithAggregatesFilterSchema';
+import { StringNullableListFilterSchema } from './StringNullableListFilterSchema';
+import { BoolWithAggregatesFilterSchema } from './BoolWithAggregatesFilterSchema';
+import { IntNullableListFilterSchema } from './IntNullableListFilterSchema';
 import { JsonWithAggregatesFilterSchema } from './JsonWithAggregatesFilterSchema';
-import { DecimalNullableWithAggregatesFilterSchema } from './DecimalNullableWithAggregatesFilterSchema';
+import { DecimalWithAggregatesFilterSchema } from './DecimalWithAggregatesFilterSchema';
 import { isValidDecimalInput } from './isValidDecimalInput';
 import { DecimalJsLikeSchema } from './DecimalJsLikeSchema';
 import { IntWithAggregatesFilterSchema } from './IntWithAggregatesFilterSchema';
@@ -18,24 +18,19 @@ export const TherapistScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.The
   OR: z.lazy(() => TherapistScalarWhereWithAggregatesInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => TherapistScalarWhereWithAggregatesInputSchema),z.lazy(() => TherapistScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   userId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  approved: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
-  status: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  submissionDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  processingDate: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
-  processedBy: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  applicationData: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
-  firstName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  lastName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   mobile: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   province: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  status: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  submissionDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  processingDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  processedByAdminId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   providerType: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   professionalLicenseType: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   isPRCLicensed: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   prcLicenseNumber: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  expirationDateOfLicense: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
-  isLicenseActive: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  expirationDateOfLicense: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   practiceStartDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+<<<<<<< HEAD
   yearsOfExperience: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   areasOfExpertise: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
   assessmentTools: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
@@ -66,6 +61,28 @@ export const TherapistScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.The
   isActive: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   patientSatisfaction: z.union([ z.lazy(() => DecimalNullableWithAggregatesFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
   totalPatients: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+=======
+  areasOfExpertise: z.lazy(() => StringNullableListFilterSchema).optional(),
+  assessmentTools: z.lazy(() => StringNullableListFilterSchema).optional(),
+  therapeuticApproachesUsedList: z.lazy(() => StringNullableListFilterSchema).optional(),
+  languagesOffered: z.lazy(() => StringNullableListFilterSchema).optional(),
+  providedOnlineTherapyBefore: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  comfortableUsingVideoConferencing: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  preferredSessionLength: z.lazy(() => IntNullableListFilterSchema).optional(),
+  privateConfidentialSpace: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  compliesWithDataPrivacyAct: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  professionalLiabilityInsurance: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  complaintsOrDisciplinaryActions: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  willingToAbideByPlatformGuidelines: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  expertise: z.lazy(() => StringNullableListFilterSchema).optional(),
+  approaches: z.lazy(() => StringNullableListFilterSchema).optional(),
+  languages: z.lazy(() => StringNullableListFilterSchema).optional(),
+  illnessSpecializations: z.lazy(() => StringNullableListFilterSchema).optional(),
+  acceptTypes: z.lazy(() => StringNullableListFilterSchema).optional(),
+  treatmentSuccessRates: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
+  sessionLength: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  hourlyRate: z.union([ z.lazy(() => DecimalWithAggregatesFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
+>>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
 }).strict();

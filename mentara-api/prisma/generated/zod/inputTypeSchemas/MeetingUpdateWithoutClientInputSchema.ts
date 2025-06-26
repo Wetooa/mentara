@@ -7,8 +7,8 @@ import { DateTimeFieldUpdateOperationsInputSchema } from './DateTimeFieldUpdateO
 import { IntFieldUpdateOperationsInputSchema } from './IntFieldUpdateOperationsInputSchema';
 import { MeetingStatusSchema } from './MeetingStatusSchema';
 import { EnumMeetingStatusFieldUpdateOperationsInputSchema } from './EnumMeetingStatusFieldUpdateOperationsInputSchema';
+import { MeetingNotesUpdateManyWithoutMeetingNestedInputSchema } from './MeetingNotesUpdateManyWithoutMeetingNestedInputSchema';
 import { TherapistUpdateOneRequiredWithoutMeetingsNestedInputSchema } from './TherapistUpdateOneRequiredWithoutMeetingsNestedInputSchema';
-import { MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema } from './MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema';
 import { ReviewUpdateManyWithoutMeetingNestedInputSchema } from './ReviewUpdateManyWithoutMeetingNestedInputSchema';
 
 export const MeetingUpdateWithoutClientInputSchema: z.ZodType<Prisma.MeetingUpdateWithoutClientInput> = z.object({
@@ -16,16 +16,14 @@ export const MeetingUpdateWithoutClientInputSchema: z.ZodType<Prisma.MeetingUpda
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   startTime: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  endTime: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   duration: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => MeetingStatusSchema),z.lazy(() => EnumMeetingStatusFieldUpdateOperationsInputSchema) ]).optional(),
   meetingType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   meetingUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  meetingNotes: z.lazy(() => MeetingNotesUpdateManyWithoutMeetingNestedInputSchema).optional(),
   therapist: z.lazy(() => TherapistUpdateOneRequiredWithoutMeetingsNestedInputSchema).optional(),
-  durationConfig: z.lazy(() => MeetingDurationUpdateOneWithoutMeetingsNestedInputSchema).optional(),
   reviews: z.lazy(() => ReviewUpdateManyWithoutMeetingNestedInputSchema).optional()
 }).strict();
 

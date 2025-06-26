@@ -10,7 +10,7 @@ import {
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { ClientService } from './client.service';
-import { ClientResponse, ClientUpdateDto } from 'src/schema/client.schemas';
+import { ClientResponse, ClientUpdateDto } from '../schema/auth.d';
 
 @Controller('client')
 @UseGuards(ClerkAuthGuard)
