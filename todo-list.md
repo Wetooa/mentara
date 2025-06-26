@@ -77,15 +77,19 @@
 
 ### Therapist - Patients Tab
 
-- [ ] Create patient listing interface
-- [ ] Implement patient search and filtering
-- [ ] Design patient profile cards
-- [ ] Create detailed patient view with history
+- [x] Create patient listing interface
+- [x] Implement patient search and filtering
+- [x] Design patient profile cards
+- [x] Create detailed patient view with history
+- [x] Integrate with real backend APIs for patient data
+- [x] Add comprehensive patient management with loading states and error handling
+- [x] Implement status filtering and advanced search capabilities
+- [x] Add patient status indicators and session progress tracking
 - [ ] Add session scheduling tools
-- [ ] Implement patient progress tracking
+- [ ] Implement patient progress tracking dashboard
 - [ ] Create treatment notes functionality
-- [ ] Add worksheet assignment system
-- [ ] Implement secure messaging with patients
+- [x] Add worksheet assignment system (via existing worksheets API)
+- [x] Implement secure messaging with patients (via existing messaging system)
 
 ## API Development
 
