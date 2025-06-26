@@ -113,7 +113,11 @@ export class AuthService {
         },
       });
 
-      return therapist;
+      return {
+        ...therapist,
+        treatmentSuccessRates: therapist.treatmentSuccessRates as Record<string, any> || {},
+        hourlyRate: Number(therapist.hourlyRate),
+      };
     } catch (error) {
       console.error(
         'Therapist registration error:',

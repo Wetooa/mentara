@@ -1,6 +1,13 @@
 import { IsString, IsOptional } from 'class-validator';
 import { UserResponse } from './auth';
 
+export class CommentUserResponse {
+  id!: string;
+  firstName!: string;
+  lastName!: string;
+  avatarUrl!: string | null;
+}
+
 export class CommentCreateInputDto {
   @IsString()
   postId!: string;
@@ -58,7 +65,7 @@ export class CommentResponse {
   updatedAt!: Date;
 
   userId!: string;
-  user!: UserResponse;
+  user!: CommentUserResponse;
 
   postId!: string;
 
@@ -83,7 +90,7 @@ export class ReplyResponse {
   updatedAt!: Date;
 
   userId!: string;
-  user!: UserResponse;
+  user!: CommentUserResponse;
 
   hearts!: number;
   files!: ReplyFileResponse[];

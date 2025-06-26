@@ -99,11 +99,19 @@ export class SearchService {
               avatarUrl: true,
             },
           },
-          community: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
+          room: {
+            include: {
+              roomGroup: {
+                include: {
+                  community: {
+                    select: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                    },
+                  },
+                },
+              },
             },
           },
           _count: {

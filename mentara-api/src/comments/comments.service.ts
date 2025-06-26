@@ -108,6 +108,7 @@ export class CommentsService {
       return {
         ...comment,
         hearts: comment.hearts.length,
+        files: [], // TODO: Implement file handling for comments
       };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
@@ -184,6 +185,7 @@ export class CommentsService {
       return {
         ...comment,
         hearts: comment.hearts.length,
+        files: [], // TODO: Implement file handling for comments
       };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));
@@ -213,18 +215,17 @@ export class CommentsService {
         where: { id, userId },
         data: {
           content: data.content,
-          files: {
-            update: data.files?.map((file) => ({
-              where: { id: file.commentId },
-              data: {
-                url: file.url,
-                type: file.type,
-              },
-            })),
-          },
+          // TODO: Implement file handling for comments
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
           hearts: true,
         },
       });
@@ -232,6 +233,7 @@ export class CommentsService {
       return {
         ...updatedComment,
         hearts: updatedComment.hearts.length,
+        files: [], // TODO: Implement file handling for comments
       };
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error));

@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { MeetingStatus } from '@prisma/client';
 import {
   MeetingCreateDto,
   MeetingUpdateDto,
@@ -277,7 +278,15 @@ export class BookingService {
       return this.prisma.meeting.update({
         where: { id },
         data: {
-          ...updateMeetingDto,
+          title: updateMeetingDto.title,
+          description: updateMeetingDto.description,
+          startTime: updateMeetingDto.startTime,
+          duration: updateMeetingDto.duration,
+          meetingType: updateMeetingDto.meetingType,
+          therapistId: updateMeetingDto.therapistId,
+          ...(updateMeetingDto.status && {
+            status: updateMeetingDto.status as MeetingStatus,
+          }),
         },
         include: {
           client: {

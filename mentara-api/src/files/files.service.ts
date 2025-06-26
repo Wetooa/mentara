@@ -10,6 +10,7 @@ import {
   ScanStatus,
   AttachmentEntityType,
   AttachmentPurpose,
+  FileShareType,
 } from '@prisma/client';
 
 @Injectable()
@@ -240,6 +241,7 @@ export class FilesService {
     return this.prisma.fileShare.create({
       data: {
         ...data,
+        shareType: data.shareType as FileShareType,
         fileId,
         shareToken,
       },

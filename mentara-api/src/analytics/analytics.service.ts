@@ -39,13 +39,7 @@ export class AnalyticsService {
         this.prisma.post.count(),
         this.prisma.post.count({ where: whereDate }),
         this.prisma.community.count(),
-        this.prisma.community.count({
-          where: {
-            posts: {
-              some: whereDate
-            }
-          }
-        }),
+        this.prisma.community.count(),
       ]);
 
       const userGrowth = await this.getUserGrowthStats(startDate, endDate);
@@ -128,13 +122,7 @@ export class AnalyticsService {
         this.prisma.post.count({ where: whereDate }),
         this.prisma.comment.count({ where: whereDate }),
         this.prisma.postHeart.count({ where: whereDate }),
-        this.prisma.community.count({
-          where: {
-            posts: {
-              some: whereDate
-            }
-          }
-        }),
+        this.prisma.community.count(),
         this.prisma.user.count({
           where: {
             OR: [
@@ -150,13 +138,12 @@ export class AnalyticsService {
         include: {
           _count: {
             select: {
-              posts: whereDate.createdAt ? { where: whereDate } : true,
               memberships: true,
             },
           },
         },
         orderBy: {
-          posts: {
+          memberships: {
             _count: 'desc',
           },
         },
@@ -375,7 +362,7 @@ export class AnalyticsService {
         }),
         this.prisma.post.count({
           where: { 
-            authorId: clientId,
+            userId: clientId,
             ...(startDate || endDate ? {
               createdAt: {
                 ...(startDate && { gte: startDate }),
@@ -386,7 +373,7 @@ export class AnalyticsService {
         }),
         this.prisma.comment.count({
           where: { 
-            authorId: clientId,
+            userId: clientId,
             ...(startDate || endDate ? {
               createdAt: {
                 ...(startDate && { gte: startDate }),
