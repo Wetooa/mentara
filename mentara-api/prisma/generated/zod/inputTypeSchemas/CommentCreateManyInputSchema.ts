@@ -7,8 +7,6 @@ export const CommentCreateManyInputSchema: z.ZodType<Prisma.CommentCreateManyInp
   postId: z.string(),
   userId: z.string(),
   content: z.string(),
-  heartCount: z.number().int().optional(),
-  parentId: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional()
 }).strict();

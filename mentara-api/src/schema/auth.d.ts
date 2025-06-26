@@ -129,7 +129,118 @@ export class TherapistCreateDto extends UserCreateDto {
   hourlyRate!: number;
 }
 
-export class TherapistUpdateDto extends UserCreateDto {}
+export class TherapistUpdateDto {
+  @IsString()
+  @IsOptional()
+  mobile?: string;
+  
+  @IsString()
+  @IsOptional()
+  province?: string;
+
+  @IsString()
+  @IsOptional()
+  providerType?: string;
+  
+  @IsString()
+  @IsOptional()
+  professionalLicenseType?: string;
+  
+  @IsString()
+  @IsOptional()
+  isPRCLicensed?: string;
+  
+  @IsString()
+  @IsOptional()
+  prcLicenseNumber?: string;
+  
+  @IsDate()
+  @IsOptional()
+  expirationDateOfLicense?: Date;
+  
+  @IsDate()
+  @IsOptional()
+  practiceStartDate?: Date;
+
+  @IsArray()
+  @IsOptional()
+  areasOfExpertise?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  assessmentTools?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  therapeuticApproachesUsedList?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  languagesOffered?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  providedOnlineTherapyBefore?: boolean;
+  
+  @IsBoolean()
+  @IsOptional()
+  comfortableUsingVideoConferencing?: boolean;
+  
+  @IsArray()
+  @IsOptional()
+  preferredSessionLength?: number[];
+
+  @IsString()
+  @IsOptional()
+  privateConfidentialSpace?: string;
+  
+  @IsBoolean()
+  @IsOptional()
+  compliesWithDataPrivacyAct?: boolean;
+  
+  @IsString()
+  @IsOptional()
+  professionalLiabilityInsurance?: string;
+  
+  @IsString()
+  @IsOptional()
+  complaintsOrDisciplinaryActions?: string;
+  
+  @IsBoolean()
+  @IsOptional()
+  willingToAbideByPlatformGuidelines?: boolean;
+
+  @IsArray()
+  @IsOptional()
+  expertise?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  approaches?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  languages?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  illnessSpecializations?: string[];
+  
+  @IsArray()
+  @IsOptional()
+  acceptTypes?: string[];
+  
+  @IsOptional()
+  treatmentSuccessRates?: Record<string, number>;
+
+  @IsString()
+  @IsOptional()
+  sessionLength?: string;
+  
+  @IsNumber()
+  @IsOptional()
+  hourlyRate?: number;
+}
 
 export type UserResponse = {
   id: string;

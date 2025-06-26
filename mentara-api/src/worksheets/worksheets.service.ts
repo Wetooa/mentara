@@ -226,13 +226,13 @@ export class WorksheetsService {
   async addSubmission(data: WorksheetSubmissionCreateInputDto) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
-      where: { id: data.worksheet.connect?.id },
+      where: { id: data.worksheetId },
       include: { client: true },
     });
 
     if (!worksheet) {
       throw new NotFoundException(
-        `Worksheet with ID ${data.worksheet.connect?.id} not found`,
+        `Worksheet with ID ${data.worksheetId} not found`,
       );
     }
 
@@ -274,7 +274,10 @@ export class WorksheetsService {
       //   );
       // }
       await prisma.worksheetSubmission.create({
-        data,
+        data: {
+          ...data,
+          worksheetId: id,
+        },
       });
 
       // Update worksheet status if completing submission

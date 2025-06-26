@@ -17,7 +17,6 @@ export const TherapistCountOrderByAggregateInputSchema: z.ZodType<Prisma.Therapi
   prcLicenseNumber: z.lazy(() => SortOrderSchema).optional(),
   expirationDateOfLicense: z.lazy(() => SortOrderSchema).optional(),
   practiceStartDate: z.lazy(() => SortOrderSchema).optional(),
-  yearsOfExperience: z.lazy(() => SortOrderSchema).optional(),
   areasOfExpertise: z.lazy(() => SortOrderSchema).optional(),
   assessmentTools: z.lazy(() => SortOrderSchema).optional(),
   therapeuticApproachesUsedList: z.lazy(() => SortOrderSchema).optional(),
@@ -25,10 +24,6 @@ export const TherapistCountOrderByAggregateInputSchema: z.ZodType<Prisma.Therapi
   providedOnlineTherapyBefore: z.lazy(() => SortOrderSchema).optional(),
   comfortableUsingVideoConferencing: z.lazy(() => SortOrderSchema).optional(),
   preferredSessionLength: z.lazy(() => SortOrderSchema).optional(),
-<<<<<<< HEAD
-  accepts: z.lazy(() => SortOrderSchema).optional(),
-=======
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
   privateConfidentialSpace: z.lazy(() => SortOrderSchema).optional(),
   compliesWithDataPrivacyAct: z.lazy(() => SortOrderSchema).optional(),
   professionalLiabilityInsurance: z.lazy(() => SortOrderSchema).optional(),
@@ -40,20 +35,8 @@ export const TherapistCountOrderByAggregateInputSchema: z.ZodType<Prisma.Therapi
   illnessSpecializations: z.lazy(() => SortOrderSchema).optional(),
   acceptTypes: z.lazy(() => SortOrderSchema).optional(),
   treatmentSuccessRates: z.lazy(() => SortOrderSchema).optional(),
-<<<<<<< HEAD
-  uploadedFiles: z.lazy(() => SortOrderSchema).optional(),
   sessionLength: z.lazy(() => SortOrderSchema).optional(),
   hourlyRate: z.lazy(() => SortOrderSchema).optional(),
-  bio: z.lazy(() => SortOrderSchema).optional(),
-  profileImageUrl: z.lazy(() => SortOrderSchema).optional(),
-  profileComplete: z.lazy(() => SortOrderSchema).optional(),
-  isActive: z.lazy(() => SortOrderSchema).optional(),
-  patientSatisfaction: z.lazy(() => SortOrderSchema).optional(),
-  totalPatients: z.lazy(() => SortOrderSchema).optional(),
-=======
-  sessionLength: z.lazy(() => SortOrderSchema).optional(),
-  hourlyRate: z.lazy(() => SortOrderSchema).optional(),
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();

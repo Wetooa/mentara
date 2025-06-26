@@ -32,7 +32,6 @@ export const TherapistSelectSchema: z.ZodType<Prisma.TherapistSelect> = z.object
   prcLicenseNumber: z.boolean().optional(),
   expirationDateOfLicense: z.boolean().optional(),
   practiceStartDate: z.boolean().optional(),
-  yearsOfExperience: z.boolean().optional(),
   areasOfExpertise: z.boolean().optional(),
   assessmentTools: z.boolean().optional(),
   therapeuticApproachesUsedList: z.boolean().optional(),
@@ -40,10 +39,6 @@ export const TherapistSelectSchema: z.ZodType<Prisma.TherapistSelect> = z.object
   providedOnlineTherapyBefore: z.boolean().optional(),
   comfortableUsingVideoConferencing: z.boolean().optional(),
   preferredSessionLength: z.boolean().optional(),
-<<<<<<< HEAD
-  accepts: z.boolean().optional(),
-=======
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
   privateConfidentialSpace: z.boolean().optional(),
   compliesWithDataPrivacyAct: z.boolean().optional(),
   professionalLiabilityInsurance: z.boolean().optional(),
@@ -55,20 +50,8 @@ export const TherapistSelectSchema: z.ZodType<Prisma.TherapistSelect> = z.object
   illnessSpecializations: z.boolean().optional(),
   acceptTypes: z.boolean().optional(),
   treatmentSuccessRates: z.boolean().optional(),
-<<<<<<< HEAD
-  uploadedFiles: z.boolean().optional(),
   sessionLength: z.boolean().optional(),
   hourlyRate: z.boolean().optional(),
-  bio: z.boolean().optional(),
-  profileImageUrl: z.boolean().optional(),
-  profileComplete: z.boolean().optional(),
-  isActive: z.boolean().optional(),
-  patientSatisfaction: z.boolean().optional(),
-  totalPatients: z.boolean().optional(),
-=======
-  sessionLength: z.boolean().optional(),
-  hourlyRate: z.boolean().optional(),
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),

@@ -8,7 +8,6 @@ async function setupBookingDemo() {
   // Get some therapists and clients
   const therapists = await prisma.therapist.findMany({
     where: { 
-      approved: true,
       status: 'approved'
     },
     take: 3,
@@ -122,7 +121,6 @@ async function setupBookingDemo() {
         title: `Sample Session ${i + 1}`,
         description: 'This is a sample therapy session',
         startTime,
-        endTime,
         duration: 60,
         meetingType: 'video',
         clientId: client.id,

@@ -136,8 +136,12 @@ export class ReviewsService {
         },
         therapist: {
           select: {
-            firstName: true,
-            lastName: true,
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         },
         meeting: {

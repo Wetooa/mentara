@@ -12,7 +12,6 @@ import { JsonFilterSchema } from './JsonFilterSchema';
 import { DecimalFilterSchema } from './DecimalFilterSchema';
 import { isValidDecimalInput } from './isValidDecimalInput';
 import { DecimalJsLikeSchema } from './DecimalJsLikeSchema';
-import { IntFilterSchema } from './IntFilterSchema';
 import { UserScalarRelationFilterSchema } from './UserScalarRelationFilterSchema';
 import { UserWhereInputSchema } from './UserWhereInputSchema';
 import { AdminNullableScalarRelationFilterSchema } from './AdminNullableScalarRelationFilterSchema';
@@ -44,38 +43,6 @@ export const TherapistWhereUniqueInputSchema: z.ZodType<Prisma.TherapistWhereUni
   prcLicenseNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   expirationDateOfLicense: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   practiceStartDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-<<<<<<< HEAD
-  yearsOfExperience: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  areasOfExpertise: z.lazy(() => JsonFilterSchema).optional(),
-  assessmentTools: z.lazy(() => JsonFilterSchema).optional(),
-  therapeuticApproachesUsedList: z.lazy(() => JsonFilterSchema).optional(),
-  languagesOffered: z.lazy(() => JsonFilterSchema).optional(),
-  providedOnlineTherapyBefore: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  comfortableUsingVideoConferencing: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  weeklyAvailability: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  preferredSessionLength: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  accepts: z.lazy(() => JsonFilterSchema).optional(),
-  privateConfidentialSpace: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  compliesWithDataPrivacyAct: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  professionalLiabilityInsurance: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  complaintsOrDisciplinaryActions: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  willingToAbideByPlatformGuidelines: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  expertise: z.lazy(() => JsonNullableFilterSchema).optional(),
-  approaches: z.lazy(() => JsonNullableFilterSchema).optional(),
-  languages: z.lazy(() => JsonNullableFilterSchema).optional(),
-  illnessSpecializations: z.lazy(() => JsonNullableFilterSchema).optional(),
-  acceptTypes: z.lazy(() => JsonNullableFilterSchema).optional(),
-  treatmentSuccessRates: z.lazy(() => JsonNullableFilterSchema).optional(),
-  uploadedFiles: z.lazy(() => JsonNullableFilterSchema).optional(),
-  sessionLength: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  hourlyRate: z.union([ z.lazy(() => DecimalNullableFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
-  bio: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  profileImageUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  profileComplete: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  patientSatisfaction: z.union([ z.lazy(() => DecimalNullableFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
-  totalPatients: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
-=======
   areasOfExpertise: z.lazy(() => StringNullableListFilterSchema).optional(),
   assessmentTools: z.lazy(() => StringNullableListFilterSchema).optional(),
   therapeuticApproachesUsedList: z.lazy(() => StringNullableListFilterSchema).optional(),
@@ -96,7 +63,6 @@ export const TherapistWhereUniqueInputSchema: z.ZodType<Prisma.TherapistWhereUni
   treatmentSuccessRates: z.lazy(() => JsonFilterSchema).optional(),
   sessionLength: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   hourlyRate: z.union([ z.lazy(() => DecimalFilterSchema),z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),

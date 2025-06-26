@@ -20,6 +20,7 @@ async function assignTherapistToUser(
     // Find the therapist
     const therapist = await prisma.therapist.findUnique({
       where: { userId: therapistClerkId },
+      include: { user: true },
     });
 
     if (!therapist) {
@@ -37,7 +38,7 @@ async function assignTherapistToUser(
     });
 
     console.log(
-      `Successfully assigned therapist ${therapist.firstName} ${therapist.lastName} to user ${user.firstName} ${user.lastName}`,
+      `Successfully assigned therapist ${therapist.user.firstName} ${therapist.user.lastName} to user ${user.firstName} ${user.lastName}`,
     );
     console.log('Created relationship:', clientTherapist);
   } catch (error) {
@@ -64,9 +65,9 @@ async function assignRandomTherapists() {
     // Get all active therapists
     const therapists = await prisma.therapist.findMany({
       where: {
-        approved: true,
         status: 'approved',
       },
+      include: { user: true },
     });
 
     if (therapists.length === 0) {
@@ -93,7 +94,7 @@ async function assignRandomTherapists() {
       });
 
       console.log(
-        `Assigned therapist ${therapist.firstName} ${therapist.lastName} to user ${user.firstName} ${user.lastName}`,
+        `Assigned therapist ${therapist.user.firstName} ${therapist.user.lastName} to user ${user.firstName} ${user.lastName}`,
       );
     }
 

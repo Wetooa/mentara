@@ -29,10 +29,7 @@ export * from './PreAssessmentSchema';
 export * from './ReviewSchema';
 export * from './ReviewHelpfulSchema';
 export * from './TherapistSchema';
-<<<<<<< HEAD
-=======
 export * from './TherapistFilesSchema';
->>>>>>> 370c253f5291a6f156c41c45aa1da22a5b06d279
 export * from './UserSchema';
 export * from './ClientSchema';
 export * from './ModeratorSchema';
