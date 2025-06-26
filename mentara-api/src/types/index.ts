@@ -109,3 +109,23 @@ export {
   SubmitWorksheetDto,
   CreateWorksheetMaterialDto,
 } from '../worksheets/dto/worksheet.dto';
+
+// Pre-assessment types
+export interface PreAssessmentResponse {
+  id: string;
+  userId: string;
+  questionnaires: string[];
+  answers: number[][];
+  answerMatrix: number[];
+  scores: Record<string, number>;
+  severityLevels: Record<string, string>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Re-export pre-assessment DTOs
+export { CreatePreAssessmentDto } from '../pre-assessment/dto/pre-assessment.dto';
+
+// Re-export auth DTOs
+export { RegisterClientDto } from '../auth/dto/register-client.dto';
+export { RegisterTherapistDto } from '../auth/dto/register-therapist.dto';
