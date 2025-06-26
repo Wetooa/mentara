@@ -9,35 +9,37 @@ async function assignTherapistToUser(
   try {
     // Find the user
     const user = await prisma.user.findUnique({
-      where: { clerkId: userClerkId },
+      where: { id: userClerkId },
     });
 
     if (!user) {
-      console.error(`User with clerkId ${userClerkId} not found`);
+      console.error(`User with id ${userClerkId} not found`);
       return;
     }
 
     // Find the therapist
     const therapist = await prisma.therapist.findUnique({
-      where: { clerkUserId: therapistClerkId },
+      where: { userId: therapistClerkId },
     });
 
     if (!therapist) {
-      console.error(`Therapist with clerkUserId ${therapistClerkId} not found`);
+      console.error(`Therapist with userId ${therapistClerkId} not found`);
       return;
     }
 
-    // Assign the therapist to the user
-    const updatedUser = await prisma.user.update({
-      where: { clerkId: userClerkId },
-      data: { therapistId: therapist.id },
-      include: { therapist: true },
+    // Create ClientTherapist relationship
+    const clientTherapist = await prisma.clientTherapist.create({
+      data: {
+        clientId: user.id,
+        therapistId: therapist.userId,
+        status: 'active',
+      },
     });
 
     console.log(
       `Successfully assigned therapist ${therapist.firstName} ${therapist.lastName} to user ${user.firstName} ${user.lastName}`,
     );
-    console.log('Updated user:', updatedUser);
+    console.log('Created relationship:', clientTherapist);
   } catch (error) {
     console.error('Error assigning therapist:', error);
   }
@@ -48,16 +50,22 @@ async function assignRandomTherapists() {
     // Get all users without therapists
     const usersWithoutTherapist = await prisma.user.findMany({
       where: {
-        therapistId: null,
         isActive: true,
         role: 'user',
+        client: {
+          assignedTherapists: {
+            none: {},
+          },
+        },
       },
+      include: { client: true },
     });
 
     // Get all active therapists
     const therapists = await prisma.therapist.findMany({
       where: {
-        isActive: true,
+        approved: true,
+        status: 'approved',
       },
     });
 
@@ -76,9 +84,12 @@ async function assignRandomTherapists() {
       const user = usersWithoutTherapist[i];
       const therapist = therapists[i % therapists.length]; // Round-robin assignment
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { therapistId: therapist.id },
+      await prisma.clientTherapist.create({
+        data: {
+          clientId: user.id,
+          therapistId: therapist.userId,
+          status: 'active',
+        },
       });
 
       console.log(
