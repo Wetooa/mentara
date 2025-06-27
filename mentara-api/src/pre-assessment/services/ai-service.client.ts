@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { 
-  IsArray, 
-  IsNumber, 
-  validateSync, 
-  Min, 
-  Max, 
-  ArrayMinSize, 
-  ArrayMaxSize 
+import {
+  IsArray,
+  IsNumber,
+  validateSync,
+  Min,
+  Max,
+  ArrayMinSize,
+  ArrayMaxSize,
 } from 'class-validator';
 
 // DTO for AI service input validation
@@ -42,8 +42,10 @@ export class AiServiceClient {
 
   constructor(private readonly configService: ConfigService) {
     // Get AI service URL from environment with fallback
-    this.baseURL = this.configService.get<string>('AI_SERVICE_URL') || 'http://localhost:5000';
-    
+    this.baseURL =
+      this.configService.get<string>('AI_SERVICE_URL') ||
+      'http://localhost:5000';
+
     this.axiosInstance = axios.create({
       baseURL: this.baseURL,
       timeout: this.timeoutMs,
@@ -62,7 +64,7 @@ export class AiServiceClient {
       (error) => {
         this.logger.error('AI service request interceptor error:', error);
         return Promise.reject(error);
-      }
+      },
     );
 
     // Add response interceptor for logging
@@ -72,9 +74,12 @@ export class AiServiceClient {
         return response;
       },
       (error) => {
-        this.logger.error('AI service response error:', error?.response?.status || error.message);
+        this.logger.error(
+          'AI service response error:',
+          error?.response?.status || error.message,
+        );
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -83,42 +88,45 @@ export class AiServiceClient {
     inputDto.inputs = flatAnswers;
 
     const errors = validateSync(inputDto);
-    
+
     if (errors.length > 0) {
-      this.logger.warn('AI service input validation failed:', errors.map(e => e.toString()));
+      this.logger.warn(
+        'AI service input validation failed:',
+        errors.map((e) => e.toString()),
+      );
       return false;
     }
-    
+
     return true;
   }
 
   private isRateLimited(): boolean {
     const now = Date.now();
-    
+
     // Reset counter every minute
     if (now - this.lastResetTime > 60000) {
       this.requestCount = 0;
       this.lastResetTime = now;
     }
-    
+
     if (this.requestCount >= this.maxRequestsPerMinute) {
       this.logger.warn('AI service rate limit exceeded');
       return true;
     }
-    
+
     this.requestCount++;
     return false;
   }
 
   private sanitizeInput(flatAnswers: number[]): number[] {
     // Sanitize input values to prevent injection attacks
-    return flatAnswers.map(value => {
+    return flatAnswers.map((value) => {
       // Ensure value is a finite number
       if (!Number.isFinite(value)) {
         this.logger.warn(`Invalid value detected: ${value}, replacing with 0`);
         return 0;
       }
-      
+
       // Clamp values to expected range
       return Math.max(0, Math.min(10, Math.round(value * 100) / 100)); // Round to 2 decimal places
     });
@@ -126,7 +134,7 @@ export class AiServiceClient {
 
   async predict(flatAnswers: number[]): Promise<AiPredictionResult> {
     const startTime = Date.now();
-    
+
     try {
       // Rate limiting check
       if (this.isRateLimited()) {
@@ -149,7 +157,7 @@ export class AiServiceClient {
 
       // Make the prediction with retry logic
       const result = await this.makeRequestWithRetry(sanitizedInput);
-      
+
       const responseTime = Date.now() - startTime;
       this.logger.log(`AI prediction completed in ${responseTime}ms`);
 
@@ -158,11 +166,10 @@ export class AiServiceClient {
         predictions: result,
         responseTime,
       };
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
       this.logger.error(`AI prediction failed after ${responseTime}ms:`, error);
-      
+
       return {
         success: false,
         error: this.getErrorMessage(error),
@@ -172,8 +179,8 @@ export class AiServiceClient {
   }
 
   private async makeRequestWithRetry(
-    sanitizedInput: number[], 
-    attempt: number = 1
+    sanitizedInput: number[],
+    attempt: number = 1,
   ): Promise<Record<string, boolean>> {
     try {
       const response = await this.axiosInstance.post('/predict', {
@@ -186,18 +193,19 @@ export class AiServiceClient {
       }
 
       return response.data as Record<string, boolean>;
-
     } catch (error) {
       if (attempt < this.maxRetries && this.isRetryableError(error)) {
-        this.logger.warn(`AI service request failed (attempt ${attempt}/${this.maxRetries}), retrying...`);
-        
+        this.logger.warn(
+          `AI service request failed (attempt ${attempt}/${this.maxRetries}), retrying...`,
+        );
+
         // Exponential backoff
         const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
         return this.makeRequestWithRetry(sanitizedInput, attempt + 1);
       }
-      
+
       throw error;
     }
   }
@@ -205,10 +213,12 @@ export class AiServiceClient {
   private isRetryableError(error: unknown): boolean {
     if (error instanceof AxiosError) {
       // Retry on network errors, timeouts, and 5xx server errors
-      return !error.response || 
-             error.response.status >= 500 || 
-             error.code === 'ECONNRESET' ||
-             error.code === 'ETIMEDOUT';
+      return (
+        !error.response ||
+        error.response.status >= 500 ||
+        error.code === 'ECONNRESET' ||
+        error.code === 'ETIMEDOUT'
+      );
     }
     return false;
   }
@@ -231,13 +241,15 @@ export class AiServiceClient {
         return 'AI service internal error';
       }
     }
-    
+
     return 'Unknown error occurred while contacting AI service';
   }
 
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await this.axiosInstance.get('/health', { timeout: 5000 });
+      const response = await this.axiosInstance.get('/health', {
+        timeout: 5000,
+      });
       return response.status === 200;
     } catch (error) {
       this.logger.warn('AI service health check failed:', error);

@@ -1,33 +1,67 @@
-import { useUser, useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
+import { useUser, useClerk, useSignIn, useSignUp, useAuth as useClerkAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AuthUser, UserRole } from "@/lib/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-async function fetchMe() {
-  const res = await fetch("/api/auth/me");
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+async function fetchMe(getToken: () => Promise<string | null>) {
+  const token = await getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    headers,
+    credentials: "include",
+  });
   if (!res.ok) throw new Error("Failed to fetch user");
   return res.json();
 }
 
 type RegisterArgs = { userId?: string | null; data: Record<string, unknown> };
 
-async function registerClient({ data }: RegisterArgs) {
-  const res = await fetch("/api/auth/register/client", {
+async function registerClient({ data }: RegisterArgs, getToken: () => Promise<string | null>) {
+  const token = await getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/auth/register/client`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(data),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to register client");
   return res.json();
 }
 
-async function registerTherapist({ data }: RegisterArgs) {
-  const res = await fetch("/api/auth/register/therapist", {
+async function registerTherapist({ data }: RegisterArgs, getToken: () => Promise<string | null>) {
+  const token = await getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}/auth/register/therapist`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(data),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to register therapist");
   return res.json();
@@ -39,6 +73,7 @@ export function useAuth() {
   const { signOut } = useClerk();
   const { signIn, isLoaded: isSignInLoaded } = useSignIn();
   const { signUp, isLoaded: isSignUpLoaded } = useSignUp();
+  const { getToken } = useClerkAuth();
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -51,7 +86,7 @@ export function useAuth() {
     refetch: refetchBackendUser,
   } = useQuery({
     queryKey: ["me"],
-    queryFn: fetchMe,
+    queryFn: () => fetchMe(getToken),
     enabled: isLoaded && !!user,
   });
 
@@ -69,7 +104,7 @@ export function useAuth() {
 
   // Mutations for backend registration
   const clientRegisterMutation = useMutation({
-    mutationFn: registerClient,
+    mutationFn: (args: RegisterArgs) => registerClient(args, getToken),
     onSuccess: () => {
       toast.success("Client registered with backend!");
       queryClient.invalidateQueries({ queryKey: ["me"] });
@@ -82,7 +117,7 @@ export function useAuth() {
   });
 
   const therapistRegisterMutation = useMutation({
-    mutationFn: registerTherapist,
+    mutationFn: (args: RegisterArgs) => registerTherapist(args, getToken),
     onSuccess: () => {
       toast.success("Therapist registered with backend!");
       queryClient.invalidateQueries({ queryKey: ["me"] });

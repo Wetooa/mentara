@@ -1,4 +1,7 @@
-import { BaseDomainEvent, EventMetadata } from './interfaces/domain-event.interface';
+import {
+  BaseDomainEvent,
+  EventMetadata,
+} from './interfaces/domain-event.interface';
 
 // Social Interaction Events
 
@@ -95,7 +98,12 @@ export class CommunityLeftEvent extends BaseDomainEvent<CommunityLeftData> {
 export interface PostReportedData {
   postId: string;
   reportedBy: string;
-  reportReason: 'inappropriate' | 'spam' | 'harassment' | 'misinformation' | 'other';
+  reportReason:
+    | 'inappropriate'
+    | 'spam'
+    | 'harassment'
+    | 'misinformation'
+    | 'other';
   description: string;
   reportedAt: Date;
   authorId: string;
@@ -132,7 +140,12 @@ export interface FollowUserData {
 
 export class FollowUserEvent extends BaseDomainEvent<FollowUserData> {
   constructor(data: FollowUserData, metadata?: EventMetadata) {
-    super(`${data.followerId}_${data.followedUserId}`, 'UserFollow', data, metadata);
+    super(
+      `${data.followerId}_${data.followedUserId}`,
+      'UserFollow',
+      data,
+      metadata,
+    );
   }
 }
 
@@ -145,6 +158,11 @@ export interface UnfollowUserData {
 
 export class UnfollowUserEvent extends BaseDomainEvent<UnfollowUserData> {
   constructor(data: UnfollowUserData, metadata?: EventMetadata) {
-    super(`${data.followerId}_${data.followedUserId}`, 'UserFollow', data, metadata);
+    super(
+      `${data.followerId}_${data.followedUserId}`,
+      'UserFollow',
+      data,
+      metadata,
+    );
   }
 }

@@ -30,7 +30,7 @@ export class TherapistManagementService {
 
   async getTherapistProfile(userId: string): Promise<TherapistResponse> {
     try {
-      return await this.prisma.therapist.findUniqueOrThrow({
+      const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId },
         include: {
           user: true,
@@ -40,6 +40,12 @@ export class TherapistManagementService {
           assignedClients: true,
         },
       });
+      return {
+        ...therapist,
+        treatmentSuccessRates:
+          (therapist.treatmentSuccessRates as Record<string, any>) || {},
+        hourlyRate: Number(therapist.hourlyRate),
+      };
     } catch (error) {
       console.error(
         'Error retrieving therapist profile:',
@@ -120,13 +126,19 @@ export class TherapistManagementService {
       if (data.hourlyRate !== undefined)
         therapistData.hourlyRate = data.hourlyRate;
 
-      return await this.prisma.therapist.update({
+      const updatedTherapist = await this.prisma.therapist.update({
         where: { userId },
         data: therapistData,
         include: {
           user: true,
         },
       });
+      return {
+        ...updatedTherapist,
+        treatmentSuccessRates:
+          (updatedTherapist.treatmentSuccessRates as Record<string, any>) || {},
+        hourlyRate: Number(updatedTherapist.hourlyRate),
+      };
     } catch (error) {
       console.error(
         'Error updating therapist profile:',
@@ -212,12 +224,18 @@ export class TherapistManagementService {
 
   async getProfile(therapistId: string): Promise<TherapistResponse> {
     try {
-      return await this.prisma.therapist.findUniqueOrThrow({
+      const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId: therapistId },
         include: {
           user: true,
         },
       });
+      return {
+        ...therapist,
+        treatmentSuccessRates:
+          (therapist.treatmentSuccessRates as Record<string, any>) || {},
+        hourlyRate: Number(therapist.hourlyRate),
+      };
     } catch (error) {
       console.error(
         'Error retrieving therapist profile:',
@@ -234,13 +252,19 @@ export class TherapistManagementService {
     data: Prisma.TherapistUpdateInput,
   ): Promise<TherapistResponse> {
     try {
-      return await this.prisma.therapist.update({
+      const updatedTherapist = await this.prisma.therapist.update({
         where: { userId: therapistId },
         data,
         include: {
           user: true,
         },
       });
+      return {
+        ...updatedTherapist,
+        treatmentSuccessRates:
+          (updatedTherapist.treatmentSuccessRates as Record<string, any>) || {},
+        hourlyRate: Number(updatedTherapist.hourlyRate),
+      };
     } catch (error) {
       console.error(
         'Error updating therapist profile:',

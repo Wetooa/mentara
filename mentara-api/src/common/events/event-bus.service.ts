@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DomainEvent, IEventBus, EventHandlerOptions } from './interfaces/domain-event.interface';
+import {
+  DomainEvent,
+  IEventBus,
+  EventHandlerOptions,
+} from './interfaces/domain-event.interface';
 
 @Injectable()
 export class EventBusService implements IEventBus {
@@ -79,7 +83,10 @@ export class EventBusService implements IEventBus {
       // For synchronous handlers, we still use async but without await
       this.eventEmitter.on(eventType, (event: DomainEvent<T>) => {
         wrappedHandler(event).catch((error) => {
-          this.logger.error(`Async event handler error: ${event.eventType}`, error);
+          this.logger.error(
+            `Async event handler error: ${event.eventType}`,
+            error,
+          );
         });
       });
     }
@@ -127,7 +134,8 @@ export class EventBusService implements IEventBus {
     const eventNames = this.eventEmitter.eventNames();
     return {
       totalListeners: eventNames.reduce(
-        (total, eventName) => total + this.eventEmitter.listenerCount(eventName),
+        (total, eventName) =>
+          total + this.eventEmitter.listenerCount(eventName),
         0,
       ),
       eventTypes: eventNames as string[],

@@ -10,4 +10,4 @@ import { AdminAuthGuard } from '../guards/admin-auth.guard';
   providers: [AdminService, PrismaService, RoleUtils, AdminAuthGuard],
   exports: [AdminService],
 })
-export class AdminModule { }
+export class AdminModule {}

@@ -1,4 +1,7 @@
-import { BaseDomainEvent, EventMetadata } from './interfaces/domain-event.interface';
+import {
+  BaseDomainEvent,
+  EventMetadata,
+} from './interfaces/domain-event.interface';
 
 // Payment & Billing Events
 
@@ -7,7 +10,12 @@ export interface PaymentProcessedData {
   userId: string;
   amount: number;
   currency: string;
-  paymentMethod: 'credit_card' | 'debit_card' | 'bank_transfer' | 'paypal' | 'insurance';
+  paymentMethod:
+    | 'credit_card'
+    | 'debit_card'
+    | 'bank_transfer'
+    | 'paypal'
+    | 'insurance';
   paymentStatus: 'pending' | 'completed' | 'failed' | 'cancelled' | 'refunded';
   transactionId: string;
   invoiceId?: string;

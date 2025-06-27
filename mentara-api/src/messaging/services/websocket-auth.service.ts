@@ -15,7 +15,7 @@ export class WebSocketAuthService {
     try {
       // Extract token from various sources
       const token = this.extractToken(socket);
-      
+
       if (!token) {
         this.logger.warn(`Socket ${socket.id} connected without valid token`);
         return null;
@@ -31,8 +31,10 @@ export class WebSocketAuthService {
         return null;
       }
 
-      this.logger.log(`Socket ${socket.id} authenticated as user ${verifiedToken.sub}`);
-      
+      this.logger.log(
+        `Socket ${socket.id} authenticated as user ${verifiedToken.sub}`,
+      );
+
       return {
         userId: verifiedToken.sub,
         role: verifiedToken.role as string | undefined,
@@ -48,7 +50,7 @@ export class WebSocketAuthService {
 
   private extractToken(socket: Socket): string | null {
     // Try different token sources in order of preference
-    
+
     // 1. Authorization header (Bearer token)
     const authHeader = socket.handshake.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -90,7 +92,7 @@ export class WebSocketAuthService {
       const verifiedToken = await verifyToken(token, {
         secretKey: process.env.CLERK_SECRET_KEY ?? '',
       });
-      
+
       // If token is valid, return as is
       return token;
     } catch (error) {

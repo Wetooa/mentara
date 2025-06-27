@@ -229,10 +229,16 @@ export class CommunitiesService {
     }
     return {
       ...community,
-      members: community.memberships.map((membership) => ({
-        ...membership,
-        user: membership.user,
-      })),
+      members: community.memberships
+        .filter(
+          (membership) =>
+            membership.userId !== null && membership.user !== null,
+        )
+        .map((membership) => ({
+          ...membership,
+          userId: membership.userId!,
+          user: membership.user!,
+        })),
     };
   }
 

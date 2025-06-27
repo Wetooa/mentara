@@ -65,7 +65,7 @@ export class ApiResponseBuilder {
     message?: string,
   ): PaginatedResponse<T> {
     const totalPages = Math.ceil(total / limit);
-    
+
     return {
       success: true,
       data,

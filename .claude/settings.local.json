@@ -16,7 +16,11 @@
       "Bash(do mv \"$file\" \"$file%.d.ts.ts\")",
       "Bash(done)",
       "Bash(grep:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(npm outdated)",
+      "Bash(npm audit:*)",
+      "Bash(rg \"any\" src/ --type ts -n)"
     ]
   },
   "enableAllProjectMcpServers": true,

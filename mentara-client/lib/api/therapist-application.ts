@@ -1,4 +1,18 @@
 import { TherapistApplication } from "@/data/mockTherapistApplicationData";
+import { createApiClient } from "@/lib/api";
+import { useAuth } from "@clerk/nextjs";
+
+// Create a function to get the API client with authentication
+const getApiClient = () => {
+  if (typeof window !== "undefined") {
+    // Client-side: use the hook
+    const { getToken } = useAuth();
+    return createApiClient(() => getToken());
+  } else {
+    // Server-side: no auth token available
+    return createApiClient(() => Promise.resolve(null));
+  }
+};
 
 /**
  * Submit a therapist application to the API
@@ -11,36 +25,11 @@ export async function submitTherapistApplication(
   try {
     console.log("Submitting application data:", applicationData);
 
-    // Ensure applicationData is properly sanitized for JSON
-    const sanitizedData = JSON.parse(JSON.stringify(applicationData));
+    // Use the centralized API client with JWT authentication
+    const api = getApiClient();
+    const data = await api.therapist.submitApplication(applicationData);
 
-    const response = await fetch("/api/therapist/application", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(sanitizedData),
-      cache: "no-store",
-    });
-
-    // Handle non-JSON responses
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error("Received non-JSON response:", text);
-      throw new Error(
-        "Server returned non-JSON response. Please try again later."
-      );
-    }
-
-    // Process the JSON response normally
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to submit application");
-    }
-
-    return { id: data.applicationId };
+    return { id: data.applicationId || data.id };
   } catch (error) {
     console.error("Error submitting therapist application:", error);
     throw error;
@@ -56,17 +45,9 @@ export async function getTherapistApplication(
   id: string
 ): Promise<TherapistApplication> {
   try {
-    const response = await fetch(`/api/therapist/application/${id}`, {
-      method: "GET",
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch application");
-    }
-
-    const data = await response.json();
-    return data.application;
+    const api = getApiClient();
+    const data = await api.therapist.getApplicationById(id);
+    return data.application || data;
   } catch (error) {
     console.error("Error fetching therapist application:", error);
     throw error;
@@ -82,25 +63,9 @@ export async function getAllTherapistApplications(
   status?: string
 ): Promise<TherapistApplication[]> {
   try {
-    const params = new URLSearchParams();
-    if (status) {
-      params.append("status", status);
-    }
-
-    const response = await fetch(
-      `/api/therapist/application?${params.toString()}`,
-      {
-        method: "GET",
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch applications");
-    }
-
-    const data = await response.json();
-    return data.applications;
+    const api = getApiClient();
+    const data = await api.therapist.getApplications({ status });
+    return data.applications || data;
   } catch (error) {
     console.error("Error fetching therapist applications:", error);
     throw error;
@@ -122,22 +87,11 @@ export async function updateTherapistApplicationStatus(
   generatedPassword?: string;
 }> {
   try {
-    const response = await fetch(`/api/therapist/application/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to update application status");
-    }
-
-    const data = await response.json();
+    const api = getApiClient();
+    const data = await api.therapist.updateApplication(id, { status });
+    
     return {
-      application: data.application,
+      application: data.application || data,
       therapistAccount: data.therapistAccount || null,
       generatedPassword: data.generatedPassword || null,
     };

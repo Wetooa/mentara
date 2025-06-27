@@ -16,7 +16,7 @@ import { Prisma } from '@prisma/client';
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
 
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(): Promise<AdminResponseDto[]> {
     try {

@@ -1,4 +1,7 @@
-import { BaseDomainEvent, EventMetadata } from './interfaces/domain-event.interface';
+import {
+  BaseDomainEvent,
+  EventMetadata,
+} from './interfaces/domain-event.interface';
 
 // Assessment & Progress Events
 
@@ -95,7 +98,11 @@ export interface ProgressNoteCreatedData {
   clientId: string;
   therapistId: string;
   sessionId?: string;
-  noteType: 'session_note' | 'progress_update' | 'treatment_plan' | 'assessment_note';
+  noteType:
+    | 'session_note'
+    | 'progress_update'
+    | 'treatment_plan'
+    | 'assessment_note';
   content: string;
   tags: string[];
   isPrivate: boolean;

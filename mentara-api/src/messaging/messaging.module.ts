@@ -7,7 +7,12 @@ import { PrismaService } from '../providers/prisma-client.provider';
 
 @Module({
   controllers: [MessagingController],
-  providers: [MessagingService, MessagingGateway, WebSocketAuthService, PrismaService],
+  providers: [
+    MessagingService,
+    MessagingGateway,
+    WebSocketAuthService,
+    PrismaService,
+  ],
   exports: [MessagingService, MessagingGateway, WebSocketAuthService],
 })
 export class MessagingModule {}

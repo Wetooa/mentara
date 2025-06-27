@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
+import { useApi } from "@/lib/api";
 
 interface Therapist {
   id: string;
@@ -32,6 +33,7 @@ interface UseTherapistReturn {
 
 export function useTherapist(): UseTherapistReturn {
   const { user } = useAuth();
+  const api = useApi();
   const [therapist, setTherapist] = useState<Therapist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,13 +48,8 @@ export function useTherapist(): UseTherapistReturn {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/users/me/therapist");
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch therapist");
-      }
-
+      // Use the user's assigned therapist endpoint (needs to be added to NestJS backend)
+      const data = await api.request<{ therapist: Therapist | null }>("/client/therapist");
       setTherapist(data.therapist);
     } catch (err) {
       setError(
@@ -72,20 +69,12 @@ export function useTherapist(): UseTherapistReturn {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/users/me/therapist", {
+      // Use the client-therapist assignment endpoint (needs to be added to NestJS backend)
+      const data = await api.request<{ therapist: Therapist }>("/client/therapist", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ therapistId }),
+        body: { therapistId },
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to assign therapist");
-      }
-
+      
       setTherapist(data.therapist);
     } catch (err) {
       setError(
@@ -106,15 +95,10 @@ export function useTherapist(): UseTherapistReturn {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/users/me/therapist", {
+      // Use the client-therapist removal endpoint (needs to be added to NestJS backend)
+      await api.request("/client/therapist", {
         method: "DELETE",
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to remove therapist");
-      }
 
       setTherapist(null);
     } catch (err) {

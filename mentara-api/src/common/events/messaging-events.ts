@@ -1,4 +1,7 @@
-import { BaseDomainEvent, EventMetadata } from './interfaces/domain-event.interface';
+import {
+  BaseDomainEvent,
+  EventMetadata,
+} from './interfaces/domain-event.interface';
 
 // Messaging & Communication Events
 

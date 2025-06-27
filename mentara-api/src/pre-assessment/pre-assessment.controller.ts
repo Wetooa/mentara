@@ -95,10 +95,10 @@ export class PreAssessmentController {
   }> {
     try {
       this.logger.log(`Admin ${currentUserId} checking AI service health`);
-      
+
       const healthy = await this.aiServiceClient.healthCheck();
       const serviceInfo = this.aiServiceClient.getServiceInfo();
-      
+
       return {
         status: healthy ? 'healthy' : 'unhealthy',
         healthy,

@@ -241,6 +241,7 @@ export class FilesService {
     return this.prisma.fileShare.create({
       data: {
         ...data,
+        shareType: data.shareType,
         fileId,
         shareToken,
       },

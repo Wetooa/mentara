@@ -1,4 +1,7 @@
-import { BaseDomainEvent, EventMetadata } from './interfaces/domain-event.interface';
+import {
+  BaseDomainEvent,
+  EventMetadata,
+} from './interfaces/domain-event.interface';
 
 // Booking & Therapy Events
 
@@ -108,13 +111,22 @@ export interface TherapistAssignedData {
   clientId: string;
   therapistId: string;
   assignedBy: string; // userId of admin or system
-  assignmentReason: 'manual' | 'recommendation' | 'availability' | 'specialty_match';
+  assignmentReason:
+    | 'manual'
+    | 'recommendation'
+    | 'availability'
+    | 'specialty_match';
   effectiveDate: Date;
 }
 
 export class TherapistAssignedEvent extends BaseDomainEvent<TherapistAssignedData> {
   constructor(data: TherapistAssignedData, metadata?: EventMetadata) {
-    super(`${data.clientId}_${data.therapistId}`, 'ClientTherapist', data, metadata);
+    super(
+      `${data.clientId}_${data.therapistId}`,
+      'ClientTherapist',
+      data,
+      metadata,
+    );
   }
 }
 
@@ -129,6 +141,11 @@ export interface TherapistUnassignedData {
 
 export class TherapistUnassignedEvent extends BaseDomainEvent<TherapistUnassignedData> {
   constructor(data: TherapistUnassignedData, metadata?: EventMetadata) {
-    super(`${data.clientId}_${data.therapistId}`, 'ClientTherapist', data, metadata);
+    super(
+      `${data.clientId}_${data.therapistId}`,
+      'ClientTherapist',
+      data,
+      metadata,
+    );
   }
 }

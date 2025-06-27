@@ -107,7 +107,6 @@ export class CommentsService {
 
       return {
         ...comment,
-        hearts: comment.hearts.length,
         files: [], // TODO: Include actual file attachments when implementing FileAttachment system
       };
     } catch (error) {
@@ -184,7 +183,6 @@ export class CommentsService {
 
       return {
         ...comment,
-        hearts: comment.hearts.length,
         files: [], // TODO: Include actual file attachments when implementing FileAttachment system
       };
     } catch (error) {
@@ -218,7 +216,14 @@ export class CommentsService {
           // TODO: Implement file updates through FileAttachment system
         },
         include: {
-          user: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
           hearts: true,
         },
       });

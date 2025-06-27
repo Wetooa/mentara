@@ -8,6 +8,7 @@ import {
   IsArray,
   IsJSON,
   IsNumber,
+  ValidateNested,
 } from 'class-validator';
 import { JsonValue, Decimal } from '@prisma/client/runtime/library';
 
@@ -174,18 +175,22 @@ export class TherapistUpdateDto {
   practiceStartDate?: Date;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   areasOfExpertise?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   assessmentTools?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   therapeuticApproachesUsedList?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   languagesOffered?: string[];
 
@@ -198,6 +203,7 @@ export class TherapistUpdateDto {
   comfortableUsingVideoConferencing?: boolean;
 
   @IsArray()
+  @IsNumber({}, { each: true })
   @IsOptional()
   preferredSessionLength?: number[];
 
@@ -222,22 +228,27 @@ export class TherapistUpdateDto {
   willingToAbideByPlatformGuidelines?: boolean;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   expertise?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   approaches?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   languages?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   illnessSpecializations?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   acceptTypes?: string[];
 

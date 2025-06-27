@@ -1,10 +1,20 @@
-import { BaseDomainEvent, EventMetadata } from './interfaces/domain-event.interface';
+import {
+  BaseDomainEvent,
+  EventMetadata,
+} from './interfaces/domain-event.interface';
 
 // System & Admin Events
 
 export interface SystemErrorData {
   errorId: string;
-  errorType: 'database' | 'external_api' | 'validation' | 'authentication' | 'authorization' | 'network' | 'internal';
+  errorType:
+    | 'database'
+    | 'external_api'
+    | 'validation'
+    | 'authentication'
+    | 'authorization'
+    | 'network'
+    | 'internal';
   errorMessage: string;
   stackTrace: string;
   requestId?: string;
@@ -42,7 +52,12 @@ export class AuditLogEvent extends BaseDomainEvent<AuditLogData> {
 
 export interface SecurityIncidentData {
   incidentId: string;
-  incidentType: 'brute_force' | 'suspicious_login' | 'data_breach' | 'unauthorized_access' | 'malicious_request';
+  incidentType:
+    | 'brute_force'
+    | 'suspicious_login'
+    | 'data_breach'
+    | 'unauthorized_access'
+    | 'malicious_request';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   affectedUserId?: string;
@@ -111,7 +126,13 @@ export class ConfigurationChangedEvent extends BaseDomainEvent<ConfigurationChan
 
 export interface AdminActionData {
   adminId: string;
-  action: 'user_suspend' | 'user_unsuspend' | 'user_delete' | 'role_change' | 'data_export' | 'system_config';
+  action:
+    | 'user_suspend'
+    | 'user_unsuspend'
+    | 'user_delete'
+    | 'role_change'
+    | 'data_export'
+    | 'system_config';
   targetUserId?: string;
   targetResource?: string;
   resourceId?: string;
@@ -124,7 +145,12 @@ export interface AdminActionData {
 
 export class AdminActionEvent extends BaseDomainEvent<AdminActionData> {
   constructor(data: AdminActionData, metadata?: EventMetadata) {
-    super(`${data.action}_${data.targetUserId || data.resourceId}`, 'AdminAction', data, metadata);
+    super(
+      `${data.action}_${data.targetUserId || data.resourceId}`,
+      'AdminAction',
+      data,
+      metadata,
+    );
   }
 }
 
@@ -151,7 +177,13 @@ export class DataExportRequestEvent extends BaseDomainEvent<DataExportRequestDat
 
 export interface PerformanceAlertData {
   alertId: string;
-  metricType: 'response_time' | 'cpu_usage' | 'memory_usage' | 'disk_usage' | 'database_connections' | 'error_rate';
+  metricType:
+    | 'response_time'
+    | 'cpu_usage'
+    | 'memory_usage'
+    | 'disk_usage'
+    | 'database_connections'
+    | 'error_rate';
   currentValue: number;
   threshold: number;
   severity: 'warning' | 'critical';

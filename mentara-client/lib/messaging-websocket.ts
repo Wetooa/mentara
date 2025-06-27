@@ -37,9 +37,7 @@ export class MessagingWebSocketService {
   private listeners = new Map<keyof MessagingWebSocketEvents, Set<Function>>();
   
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.authToken = localStorage.getItem('authToken');
-    }
+    // Don't auto-retrieve token in constructor - let it be passed in explicitly
   }
   
   // Connect to WebSocket server
@@ -253,9 +251,6 @@ export class MessagingWebSocketService {
   
   setAuthToken(token: string): void {
     this.authToken = token;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('authToken', token);
-    }
     
     // Reconnect with new token if currently connected
     if (this.isConnected) {
@@ -273,11 +268,3 @@ export class MessagingWebSocketService {
 
 // Export singleton instance
 export const messagingWebSocket = new MessagingWebSocketService();
-
-// Auto-connect when token is available
-if (typeof window !== 'undefined') {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    messagingWebSocket.connect(token);
-  }
-}

@@ -9,7 +9,7 @@ export class UsersService {
 
   async findById(id: string): Promise<User | null> {
     return await this.prisma.user.findUnique({
-      where: { 
+      where: {
         id,
         isActive: true, // Only return active users by default
       },
@@ -36,7 +36,7 @@ export class UsersService {
   async findOne(id: string): Promise<User | null> {
     try {
       return await this.prisma.user.findUnique({
-        where: { 
+        where: {
           id,
           isActive: true, // Only return active users
         },
@@ -52,7 +52,7 @@ export class UsersService {
     try {
       return await this.prisma.user.findUnique({
         where: { id },
-        include: { 
+        include: {
           therapist: true,
           client: true,
           admin: true,
@@ -66,7 +66,7 @@ export class UsersService {
 
   async findByRole(role: string): Promise<User[]> {
     return await this.prisma.user.findMany({
-      where: { 
+      where: {
         role,
         isActive: true, // Only return active users
       },
@@ -104,7 +104,11 @@ export class UsersService {
     });
   }
 
-  async deactivate(id: string, reason?: string, deactivatedBy?: string): Promise<User> {
+  async deactivate(
+    id: string,
+    reason?: string,
+    deactivatedBy?: string,
+  ): Promise<User> {
     // Administrative deactivation with audit trail
     return await this.prisma.user.update({
       where: { id },

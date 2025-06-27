@@ -27,18 +27,21 @@ export class PreAssessmentService {
     flatAnswers: number[],
   ): Promise<Record<string, boolean> | null> {
     try {
-      this.logger.debug(`Requesting AI prediction for ${flatAnswers.length} values`);
-      
+      this.logger.debug(
+        `Requesting AI prediction for ${flatAnswers.length} values`,
+      );
+
       const result = await this.aiServiceClient.predict(flatAnswers);
-      
+
       if (!result.success) {
         this.logger.warn(`AI prediction failed: ${result.error}`);
         return null;
       }
-      
-      this.logger.log(`AI prediction completed successfully in ${result.responseTime}ms`);
+
+      this.logger.log(
+        `AI prediction completed successfully in ${result.responseTime}ms`,
+      );
       return result.predictions || null;
-      
     } catch (error) {
       this.logger.error(
         'AI model prediction error:',
@@ -56,23 +59,31 @@ export class PreAssessmentService {
 
     // Flatten the 2D answers array
     const flattened = answers.flat();
-    
+
     // Validate flattened array
     if (!Array.isArray(flattened) || flattened.length === 0) {
       throw new BadRequestException('Flattened answers array cannot be empty');
     }
 
     // Validate all values are numbers
-    if (!flattened.every(value => typeof value === 'number' && Number.isFinite(value))) {
+    if (
+      !flattened.every(
+        (value) => typeof value === 'number' && Number.isFinite(value),
+      )
+    ) {
       throw new BadRequestException('All answer values must be finite numbers');
     }
 
     // Validate expected length for AI model
     if (flattened.length !== 201) {
-      this.logger.warn(`Expected 201 values for AI prediction, got ${flattened.length}`);
+      this.logger.warn(
+        `Expected 201 values for AI prediction, got ${flattened.length}`,
+      );
     }
 
-    this.logger.debug(`Flattened ${answers.length} questionnaire arrays into ${flattened.length} values`);
+    this.logger.debug(
+      `Flattened ${answers.length} questionnaire arrays into ${flattened.length} values`,
+    );
     return flattened;
   }
 
@@ -88,25 +99,33 @@ export class PreAssessmentService {
     // Validate each questionnaire's answers
     for (let i = 0; i < answers.length; i++) {
       const questionnaire = answers[i];
-      
+
       if (!Array.isArray(questionnaire)) {
-        throw new BadRequestException(`Questionnaire ${i} answers must be an array`);
+        throw new BadRequestException(
+          `Questionnaire ${i} answers must be an array`,
+        );
       }
 
       if (questionnaire.length === 0) {
-        throw new BadRequestException(`Questionnaire ${i} cannot have empty answers`);
+        throw new BadRequestException(
+          `Questionnaire ${i} cannot have empty answers`,
+        );
       }
 
       // Validate answer values are in reasonable range (0-10 for most scales)
       for (let j = 0; j < questionnaire.length; j++) {
         const value = questionnaire[j];
-        
+
         if (typeof value !== 'number' || !Number.isFinite(value)) {
-          throw new BadRequestException(`Invalid answer value at questionnaire ${i}, question ${j}: ${value}`);
+          throw new BadRequestException(
+            `Invalid answer value at questionnaire ${i}, question ${j}: ${value}`,
+          );
         }
 
         if (value < 0 || value > 10) {
-          throw new BadRequestException(`Answer value out of range (0-10) at questionnaire ${i}, question ${j}: ${value}`);
+          throw new BadRequestException(
+            `Answer value out of range (0-10) at questionnaire ${i}, question ${j}: ${value}`,
+          );
         }
       }
     }
@@ -123,14 +142,30 @@ export class PreAssessmentService {
 
     // Define valid questionnaire types
     const validQuestionnaires = [
-      'Stress', 'Anxiety', 'Depression', 'Insomnia', 'Panic Disorder', 
-      'Bipolar Disorder', 'OCD', 'PTSD', 'Social Anxiety', 'Phobia',
-      'Burnout', 'Binge Eating', 'ADHD', 'Alcohol Use'
+      'Stress',
+      'Anxiety',
+      'Depression',
+      'Insomnia',
+      'Panic Disorder',
+      'Bipolar Disorder',
+      'OCD',
+      'PTSD',
+      'Social Anxiety',
+      'Phobia',
+      'Burnout',
+      'Binge Eating',
+      'ADHD',
+      'Alcohol Use',
     ];
 
     for (const questionnaire of questionnaires) {
-      if (typeof questionnaire !== 'string' || questionnaire.trim().length === 0) {
-        throw new BadRequestException('All questionnaire names must be non-empty strings');
+      if (
+        typeof questionnaire !== 'string' ||
+        questionnaire.trim().length === 0
+      ) {
+        throw new BadRequestException(
+          'All questionnaire names must be non-empty strings',
+        );
       }
 
       if (!validQuestionnaires.includes(questionnaire)) {
@@ -147,7 +182,7 @@ export class PreAssessmentService {
       this.logger.log(`Creating pre-assessment for user ${userId}`);
 
       // Validate user exists and is active
-      const user = await this.prisma.user.findUnique({ 
+      const user = await this.prisma.user.findUnique({
         where: { id: userId, isActive: true },
         select: { id: true, isActive: true },
       });
@@ -169,7 +204,9 @@ export class PreAssessmentService {
         where: { clientId: userId },
       });
       if (existingAssessment) {
-        throw new BadRequestException('Pre-assessment already exists for this user');
+        throw new BadRequestException(
+          'Pre-assessment already exists for this user',
+        );
       }
 
       // Comprehensive input validation
@@ -177,13 +214,22 @@ export class PreAssessmentService {
       this.validateAnswersStructure(data.answers as number[][]);
 
       // Validate questionnaires and answers alignment
-      if ((data.questionnaires as string[]).length !== (data.answers as number[][]).length) {
-        throw new BadRequestException('Number of questionnaires must match number of answer arrays');
+      if (
+        (data.questionnaires as string[]).length !==
+        (data.answers as number[][]).length
+      ) {
+        throw new BadRequestException(
+          'Number of questionnaires must match number of answer arrays',
+        );
       }
 
-      let scores: Record<string, number> = data.scores as Record<string, number>;
-      let severityLevels: Record<string, string> = data.severityLevels as Record<string, string>;
-      
+      let scores: Record<string, number> = data.scores as Record<
+        string,
+        number
+      >;
+      let severityLevels: Record<string, string> =
+        data.severityLevels as Record<string, string>;
+
       // Calculate scores if not provided
       if (!data.scores || !data.severityLevels) {
         this.logger.debug('Calculating scores and severity levels');
@@ -204,7 +250,7 @@ export class PreAssessmentService {
       let aiEstimate: Record<string, boolean> = {};
       try {
         const flatAnswers = this.flattenAnswers(data.answers as number[][]);
-        
+
         if (flatAnswers.length === 201) {
           this.logger.debug('Attempting AI prediction with validated input');
           const aiResult = await this.getAiEstimate(flatAnswers);
@@ -212,13 +258,20 @@ export class PreAssessmentService {
             aiEstimate = aiResult;
             this.logger.log('AI prediction successful');
           } else {
-            this.logger.warn('AI prediction failed, continuing without AI estimate');
+            this.logger.warn(
+              'AI prediction failed, continuing without AI estimate',
+            );
           }
         } else {
-          this.logger.warn(`Cannot perform AI prediction: expected 201 values, got ${flatAnswers.length}`);
+          this.logger.warn(
+            `Cannot perform AI prediction: expected 201 values, got ${flatAnswers.length}`,
+          );
         }
       } catch (aiError) {
-        this.logger.error('AI prediction error, continuing without AI estimate:', aiError);
+        this.logger.error(
+          'AI prediction error, continuing without AI estimate:',
+          aiError,
+        );
         // Continue without AI estimate - don't fail the entire assessment
       }
 
@@ -237,12 +290,14 @@ export class PreAssessmentService {
 
       this.logger.log(`Pre-assessment created successfully for user ${userId}`);
       return preAssessment;
-
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      
+
       this.logger.error(
         'Error creating pre-assessment:',
         error instanceof Error ? error.message : error,

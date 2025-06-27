@@ -189,11 +189,11 @@ export class BillingController {
 
   @Get('payments')
   getPayments(
+    @CurrentUserRole() userRole: string,
     @Query('subscriptionId') subscriptionId?: string,
     @Query('status') status?: PaymentStatus,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserRole() userRole?: string,
   ) {
     // Only admins can view all payments
     if (userRole !== 'admin') {
@@ -256,10 +256,10 @@ export class BillingController {
 
   @Get('invoices')
   getInvoices(
+    @CurrentUserRole() userRole: string,
+    @CurrentUserId() userId: string,
     @Query('subscriptionId') subscriptionId?: string,
     @Query('status') status?: InvoiceStatus,
-    @CurrentUserRole() userRole?: string,
-    @CurrentUserId() userId?: string,
   ) {
     // Users can only see their own invoices
     if (userRole !== 'admin') {
@@ -367,10 +367,10 @@ export class BillingController {
   @Get('usage/:subscriptionId')
   getUsageRecords(
     @Param('subscriptionId') subscriptionId: string,
+    @CurrentUserRole() userRole: string,
     @Query('feature') feature?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserRole() userRole?: string,
   ) {
     // Users can only see their own usage
     if (userRole !== 'admin') {
@@ -388,9 +388,9 @@ export class BillingController {
   // Statistics
   @Get('statistics')
   getBillingStatistics(
+    @CurrentUserRole() userRole: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
