@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Contact, Conversation, Message, MessagesState } from '@/components/messages/types';
-import { messagingApi } from '@/lib/messaging-api';
+import { createMessagingApiService } from '@/lib/messaging-api';
 import { messagingWebSocket } from '@/lib/messaging-websocket';
 
 export interface UseMessagingReturn {
@@ -31,6 +31,9 @@ export interface UseMessagingReturn {
 export function useMessaging(): UseMessagingReturn {
   // Clerk authentication
   const { getToken, isLoaded } = useAuth();
+  
+  // Create authenticated messaging API service
+  const messagingApi = getToken ? createMessagingApiService(getToken) : null;
   
   // State
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -61,6 +64,11 @@ export function useMessaging(): UseMessagingReturn {
   
   // Load initial contacts
   const loadContacts = useCallback(async () => {
+    if (!messagingApi) {
+      console.error('Messaging API not available');
+      return;
+    }
+    
     setIsLoadingContacts(true);
     setError(null);
     
@@ -78,12 +86,12 @@ export function useMessaging(): UseMessagingReturn {
     } finally {
       setIsLoadingContacts(false);
     }
-  }, [selectedContactId]);
+  }, [selectedContactId, messagingApi]);
   
   // Load conversation messages
   const loadConversation = useCallback(async (contactId: string) => {
-    if (conversations.has(contactId)) {
-      return; // Already loaded
+    if (conversations.has(contactId) || !messagingApi) {
+      return; // Already loaded or API not available
     }
     
     setIsLoadingMessages(true);
@@ -103,7 +111,7 @@ export function useMessaging(): UseMessagingReturn {
     } finally {
       setIsLoadingMessages(false);
     }
-  }, [conversations]);
+  }, [conversations, messagingApi]);
   
   // Select contact and load conversation
   const selectContact = useCallback(async (contactId: string) => {
@@ -120,6 +128,10 @@ export function useMessaging(): UseMessagingReturn {
   const sendMessage = useCallback(async (text: string, attachments?: any[]) => {
     if (!selectedContactId) {
       throw new Error('No conversation selected');
+    }
+    
+    if (!messagingApi) {
+      throw new Error('Messaging API not available');
     }
     
     try {
@@ -148,34 +160,40 @@ export function useMessaging(): UseMessagingReturn {
       setError(err instanceof Error ? err.message : 'Failed to send message');
       throw err;
     }
-  }, [selectedContactId]);
+  }, [selectedContactId, messagingApi]);
   
   // Mark message as read
   const markAsRead = useCallback(async (messageId: string) => {
+    if (!messagingApi) return;
+    
     try {
       await messagingApi.markMessageAsRead(messageId);
     } catch (err) {
       console.error('Error marking message as read:', err);
     }
-  }, []);
+  }, [messagingApi]);
   
   // Add reaction to message
   const addReaction = useCallback(async (messageId: string, emoji: string) => {
+    if (!messagingApi) return;
+    
     try {
       await messagingApi.addMessageReaction(messageId, emoji);
     } catch (err) {
       console.error('Error adding reaction:', err);
     }
-  }, []);
+  }, [messagingApi]);
   
   // Remove reaction from message
   const removeReaction = useCallback(async (messageId: string, emoji: string) => {
+    if (!messagingApi) return;
+    
     try {
       await messagingApi.removeMessageReaction(messageId, emoji);
     } catch (err) {
       console.error('Error removing reaction:', err);
     }
-  }, []);
+  }, [messagingApi]);
   
   // Send typing indicator
   const sendTyping = useCallback((isTyping: boolean) => {
@@ -186,13 +204,15 @@ export function useMessaging(): UseMessagingReturn {
   
   // Search messages
   const searchMessages = useCallback(async (query: string): Promise<Message[]> => {
+    if (!messagingApi) return [];
+    
     try {
       return await messagingApi.searchMessages(query, selectedContactId || undefined);
     } catch (err) {
       console.error('Error searching messages:', err);
       return [];
     }
-  }, [selectedContactId]);
+  }, [selectedContactId, messagingApi]);
   
   // WebSocket event handlers
   useEffect(() => {
@@ -280,16 +300,14 @@ export function useMessaging(): UseMessagingReturn {
   
   // Connect to WebSocket with Clerk authentication
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !getToken) return;
     
     const initializeWebSocket = async () => {
       try {
-        const token = await getToken();
-        if (token) {
-          messagingWebSocket.connect(token);
-        }
+        // Use the new method that accepts getToken function for automatic token refresh
+        messagingWebSocket.connectWithTokenFunction(getToken);
       } catch (error) {
-        console.error('Failed to get auth token for WebSocket:', error);
+        console.error('Failed to initialize WebSocket connection:', error);
         setError('Failed to establish secure connection');
       }
     };

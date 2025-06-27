@@ -13,7 +13,7 @@ import {
   Upload as UploadIcon,
 } from "lucide-react";
 import { Task, TaskFile } from "@/components/worksheets/types";
-import { worksheetsApi } from "@/lib/api/worksheets";
+import { createWorksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 import { useToast } from "@/contexts/ToastContext";
@@ -78,7 +78,7 @@ export default function TaskDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const taskId = params.taskId as string;
-  useAuth();
+  const { getToken } = useAuth();
   const { showToast } = useToast();
 
   // Determine if task is editable based on submission status
@@ -88,9 +88,14 @@ export default function TaskDetailPage() {
   // Fetch task data from API
   useEffect(() => {
     async function fetchTask() {
+      if (!getToken) return;
+
       try {
         setIsLoading(true);
         setError(null);
+
+        // Create authenticated API client
+        const worksheetsApi = createWorksheetsApi(getToken);
 
         // Call the API to get worksheet details
         const worksheetData = await worksheetsApi.getById(taskId);
@@ -108,7 +113,7 @@ export default function TaskDetailPage() {
     }
 
     fetchTask();
-  }, [taskId]);
+  }, [taskId, getToken]);
 
   useEffect(() => {
     // Close dropdown when clicking outside
