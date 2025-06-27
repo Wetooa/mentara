@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { EmailService } from '../services/email.service';
 import { TherapistApplicationDto } from './therapist-application.dto';
 import { ApplicationStatusUpdateDto, TherapistApplicationResponse } from './therapist-application.controller';
 import * as fs from 'fs';
@@ -8,7 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TherapistApplicationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async createApplication(applicationData: TherapistApplicationDto) {
     // Check if user already has an application
@@ -243,20 +247,48 @@ export class TherapistApplicationService {
         message: `Application ${updateData.status} successfully`,
       };
 
-      // If approved, handle Clerk account creation (placeholder for now)
+      // Handle status-specific actions and notifications
       if (updateData.status === 'approved') {
         // TODO: Implement Clerk account creation here
         // For now, we'll return placeholder credentials
         const temporaryPassword = this.generateTemporaryPassword();
         
+        const credentials = {
+          email: application.user.email,
+          password: temporaryPassword,
+        };
+
         result = {
           ...result,
           message: 'Application approved successfully. Therapist account credentials generated.',
-          credentials: {
-            email: application.user.email,
-            password: temporaryPassword,
-          },
+          credentials,
         };
+
+        // Send approval email notification
+        try {
+          await this.emailService.sendTherapistWelcomeEmail(
+            application.user.email,
+            `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() || 'Therapist',
+            credentials
+          );
+          console.log('Approval email notification sent successfully');
+        } catch (error) {
+          console.error('Failed to send approval email notification:', error);
+          // Don't fail the entire operation if email fails
+        }
+      } else if (updateData.status === 'rejected') {
+        // Send rejection email notification
+        try {
+          await this.emailService.sendTherapistRejectionEmail(
+            application.user.email,
+            `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() || 'Therapist',
+            updateData.adminNotes
+          );
+          console.log('Rejection email notification sent successfully');
+        } catch (error) {
+          console.error('Failed to send rejection email notification:', error);
+          // Don't fail the entire operation if email fails
+        }
       }
 
       return result;
