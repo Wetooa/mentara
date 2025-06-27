@@ -30,45 +30,56 @@ const ApplicationConfirmation = () => {
   // Upload files to server
   const uploadFiles = async () => {
     console.log("Uploading files...");
-    const fileUploads = [];
+    
+    // Create a single FormData for all files
+    const formData = new FormData();
+    const fileTypeMap: Record<string, string> = {};
+    let fileIndex = 0;
 
-    // Create an array of upload promises for each document type
+    // Add all files to FormData and create type mapping
     for (const [docType, files] of Object.entries(documents)) {
       if (!files || !Array.isArray(files) || files.length === 0) continue;
 
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("docType", docType);
-
-        // Upload each file
-        try {
-          const response = await fetch("/api/therapist/upload", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!response.ok) {
-            throw new Error(`Failed to upload ${docType}`);
-          }
-
-          const data = await response.json();
-          fileUploads.push({
-            docType,
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type,
-            fileUrl: data.fileUrl,
-            uploadId: data.uploadId,
-          });
-        } catch (error) {
-          console.error(`Error uploading ${docType}:`, error);
-          throw error;
-        }
+        formData.append("files", file); // Backend expects "files" field name
+        fileTypeMap[`file_${fileIndex}`] = docType;
+        fileIndex++;
       }
     }
 
-    return fileUploads;
+    // Add file type mapping as JSON string
+    formData.append("fileTypes", JSON.stringify(fileTypeMap));
+
+    // Upload all files in a single request
+    try {
+      const response = await fetch("/api/therapist/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success || !data.uploadedFiles) {
+        throw new Error(data.error || "Upload response missing file data");
+      }
+
+      return data.uploadedFiles.map((file: any, index: number) => ({
+        docType: Object.values(fileTypeMap)[index] || 'unknown',
+        fileName: file.fileName,
+        fileSize: 0, // Backend doesn't return file size
+        fileType: '', // Backend doesn't return file type
+        fileUrl: file.url,
+        uploadId: file.id,
+      }));
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      throw error;
+    }
   };
 
   // Submit the application to the database

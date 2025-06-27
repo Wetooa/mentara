@@ -1,18 +1,7 @@
 import { TherapistApplication } from "@/data/mockTherapistApplicationData";
-import { createApiClient } from "@/lib/api";
-import { useAuth } from "@clerk/nextjs";
 
-// Create a function to get the API client with authentication
-const getApiClient = () => {
-  if (typeof window !== "undefined") {
-    // Client-side: use the hook
-    const { getToken } = useAuth();
-    return createApiClient(() => getToken());
-  } else {
-    // Server-side: no auth token available
-    return createApiClient(() => Promise.resolve(null));
-  }
-};
+// Client-side therapist application API functions
+// These should only be called from React components that have access to useAuth
 
 /**
  * Submit a therapist application to the API
@@ -25,10 +14,21 @@ export async function submitTherapistApplication(
   try {
     console.log("Submitting application data:", applicationData);
 
-    // Use the centralized API client with JWT authentication
-    const api = getApiClient();
-    const data = await api.therapist.submitApplication(applicationData);
+    // Use the Next.js API route which handles authentication
+    const response = await fetch("/api/therapist/application", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(applicationData),
+    });
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || `Submit failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
     return { id: data.applicationId || data.id };
   } catch (error) {
     console.error("Error submitting therapist application:", error);
@@ -45,8 +45,19 @@ export async function getTherapistApplication(
   id: string
 ): Promise<TherapistApplication> {
   try {
-    const api = getApiClient();
-    const data = await api.therapist.getApplicationById(id);
+    const response = await fetch(`/api/therapist/application/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || `Fetch failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
     return data.application || data;
   } catch (error) {
     console.error("Error fetching therapist application:", error);
@@ -63,8 +74,24 @@ export async function getAllTherapistApplications(
   status?: string
 ): Promise<TherapistApplication[]> {
   try {
-    const api = getApiClient();
-    const data = await api.therapist.getApplications({ status });
+    const queryParams = new URLSearchParams();
+    if (status) queryParams.append("status", status);
+
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+    
+    const response = await fetch(`/api/therapist/application${queryString}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || `Fetch failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
     return data.applications || data;
   } catch (error) {
     console.error("Error fetching therapist applications:", error);
@@ -80,21 +107,29 @@ export async function getAllTherapistApplications(
  */
 export async function updateTherapistApplicationStatus(
   id: string,
-  status: "approved" | "rejected"
+  status: "approved" | "rejected",
+  adminNotes?: string
 ): Promise<{
-  application: TherapistApplication;
-  therapistAccount?: any;
-  generatedPassword?: string;
+  success: boolean;
+  message: string;
+  credentials?: { email: string; password: string };
 }> {
   try {
-    const api = getApiClient();
-    const data = await api.therapist.updateApplication(id, { status });
-    
-    return {
-      application: data.application || data,
-      therapistAccount: data.therapistAccount || null,
-      generatedPassword: data.generatedPassword || null,
-    };
+    const response = await fetch(`/api/therapist/application/${id}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status, adminNotes }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || `Update failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error("Error updating therapist application status:", error);
     throw error;
