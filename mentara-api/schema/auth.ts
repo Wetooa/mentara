@@ -9,6 +9,7 @@ import {
   IsJSON,
   IsNumber,
 } from 'class-validator';
+import { JsonValue, Decimal } from '@prisma/client/runtime/library';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -53,13 +54,13 @@ export class UserCreateDto {
 }
 
 export class ClientCreateDto {
-  user: UserCreateDto;
+  user!: UserCreateDto;
 }
 
 export class ClientUpdateDto extends UserCreateDto {}
 
 export class TherapistCreateDto extends UserCreateDto {
-  user: UserCreateDto;
+  user!: UserCreateDto;
 
   @IsString()
   mobile!: string;
@@ -79,20 +80,25 @@ export class TherapistCreateDto extends UserCreateDto {
   @IsDate()
   practiceStartDate!: Date;
 
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   areasOfExpertise!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   assessmentTools!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   therapeuticApproachesUsedList!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   languagesOffered!: string[];
 
   @IsBoolean()
   providedOnlineTherapyBefore!: boolean;
   @IsBoolean()
   comfortableUsingVideoConferencing!: boolean;
-  @IsArray(IsNumber())
+  @IsArray()
+  @IsNumber({}, { each: true })
   preferredSessionLength!: number[];
 
   @IsString()
@@ -110,15 +116,20 @@ export class TherapistCreateDto extends UserCreateDto {
   @IsBoolean()
   willingToAbideByPlatformGuidelines!: boolean;
 
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   expertise!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   approaches!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   languages!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   illnessSpecializations!: string[];
-  @IsArray(IsString())
+  @IsArray()
+  @IsString({ each: true })
   acceptTypes!: string[];
   @IsJSON()
   treatmentSuccessRates!: Record<string, number>;
@@ -305,10 +316,10 @@ export type TherapistResponse = {
   languages: string[];
   illnessSpecializations: string[];
   acceptTypes: string[];
-  treatmentSuccessRates: Record<string, any>;
+  treatmentSuccessRates: JsonValue;
 
   sessionLength: string;
-  hourlyRate: number;
+  hourlyRate: Decimal;
 
   createdAt: Date;
   updatedAt: Date;

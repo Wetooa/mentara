@@ -1,4 +1,13 @@
-import { IsString, IsEmail, IsOptional, IsDateString, IsBoolean, IsArray, IsJSON, IsDecimal } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsDateString,
+  IsBoolean,
+  IsArray,
+  IsJSON,
+  IsDecimal,
+} from 'class-validator';
 
 export class RegisterTherapistDto {
   @IsString()

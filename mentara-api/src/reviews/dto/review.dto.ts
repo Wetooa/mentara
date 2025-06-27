@@ -1,11 +1,20 @@
-import { IsString, IsInt, IsOptional, IsBoolean, IsUUID, Min, Max, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsBoolean,
+  IsUUID,
+  Min,
+  Max,
+  IsEnum,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum ReviewStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
-  FLAGGED = 'FLAGGED'
+  FLAGGED = 'FLAGGED',
 }
 
 export class CreateReviewDto {

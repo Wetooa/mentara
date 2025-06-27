@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsArray, IsEnum, IsInt, Min, IsUUID, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsEnum,
+  IsInt,
+  Min,
+  IsUUID,
+  IsNotEmpty,
+} from 'class-validator';
 import { ConversationType, MessageType } from '@prisma/client';
 
 export class CreateConversationDto {

@@ -12,7 +12,12 @@ import { AuditLogsService } from './audit-logs.service';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
-import { AuditAction, EventSeverity, SystemEventType, DataClassification } from '@prisma/client';
+import {
+  AuditAction,
+  EventSeverity,
+  SystemEventType,
+  DataClassification,
+} from '@prisma/client';
 
 @Controller('audit-logs')
 @UseGuards(ClerkAuthGuard)
@@ -21,7 +26,8 @@ export class AuditLogsController {
 
   @Post()
   createAuditLog(
-    @Body() body: {
+    @Body()
+    body: {
       action: AuditAction;
       entity: string;
       entityId: string;
@@ -73,7 +79,8 @@ export class AuditLogsController {
 
   @Post('system-events')
   createSystemEvent(
-    @Body() body: {
+    @Body()
+    body: {
       eventType: SystemEventType;
       severity: EventSeverity;
       title: string;
@@ -132,12 +139,17 @@ export class AuditLogsController {
       throw new Error('Unauthorized');
     }
 
-    return this.auditLogsService.resolveSystemEvent(id, userId, body.resolution);
+    return this.auditLogsService.resolveSystemEvent(
+      id,
+      userId,
+      body.resolution,
+    );
   }
 
   @Post('data-changes')
   createDataChangeLog(
-    @Body() body: {
+    @Body()
+    body: {
       tableName: string;
       recordId: string;
       operation: 'INSERT' | 'UPDATE' | 'DELETE';
@@ -233,7 +245,8 @@ export class AuditLogsController {
 
   @Post('profile-update')
   logProfileUpdate(
-    @Body() body: {
+    @Body()
+    body: {
       oldValues: any;
       newValues: any;
       ipAddress?: string;
@@ -252,7 +265,8 @@ export class AuditLogsController {
 
   @Post('system-error')
   logSystemError(
-    @Body() body: {
+    @Body()
+    body: {
       component: string;
       error: { name: string; message: string; stack?: string };
       metadata?: any;

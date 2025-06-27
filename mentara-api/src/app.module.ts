@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -25,10 +27,25 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { SearchModule } from './search/search.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PrismaService } from './providers/prisma-client.provider';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { EventBusService } from './common/events/event-bus.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    EventEmitterModule.forRoot({
+      // Set this to `true` to use wildcards
+      wildcard: true,
+      // The delimiter used to segment namespaces
+      delimiter: '.',
+      // Disable throwing uncaught exceptions
+      ignoreErrors: false,
+      // Max listeners per event
+      maxListeners: 10,
+      // Show event name in memory leaks message when more than maximum amount of listeners
+      verboseMemoryLeak: false,
+    }),
     AuthModule,
     UsersModule,
     CommunitiesModule,
@@ -56,6 +73,15 @@ import { PrismaService } from './providers/prisma-client.provider';
   providers: [
     AppService,
     PrismaService,
+    EventBusService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

@@ -10,7 +10,7 @@ import {
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { AuthService } from './auth.service';
-import { ClientCreateDto, TherapistCreateDto } from '../schema/auth';
+import { ClientCreateDto, TherapistCreateDto } from '../../schema/auth';
 
 @Controller('auth')
 export class AuthController {

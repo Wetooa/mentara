@@ -55,11 +55,19 @@ export class DashboardService {
       });
 
       const recentPosts = await this.prisma.post.findMany({
-        where: { authorId: userId },
+        where: { userId: userId },
         orderBy: { createdAt: 'desc' },
         take: 3,
         include: {
-          community: true,
+          room: {
+            include: {
+              roomGroup: {
+                include: {
+                  community: true,
+                },
+              },
+            },
+          },
           _count: {
             select: { hearts: true, comments: true },
           },

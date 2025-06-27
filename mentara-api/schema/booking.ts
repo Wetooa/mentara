@@ -6,6 +6,7 @@ import {
   IsIn,
   Min,
   Max,
+  IsEnum,
 } from 'class-validator';
 
 export enum MeetingStatus {
@@ -33,8 +34,8 @@ export class MeetingCreateDto {
   duration!: number;
 
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(MeetingStatus)
+  status?: MeetingStatus;
 
   @IsOptional()
   @IsString()

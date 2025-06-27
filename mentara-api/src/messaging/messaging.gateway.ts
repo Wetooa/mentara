@@ -11,6 +11,10 @@ import { Server, Socket } from 'socket.io';
 import { Logger, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
+  WebSocketAuthService,
+  AuthenticatedUser,
+} from './services/websocket-auth.service';
+import {
   JoinConversationDto,
   LeaveConversationDto,
   TypingIndicatorDto,
@@ -19,6 +23,7 @@ import {
 interface AuthenticatedSocket extends Socket {
   userId?: string;
   userRole?: string;
+  isAuthenticated?: boolean;
 }
 
 @WebSocketGateway({
@@ -38,48 +43,82 @@ export class MessagingGateway
   private userSockets = new Map<string, Set<string>>(); // userId -> Set of socket IDs
   private conversationParticipants = new Map<string, Set<string>>(); // conversationId -> Set of user IDs
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly webSocketAuth: WebSocketAuthService,
+  ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
-      // Extract token from auth header or query
-      const token =
-        client.handshake.auth?.token || client.handshake.query?.token;
+      this.logger.log(`New WebSocket connection attempt: ${client.id}`);
 
-      if (!token) {
-        this.logger.warn(`Client ${client.id} connected without token`);
-        client.disconnect();
+      // Authenticate the socket connection using the new auth service
+      const authResult = await this.webSocketAuth.authenticateSocket(client);
+
+      if (!authResult) {
+        this.logger.warn(`Client ${client.id} authentication failed`);
+        client.emit('auth_error', {
+          message: 'Authentication failed. Please provide a valid token.',
+          code: 'AUTH_FAILED',
+        });
+        client.disconnect(true);
         return;
       }
 
-      // Verify token with Clerk (you'll need to import and use your clerk client)
-      // For now, we'll extract userId from token payload (implement proper verification)
-      const userId = await this.verifyTokenAndGetUserId(token);
+      // Attach authenticated user info to socket
+      client.userId = authResult.userId;
+      client.userRole = authResult.role;
+      client.isAuthenticated = true;
 
-      if (!userId) {
-        this.logger.warn(`Client ${client.id} connected with invalid token`);
-        client.disconnect();
+      // Verify user exists in database and is active
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: authResult.userId,
+          isActive: true, // Only allow active users
+        },
+        select: { id: true, role: true, isActive: true },
+      });
+
+      if (!user) {
+        this.logger.warn(`User ${authResult.userId} not found or inactive`);
+        client.emit('auth_error', {
+          message: 'User account not found or inactive',
+          code: 'USER_NOT_FOUND',
+        });
+        client.disconnect(true);
         return;
       }
-
-      client.userId = userId;
 
       // Add socket to user's socket set
-      if (!this.userSockets.has(userId)) {
-        this.userSockets.set(userId, new Set());
+      if (!this.userSockets.has(authResult.userId)) {
+        this.userSockets.set(authResult.userId, new Set());
       }
-      this.userSockets.get(userId)!.add(client.id);
+      this.userSockets.get(authResult.userId)!.add(client.id);
 
       // Join user to their conversation rooms
-      await this.joinUserConversations(client, userId);
+      await this.joinUserConversations(client, authResult.userId);
+
+      // Notify successful connection
+      client.emit('authenticated', {
+        userId: authResult.userId,
+        role: user.role,
+        message: 'Successfully authenticated and connected',
+        timestamp: new Date().toISOString(),
+      });
 
       // Emit user online status to their contacts
-      await this.broadcastUserStatus(userId, 'online');
+      await this.broadcastUserStatus(authResult.userId, 'online');
 
-      this.logger.log(`User ${userId} connected with socket ${client.id}`);
+      this.logger.log(
+        `User ${authResult.userId} successfully authenticated and connected with socket ${client.id}`,
+      );
     } catch (error) {
       this.logger.error(`Connection error for client ${client.id}:`, error);
-      client.disconnect();
+      client.emit('connection_error', {
+        message: 'Internal server error during connection',
+        code: 'INTERNAL_ERROR',
+      });
+      client.disconnect(true);
     }
   }
 
@@ -105,6 +144,11 @@ export class MessagingGateway
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: JoinConversationDto,
   ) {
+    // Authentication guard
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
     try {
       const { conversationId } = data;
       const userId = client.userId!;
@@ -154,6 +198,11 @@ export class MessagingGateway
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: LeaveConversationDto,
   ) {
+    // Authentication guard
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
     const { conversationId } = data;
     const userId = client.userId!;
 
@@ -183,6 +232,11 @@ export class MessagingGateway
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: TypingIndicatorDto,
   ) {
+    // Authentication guard
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
     const { conversationId, isTyping = true } = data;
     const userId = client.userId!;
 
@@ -272,19 +326,19 @@ export class MessagingGateway
   }
 
   // Private helper methods
-  private async verifyTokenAndGetUserId(token: string): Promise<string | null> {
-    try {
-      // TODO: Implement proper Clerk token verification
-      // For now, return a mock user ID (replace with actual verification)
-      // const verifiedToken = await clerkClient.verifyJwt(token);
-      // return verifiedToken.sub;
-
-      // Temporary mock implementation - replace with real Clerk verification
-      return 'user_mock_id';
-    } catch (error) {
-      this.logger.error('Token verification failed:', error);
-      return null;
+  // Authentication guard for message handlers
+  private isAuthenticated(client: AuthenticatedSocket): boolean {
+    if (!client.isAuthenticated || !client.userId) {
+      this.logger.warn(
+        `Unauthenticated client ${client.id} attempted to perform action`,
+      );
+      client.emit('auth_error', {
+        message: 'Authentication required for this action',
+        code: 'AUTH_REQUIRED',
+      });
+      return false;
     }
+    return true;
   }
 
   private async joinUserConversations(

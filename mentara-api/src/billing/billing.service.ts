@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { 
-  Subscription, 
-  SubscriptionStatus, 
-  SubscriptionTier, 
-  BillingCycle, 
-  PaymentStatus, 
+import {
+  Subscription,
+  SubscriptionStatus,
+  SubscriptionTier,
+  BillingCycle,
+  PaymentStatus,
   PaymentMethodType,
   InvoiceStatus,
-  DiscountType 
+  DiscountType,
 } from '@prisma/client';
 
 @Injectable()
@@ -29,16 +33,19 @@ export class BillingService {
     });
 
     if (!plan) {
-      throw new NotFoundException(`Subscription plan with ID ${data.planId} not found`);
+      throw new NotFoundException(
+        `Subscription plan with ID ${data.planId} not found`,
+      );
     }
 
-    const amount = data.billingCycle === BillingCycle.YEARLY 
-      ? plan.yearlyPrice || plan.monthlyPrice 
-      : plan.monthlyPrice;
+    const amount =
+      data.billingCycle === BillingCycle.YEARLY
+        ? plan.yearlyPrice || plan.monthlyPrice
+        : plan.monthlyPrice;
 
     const currentPeriodStart = new Date();
     const currentPeriodEnd = new Date();
-    
+
     if (data.billingCycle === BillingCycle.YEARLY) {
       currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
     } else {
@@ -57,7 +64,9 @@ export class BillingService {
         trialStart: data.trialStart,
         trialEnd: data.trialEnd,
         defaultPaymentMethodId: data.defaultPaymentMethodId,
-        status: data.trialStart ? SubscriptionStatus.TRIALING : SubscriptionStatus.ACTIVE,
+        status: data.trialStart
+          ? SubscriptionStatus.TRIALING
+          : SubscriptionStatus.ACTIVE,
       },
       include: {
         plan: true,
@@ -80,12 +89,15 @@ export class BillingService {
     });
   }
 
-  async updateSubscription(userId: string, data: {
-    planId?: string;
-    billingCycle?: BillingCycle;
-    status?: SubscriptionStatus;
-    defaultPaymentMethodId?: string;
-  }) {
+  async updateSubscription(
+    userId: string,
+    data: {
+      planId?: string;
+      billingCycle?: BillingCycle;
+      status?: SubscriptionStatus;
+      defaultPaymentMethodId?: string;
+    },
+  ) {
     const subscription = await this.findUserSubscription(userId);
     if (!subscription) {
       throw new NotFoundException(`Subscription for user ${userId} not found`);
@@ -99,13 +111,16 @@ export class BillingService {
         where: { id: data.planId },
       });
       if (!plan) {
-        throw new NotFoundException(`Subscription plan with ID ${data.planId} not found`);
+        throw new NotFoundException(
+          `Subscription plan with ID ${data.planId} not found`,
+        );
       }
-      
+
       updateData.tier = plan.tier;
-      updateData.amount = data.billingCycle === BillingCycle.YEARLY 
-        ? plan.yearlyPrice || plan.monthlyPrice 
-        : plan.monthlyPrice;
+      updateData.amount =
+        data.billingCycle === BillingCycle.YEARLY
+          ? plan.yearlyPrice || plan.monthlyPrice
+          : plan.monthlyPrice;
     }
 
     return this.prisma.subscription.update({
@@ -147,16 +162,19 @@ export class BillingService {
     });
   }
 
-  async updatePlan(id: string, data: Partial<{
-    name: string;
-    description: string;
-    monthlyPrice: number;
-    yearlyPrice: number;
-    features: any;
-    limits: any;
-    trialDays: number;
-    isActive: boolean;
-  }>) {
+  async updatePlan(
+    id: string,
+    data: Partial<{
+      name: string;
+      description: string;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      features: any;
+      limits: any;
+      trialDays: number;
+      isActive: boolean;
+    }>,
+  ) {
     return this.prisma.subscriptionPlan.update({
       where: { id },
       data,
@@ -190,17 +208,17 @@ export class BillingService {
   async findUserPaymentMethods(userId: string) {
     return this.prisma.paymentMethod.findMany({
       where: { userId, isActive: true },
-      orderBy: [
-        { isDefault: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
-  async updatePaymentMethod(id: string, data: Partial<{
-    isDefault: boolean;
-    isActive: boolean;
-  }>) {
+  async updatePaymentMethod(
+    id: string,
+    data: Partial<{
+      isDefault: boolean;
+      isActive: boolean;
+    }>,
+  ) {
     const paymentMethod = await this.prisma.paymentMethod.findUnique({
       where: { id },
     });
@@ -263,7 +281,8 @@ export class BillingService {
     } else if (status === PaymentStatus.FAILED) {
       updateData.failedAt = new Date();
       if (metadata?.failureCode) updateData.failureCode = metadata.failureCode;
-      if (metadata?.failureMessage) updateData.failureMessage = metadata.failureMessage;
+      if (metadata?.failureMessage)
+        updateData.failureMessage = metadata.failureMessage;
     }
 
     return this.prisma.payment.update({
@@ -305,7 +324,8 @@ export class BillingService {
     dueDate: Date;
     billingAddress?: any;
   }) {
-    const total = data.subtotal + (data.taxAmount || 0) - (data.discountAmount || 0);
+    const total =
+      data.subtotal + (data.taxAmount || 0) - (data.discountAmount || 0);
     const invoiceNumber = await this.generateInvoiceNumber();
 
     return this.prisma.invoice.create({
@@ -353,13 +373,16 @@ export class BillingService {
     }
 
     const totalPaid = invoice.payments
-      .filter(p => p.status === PaymentStatus.SUCCEEDED)
+      .filter((p) => p.status === PaymentStatus.SUCCEEDED)
       .reduce((sum, p) => sum + Number(p.amount), 0);
 
     return this.prisma.invoice.update({
       where: { id },
       data: {
-        status: totalPaid >= Number(invoice.total) ? InvoiceStatus.PAID : InvoiceStatus.OPEN,
+        status:
+          totalPaid >= Number(invoice.total)
+            ? InvoiceStatus.PAID
+            : InvoiceStatus.OPEN,
         amountPaid: totalPaid,
         paidAt: totalPaid >= Number(invoice.total) ? new Date() : null,
       },
@@ -412,18 +435,27 @@ export class BillingService {
       throw new BadRequestException('Discount code usage limit reached');
     }
 
-    if (discount.maxUsesPerUser && discount.redemptions.length >= discount.maxUsesPerUser) {
+    if (
+      discount.maxUsesPerUser &&
+      discount.redemptions.length >= discount.maxUsesPerUser
+    ) {
       throw new BadRequestException('You have already used this discount code');
     }
 
     if (discount.minAmount && amount < Number(discount.minAmount)) {
-      throw new BadRequestException(`Minimum amount of ${discount.minAmount} required`);
+      throw new BadRequestException(
+        `Minimum amount of ${discount.minAmount} required`,
+      );
     }
 
     return discount;
   }
 
-  async redeemDiscount(discountId: string, userId: string, amountSaved: number) {
+  async redeemDiscount(
+    discountId: string,
+    userId: string,
+    amountSaved: number,
+  ) {
     await this.prisma.$transaction(async (tx) => {
       // Create redemption record
       await tx.discountRedemption.create({

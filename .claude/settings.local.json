@@ -14,7 +14,9 @@
       "Bash(rm:*)",
       "Bash(for file in *.d.ts)",
       "Bash(do mv \"$file\" \"$file%.d.ts.ts\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(npm install:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

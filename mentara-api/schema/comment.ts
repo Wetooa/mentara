@@ -1,4 +1,5 @@
 import { IsString, IsOptional } from 'class-validator';
+import { UserResponse } from './auth';
 
 export class CommentCreateInputDto {
   @IsString()
@@ -50,9 +51,7 @@ export class ReplyFileCreateInputDto {
   type?: string;
 }
 
-export class CommentUpdateInputDto extends CommentCreateInputDto {}
-
-export class CommentResponse {
+export interface CommentResponse {
   id: string;
   content: string;
   createdAt: Date;
@@ -67,14 +66,14 @@ export class CommentResponse {
   files: CommentFileResponse[];
 }
 
-export class CommentFileResponse {
+export interface CommentFileResponse {
   id: string;
   commentId: string;
   url: string;
   type: string | null;
 }
 
-export class ReplyResponse {
+export interface ReplyResponse {
   id: string;
   commentId: string;
 
@@ -91,7 +90,7 @@ export class ReplyResponse {
   replies: ReplyResponse[];
 }
 
-export class ReplyFileResponse {
+export interface ReplyFileResponse {
   id: string;
   replyId: string;
   url: string;

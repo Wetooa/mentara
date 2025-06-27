@@ -21,7 +21,8 @@ export class NotificationsController {
 
   @Post()
   create(
-    @Body() body: {
+    @Body()
+    body: {
       title: string;
       message: string;
       type: NotificationType;
@@ -41,13 +42,18 @@ export class NotificationsController {
 
   @Get()
   findAll(
+    @CurrentUserId() userId: string,
     @Query('isRead') isRead?: string,
     @Query('type') type?: NotificationType,
     @Query('priority') priority?: NotificationPriority,
-    @CurrentUserId() userId: string,
   ) {
     const isReadBool = isRead !== undefined ? isRead === 'true' : undefined;
-    return this.notificationsService.findAll(userId, isReadBool, type, priority);
+    return this.notificationsService.findAll(
+      userId,
+      isReadBool,
+      type,
+      priority,
+    );
   }
 
   @Get('unread-count')
@@ -62,7 +68,8 @@ export class NotificationsController {
 
   @Patch('settings')
   updateNotificationSettings(
-    @Body() body: {
+    @Body()
+    body: {
       emailAppointmentReminders?: boolean;
       emailNewMessages?: boolean;
       emailWorksheetUpdates?: boolean;
@@ -108,7 +115,8 @@ export class NotificationsController {
 
   @Post('appointment-reminder')
   createAppointmentReminder(
-    @Body() body: {
+    @Body()
+    body: {
       appointmentId: string;
       appointmentTime: string;
       therapistName: string;
@@ -125,7 +133,8 @@ export class NotificationsController {
 
   @Post('message-notification')
   createMessageNotification(
-    @Body() body: {
+    @Body()
+    body: {
       senderId: string;
       senderName: string;
       conversationId: string;
@@ -142,7 +151,8 @@ export class NotificationsController {
 
   @Post('worksheet-assigned')
   createWorksheetAssignedNotification(
-    @Body() body: {
+    @Body()
+    body: {
       worksheetId: string;
       worksheetTitle: string;
       therapistName: string;
@@ -159,7 +169,8 @@ export class NotificationsController {
 
   @Post('therapist-application')
   createTherapistApplicationNotification(
-    @Body() body: {
+    @Body()
+    body: {
       status: 'approved' | 'rejected';
     },
     @CurrentUserId() userId: string,
@@ -172,7 +183,8 @@ export class NotificationsController {
 
   @Post('review-request')
   createReviewRequestNotification(
-    @Body() body: {
+    @Body()
+    body: {
       therapistId: string;
       therapistName: string;
       sessionId: string;
@@ -189,7 +201,8 @@ export class NotificationsController {
 
   @Post('community-post')
   createCommunityPostNotification(
-    @Body() body: {
+    @Body()
+    body: {
       postId: string;
       communityName: string;
       authorName: string;

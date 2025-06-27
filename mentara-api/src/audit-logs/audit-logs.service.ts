@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { AuditAction, EventSeverity, SystemEventType, DataClassification } from '@prisma/client';
+import {
+  AuditAction,
+  EventSeverity,
+  SystemEventType,
+  DataClassification,
+} from '@prisma/client';
 
 @Injectable()
 export class AuditLogsService {
@@ -112,11 +117,7 @@ export class AuditLogsService {
     });
   }
 
-  async resolveSystemEvent(
-    id: string,
-    resolvedBy: string,
-    resolution: string,
-  ) {
+  async resolveSystemEvent(id: string, resolvedBy: string, resolution: string) {
     return this.prisma.systemEvent.update({
       where: { id },
       data: {
@@ -244,9 +245,10 @@ export class AuditLogsService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    const action = status === 'approved' 
-      ? AuditAction.THERAPIST_APPLICATION_APPROVE 
-      : AuditAction.THERAPIST_APPLICATION_REJECT;
+    const action =
+      status === 'approved'
+        ? AuditAction.THERAPIST_APPLICATION_APPROVE
+        : AuditAction.THERAPIST_APPLICATION_REJECT;
 
     return this.createAuditLog({
       action,
@@ -301,11 +303,7 @@ export class AuditLogsService {
     });
   }
 
-  async logSystemError(
-    component: string,
-    error: Error,
-    metadata?: any,
-  ) {
+  async logSystemError(component: string, error: Error, metadata?: any) {
     return this.createSystemEvent({
       eventType: SystemEventType.THIRD_PARTY_API_ERROR,
       severity: EventSeverity.ERROR,
@@ -325,12 +323,7 @@ export class AuditLogsService {
     if (startDate) where.createdAt = { ...where.createdAt, gte: startDate };
     if (endDate) where.createdAt = { ...where.createdAt, lte: endDate };
 
-    const [
-      totalLogs,
-      actionStats,
-      entityStats,
-      userStats,
-    ] = await Promise.all([
+    const [totalLogs, actionStats, entityStats, userStats] = await Promise.all([
       this.prisma.auditLog.count({ where }),
       this.prisma.auditLog.groupBy({
         by: ['action'],

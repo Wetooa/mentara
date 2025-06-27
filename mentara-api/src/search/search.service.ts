@@ -91,7 +91,7 @@ export class SearchService {
       return this.prisma.post.findMany({
         where,
         include: {
-          author: {
+          user: {
             select: {
               id: true,
               firstName: true,
@@ -99,11 +99,19 @@ export class SearchService {
               avatarUrl: true,
             },
           },
-          community: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
+          room: {
+            include: {
+              roomGroup: {
+                include: {
+                  community: {
+                    select: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                    },
+                  },
+                },
+              },
             },
           },
           _count: {
@@ -136,7 +144,6 @@ export class SearchService {
           _count: {
             select: {
               memberships: true,
-              posts: true,
             },
           },
         },

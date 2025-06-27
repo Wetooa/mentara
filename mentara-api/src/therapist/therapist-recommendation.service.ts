@@ -17,6 +17,10 @@ interface TherapistRecommendationRequest {
 interface TherapistRecommendationResponse {
   therapists: any[];
   total: number;
+  userConditions: string[];
+  matchCriteria: any;
+  page: number;
+  pageSize: number;
 }
 
 @Injectable()
@@ -90,7 +94,7 @@ export class TherapistRecommendationService {
       const secondaryConditions = this.getSecondaryConditions(userConditions);
 
       return {
-        totalCount: sortedTherapists.length,
+        total: sortedTherapists.length,
         userConditions: Object.keys(userConditions),
         therapists: sortedTherapists,
         matchCriteria: {

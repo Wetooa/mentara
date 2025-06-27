@@ -31,7 +31,8 @@ export class BillingController {
   // Subscription endpoints
   @Post('subscriptions')
   createSubscription(
-    @Body() body: {
+    @Body()
+    body: {
       planId: string;
       billingCycle?: BillingCycle;
       defaultPaymentMethodId?: string;
@@ -55,7 +56,8 @@ export class BillingController {
 
   @Patch('subscriptions/me')
   updateMySubscription(
-    @Body() body: {
+    @Body()
+    body: {
       planId?: string;
       billingCycle?: BillingCycle;
       defaultPaymentMethodId?: string;
@@ -83,7 +85,8 @@ export class BillingController {
 
   @Post('plans')
   createPlan(
-    @Body() body: {
+    @Body()
+    body: {
       name: string;
       description?: string;
       tier: SubscriptionTier;
@@ -93,7 +96,7 @@ export class BillingController {
       limits: any;
       trialDays?: number;
     },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
@@ -104,7 +107,8 @@ export class BillingController {
   @Patch('plans/:id')
   updatePlan(
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       name?: string;
       description?: string;
       monthlyPrice?: number;
@@ -114,7 +118,7 @@ export class BillingController {
       trialDays?: number;
       isActive?: boolean;
     },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
@@ -125,7 +129,8 @@ export class BillingController {
   // Payment Methods
   @Post('payment-methods')
   createPaymentMethod(
-    @Body() body: {
+    @Body()
+    body: {
       type: PaymentMethodType;
       cardLast4?: string;
       cardBrand?: string;
@@ -150,7 +155,8 @@ export class BillingController {
   @Patch('payment-methods/:id')
   updatePaymentMethod(
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       isDefault?: boolean;
       isActive?: boolean;
     },
@@ -166,7 +172,8 @@ export class BillingController {
   // Payments
   @Post('payments')
   createPayment(
-    @Body() body: {
+    @Body()
+    body: {
       amount: number;
       currency?: string;
       paymentMethodId?: string;
@@ -186,7 +193,7 @@ export class BillingController {
     @Query('status') status?: PaymentStatus,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     // Only admins can view all payments
     if (userRole !== 'admin') {
@@ -204,24 +211,30 @@ export class BillingController {
   @Patch('payments/:id/status')
   updatePaymentStatus(
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       status: PaymentStatus;
       metadata?: any;
     },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     // Only admins can update payment status
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
     }
 
-    return this.billingService.updatePaymentStatus(id, body.status, body.metadata);
+    return this.billingService.updatePaymentStatus(
+      id,
+      body.status,
+      body.metadata,
+    );
   }
 
   // Invoices
   @Post('invoices')
   createInvoice(
-    @Body() body: {
+    @Body()
+    body: {
       subscriptionId: string;
       subtotal: number;
       taxAmount?: number;
@@ -229,7 +242,7 @@ export class BillingController {
       dueDate: string;
       billingAddress?: any;
     },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
@@ -245,7 +258,7 @@ export class BillingController {
   getInvoices(
     @Query('subscriptionId') subscriptionId?: string,
     @Query('status') status?: InvoiceStatus,
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
     @CurrentUserId() userId?: string,
   ) {
     // Users can only see their own invoices
@@ -261,7 +274,7 @@ export class BillingController {
   markInvoiceAsPaid(
     @Param('id') id: string,
     @Body() body: { paymentId: string },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
@@ -273,7 +286,8 @@ export class BillingController {
   // Discounts
   @Post('discounts')
   createDiscount(
-    @Body() body: {
+    @Body()
+    body: {
       code?: string;
       name: string;
       description?: string;
@@ -287,7 +301,7 @@ export class BillingController {
       applicableTiers?: SubscriptionTier[];
       minAmount?: number;
     },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');
@@ -302,7 +316,8 @@ export class BillingController {
 
   @Post('discounts/validate')
   validateDiscount(
-    @Body() body: {
+    @Body()
+    body: {
       code: string;
       amount: number;
     },
@@ -317,13 +332,18 @@ export class BillingController {
     @Body() body: { amountSaved: number },
     @CurrentUserId() userId: string,
   ) {
-    return this.billingService.redeemDiscount(discountId, userId, body.amountSaved);
+    return this.billingService.redeemDiscount(
+      discountId,
+      userId,
+      body.amountSaved,
+    );
   }
 
   // Usage Records
   @Post('usage')
   recordUsage(
-    @Body() body: {
+    @Body()
+    body: {
       subscriptionId: string;
       feature: string;
       quantity: number;
@@ -331,7 +351,7 @@ export class BillingController {
       usageDate?: string;
       metadata?: any;
     },
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     // Only admins or system can record usage
     if (userRole !== 'admin') {
@@ -350,7 +370,7 @@ export class BillingController {
     @Query('feature') feature?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     // Users can only see their own usage
     if (userRole !== 'admin') {
@@ -370,7 +390,7 @@ export class BillingController {
   getBillingStatistics(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @CurrentUserRole() userRole: string,
+    @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
       throw new Error('Unauthorized');

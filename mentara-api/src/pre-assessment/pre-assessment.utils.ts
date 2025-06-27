@@ -164,10 +164,7 @@ export function calculateQuestionnaireScore(
   questionnaireName: string,
   answers: number[],
 ): QuestionnaireScore {
-  const config =
-    QUESTIONNAIRE_SCORING[
-      questionnaireName as keyof typeof QUESTIONNAIRE_SCORING
-    ];
+  const config = QUESTIONNAIRE_SCORING[questionnaireName];
   if (!config) {
     return { score: 0, severity: 'Unknown questionnaire' };
   }
@@ -179,8 +176,7 @@ export function calculateQuestionnaireScore(
     const answer = answers[i];
     if (answer === -1 || answer === undefined) continue; // Skip unanswered questions
 
-    let questionScore =
-      config.scoreMapping[answer as keyof typeof config.scoreMapping] || 0;
+    let questionScore = config.scoreMapping[answer] || 0;
 
     // Handle reverse scoring for specific questionnaires
     if (

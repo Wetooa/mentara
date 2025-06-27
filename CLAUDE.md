@@ -66,10 +66,18 @@ Prisma uses a multi-file schema approach in `prisma/models/`:
 - `user.prisma` - User accounts and profiles
 - `therapist.prisma` - Therapist profiles and applications
 - `community.prisma` - Support communities and groups
-- `post.prisma` - Community posts and comments
+- `content.prisma` - Community posts and comments
 - `worksheet.prisma` - Therapy assignments and submissions
-- `preassessment.prisma` - Mental health assessments
+- `pre-assessment.prisma` - Mental health assessments
 - `booking.prisma` - Session scheduling system
+- `messaging.prisma` - Real-time messaging system
+- `files.prisma` - File upload management
+- `sessions.prisma` - Therapy session tracking
+- `notifications.prisma` - User notifications
+- `billing.prisma` - Payment and billing
+- `review.prisma` - Therapist reviews and ratings
+- `assessments.prisma` - Mental health assessments
+- `audit-logs.prisma` - System audit trails
 
 ## Key Architectural Patterns
 
@@ -90,8 +98,9 @@ app/
 ### Authentication & Authorization
 - Clerk handles authentication with JWT tokens
 - Middleware (`middleware.ts`) enforces role-based routing
-- Three user roles: `user`, `therapist`, `admin`
+- Four user roles: `client`, `therapist`, `moderator`, `admin`
 - Protected routes redirect unauthorized users to appropriate dashboards
+- Role-based access control implemented in both frontend and backend
 
 ### Component Architecture
 - Fixed layout with static sidebar and header
@@ -106,8 +115,23 @@ NestJS modules organized by feature:
 - `therapist/` - Therapist profiles and applications
 - `communities/` - Community features
 - `posts/` - Content management
+- `comments/` - Comment management
 - `worksheets/` - Therapy assignments
 - `booking/` - Session scheduling
+- `messaging/` - Real-time messaging with WebSocket
+- `files/` - File upload and management
+- `sessions/` - Therapy session tracking
+- `notifications/` - User notifications
+- `reviews/` - Therapist reviews and ratings
+- `pre-assessment/` - Mental health assessments
+- `admin/` - Admin dashboard functionality
+- `moderator/` - Content moderation
+- `client/` - Client-specific functionality
+- `billing/` - Payment processing
+- `dashboard/` - Dashboard data aggregation
+- `search/` - Search functionality
+- `analytics/` - Usage analytics
+- `audit-logs/` - System audit logging
 
 ## Development Workflow
 
@@ -135,12 +159,51 @@ NestJS modules organized by feature:
 
 ### AI Integration
 - Separate Flask service handles mental health assessments
-- Neural network processes questionnaire responses
+- PyTorch neural network processes questionnaire responses  
 - Results integrated back into main application
+- AI service dependencies: Flask, PyTorch, NumPy
 
 ### Mock Data Structure
 Comprehensive mock data in `data/` directory:
 - `mockTherapistListingData.ts` - Therapist profiles and meetings
 - `mockUserDashboardData.ts` - User dashboard data
 - `mockPatientsData.ts` - Patient data for therapist views
+- `mockMessagesData.ts` - Messaging data for chat interface
+- `mockTherapistApplicationData.ts` - Therapist application data
+- `mockTherapistData.ts` - Additional therapist profile data
 - All use TypeScript interfaces for type safety
+
+## AI Patient Evaluation Service
+
+### Running the AI Service (ai-patient-evaluation/)
+```bash
+# Set up virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run Flask service
+python api.py
+```
+
+### AI Service Structure
+- `api.py` - Flask API endpoints for mental health assessments
+- `model.py` - PyTorch neural network implementation
+- `mental_model_config2.pt` - Pre-trained model weights
+- `list_converter.py` - Data preprocessing utilities
+- Service runs on separate port and communicates with main API
+
+## Real-time Features
+
+### WebSocket Messaging
+- Socket.io integration for real-time messaging
+- Implemented in both client and server
+- Message persistence in PostgreSQL via Prisma
+- File attachment support in messages
+
+### Live Notifications
+- Real-time notification system
+- WebSocket-based delivery
+- Notification types: messages, appointments, system alerts

@@ -58,7 +58,7 @@ export type RoomResponse = {
 
 export type MembershipResponse = {
   id: string;
-  userId: string;
+  userId: string | null;
   communityId: string;
   role: string;
   joinedAt: Date;
@@ -67,14 +67,14 @@ export type MembershipResponse = {
     firstName: string;
     lastName: string;
     avatarUrl: string | null;
-  };
+  } | null;
 };
 
 export type PostResponse = {
   id: string;
   title: string;
   content: string;
-  authorId: string;
+  userId: string;
   communityId: string;
   createdAt: Date;
   updatedAt: Date;

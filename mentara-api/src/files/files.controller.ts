@@ -21,6 +21,7 @@ import {
   AttachmentEntityType,
   AttachmentPurpose,
 } from '@prisma/client';
+import { FileShareCreateDto } from '../../schema/files';
 
 @Controller('files')
 @UseGuards(ClerkAuthGuard)
@@ -139,13 +140,8 @@ export class FilesController {
     @Param('id') fileId: string,
     @CurrentUserId() userId: string,
     @Body()
-    body: {
-      shareType: string;
-      password?: string;
-      maxDownloads?: number;
+    body: Omit<FileShareCreateDto, 'fileId' | 'sharedBy'> & {
       expiresAt?: string;
-      sharedWith?: string[];
-      message?: string;
     },
   ) {
     return this.filesService.createShare(fileId, {
