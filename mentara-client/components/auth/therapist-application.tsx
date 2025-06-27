@@ -13,6 +13,8 @@ import { therapistProfileFormFields } from "@/constants/therapist_application";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
+import { useRouter } from "next/navigation";
+import useTherapistForm from "@/store/therapistform";
 import {
   Form,
   FormField,
@@ -143,6 +145,9 @@ const steps = [
 ];
 
 export default function MentaraApplication() {
+  const router = useRouter();
+  const { updateField, updateNestedField } = useTherapistForm();
+  
   const form = useForm<TherapistApplicationForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -170,8 +175,37 @@ export default function MentaraApplication() {
   });
 
   function onSubmit(values: TherapistApplicationForm) {
-    // TODO: handle submission
-    console.log("Therapist Application Submitted:", values);
+    try {
+      // Save all form data to Zustand store
+      updateField("professionalLicenseType", values.professionalLicenseType);
+      updateField("professionalLicenseType_specify", values.professionalLicenseType_specify);
+      updateField("isPRCLicensed", values.isPRCLicensed);
+      updateField("prcLicenseNumber", values.prcLicenseNumber);
+      updateField("expirationDateOfLicense", values.expirationDateOfLicense);
+      updateField("isLicenseActive", values.isLicenseActive);
+      
+      // Save nested teletherapy readiness data
+      updateNestedField("teletherapyReadiness", "providedOnlineTherapyBefore", values.teletherapyReadiness.providedOnlineTherapyBefore);
+      updateNestedField("teletherapyReadiness", "comfortableUsingVideoConferencing", values.teletherapyReadiness.comfortableUsingVideoConferencing);
+      updateNestedField("teletherapyReadiness", "privateConfidentialSpace", values.teletherapyReadiness.privateConfidentialSpace);
+      updateNestedField("teletherapyReadiness", "compliesWithDataPrivacyAct", values.teletherapyReadiness.compliesWithDataPrivacyAct);
+      
+      // Save areas of expertise
+      updateField("areasOfExpertise", values.areasOfExpertise);
+      
+      // Save nested compliance data
+      updateNestedField("compliance", "professionalLiabilityInsurance", values.compliance.professionalLiabilityInsurance);
+      updateNestedField("compliance", "complaintsOrDisciplinaryActions", values.compliance.complaintsOrDisciplinaryActions);
+      updateNestedField("compliance", "complaintsOrDisciplinaryActions_specify", values.compliance.complaintsOrDisciplinaryActions_specify);
+      updateNestedField("compliance", "willingToAbideByPlatformGuidelines", values.compliance.willingToAbideByPlatformGuidelines);
+      
+      console.log("Therapist Application Data Saved:", values);
+      
+      // Navigate to step 2 (Document Upload)
+      router.push("/therapist-application/2");
+    } catch (error) {
+      console.error("Error saving application data:", error);
+    }
   }
 
   return (
@@ -186,7 +220,7 @@ export default function MentaraApplication() {
       <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
         <div className="mb-8">
           <Image
-            src="/mentara-landscape.png"
+            src="/icons/mentara/mentara-landscape.png"
             alt="Mentara logo"
             width={250}
             height={100}
@@ -204,8 +238,8 @@ export default function MentaraApplication() {
       {/* Right content area - scrollable form */}
       <div className="w-4/5 flex justify-center p-8">
         <div className="w-full max-w-3xl h-full">
-          <FormProvider {...form}>
-            <Form onSubmit={form.handleSubmit(onSubmit)}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="space-y-8">
                 {/* Professional License Type */}
                 <FormField
@@ -573,8 +607,8 @@ export default function MentaraApplication() {
                   </button>
                 </div>
               </div>
-            </Form>
-          </FormProvider>
+            </form>
+          </Form>
         </div>
       </div>
     </motion.div>

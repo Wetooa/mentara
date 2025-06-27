@@ -22,6 +22,10 @@
       "Bash(npm audit:*)",
       "Bash(rg \"any\" src/ --type ts -n)",
       "Bash(rg:*)"
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_fill"
     ]
   },
   "enableAllProjectMcpServers": true,
