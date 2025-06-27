@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Test account configuration
-export const TEST_ACCOUNTS = {
+const TEST_ACCOUNTS = {
   clients: [
     {
       clerkId: 'user_2z5S2iaKkRuHpe3BygkU0R3NnDu',
@@ -302,7 +302,7 @@ async function createTherapistAccount(account: any) {
       sessionLength: '60 minutes',
       hourlyRate: 150.00,
       submissionDate: new Date(),
-      processingDate: account.status === 'approved' ? new Date() : null,
+      processingDate: account.status === 'approved' ? new Date() : undefined,
     }
   });
 
@@ -343,7 +343,7 @@ async function createModeratorAccount(account: any) {
     data: {
       userId: account.clerkId,
       permissions: ['moderate_posts', 'moderate_comments', 'ban_users'],
-      assignedCommunityIds: communities.map(c => c.id),
+      assignedCommunities: communities.map(c => c.id),
     }
   });
 
@@ -471,7 +471,7 @@ async function createMixedAccount(account: any) {
         data: {
           userId: account.clerkId,
           permissions: ['moderate_posts'],
-          assignedCommunityIds: communities.map(c => c.id),
+          assignedCommunities: communities.map(c => c.id),
         }
       });
     }
