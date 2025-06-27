@@ -23,7 +23,11 @@
     "db:generate": "prisma generate",
     "db:reset": "prisma migrate reset && npm run db:seed",
     "assign-therapist": "ts-node scripts/assign-therapist.ts",
-    "assign-random-therapists": "ts-node scripts/assign-therapist.ts random"
+    "assign-random-therapists": "ts-node scripts/assign-therapist.ts random",
+    "test-accounts": "ts-node scripts/create-test-accounts.ts",
+    "seed-test-data": "ts-node prisma/seed-test-accounts.ts",
+    "test-auth-endpoints": "ts-node scripts/test-auth-endpoints.ts",
+    "cleanup-test-accounts": "ts-node scripts/cleanup-test-accounts.ts"
   },
   "dependencies": {
     "@clerk/backend": "^1.31.4",
