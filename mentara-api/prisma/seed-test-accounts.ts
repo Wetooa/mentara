@@ -40,7 +40,6 @@ async function seedTestData() {
 
     console.log('\n🎉 Enhanced test data seeding completed successfully!');
     await printTestDataSummary();
-
   } catch (error) {
     console.error('❌ Error during enhanced seeding:', error);
     throw error;
@@ -58,7 +57,7 @@ async function createTestUsers() {
     ...TEST_ACCOUNTS.therapists,
     ...TEST_ACCOUNTS.moderators,
     ...TEST_ACCOUNTS.admins,
-    ...TEST_ACCOUNTS.mixed
+    ...TEST_ACCOUNTS.mixed,
   ];
 
   for (const account of allAccounts) {
@@ -74,7 +73,7 @@ async function createTestUsers() {
 async function createTestUser(account: any) {
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
-    where: { id: account.clerkId }
+    where: { id: account.clerkId },
   });
 
   if (existingUser) {
@@ -94,7 +93,7 @@ async function createTestUser(account: any) {
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.firstName}`,
       address: `Test Address ${Math.floor(Math.random() * 1000)}, Test City`,
       birthDate: new Date('1990-01-01'),
-    }
+    },
   });
 
   // Create role-specific records
@@ -110,8 +109,9 @@ async function createRoleSpecificRecord(account: any) {
       await prisma.client.create({
         data: {
           userId: account.clerkId,
-          hasSeenTherapistRecommendations: account.description.includes('complete'),
-        }
+          hasSeenTherapistRecommendations:
+            account.description.includes('complete'),
+        },
       });
       break;
 
@@ -130,7 +130,9 @@ async function createRoleSpecificRecord(account: any) {
           practiceStartDate: new Date('2019-01-01'),
           areasOfExpertise: getTherapistExpertise(account.description),
           assessmentTools: ['PHQ-9', 'GAD-7', 'PCL-5'],
-          therapeuticApproachesUsedList: getTherapeuticApproaches(account.description),
+          therapeuticApproachesUsedList: getTherapeuticApproaches(
+            account.description,
+          ),
           languagesOffered: ['English', 'Tagalog'],
           providedOnlineTherapyBefore: true,
           comfortableUsingVideoConferencing: true,
@@ -140,17 +142,23 @@ async function createRoleSpecificRecord(account: any) {
           professionalLiabilityInsurance: 'Yes, fully covered',
           complaintsOrDisciplinaryActions: 'No complaints or actions',
           willingToAbideByPlatformGuidelines: true,
-          expertise: getTherapistExpertise(account.description).map(e => e.toLowerCase()),
-          approaches: getTherapeuticApproaches(account.description).map(a => a.toLowerCase()),
+          expertise: getTherapistExpertise(account.description).map((e) =>
+            e.toLowerCase(),
+          ),
+          approaches: getTherapeuticApproaches(account.description).map((a) =>
+            a.toLowerCase(),
+          ),
           languages: ['english', 'tagalog'],
-          illnessSpecializations: getIllnessSpecializations(account.description),
+          illnessSpecializations: getIllnessSpecializations(
+            account.description,
+          ),
           acceptTypes: ['insurance', 'self-pay'],
           treatmentSuccessRates: getTreatmentSuccessRates(account.description),
           sessionLength: '60 minutes',
           hourlyRate: getHourlyRate(account.description),
           submissionDate: new Date(),
-          processingDate: account.status === 'approved' ? new Date() : null,
-        }
+          processingDate: account.status === 'approved' ? new Date() : undefined,
+        },
       });
       break;
 
@@ -161,8 +169,10 @@ async function createRoleSpecificRecord(account: any) {
         data: {
           userId: account.clerkId,
           permissions: getModeratorPermissions(account.description),
-          assignedCommunityIds: communities.map(c => c.id),
-        }
+          assignedCommunities: {
+            connect: communities.map((c) => ({ id: c.id })),
+          },
+        },
       });
       break;
 
@@ -172,7 +182,7 @@ async function createRoleSpecificRecord(account: any) {
           userId: account.clerkId,
           permissions: getAdminPermissions(account.description),
           adminLevel: account.adminLevel || 'admin',
-        }
+        },
       });
       break;
   }
@@ -185,27 +195,29 @@ async function createTestCommunities() {
   const testCommunities = [
     {
       name: 'Anxiety Support Group',
-      description: 'A supportive community for those dealing with anxiety disorders',
+      description:
+        'A supportive community for those dealing with anxiety disorders',
       slug: 'anxiety-support-test',
-      imageUrl: '/images/communities/anxiety.jpg'
+      imageUrl: '/images/communities/anxiety.jpg',
     },
     {
       name: 'Depression Recovery',
-      description: 'Share experiences and find hope in recovery from depression',
+      description:
+        'Share experiences and find hope in recovery from depression',
       slug: 'depression-recovery-test',
-      imageUrl: '/images/communities/depression.jpg'
+      imageUrl: '/images/communities/depression.jpg',
     },
     {
       name: 'Trauma Survivors Network',
       description: 'Support network for trauma survivors and PTSD management',
       slug: 'trauma-survivors-test',
-      imageUrl: '/images/communities/trauma.jpg'
-    }
+      imageUrl: '/images/communities/trauma.jpg',
+    },
   ];
 
   for (const communityData of testCommunities) {
     const existingCommunity = await prisma.community.findUnique({
-      where: { slug: communityData.slug }
+      where: { slug: communityData.slug },
     });
 
     if (!existingCommunity) {
@@ -215,7 +227,7 @@ async function createTestCommunities() {
 
   // Create test memberships
   const communities = await prisma.community.findMany({
-    where: { slug: { endsWith: '-test' } }
+    where: { slug: { endsWith: '-test' } },
   });
 
   const clients = await getTestUsers('client');
@@ -228,20 +240,22 @@ async function createTestCommunities() {
         where: {
           userId_communityId: {
             userId: client.id,
-            communityId: community.id
-          }
+            communityId: community.id,
+          },
         },
         update: {},
         create: {
           userId: client.id,
           communityId: community.id,
-          role: 'member'
-        }
+          role: 'member',
+        },
       });
     }
   }
 
-  console.log(`   ✅ Created ${testCommunities.length} test communities with memberships`);
+  console.log(
+    `   ✅ Created ${testCommunities.length} test communities with memberships`,
+  );
 }
 
 /**
@@ -256,14 +270,13 @@ async function createTestConversations() {
     const conversation = await prisma.conversation.create({
       data: {
         type: 'DIRECT',
-        name: `Session Chat: ${clients[0].firstName} & ${therapists[0].firstName}`,
         participants: {
           create: [
             { userId: clients[0].id, role: 'MEMBER' },
-            { userId: therapists[0].id, role: 'MEMBER' }
-          ]
-        }
-      }
+            { userId: therapists[0].id, role: 'MEMBER' },
+          ],
+        },
+      },
     });
 
     // Create test messages
@@ -271,17 +284,17 @@ async function createTestConversations() {
       data: [
         {
           conversationId: conversation.id,
-          userId: clients[0].id,
-          content: 'Hello, I'm looking forward to our session today.',
-          type: 'TEXT'
+          senderId: clients[0].id,
+          content: "Hello, I'm looking forward to our session today.",
+          messageType: 'TEXT',
         },
         {
           conversationId: conversation.id,
-          userId: therapists[0].id,
-          content: 'Hello! I'm ready when you are. How are you feeling today?',
-          type: 'TEXT'
-        }
-      ]
+          senderId: therapists[0].id,
+          content: "Hello! I'm ready when you are. How are you feeling today?",
+          messageType: 'TEXT',
+        },
+      ],
     });
 
     console.log('   ✅ Created test conversations and messages');
@@ -300,24 +313,25 @@ async function createTestWorksheets() {
       data: {
         title: 'Mood Tracking Worksheet',
         instructions: 'Track your daily mood and identify patterns',
-        description: 'A comprehensive worksheet for mood tracking and self-reflection',
+        description:
+          'A comprehensive worksheet for mood tracking and self-reflection',
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
         status: 'assigned',
         clientId: clients[0].id,
         therapistId: therapists[0].id,
-        isCompleted: false
-      }
+        isCompleted: false,
+      },
     });
 
     // Create worksheet material
     await prisma.worksheetMaterial.create({
       data: {
         worksheetId: worksheet.id,
-        fileName: 'mood-tracking-template.pdf',
-        filePath: '/test-materials/mood-tracking-template.pdf',
+        filename: 'mood-tracking-template.pdf',
+        url: '/test-materials/mood-tracking-template.pdf',
         fileSize: 1024000,
-        mimeType: 'application/pdf'
-      }
+        fileType: 'application/pdf',
+      },
     });
 
     console.log('   ✅ Created test worksheets and materials');
@@ -338,20 +352,21 @@ async function createTestTherapeuticRelationships() {
         where: {
           clientId_therapistId: {
             clientId: clients[i].id,
-            therapistId: therapists[i].id
-          }
+            therapistId: therapists[i].id,
+          },
         },
         update: {},
         create: {
           clientId: clients[i].id,
           therapistId: therapists[i].id,
           assignedAt: new Date(),
-          isActive: true
-        }
+        },
       });
     }
 
-    console.log(`   ✅ Created ${Math.min(clients.length, therapists.length)} therapeutic relationships`);
+    console.log(
+      `   ✅ Created ${Math.min(clients.length, therapists.length)} therapeutic relationships`,
+    );
   }
 }
 
@@ -360,7 +375,7 @@ async function createTestTherapeuticRelationships() {
  */
 async function createTestSessions() {
   const relationships = await prisma.clientTherapist.findMany({
-    include: { client: true, therapist: true }
+    include: { client: true, therapist: true },
   });
 
   for (const relationship of relationships.slice(0, 2)) {
@@ -370,12 +385,10 @@ async function createTestSessions() {
         clientId: relationship.clientId,
         therapistId: relationship.therapistId,
         startTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        endTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000), // 1 hour duration
-        status: 'completed',
+        status: 'COMPLETED',
         meetingType: 'video',
-        notes: 'Great progress in today\'s session. Patient showed improved coping strategies.',
-        duration: 60
-      }
+        duration: 60,
+      },
     });
 
     // Create upcoming session
@@ -384,11 +397,10 @@ async function createTestSessions() {
         clientId: relationship.clientId,
         therapistId: relationship.therapistId,
         startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-        endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000), // 1 hour duration
-        status: 'scheduled',
+        status: 'SCHEDULED',
         meetingType: 'video',
-        duration: 60
-      }
+        duration: 60,
+      },
     });
   }
 
@@ -406,19 +418,21 @@ async function createTestNotifications() {
       data: [
         {
           userId: user.id,
-          type: 'session_reminder',
+          type: 'APPOINTMENT_REMINDER',
           title: 'Upcoming Session Reminder',
-          message: 'You have a therapy session scheduled for tomorrow at 3:00 PM',
-          isRead: false
+          message:
+            'You have a therapy session scheduled for tomorrow at 3:00 PM',
+          isRead: false,
         },
         {
           userId: user.id,
-          type: 'worksheet_assigned',
+          type: 'WORKSHEET_ASSIGNED',
           title: 'New Worksheet Assigned',
-          message: 'Your therapist has assigned you a new mood tracking worksheet',
-          isRead: true
-        }
-      ]
+          message:
+            'Your therapist has assigned you a new mood tracking worksheet',
+          isRead: true,
+        },
+      ],
     });
   }
 
@@ -454,24 +468,29 @@ function getIllnessSpecializations(description: string): string[] {
 
 function getTreatmentSuccessRates(description: string): Record<string, number> {
   if (description.includes('specialist')) {
-    return { "ptsd": 88, "trauma": 85, "anxiety": 92 };
+    return { ptsd: 88, trauma: 85, anxiety: 92 };
   }
-  return { "anxiety": 85, "depression": 78, "general": 80 };
+  return { anxiety: 85, depression: 78, general: 80 };
 }
 
 function getHourlyRate(description: string): number {
   if (description.includes('specialist')) {
-    return 200.00;
+    return 200.0;
   }
   if (description.includes('approved')) {
-    return 150.00;
+    return 150.0;
   }
-  return 125.00;
+  return 125.0;
 }
 
 function getModeratorPermissions(description: string): string[] {
   if (description.includes('primary')) {
-    return ['moderate_posts', 'moderate_comments', 'ban_users', 'manage_reports'];
+    return [
+      'moderate_posts',
+      'moderate_comments',
+      'ban_users',
+      'manage_reports',
+    ];
   }
   if (description.includes('limited')) {
     return ['moderate_posts'];
@@ -481,7 +500,14 @@ function getModeratorPermissions(description: string): string[] {
 
 function getAdminPermissions(description: string): string[] {
   if (description.includes('super')) {
-    return ['view', 'edit', 'delete', 'manage_users', 'manage_content', 'system_admin'];
+    return [
+      'view',
+      'edit',
+      'delete',
+      'manage_users',
+      'manage_content',
+      'system_admin',
+    ];
   }
   if (description.includes('user manager')) {
     return ['view', 'edit', 'manage_users'];
@@ -496,8 +522,8 @@ async function getTestUsers(role: string) {
   return await prisma.user.findMany({
     where: {
       role: role,
-      email: { contains: 'mentaratest.dev' }
-    }
+      email: { contains: 'mentaratest.dev' },
+    },
   });
 }
 
@@ -505,8 +531,12 @@ async function getTestUsers(role: string) {
  * Print summary of created test data
  */
 async function printTestDataSummary() {
-  const users = await prisma.user.count({ where: { email: { contains: 'mentaratest.dev' } } });
-  const communities = await prisma.community.count({ where: { slug: { endsWith: '-test' } } });
+  const users = await prisma.user.count({
+    where: { email: { contains: 'mentaratest.dev' } },
+  });
+  const communities = await prisma.community.count({
+    where: { slug: { endsWith: '-test' } },
+  });
   const memberships = await prisma.membership.count();
   const conversations = await prisma.conversation.count();
   const messages = await prisma.message.count();

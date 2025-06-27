@@ -11,7 +11,7 @@ const TEST_ACCOUNTS = {
       firstName: 'Sarah',
       lastName: 'Johnson',
       role: 'client',
-      description: 'Basic client with minimal profile data'
+      description: 'Basic client with minimal profile data',
     },
     {
       clerkId: 'user_2z5S4N84dgKfWuXzXGYjtXbkWVC',
@@ -19,7 +19,7 @@ const TEST_ACCOUNTS = {
       firstName: 'Marcus',
       lastName: 'Rodriguez',
       role: 'client',
-      description: 'Client with complete profile data'
+      description: 'Client with complete profile data',
     },
     {
       clerkId: 'user_2z5S76EFlCdnil28daogAv2A4bB',
@@ -28,8 +28,8 @@ const TEST_ACCOUNTS = {
       lastName: 'Chen',
       role: 'client',
       description: 'Inactive client for edge testing',
-      isActive: false
-    }
+      isActive: false,
+    },
   ],
   therapists: [
     {
@@ -39,7 +39,7 @@ const TEST_ACCOUNTS = {
       lastName: 'Thompson',
       role: 'therapist',
       description: 'Approved therapist with full credentials',
-      status: 'approved'
+      status: 'approved',
     },
     {
       clerkId: 'user_2z5SBGCUI2ypqCYmIMEanA335FT',
@@ -48,7 +48,7 @@ const TEST_ACCOUNTS = {
       lastName: 'Park',
       role: 'therapist',
       description: 'Pending approval therapist',
-      status: 'pending'
+      status: 'pending',
     },
     {
       clerkId: 'user_2z5SDHpsxW80HEoqRHkQCon9bHZ',
@@ -57,8 +57,8 @@ const TEST_ACCOUNTS = {
       lastName: 'Williams',
       role: 'therapist',
       description: 'Specialist therapist with expertise',
-      status: 'approved'
-    }
+      status: 'approved',
+    },
   ],
   moderators: [
     {
@@ -67,7 +67,7 @@ const TEST_ACCOUNTS = {
       firstName: 'Alex',
       lastName: 'Morgan',
       role: 'moderator',
-      description: 'Primary content moderator'
+      description: 'Primary content moderator',
     },
     {
       clerkId: 'user_2z5SL6dkZ1D1Yq9WBI3rKb2QN1P',
@@ -75,7 +75,7 @@ const TEST_ACCOUNTS = {
       firstName: 'Taylor',
       lastName: 'Davis',
       role: 'moderator',
-      description: 'Community-focused moderator'
+      description: 'Community-focused moderator',
     },
     {
       clerkId: 'user_2z5SO5MFy8ISp3f6bjWW8xYfd4q',
@@ -83,8 +83,8 @@ const TEST_ACCOUNTS = {
       firstName: 'Jordan',
       lastName: 'Smith',
       role: 'moderator',
-      description: 'Limited permission moderator'
-    }
+      description: 'Limited permission moderator',
+    },
   ],
   admins: [
     {
@@ -94,7 +94,7 @@ const TEST_ACCOUNTS = {
       lastName: 'Anderson',
       role: 'admin',
       description: 'Super admin with full permissions',
-      adminLevel: 'super'
+      adminLevel: 'super',
     },
     {
       clerkId: 'user_2z5STvOT1aof3ypYHO0KpKFto0S',
@@ -103,7 +103,7 @@ const TEST_ACCOUNTS = {
       lastName: 'Martinez',
       role: 'admin',
       description: 'User management focused admin',
-      adminLevel: 'admin'
+      adminLevel: 'admin',
     },
     {
       clerkId: 'user_2z5SVREYNRPeHeoAiUQq5pC4z42',
@@ -112,8 +112,8 @@ const TEST_ACCOUNTS = {
       lastName: 'Wilson',
       role: 'admin',
       description: 'Content management focused admin',
-      adminLevel: 'admin'
-    }
+      adminLevel: 'admin',
+    },
   ],
   mixed: [
     {
@@ -122,7 +122,7 @@ const TEST_ACCOUNTS = {
       firstName: 'Emily',
       lastName: 'Garcia',
       role: 'client',
-      description: 'Client transitioning to therapist'
+      description: 'Client transitioning to therapist',
     },
     {
       clerkId: 'user_2z5SZPFs86juZvlUsAFqY1PPCNs',
@@ -131,7 +131,7 @@ const TEST_ACCOUNTS = {
       lastName: 'Lee',
       role: 'therapist',
       description: 'Therapist with moderator privileges',
-      status: 'approved'
+      status: 'approved',
     },
     {
       clerkId: 'user_2z5SauPsyJpHaTEzrLvJXfkdhKi',
@@ -141,9 +141,9 @@ const TEST_ACCOUNTS = {
       role: 'admin',
       description: 'Inactive admin for security testing',
       isActive: false,
-      adminLevel: 'admin'
-    }
-  ]
+      adminLevel: 'admin',
+    },
+  ],
 };
 
 /**
@@ -190,8 +190,9 @@ async function createTestAccounts() {
     console.log(`• Moderators: ${TEST_ACCOUNTS.moderators.length}`);
     console.log(`• Admins: ${TEST_ACCOUNTS.admins.length}`);
     console.log(`• Mixed: ${TEST_ACCOUNTS.mixed.length}`);
-    console.log(`• Total: ${Object.values(TEST_ACCOUNTS).reduce((acc, arr) => acc + arr.length, 0)}`);
-
+    console.log(
+      `• Total: ${Object.values(TEST_ACCOUNTS).reduce((acc, arr) => acc + arr.length, 0)}`,
+    );
   } catch (error) {
     console.error('❌ Error creating test accounts:', error);
     throw error;
@@ -205,11 +206,13 @@ async function createTestAccounts() {
  */
 async function createClientAccount(account: any) {
   const existingUser = await prisma.user.findUnique({
-    where: { id: account.clerkId }
+    where: { id: account.clerkId },
   });
 
   if (existingUser) {
-    console.log(`   ⏭️  Client user already exists: ${account.firstName} ${account.lastName}`);
+    console.log(
+      `   ⏭️  Client user already exists: ${account.firstName} ${account.lastName}`,
+    );
     return;
   }
 
@@ -224,7 +227,7 @@ async function createClientAccount(account: any) {
       isActive: account.isActive ?? true,
       bio: `Test client account: ${account.description}`,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.firstName}`,
-    }
+    },
   });
 
   // Create Client record
@@ -232,10 +235,12 @@ async function createClientAccount(account: any) {
     data: {
       userId: account.clerkId,
       hasSeenTherapistRecommendations: false,
-    }
+    },
   });
 
-  console.log(`   ✅ Created client: ${account.firstName} ${account.lastName} (${account.description})`);
+  console.log(
+    `   ✅ Created client: ${account.firstName} ${account.lastName} (${account.description})`,
+  );
 }
 
 /**
@@ -243,11 +248,13 @@ async function createClientAccount(account: any) {
  */
 async function createTherapistAccount(account: any) {
   const existingUser = await prisma.user.findUnique({
-    where: { id: account.clerkId }
+    where: { id: account.clerkId },
   });
 
   if (existingUser) {
-    console.log(`   ⏭️  Therapist user already exists: ${account.firstName} ${account.lastName}`);
+    console.log(
+      `   ⏭️  Therapist user already exists: ${account.firstName} ${account.lastName}`,
+    );
     return;
   }
 
@@ -261,7 +268,7 @@ async function createTherapistAccount(account: any) {
       role: account.role,
       bio: `Test therapist account: ${account.description}`,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.firstName}`,
-    }
+    },
   });
 
   // Create Therapist record with realistic data
@@ -279,7 +286,10 @@ async function createTherapistAccount(account: any) {
       practiceStartDate: new Date('2019-01-01'),
       areasOfExpertise: ['Anxiety Disorders', 'Depression', 'Trauma Therapy'],
       assessmentTools: ['PHQ-9', 'GAD-7', 'PCL-5'],
-      therapeuticApproachesUsedList: ['Cognitive Behavioral Therapy', 'Dialectical Behavior Therapy'],
+      therapeuticApproachesUsedList: [
+        'Cognitive Behavioral Therapy',
+        'Dialectical Behavior Therapy',
+      ],
       languagesOffered: ['English', 'Tagalog'],
       providedOnlineTherapyBefore: true,
       comfortableUsingVideoConferencing: true,
@@ -295,18 +305,20 @@ async function createTherapistAccount(account: any) {
       illnessSpecializations: ['anxiety-disorders', 'mood-disorders', 'ptsd'],
       acceptTypes: ['insurance', 'self-pay'],
       treatmentSuccessRates: {
-        "anxiety": 85,
-        "depression": 78,
-        "trauma": 82
+        anxiety: 85,
+        depression: 78,
+        trauma: 82,
       },
       sessionLength: '60 minutes',
-      hourlyRate: 150.00,
+      hourlyRate: 150.0,
       submissionDate: new Date(),
       processingDate: account.status === 'approved' ? new Date() : undefined,
-    }
+    },
   });
 
-  console.log(`   ✅ Created therapist: ${account.firstName} ${account.lastName} (${account.description})`);
+  console.log(
+    `   ✅ Created therapist: ${account.firstName} ${account.lastName} (${account.description})`,
+  );
 }
 
 /**
@@ -314,11 +326,13 @@ async function createTherapistAccount(account: any) {
  */
 async function createModeratorAccount(account: any) {
   const existingUser = await prisma.user.findUnique({
-    where: { id: account.clerkId }
+    where: { id: account.clerkId },
   });
 
   if (existingUser) {
-    console.log(`   ⏭️  Moderator user already exists: ${account.firstName} ${account.lastName}`);
+    console.log(
+      `   ⏭️  Moderator user already exists: ${account.firstName} ${account.lastName}`,
+    );
     return;
   }
 
@@ -332,7 +346,7 @@ async function createModeratorAccount(account: any) {
       role: account.role,
       bio: `Test moderator account: ${account.description}`,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.firstName}`,
-    }
+    },
   });
 
   // Get some communities to assign to moderator
@@ -343,11 +357,13 @@ async function createModeratorAccount(account: any) {
     data: {
       userId: account.clerkId,
       permissions: ['moderate_posts', 'moderate_comments', 'ban_users'],
-      assignedCommunities: communities.map(c => c.id),
-    }
+      assignedCommunities: communities.map((c) => c.id),
+    },
   });
 
-  console.log(`   ✅ Created moderator: ${account.firstName} ${account.lastName} (${account.description})`);
+  console.log(
+    `   ✅ Created moderator: ${account.firstName} ${account.lastName} (${account.description})`,
+  );
 }
 
 /**
@@ -355,11 +371,13 @@ async function createModeratorAccount(account: any) {
  */
 async function createAdminAccount(account: any) {
   const existingUser = await prisma.user.findUnique({
-    where: { id: account.clerkId }
+    where: { id: account.clerkId },
   });
 
   if (existingUser) {
-    console.log(`   ⏭️  Admin user already exists: ${account.firstName} ${account.lastName}`);
+    console.log(
+      `   ⏭️  Admin user already exists: ${account.firstName} ${account.lastName}`,
+    );
     return;
   }
 
@@ -374,21 +392,31 @@ async function createAdminAccount(account: any) {
       isActive: account.isActive ?? true,
       bio: `Test admin account: ${account.description}`,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.firstName}`,
-    }
+    },
   });
 
   // Create Admin record
   const admin = await prisma.admin.create({
     data: {
       userId: account.clerkId,
-      permissions: account.adminLevel === 'super' 
-        ? ['view', 'edit', 'delete', 'manage_users', 'manage_content', 'system_admin']
-        : ['view', 'edit', 'manage_users'],
+      permissions:
+        account.adminLevel === 'super'
+          ? [
+              'view',
+              'edit',
+              'delete',
+              'manage_users',
+              'manage_content',
+              'system_admin',
+            ]
+          : ['view', 'edit', 'manage_users'],
       adminLevel: account.adminLevel || 'admin',
-    }
+    },
   });
 
-  console.log(`   ✅ Created admin: ${account.firstName} ${account.lastName} (${account.description})`);
+  console.log(
+    `   ✅ Created admin: ${account.firstName} ${account.lastName} (${account.description})`,
+  );
 }
 
 /**
@@ -396,11 +424,13 @@ async function createAdminAccount(account: any) {
  */
 async function createMixedAccount(account: any) {
   const existingUser = await prisma.user.findUnique({
-    where: { id: account.clerkId }
+    where: { id: account.clerkId },
   });
 
   if (existingUser) {
-    console.log(`   ⏭️  Mixed user already exists: ${account.firstName} ${account.lastName}`);
+    console.log(
+      `   ⏭️  Mixed user already exists: ${account.firstName} ${account.lastName}`,
+    );
     return;
   }
 
@@ -415,7 +445,7 @@ async function createMixedAccount(account: any) {
       isActive: account.isActive ?? true,
       bio: `Test mixed account: ${account.description}`,
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.firstName}`,
-    }
+    },
   });
 
   // Create role-specific records based on account type
@@ -424,7 +454,7 @@ async function createMixedAccount(account: any) {
       data: {
         userId: account.clerkId,
         hasSeenTherapistRecommendations: true,
-      }
+      },
     });
   } else if (account.role === 'therapist') {
     await prisma.therapist.create({
@@ -456,12 +486,12 @@ async function createMixedAccount(account: any) {
         languages: ['english', 'tagalog'],
         illnessSpecializations: ['relationship-issues'],
         acceptTypes: ['insurance'],
-        treatmentSuccessRates: { "family-therapy": 90 },
+        treatmentSuccessRates: { 'family-therapy': 90 },
         sessionLength: '50 minutes',
-        hourlyRate: 125.00,
+        hourlyRate: 125.0,
         submissionDate: new Date(),
         processingDate: new Date(),
-      }
+      },
     });
 
     // Also create moderator record for therapist-moderator
@@ -471,8 +501,8 @@ async function createMixedAccount(account: any) {
         data: {
           userId: account.clerkId,
           permissions: ['moderate_posts'],
-          assignedCommunities: communities.map(c => c.id),
-        }
+          assignedCommunities: communities.map((c) => c.id),
+        },
       });
     }
   } else if (account.role === 'admin') {
@@ -481,11 +511,13 @@ async function createMixedAccount(account: any) {
         userId: account.clerkId,
         permissions: ['view', 'edit'],
         adminLevel: account.adminLevel || 'admin',
-      }
+      },
     });
   }
 
-  console.log(`   ✅ Created mixed account: ${account.firstName} ${account.lastName} (${account.description})`);
+  console.log(
+    `   ✅ Created mixed account: ${account.firstName} ${account.lastName} (${account.description})`,
+  );
 }
 
 /**
@@ -494,32 +526,42 @@ async function createMixedAccount(account: any) {
 async function validateTestAccounts() {
   console.log('\n🔍 Validating test accounts...');
 
-  const allTestEmails = Object.values(TEST_ACCOUNTS).flat().map(account => account.email);
-  
+  const allTestEmails = Object.values(TEST_ACCOUNTS)
+    .flat()
+    .map((account) => account.email);
+
   const users = await prisma.user.findMany({
     where: {
-      email: { in: allTestEmails }
+      email: { in: allTestEmails },
     },
     include: {
       client: true,
       therapist: true,
       moderator: true,
       admin: true,
-    }
+    },
   });
 
   console.log(`   Found ${users.length} test users in database`);
-  
-  // Validate each role type
-  const clients = users.filter(u => u.role === 'client');
-  const therapists = users.filter(u => u.role === 'therapist');
-  const moderators = users.filter(u => u.role === 'moderator');
-  const admins = users.filter(u => u.role === 'admin');
 
-  console.log(`   • Clients: ${clients.length} (${clients.filter(c => c.client).length} with Client records)`);
-  console.log(`   • Therapists: ${therapists.length} (${therapists.filter(t => t.therapist).length} with Therapist records)`);
-  console.log(`   • Moderators: ${moderators.length} (${moderators.filter(m => m.moderator).length} with Moderator records)`);
-  console.log(`   • Admins: ${admins.length} (${admins.filter(a => a.admin).length} with Admin records)`);
+  // Validate each role type
+  const clients = users.filter((u) => u.role === 'client');
+  const therapists = users.filter((u) => u.role === 'therapist');
+  const moderators = users.filter((u) => u.role === 'moderator');
+  const admins = users.filter((u) => u.role === 'admin');
+
+  console.log(
+    `   • Clients: ${clients.length} (${clients.filter((c) => c.client).length} with Client records)`,
+  );
+  console.log(
+    `   • Therapists: ${therapists.length} (${therapists.filter((t) => t.therapist).length} with Therapist records)`,
+  );
+  console.log(
+    `   • Moderators: ${moderators.length} (${moderators.filter((m) => m.moderator).length} with Moderator records)`,
+  );
+  console.log(
+    `   • Admins: ${admins.length} (${admins.filter((a) => a.admin).length} with Admin records)`,
+  );
 
   console.log('   ✅ Test account validation completed');
 }
@@ -542,12 +584,18 @@ async function main() {
       await validateTestAccounts();
       break;
     default:
-      console.log('Usage: npm run test-accounts [create|validate|create-and-validate]');
+      console.log(
+        'Usage: npm run test-accounts [create|validate|create-and-validate]',
+      );
       console.log('');
       console.log('Commands:');
-      console.log('  create              - Create all test accounts in database');
+      console.log(
+        '  create              - Create all test accounts in database',
+      );
       console.log('  validate            - Validate existing test accounts');
-      console.log('  create-and-validate - Create and then validate test accounts');
+      console.log(
+        '  create-and-validate - Create and then validate test accounts',
+      );
       break;
   }
 }
