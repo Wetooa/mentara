@@ -197,3 +197,29 @@ Comprehensive mock data in `data/` directory:
 - `mockUserDashboardData.ts` - User dashboard data
 - `mockPatientsData.ts` - Patient data for therapist views
 - All use TypeScript interfaces for type safety
+
+## Important Development Guidelines
+
+### Code Quality
+- Run linting and type checking before commits:
+  - Client: `npm run lint` (in mentara-client/)
+  - API: `npm run lint` (in mentara-api/)
+- Always generate Prisma client after schema changes: `npm run db:generate`
+- Use existing mock data patterns when adding new features
+
+### Testing Strategy  
+- API unit tests: `npm run test` (in mentara-api/)
+- API e2e tests: `npm run test:e2e` (in mentara-api/)
+- Coverage reports: `npm run test:cov` (in mentara-api/)
+- Debug tests: `npm run test:debug` (in mentara-api/)
+
+### Environment Setup
+- Ensure all three services can run simultaneously:
+  - Frontend: `npm run dev` (port 3000)
+  - Backend: `npm run start:dev` (NestJS default port)
+  - AI Service: `python api.py` (Flask default port)
+
+### Working Directory Context
+- Always specify which directory commands should run in
+- Use relative paths consistently within each service
+- The current branch strategy uses `dev` for development, `master` for production

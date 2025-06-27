@@ -22,7 +22,7 @@ export class ClerkAuthGuard implements CanActivate {
     const token = (
       request?.headers.authorization as string | undefined
     )?.replace('Bearer ', '');
-    console.log(token);
+    // console.log(token);
 
     if (!token) {
       return false;
