@@ -19,6 +19,7 @@ const publicRoutes = [
   "/sign-up",
   "/pre-assessment",
   "/therapist_signup",
+  "/therapist-application",
   "/about",
   "/community",
   "/for-therapists",
@@ -69,8 +70,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL(redirectPath, req.url));
   }
 
-  // Allow all public routes
-  if (publicRoutes.includes(req.nextUrl.pathname)) {
+  // Allow all public routes (exact match or path prefix for therapist-application)
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || 
+                       req.nextUrl.pathname.startsWith('/therapist-application/');
+  
+  if (isPublicRoute) {
     return NextResponse.next();
   }
 
