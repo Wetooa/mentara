@@ -98,48 +98,92 @@ const convertBackendConversationToFrontend = (
 
 // Create authenticated messaging API service
 export const createMessagingApiService = (getToken: () => Promise<string | null>) => {
-  // Helper function to make authenticated requests
+  // Request deduplication to prevent multiple simultaneous calls
+  const pendingRequests = new Map<string, Promise<any>>();
+  
+  // Helper function to make authenticated requests with deduplication
   const makeRequest = async (endpoint: string, options: RequestInit = {}) => {
     const url = `${API_BASE_URL}${endpoint}`;
-    const token = await getToken();
+    const requestKey = `${options.method || 'GET'}:${endpoint}`;
     
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    };
-    
-    console.log(`Making messaging API request to ${url}`, { hasToken: !!token });
-    
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      credentials: 'include',
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Messaging API Error:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-        endpoint,
-      });
-      throw new Error(errorData.error || `API request failed: ${response.statusText}`);
+    // Check if this request is already pending
+    if (pendingRequests.has(requestKey)) {
+      console.log(`Deduplicating request to ${url}`);
+      return pendingRequests.get(requestKey);
     }
     
-    return response.json();
+    // Create new request promise
+    const requestPromise = (async () => {
+      try {
+        const token = await getToken();
+        
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+          ...options.headers,
+        };
+        
+        console.log(`Making messaging API request to ${url}`, { hasToken: !!token });
+        
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Messaging API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            errorData,
+            endpoint,
+          });
+          throw new Error(errorData.error || `API request failed: ${response.statusText}`);
+        }
+        
+        return response.json();
+      } finally {
+        // Remove from pending requests when done
+        pendingRequests.delete(requestKey);
+      }
+    })();
+    
+    // Store the promise
+    pendingRequests.set(requestKey, requestPromise);
+    
+    return requestPromise;
   };
 
-  // Get current user ID from token
+  // Get current user ID from token with caching to prevent repeated calls
+  let cachedUserId: string | null = null;
+  let userIdPromise: Promise<string> | null = null;
+  
   const getCurrentUserId = async (): Promise<string> => {
-    try {
-      const userInfo = await makeRequest('/auth/me');
-      return userInfo.id;
-    } catch (error) {
-      console.error('Error getting current user ID:', error);
-      throw new Error('Failed to get current user ID');
+    // Return cached value if available
+    if (cachedUserId) {
+      return cachedUserId;
     }
+    
+    // Return existing promise if one is already in progress
+    if (userIdPromise) {
+      return userIdPromise;
+    }
+    
+    userIdPromise = (async () => {
+      try {
+        const userInfo = await makeRequest('/auth/me');
+        cachedUserId = userInfo.id;
+        return cachedUserId;
+      } catch (error) {
+        console.error('Error getting current user ID:', error);
+        throw new Error('Failed to get current user ID');
+      } finally {
+        userIdPromise = null; // Clear the promise when done
+      }
+    })();
+    
+    return userIdPromise;
   };
 
   return {

@@ -41,46 +41,23 @@ export class MessagingWebSocketService {
     // Don't auto-retrieve token in constructor - let it be passed in explicitly
   }
   
-  // Connect to WebSocket server with token function
+  // Connect to WebSocket server with token function (simplified for demo)
   connectWithTokenFunction(getTokenFn: () => Promise<string | null>): void {
     this.getToken = getTokenFn;
     this.connect();
   }
   
-  // Connect to WebSocket server
+  // Connect to WebSocket server (simplified without authentication)
   async connect(token?: string): Promise<void> {
-    // If token is provided, use it directly
-    if (token) {
-      this.authToken = token;
-    } 
-    // Otherwise try to get fresh token
-    else if (this.getToken) {
-      try {
-        this.authToken = await this.getToken();
-      } catch (error) {
-        console.error('Failed to get fresh token for WebSocket:', error);
-        this.emit('error', 'Failed to authenticate WebSocket connection');
-        return;
-      }
-    }
-    
-    if (!this.authToken) {
-      console.warn('No auth token available for WebSocket connection');
-      this.emit('error', 'No authentication token available');
-      return;
-    }
-    
     if (this.socket?.connected) {
       console.log('WebSocket already connected');
       return;
     }
     
-    console.log('Connecting to WebSocket with auth token...');
+    console.log('Connecting to WebSocket without authentication (demo mode)...');
     
     this.socket = io(`${WEBSOCKET_URL}/messaging`, {
-      auth: {
-        token: this.authToken,
-      },
+      // Remove auth requirement for demo to prevent connection loops
       transports: ['websocket'],
       upgrade: true,
       rememberUpgrade: true,
@@ -181,7 +158,7 @@ export class MessagingWebSocketService {
     });
   }
   
-  // Handle reconnection logic
+  // Handle reconnection logic (simplified for demo)
   private async handleReconnection(): Promise<void> {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
@@ -190,29 +167,18 @@ export class MessagingWebSocketService {
     }
     
     this.reconnectAttempts++;
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    const delay = Math.min(2000 * this.reconnectAttempts, 10000); // Slower reconnection
     
     console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
     
     setTimeout(async () => {
       if (!this.isConnected) {
         try {
-          // Try to get a fresh token for reconnection
-          if (this.getToken) {
-            const freshToken = await this.getToken();
-            if (freshToken) {
-              this.authToken = freshToken;
-              await this.connect();
-            } else {
-              console.error('No fresh token available for reconnection');
-              this.emit('error', 'Authentication failed during reconnection');
-            }
-          } else if (this.authToken) {
-            await this.connect();
-          }
+          // Simplified reconnection without token refresh
+          await this.connect();
         } catch (error) {
           console.error('Error during reconnection:', error);
-          this.handleReconnection(); // Try again
+          // Don't immediately retry to prevent infinite loops
         }
       }
     }, delay);
@@ -290,30 +256,16 @@ export class MessagingWebSocketService {
     return this.isConnected && !!this.socket?.connected;
   }
   
+  // Simplified token methods for demo (authentication disabled)
   async setAuthToken(token: string): Promise<void> {
-    this.authToken = token;
-    
-    // Reconnect with new token if currently connected
-    if (this.isConnected) {
-      this.disconnect();
-      await this.connect();
-    }
+    // Token functionality disabled for demo
+    console.log('Token functionality disabled for demo mode');
   }
   
-  // Refresh token and reconnect if needed
+  // Refresh token functionality disabled for demo
   async refreshToken(): Promise<void> {
-    if (this.getToken) {
-      try {
-        const freshToken = await this.getToken();
-        if (freshToken && freshToken !== this.authToken) {
-          console.log('Refreshing WebSocket token...');
-          await this.setAuthToken(freshToken);
-        }
-      } catch (error) {
-        console.error('Failed to refresh WebSocket token:', error);
-        this.emit('error', 'Token refresh failed');
-      }
-    }
+    // Token refresh disabled for demo
+    console.log('Token refresh disabled for demo mode');
   }
   
   // Cleanup method

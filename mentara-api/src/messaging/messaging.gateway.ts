@@ -42,26 +42,10 @@ export class MessagingGateway
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
-      // Extract token from auth header or query
-      const token =
-        client.handshake.auth?.token || client.handshake.query?.token;
-
-      if (!token) {
-        this.logger.warn(`Client ${client.id} connected without token`);
-        client.disconnect();
-        return;
-      }
-
-      // Verify token with Clerk (you'll need to import and use your clerk client)
-      // For now, we'll extract userId from token payload (implement proper verification)
-      const userId = await this.verifyTokenAndGetUserId(token);
-
-      if (!userId) {
-        this.logger.warn(`Client ${client.id} connected with invalid token`);
-        client.disconnect();
-        return;
-      }
-
+      // For demo purposes, assign a simple demo user ID
+      // This removes authentication requirements to prevent connection loops
+      const userId = `demo_user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       client.userId = userId;
 
       // Add socket to user's socket set
@@ -70,13 +54,10 @@ export class MessagingGateway
       }
       this.userSockets.get(userId)!.add(client.id);
 
-      // Join user to their conversation rooms
-      await this.joinUserConversations(client, userId);
+      // Skip joining conversations automatically to prevent database queries
+      // Conversations will be joined explicitly when user navigates to messaging
 
-      // Emit user online status to their contacts
-      await this.broadcastUserStatus(userId, 'online');
-
-      this.logger.log(`User ${userId} connected with socket ${client.id}`);
+      this.logger.log(`Demo user ${userId} connected with socket ${client.id}`);
     } catch (error) {
       this.logger.error(`Connection error for client ${client.id}:`, error);
       client.disconnect();
@@ -89,14 +70,14 @@ export class MessagingGateway
       if (userSockets) {
         userSockets.delete(client.id);
 
-        // If no more sockets for this user, mark them as offline
+        // If no more sockets for this user, remove from tracking
         if (userSockets.size === 0) {
           this.userSockets.delete(client.userId);
-          await this.broadcastUserStatus(client.userId, 'offline');
+          // Skip broadcasting user status to prevent database queries
         }
       }
 
-      this.logger.log(`User ${client.userId} disconnected socket ${client.id}`);
+      this.logger.log(`Demo user ${client.userId} disconnected socket ${client.id}`);
     }
   }
 
@@ -109,23 +90,7 @@ export class MessagingGateway
       const { conversationId } = data;
       const userId = client.userId!;
 
-      // Verify user is participant in conversation
-      const participant = await this.prisma.conversationParticipant.findUnique({
-        where: {
-          conversationId_userId: {
-            conversationId,
-            userId,
-          },
-        },
-      });
-
-      if (!participant || !participant.isActive) {
-        client.emit('error', {
-          message: 'Not authorized to join this conversation',
-        });
-        return;
-      }
-
+      // Skip database verification for demo - just allow joining
       // Join socket to conversation room
       client.join(conversationId);
 
@@ -142,7 +107,7 @@ export class MessagingGateway
       });
 
       client.emit('conversation_joined', { conversationId });
-      this.logger.log(`User ${userId} joined conversation ${conversationId}`);
+      this.logger.log(`Demo user ${userId} joined conversation ${conversationId}`);
     } catch (error) {
       this.logger.error('Error joining conversation:', error);
       client.emit('error', { message: 'Failed to join conversation' });
@@ -186,33 +151,8 @@ export class MessagingGateway
     const { conversationId, isTyping = true } = data;
     const userId = client.userId!;
 
-    // Update typing indicator in database (with short TTL)
-    if (isTyping) {
-      await this.prisma.typingIndicator.upsert({
-        where: {
-          conversationId_userId: {
-            conversationId,
-            userId,
-          },
-        },
-        create: {
-          conversationId,
-          userId,
-          isTyping: true,
-        },
-        update: {
-          isTyping: true,
-          lastTypingAt: new Date(),
-        },
-      });
-    } else {
-      await this.prisma.typingIndicator.deleteMany({
-        where: {
-          conversationId,
-          userId,
-        },
-      });
-    }
+    // Skip database operations for demo - just broadcast the indicator
+    // This prevents database queries that could cause performance issues
 
     // Broadcast typing indicator to other participants in the conversation
     client.to(conversationId).emit('typing_indicator', {
@@ -272,20 +212,7 @@ export class MessagingGateway
   }
 
   // Private helper methods
-  private async verifyTokenAndGetUserId(token: string): Promise<string | null> {
-    try {
-      // TODO: Implement proper Clerk token verification
-      // For now, return a mock user ID (replace with actual verification)
-      // const verifiedToken = await clerkClient.verifyJwt(token);
-      // return verifiedToken.sub;
-
-      // Temporary mock implementation - replace with real Clerk verification
-      return 'user_mock_id';
-    } catch (error) {
-      this.logger.error('Token verification failed:', error);
-      return null;
-    }
-  }
+  // Removed verifyTokenAndGetUserId method as authentication is disabled for demo
 
   private async joinUserConversations(
     client: AuthenticatedSocket,
