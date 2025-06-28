@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import useTherapistForm from "@/store/therapistform";
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Controller, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
@@ -81,8 +82,13 @@ function FormDropdown(props: DropdownProps) {
   return (
     <div className={`w-full h-fit flex flex-col ${props.className}`}>
       <Select
-        value={props.value}
-        onValueChange={props.onValueChange}
+        value={props.value || ""}
+        onValueChange={(value) => {
+          // Ensure the value change is properly handled
+          if (value && value !== props.value) {
+            props.onValueChange(value);
+          }
+        }}
         name={props.name}
       >
         <SelectTrigger
@@ -98,13 +104,22 @@ function FormDropdown(props: DropdownProps) {
         >
           <SelectValue placeholder={props.PlaceHolder} />
         </SelectTrigger>
-        <SelectContent className="rounded-2xl bg-input border-gray-300 text-secondary">
+        <SelectContent 
+          className="rounded-2xl bg-input border-gray-300 text-secondary"
+          position="popper"
+          side="bottom"
+          align="start"
+        >
           <SelectGroup>
             {props.List.map((item) => (
               <SelectItem
                 className="text-secondary data-[highlighted]:bg-primary data-[highlighted]:text-white cursor-pointer"
                 key={item}
                 value={item}
+                onSelect={() => {
+                  // Additional handling to ensure selection works
+                  props.onValueChange(item);
+                }}
               >
                 {item}
               </SelectItem>
@@ -131,21 +146,29 @@ export default function TherapistSignUp() {
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string | null>>({});
 
-  // Add useEffect to reset form on component mount (optional)
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
+  // Initialize form with clean state - removed resetForm to prevent conflicts
+  // useEffect(() => {
+  //   resetForm();
+  // }, [resetForm]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateField(name, value);
-  };
+    // Clear any existing errors for this field
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
+  }, [updateField, errors]);
 
-  const handleDropdownChange = (name: string, value: string) => {
+  const handleDropdownChange = useCallback((name: string, value: string) => {
     updateField(name, value);
-  };
+    // Clear any existing errors for this field
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
+  }, [updateField, errors]);
 
-  const validateForm = (): Record<string, string | null> => {
+  const validateForm = useCallback((): Record<string, string | null> => {
     const newErrors: Record<string, string | null> = {};
     const phoneRegex = /^(09|\+639)\d{9}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -175,9 +198,9 @@ export default function TherapistSignUp() {
     }
 
     return newErrors;
-  };
+  }, [formValues]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
 
@@ -190,7 +213,10 @@ export default function TherapistSignUp() {
 
     if (!hasErrors) {
       console.log("Form Submitted Successfully:", formValues);
-      router.push("/therapist-application/1");
+      // Add small delay to ensure state is fully updated before navigation
+      setTimeout(() => {
+        router.push("/therapist-application/1");
+      }, 100);
     } else {
       console.log("Validation Errors:", validationErrors);
       const firstErrorKey = Object.keys(validationErrors).find(
@@ -203,7 +229,7 @@ export default function TherapistSignUp() {
         }
       }
     }
-  };
+  }, [formValues, router, validateForm]);
 
   return (
     <div className="w-full h-full flex flex-col gap-16 md:gap-24 lg:gap-36 bg-gradient-to-b from-tertiary to-transparent min-h-screen pb-20">
@@ -293,7 +319,10 @@ export default function TherapistSignUp() {
               Span={false}
               List={PHILIPPINE_PROVINCES}
               value={formValues?.province || ""}
-              onValueChange={(value) => handleDropdownChange("province", value)}
+              onValueChange={(value) => {
+                console.log("Province selected:", value);
+                handleDropdownChange("province", value);
+              }}
               error={errors.province}
               name="province"
               className="md:col-span-1"
@@ -305,9 +334,10 @@ export default function TherapistSignUp() {
               Span={false}
               List={PROVIDER_TYPE}
               value={formValues?.providerType || ""}
-              onValueChange={(value) =>
-                handleDropdownChange("providerType", value)
-              }
+              onValueChange={(value) => {
+                console.log("Provider type selected:", value);
+                handleDropdownChange("providerType", value);
+              }}
               error={errors.providerType}
               name="providerType"
               className="md:col-span-1"

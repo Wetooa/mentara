@@ -50,18 +50,29 @@ const useTherapistForm = create<TherapistFormState>((set) => ({
 
   // Methods
   updateField: (fieldKey, value) =>
-    set((state) => ({
-      ...state,
-      formValues: {
-        ...state.formValues,
-        [fieldKey]: value,
-      },
-    })),
+    set((state) => {
+      // Only update if the value has actually changed
+      if (state.formValues[fieldKey] === value) {
+        return state;
+      }
+      return {
+        ...state,
+        formValues: {
+          ...state.formValues,
+          [fieldKey]: value,
+        },
+      };
+    }),
 
   updateNestedField: (group, field, value) =>
     set((state) => {
       // Check if the group exists in formValues
       const groupState = state.formValues[group] || {};
+      
+      // Only update if the value has actually changed
+      if (groupState[field] === value) {
+        return state;
+      }
 
       return {
         ...state,

@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import React, { useCallback, useMemo } from "react";
+import { useForm, FormProvider, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -171,29 +171,40 @@ export default function MentaraApplication() {
         willingToAbideByPlatformGuidelines: "",
       },
     },
-    mode: "onChange",
+    mode: "onSubmit",
   });
 
-  function onSubmit(values: TherapistApplicationForm) {
+  // Use useWatch instead of form.watch to prevent infinite re-renders
+  const watchedValues = useWatch({
+    control: form.control,
+    name: ["professionalLicenseType", "isPRCLicensed", "compliance.complaintsOrDisciplinaryActions"],
+  });
+  
+  const [professionalLicenseType, isPRCLicensed, complaintsOrDisciplinaryActions] = watchedValues;
+
+  const onSubmit = useCallback((values: TherapistApplicationForm) => {
     try {
-      // Save all form data to Zustand store
-      updateField("professionalLicenseType", values.professionalLicenseType);
-      updateField("professionalLicenseType_specify", values.professionalLicenseType_specify);
-      updateField("isPRCLicensed", values.isPRCLicensed);
-      updateField("prcLicenseNumber", values.prcLicenseNumber);
-      updateField("expirationDateOfLicense", values.expirationDateOfLicense);
-      updateField("isLicenseActive", values.isLicenseActive);
+      // Batch all Zustand store updates to prevent excessive re-renders
+      const updateData = {
+        professionalLicenseType: values.professionalLicenseType,
+        professionalLicenseType_specify: values.professionalLicenseType_specify,
+        isPRCLicensed: values.isPRCLicensed,
+        prcLicenseNumber: values.prcLicenseNumber,
+        expirationDateOfLicense: values.expirationDateOfLicense,
+        isLicenseActive: values.isLicenseActive,
+        areasOfExpertise: values.areasOfExpertise,
+      };
       
-      // Save nested teletherapy readiness data
+      // Update fields efficiently
+      Object.entries(updateData).forEach(([key, value]) => {
+        updateField(key, value);
+      });
+      
+      // Save nested data
       updateNestedField("teletherapyReadiness", "providedOnlineTherapyBefore", values.teletherapyReadiness.providedOnlineTherapyBefore);
       updateNestedField("teletherapyReadiness", "comfortableUsingVideoConferencing", values.teletherapyReadiness.comfortableUsingVideoConferencing);
       updateNestedField("teletherapyReadiness", "privateConfidentialSpace", values.teletherapyReadiness.privateConfidentialSpace);
       updateNestedField("teletherapyReadiness", "compliesWithDataPrivacyAct", values.teletherapyReadiness.compliesWithDataPrivacyAct);
-      
-      // Save areas of expertise
-      updateField("areasOfExpertise", values.areasOfExpertise);
-      
-      // Save nested compliance data
       updateNestedField("compliance", "professionalLiabilityInsurance", values.compliance.professionalLiabilityInsurance);
       updateNestedField("compliance", "complaintsOrDisciplinaryActions", values.compliance.complaintsOrDisciplinaryActions);
       updateNestedField("compliance", "complaintsOrDisciplinaryActions_specify", values.compliance.complaintsOrDisciplinaryActions_specify);
@@ -206,7 +217,7 @@ export default function MentaraApplication() {
     } catch (error) {
       console.error("Error saving application data:", error);
     }
-  }
+  }, [updateField, updateNestedField, router]);
 
   return (
     <motion.div
@@ -250,32 +261,46 @@ export default function MentaraApplication() {
                       <FormLabel>
                         What is your professional license type?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="rpsy" id="rpsy" />
-                        <Label htmlFor="rpsy">
-                          RPsy (Registered Psychologist)
-                        </Label>
-                        <RadioGroupItem value="rpm" id="rpm" />
-                        <Label htmlFor="rpm">
-                          RPm (Registered Psychometrician)
-                        </Label>
-                        <RadioGroupItem value="rgc" id="rgc" />
-                        <Label htmlFor="rgc">
-                          RGC (Registered Guidance Counselor)
-                        </Label>
-                        <RadioGroupItem value="other" id="other" />
-                        <Label htmlFor="other">Others (Please specify)</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="professionalLicenseType"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="rpsy" id="rpsy" />
+                              <Label htmlFor="rpsy">
+                                RPsy (Registered Psychologist)
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="rpm" id="rpm" />
+                              <Label htmlFor="rpm">
+                                RPm (Registered Psychometrician)
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="rgc" id="rgc" />
+                              <Label htmlFor="rgc">
+                                RGC (Registered Guidance Counselor)
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="other" id="other" />
+                              <Label htmlFor="other">Others (Please specify)</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 {/* Specify License Type if 'other' */}
-                {form.watch("professionalLicenseType") === "other" && (
+                {professionalLicenseType === "other" && (
                   <FormField
                     control={form.control}
                     name="professionalLicenseType_specify"
@@ -297,22 +322,32 @@ export default function MentaraApplication() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Are you PRC-licensed?</FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="prc-yes" />
-                        <Label htmlFor="prc-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="prc-no" />
-                        <Label htmlFor="prc-no">No</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="isPRCLicensed"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="prc-yes" />
+                              <Label htmlFor="prc-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="prc-no" />
+                              <Label htmlFor="prc-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 {/* PRC License Number, Expiration, Active if PRC Licensed */}
-                {form.watch("isPRCLicensed") === "yes" && (
+                {isPRCLicensed === "yes" && (
                   <>
                     <FormField
                       control={form.control}
@@ -349,16 +384,26 @@ export default function MentaraApplication() {
                             Is your license currently active and in good
                             standing?
                           </FormLabel>
-                          <RadioGroup
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            name={field.name}
-                          >
-                            <RadioGroupItem value="yes" id="active-yes" />
-                            <Label htmlFor="active-yes">Yes</Label>
-                            <RadioGroupItem value="no" id="active-no" />
-                            <Label htmlFor="active-no">No</Label>
-                          </RadioGroup>
+                          <Controller
+                            control={form.control}
+                            name="isLicenseActive"
+                            render={({ field }) => (
+                              <RadioGroup
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                name={field.name}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="yes" id="active-yes" />
+                                  <Label htmlFor="active-yes">Yes</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="no" id="active-no" />
+                                  <Label htmlFor="active-no">No</Label>
+                                </div>
+                              </RadioGroup>
+                            )}
+                          />
                           <FormMessage />
                         </FormItem>
                       )}
@@ -374,16 +419,26 @@ export default function MentaraApplication() {
                       <FormLabel>
                         Have you provided online therapy before?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="online-yes" />
-                        <Label htmlFor="online-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="online-no" />
-                        <Label htmlFor="online-no">No</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="teletherapyReadiness.providedOnlineTherapyBefore"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="online-yes" />
+                              <Label htmlFor="online-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="online-no" />
+                              <Label htmlFor="online-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -397,16 +452,26 @@ export default function MentaraApplication() {
                         Are you comfortable using secure video conferencing
                         tools (e.g., Zoom, Google Meet)?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="video-yes" />
-                        <Label htmlFor="video-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="video-no" />
-                        <Label htmlFor="video-no">No</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="teletherapyReadiness.comfortableUsingVideoConferencing"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="video-yes" />
+                              <Label htmlFor="video-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="video-no" />
+                              <Label htmlFor="video-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -420,16 +485,26 @@ export default function MentaraApplication() {
                         Do you have a private and confidential space for
                         conducting virtual sessions?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="private-yes" />
-                        <Label htmlFor="private-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="private-no" />
-                        <Label htmlFor="private-no">No</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="teletherapyReadiness.privateConfidentialSpace"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="private-yes" />
+                              <Label htmlFor="private-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="private-no" />
+                              <Label htmlFor="private-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -443,16 +518,26 @@ export default function MentaraApplication() {
                         Do you comply with the Philippine Data Privacy Act (RA
                         10173)?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="privacy-yes" />
-                        <Label htmlFor="privacy-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="privacy-no" />
-                        <Label htmlFor="privacy-no">No</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="teletherapyReadiness.compliesWithDataPrivacyAct"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="privacy-yes" />
+                              <Label htmlFor="privacy-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="privacy-no" />
+                              <Label htmlFor="privacy-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -509,23 +594,35 @@ export default function MentaraApplication() {
                         Do you have professional liability insurance for online
                         practice?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="liability-yes" />
-                        <Label htmlFor="liability-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="liability-no" />
-                        <Label htmlFor="liability-no">No</Label>
-                        <RadioGroupItem
-                          value="willing"
-                          id="liability-willing"
-                        />
-                        <Label htmlFor="liability-willing">
-                          Not yet, but willing to secure
-                        </Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="compliance.professionalLiabilityInsurance"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="liability-yes" />
+                              <Label htmlFor="liability-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="liability-no" />
+                              <Label htmlFor="liability-no">No</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem
+                                value="willing"
+                                id="liability-willing"
+                              />
+                              <Label htmlFor="liability-willing">
+                                Not yet, but willing to secure
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -539,25 +636,34 @@ export default function MentaraApplication() {
                         Have you ever had complaints or disciplinary actions
                         against your PRC license?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="no" id="complaints-no" />
-                        <Label htmlFor="complaints-no">No</Label>
-                        <RadioGroupItem value="yes" id="complaints-yes" />
-                        <Label htmlFor="complaints-yes">
-                          Yes (please briefly explain):
-                        </Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="compliance.complaintsOrDisciplinaryActions"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="complaints-no" />
+                              <Label htmlFor="complaints-no">No</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="complaints-yes" />
+                              <Label htmlFor="complaints-yes">
+                                Yes (please briefly explain):
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 {/* Specify if complaints = yes */}
-                {form.watch("compliance.complaintsOrDisciplinaryActions") ===
-                  "yes" && (
+                {complaintsOrDisciplinaryActions === "yes" && (
                   <FormField
                     control={form.control}
                     name="compliance.complaintsOrDisciplinaryActions_specify"
@@ -584,16 +690,26 @@ export default function MentaraApplication() {
                         guidelines, privacy policies, and patient safety
                         standards?
                       </FormLabel>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <RadioGroupItem value="yes" id="guidelines-yes" />
-                        <Label htmlFor="guidelines-yes">Yes</Label>
-                        <RadioGroupItem value="no" id="guidelines-no" />
-                        <Label htmlFor="guidelines-no">No</Label>
-                      </RadioGroup>
+                      <Controller
+                        control={form.control}
+                        name="compliance.willingToAbideByPlatformGuidelines"
+                        render={({ field }) => (
+                          <RadioGroup
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            name={field.name}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="guidelines-yes" />
+                              <Label htmlFor="guidelines-yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="guidelines-no" />
+                              <Label htmlFor="guidelines-no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        )}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
