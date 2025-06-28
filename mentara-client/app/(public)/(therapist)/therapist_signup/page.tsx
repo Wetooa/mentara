@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import useTherapistForm from "@/store/therapistform";
@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Controller, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
@@ -141,7 +140,7 @@ function FormDropdown(props: DropdownProps) {
 
 export default function TherapistSignUp() {
   // Access Zustand store
-  const { formValues, updateField, resetForm } = useTherapistForm();
+  const { formValues, updateField } = useTherapistForm();
 
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string | null>>({});
