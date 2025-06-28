@@ -3,7 +3,6 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  Param,
   Body,
   BadRequestException,
 } from '@nestjs/common';

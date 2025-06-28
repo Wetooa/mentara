@@ -1,10 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsEmail,
-  IsBoolean,
-  IsArray,
-} from 'class-validator';
+import { IsString, IsOptional, IsArray } from 'class-validator';
 
 export class CreateAdminDto {
   @IsString()

@@ -7,18 +7,11 @@ import {
 import { BookingService } from './booking.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
-import {
-  createMockPrismaService,
-  TestDataFactory,
-  TEST_USER_IDS,
-  delay,
-  expectToThrowAsync,
-} from '../test-utils';
+import { createMockPrismaService, TEST_USER_IDS } from '../test-utils';
 
 describe('BookingService', () => {
   let service: BookingService;
   let prismaService: jest.Mocked<PrismaService>;
-  let testFactory: TestDataFactory;
 
   beforeEach(async () => {
     const mockPrisma = createMockPrismaService();

@@ -11,7 +11,9 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  PayloadTooLargeException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
@@ -29,6 +31,7 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post('upload')
+  @Throttle({ upload: { limit: 5, ttl: 60000 } }) // 5 uploads per minute
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
@@ -37,6 +40,38 @@ export class FilesController {
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
+    }
+
+    // File size validation (10MB limit)
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSizeInBytes) {
+      throw new PayloadTooLargeException('File size exceeds 10MB limit');
+    }
+
+    // File type validation - Allow common safe file types
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'text/plain',
+      'text/csv',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    ];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        `File type ${file.mimetype} is not allowed`,
+      );
+    }
+
+    // Filename validation - prevent path traversal
+    const safeFilename = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    if (safeFilename !== file.originalname) {
+      throw new BadRequestException('Filename contains invalid characters');
     }
 
     // In a real implementation, you would upload to cloud storage here

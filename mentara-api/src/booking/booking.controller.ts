@@ -8,6 +8,7 @@ import {
   Put,
   Query,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
@@ -83,7 +84,9 @@ export class BookingController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can manage availability');
+      throw new UnauthorizedException(
+        'Only therapists can manage availability',
+      );
     }
     return this.bookingService.createAvailability(
       createAvailabilityDto,
@@ -97,7 +100,9 @@ export class BookingController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can view their availability');
+      throw new UnauthorizedException(
+        'Only therapists can view their availability',
+      );
     }
     return this.bookingService.getAvailability(therapistId);
   }
@@ -110,7 +115,9 @@ export class BookingController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can update availability');
+      throw new UnauthorizedException(
+        'Only therapists can update availability',
+      );
     }
     return this.bookingService.updateAvailability(
       id,
@@ -126,7 +133,9 @@ export class BookingController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can delete availability');
+      throw new UnauthorizedException(
+        'Only therapists can delete availability',
+      );
     }
     return this.bookingService.deleteAvailability(id, therapistId);
   }

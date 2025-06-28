@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import {
-  Subscription,
   SubscriptionStatus,
   SubscriptionTier,
   BillingCycle,
@@ -133,7 +132,7 @@ export class BillingService {
     });
   }
 
-  async cancelSubscription(userId: string, reason?: string) {
+  async cancelSubscription(userId: string) {
     return this.updateSubscription(userId, {
       status: SubscriptionStatus.CANCELED,
     });
@@ -362,7 +361,7 @@ export class BillingService {
     });
   }
 
-  async markInvoiceAsPaid(id: string, paymentId: string) {
+  async markInvoiceAsPaid(id: string) {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
       include: { payments: true },
@@ -444,7 +443,7 @@ export class BillingService {
 
     if (discount.minAmount && amount < Number(discount.minAmount)) {
       throw new BadRequestException(
-        `Minimum amount of ${discount.minAmount} required`,
+        `Minimum amount of ${String(discount.minAmount)} required`,
       );
     }
 

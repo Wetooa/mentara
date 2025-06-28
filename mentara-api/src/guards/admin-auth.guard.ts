@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { RoleUtils, UserRole } from '../utils/role-utils';
+import { RoleUtils } from '../utils/role-utils';
 import { ADMIN_ONLY_KEY } from '../decorators/admin-only.decorator';
 
 @Injectable()

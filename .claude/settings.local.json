@@ -20,7 +20,8 @@
       "Bash(npm test:*)",
       "Bash(npm outdated)",
       "Bash(npm audit:*)",
-      "Bash(rg \"any\" src/ --type ts -n)"
+      "Bash(rg \"any\" src/ --type ts -n)",
+      "Bash(rg:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

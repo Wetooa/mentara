@@ -7,6 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { AuthService } from './auth.service';
@@ -17,6 +18,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @UseGuards(ClerkAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registrations per 5 minutes
   @Post('register/client')
   @HttpCode(HttpStatus.CREATED)
   async registerClient(
@@ -27,6 +29,7 @@ export class AuthController {
   }
 
   @UseGuards(ClerkAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 therapist registrations per 10 minutes
   @Post('register/therapist')
   @HttpCode(HttpStatus.CREATED)
   async registerTherapist(

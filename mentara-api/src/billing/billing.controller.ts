@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
   Delete,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { BillingService } from './billing.service';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
@@ -15,7 +16,6 @@ import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
 import {
   BillingCycle,
-  SubscriptionStatus,
   SubscriptionTier,
   PaymentMethodType,
   PaymentStatus,
@@ -99,7 +99,7 @@ export class BillingController {
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
     return this.billingService.createSubscriptionPlan(body);
   }
@@ -121,7 +121,7 @@ export class BillingController {
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
     return this.billingService.updatePlan(id, body);
   }
@@ -197,7 +197,7 @@ export class BillingController {
   ) {
     // Only admins can view all payments
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.findPayments(
@@ -220,7 +220,7 @@ export class BillingController {
   ) {
     // Only admins can update payment status
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.updatePaymentStatus(
@@ -245,7 +245,7 @@ export class BillingController {
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.createInvoice({
@@ -277,7 +277,7 @@ export class BillingController {
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.markInvoiceAsPaid(id, body.paymentId);
@@ -304,7 +304,7 @@ export class BillingController {
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.createDiscount({
@@ -355,7 +355,7 @@ export class BillingController {
   ) {
     // Only admins or system can record usage
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.recordUsage({
@@ -393,7 +393,7 @@ export class BillingController {
     @Query('endDate') endDate?: string,
   ) {
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.getBillingStatistics(

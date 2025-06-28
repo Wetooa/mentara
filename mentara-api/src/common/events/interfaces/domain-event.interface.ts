@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto';
+
 export interface EventMetadata {
   userId?: string;
   sessionId?: string;
@@ -51,11 +53,11 @@ export abstract class BaseDomainEvent<T = any> implements DomainEvent<T> {
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `event_${Date.now()}_${randomBytes(8).toString('hex')}`;
   }
 
   private generateCorrelationId(): string {
-    return `corr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `corr_${Date.now()}_${randomBytes(8).toString('hex')}`;
   }
 }
 

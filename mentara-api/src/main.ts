@@ -3,12 +3,53 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
+import helmet from 'helmet';
+import {
+  validateEnvironmentVariables,
+  logEnvironmentInfo,
+} from './config/env-validation';
 
 async function bootstrap() {
+  // Validate environment variables before starting the application
+  try {
+    validateEnvironmentVariables();
+    logEnvironmentInfo();
+  } catch (error) {
+    console.error(
+      '❌ Failed to start application:',
+      error instanceof Error ? error.message : error,
+    );
+    process.exit(1);
+  }
   // Create with raw body parsing for webhooks
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
+
+  // Enable security headers with helmet
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Disable for API compatibility
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
 
   // Parse JSON payloads
   // app.use(
@@ -19,9 +60,12 @@ async function bootstrap() {
   //   }),
   // );
 
-  // Enable CORS with proper configuration
+  // Enable CORS with secure configuration
   app.enableCors({
-    origin: true, // Allow all origins in development
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL?.split(',') || ['https://mentara.app']
+        : ['http://localhost:3000', 'http://localhost:3001'], // Only allow local dev in development
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     allowedHeaders: [

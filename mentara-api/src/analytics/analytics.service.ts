@@ -1,8 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 
 @Injectable()
 export class AnalyticsService {
+  private readonly logger = new Logger(AnalyticsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getPlatformAnalytics(startDate?: Date, endDate?: Date) {
@@ -81,8 +87,9 @@ export class AnalyticsService {
         sessions: sessionStats,
       };
     } catch (error) {
-      throw new Error(
-        `Failed to get platform analytics: ${error instanceof Error ? error.message : String(error)}`,
+      this.logger.error(`Failed to get platform analytics: ${String(error)}`);
+      throw new InternalServerErrorException(
+        'Failed to retrieve platform analytics',
       );
     }
   }

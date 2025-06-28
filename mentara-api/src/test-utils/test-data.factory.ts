@@ -184,8 +184,8 @@ export class TestDataFactory {
       therapistId,
       startTime: faker.date.future(),
       duration: faker.helpers.arrayElement([30, 45, 60]),
-      status: 'SCHEDULED',
-      notes: faker.lorem.paragraph(),
+      status: 'SCHEDULED' as any,
+      description: faker.lorem.paragraph(),
       ...overrides,
     };
 
@@ -195,11 +195,13 @@ export class TestDataFactory {
   // Pre-assessment Factory
   async createPreAssessment(userId: string, overrides: Partial<any> = {}) {
     const assessmentData = {
-      userId,
-      responses: this.generateAssessmentResponses(),
+      clientId: userId,
+      questionnaires: this.generateQuestionnaires(),
+      answers: this.generateAssessmentResponses(),
+      answerMatrix: this.generateAnswerMatrix(),
       scores: this.generateAssessmentScores(),
       severityLevels: this.generateSeverityLevels(),
-      completedAt: faker.date.recent(),
+      aiEstimate: this.generateAiEstimate(),
       ...overrides,
     };
 
@@ -215,9 +217,8 @@ export class TestDataFactory {
     const postData = {
       title: faker.lorem.sentence(),
       content: faker.lorem.paragraphs(3),
-      authorId,
-      communityId,
-      isAnonymous: faker.datatype.boolean(),
+      userId: authorId,
+      roomId: communityId,
       ...overrides,
     };
 
@@ -282,9 +283,101 @@ export class TestDataFactory {
     };
   }
 
+  private generateQuestionnaires() {
+    return [
+      { id: 'PHQ-9', name: 'Patient Health Questionnaire-9', questions: 9 },
+      { id: 'GAD-7', name: 'General Anxiety Disorder-7', questions: 7 },
+      {
+        id: 'AUDIT',
+        name: 'Alcohol Use Disorders Identification Test',
+        questions: 10,
+      },
+      { id: 'ASRS', name: 'Adult ADHD Self-Report Scale', questions: 18 },
+      { id: 'BES', name: 'Binge Eating Scale', questions: 16 },
+      { id: 'DAST-10', name: 'Drug Abuse Screening Test', questions: 10 },
+      { id: 'ISI', name: 'Insomnia Severity Index', questions: 7 },
+      { id: 'MBI', name: 'Maslach Burnout Inventory', questions: 22 },
+      { id: 'MDQ', name: 'Mood Disorder Questionnaire', questions: 13 },
+      {
+        id: 'OCI-R',
+        name: 'Obsessive-Compulsive Inventory-Revised',
+        questions: 18,
+      },
+      { id: 'PCL-5', name: 'PTSD Checklist for DSM-5', questions: 20 },
+      { id: 'PDSS', name: 'Panic Disorder Severity Scale', questions: 7 },
+      { id: 'PSS', name: 'Perceived Stress Scale', questions: 10 },
+    ];
+  }
+
+  private generateAnswerMatrix() {
+    const matrix: any[] = [];
+    for (let questionIndex = 0; questionIndex < 201; questionIndex++) {
+      matrix.push({
+        questionId: questionIndex + 1,
+        scale: faker.helpers.arrayElement([
+          'PHQ-9',
+          'GAD-7',
+          'AUDIT',
+          'ASRS',
+          'BES',
+          'DAST-10',
+          'ISI',
+          'MBI',
+          'MDQ',
+          'OCI-R',
+          'PCL-5',
+          'PDSS',
+          'PSS',
+        ]),
+        weight: faker.number.float({ min: 0.1, max: 1.0, fractionDigits: 2 }),
+        reverse_scored: faker.datatype.boolean({ probability: 0.1 }),
+      });
+    }
+    return matrix;
+  }
+
+  private generateAiEstimate() {
+    return {
+      confidence: faker.number.float({
+        min: 0.7,
+        max: 0.98,
+        fractionDigits: 3,
+      }),
+      risk_factors: faker.helpers.arrayElements(
+        [
+          'substance_abuse',
+          'trauma_history',
+          'family_history',
+          'chronic_stress',
+          'social_isolation',
+          'financial_stress',
+          'relationship_issues',
+        ],
+        { min: 1, max: 4 },
+      ),
+      recommendations: faker.helpers.arrayElements(
+        [
+          'CBT therapy',
+          'medication_evaluation',
+          'lifestyle_changes',
+          'support_group',
+          'stress_management',
+          'mindfulness_practice',
+        ],
+        { min: 2, max: 5 },
+      ),
+      estimated_severity: {
+        overall: faker.helpers.arrayElement(['low', 'moderate', 'high']),
+        depression: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        anxiety: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        stress: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+      },
+    };
+  }
+
   // Bulk creation methods
   async createMultipleUsers(count: number, overrides: Partial<any> = {}) {
-    const users = [];
+    const users: any[] = [];
     for (let i = 0; i < count; i++) {
       users.push(await this.createUser(overrides));
     }
@@ -292,7 +385,7 @@ export class TestDataFactory {
   }
 
   async createMultipleTherapists(count: number, overrides: Partial<any> = {}) {
-    const therapists = [];
+    const therapists: any[] = [];
     for (let i = 0; i < count; i++) {
       therapists.push(await this.createTherapist(overrides));
     }
@@ -300,7 +393,7 @@ export class TestDataFactory {
   }
 
   async createMultipleClients(count: number, overrides: Partial<any> = {}) {
-    const clients = [];
+    const clients: any[] = [];
     for (let i = 0; i < count; i++) {
       clients.push(await this.createClient(overrides));
     }
@@ -326,11 +419,11 @@ export class TestDataFactory {
     const preAssessment = await this.createPreAssessment(client.userId);
 
     // Create some meetings
-    const meetings = [];
+    const meetings: any[] = [];
     for (let i = 0; i < 3; i++) {
       meetings.push(
         await this.createMeeting(client.userId, therapist.userId, {
-          startTime: faker.date.future({ days: 7 * (i + 1) }),
+          startTime: faker.date.future({ years: (7 * (i + 1)) / 365 }),
         }),
       );
     }
@@ -359,7 +452,7 @@ export class TestDataFactory {
     }
 
     // Create posts and comments
-    const posts = [];
+    const posts: any[] = [];
     for (let i = 0; i < 3; i++) {
       const post = await this.createPost(
         faker.helpers.arrayElement(users).id,

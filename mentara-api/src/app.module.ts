@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -34,6 +35,22 @@ import { EventBusService } from './common/events/event-bus.service';
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 100, // 100 requests per minute per IP
+      },
+      {
+        name: 'auth',
+        ttl: 300000, // 5 minutes
+        limit: 10, // 10 auth attempts per 5 minutes per IP
+      },
+      {
+        name: 'upload',
+        ttl: 60000, // 1 minute
+        limit: 5, // 5 file uploads per minute per IP
+      },
+    ]),
     EventEmitterModule.forRoot({
       // Set this to `true` to use wildcards
       wildcard: true,
@@ -81,6 +98,10 @@ import { EventBusService } from './common/events/event-bus.service';
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

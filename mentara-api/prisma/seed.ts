@@ -144,12 +144,63 @@ class SeedDataGenerator {
       panic_disorder: faker.helpers.arrayElement(['minimal', 'mild', 'moderate', 'severe']),
     };
   }
+
+  static generateQuestionnaires() {
+    return [
+      { id: 'PHQ-9', name: 'Patient Health Questionnaire-9', questions: 9 },
+      { id: 'GAD-7', name: 'General Anxiety Disorder-7', questions: 7 },
+      { id: 'AUDIT', name: 'Alcohol Use Disorders Identification Test', questions: 10 },
+      { id: 'ASRS', name: 'Adult ADHD Self-Report Scale', questions: 18 },
+      { id: 'BES', name: 'Binge Eating Scale', questions: 16 },
+      { id: 'DAST-10', name: 'Drug Abuse Screening Test', questions: 10 },
+      { id: 'ISI', name: 'Insomnia Severity Index', questions: 7 },
+      { id: 'MBI', name: 'Maslach Burnout Inventory', questions: 22 },
+      { id: 'MDQ', name: 'Mood Disorder Questionnaire', questions: 13 },
+      { id: 'OCI-R', name: 'Obsessive-Compulsive Inventory-Revised', questions: 18 },
+      { id: 'PCL-5', name: 'PTSD Checklist for DSM-5', questions: 20 },
+      { id: 'PDSS', name: 'Panic Disorder Severity Scale', questions: 7 },
+      { id: 'PSS', name: 'Perceived Stress Scale', questions: 10 }
+    ];
+  }
+
+  static generateAnswerMatrix() {
+    const matrix: any[] = [];
+    for (let questionIndex = 0; questionIndex < 201; questionIndex++) {
+      matrix.push({
+        questionId: questionIndex + 1,
+        scale: faker.helpers.arrayElement(['PHQ-9', 'GAD-7', 'AUDIT', 'ASRS', 'BES', 'DAST-10', 'ISI', 'MBI', 'MDQ', 'OCI-R', 'PCL-5', 'PDSS', 'PSS']),
+        weight: faker.number.float({ min: 0.1, max: 1.0, fractionDigits: 2 }),
+        reverse_scored: faker.datatype.boolean({ probability: 0.1 })
+      });
+    }
+    return matrix;
+  }
+
+  static generateAiEstimate() {
+    return {
+      confidence: faker.number.float({ min: 0.7, max: 0.98, fractionDigits: 3 }),
+      risk_factors: faker.helpers.arrayElements([
+        'substance_abuse', 'trauma_history', 'family_history', 'chronic_stress',
+        'social_isolation', 'financial_stress', 'relationship_issues'
+      ], { min: 1, max: 4 }),
+      recommendations: faker.helpers.arrayElements([
+        'CBT therapy', 'medication_evaluation', 'lifestyle_changes',
+        'support_group', 'stress_management', 'mindfulness_practice'
+      ], { min: 2, max: 5 }),
+      estimated_severity: {
+        overall: faker.helpers.arrayElement(['low', 'moderate', 'high']),
+        depression: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        anxiety: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        stress: faker.number.float({ min: 0, max: 1, fractionDigits: 2 })
+      }
+    };
+  }
 }
 
 async function seedUsers() {
   console.log('👥 Creating users...');
   
-  const users = [];
+  const users: any[] = [];
   
   // Create admin users
   for (let i = 0; i < SEED_CONFIG.USERS.ADMINS; i++) {
@@ -174,7 +225,7 @@ async function seedUsers() {
   }
 
   // Create client users
-  const clients = [];
+  const clients: any[] = [];
   for (let i = 0; i < SEED_CONFIG.USERS.CLIENTS; i++) {
     const userData = SeedDataGenerator.generateUserData('client');
     const user = await prisma.user.create({ data: userData });
@@ -190,7 +241,7 @@ async function seedUsers() {
   }
 
   // Create therapist users
-  const therapists = [];
+  const therapists: any[] = [];
   for (let i = 0; i < SEED_CONFIG.USERS.THERAPISTS; i++) {
     const userData = SeedDataGenerator.generateUserData('therapist');
     const user = await prisma.user.create({ data: userData });
@@ -212,7 +263,7 @@ async function seedUsers() {
 async function seedCommunities() {
   console.log('🏘️  Creating communities...');
   
-  const communities = [];
+  const communities: any[] = [];
 
   // Create illness communities from config
   for (const communityConfig of ILLNESS_COMMUNITIES) {
@@ -266,7 +317,7 @@ async function seedCommunities() {
 async function seedMemberships(users: any[], communities: any[]) {
   console.log('👥 Creating community memberships...');
   
-  const memberships = [];
+  const memberships: any[] = [];
   
   // Get only client and therapist users for community memberships
   const memberUsers = users.filter(user => ['client', 'therapist'].includes(user.role));
@@ -300,7 +351,7 @@ async function seedMemberships(users: any[], communities: any[]) {
 async function seedClientTherapistRelationships(clients: any[], therapists: any[]) {
   console.log('🤝 Creating client-therapist relationships...');
   
-  const relationships = [];
+  const relationships: any[] = [];
   const assignmentCount = Math.floor(clients.length * SEED_CONFIG.RELATIONSHIPS.CLIENT_THERAPIST_RATIO);
   const clientsToAssign = faker.helpers.arrayElements(clients, assignmentCount);
   
@@ -324,18 +375,20 @@ async function seedClientTherapistRelationships(clients: any[], therapists: any[
 async function seedPreAssessments(clients: any[]) {
   console.log('📋 Creating pre-assessments...');
   
-  const assessments = [];
+  const assessments: any[] = [];
   const assessmentCount = Math.floor(clients.length * SEED_CONFIG.ASSESSMENTS.COMPLETION_RATE);
   const clientsWithAssessments = faker.helpers.arrayElements(clients, assessmentCount);
   
   for (const client of clientsWithAssessments) {
     const assessment = await prisma.preAssessment.create({
       data: {
-        userId: client.user.id,
-        responses: SeedDataGenerator.generateAssessmentResponses(),
+        clientId: client.user.id,
+        questionnaires: SeedDataGenerator.generateQuestionnaires(),
+        answers: SeedDataGenerator.generateAssessmentResponses(),
+        answerMatrix: SeedDataGenerator.generateAnswerMatrix(),
         scores: SeedDataGenerator.generateAssessmentScores(),
         severityLevels: SeedDataGenerator.generateSeverityLevels(),
-        completedAt: faker.date.past({ months: 6 }),
+        aiEstimate: SeedDataGenerator.generateAiEstimate(),
       },
     });
     assessments.push(assessment);
@@ -348,7 +401,7 @@ async function seedPreAssessments(clients: any[]) {
 async function seedMeetings(relationships: any[]) {
   console.log('📅 Creating meetings...');
   
-  const meetings = [];
+  const meetings: any[] = [];
   
   for (const { relationship, client, therapist } of relationships) {
     const meetingCount = faker.number.int({ min: 1, max: SEED_CONFIG.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP });
@@ -366,7 +419,7 @@ async function seedMeetings(relationships: any[]) {
           startTime,
           duration: faker.helpers.arrayElement([45, 60, 90]),
           status: faker.helpers.arrayElement(['COMPLETED', 'COMPLETED', 'SCHEDULED', 'CANCELLED']),
-          notes: faker.lorem.paragraph(),
+          description: faker.lorem.paragraph(),
           meetingType: faker.helpers.arrayElement(['initial', 'followup', 'crisis', 'assessment']),
         },
       });
@@ -381,8 +434,8 @@ async function seedMeetings(relationships: any[]) {
 async function seedCommunityContent(communities: any[], users: any[]) {
   console.log('📝 Creating community content...');
   
-  const posts = [];
-  const comments = [];
+  const posts: any[] = [];
+  const comments: any[] = [];
   
   for (const community of communities) {
     // Get community members
@@ -400,17 +453,16 @@ async function seedCommunityContent(communities: any[], users: any[]) {
         data: {
           title: faker.lorem.sentence(),
           content: faker.lorem.paragraphs(faker.number.int({ min: 2, max: 5 })),
-          authorId: author.id,
-          communityId: community.id,
-          isAnonymous: faker.datatype.boolean({ probability: 0.3 }),
-          createdAt: faker.date.past({ months: 6 }),
+          userId: author?.id,
+          roomId: community.id,
+          createdAt: faker.date.past({ years: 0.5 }),
         },
       });
       posts.push(post);
       
       // Create comments for each post
       for (let j = 0; j < SEED_CONFIG.COMMUNITIES.COMMENTS_PER_POST; j++) {
-        const commenter = faker.helpers.arrayElement(memberships).user;
+        const commenter = faker.helpers.arrayElement(memberships).user!;
         const comment = await prisma.comment.create({
           data: {
             content: faker.lorem.paragraph(),
@@ -426,7 +478,7 @@ async function seedCommunityContent(communities: any[], users: any[]) {
         
         // Add some hearts to comments
         if (faker.datatype.boolean({ probability: 0.6 })) {
-          const heartGiver = faker.helpers.arrayElement(memberships).user;
+          const heartGiver = faker.helpers.arrayElement(memberships).user!;
           try {
             await prisma.commentHeart.create({
               data: {
@@ -447,7 +499,7 @@ async function seedCommunityContent(communities: any[], users: any[]) {
         try {
           await prisma.postHeart.create({
             data: {
-              userId: heartGiver.user.id,
+              userId: heartGiver.user!.id,
               postId: post.id,
             },
           });
@@ -465,11 +517,11 @@ async function seedCommunityContent(communities: any[], users: any[]) {
 async function seedTherapistAvailability(therapists: any[]) {
   console.log('📅 Creating therapist availability...');
   
-  const availabilities = [];
+  const availabilities: any[] = [];
   
   for (const { therapist, user } of therapists) {
     // Create availability for each day of the week
-    const daysOfWeek = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+    const daysOfWeek = [1, 2, 3, 4, 5]; // Monday to Friday (1-5)
     const selectedDays = faker.helpers.arrayElements(daysOfWeek, faker.number.int({ min: 3, max: 5 }));
     
     for (const dayOfWeek of selectedDays) {
@@ -477,10 +529,8 @@ async function seedTherapistAvailability(therapists: any[]) {
         data: {
           therapistId: user.id,
           dayOfWeek,
-          startTime: faker.helpers.arrayElement(['09:00:00', '10:00:00', '11:00:00']),
-          endTime: faker.helpers.arrayElement(['16:00:00', '17:00:00', '18:00:00']),
-          timezone: 'America/New_York',
-          isRecurring: true,
+          startTime: faker.helpers.arrayElement(['09:00', '10:00', '11:00']),
+          endTime: faker.helpers.arrayElement(['16:00', '17:00', '18:00']),
         },
       });
       availabilities.push(availability);

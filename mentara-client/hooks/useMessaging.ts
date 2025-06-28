@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Contact, Conversation, Message, MessagesState } from '@/components/messages/types';
-import { messagingApi } from '@/lib/messaging-api';
+import { createMessagingApiService } from '@/lib/messaging-api';
 import { messagingWebSocket } from '@/lib/messaging-websocket';
 
 export interface UseMessagingReturn {
@@ -32,6 +32,9 @@ export function useMessaging(): UseMessagingReturn {
   // Clerk authentication
   const { getToken, isLoaded } = useAuth();
   
+  // Create authenticated messaging API service
+  const messagingApi = getToken ? createMessagingApiService(getToken) : null;
+  
   // State
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [conversations, setConversations] = useState<Map<string, Conversation>>(new Map());
@@ -45,6 +48,7 @@ export function useMessaging(): UseMessagingReturn {
   const contactsRef = useRef(contacts);
   const conversationsRef = useRef(conversations);
   const selectedContactIdRef = useRef(selectedContactId);
+  const contactsLoadedRef = useRef(false); // Track if contacts have been loaded
   
   // Update refs when state changes
   useEffect(() => {
@@ -59,17 +63,22 @@ export function useMessaging(): UseMessagingReturn {
     selectedContactIdRef.current = selectedContactId;
   }, [selectedContactId]);
   
-  // Load initial contacts
+  // Load initial contacts (fixed dependencies to prevent infinite loops)
   const loadContacts = useCallback(async () => {
+    if (!messagingApi || contactsLoadedRef.current) {
+      return; // API not available or already loaded
+    }
+    
     setIsLoadingContacts(true);
     setError(null);
     
     try {
       const fetchedContacts = await messagingApi.fetchContacts();
       setContacts(fetchedContacts);
+      contactsLoadedRef.current = true; // Mark as loaded
       
-      // Auto-select first contact if none selected
-      if (!selectedContactId && fetchedContacts.length > 0) {
+      // Auto-select first contact if none selected (use ref to prevent dependency)
+      if (!selectedContactIdRef.current && fetchedContacts.length > 0) {
         setSelectedContactId(fetchedContacts[0].id);
       }
     } catch (err) {
@@ -78,12 +87,12 @@ export function useMessaging(): UseMessagingReturn {
     } finally {
       setIsLoadingContacts(false);
     }
-  }, [selectedContactId]);
+  }, [messagingApi]); // Removed selectedContactId dependency to prevent loops
   
-  // Load conversation messages
+  // Load conversation messages (fixed dependencies to prevent infinite loops)
   const loadConversation = useCallback(async (contactId: string) => {
-    if (conversations.has(contactId)) {
-      return; // Already loaded
+    if (conversationsRef.current.has(contactId) || !messagingApi) {
+      return; // Already loaded or API not available
     }
     
     setIsLoadingMessages(true);
@@ -103,34 +112,40 @@ export function useMessaging(): UseMessagingReturn {
     } finally {
       setIsLoadingMessages(false);
     }
-  }, [conversations]);
+  }, [messagingApi]); // Removed conversations dependency and use ref instead
   
-  // Select contact and load conversation
+  // Select contact and load conversation (fixed dependencies to prevent infinite loops)
   const selectContact = useCallback(async (contactId: string) => {
-    // Leave previous conversation room
-    if (selectedContactId) {
-      messagingWebSocket.leaveConversation(selectedContactId);
+    // Leave previous conversation room (use ref to prevent dependency)
+    if (selectedContactIdRef.current) {
+      messagingWebSocket.leaveConversation(selectedContactIdRef.current);
     }
     
     setSelectedContactId(contactId);
     await loadConversation(contactId);
-  }, [selectedContactId, loadConversation]);
+  }, [loadConversation]); // Removed selectedContactId dependency and use ref instead
   
-  // Send message
+  // Send message (fixed dependencies to prevent infinite loops)
   const sendMessage = useCallback(async (text: string, attachments?: any[]) => {
-    if (!selectedContactId) {
+    const currentContactId = selectedContactIdRef.current;
+    
+    if (!currentContactId) {
       throw new Error('No conversation selected');
     }
     
+    if (!messagingApi) {
+      throw new Error('Messaging API not available');
+    }
+    
     try {
-      const message = await messagingApi.sendMessage(selectedContactId, text, attachments);
+      const message = await messagingApi.sendMessage(currentContactId, text, attachments);
       
       // Update local conversation
       setConversations(prev => {
         const newConversations = new Map(prev);
-        const conversation = newConversations.get(selectedContactId);
+        const conversation = newConversations.get(currentContactId);
         if (conversation) {
-          newConversations.set(selectedContactId, {
+          newConversations.set(currentContactId, {
             ...conversation,
             messages: [...conversation.messages, message],
           });
@@ -140,7 +155,7 @@ export function useMessaging(): UseMessagingReturn {
       
       // Update contact's last message
       setContacts(prev => prev.map(contact => 
-        contact.id === selectedContactId
+        contact.id === currentContactId
           ? { ...contact, lastMessage: text, time: message.time }
           : contact
       ));
@@ -148,51 +163,61 @@ export function useMessaging(): UseMessagingReturn {
       setError(err instanceof Error ? err.message : 'Failed to send message');
       throw err;
     }
-  }, [selectedContactId]);
+  }, [messagingApi]); // Removed selectedContactId dependency and use ref instead
   
   // Mark message as read
   const markAsRead = useCallback(async (messageId: string) => {
+    if (!messagingApi) return;
+    
     try {
       await messagingApi.markMessageAsRead(messageId);
     } catch (err) {
       console.error('Error marking message as read:', err);
     }
-  }, []);
+  }, [messagingApi]);
   
   // Add reaction to message
   const addReaction = useCallback(async (messageId: string, emoji: string) => {
+    if (!messagingApi) return;
+    
     try {
       await messagingApi.addMessageReaction(messageId, emoji);
     } catch (err) {
       console.error('Error adding reaction:', err);
     }
-  }, []);
+  }, [messagingApi]);
   
   // Remove reaction from message
   const removeReaction = useCallback(async (messageId: string, emoji: string) => {
+    if (!messagingApi) return;
+    
     try {
       await messagingApi.removeMessageReaction(messageId, emoji);
     } catch (err) {
       console.error('Error removing reaction:', err);
     }
-  }, []);
+  }, [messagingApi]);
   
-  // Send typing indicator
+  // Send typing indicator (fixed dependencies to prevent infinite loops)
   const sendTyping = useCallback((isTyping: boolean) => {
-    if (selectedContactId) {
-      messagingWebSocket.sendTypingIndicator(selectedContactId, isTyping);
+    const currentContactId = selectedContactIdRef.current;
+    if (currentContactId) {
+      messagingWebSocket.sendTypingIndicator(currentContactId, isTyping);
     }
-  }, [selectedContactId]);
+  }, []); // Removed selectedContactId dependency and use ref instead
   
-  // Search messages
+  // Search messages (fixed dependencies to prevent infinite loops)
   const searchMessages = useCallback(async (query: string): Promise<Message[]> => {
+    if (!messagingApi) return [];
+    
     try {
-      return await messagingApi.searchMessages(query, selectedContactId || undefined);
+      const currentContactId = selectedContactIdRef.current;
+      return await messagingApi.searchMessages(query, currentContactId || undefined);
     } catch (err) {
       console.error('Error searching messages:', err);
       return [];
     }
-  }, [selectedContactId]);
+  }, [messagingApi]); // Removed selectedContactId dependency and use ref instead
   
   // WebSocket event handlers
   useEffect(() => {
@@ -273,23 +298,21 @@ export function useMessaging(): UseMessagingReturn {
     };
   }, []);
   
-  // Initialize data on mount
+  // Initialize data on mount (run only once)
   useEffect(() => {
     loadContacts();
-  }, [loadContacts]);
+  }, []); // Empty dependency array to run only once on mount
   
   // Connect to WebSocket with Clerk authentication
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !getToken) return;
     
     const initializeWebSocket = async () => {
       try {
-        const token = await getToken();
-        if (token) {
-          messagingWebSocket.connect(token);
-        }
+        // Use the new method that accepts getToken function for automatic token refresh
+        messagingWebSocket.connectWithTokenFunction(getToken);
       } catch (error) {
-        console.error('Failed to get auth token for WebSocket:', error);
+        console.error('Failed to initialize WebSocket connection:', error);
         setError('Failed to establish secure connection');
       }
     };

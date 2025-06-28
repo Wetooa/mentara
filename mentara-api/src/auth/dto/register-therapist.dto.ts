@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsDateString,
   IsBoolean,
-  IsArray,
   IsJSON,
   IsDecimal,
 } from 'class-validator';

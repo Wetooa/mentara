@@ -1,4 +1,9 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
@@ -15,7 +20,7 @@ export class DashboardController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'user') {
-      throw new Error('Access denied');
+      throw new UnauthorizedException('Access denied');
     }
     return this.dashboardService.getUserDashboardData(userId);
   }
@@ -26,7 +31,7 @@ export class DashboardController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Access denied');
+      throw new UnauthorizedException('Access denied');
     }
     return this.dashboardService.getTherapistDashboardData(userId);
   }
@@ -34,7 +39,7 @@ export class DashboardController {
   @Get('admin')
   getAdminDashboard(@CurrentUserRole() role: string) {
     if (role !== 'admin') {
-      throw new Error('Access denied');
+      throw new UnauthorizedException('Access denied');
     }
     return this.dashboardService.getAdminDashboardData();
   }

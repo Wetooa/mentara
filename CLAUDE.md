@@ -196,42 +196,30 @@ Comprehensive mock data in `data/` directory:
 - `mockTherapistListingData.ts` - Therapist profiles and meetings
 - `mockUserDashboardData.ts` - User dashboard data
 - `mockPatientsData.ts` - Patient data for therapist views
-- `mockMessagesData.ts` - Messaging data for chat interface
-- `mockTherapistApplicationData.ts` - Therapist application data
-- `mockTherapistData.ts` - Additional therapist profile data
 - All use TypeScript interfaces for type safety
 
-## AI Patient Evaluation Service
+## Important Development Guidelines
 
-### Running the AI Service (ai-patient-evaluation/)
-```bash
-# Set up virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+### Code Quality
+- Run linting and type checking before commits:
+  - Client: `npm run lint` (in mentara-client/)
+  - API: `npm run lint` (in mentara-api/)
+- Always generate Prisma client after schema changes: `npm run db:generate`
+- Use existing mock data patterns when adding new features
 
-# Install dependencies
-pip install -r requirements.txt
+### Testing Strategy  
+- API unit tests: `npm run test` (in mentara-api/)
+- API e2e tests: `npm run test:e2e` (in mentara-api/)
+- Coverage reports: `npm run test:cov` (in mentara-api/)
+- Debug tests: `npm run test:debug` (in mentara-api/)
 
-# Run Flask service
-python api.py
-```
+### Environment Setup
+- Ensure all three services can run simultaneously:
+  - Frontend: `npm run dev` (port 3000)
+  - Backend: `npm run start:dev` (NestJS default port)
+  - AI Service: `python api.py` (Flask default port)
 
-### AI Service Structure
-- `api.py` - Flask API endpoints for mental health assessments
-- `model.py` - PyTorch neural network implementation
-- `mental_model_config2.pt` - Pre-trained model weights
-- `list_converter.py` - Data preprocessing utilities
-- Service runs on separate port and communicates with main API
-
-## Real-time Features
-
-### WebSocket Messaging
-- Socket.io integration for real-time messaging
-- Implemented in both client and server
-- Message persistence in PostgreSQL via Prisma
-- File attachment support in messages
-
-### Live Notifications
-- Real-time notification system
-- WebSocket-based delivery
-- Notification types: messages, appointments, system alerts
+### Working Directory Context
+- Always specify which directory commands should run in
+- Use relative paths consistently within each service
+- The current branch strategy uses `dev` for development, `master` for production

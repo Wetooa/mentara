@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
 import { Task } from "@/components/worksheets/types";
-import { worksheetsApi } from "@/lib/api/worksheets";
+import { createWorksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
 
 // Fallback mock data in case API is not available
@@ -78,16 +78,19 @@ export default function WorksheetsPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
 
   // Fetch worksheets from API
   useEffect(() => {
     async function fetchWorksheets() {
-      if (!userId) return;
+      if (!userId || !getToken) return;
 
       try {
         setIsLoading(true);
         setError(null);
+
+        // Create authenticated API client
+        const worksheetsApi = createWorksheetsApi(getToken);
 
         // Convert activeFilter to status filter for API
         let statusFilter: string | undefined;
@@ -112,7 +115,7 @@ export default function WorksheetsPage() {
     }
 
     fetchWorksheets();
-  }, [userId, activeFilter]);
+  }, [userId, getToken, activeFilter]);
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {

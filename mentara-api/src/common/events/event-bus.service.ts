@@ -82,7 +82,7 @@ export class EventBusService implements IEventBus {
     } else {
       // For synchronous handlers, we still use async but without await
       this.eventEmitter.on(eventType, (event: DomainEvent<T>) => {
-        wrappedHandler(event).catch((error) => {
+        void wrappedHandler(event).catch((error) => {
           this.logger.error(
             `Async event handler error: ${event.eventType}`,
             error,

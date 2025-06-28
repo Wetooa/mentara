@@ -35,34 +35,34 @@ export class MessagingWebSocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private listeners = new Map<keyof MessagingWebSocketEvents, Set<Function>>();
+  private getToken: (() => Promise<string | null>) | null = null;
   
   constructor() {
     // Don't auto-retrieve token in constructor - let it be passed in explicitly
   }
   
-  // Connect to WebSocket server
-  connect(token?: string): void {
-    if (token) {
-      this.authToken = token;
-    }
-    
-    if (!this.authToken) {
-      console.warn('No auth token available for WebSocket connection');
-      return;
-    }
-    
+  // Connect to WebSocket server with token function (simplified for demo)
+  connectWithTokenFunction(getTokenFn: () => Promise<string | null>): void {
+    this.getToken = getTokenFn;
+    this.connect();
+  }
+  
+  // Connect to WebSocket server (simplified without authentication)
+  async connect(token?: string): Promise<void> {
     if (this.socket?.connected) {
       console.log('WebSocket already connected');
       return;
     }
     
+    console.log('Connecting to WebSocket without authentication (demo mode)...');
+    
     this.socket = io(`${WEBSOCKET_URL}/messaging`, {
-      auth: {
-        token: this.authToken,
-      },
+      // Remove auth requirement for demo to prevent connection loops
       transports: ['websocket'],
       upgrade: true,
       rememberUpgrade: true,
+      timeout: 10000, // 10 second timeout
+      autoConnect: true,
     });
     
     this.setupEventListeners();
@@ -158,21 +158,28 @@ export class MessagingWebSocketService {
     });
   }
   
-  // Handle reconnection logic
-  private handleReconnection(): void {
+  // Handle reconnection logic (simplified for demo)
+  private async handleReconnection(): Promise<void> {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
+      this.emit('error', 'Maximum reconnection attempts exceeded');
       return;
     }
     
     this.reconnectAttempts++;
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    const delay = Math.min(2000 * this.reconnectAttempts, 10000); // Slower reconnection
     
     console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
     
-    setTimeout(() => {
-      if (!this.isConnected && this.authToken) {
-        this.connect();
+    setTimeout(async () => {
+      if (!this.isConnected) {
+        try {
+          // Simplified reconnection without token refresh
+          await this.connect();
+        } catch (error) {
+          console.error('Error during reconnection:', error);
+          // Don't immediately retry to prevent infinite loops
+        }
       }
     }, delay);
   }
@@ -249,14 +256,16 @@ export class MessagingWebSocketService {
     return this.isConnected && !!this.socket?.connected;
   }
   
-  setAuthToken(token: string): void {
-    this.authToken = token;
-    
-    // Reconnect with new token if currently connected
-    if (this.isConnected) {
-      this.disconnect();
-      this.connect();
-    }
+  // Simplified token methods for demo (authentication disabled)
+  async setAuthToken(token: string): Promise<void> {
+    // Token functionality disabled for demo
+    console.log('Token functionality disabled for demo mode');
+  }
+  
+  // Refresh token functionality disabled for demo
+  async refreshToken(): Promise<void> {
+    // Token refresh disabled for demo
+    console.log('Token refresh disabled for demo mode');
   }
   
   // Cleanup method

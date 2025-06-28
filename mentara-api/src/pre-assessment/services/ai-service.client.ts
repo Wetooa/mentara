@@ -63,7 +63,7 @@ export class AiServiceClient {
       },
       (error) => {
         this.logger.error('AI service request interceptor error:', error);
-        return Promise.reject(error);
+        return Promise.reject(new Error(String(error)));
       },
     );
 
@@ -78,7 +78,7 @@ export class AiServiceClient {
           'AI service response error:',
           error?.response?.status || error.message,
         );
-        return Promise.reject(error);
+        return Promise.reject(new Error(String(error)));
       },
     );
   }

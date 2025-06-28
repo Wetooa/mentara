@@ -5,23 +5,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PreAssessment } from '@prisma/client';
-
-interface TherapistRecommendationRequest {
-  userId: string;
-  limit?: number;
-  includeInactive?: boolean;
-  province?: string;
-  maxHourlyRate?: number;
-}
-
-interface TherapistRecommendationResponse {
-  therapists: any[];
-  total: number;
-  userConditions: string[];
-  matchCriteria: any;
-  page: number;
-  pageSize: number;
-}
+import {
+  TherapistRecommendationRequest,
+  TherapistRecommendationResponse,
+} from './therapist-application.dto';
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -94,7 +81,7 @@ export class TherapistRecommendationService {
       const secondaryConditions = this.getSecondaryConditions(userConditions);
 
       return {
-        total: sortedTherapists.length,
+        totalCount: sortedTherapists.length,
         userConditions: Object.keys(userConditions),
         therapists: sortedTherapists,
         matchCriteria: {

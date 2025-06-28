@@ -7,6 +7,7 @@ import {
   Param,
   Query,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuditLogsService } from './audit-logs.service';
 import { ClerkAuthGuard } from 'src/clerk-auth.guard';
@@ -63,7 +64,7 @@ export class AuditLogsController {
     // Only admins can view all audit logs
     if (userRole !== 'admin' && userRole !== 'moderator') {
       // Regular users can only see their own logs
-      userId = userId; // This would be restricted to current user in real implementation
+      // userId is already restricted to current user via decorator
     }
 
     return this.auditLogsService.findAuditLogs(
@@ -94,7 +95,7 @@ export class AuditLogsController {
   ) {
     // Only admins can create system events manually
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     return this.auditLogsService.createSystemEvent(body);
@@ -113,7 +114,7 @@ export class AuditLogsController {
   ) {
     // Only admins and moderators can view system events
     if (userRole !== 'admin' && userRole !== 'moderator') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     return this.auditLogsService.findSystemEvents(
@@ -136,7 +137,7 @@ export class AuditLogsController {
   ) {
     // Only admins can resolve system events
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     return this.auditLogsService.resolveSystemEvent(
@@ -164,7 +165,7 @@ export class AuditLogsController {
   ) {
     // Only admins can create data change logs manually
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     return this.auditLogsService.createDataChangeLog({
@@ -186,7 +187,7 @@ export class AuditLogsController {
   ) {
     // Only admins can view data change logs
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     return this.auditLogsService.findDataChangeLogs(
@@ -208,7 +209,7 @@ export class AuditLogsController {
   ) {
     // Only admins can view audit statistics
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     return this.auditLogsService.getAuditStatistics(
@@ -275,7 +276,7 @@ export class AuditLogsController {
   ) {
     // Only system or admins can log system errors
     if (userRole !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException('Admin role required');
     }
 
     const error = new Error(body.error.message);

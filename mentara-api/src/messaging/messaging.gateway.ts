@@ -8,12 +8,9 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
-  WebSocketAuthService,
-  AuthenticatedUser,
-} from './services/websocket-auth.service';
+import { WebSocketAuthService } from './services/websocket-auth.service';
 import {
   JoinConversationDto,
   LeaveConversationDto,
@@ -128,9 +125,10 @@ export class MessagingGateway
       if (userSockets) {
         userSockets.delete(client.id);
 
-        // If no more sockets for this user, mark them as offline
+        // If no more sockets for this user, remove from tracking
         if (userSockets.size === 0) {
           this.userSockets.delete(client.userId);
+          // Broadcast user offline status to their contacts
           await this.broadcastUserStatus(client.userId, 'offline');
         }
       }
@@ -153,25 +151,24 @@ export class MessagingGateway
       const { conversationId } = data;
       const userId = client.userId!;
 
-      // Verify user is participant in conversation
-      const participant = await this.prisma.conversationParticipant.findUnique({
-        where: {
-          conversationId_userId: {
+      // Verify user is a participant in this conversation
+      const participation = await this.prisma.conversationParticipant.findFirst(
+        {
+          where: {
             conversationId,
             userId,
+            isActive: true,
           },
         },
-      });
+      );
 
-      if (!participant || !participant.isActive) {
-        client.emit('error', {
-          message: 'Not authorized to join this conversation',
-        });
+      if (!participation) {
+        client.emit('error', { message: 'Access denied to this conversation' });
         return;
       }
 
       // Join socket to conversation room
-      client.join(conversationId);
+      void client.join(conversationId);
 
       // Add user to conversation participants tracking
       if (!this.conversationParticipants.has(conversationId)) {
@@ -194,7 +191,7 @@ export class MessagingGateway
   }
 
   @SubscribeMessage('leave_conversation')
-  async handleLeaveConversation(
+  handleLeaveConversation(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() data: LeaveConversationDto,
   ) {
@@ -206,7 +203,7 @@ export class MessagingGateway
     const { conversationId } = data;
     const userId = client.userId!;
 
-    client.leave(conversationId);
+    void client.leave(conversationId);
 
     // Remove user from conversation participants tracking
     const participants = this.conversationParticipants.get(conversationId);
@@ -240,7 +237,7 @@ export class MessagingGateway
     const { conversationId, isTyping = true } = data;
     const userId = client.userId!;
 
-    // Update typing indicator in database (with short TTL)
+    // Update typing indicator in database for persistence
     if (isTyping) {
       await this.prisma.typingIndicator.upsert({
         where: {
@@ -252,14 +249,14 @@ export class MessagingGateway
         create: {
           conversationId,
           userId,
-          isTyping: true,
+          lastTypingAt: new Date(),
         },
         update: {
-          isTyping: true,
           lastTypingAt: new Date(),
         },
       });
     } else {
+      // Remove typing indicator when user stops typing
       await this.prisma.typingIndicator.deleteMany({
         where: {
           conversationId,
@@ -289,7 +286,7 @@ export class MessagingGateway
   }
 
   // Broadcast message update (edit/delete)
-  async broadcastMessageUpdate(
+  broadcastMessageUpdate(
     conversationId: string,
     messageId: string,
     update: any,
@@ -301,7 +298,7 @@ export class MessagingGateway
   }
 
   // Broadcast read receipt
-  async broadcastReadReceipt(
+  broadcastReadReceipt(
     conversationId: string,
     messageId: string,
     userId: string,
@@ -314,11 +311,7 @@ export class MessagingGateway
   }
 
   // Broadcast message reaction
-  async broadcastReaction(
-    conversationId: string,
-    messageId: string,
-    reaction: any,
-  ) {
+  broadcastReaction(conversationId: string, messageId: string, reaction: any) {
     this.server.to(conversationId).emit('message_reaction', {
       messageId,
       reaction,
@@ -364,7 +357,7 @@ export class MessagingGateway
 
       // Join all conversation rooms
       for (const conversation of conversations) {
-        client.join(conversation.id);
+        void client.join(conversation.id);
 
         // Add to tracking
         if (!this.conversationParticipants.has(conversation.id)) {
@@ -410,11 +403,7 @@ export class MessagingGateway
     }
   }
 
-  private async sendPushNotifications(
-    conversationId: string,
-    message: any,
-    senderId: string,
-  ) {
+  private sendPushNotifications(conversationId: string, message: any) {
     // TODO: Implement push notifications for offline users
     // This could integrate with FCM, APNS, or other push notification services
     this.logger.log(

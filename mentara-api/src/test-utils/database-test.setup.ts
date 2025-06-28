@@ -34,6 +34,7 @@ export class DatabaseTestSetup {
     this.prismaService = module.get<PrismaService>(PrismaService);
 
     // Run migrations
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { execSync } = require('child_process');
     execSync('npx prisma migrate deploy', {
       env: { ...process.env, DATABASE_URL: container.getConnectionUri() },
@@ -69,7 +70,7 @@ export class DatabaseTestSetup {
           await this.prismaService.$executeRawUnsafe(
             `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE;`,
           );
-        } catch (error) {
+        } catch {
           // Ignore if table doesn't exist
         }
       }

@@ -89,7 +89,7 @@ export class WebSocketAuthService {
   async refreshTokenIfNeeded(token: string): Promise<string | null> {
     try {
       // Check if token is close to expiry and refresh if needed
-      const verifiedToken = await verifyToken(token, {
+      await verifyToken(token, {
         secretKey: process.env.CLERK_SECRET_KEY ?? '',
       });
 

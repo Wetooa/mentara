@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import {
   ClientResponse,
   TherapistResponse,
@@ -44,7 +45,7 @@ export class TherapistManagementService {
         ...therapist,
         treatmentSuccessRates:
           (therapist.treatmentSuccessRates as Record<string, any>) || {},
-        hourlyRate: Number(therapist.hourlyRate),
+        hourlyRate: therapist.hourlyRate,
       };
     } catch (error) {
       console.error(
@@ -124,7 +125,7 @@ export class TherapistManagementService {
       if (data.sessionLength !== undefined)
         therapistData.sessionLength = data.sessionLength;
       if (data.hourlyRate !== undefined)
-        therapistData.hourlyRate = data.hourlyRate;
+        therapistData.hourlyRate = new Decimal(data.hourlyRate);
 
       const updatedTherapist = await this.prisma.therapist.update({
         where: { userId },
@@ -137,7 +138,7 @@ export class TherapistManagementService {
         ...updatedTherapist,
         treatmentSuccessRates:
           (updatedTherapist.treatmentSuccessRates as Record<string, any>) || {},
-        hourlyRate: Number(updatedTherapist.hourlyRate),
+        hourlyRate: updatedTherapist.hourlyRate,
       };
     } catch (error) {
       console.error(
@@ -234,7 +235,7 @@ export class TherapistManagementService {
         ...therapist,
         treatmentSuccessRates:
           (therapist.treatmentSuccessRates as Record<string, any>) || {},
-        hourlyRate: Number(therapist.hourlyRate),
+        hourlyRate: therapist.hourlyRate,
       };
     } catch (error) {
       console.error(
@@ -263,7 +264,7 @@ export class TherapistManagementService {
         ...updatedTherapist,
         treatmentSuccessRates:
           (updatedTherapist.treatmentSuccessRates as Record<string, any>) || {},
-        hourlyRate: Number(updatedTherapist.hourlyRate),
+        hourlyRate: updatedTherapist.hourlyRate,
       };
     } catch (error) {
       console.error(

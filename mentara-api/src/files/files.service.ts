@@ -12,6 +12,7 @@ import {
   AttachmentPurpose,
   FileShareType,
 } from '@prisma/client';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class FilesService {
@@ -298,9 +299,7 @@ export class FilesService {
   }
 
   private generateShareToken(): string {
-    return (
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15)
-    );
+    // Generate cryptographically secure random token (32 bytes = 64 hex characters)
+    return randomBytes(32).toString('hex');
   }
 }

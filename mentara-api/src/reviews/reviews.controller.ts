@@ -1,12 +1,10 @@
 import {
   Controller,
-  Get,
   Post,
   Put,
   Delete,
   Body,
   Param,
-  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -14,12 +12,7 @@ import {
 import { ReviewsService } from './reviews.service';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import {
-  ReviewCreateDto,
-  ReviewStatusEnum,
-  ReviewUpdateDto,
-  ReviewStatusDto,
-} from 'schema/review';
+import { ReviewCreateDto, ReviewUpdateDto } from 'schema/review';
 
 @Controller('reviews')
 @UseGuards(ClerkAuthGuard)
