@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle, Shield, FileText, Users, Clock, AlertCircle, Check } from "lucide-react";
+import { CheckCircle, Circle, Shield, FileText, Users, Clock, AlertCircle, Check, Save, Loader2 } from "lucide-react";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import Image from "next/image";
@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
 import { useRouter } from "next/navigation";
 import useTherapistForm from "@/store/therapistform";
+import { useToast } from "@/contexts/ToastContext";
 import {
   Form,
   FormField,
@@ -166,6 +167,9 @@ const steps = [
 export default function MentaraApplication() {
   const router = useRouter();
   const { updateField, updateNestedField } = useTherapistForm();
+  const { showToast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [lastSavedAt, setLastSavedAt] = React.useState<Date | null>(null);
   
   const form = useForm<TherapistApplicationForm>({
     resolver: zodResolver(schema),
@@ -225,7 +229,8 @@ export default function MentaraApplication() {
     return <Circle className={`${size} text-gray-300`} />;
   }, [form]);
 
-  const onSubmit = useCallback((values: TherapistApplicationForm) => {
+  // Auto-save functionality
+  const autoSave = useCallback((values: TherapistApplicationForm) => {
     try {
       // Batch all Zustand store updates to prevent excessive re-renders
       const updateData = {
@@ -253,14 +258,54 @@ export default function MentaraApplication() {
       updateNestedField("compliance", "complaintsOrDisciplinaryActions_specify", values.compliance.complaintsOrDisciplinaryActions_specify);
       updateNestedField("compliance", "willingToAbideByPlatformGuidelines", values.compliance.willingToAbideByPlatformGuidelines);
       
-      console.log("Therapist Application Data Saved:", values);
+      setLastSavedAt(new Date());
+      showToast("Draft saved automatically", "info", 2000);
+    } catch (error) {
+      console.error("Error auto-saving application data:", error);
+      showToast("Failed to save draft", "error");
+    }
+  }, [updateField, updateNestedField, showToast]);
+
+  const onSubmit = useCallback(async (values: TherapistApplicationForm) => {
+    setIsSubmitting(true);
+    
+    try {
+      // Validate that required fields are completed
+      if (values.compliance.willingToAbideByPlatformGuidelines !== "yes") {
+        throw new Error("You must agree to abide by platform guidelines to proceed.");
+      }
       
-      // Navigate to step 2 (Document Upload)
-      router.push("/therapist-application/2");
+      // Save data using the same function as auto-save
+      autoSave(values);
+      
+      console.log("Therapist Application Data Saved:", values);
+      showToast("Professional profile saved successfully!", "success");
+      
+      // Navigate to step 2 (Document Upload) after a brief delay
+      setTimeout(() => {
+        router.push("/therapist-application/2");
+      }, 1500);
     } catch (error) {
       console.error("Error saving application data:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to save application. Please try again.";
+      showToast(errorMessage, "error");
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [updateField, updateNestedField, router]);
+  }, [autoSave, router, showToast]);
+
+  // Auto-save every 30 seconds
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      const currentValues = form.getValues();
+      // Only auto-save if there are meaningful values
+      if (currentValues.professionalLicenseType || currentValues.areasOfExpertise.length > 0) {
+        autoSave(currentValues);
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [form, autoSave]);
 
   return (
     <motion.div
@@ -293,17 +338,42 @@ export default function MentaraApplication() {
       <div className="w-4/5 flex justify-center p-8">
         <div className="w-full max-w-4xl h-full">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Professional Profile</h1>
-            <p className="text-gray-600">Please provide your professional information and qualifications. All fields marked with <span className="text-red-500">*</span> are required.</p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Professional Profile</h1>
+                <p className="text-gray-600">Please provide your professional information and qualifications. All fields marked with <span className="text-red-500">*</span> are required.</p>
+              </div>
+              
+              {/* Auto-save status indicator */}
+              <div className="flex items-center gap-2 text-sm">
+                {lastSavedAt ? (
+                  <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-full border border-green-200">
+                    <Save className="w-4 h-4" />
+                    <span className="font-medium">
+                      Saved {lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-2 rounded-full border border-gray-200">
+                    <Circle className="w-4 h-4" />
+                    <span>Not saved yet</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="space-y-6">
+            <form 
+              onSubmit={form.handleSubmit(onSubmit)}
+              aria-label="Therapist Professional Profile Form"
+              role="form"
+            >
+              <div className="space-y-6" role="region" aria-label="Professional Information Sections">
                 {/* Professional License Information */}
-                <Card className="border-2 border-gray-200 hover:border-green-300 transition-colors">
+                <Card className="border-2 border-gray-200 hover:border-green-300 transition-colors" role="group" aria-labelledby="license-info-title">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle id="license-info-title" className="flex items-center gap-2 text-xl">
                       <FileText className="w-5 h-5 text-green-600" />
                       Professional License Information
                       <Badge variant="destructive" className="ml-2 text-xs">Required</Badge>
@@ -506,9 +576,9 @@ export default function MentaraApplication() {
                   </CardContent>
                 </Card>
                 {/* Teletherapy Readiness Assessment */}
-                <Card className="border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                <Card className="border-2 border-gray-200 hover:border-blue-300 transition-colors" role="group" aria-labelledby="teletherapy-title">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle id="teletherapy-title" className="flex items-center gap-2 text-xl">
                       <Clock className="w-5 h-5 text-blue-600" />
                       Teletherapy Readiness Assessment
                       <Badge variant="destructive" className="ml-2 text-xs">Required</Badge>
@@ -653,9 +723,9 @@ export default function MentaraApplication() {
                   </CardContent>
                 </Card>
                 {/* Areas of Expertise */}
-                <Card className="border-2 border-gray-200 hover:border-purple-300 transition-colors">
+                <Card className="border-2 border-gray-200 hover:border-purple-300 transition-colors" role="group" aria-labelledby="expertise-title">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle id="expertise-title" className="flex items-center gap-2 text-xl">
                       <Users className="w-5 h-5 text-purple-600" />
                       Areas of Expertise
                       <Badge variant="destructive" className="ml-2 text-xs">Required</Badge>
@@ -722,9 +792,9 @@ export default function MentaraApplication() {
                   </CardContent>
                 </Card>
                 {/* Compliance & Professional Standards */}
-                <Card className="border-2 border-gray-200 hover:border-orange-300 transition-colors">
+                <Card className="border-2 border-gray-200 hover:border-orange-300 transition-colors" role="group" aria-labelledby="compliance-title">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle id="compliance-title" className="flex items-center gap-2 text-xl">
                       <Shield className="w-5 h-5 text-orange-600" />
                       Compliance & Professional Standards
                       <Badge variant="destructive" className="ml-2 text-xs">Required</Badge>
@@ -888,21 +958,31 @@ export default function MentaraApplication() {
                   </CardContent>
                 </Card>
                 {/* Submit Section */}
-                <Card className="border-2 border-green-200 bg-green-50">
+                <Card className="border-2 border-green-200 bg-green-50" role="group" aria-labelledby="submit-section-title">
                   <CardContent className="pt-6">
                     <div className="text-center space-y-4">
                       <div className="flex items-center justify-center gap-2 text-green-800 mb-4">
                         <CheckCircle className="w-5 h-5" />
-                        <span className="font-semibold">Ready to Continue?</span>
+                        <span id="submit-section-title" className="font-semibold">Ready to Continue?</span>
                       </div>
                       <p className="text-sm text-green-700 mb-6">
                         Please review your information above. You can return to edit these details later if needed.
                       </p>
                       <button
                         type="submit"
-                        className="w-full md:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold text-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        disabled={isSubmitting}
+                        className="w-full md:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold text-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                       >
-                        Save and Continue to Document Upload
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Saving Profile...
+                          </>
+                        ) : (
+                          <>
+                            Save and Continue to Document Upload
+                          </>
+                        )}
                       </button>
                       <p className="text-xs text-gray-500 mt-3">
                         Next: Upload required documents and complete your application
