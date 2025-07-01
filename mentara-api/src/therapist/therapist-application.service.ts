@@ -33,17 +33,16 @@ export class TherapistApplicationService {
       throw new NotFoundException('User not found');
     }
 
-    // Convert string boolean values to actual booleans
+    // Process the application data
     const convertedData = {
       ...applicationData,
-      providedOnlineTherapyBefore: applicationData.providedOnlineTherapyBefore === 'true' || applicationData.providedOnlineTherapyBefore === 'yes',
-      comfortableUsingVideoConferencing: applicationData.comfortableUsingVideoConferencing === 'true' || applicationData.comfortableUsingVideoConferencing === 'yes',
       practiceStartDate: new Date(applicationData.practiceStartDate),
+      // Handle expiration date
+      expirationDateOfLicense: applicationData.expirationDateOfLicense 
+        ? new Date(applicationData.expirationDateOfLicense)
+        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Default to 1 year from now
       // Set default values for required fields
-      expirationDateOfLicense: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Default to 1 year from now
       licenseVerified: false,
-      compliesWithDataPrivacyAct: true,
-      willingToAbideByPlatformGuidelines: true,
       acceptsInsurance: false,
       hourlyRate: applicationData.hourlyRate || 0,
     };
@@ -57,7 +56,7 @@ export class TherapistApplicationService {
           providerType: convertedData.providerType,
           professionalLicenseType: convertedData.professionalLicenseType,
           isPRCLicensed: convertedData.isPRCLicensed,
-          prcLicenseNumber: convertedData.prcLicenseNumber,
+          prcLicenseNumber: convertedData.prcLicenseNumber || '',
           practiceStartDate: convertedData.practiceStartDate,
           areasOfExpertise: convertedData.areasOfExpertise,
           assessmentTools: convertedData.assessmentTools,
@@ -65,6 +64,11 @@ export class TherapistApplicationService {
           languagesOffered: convertedData.languagesOffered,
           providedOnlineTherapyBefore: convertedData.providedOnlineTherapyBefore,
           comfortableUsingVideoConferencing: convertedData.comfortableUsingVideoConferencing,
+          privateConfidentialSpace: convertedData.privateConfidentialSpace ? 'yes' : 'no',
+          compliesWithDataPrivacyAct: convertedData.compliesWithDataPrivacyAct,
+          professionalLiabilityInsurance: convertedData.professionalLiabilityInsurance,
+          complaintsOrDisciplinaryActions: convertedData.complaintsOrDisciplinaryActions,
+          willingToAbideByPlatformGuidelines: convertedData.willingToAbideByPlatformGuidelines,
           sessionLength: convertedData.preferredSessionLength,
           hourlyRate: convertedData.hourlyRate,
           status: 'pending',
@@ -72,8 +76,6 @@ export class TherapistApplicationService {
           processingDate: new Date(),
           expirationDateOfLicense: convertedData.expirationDateOfLicense,
           licenseVerified: convertedData.licenseVerified,
-          compliesWithDataPrivacyAct: convertedData.compliesWithDataPrivacyAct,
-          willingToAbideByPlatformGuidelines: convertedData.willingToAbideByPlatformGuidelines,
           acceptsInsurance: convertedData.acceptsInsurance,
           acceptedInsuranceTypes: [],
           specialCertifications: [],

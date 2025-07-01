@@ -81,11 +81,17 @@ export class TherapistApplicationDto {
   @IsString()
   isPRCLicensed!: string;
 
+  @IsOptional()
   @IsString()
-  prcLicenseNumber!: string;
+  prcLicenseNumber?: string;
 
+  @IsOptional()
   @IsString()
-  isLicenseActive!: string;
+  isLicenseActive?: string;
+
+  @IsOptional()
+  @IsString()
+  expirationDateOfLicense?: string;
 
   @IsString()
   practiceStartDate!: string;
@@ -102,11 +108,17 @@ export class TherapistApplicationDto {
   @IsArray()
   languagesOffered!: string[];
 
-  @IsString()
-  providedOnlineTherapyBefore!: string;
+  @IsBoolean()
+  providedOnlineTherapyBefore!: boolean;
 
-  @IsString()
-  comfortableUsingVideoConferencing!: string;
+  @IsBoolean()
+  comfortableUsingVideoConferencing!: boolean;
+
+  @IsBoolean()
+  privateConfidentialSpace!: boolean;
+
+  @IsBoolean()
+  compliesWithDataPrivacyAct!: boolean;
 
   @IsString()
   weeklyAvailability!: string;
@@ -124,4 +136,18 @@ export class TherapistApplicationDto {
   @IsOptional()
   @IsNumber()
   hourlyRate?: number;
+
+  // Compliance fields
+  @IsString()
+  professionalLiabilityInsurance!: string;
+
+  @IsString()
+  complaintsOrDisciplinaryActions!: string;
+
+  @IsOptional()
+  @IsString()
+  complaintsOrDisciplinaryActions_specify?: string;
+
+  @IsBoolean()
+  willingToAbideByPlatformGuidelines!: boolean;
 }

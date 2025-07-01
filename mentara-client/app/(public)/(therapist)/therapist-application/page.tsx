@@ -73,43 +73,11 @@ const unifiedTherapistSchema = z.object({
 
   // Professional License Information
   professionalLicenseType: z.string().min(1, "Please select your professional license type"),
-  professionalLicenseType_specify: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.professionalLicenseType === "other") {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please specify your license type" }
-  ),
+  professionalLicenseType_specify: z.string().optional(),
   isPRCLicensed: z.string().min(1, "Please indicate if you are PRC-licensed"),
-  prcLicenseNumber: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.isPRCLicensed === "yes") {
-        return val && /^[0-9]{7}$/.test(val);
-      }
-      return true;
-    },
-    { message: "Please enter a valid 7-digit PRC license number" }
-  ),
-  expirationDateOfLicense: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.isPRCLicensed === "yes") {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please enter the license expiration date" }
-  ),
-  isLicenseActive: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.isPRCLicensed === "yes") {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please confirm the status of your license" }
-  ),
+  prcLicenseNumber: z.string().optional(),
+  expirationDateOfLicense: z.string().optional(),
+  isLicenseActive: z.string().optional(),
 
   // Practice Information - NEW REQUIRED FIELDS
   practiceStartDate: z.string().min(1, "Please enter when you started practicing"),
@@ -124,50 +92,18 @@ const unifiedTherapistSchema = z.object({
   areasOfExpertise: z.array(z.string()).min(1, "Please select at least one area of expertise"),
   assessmentTools: z.array(z.string()).min(1, "Please select at least one assessment tool"),
   therapeuticApproachesUsedList: z.array(z.string()).min(1, "Please select at least one therapeutic approach"),
-  therapeuticApproachesUsedList_specify: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.therapeuticApproachesUsedList?.includes("other")) {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please specify other therapeutic approaches" }
-  ),
+  therapeuticApproachesUsedList_specify: z.string().optional(),
   
   // Languages and Availability
   languagesOffered: z.array(z.string()).min(1, "Please select at least one language"),
-  languagesOffered_specify: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.languagesOffered?.includes("other")) {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please specify other languages" }
-  ),
+  languagesOffered_specify: z.string().optional(),
   weeklyAvailability: z.string().min(1, "Please select your weekly availability"),
   preferredSessionLength: z.string().min(1, "Please select your preferred session length"),
-  preferredSessionLength_specify: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.preferredSessionLength === "other") {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please specify your preferred session length" }
-  ),
+  preferredSessionLength_specify: z.string().optional(),
 
   // Payment and Rates
   accepts: z.array(z.string()).min(1, "Please select at least one payment method"),
-  accepts_hmo_specify: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.accepts?.includes("hmo")) {
-        return val && val.length > 0;
-      }
-      return true;
-    },
-    { message: "Please specify HMO providers" }
-  ),
+  accepts_hmo_specify: z.string().optional(),
   hourlyRate: z.number().optional().refine(
     (val) => val === undefined || val >= 0,
     { message: "Rate must be a positive number" }
@@ -179,15 +115,7 @@ const unifiedTherapistSchema = z.object({
   // Compliance - Flattened for backend compatibility
   professionalLiabilityInsurance: z.string().min(1, "Please answer regarding liability insurance"),
   complaintsOrDisciplinaryActions: z.string().min(1, "Please answer regarding complaints history"),
-  complaintsOrDisciplinaryActions_specify: z.string().optional().refine(
-    (val, ctx) => {
-      if (ctx?.parent?.complaintsOrDisciplinaryActions === "yes") {
-        return val && val.length >= 10;
-      }
-      return true;
-    },
-    { message: "Please provide a brief explanation (min. 10 characters)" }
-  ),
+  complaintsOrDisciplinaryActions_specify: z.string().optional(),
   willingToAbideByPlatformGuidelines: z.string().refine((val) => val === "yes", {
     message: "You must agree to abide by the platform guidelines to proceed",
   }),
@@ -203,6 +131,79 @@ const unifiedTherapistSchema = z.object({
   consentChecked: z.boolean().refine((val) => val === true, {
     message: "You must certify that the documents are authentic",
   }),
+}).superRefine((val, ctx) => {
+  // Conditional validation for dependent fields
+  if (val.professionalLicenseType === "other" && (!val.professionalLicenseType_specify || val.professionalLicenseType_specify.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please specify your license type",
+      path: ["professionalLicenseType_specify"],
+    });
+  }
+
+  if (val.isPRCLicensed === "yes") {
+    if (!val.prcLicenseNumber || !/^[0-9]{7}$/.test(val.prcLicenseNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid 7-digit PRC license number",
+        path: ["prcLicenseNumber"],
+      });
+    }
+    if (!val.expirationDateOfLicense || val.expirationDateOfLicense.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter the license expiration date",
+        path: ["expirationDateOfLicense"],
+      });
+    }
+    if (!val.isLicenseActive || val.isLicenseActive.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please confirm the status of your license",
+        path: ["isLicenseActive"],
+      });
+    }
+  }
+
+  if (val.therapeuticApproachesUsedList?.includes("other") && (!val.therapeuticApproachesUsedList_specify || val.therapeuticApproachesUsedList_specify.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please specify other therapeutic approaches",
+      path: ["therapeuticApproachesUsedList_specify"],
+    });
+  }
+
+  if (val.languagesOffered?.includes("other") && (!val.languagesOffered_specify || val.languagesOffered_specify.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please specify other languages",
+      path: ["languagesOffered_specify"],
+    });
+  }
+
+  if (val.preferredSessionLength === "other" && (!val.preferredSessionLength_specify || val.preferredSessionLength_specify.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please specify your preferred session length",
+      path: ["preferredSessionLength_specify"],
+    });
+  }
+
+  if (val.accepts?.includes("hmo") && (!val.accepts_hmo_specify || val.accepts_hmo_specify.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please specify HMO providers",
+      path: ["accepts_hmo_specify"],
+    });
+  }
+
+  if (val.complaintsOrDisciplinaryActions === "yes" && (!val.complaintsOrDisciplinaryActions_specify || val.complaintsOrDisciplinaryActions_specify.length < 10)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please provide a brief explanation (min. 10 characters)",
+      path: ["complaintsOrDisciplinaryActions_specify"],
+    });
+  }
 });
 
 type UnifiedTherapistForm = z.infer<typeof unifiedTherapistSchema>;
@@ -629,7 +630,19 @@ export default function SinglePageTherapistApplication() {
                     ? "bg-green-50 border-green-200"
                     : "bg-white border-gray-200 hover:bg-gray-50"
                 }`}
-                onClick={() => toggleSection(section.id)}
+                onClick={() => {
+                  // Open the section if it's not already open
+                  if (!isOpen) {
+                    toggleSection(section.id);
+                  }
+                  // Smooth scroll to the section
+                  setTimeout(() => {
+                    const element = document.getElementById(`section-${section.id}`);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100); // Small delay to allow section to open
+                }}
               >
                 <div className="flex items-center gap-3">
                   <div className={`flex-shrink-0 ${isCompleted ? "text-green-600" : "text-gray-400"}`}>
@@ -730,26 +743,57 @@ export default function SinglePageTherapistApplication() {
                     <p className="text-sm text-green-700 mb-6">
                       Please review your information above before submitting your application.
                     </p>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting || overallProgress < 100}
-                      className="w-full md:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold text-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          Submitting Application...
-                        </>
-                      ) : (
-                        <>
-                          Submit Application
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting || overallProgress < 100}
+                        className="px-8 py-4 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold text-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2 transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Submitting Application...
+                          </>
+                        ) : (
+                          <>
+                            Submit Application
+                          </>
+                        )}
+                      </Button>
+                    </div>
                     {overallProgress < 100 && (
-                      <p className="text-sm text-gray-500">
-                        Please complete all required sections before submitting.
-                      </p>
+                      <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-800 font-medium mb-2">
+                          <AlertCircle className="w-4 h-4 inline mr-2" />
+                          Please complete the following sections before submitting:
+                        </p>
+                        <ul className="text-sm text-yellow-700 list-disc list-inside space-y-1">
+                          {sections.map((section) => {
+                            const completion = getSectionCompletion(section.id);
+                            if (completion.percentage < 100) {
+                              return (
+                                <li key={section.id}>
+                                  <button
+                                    type="button"
+                                    className="text-yellow-800 hover:text-yellow-900 underline"
+                                    onClick={() => {
+                                      setOpenSections(prev => new Set([...prev, section.id]));
+                                      const element = document.getElementById(`section-${section.id}`);
+                                      if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                      }
+                                    }}
+                                  >
+                                    {section.title}
+                                  </button>
+                                  {` (${completion.completed}/${completion.total} complete)`}
+                                </li>
+                              );
+                            }
+                            return null;
+                          })}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 </CardContent>
@@ -804,7 +848,7 @@ function SectionComponent({
 
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
-      <Card className="border-2 border-gray-200 hover:border-green-300 transition-colors">
+      <Card id={`section-${section.id}`} className="border-2 border-gray-200 hover:border-green-300 transition-colors">
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
             <div className="flex items-center justify-between">
