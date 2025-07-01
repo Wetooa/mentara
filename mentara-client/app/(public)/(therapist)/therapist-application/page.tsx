@@ -359,9 +359,9 @@ export default function SinglePageTherapistApplication() {
       
       showToast("Application submitted successfully!", "success");
       
-      // Navigate to confirmation page
+      // Navigate to sign-in page after successful submission
       setTimeout(() => {
-        router.push("/therapist-application/3");
+        router.push("/sign-in?message=application-submitted");
       }, 1500);
     } catch (error) {
       console.error("Error submitting application:", error);
