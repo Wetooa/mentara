@@ -390,7 +390,7 @@ export default function SinglePageTherapistApplication() {
         </div>
 
         {/* Overall Progress */}
-        <div className="mb-6">
+        <div className="mb-6" data-testid="overall-progress">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">Overall Progress</span>
             <span className="text-sm text-gray-600">{overallProgress}%</span>
@@ -476,7 +476,7 @@ export default function SinglePageTherapistApplication() {
       </div>
 
       {/* Main Content */}
-      <div className="w-4/5 flex justify-center p-8">
+      <div className="w-4/5 flex justify-center p-8" data-testid="main-content">
         <div className="w-full max-w-4xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
