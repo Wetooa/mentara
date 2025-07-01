@@ -132,6 +132,18 @@ Successfully removed all deprecated therapist application routes and consolidate
 - **Testing Updated**: Puppeteer test suite updated for new route
 - **Backend Stable**: No backend changes required, API endpoints unchanged
 
+#### **Phase 5: Bug Fix - Zod Validation Errors**
+- **Issue**: "Error: can't access property 'parent', ctx is undefined" in Zod validation
+- **Root Cause**: Zod `.refine()` functions accessing `ctx.parent` without null checks
+- **Solution**: Added optional chaining (`ctx?.parent?.field`) to all conditional validations
+- **Fixed Fields**: 
+  - `professionalLicenseType_specify`
+  - `prcLicenseNumber`
+  - `expirationDateOfLicense`
+  - `isLicenseActive`
+  - `complaintsOrDisciplinaryActions_specify`
+- **Result**: Form now loads and validates without runtime errors
+
 ---
 
 ## Previous Update: Single-Page Therapist Application Implementation (2025-07-01)
