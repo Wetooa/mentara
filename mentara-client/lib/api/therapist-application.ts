@@ -135,3 +135,46 @@ export async function updateTherapistApplicationStatus(
     throw error;
   }
 }
+
+/**
+ * Upload documents for therapist application
+ * @param files Files to upload
+ * @param fileTypes Mapping of file types
+ * @returns Upload result with file URLs
+ */
+export async function uploadTherapistDocuments(
+  files: File[],
+  fileTypes: Record<string, string> = {}
+): Promise<{
+  success: boolean;
+  message: string;
+  uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+}> {
+  try {
+    const formData = new FormData();
+    
+    // Add files to form data
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    
+    // Add file type mappings
+    formData.append('fileTypes', JSON.stringify(fileTypes));
+
+    const response = await fetch('/api/therapist/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error uploading therapist documents:", error);
+    throw error;
+  }
+}
