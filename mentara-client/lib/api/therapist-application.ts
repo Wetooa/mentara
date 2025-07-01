@@ -161,7 +161,7 @@ export async function uploadTherapistDocuments(
     // Add file type mappings
     formData.append('fileTypes', JSON.stringify(fileTypes));
 
-    const response = await fetch('/api/therapist/upload', {
+    const response = await fetch('/api/therapist/upload-public', {
       method: 'POST',
       body: formData,
     });

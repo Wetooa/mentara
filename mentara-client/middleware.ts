@@ -27,7 +27,7 @@ const publicRoutes = [
 // Define public API routes that don't require authentication
 const publicApiRoutes = [
   "/api/therapist/apply",
-  "/api/therapist/upload",
+  "/api/therapist/upload-public",
 ];
 
 // Helper to get required role for a path

@@ -222,6 +222,77 @@ export class TherapistApplicationController {
     }
   }
 
+  @Post('upload-public')
+  @UseInterceptors(FilesInterceptor('files', 10, {
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
+    fileFilter: (req, file, callback) => {
+      const allowedMimeTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
+      
+      if (allowedMimeTypes.includes(file.mimetype)) {
+        callback(null, true);
+      } else {
+        callback(new BadRequestException('Invalid file type'), false);
+      }
+    },
+  }))
+  async uploadDocumentsPublic(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('fileTypes') fileTypes: string, // JSON string of file type mappings
+  ): Promise<{
+    success: boolean;
+    message: string;
+    uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+  }> {
+    try {
+      if (!files || files.length === 0) {
+        throw new BadRequestException('No files provided');
+      }
+
+      console.log('Public upload request:', {
+        fileCount: files.length,
+        fileNames: files.map(f => f.originalname),
+        fileTypes
+      });
+
+      let fileTypeMap: Record<string, string> = {};
+      if (fileTypes) {
+        try {
+          fileTypeMap = JSON.parse(fileTypes);
+        } catch (error) {
+          console.warn('Invalid fileTypes JSON, proceeding without mapping');
+        }
+      }
+
+      // For public uploads, use a temporary user ID based on timestamp
+      const tempUserId = `temp_upload_${Date.now()}`;
+      
+      const uploadedFiles = await this.therapistApplicationService.uploadDocuments(
+        tempUserId,
+        files,
+        fileTypeMap,
+      );
+
+      return {
+        success: true,
+        message: 'Files uploaded successfully',
+        uploadedFiles,
+      };
+    } catch (error) {
+      console.error('Error uploading documents (public):', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to upload documents');
+    }
+  }
+
   @Post('upload')
   @UseGuards(ClerkAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10, {

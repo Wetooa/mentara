@@ -261,10 +261,9 @@ const sections: Section[] = [
     estimatedTime: "5-7 minutes",
     fields: [
       "weeklyAvailability",
-      "preferredSessionLength",
-      "accepts",
-      "hourlyRate",
-      "bio"
+      "preferredSessionLength", 
+      "accepts"
+      // Note: hourlyRate and bio are optional fields
     ],
     isRequired: true,
   },
@@ -272,10 +271,10 @@ const sections: Section[] = [
     id: "documents",
     title: "Document Upload",
     icon: <Upload className="w-5 h-5" />,
-    description: "Upload required professional documents and certifications",
-    estimatedTime: "3-5 minutes",
+    description: "Upload professional documents and certifications (optional - can be submitted later)",
+    estimatedTime: "3-5 minutes", 
     fields: ["documentsUploaded"],
-    isRequired: true,
+    isRequired: false, // Documents are optional for initial submission
   },
   {
     id: "review",
@@ -378,46 +377,78 @@ export default function SinglePageTherapistApplication() {
         break;
       
       case "professionalProfile":
-        // Count main required fields
-        let profCompleted = 0;
-        let profTotal = 13; // Total required fields in this section
+        // Define required fields for professional profile
+        const professionalRequiredFields = [
+          "professionalLicenseType",
+          "isPRCLicensed", 
+          "practiceStartDate",
+          "providedOnlineTherapyBefore",
+          "comfortableUsingVideoConferencing",
+          "privateConfidentialSpace",
+          "compliesWithDataPrivacyAct",
+          "areasOfExpertise",
+          "assessmentTools", 
+          "therapeuticApproachesUsedList",
+          "languagesOffered",
+          "professionalLiabilityInsurance",
+          "complaintsOrDisciplinaryActions",
+          "willingToAbideByPlatformGuidelines"
+        ];
         
-        if (values.professionalLicenseType) profCompleted++;
-        if (values.isPRCLicensed) profCompleted++;
-        if (values.practiceStartDate) profCompleted++;
-        if (values.providedOnlineTherapyBefore) profCompleted++;
-        if (values.comfortableUsingVideoConferencing) profCompleted++;
-        if (values.privateConfidentialSpace) profCompleted++;
-        if (values.compliesWithDataPrivacyAct) profCompleted++;
-        if (values.areasOfExpertise?.length > 0) profCompleted++;
-        if (values.assessmentTools?.length > 0) profCompleted++;
-        if (values.therapeuticApproachesUsedList?.length > 0) profCompleted++;
-        if (values.languagesOffered?.length > 0) profCompleted++;
-        if (values.professionalLiabilityInsurance) profCompleted++;
-        if (values.complaintsOrDisciplinaryActions) profCompleted++;
-        if (values.willingToAbideByPlatformGuidelines === "yes") profCompleted++;
+        let profCompleted = 0;
+        
+        professionalRequiredFields.forEach(field => {
+          if (field === "areasOfExpertise" || field === "assessmentTools" || 
+              field === "therapeuticApproachesUsedList" || field === "languagesOffered") {
+            if (values[field]?.length > 0) profCompleted++;
+          } else if (field === "willingToAbideByPlatformGuidelines") {
+            if (values[field] === "yes") profCompleted++;
+          } else {
+            if (values[field] && values[field] !== "") profCompleted++;
+          }
+        });
         
         completed = profCompleted;
-        total = profTotal;
+        total = professionalRequiredFields.length;
         break;
         
       case "availability":
-        let availCompleted = 0;
-        let availTotal = 3; // weeklyAvailability, preferredSessionLength, accepts are required
+        // Only count required fields - hourlyRate and bio are optional
+        const availabilityRequiredFields = [
+          "weeklyAvailability",
+          "preferredSessionLength", 
+          "accepts"
+        ];
         
-        if (values.weeklyAvailability) availCompleted++;
-        if (values.preferredSessionLength) availCompleted++;
-        if (values.accepts?.length > 0) availCompleted++;
-        // hourlyRate and bio are optional
+        let availCompleted = 0;
+        
+        availabilityRequiredFields.forEach(field => {
+          if (field === "accepts") {
+            if (values[field]?.length > 0) availCompleted++;
+          } else {
+            if (values[field] && values[field] !== "") availCompleted++;
+          }
+        });
         
         completed = availCompleted;
-        total = availTotal;
+        total = availabilityRequiredFields.length;
         break;
 
       case "documents":
-        const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"];
-        completed = requiredDocs.filter(doc => documents[doc]?.length > 0).length;
-        total = requiredDocs.length;
+        // Documents are optional for initial submission
+        // Users can submit without documents and upload them later
+        const optionalDocs = ["prcLicense", "nbiClearance", "resumeCV"];
+        const uploadedDocs = optionalDocs.filter(doc => documents[doc]?.length > 0).length;
+        
+        // If no documents uploaded, consider it 100% complete since they're optional
+        // If some documents uploaded, show actual progress
+        if (uploadedDocs === 0) {
+          completed = 1;
+          total = 1;
+        } else {
+          completed = uploadedDocs;
+          total = optionalDocs.length;
+        }
         break;
 
       case "review":
@@ -430,8 +461,17 @@ export default function SinglePageTherapistApplication() {
     return { completed, total, percentage };
   }, [form, documents]);
 
-  // Overall progress calculation
+  // Overall progress calculation - only count required sections for submission eligibility
   const overallProgress = useMemo(() => {
+    const requiredSections = sections.filter(section => section.isRequired);
+    const sectionProgresses = requiredSections.map(section => getSectionCompletion(section.id));
+    const totalCompleted = sectionProgresses.reduce((sum, prog) => sum + prog.completed, 0);
+    const totalFields = sectionProgresses.reduce((sum, prog) => sum + prog.total, 0);
+    return totalFields > 0 ? Math.round((totalCompleted / totalFields) * 100) : 0;
+  }, [getSectionCompletion]);
+
+  // Separate progress for display that includes all sections
+  const displayProgress = useMemo(() => {
     const sectionProgresses = sections.map(section => getSectionCompletion(section.id));
     const totalCompleted = sectionProgresses.reduce((sum, prog) => sum + prog.completed, 0);
     const totalFields = sectionProgresses.reduce((sum, prog) => sum + prog.total, 0);
@@ -551,13 +591,19 @@ export default function SinglePageTherapistApplication() {
           showToast(`Successfully uploaded ${uploadedFiles.length} document(s)`, "success", 3000);
         } catch (uploadError) {
           console.error("Document upload failed:", uploadError);
+          
+          // Show error but allow user to choose to proceed without documents
+          const errorMessage = uploadError instanceof Error 
+            ? uploadError.message 
+            : "Document upload failed";
+            
           showToast(
-            uploadError instanceof Error 
-              ? `Document upload failed: ${uploadError.message}` 
-              : "Document upload failed. Please try again.", 
-            "error"
+            `${errorMessage}. You can submit your application without documents and upload them later.`, 
+            "warning",
+            5000
           );
-          return; // Don't submit if document upload fails
+          
+          // Don't return here - allow submission to continue without documents
         }
       }
       
@@ -608,9 +654,9 @@ export default function SinglePageTherapistApplication() {
         <div className="mb-6" data-testid="overall-progress">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-            <span className="text-sm text-gray-600">{overallProgress}%</span>
+            <span className="text-sm text-gray-600">{displayProgress}%</span>
           </div>
-          <Progress value={overallProgress} className="h-2" />
+          <Progress value={displayProgress} className="h-2" />
         </div>
 
         {/* Section List */}
@@ -768,7 +814,7 @@ export default function SinglePageTherapistApplication() {
                           Please complete the following sections before submitting:
                         </p>
                         <ul className="text-sm text-yellow-700 list-disc list-inside space-y-1">
-                          {sections.map((section) => {
+                          {sections.filter(section => section.isRequired).map((section) => {
                             const completion = getSectionCompletion(section.id);
                             if (completion.percentage < 100) {
                               return (
