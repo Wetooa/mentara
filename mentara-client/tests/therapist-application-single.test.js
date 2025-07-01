@@ -1,11 +1,11 @@
 /**
- * Comprehensive Puppeteer Test Suite for Single-Page Therapist Application
+ * Comprehensive Puppeteer Test Suite for Therapist Application
  * Tests form filling, validation, progress tracking, and submission flow
  */
 
 const puppeteer = require('puppeteer');
 
-describe('Single-Page Therapist Application', () => {
+describe('Therapist Application', () => {
   let browser;
   let page;
   const BASE_URL = 'http://localhost:3000';
@@ -24,13 +24,13 @@ describe('Single-Page Therapist Application', () => {
   });
 
   beforeEach(async () => {
-    await page.goto(`${BASE_URL}/therapist-application-single`, { 
+    await page.goto(`${BASE_URL}/therapist-application`, { 
       waitUntil: 'networkidle2' 
     });
   });
 
   describe('Page Load and Initial State', () => {
-    test('should load the single-page application successfully', async () => {
+    test('should load the therapist application successfully', async () => {
       await page.waitForSelector('h1');
       const title = await page.$eval('h1', el => el.textContent);
       expect(title).toBe('Therapist Application');
