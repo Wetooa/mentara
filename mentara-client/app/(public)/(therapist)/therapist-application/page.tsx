@@ -73,7 +73,7 @@ const unifiedTherapistSchema = z.object({
   professionalLicenseType: z.string().min(1, "Please select your professional license type"),
   professionalLicenseType_specify: z.string().optional().refine(
     (val, ctx) => {
-      if (ctx.parent.professionalLicenseType === "other") {
+      if (ctx?.parent?.professionalLicenseType === "other") {
         return val && val.length > 0;
       }
       return true;
@@ -83,7 +83,7 @@ const unifiedTherapistSchema = z.object({
   isPRCLicensed: z.string().min(1, "Please indicate if you are PRC-licensed"),
   prcLicenseNumber: z.string().optional().refine(
     (val, ctx) => {
-      if (ctx.parent.isPRCLicensed === "yes") {
+      if (ctx?.parent?.isPRCLicensed === "yes") {
         return val && /^[0-9]{7}$/.test(val);
       }
       return true;
@@ -92,7 +92,7 @@ const unifiedTherapistSchema = z.object({
   ),
   expirationDateOfLicense: z.string().optional().refine(
     (val, ctx) => {
-      if (ctx.parent.isPRCLicensed === "yes") {
+      if (ctx?.parent?.isPRCLicensed === "yes") {
         return val && val.length > 0;
       }
       return true;
@@ -101,7 +101,7 @@ const unifiedTherapistSchema = z.object({
   ),
   isLicenseActive: z.string().optional().refine(
     (val, ctx) => {
-      if (ctx.parent.isPRCLicensed === "yes") {
+      if (ctx?.parent?.isPRCLicensed === "yes") {
         return val && val.length > 0;
       }
       return true;
@@ -126,7 +126,7 @@ const unifiedTherapistSchema = z.object({
     complaintsOrDisciplinaryActions: z.string().min(1, "Please answer regarding complaints history"),
     complaintsOrDisciplinaryActions_specify: z.string().optional().refine(
       (val, ctx) => {
-        if (ctx.parent.complaintsOrDisciplinaryActions === "yes") {
+        if (ctx?.parent?.complaintsOrDisciplinaryActions === "yes") {
           return val && val.length >= 10;
         }
         return true;
