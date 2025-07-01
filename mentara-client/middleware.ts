@@ -72,7 +72,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // Allow all public routes (exact match or path prefix for therapist-application)
   const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || 
-                       req.nextUrl.pathname.startsWith('/therapist-application/');
+                       req.nextUrl.pathname.startsWith('/therapist-application/') ||
+                       req.nextUrl.pathname.startsWith('/therapist-application-single');
   
   if (isPublicRoute) {
     return NextResponse.next();

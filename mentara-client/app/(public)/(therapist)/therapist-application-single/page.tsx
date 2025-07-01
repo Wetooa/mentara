@@ -548,7 +548,7 @@ export default function SinglePageTherapistApplication() {
   );
 }
 
-// Individual Section Component (to be implemented in the next step)
+// Individual Section Component with full form implementations
 function SectionComponent({ 
   section, 
   isOpen, 
@@ -560,6 +560,34 @@ function SectionComponent({
   updateDocuments,
   removeDocument
 }) {
+  const { showToast } = useToast();
+
+  const handleFileChange = useCallback((docType: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg", 
+      "image/png",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    const maxSizeMB = 10;
+    const validFiles = Array.from(files).filter(
+      (file) => allowedTypes.includes(file.type) && file.size <= maxSizeMB * 1024 * 1024
+    );
+
+    if (validFiles.length !== files.length) {
+      showToast("Some files were invalid (type or size) and were not added", "warning");
+    }
+
+    updateDocuments(docType, [...documents[docType], ...validFiles]);
+  }, [documents, updateDocuments, showToast]);
+
+  const handleRemoveFile = useCallback((docType: string, index: number) => {
+    removeDocument(docType, index);
+  }, [removeDocument]);
+
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
       <Card className="border-2 border-gray-200 hover:border-green-300 transition-colors">
@@ -571,7 +599,12 @@ function SectionComponent({
                   {section.icon}
                 </div>
                 <div>
-                  <CardTitle className="text-xl">{section.title}</CardTitle>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    {section.title}
+                    {section.isRequired && (
+                      <Badge variant="destructive" className="text-xs">Required</Badge>
+                    )}
+                  </CardTitle>
                   <p className="text-sm text-gray-600 mt-1">{section.description}</p>
                 </div>
               </div>
@@ -598,14 +631,775 @@ function SectionComponent({
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent>
-            {/* Section content will be implemented next */}
-            <div className="p-8 text-center text-gray-500">
-              Section content for {section.title} coming soon...
-            </div>
+          <CardContent className="space-y-6">
+            {section.id === "basicInfo" && (
+              <BasicInformationSection form={form} />
+            )}
+            {section.id === "professionalProfile" && (
+              <ProfessionalProfileSection form={form} watchedValues={watchedValues} />
+            )}
+            {section.id === "documents" && (
+              <DocumentUploadSection 
+                documents={documents}
+                onFileChange={handleFileChange}
+                onRemoveFile={handleRemoveFile}
+              />
+            )}
+            {section.id === "review" && (
+              <ReviewSection form={form} watchedValues={watchedValues} documents={documents} />
+            )}
           </CardContent>
         </CollapsibleContent>
       </Card>
     </Collapsible>
+  );
+}
+
+// Basic Information Section Component
+function BasicInformationSection({ form }) {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold">
+                First Name <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Enter your first name" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold">
+                Last Name <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Enter your last name" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={form.control}
+        name="mobile"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-base font-semibold">
+              Mobile Phone Number <span className="text-red-500">*</span>
+            </FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="e.g., 09xxxxxxxxx" type="tel" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-base font-semibold">
+              Email Address <span className="text-red-500">*</span>
+            </FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="Enter your email address" type="email" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="province"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold">
+                Province <span className="text-red-500">*</span>
+              </FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your province" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    {PHILIPPINE_PROVINCES.map((province) => (
+                      <SelectItem key={province} value={province}>
+                        {province}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="providerType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold">
+                Provider Type <span className="text-red-500">*</span>
+              </FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select provider type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    {PROVIDER_TYPE.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Professional Profile Section Component 
+function ProfessionalProfileSection({ form, watchedValues }) {
+  const { professionalLicenseType, isPRCLicensed, compliance } = watchedValues;
+
+  return (
+    <div className="space-y-8">
+      {/* Professional License Information */}
+      <Card className="border border-blue-200 bg-blue-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="w-5 h-5 text-blue-600" />
+            Professional License Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="professionalLicenseType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  What is your professional license type? <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="rpsy" id="rpsy" />
+                      <Label htmlFor="rpsy" className="flex-1 cursor-pointer">
+                        <div className="font-medium">RPsy (Registered Psychologist)</div>
+                        <div className="text-sm text-gray-500">Licensed to practice psychology</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="rpm" id="rpm" />
+                      <Label htmlFor="rpm" className="flex-1 cursor-pointer">
+                        <div className="font-medium">RPm (Registered Psychometrician)</div>
+                        <div className="text-sm text-gray-500">Licensed to administer psychological tests</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="rgc" id="rgc" />
+                      <Label htmlFor="rgc" className="flex-1 cursor-pointer">
+                        <div className="font-medium">RGC (Registered Guidance Counselor)</div>
+                        <div className="text-sm text-gray-500">Licensed to provide guidance and counseling</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="other" id="other" />
+                      <Label htmlFor="other" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Others (Please specify)</div>
+                        <div className="text-sm text-gray-500">Other recognized mental health license</div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {professionalLicenseType === "other" && (
+            <FormField
+              control={form.control}
+              name="professionalLicenseType_specify"
+              render={({ field }) => (
+                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <FormLabel className="text-base font-semibold">
+                    Please specify your license type <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="e.g., Licensed Professional Counselor" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name="isPRCLicensed"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Are you PRC-licensed? <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-6">
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="yes" id="prc-yes" />
+                      <Label htmlFor="prc-yes" className="cursor-pointer font-medium">Yes</Label>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="no" id="prc-no" />
+                      <Label htmlFor="prc-no" className="cursor-pointer font-medium">No</Label>
+                    </div>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {isPRCLicensed === "yes" && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Shield className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold text-green-900">PRC License Details</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="prcLicenseNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold">
+                        PRC License Number <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., 1234567" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="expirationDateOfLicense"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold">
+                        License Expiration Date <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="isLicenseActive"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold">
+                      Is your license currently active and in good standing? <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-6">
+                        <div className="flex items-center space-x-3 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-50">
+                          <RadioGroupItem value="yes" id="active-yes" />
+                          <Label htmlFor="active-yes" className="cursor-pointer font-medium">Yes</Label>
+                        </div>
+                        <div className="flex items-center space-x-3 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-50">
+                          <RadioGroupItem value="no" id="active-no" />
+                          <Label htmlFor="active-no" className="cursor-pointer font-medium">No</Label>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Teletherapy Readiness */}
+      <Card className="border border-purple-200 bg-purple-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock className="w-5 h-5 text-purple-600" />
+            Teletherapy Readiness Assessment
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {[
+            {
+              name: "teletherapyReadiness.providedOnlineTherapyBefore",
+              label: "Have you provided online therapy before?",
+              id: "online-therapy"
+            },
+            {
+              name: "teletherapyReadiness.comfortableUsingVideoConferencing", 
+              label: "Are you comfortable using secure video conferencing tools (e.g., Zoom, Google Meet)?",
+              id: "video-conferencing"
+            },
+            {
+              name: "teletherapyReadiness.privateConfidentialSpace",
+              label: "Do you have a private and confidential space for conducting virtual sessions?",
+              id: "private-space"
+            },
+            {
+              name: "teletherapyReadiness.compliesWithDataPrivacyAct",
+              label: "Do you comply with the Philippine Data Privacy Act (RA 10173)?",
+              id: "privacy-act"
+            }
+          ].map((item, index) => (
+            <FormField
+              key={item.name}
+              control={form.control}
+              name={item.name}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-semibold">
+                    {item.label} <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-6">
+                      <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="yes" id={`${item.id}-yes`} />
+                        <Label htmlFor={`${item.id}-yes`} className="cursor-pointer font-medium">Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="no" id={`${item.id}-no`} />
+                        <Label htmlFor={`${item.id}-no`} className="cursor-pointer font-medium">No</Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Areas of Expertise */}
+      <Card className="border border-orange-200 bg-orange-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-orange-600" />
+            Areas of Expertise
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Select all areas where you have professional experience and training. You must select at least one area.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <FormField
+            control={form.control}
+            name="areasOfExpertise"
+            render={({ field }) => (
+              <FormItem>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {therapistProfileFormFields.areasOfExpertise.options.map((option) => (
+                    <Label
+                      key={option.value}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-orange-100 hover:border-orange-300 cursor-pointer transition-colors group"
+                    >
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...field.value, option.value]);
+                          } else {
+                            field.onChange(field.value.filter((v) => v !== option.value));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium group-hover:text-orange-700 transition-colors">
+                        {option.label}
+                      </span>
+                      {field.value?.includes(option.value) && (
+                        <CheckCircle className="w-4 h-4 text-orange-600 ml-auto" />
+                      )}
+                    </Label>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-orange-100 border border-orange-200 rounded-lg">
+                  <p className="text-sm text-orange-800">
+                    <strong>Selected:</strong> {field.value?.length || 0} area{field.value?.length !== 1 ? 's' : ''}
+                    {field.value?.length > 0 && (
+                      <span className="ml-2 text-orange-600">
+                        ({field.value.map(val => 
+                          therapistProfileFormFields.areasOfExpertise.options.find(opt => opt.value === val)?.label
+                        ).join(', ')})
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Compliance & Professional Standards */}
+      <Card className="border border-red-200 bg-red-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Shield className="w-5 h-5 text-red-600" />
+            Compliance & Professional Standards
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="compliance.professionalLiabilityInsurance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Do you have professional liability insurance for online practice? <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
+                    {[
+                      { value: "yes", label: "Yes", description: "I have active professional liability insurance" },
+                      { value: "no", label: "No", description: "I do not have liability insurance" },
+                      { value: "willing", label: "Not yet, but willing to secure", description: "I am willing to obtain insurance before starting practice" }
+                    ].map((option) => (
+                      <div key={option.value} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value={option.value} id={`liability-${option.value}`} />
+                        <Label htmlFor={`liability-${option.value}`} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{option.label}</div>
+                          <div className="text-sm text-gray-500">{option.description}</div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="compliance.complaintsOrDisciplinaryActions"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Have you ever had complaints or disciplinary actions against your PRC license? <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="no" id="complaints-no" />
+                      <Label htmlFor="complaints-no" className="flex-1 cursor-pointer">
+                        <div className="font-medium">No</div>
+                        <div className="text-sm text-gray-500">No complaints or disciplinary actions</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <RadioGroupItem value="yes" id="complaints-yes" />
+                      <Label htmlFor="complaints-yes" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Yes (please briefly explain)</div>
+                        <div className="text-sm text-gray-500">I will provide details below</div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {compliance?.complaintsOrDisciplinaryActions === "yes" && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <FormField
+                control={form.control}
+                name="compliance.complaintsOrDisciplinaryActions_specify"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">
+                      Please briefly explain the nature and resolution <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Please provide details about the complaint or disciplinary action and how it was resolved..."
+                        rows={4}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          <div className="pt-4 border-t border-gray-200">
+            <FormField
+              control={form.control}
+              name="compliance.willingToAbideByPlatformGuidelines"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-semibold">
+                    Are you willing to abide by our platform's ethical guidelines, privacy policies, and patient safety standards? <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
+                      <div className="flex items-center space-x-3 p-4 border-2 border-green-200 bg-green-50 rounded-lg hover:bg-green-100">
+                        <RadioGroupItem value="yes" id="guidelines-yes" />
+                        <Label htmlFor="guidelines-yes" className="flex-1 cursor-pointer">
+                          <div className="font-medium text-green-900">Yes, I agree</div>
+                          <div className="text-sm text-green-700">I commit to following all platform guidelines and standards</div>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-4 border border-red-200 bg-red-50 rounded-lg hover:bg-red-100">
+                        <RadioGroupItem value="no" id="guidelines-no" />
+                        <Label htmlFor="guidelines-no" className="flex-1 cursor-pointer">
+                          <div className="font-medium text-red-900">No</div>
+                          <div className="text-sm text-red-700">I do not agree to abide by the guidelines</div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Document Upload Section Component
+function DocumentUploadSection({ documents, onFileChange, onRemoveFile }) {
+  const requiredDocs = [
+    { key: "prcLicense", title: "PRC License", description: "Upload a clear copy of your valid PRC license" },
+    { key: "nbiClearance", title: "NBI Clearance", description: "Upload your NBI clearance (issued within the last 6 months)" },
+    { key: "resumeCV", title: "Resume/CV", description: "Upload your professional resume or curriculum vitae" }
+  ];
+
+  const optionalDocs = [
+    { key: "liabilityInsurance", title: "Professional Liability Insurance", description: "If applicable, upload a copy of your professional liability insurance" },
+    { key: "birForm", title: "BIR Form 2303 / Certificate of Registration", description: "Optional: Upload for tax reporting and payment processing" }
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Required Documents</h3>
+        <p className="text-sm text-gray-600 mb-6">
+          Please upload the following documents to complete your application. All documents must be clear and legible. 
+          Accepted formats: PDF, JPG, PNG, DOCX (Max 10MB each).
+        </p>
+        
+        <div className="space-y-6">
+          {requiredDocs.map((doc) => (
+            <DocumentUploadCard
+              key={doc.key}
+              title={doc.title}
+              description={doc.description}
+              required={true}
+              files={documents[doc.key] || []}
+              onFileChange={(files) => onFileChange(doc.key, files)}
+              onRemoveFile={(index) => onRemoveFile(doc.key, index)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Additional Documents (Optional)</h3>
+        <div className="space-y-6">
+          {optionalDocs.map((doc) => (
+            <DocumentUploadCard
+              key={doc.key}
+              title={doc.title}
+              description={doc.description}
+              required={false}
+              files={documents[doc.key] || []}
+              onFileChange={(files) => onFileChange(doc.key, files)}
+              onRemoveFile={(index) => onRemoveFile(doc.key, index)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Document Upload Card Component
+function DocumentUploadCard({ title, description, required, files, onFileChange, onRemoveFile }) {
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      onFileChange(e.dataTransfer.files);
+    }
+  }, [onFileChange]);
+
+  return (
+    <Card className={`border ${files.length > 0 ? "border-green-300 bg-green-50" : "border-gray-200"}`}>
+      <CardContent className="p-0">
+        <div className="p-5 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+            {required && <Badge variant="destructive" className="text-xs">Required</Badge>}
+          </div>
+          <p className="text-sm text-gray-600 mt-1">{description}</p>
+        </div>
+
+        <div className="p-5">
+          {files && files.length > 0 ? (
+            <div className="space-y-3">
+              {Array.from(files).map((file, index) => (
+                <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center min-w-0">
+                    <FileText className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
+                    <div className="flex-grow min-w-0">
+                      <p className="text-sm font-medium truncate">{file.name}</p>
+                      <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="flex-shrink-0 ml-2"
+                    onClick={() => onRemoveFile(index)}
+                  >
+                    <X className="w-4 h-4 text-gray-500 hover:text-red-500" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                type="button"
+                className="w-full mt-3 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100"
+                onClick={() => document.getElementById(`file-input-${title}`).click()}
+              >
+                <Upload className="w-4 h-4 mr-2" /> Upload Additional File(s)
+              </Button>
+            </div>
+          ) : (
+            <div
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center transition-colors cursor-pointer hover:border-green-400 bg-white"
+              onClick={() => document.getElementById(`file-input-${title}`).click()}
+            >
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="mt-3">
+                <p className="text-sm font-medium text-gray-700">
+                  Drag and drop your file(s) here, or
+                </p>
+                <p className="mt-1 text-xs text-gray-500">PDF, JPG, PNG or DOCX up to 10MB each</p>
+              </div>
+              <Button type="button" variant="outline" className="mt-4">
+                Browse Files
+              </Button>
+            </div>
+          )}
+          <input
+            id={`file-input-${title}`}
+            type="file"
+            className="hidden"
+            onChange={(e) => onFileChange(e.target.files)}
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            multiple
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Review Section Component
+function ReviewSection({ form, watchedValues, documents }) {
+  return (
+    <div className="space-y-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-blue-900 mb-4">Application Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p><strong>Name:</strong> {watchedValues.firstName} {watchedValues.lastName}</p>
+            <p><strong>Email:</strong> {watchedValues.email}</p>
+            <p><strong>Mobile:</strong> {watchedValues.mobile}</p>
+            <p><strong>Province:</strong> {watchedValues.province}</p>
+          </div>
+          <div>
+            <p><strong>License Type:</strong> {watchedValues.professionalLicenseType}</p>
+            <p><strong>PRC Licensed:</strong> {watchedValues.isPRCLicensed}</p>
+            <p><strong>Expertise Areas:</strong> {watchedValues.areasOfExpertise?.length || 0} selected</p>
+            <p><strong>Documents:</strong> {Object.values(documents).reduce((sum, docs) => sum + docs.length, 0)} files uploaded</p>
+          </div>
+        </div>
+      </div>
+
+      <FormField
+        control={form.control}
+        name="consentChecked"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-gray-200 rounded-lg">
+            <FormControl>
+              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+            <div className="space-y-1 leading-none">
+              <FormLabel>
+                I certify that all documents uploaded are authentic and valid. I understand that providing false information may result in the rejection of my application.
+              </FormLabel>
+              <FormMessage />
+            </div>
+          </FormItem>
+        )}
+      />
+    </div>
   );
 }
