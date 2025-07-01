@@ -14,8 +14,8 @@ export async function submitTherapistApplication(
   try {
     console.log("Submitting application data:", applicationData);
 
-    // Use the Next.js API route which handles authentication
-    const response = await fetch("/api/therapist/application", {
+    // Use the public Next.js API route for therapist applications
+    const response = await fetch("/api/therapist/apply", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

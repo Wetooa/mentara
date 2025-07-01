@@ -24,13 +24,33 @@ export class TherapistApplicationService {
       throw new BadRequestException('User already has a therapist application');
     }
 
-    // Check if user exists
-    const user = await this.prisma.user.findUnique({
-      where: { id: applicationData.userId },
-    });
+    // For public applications (temporary user IDs), skip user existence check
+    const isPublicApplication = applicationData.userId.startsWith('temp_');
+    
+    if (!isPublicApplication) {
+      // Check if user exists for authenticated applications
+      const user = await this.prisma.user.findUnique({
+        where: { id: applicationData.userId },
+      });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+    } else {
+      // For public applications, check if someone with this email already applied
+      const existingByEmail = await this.prisma.therapist.findFirst({
+        where: { 
+          OR: [
+            { user: { email: applicationData.email } },
+            // Also check temp user IDs with this email pattern
+            { userId: { contains: applicationData.email.replace('@', '_at_') } }
+          ]
+        },
+      });
+
+      if (existingByEmail) {
+        throw new BadRequestException('An application with this email already exists');
+      }
     }
 
     // Process the application data
@@ -48,6 +68,21 @@ export class TherapistApplicationService {
     };
 
     try {
+      // For public applications, we need to create the user record first
+      if (isPublicApplication) {
+        // Create a temporary user record
+        await this.prisma.user.create({
+          data: {
+            id: convertedData.userId,
+            email: convertedData.email,
+            firstName: convertedData.firstName,
+            lastName: convertedData.lastName,
+            role: 'client', // Temporary role until approved
+            isActive: false, // Inactive until approved
+          },
+        });
+      }
+
       const application = await this.prisma.therapist.create({
         data: {
           userId: convertedData.userId,

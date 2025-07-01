@@ -24,6 +24,12 @@ const publicRoutes = [
   "/for-therapists",
 ];
 
+// Define public API routes that don't require authentication
+const publicApiRoutes = [
+  "/api/therapist/apply",
+  "/api/therapist/upload",
+];
+
 // Helper to get required role for a path
 function getRequiredRole(pathname: string): string | null {
   for (const [route, roles] of Object.entries(protectedRoutes)) {
@@ -73,7 +79,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || 
                        req.nextUrl.pathname.startsWith('/therapist-application/');
   
-  if (isPublicRoute) {
+  // Allow public API routes (exact match)
+  const isPublicApiRoute = publicApiRoutes.includes(req.nextUrl.pathname);
+  
+  if (isPublicRoute || isPublicApiRoute) {
     return NextResponse.next();
   }
 

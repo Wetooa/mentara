@@ -70,6 +70,40 @@ export class TherapistApplicationController {
     private readonly therapistApplicationService: TherapistApplicationService,
   ) {}
 
+  @Post('apply')
+  async submitPublicApplication(
+    @Body() applicationData: TherapistApplicationDto,
+  ): Promise<{ 
+    success: boolean; 
+    message: string; 
+    applicationId?: string; 
+  }> {
+    try {
+      console.log('Received public therapist application:', {
+        firstName: applicationData.firstName,
+        lastName: applicationData.lastName,
+        email: applicationData.email,
+      });
+      
+      // For public applications, we need to create a temporary user ID or use email as identifier
+      const tempUserId = `temp_${Date.now()}_${applicationData.email.replace('@', '_at_')}`;
+      const applicationWithUserId = { ...applicationData, userId: tempUserId };
+      
+      const application = await this.therapistApplicationService.createApplication(
+        applicationWithUserId,
+      );
+
+      return {
+        success: true,
+        message: 'Application submitted successfully',
+        applicationId: application.userId,
+      };
+    } catch (error) {
+      console.error('Error submitting therapist application:', error);
+      throw new InternalServerErrorException('Failed to submit application');
+    }
+  }
+
   @Post('application')
   @UseGuards(ClerkAuthGuard)
   async submitApplication(
