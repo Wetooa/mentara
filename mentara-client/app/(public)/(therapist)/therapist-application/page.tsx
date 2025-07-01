@@ -21,7 +21,8 @@ import {
   Save,
   Loader2,
   AlertCircle,
-  Check
+  Check,
+  X
 } from "lucide-react";
 
 // UI Components
@@ -58,8 +59,9 @@ import { useToast } from "@/contexts/ToastContext";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
+import { submitTherapistApplication, uploadTherapistDocuments } from "@/lib/api/therapist-application";
 
-// Comprehensive Zod Schema for all form sections
+// Comprehensive Zod Schema for all form sections - Updated to match backend DTO
 const unifiedTherapistSchema = z.object({
   // Basic Information (from signup page)
   firstName: z.string().min(1, "First name is required"),
@@ -109,33 +111,85 @@ const unifiedTherapistSchema = z.object({
     { message: "Please confirm the status of your license" }
   ),
 
-  // Teletherapy Readiness
-  teletherapyReadiness: z.object({
-    providedOnlineTherapyBefore: z.string().min(1, "Please answer this question"),
-    comfortableUsingVideoConferencing: z.string().min(1, "Please answer this question"),
-    privateConfidentialSpace: z.string().min(1, "Please answer this question"),
-    compliesWithDataPrivacyAct: z.string().min(1, "Please confirm compliance with the Data Privacy Act"),
-  }),
+  // Practice Information - NEW REQUIRED FIELDS
+  practiceStartDate: z.string().min(1, "Please enter when you started practicing"),
+  
+  // Teletherapy Readiness - Flattened for backend compatibility
+  providedOnlineTherapyBefore: z.string().min(1, "Please answer this question"),
+  comfortableUsingVideoConferencing: z.string().min(1, "Please answer this question"),
+  privateConfidentialSpace: z.string().min(1, "Please answer this question"),
+  compliesWithDataPrivacyAct: z.string().min(1, "Please confirm compliance with the Data Privacy Act"),
 
-  // Areas of Expertise
+  // Areas of Expertise and Tools
   areasOfExpertise: z.array(z.string()).min(1, "Please select at least one area of expertise"),
+  assessmentTools: z.array(z.string()).min(1, "Please select at least one assessment tool"),
+  therapeuticApproachesUsedList: z.array(z.string()).min(1, "Please select at least one therapeutic approach"),
+  therapeuticApproachesUsedList_specify: z.string().optional().refine(
+    (val, ctx) => {
+      if (ctx?.parent?.therapeuticApproachesUsedList?.includes("other")) {
+        return val && val.length > 0;
+      }
+      return true;
+    },
+    { message: "Please specify other therapeutic approaches" }
+  ),
+  
+  // Languages and Availability
+  languagesOffered: z.array(z.string()).min(1, "Please select at least one language"),
+  languagesOffered_specify: z.string().optional().refine(
+    (val, ctx) => {
+      if (ctx?.parent?.languagesOffered?.includes("other")) {
+        return val && val.length > 0;
+      }
+      return true;
+    },
+    { message: "Please specify other languages" }
+  ),
+  weeklyAvailability: z.string().min(1, "Please select your weekly availability"),
+  preferredSessionLength: z.string().min(1, "Please select your preferred session length"),
+  preferredSessionLength_specify: z.string().optional().refine(
+    (val, ctx) => {
+      if (ctx?.parent?.preferredSessionLength === "other") {
+        return val && val.length > 0;
+      }
+      return true;
+    },
+    { message: "Please specify your preferred session length" }
+  ),
 
-  // Compliance
-  compliance: z.object({
-    professionalLiabilityInsurance: z.string().min(1, "Please answer regarding liability insurance"),
-    complaintsOrDisciplinaryActions: z.string().min(1, "Please answer regarding complaints history"),
-    complaintsOrDisciplinaryActions_specify: z.string().optional().refine(
-      (val, ctx) => {
-        if (ctx?.parent?.complaintsOrDisciplinaryActions === "yes") {
-          return val && val.length >= 10;
-        }
-        return true;
-      },
-      { message: "Please provide a brief explanation (min. 10 characters)" }
-    ),
-    willingToAbideByPlatformGuidelines: z.string().refine((val) => val === "yes", {
-      message: "You must agree to abide by the platform guidelines to proceed",
-    }),
+  // Payment and Rates
+  accepts: z.array(z.string()).min(1, "Please select at least one payment method"),
+  accepts_hmo_specify: z.string().optional().refine(
+    (val, ctx) => {
+      if (ctx?.parent?.accepts?.includes("hmo")) {
+        return val && val.length > 0;
+      }
+      return true;
+    },
+    { message: "Please specify HMO providers" }
+  ),
+  hourlyRate: z.number().optional().refine(
+    (val) => val === undefined || val >= 0,
+    { message: "Rate must be a positive number" }
+  ),
+  
+  // Bio/About
+  bio: z.string().optional(),
+
+  // Compliance - Flattened for backend compatibility
+  professionalLiabilityInsurance: z.string().min(1, "Please answer regarding liability insurance"),
+  complaintsOrDisciplinaryActions: z.string().min(1, "Please answer regarding complaints history"),
+  complaintsOrDisciplinaryActions_specify: z.string().optional().refine(
+    (val, ctx) => {
+      if (ctx?.parent?.complaintsOrDisciplinaryActions === "yes") {
+        return val && val.length >= 10;
+      }
+      return true;
+    },
+    { message: "Please provide a brief explanation (min. 10 characters)" }
+  ),
+  willingToAbideByPlatformGuidelines: z.string().refine((val) => val === "yes", {
+    message: "You must agree to abide by the platform guidelines to proceed",
   }),
 
   // Document Upload flags (documents themselves handled separately)
@@ -179,13 +233,37 @@ const sections: Section[] = [
     title: "Professional Profile",
     icon: <FileText className="w-5 h-5" />,
     description: "Your professional qualifications and licensing information",
-    estimatedTime: "5-8 minutes", 
+    estimatedTime: "8-12 minutes", 
     fields: [
       "professionalLicenseType",
-      "isPRCLicensed", 
-      "teletherapyReadiness",
+      "isPRCLicensed",
+      "practiceStartDate",
+      "providedOnlineTherapyBefore",
+      "comfortableUsingVideoConferencing",
+      "privateConfidentialSpace",
+      "compliesWithDataPrivacyAct",
       "areasOfExpertise",
-      "compliance"
+      "assessmentTools",
+      "therapeuticApproachesUsedList",
+      "languagesOffered",
+      "professionalLiabilityInsurance",
+      "complaintsOrDisciplinaryActions",
+      "willingToAbideByPlatformGuidelines"
+    ],
+    isRequired: true,
+  },
+  {
+    id: "availability",
+    title: "Availability & Services",
+    icon: <Clock className="w-5 h-5" />,
+    description: "Your availability, session preferences, and service information",
+    estimatedTime: "5-7 minutes",
+    fields: [
+      "weeklyAvailability",
+      "preferredSessionLength",
+      "accepts",
+      "hourlyRate",
+      "bio"
     ],
     isRequired: true,
   },
@@ -236,19 +314,28 @@ export default function SinglePageTherapistApplication() {
       prcLicenseNumber: "",
       expirationDateOfLicense: "",
       isLicenseActive: "",
-      teletherapyReadiness: {
-        providedOnlineTherapyBefore: "",
-        comfortableUsingVideoConferencing: "",
-        privateConfidentialSpace: "",
-        compliesWithDataPrivacyAct: "",
-      },
+      practiceStartDate: "",
+      providedOnlineTherapyBefore: "",
+      comfortableUsingVideoConferencing: "",
+      privateConfidentialSpace: "",
+      compliesWithDataPrivacyAct: "",
       areasOfExpertise: [],
-      compliance: {
-        professionalLiabilityInsurance: "",
-        complaintsOrDisciplinaryActions: "",
-        complaintsOrDisciplinaryActions_specify: "",
-        willingToAbideByPlatformGuidelines: "",
-      },
+      assessmentTools: [],
+      therapeuticApproachesUsedList: [],
+      therapeuticApproachesUsedList_specify: "",
+      languagesOffered: [],
+      languagesOffered_specify: "",
+      weeklyAvailability: "",
+      preferredSessionLength: "",
+      preferredSessionLength_specify: "",
+      accepts: [],
+      accepts_hmo_specify: "",
+      hourlyRate: undefined,
+      bio: "",
+      professionalLiabilityInsurance: "",
+      complaintsOrDisciplinaryActions: "",
+      complaintsOrDisciplinaryActions_specify: "",
+      willingToAbideByPlatformGuidelines: "",
       documentsUploaded: {
         prcLicense: false,
         nbiClearance: false,
@@ -262,7 +349,15 @@ export default function SinglePageTherapistApplication() {
 
   // Watch form values for conditional rendering
   const watchedValues = useWatch({ control: form.control });
-  const { professionalLicenseType, isPRCLicensed, compliance } = watchedValues;
+  const { 
+    professionalLicenseType, 
+    isPRCLicensed, 
+    therapeuticApproachesUsedList,
+    languagesOffered,
+    preferredSessionLength,
+    accepts,
+    complaintsOrDisciplinaryActions
+  } = watchedValues;
 
   // Calculate completion status
   const getSectionCompletion = useCallback((sectionId: string) => {
@@ -282,13 +377,40 @@ export default function SinglePageTherapistApplication() {
         break;
       
       case "professionalProfile":
-        // Count main fields
-        if (values.professionalLicenseType) completed++;
-        if (values.isPRCLicensed) completed++;
-        if (values.teletherapyReadiness?.providedOnlineTherapyBefore) completed++;
-        if (values.areasOfExpertise?.length > 0) completed++;
-        if (values.compliance?.willingToAbideByPlatformGuidelines === "yes") completed++;
-        total = 5;
+        // Count main required fields
+        let profCompleted = 0;
+        let profTotal = 13; // Total required fields in this section
+        
+        if (values.professionalLicenseType) profCompleted++;
+        if (values.isPRCLicensed) profCompleted++;
+        if (values.practiceStartDate) profCompleted++;
+        if (values.providedOnlineTherapyBefore) profCompleted++;
+        if (values.comfortableUsingVideoConferencing) profCompleted++;
+        if (values.privateConfidentialSpace) profCompleted++;
+        if (values.compliesWithDataPrivacyAct) profCompleted++;
+        if (values.areasOfExpertise?.length > 0) profCompleted++;
+        if (values.assessmentTools?.length > 0) profCompleted++;
+        if (values.therapeuticApproachesUsedList?.length > 0) profCompleted++;
+        if (values.languagesOffered?.length > 0) profCompleted++;
+        if (values.professionalLiabilityInsurance) profCompleted++;
+        if (values.complaintsOrDisciplinaryActions) profCompleted++;
+        if (values.willingToAbideByPlatformGuidelines === "yes") profCompleted++;
+        
+        completed = profCompleted;
+        total = profTotal;
+        break;
+        
+      case "availability":
+        let availCompleted = 0;
+        let availTotal = 3; // weeklyAvailability, preferredSessionLength, accepts are required
+        
+        if (values.weeklyAvailability) availCompleted++;
+        if (values.preferredSessionLength) availCompleted++;
+        if (values.accepts?.length > 0) availCompleted++;
+        // hourlyRate and bio are optional
+        
+        completed = availCompleted;
+        total = availTotal;
         break;
 
       case "documents":
@@ -354,9 +476,96 @@ export default function SinglePageTherapistApplication() {
   const onSubmit = useCallback(async (values: UnifiedTherapistForm) => {
     setIsSubmitting(true);
     try {
-      // Save all data
+      // First, save the data locally
       autoSave(values);
       
+      // Transform form data to match backend DTO format
+      const transformedData = {
+        // Basic information
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        mobile: values.mobile,
+        province: values.province,
+        providerType: values.providerType,
+        
+        // Professional license information
+        professionalLicenseType: values.professionalLicenseType_specify || values.professionalLicenseType,
+        isPRCLicensed: values.isPRCLicensed,
+        prcLicenseNumber: values.prcLicenseNumber || "",
+        isLicenseActive: values.isLicenseActive || "",
+        practiceStartDate: values.practiceStartDate,
+        
+        // Areas and tools
+        areasOfExpertise: values.areasOfExpertise,
+        assessmentTools: values.assessmentTools,
+        therapeuticApproachesUsedList: values.therapeuticApproachesUsedList_specify 
+          ? [...values.therapeuticApproachesUsedList.filter(t => t !== "other"), values.therapeuticApproachesUsedList_specify]
+          : values.therapeuticApproachesUsedList,
+        languagesOffered: values.languagesOffered_specify
+          ? [...values.languagesOffered.filter(l => l !== "other"), values.languagesOffered_specify]
+          : values.languagesOffered,
+        
+        // Teletherapy readiness (flattened) - Convert strings to booleans
+        providedOnlineTherapyBefore: values.providedOnlineTherapyBefore === "yes",
+        comfortableUsingVideoConferencing: values.comfortableUsingVideoConferencing === "yes",
+        privateConfidentialSpace: values.privateConfidentialSpace === "yes",
+        compliesWithDataPrivacyAct: values.compliesWithDataPrivacyAct === "yes",
+        
+        // Compliance (flattened) - Convert strings to booleans
+        professionalLiabilityInsurance: values.professionalLiabilityInsurance,
+        complaintsOrDisciplinaryActions: values.complaintsOrDisciplinaryActions,
+        willingToAbideByPlatformGuidelines: values.willingToAbideByPlatformGuidelines === "yes",
+        
+        // Availability and payment
+        weeklyAvailability: values.weeklyAvailability,
+        preferredSessionLength: values.preferredSessionLength_specify || values.preferredSessionLength,
+        accepts: values.accepts,
+        
+        // Optional fields
+        bio: values.bio || "",
+        hourlyRate: values.hourlyRate || 0,
+      };
+      
+      // Upload documents first if any exist
+      let uploadedFiles: any[] = [];
+      const allFiles = Object.entries(documents).flatMap(([type, files]) => 
+        files.map(file => ({ file, type }))
+      );
+      
+      if (allFiles.length > 0) {
+        showToast("Uploading documents...", "info");
+        
+        const fileTypeMap: Record<string, string> = {};
+        const filesToUpload: File[] = [];
+        
+        allFiles.forEach(({ file, type }, index) => {
+          filesToUpload.push(file);
+          fileTypeMap[file.name] = type;
+        });
+        
+        try {
+          const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap);
+          uploadedFiles = uploadResult.uploadedFiles;
+          showToast(`Successfully uploaded ${uploadedFiles.length} document(s)`, "success", 3000);
+        } catch (uploadError) {
+          console.error("Document upload failed:", uploadError);
+          showToast(
+            uploadError instanceof Error 
+              ? `Document upload failed: ${uploadError.message}` 
+              : "Document upload failed. Please try again.", 
+            "error"
+          );
+          return; // Don't submit if document upload fails
+        }
+      }
+      
+      console.log("Submitting therapist application:", transformedData);
+      
+      // Actually submit to the backend
+      const result = await submitTherapistApplication(transformedData);
+      
+      console.log("Application submitted successfully:", result);
       showToast("Application submitted successfully!", "success");
       
       // Navigate to sign-in page after successful submission
@@ -365,7 +574,12 @@ export default function SinglePageTherapistApplication() {
       }, 1500);
     } catch (error) {
       console.error("Error submitting application:", error);
-      showToast("Failed to submit application. Please try again.", "error");
+      showToast(
+        error instanceof Error 
+          ? `Failed to submit application: ${error.message}` 
+          : "Failed to submit application. Please try again.", 
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -638,6 +852,9 @@ function SectionComponent({
             {section.id === "professionalProfile" && (
               <ProfessionalProfileSection form={form} watchedValues={watchedValues} />
             )}
+            {section.id === "availability" && (
+              <AvailabilityServicesSection form={form} watchedValues={watchedValues} />
+            )}
             {section.id === "documents" && (
               <DocumentUploadSection 
                 documents={documents}
@@ -656,7 +873,7 @@ function SectionComponent({
 }
 
 // Basic Information Section Component
-function BasicInformationSection({ form }) {
+function BasicInformationSection({ form }: { form: any }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -789,8 +1006,14 @@ function BasicInformationSection({ form }) {
 }
 
 // Professional Profile Section Component 
-function ProfessionalProfileSection({ form, watchedValues }) {
-  const { professionalLicenseType, isPRCLicensed, compliance } = watchedValues;
+function ProfessionalProfileSection({ form, watchedValues }: { form: any, watchedValues: any }) {
+  const { 
+    professionalLicenseType, 
+    isPRCLicensed, 
+    therapeuticApproachesUsedList,
+    languagesOffered,
+    complaintsOrDisciplinaryActions
+  } = watchedValues;
 
   return (
     <div className="space-y-8">
@@ -958,6 +1181,22 @@ function ProfessionalProfileSection({ form, watchedValues }) {
               />
             </div>
           )}
+          
+          <FormField
+            control={form.control}
+            name="practiceStartDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  When did you start practicing as a licensed professional? <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </CardContent>
       </Card>
 
@@ -972,22 +1211,22 @@ function ProfessionalProfileSection({ form, watchedValues }) {
         <CardContent className="space-y-6">
           {[
             {
-              name: "teletherapyReadiness.providedOnlineTherapyBefore",
+              name: "providedOnlineTherapyBefore",
               label: "Have you provided online therapy before?",
               id: "online-therapy"
             },
             {
-              name: "teletherapyReadiness.comfortableUsingVideoConferencing", 
+              name: "comfortableUsingVideoConferencing", 
               label: "Are you comfortable using secure video conferencing tools (e.g., Zoom, Google Meet)?",
               id: "video-conferencing"
             },
             {
-              name: "teletherapyReadiness.privateConfidentialSpace",
+              name: "privateConfidentialSpace",
               label: "Do you have a private and confidential space for conducting virtual sessions?",
               id: "private-space"
             },
             {
-              name: "teletherapyReadiness.compliesWithDataPrivacyAct",
+              name: "compliesWithDataPrivacyAct",
               label: "Do you comply with the Philippine Data Privacy Act (RA 10173)?",
               id: "privacy-act"
             }
@@ -1082,6 +1321,201 @@ function ProfessionalProfileSection({ form, watchedValues }) {
         </CardContent>
       </Card>
 
+      {/* Assessment Tools */}
+      <Card className="border border-indigo-200 bg-indigo-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-indigo-600" />
+            Assessment Tools & Approaches
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Select all assessment tools and approaches you use. You must select at least one.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <FormField
+            control={form.control}
+            name="assessmentTools"
+            render={({ field }) => (
+              <FormItem>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {therapistProfileFormFields.assessmentTools.options.map((option) => (
+                    <Label
+                      key={option.value}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 cursor-pointer transition-colors group"
+                    >
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...field.value, option.value]);
+                          } else {
+                            field.onChange(field.value.filter((v) => v !== option.value));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium group-hover:text-indigo-700 transition-colors">
+                        {option.label}
+                      </span>
+                      {field.value?.includes(option.value) && (
+                        <CheckCircle className="w-4 h-4 text-indigo-600 ml-auto" />
+                      )}
+                    </Label>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-indigo-100 border border-indigo-200 rounded-lg">
+                  <p className="text-sm text-indigo-800">
+                    <strong>Selected:</strong> {field.value?.length || 0} tool{field.value?.length !== 1 ? 's' : ''}
+                    {field.value?.length > 0 && (
+                      <span className="ml-2 text-indigo-600">
+                        ({field.value.map(val => 
+                          therapistProfileFormFields.assessmentTools.options.find(opt => opt.value === val)?.label
+                        ).join(', ')})
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Therapeutic Approaches */}
+      <Card className="border border-teal-200 bg-teal-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-teal-600" />
+            Therapeutic Approaches
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Select all therapeutic approaches you use in your practice.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="therapeuticApproachesUsedList"
+            render={({ field }) => (
+              <FormItem>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {therapistProfileFormFields.therapeuticApproachesUsedList.options.map((option) => (
+                    <Label
+                      key={option.value}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-teal-100 hover:border-teal-300 cursor-pointer transition-colors group"
+                    >
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...field.value, option.value]);
+                          } else {
+                            field.onChange(field.value.filter((v) => v !== option.value));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium group-hover:text-teal-700 transition-colors">
+                        {option.label}
+                      </span>
+                      {field.value?.includes(option.value) && (
+                        <CheckCircle className="w-4 h-4 text-teal-600 ml-auto" />
+                      )}
+                    </Label>
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {therapeuticApproachesUsedList?.includes("other") && (
+            <FormField
+              control={form.control}
+              name="therapeuticApproachesUsedList_specify"
+              render={({ field }) => (
+                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <FormLabel className="text-base font-semibold">
+                    Please specify other therapeutic approaches <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Please describe the other therapeutic approaches you use..." rows={3} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Languages Offered */}
+      <Card className="border border-green-200 bg-green-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-green-600" />
+            Languages Offered
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-2">
+            Select all languages you can offer therapy sessions in.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="languagesOffered"
+            render={({ field }) => (
+              <FormItem>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {therapistProfileFormFields.languagesOffered.options.map((option) => (
+                    <Label
+                      key={option.value}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
+                    >
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...field.value, option.value]);
+                          } else {
+                            field.onChange(field.value.filter((v) => v !== option.value));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium group-hover:text-green-700 transition-colors">
+                        {option.label}
+                      </span>
+                      {field.value?.includes(option.value) && (
+                        <CheckCircle className="w-4 h-4 text-green-600 ml-auto" />
+                      )}
+                    </Label>
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {languagesOffered?.includes("other") && (
+            <FormField
+              control={form.control}
+              name="languagesOffered_specify"
+              render={({ field }) => (
+                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <FormLabel className="text-base font-semibold">
+                    Please specify other languages <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="e.g., Tagalog, Kapampangan, etc." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </CardContent>
+      </Card>
+
       {/* Compliance & Professional Standards */}
       <Card className="border border-red-200 bg-red-50">
         <CardHeader className="pb-4">
@@ -1093,7 +1527,7 @@ function ProfessionalProfileSection({ form, watchedValues }) {
         <CardContent className="space-y-6">
           <FormField
             control={form.control}
-            name="compliance.professionalLiabilityInsurance"
+            name="professionalLiabilityInsurance"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-base font-semibold">
@@ -1123,7 +1557,7 @@ function ProfessionalProfileSection({ form, watchedValues }) {
 
           <FormField
             control={form.control}
-            name="compliance.complaintsOrDisciplinaryActions"
+            name="complaintsOrDisciplinaryActions"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-base font-semibold">
@@ -1152,11 +1586,11 @@ function ProfessionalProfileSection({ form, watchedValues }) {
             )}
           />
 
-          {compliance?.complaintsOrDisciplinaryActions === "yes" && (
+          {complaintsOrDisciplinaryActions === "yes" && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <FormField
                 control={form.control}
-                name="compliance.complaintsOrDisciplinaryActions_specify"
+                name="complaintsOrDisciplinaryActions_specify"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold">
@@ -1179,7 +1613,7 @@ function ProfessionalProfileSection({ form, watchedValues }) {
           <div className="pt-4 border-t border-gray-200">
             <FormField
               control={form.control}
-              name="compliance.willingToAbideByPlatformGuidelines"
+              name="willingToAbideByPlatformGuidelines"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold">
@@ -1214,8 +1648,227 @@ function ProfessionalProfileSection({ form, watchedValues }) {
   );
 }
 
+// Availability & Services Section Component
+function AvailabilityServicesSection({ form, watchedValues }: { form: any, watchedValues: any }) {
+  const { preferredSessionLength, accepts } = watchedValues;
+
+  return (
+    <div className="space-y-8">
+      {/* Weekly Availability */}
+      <Card className="border border-cyan-200 bg-cyan-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock className="w-5 h-5 text-cyan-600" />
+            Weekly Availability
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FormField
+            control={form.control}
+            name="weeklyAvailability"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Weekly availability for online sessions: <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
+                    {therapistProfileFormFields.availabilityAndPayment.weeklyAvailability.options.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-cyan-100">
+                        <RadioGroupItem value={option.value} id={`weekly-${option.value}`} />
+                        <Label htmlFor={`weekly-${option.value}`} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{option.label}</div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Session Length */}
+      <Card className="border border-blue-200 bg-blue-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock className="w-5 h-5 text-blue-600" />
+            Session Preferences
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="preferredSessionLength"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Preferred session length: <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
+                    {therapistProfileFormFields.availabilityAndPayment.preferredSessionLength.options.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-blue-100">
+                        <RadioGroupItem value={option.value} id={`session-${option.value}`} />
+                        <Label htmlFor={`session-${option.value}`} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{option.label}</div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {preferredSessionLength === "other" && (
+            <FormField
+              control={form.control}
+              name="preferredSessionLength_specify"
+              render={({ field }) => (
+                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <FormLabel className="text-base font-semibold">
+                    Please specify your preferred session length <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="e.g., 50 minutes" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Payment Methods */}
+      <Card className="border border-green-200 bg-green-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Shield className="w-5 h-5 text-green-600" />
+            Payment Methods
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="accepts"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Payment Methods Accepted: <span className="text-red-500">*</span>
+                </FormLabel>
+                <div className="grid grid-cols-1 gap-3">
+                  {therapistProfileFormFields.availabilityAndPayment.accepts.options.map((option) => (
+                    <Label
+                      key={option.value}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
+                    >
+                      <Checkbox
+                        checked={field.value?.includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...field.value, option.value]);
+                          } else {
+                            field.onChange(field.value.filter((v) => v !== option.value));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium group-hover:text-green-700 transition-colors">
+                        {option.label}
+                      </span>
+                      {field.value?.includes(option.value) && (
+                        <CheckCircle className="w-4 h-4 text-green-600 ml-auto" />
+                      )}
+                    </Label>
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {accepts?.includes("hmo") && (
+            <FormField
+              control={form.control}
+              name="accepts_hmo_specify"
+              render={({ field }) => (
+                <FormItem className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <FormLabel className="text-base font-semibold">
+                    Please specify HMO providers <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Please list the HMO providers you accept..." rows={3} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Rate and Bio */}
+      <Card className="border border-purple-200 bg-purple-50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <User className="w-5 h-5 text-purple-600" />
+            Additional Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <FormField
+            control={form.control}
+            name="hourlyRate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Standard session rate (PHP, optional):
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder="e.g., 1500" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="bio"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Professional Bio (optional):
+                </FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="Brief description of your background, specializations, and approach to therapy..."
+                    rows={4}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 // Document Upload Section Component
-function DocumentUploadSection({ documents, onFileChange, onRemoveFile }) {
+function DocumentUploadSection({ documents, onFileChange, onRemoveFile }: { documents: any, onFileChange: any, onRemoveFile: any }) {
   const requiredDocs = [
     { key: "prcLicense", title: "PRC License", description: "Upload a clear copy of your valid PRC license" },
     { key: "nbiClearance", title: "NBI Clearance", description: "Upload your NBI clearance (issued within the last 6 months)" },
@@ -1272,7 +1925,7 @@ function DocumentUploadSection({ documents, onFileChange, onRemoveFile }) {
 }
 
 // Document Upload Card Component
-function DocumentUploadCard({ title, description, required, files, onFileChange, onRemoveFile }) {
+function DocumentUploadCard({ title, description, required, files, onFileChange, onRemoveFile }: { title: string, description: string, required: boolean, files: any, onFileChange: any, onRemoveFile: any }) {
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1362,7 +2015,7 @@ function DocumentUploadCard({ title, description, required, files, onFileChange,
 }
 
 // Review Section Component
-function ReviewSection({ form, watchedValues, documents }) {
+function ReviewSection({ form, watchedValues, documents }: { form: any, watchedValues: any, documents: any }) {
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
