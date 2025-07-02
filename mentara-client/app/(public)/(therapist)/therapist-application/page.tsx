@@ -152,10 +152,10 @@ const unifiedTherapistSchema = z
         message: "Rate must be a positive number",
       }),
     
-    // Insurance Information
-    acceptsInsurance: z.boolean().default(false),
+    // Insurance Information (optional - not implemented in UI yet)
+    acceptsInsurance: z.boolean().optional(),
     acceptedInsuranceTypes: z.array(z.string()).optional(),
-    sessionLength: z.string().min(1, "Please specify your standard session length"),
+    sessionLength: z.string().optional(),
 
     // Bio/About
     bio: z.string().optional(),
@@ -371,14 +371,11 @@ const sections: Section[] = [
     icon: <Clock className="w-5 h-5" />,
     description:
       "Your availability, session preferences, and service information",
-    estimatedTime: "5-7 minutes",
+    estimatedTime: "3-5 minutes",
     fields: [
       "weeklyAvailability",
       "preferredSessionLength",
-      "sessionLength",
       "accepts",
-      "acceptsInsurance",
-      "acceptedInsuranceTypes",
       // Note: hourlyRate and bio are optional fields
     ],
     isRequired: true,
@@ -466,9 +463,9 @@ export default function SinglePageTherapistApplication() {
       accepts: formValues.accepts || [],
       accepts_hmo_specify: formValues.accepts_hmo_specify || "",
       hourlyRate: formValues.hourlyRate || undefined,
-      acceptsInsurance: formValues.acceptsInsurance || false,
-      acceptedInsuranceTypes: formValues.acceptedInsuranceTypes || [],
-      sessionLength: formValues.sessionLength || "",
+      acceptsInsurance: formValues.acceptsInsurance || undefined,
+      acceptedInsuranceTypes: formValues.acceptedInsuranceTypes || undefined,
+      sessionLength: formValues.sessionLength || undefined,
       bio: formValues.bio || "",
       professionalLiabilityInsurance: formValues.professionalLiabilityInsurance || "",
       complaintsOrDisciplinaryActions: formValues.complaintsOrDisciplinaryActions || "",
@@ -607,13 +604,12 @@ export default function SinglePageTherapistApplication() {
           break;
 
         case "availability":
-          // Only count required fields - hourlyRate and bio are optional
+          // Only count fields that are actually implemented in the UI
+          // hourlyRate and bio are optional fields
           const availabilityRequiredFields = [
             "weeklyAvailability",
-            "preferredSessionLength",
-            "sessionLength",
+            "preferredSessionLength", 
             "accepts",
-            "acceptsInsurance",
           ];
 
           let availCompleted = 0;
@@ -621,23 +617,13 @@ export default function SinglePageTherapistApplication() {
           availabilityRequiredFields.forEach((field) => {
             if (field === "accepts") {
               if (values[field]?.length > 0) availCompleted++;
-            } else if (field === "acceptsInsurance") {
-              // acceptsInsurance is a boolean, so check if it's defined
-              if (typeof values[field] === "boolean") availCompleted++;
             } else {
               if (values[field] && values[field] !== "") availCompleted++;
             }
           });
 
-          // Add conditional field for accepted insurance types
-          if (values.acceptsInsurance === true) {
-            if (values.acceptedInsuranceTypes?.length > 0) availCompleted++;
-            total = availabilityRequiredFields.length + 1; // +1 for acceptedInsuranceTypes
-          } else {
-            total = availabilityRequiredFields.length;
-          }
-
           completed = availCompleted;
+          total = availabilityRequiredFields.length;
           break;
 
         case "documents":
