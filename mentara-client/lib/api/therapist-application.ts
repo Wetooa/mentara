@@ -183,7 +183,8 @@ export async function updateTherapistApplicationStatus(
  */
 export async function uploadTherapistDocuments(
   files: File[],
-  fileTypes: Record<string, string> = {}
+  fileTypes: Record<string, string> = {},
+  applicationId?: string
 ): Promise<{
   success: boolean;
   message: string;
@@ -200,8 +201,12 @@ export async function uploadTherapistDocuments(
       formData.append("files", file);
     });
 
-    // Add file type mappings
-    formData.append("fileTypes", JSON.stringify(fileTypes));
+    // Add file type mappings and application ID
+    const fileTypesWithAppId = { ...fileTypes };
+    if (applicationId) {
+      fileTypesWithAppId.applicationId = applicationId;
+    }
+    formData.append("fileTypes", JSON.stringify(fileTypesWithAppId));
 
     const response = await fetch(`${backendUrl}/api/therapist/upload-public`, {
       method: "POST",

@@ -271,10 +271,10 @@ const sections: Section[] = [
     id: "documents",
     title: "Document Upload",
     icon: <Upload className="w-5 h-5" />,
-    description: "Upload professional documents and certifications (optional - can be submitted later)",
+    description: "Upload professional documents and certifications (required for application)",
     estimatedTime: "3-5 minutes", 
     fields: ["documentsUploaded"],
-    isRequired: false, // Documents are optional for initial submission
+    isRequired: true, // Documents are required for submission
   },
   {
     id: "review",
@@ -435,20 +435,12 @@ export default function SinglePageTherapistApplication() {
         break;
 
       case "documents":
-        // Documents are optional for initial submission
-        // Users can submit without documents and upload them later
-        const optionalDocs = ["prcLicense", "nbiClearance", "resumeCV"];
-        const uploadedDocs = optionalDocs.filter(doc => documents[doc]?.length > 0).length;
+        // Documents are required for submission
+        const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"];
+        const uploadedDocs = requiredDocs.filter(doc => documents[doc]?.length > 0).length;
         
-        // If no documents uploaded, consider it 100% complete since they're optional
-        // If some documents uploaded, show actual progress
-        if (uploadedDocs === 0) {
-          completed = 1;
-          total = 1;
-        } else {
-          completed = uploadedDocs;
-          total = optionalDocs.length;
-        }
+        completed = uploadedDocs;
+        total = requiredDocs.length;
         break;
 
       case "review":
@@ -566,9 +558,34 @@ export default function SinglePageTherapistApplication() {
         // Optional fields
         bio: values.bio || "",
         hourlyRate: values.hourlyRate || 0,
+        
+        // Add application ID for document linking
+        applicationId: `temp_${Date.now()}_${values.email.replace('@', '_at_')}`
       };
       
-      // Upload documents first if any exist
+      // Validate that all required documents are uploaded
+      const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"];
+      const missingDocs = requiredDocs.filter(doc => !documents[doc] || documents[doc].length === 0);
+      
+      if (missingDocs.length > 0) {
+        const missingNames = missingDocs.map(doc => {
+          const docNames = {
+            prcLicense: "PRC License",
+            nbiClearance: "NBI Clearance", 
+            resumeCV: "Resume/CV"
+          };
+          return docNames[doc as keyof typeof docNames];
+        }).join(", ");
+        
+        showToast(
+          `Please upload all required documents: ${missingNames}`, 
+          "error",
+          5000
+        );
+        return;
+      }
+
+      // Upload documents with proper categorization
       let uploadedFiles: any[] = [];
       const allFiles = Object.entries(documents).flatMap(([type, files]) => 
         files.map(file => ({ file, type }))
@@ -580,30 +597,34 @@ export default function SinglePageTherapistApplication() {
         const fileTypeMap: Record<string, string> = {};
         const filesToUpload: File[] = [];
         
-        allFiles.forEach(({ file, type }, index) => {
+        // Map document types to backend categories
+        const docTypeMapping = {
+          prcLicense: "license",
+          nbiClearance: "certificate",
+          resumeCV: "resume",
+          liabilityInsurance: "certificate",
+          birForm: "document"
+        };
+        
+        allFiles.forEach(({ file, type }) => {
           filesToUpload.push(file);
-          fileTypeMap[file.name] = type;
+          fileTypeMap[file.name] = docTypeMapping[type as keyof typeof docTypeMapping] || "document";
         });
         
         try {
-          const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap);
+          const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap, transformedData.applicationId);
           uploadedFiles = uploadResult.uploadedFiles;
           showToast(`Successfully uploaded ${uploadedFiles.length} document(s)`, "success", 3000);
         } catch (uploadError) {
           console.error("Document upload failed:", uploadError);
           
-          // Show error but allow user to choose to proceed without documents
           const errorMessage = uploadError instanceof Error 
             ? uploadError.message 
             : "Document upload failed";
-            
-          showToast(
-            `${errorMessage}. You can submit your application without documents and upload them later.`, 
-            "warning",
-            5000
-          );
           
-          // Don't return here - allow submission to continue without documents
+          // Redirect to error page for upload failures
+          router.push(`/therapist-application/error?type=upload_error&message=${encodeURIComponent(errorMessage)}`);
+          return;
         }
       }
       
@@ -615,18 +636,34 @@ export default function SinglePageTherapistApplication() {
       console.log("Application submitted successfully:", result);
       showToast("Application submitted successfully!", "success");
       
-      // Navigate to sign-in page after successful submission
+      // Navigate to success page after successful submission
       setTimeout(() => {
-        router.push("/sign-in?message=application-submitted");
+        router.push(`/therapist-application/success?id=${result.id}`);
       }, 1500);
     } catch (error) {
       console.error("Error submitting application:", error);
-      showToast(
-        error instanceof Error 
-          ? `Failed to submit application: ${error.message}` 
-          : "Failed to submit application. Please try again.", 
-        "error"
-      );
+      
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message.includes("email already exists") || error.message.includes("An application with this email")) {
+          router.push(`/therapist-application/error?type=email_exists&message=${encodeURIComponent(error.message)}`);
+          return;
+        }
+        
+        if (error.message.includes("validation") || error.message.includes("required")) {
+          router.push(`/therapist-application/error?type=validation_error&message=${encodeURIComponent(error.message)}`);
+          return;
+        }
+        
+        if (error.message.includes("server") || error.message.includes("500")) {
+          router.push(`/therapist-application/error?type=server_error&message=${encodeURIComponent(error.message)}`);
+          return;
+        }
+      }
+      
+      // Generic error fallback
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      router.push(`/therapist-application/error?type=unknown&message=${encodeURIComponent(errorMessage)}`);
     } finally {
       setIsSubmitting(false);
     }
