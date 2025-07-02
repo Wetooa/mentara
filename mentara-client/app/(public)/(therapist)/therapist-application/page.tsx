@@ -64,6 +64,7 @@ import { useAutoSave } from "@/hooks/use-auto-save";
 import { SaveIndicator } from "@/components/ui/save-indicator";
 import { BasicInfoSection } from "@/components/therapist-application/BasicInfoSection";
 import { LicenseInfoSection } from "@/components/therapist-application/LicenseInfoSection";
+import { TeletherapySection } from "@/components/therapist-application/TeletherapySection";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
@@ -322,16 +323,26 @@ const sections: Section[] = [
     isRequired: true,
   },
   {
-    id: "professionalProfile",
-    title: "Professional Profile",
-    icon: <FileText className="w-5 h-5" />,
-    description: "Your professional experience and specializations",
-    estimatedTime: "5-7 minutes",
+    id: "teletherapy",
+    title: "Teletherapy Readiness",
+    icon: <Clock className="w-5 h-5" />,
+    description: "Your readiness and capability for online therapy delivery",
+    estimatedTime: "2-3 minutes",
     fields: [
       "providedOnlineTherapyBefore",
       "comfortableUsingVideoConferencing",
       "privateConfidentialSpace",
       "compliesWithDataPrivacyAct",
+    ],
+    isRequired: true,
+  },
+  {
+    id: "professionalProfile",
+    title: "Professional Profile",
+    icon: <FileText className="w-5 h-5" />,
+    description: "Your professional experience and specializations",
+    estimatedTime: "3-5 minutes",
+    fields: [
       "areasOfExpertise",
       "assessmentTools",
       "therapeuticApproachesUsedList",
@@ -528,13 +539,22 @@ export default function SinglePageTherapistApplication() {
           completed = licenseCompleted;
           break;
 
-        case "professionalProfile":
-          // Define required fields for professional profile (license fields moved to licenseInfo)
-          const professionalRequiredFields = [
+        case "teletherapy":
+          const teletherapyFields = [
             "providedOnlineTherapyBefore",
             "comfortableUsingVideoConferencing",
             "privateConfidentialSpace",
             "compliesWithDataPrivacyAct",
+          ];
+          completed = teletherapyFields.filter(
+            (field) => values[field] && values[field] !== ""
+          ).length;
+          total = teletherapyFields.length;
+          break;
+
+        case "professionalProfile":
+          // Define required fields for professional profile (license and teletherapy fields moved to separate sections)
+          const professionalRequiredFields = [
             "areasOfExpertise",
             "assessmentTools",
             "therapeuticApproachesUsedList",
@@ -1347,6 +1367,9 @@ function SectionComponent({
                 watchedValues={watchedValues}
               />
             )}
+            {section.id === "teletherapy" && (
+              <TeletherapySection control={form.control} />
+            )}
             {section.id === "professionalProfile" && (
               <ProfessionalProfileSection
                 form={form}
@@ -1397,83 +1420,6 @@ function ProfessionalProfileSection({
 
   return (
     <div className="space-y-8">
-      {/* Teletherapy Readiness */}
-      <Card className="border border-purple-200 bg-purple-50">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Clock className="w-5 h-5 text-purple-600" />
-            Teletherapy Readiness Assessment
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {[
-            {
-              name: "providedOnlineTherapyBefore",
-              label: "Have you provided online therapy before?",
-              id: "online-therapy",
-            },
-            {
-              name: "comfortableUsingVideoConferencing",
-              label:
-                "Are you comfortable using secure video conferencing tools (e.g., Zoom, Google Meet)?",
-              id: "video-conferencing",
-            },
-            {
-              name: "privateConfidentialSpace",
-              label:
-                "Do you have a private and confidential space for conducting virtual sessions?",
-              id: "private-space",
-            },
-            {
-              name: "compliesWithDataPrivacyAct",
-              label:
-                "Do you comply with the Philippine Data Privacy Act (RA 10173)?",
-              id: "privacy-act",
-            },
-          ].map((item, index) => (
-            <FormField
-              key={item.name}
-              control={form.control}
-              name={item.name}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-semibold">
-                    {item.label} <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      className="flex gap-6"
-                    >
-                      <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
-                        <RadioGroupItem value="yes" id={`${item.id}-yes`} />
-                        <Label
-                          htmlFor={`${item.id}-yes`}
-                          className="cursor-pointer font-medium"
-                        >
-                          Yes
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
-                        <RadioGroupItem value="no" id={`${item.id}-no`} />
-                        <Label
-                          htmlFor={`${item.id}-no`}
-                          className="cursor-pointer font-medium"
-                        >
-                          No
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-        </CardContent>
-      </Card>
-
       {/* Areas of Expertise */}
       <Card className="border border-orange-200 bg-orange-50">
         <CardHeader className="pb-4">
