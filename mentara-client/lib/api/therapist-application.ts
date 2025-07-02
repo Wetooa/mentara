@@ -7,6 +7,7 @@ import { TherapistApplication } from "@/data/mockTherapistApplicationData";
  * Submit a therapist application to the API
  * @param applicationData Complete therapist application data
  * @returns The created application object with ID
+ * @deprecated Use submitApplicationWithDocuments for new implementations
  */
 export async function submitTherapistApplication(
   applicationData: any

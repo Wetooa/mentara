@@ -25,6 +25,9 @@ export class TherapistApplicationService {
     private readonly emailService: EmailService,
   ) {}
 
+  /**
+   * @deprecated Use createApplicationWithDocuments for new implementations - this method is kept for admin/legacy support only
+   */
   async createApplication(applicationData: TherapistApplicationDto) {
     // Check if user already has an application
     const existingApplication = await this.prisma.therapist.findUnique({
@@ -368,6 +371,9 @@ export class TherapistApplicationService {
     }
   }
 
+  /**
+   * @deprecated Use createApplicationWithDocuments for new implementations - this method is kept for admin/legacy support only
+   */
   async uploadDocuments(
     userId: string,
     files: Express.Multer.File[],
