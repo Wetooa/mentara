@@ -197,7 +197,7 @@ export async function submitApplicationWithDocuments(
     console.log("Submitting application with documents:", {
       application: applicationData,
       fileCount: files.length,
-      fileNames: files.map(f => f.name),
+      fileNames: files.map((f) => f.name),
     });
 
     const backendUrl =
@@ -216,22 +216,27 @@ export async function submitApplicationWithDocuments(
     // Add file type mappings
     formData.append("fileTypes", JSON.stringify(fileTypes));
 
-    const response = await fetch(`${backendUrl}/api/therapist/apply-with-documents`, {
-      method: "POST",
-      body: formData,
-    });
+    const response = await fetch(
+      `${backendUrl}/api/therapist/apply-with-documents`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response
         .json()
         .catch(() => ({ error: "Unknown error" }));
       throw new Error(
-        errorData.error || errorData.message || `Submit failed with status ${response.status}`
+        errorData.error ||
+          errorData.message ||
+          `Submit failed with status ${response.status}`
       );
     }
 
     const data = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
     console.error("Error submitting application with documents:", error);
     throw error;
