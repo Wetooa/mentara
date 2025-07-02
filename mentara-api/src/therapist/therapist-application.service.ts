@@ -501,7 +501,9 @@ export class TherapistApplicationService {
       });
 
       if (existingApplication) {
-        throw new BadRequestException('User already has a therapist application');
+        throw new BadRequestException(
+          'User already has a therapist application',
+        );
       }
 
       // For public applications (temporary user IDs), skip user existence check
@@ -524,7 +526,9 @@ export class TherapistApplicationService {
               { user: { email: applicationData.email } },
               // Also check temp user IDs with this email pattern
               {
-                userId: { contains: applicationData.email.replace('@', '_at_') },
+                userId: {
+                  contains: applicationData.email.replace('@', '_at_'),
+                },
               },
             ],
           },
@@ -619,8 +623,13 @@ export class TherapistApplicationService {
       });
 
       // Process and upload documents if provided
-      let uploadedFiles: Array<{ id: string; fileName: string; url: string }> = [];
-      
+      const uploadedFiles: Array<{
+        id: string;
+        fileName: string;
+        url: string;
+      }> = [];
+      [];
+
       if (files && files.length > 0) {
         // Create uploads directory if it doesn't exist
         const uploadsDir = path.join(
@@ -675,7 +684,9 @@ export class TherapistApplicationService {
           } catch (error) {
             console.error('Error uploading file:', error);
             // In a transaction, this will cause the entire operation to rollback
-            throw new BadRequestException(`Failed to upload file: ${file.originalname}`);
+            throw new BadRequestException(
+              `Failed to upload file: ${file.originalname}`,
+            );
           }
         }
       }

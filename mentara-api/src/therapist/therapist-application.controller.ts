@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ClerkAuthGuard } from '../clerk-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { TherapistApplicationService } from './therapist-application.service';
 import { TherapistApplicationDto } from './therapist-application.dto';
@@ -93,7 +92,7 @@ export class TherapistApplicationController {
     }),
   )
   async applyWithDocuments(
-    @Body() applicationDataJson: string,
+    @Body('applicationDataJson') applicationDataJson: string,
     @Body('fileTypes') fileTypes: string,
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<{
@@ -103,12 +102,54 @@ export class TherapistApplicationController {
     uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
   }> {
     try {
+      // Debug logging for received data
+      console.log('Raw form data received:', {
+        applicationDataJsonType: typeof applicationDataJson,
+        applicationDataJsonLength: applicationDataJson?.length,
+        applicationDataJsonPreview: applicationDataJson?.substring(0, 100),
+        fileTypesType: typeof fileTypes,
+        fileTypesValue: fileTypes,
+        filesCount: files?.length || 0,
+        filesNames: files?.map((f) => f.originalname) || [],
+      });
+
       // Parse application data from form
       let applicationData: TherapistApplicationDto;
       try {
+        if (!applicationDataJson) {
+          throw new BadRequestException(
+            'Application data is missing. Please ensure the form is submitted correctly.',
+          );
+        }
+
+        if (typeof applicationDataJson !== 'string') {
+          console.error(
+            'Expected string but received:',
+            typeof applicationDataJson,
+            applicationDataJson,
+          );
+          throw new BadRequestException(
+            'Application data must be a JSON string.',
+          );
+        }
+
         applicationData = JSON.parse(applicationDataJson);
+        console.log('Successfully parsed application data:', {
+          firstName: applicationData.firstName,
+          lastName: applicationData.lastName,
+          email: applicationData.email,
+          hasRequiredFields: !!(
+            applicationData.firstName &&
+            applicationData.lastName &&
+            applicationData.email
+          ),
+        });
       } catch (error) {
-        throw new BadRequestException('Invalid application data format');
+        console.error('JSON parsing error:', error);
+        console.error('Raw applicationDataJson:', applicationDataJson);
+        throw new BadRequestException(
+          'Invalid application data format. Please check that all form fields are filled correctly.',
+        );
       }
 
       console.log('Received consolidated application with documents:', {
@@ -116,7 +157,7 @@ export class TherapistApplicationController {
         lastName: applicationData.lastName,
         email: applicationData.email,
         fileCount: files?.length || 0,
-        fileNames: files?.map(f => f.originalname) || [],
+        fileNames: files?.map((f) => f.originalname) || [],
       });
 
       // For public applications, create a temporary user ID
@@ -134,11 +175,12 @@ export class TherapistApplicationController {
       }
 
       // Use consolidated service method to create application and upload documents in one transaction
-      const result = await this.therapistApplicationService.createApplicationWithDocuments(
-        applicationWithUserId,
-        files || [],
-        fileTypeMap,
-      );
+      const result =
+        await this.therapistApplicationService.createApplicationWithDocuments(
+          applicationWithUserId,
+          files || [],
+          fileTypeMap,
+        );
 
       return {
         success: true,
@@ -148,31 +190,40 @@ export class TherapistApplicationController {
       };
     } catch (error) {
       console.error('Error submitting application with documents:', error);
-      
+
       if (error instanceof BadRequestException) {
         throw error;
       }
-      
+
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       // Enhanced error handling with specific error types
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
       if (errorMessage.includes('email already exists')) {
-        throw new BadRequestException('An application with this email address already exists. Please check your email or contact support.');
+        throw new BadRequestException(
+          'An application with this email address already exists. Please check your email or contact support.',
+        );
       }
-      
+
       if (errorMessage.includes('file upload')) {
-        throw new BadRequestException('One or more files failed to upload. Please check file formats and sizes.');
+        throw new BadRequestException(
+          'One or more files failed to upload. Please check file formats and sizes.',
+        );
       }
-      
+
       if (errorMessage.includes('validation')) {
-        throw new BadRequestException('Application data validation failed. Please check all required fields.');
+        throw new BadRequestException(
+          'Application data validation failed. Please check all required fields.',
+        );
       }
-      
-      throw new InternalServerErrorException('Failed to submit application with documents. Please try again or contact support.');
+
+      throw new InternalServerErrorException(
+        'Failed to submit application with documents. Please try again or contact support.',
+      );
     }
   }
 
