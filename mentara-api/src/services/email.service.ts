@@ -17,12 +17,12 @@ export class EmailService {
    * Send therapist application status notification
    * This is a placeholder that will trigger the client-side EmailJS service
    * In a production environment, you might want to use a server-side email service
-   * 
+   *
    * @param data Email notification data
    * @returns Promise with operation result
    */
   async sendTherapistApplicationNotification(
-    data: EmailNotificationData
+    data: EmailNotificationData,
   ): Promise<{ success: boolean; message: string }> {
     try {
       console.log('Email notification requested:', {
@@ -39,7 +39,7 @@ export class EmailService {
       // - Or trigger a webhook to the frontend to send via EmailJS
 
       const emailContent = this.generateEmailContent(data);
-      
+
       console.log('Generated email content:', emailContent);
 
       // TODO: Implement actual email sending
@@ -52,7 +52,10 @@ export class EmailService {
       console.error('Failed to send email notification:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to send notification',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to send notification',
       };
     }
   }
@@ -79,20 +82,20 @@ export class EmailService {
           '',
           'You can now start providing therapy services through the Mentara platform.',
           '',
-          ...(credentials ? [
-            'Your account credentials:',
-            `Email: ${credentials.email}`,
-            `Temporary Password: ${credentials.password}`,
-            '',
-            'Please log in and change your password immediately.',
-            'You can access your therapist dashboard at: https://mentara.com/therapist',
-            '',
-          ] : []),
-          ...(adminNotes ? [
-            'Additional notes from our team:',
-            adminNotes,
-            '',
-          ] : []),
+          ...(credentials
+            ? [
+                'Your account credentials:',
+                `Email: ${credentials.email}`,
+                `Temporary Password: ${credentials.password}`,
+                '',
+                'Please log in and change your password immediately.',
+                'You can access your therapist dashboard at: https://mentara.com/therapist',
+                '',
+              ]
+            : []),
+          ...(adminNotes
+            ? ['Additional notes from our team:', adminNotes, '']
+            : []),
           'Welcome to the Mentara therapist network!',
         ].join('\n'),
       };
@@ -104,14 +107,12 @@ export class EmailService {
           '',
           'After careful review, we have decided not to approve your application at this time.',
           '',
-          ...(adminNotes ? [
-            'Feedback from our review team:',
-            adminNotes,
-            '',
-          ] : []),
+          ...(adminNotes
+            ? ['Feedback from our review team:', adminNotes, '']
+            : []),
           'We encourage you to address any concerns mentioned above and reapply in the future.',
           '',
-          'If you have any questions, please don\'t hesitate to contact our support team.',
+          "If you have any questions, please don't hesitate to contact our support team.",
         ].join('\n'),
       };
     }
@@ -127,7 +128,7 @@ export class EmailService {
   async sendTherapistWelcomeEmail(
     therapistEmail: string,
     therapistName: string,
-    credentials: { email: string; password: string }
+    credentials: { email: string; password: string },
   ): Promise<{ success: boolean; message: string }> {
     return this.sendTherapistApplicationNotification({
       to: therapistEmail,
@@ -147,7 +148,7 @@ export class EmailService {
   async sendTherapistRejectionEmail(
     therapistEmail: string,
     therapistName: string,
-    reason?: string
+    reason?: string,
   ): Promise<{ success: boolean; message: string }> {
     return this.sendTherapistApplicationNotification({
       to: therapistEmail,
@@ -164,7 +165,7 @@ export class EmailService {
   async testConfiguration(): Promise<{ success: boolean; message: string }> {
     try {
       console.log('Testing email service configuration...');
-      
+
       // Test email generation
       const testData: EmailNotificationData = {
         to: 'test@example.com',

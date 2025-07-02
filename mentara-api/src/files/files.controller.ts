@@ -12,7 +12,12 @@ import {
   UseInterceptors,
   BadRequestException,
   PayloadTooLargeException,
+  Res,
+  StreamableFile,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
@@ -208,5 +213,38 @@ export class FilesController {
     });
 
     return { downloadUrl: share.file.storageUrl || share.file.storagePath };
+  }
+
+  @Get('serve/:id')
+  async serveFile(
+    @Param('id') fileId: string,
+    @CurrentUserId() userId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const file = await this.filesService.findOne(fileId);
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    // Check if user has permission to access this file
+    const canAccess = await this.filesService.canUserAccessFile(fileId, userId);
+    if (!canAccess) {
+      throw new ForbiddenException(
+        'You do not have permission to access this file',
+      );
+    }
+
+    // Stream the file
+    const fileStream = await this.filesService.getFileStream(fileId);
+
+    // Set appropriate headers
+    res.set({
+      'Content-Type': file.mimeType,
+      'Content-Disposition': `inline; filename="${file.filename}"`,
+      'Content-Length': file.size.toString(),
+    });
+
+    return new StreamableFile(fileStream);
   }
 }

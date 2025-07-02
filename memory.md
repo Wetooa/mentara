@@ -109,7 +109,59 @@ Successfully removed all deprecated therapist application routes and consolidate
 
 ---
 
-## Latest Update: Therapist Application JSON Parse Error Fix & UX Enhancement (2025-07-01)
+## Latest Update: File Upload Categorization Feature Implementation (2025-07-02)
+
+### COMPLETE DOCUMENT CATEGORIZATION SYSTEM ✅
+
+Successfully resolved TypeScript compilation error and implemented complete therapist document upload categorization system, enabling proper document classification (license, certificate, general document) based on user selection.
+
+#### **Phase 1: Critical TypeScript Error Resolution**
+- **Problem Identified**: NestJS dev server failing with "Expected 2 arguments, but got 3" error
+- **Root Cause**: Incomplete implementation where controller passed 3 parameters to service method that only accepted 2
+- **Solution Implemented**:
+  - Updated `uploadDocuments` method signature to accept `fileTypeMap` parameter
+  - Fixed both authenticated and public upload endpoints to use new signature
+  - Ensured backward compatibility with optional parameter default
+
+#### **Phase 2: Document Categorization Logic Implementation**
+- **Achievement**: Complete file type mapping system with database integration
+- **Implementation**:
+  - Created `mapFileTypeToPurpose()` method to convert frontend file types to `AttachmentPurpose` enum
+  - Added comprehensive type mapping: license→LICENSE, certificate→CERTIFICATE, resume→DOCUMENT, etc.
+  - Integrated mapping into FileAttachment creation process
+  - Added fallback handling for unknown file types (defaults to DOCUMENT)
+
+#### **Phase 3: Full System Integration & Verification**
+- **Achievement**: End-to-end functionality validation and testing
+- **Implementation**:
+  - Verified NestJS server starts successfully with "Found 0 errors" compilation
+  - Created comprehensive test suite for file type mapping logic (11/11 tests passed)
+  - Tested realistic file mapping scenarios: "professional_license.pdf"→LICENSE, "certification.pdf"→CERTIFICATE
+  - Confirmed API endpoints properly handle fileTypeMap parameter
+  - Verified existing code quality standards maintained (linting passed)
+
+### **Technical Architecture Enhancements**
+
+**Enhanced Service Methods:**
+- `uploadDocuments()` - Now accepts fileTypeMap for proper categorization
+- `mapFileTypeToPurpose()` - Intelligent mapping from frontend types to database enums
+- Full database schema integration using existing `AttachmentPurpose` enum
+
+**Supported Document Categories:**
+- `LICENSE` - Professional licenses, certifications required for practice
+- `CERTIFICATE` - Educational certificates, diplomas, degrees, specializations  
+- `DOCUMENT` - General documents, resumes, CVs, transcripts
+
+**Quality Assurance Results:**
+- ✅ TypeScript compilation: 0 errors
+- ✅ Server startup: Successful 
+- ✅ File type mapping: 11/11 test cases passed
+- ✅ Code quality: Linting passed (no new issues)
+- ✅ API integration: Endpoints properly handle new parameters
+
+---
+
+## Previous Update: Therapist Application JSON Parse Error Fix & UX Enhancement (2025-07-01)
 
 ### COMPLETE JSON PARSE ERROR RESOLUTION & UX IMPROVEMENTS ✅
 
@@ -147,6 +199,57 @@ Successfully resolved the critical JSON parse error that was preventing therapis
   - Fixed data type mismatches (string vs boolean fields)
   - Updated backend service to properly handle new DTO structure
   - Verified API endpoints responding correctly (403 Forbidden expected without auth)
+
+---
+
+## Latest Update: Therapist Application File Upload System Fix (2025-07-02)
+
+### COMPLETE FILE UPLOAD SYSTEM RESOLUTION ✅
+
+Successfully resolved the file upload system for therapist applications by fixing the static file serving configuration and verifying the complete file upload workflow.
+
+#### **Phase 1: File Upload Analysis & Discovery**
+- **Discovery**: Document upload UI was already fully implemented with comprehensive features
+- **Existing Implementation**:
+  - Complete drag-and-drop functionality with DocumentUploadSection component
+  - File validation (PDF, JPG, PNG, DOCX, max 10MB each)
+  - File preview and removal capabilities
+  - Integration with Zustand state management
+  - Required documents: PRC License, NBI Clearance, Resume/CV
+  - Optional documents: Professional Liability Insurance, BIR Form
+
+#### **Phase 2: Backend File Path Configuration Fix** 
+- **Problem Identified**: Files being saved to wrong directory preventing static access
+- **Solution Implemented**:
+  - Fixed file upload path in `therapist-application.service.ts` from `uploads/therapist-documents/` to `dist/uploads/therapist-documents/`
+  - Created proper directory structure: `dist/uploads/therapist-documents/`
+  - Verified static file serving works with NestJS `useStaticAssets` configuration
+  - Files now accessible via direct URLs: `http://localhost:5000/uploads/therapist-documents/filename`
+
+#### **Phase 3: Static File Serving Verification**
+- **Achievement**: Confirmed complete file upload and access workflow
+- **Testing Results**:
+  - Static file serving working correctly with 200 response
+  - File upload endpoints configured and functional
+  - Document upload UI displaying correctly with professional design
+  - Drag-and-drop functionality verified through Puppeteer testing
+  - All document upload sections visible and interactive
+
+#### **Technical Architecture Confirmed**
+- **Frontend**: Single-page therapist application with collapsible sections
+- **File Storage**: Local filesystem storage in `dist/uploads/therapist-documents/`
+- **File Access**: Direct URL access via NestJS static assets configuration
+- **Database Integration**: File metadata stored in `TherapistFiles` table with location strings
+- **Security**: File type validation, size limits, and path traversal protection
+
+### **Implementation Summary**
+The file upload system was already fully implemented on the frontend with professional UI/UX. The only issue was a backend path configuration that prevented static file access. With the path fix, the complete file upload workflow now functions correctly:
+
+1. ✅ Users can drag-and-drop or browse files in document upload section
+2. ✅ Files are validated and uploaded to backend API endpoints
+3. ✅ Files are saved to correct directory for static serving
+4. ✅ File metadata stored in database with accessible URLs
+5. ✅ Files can be accessed directly via static URLs for preview/download
   - Confirmed local development servers running (NextJS on :3000, NestJS on :5000)
 
 #### **Phase 4: Comprehensive End-to-End Testing with Puppeteer**

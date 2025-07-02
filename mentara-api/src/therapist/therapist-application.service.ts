@@ -1,11 +1,22 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EmailService } from '../services/email.service';
 import { TherapistApplicationDto } from './therapist-application.dto';
-import { ApplicationStatusUpdateDto, TherapistApplicationResponse } from './therapist-application.controller';
+import {
+  ApplicationStatusUpdateDto,
+  TherapistApplicationResponse,
+} from './therapist-application.controller';
+import {
+  FileStatus,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TherapistApplicationService {
@@ -26,7 +37,7 @@ export class TherapistApplicationService {
 
     // For public applications (temporary user IDs), skip user existence check
     const isPublicApplication = applicationData.userId.startsWith('temp_');
-    
+
     if (!isPublicApplication) {
       // Check if user exists for authenticated applications
       const user = await this.prisma.user.findUnique({
@@ -39,17 +50,21 @@ export class TherapistApplicationService {
     } else {
       // For public applications, check if someone with this email already applied
       const existingByEmail = await this.prisma.therapist.findFirst({
-        where: { 
+        where: {
           OR: [
             { user: { email: applicationData.email } },
             // Also check temp user IDs with this email pattern
-            { userId: { contains: applicationData.email.replace('@', '_at_') } }
-          ]
+            {
+              userId: { contains: applicationData.email.replace('@', '_at_') },
+            },
+          ],
         },
       });
 
       if (existingByEmail) {
-        throw new BadRequestException('An application with this email already exists');
+        throw new BadRequestException(
+          'An application with this email already exists',
+        );
       }
     }
 
@@ -58,7 +73,7 @@ export class TherapistApplicationService {
       ...applicationData,
       practiceStartDate: new Date(applicationData.practiceStartDate),
       // Handle expiration date
-      expirationDateOfLicense: applicationData.expirationDateOfLicense 
+      expirationDateOfLicense: applicationData.expirationDateOfLicense
         ? new Date(applicationData.expirationDateOfLicense)
         : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Default to 1 year from now
       // Set default values for required fields
@@ -95,15 +110,23 @@ export class TherapistApplicationService {
           practiceStartDate: convertedData.practiceStartDate,
           areasOfExpertise: convertedData.areasOfExpertise,
           assessmentTools: convertedData.assessmentTools,
-          therapeuticApproachesUsedList: convertedData.therapeuticApproachesUsedList,
+          therapeuticApproachesUsedList:
+            convertedData.therapeuticApproachesUsedList,
           languagesOffered: convertedData.languagesOffered,
-          providedOnlineTherapyBefore: convertedData.providedOnlineTherapyBefore,
-          comfortableUsingVideoConferencing: convertedData.comfortableUsingVideoConferencing,
-          privateConfidentialSpace: convertedData.privateConfidentialSpace ? 'yes' : 'no',
+          providedOnlineTherapyBefore:
+            convertedData.providedOnlineTherapyBefore,
+          comfortableUsingVideoConferencing:
+            convertedData.comfortableUsingVideoConferencing,
+          privateConfidentialSpace: convertedData.privateConfidentialSpace
+            ? 'yes'
+            : 'no',
           compliesWithDataPrivacyAct: convertedData.compliesWithDataPrivacyAct,
-          professionalLiabilityInsurance: convertedData.professionalLiabilityInsurance,
-          complaintsOrDisciplinaryActions: convertedData.complaintsOrDisciplinaryActions,
-          willingToAbideByPlatformGuidelines: convertedData.willingToAbideByPlatformGuidelines,
+          professionalLiabilityInsurance:
+            convertedData.professionalLiabilityInsurance,
+          complaintsOrDisciplinaryActions:
+            convertedData.complaintsOrDisciplinaryActions,
+          willingToAbideByPlatformGuidelines:
+            convertedData.willingToAbideByPlatformGuidelines,
           sessionLength: convertedData.preferredSessionLength,
           hourlyRate: convertedData.hourlyRate,
           status: 'pending',
@@ -149,7 +172,6 @@ export class TherapistApplicationService {
         where: whereClause,
         include: {
           user: true,
-          therapistFiles: true,
         },
         skip,
         take: limit,
@@ -158,39 +180,44 @@ export class TherapistApplicationService {
       this.prisma.therapist.count({ where: whereClause }),
     ]);
 
-    const transformedApplications: TherapistApplicationResponse[] = applications.map(app => ({
-      id: app.userId,
-      status: app.status,
-      submissionDate: app.submissionDate.toISOString(),
-      processingDate: app.processingDate?.toISOString(),
-      firstName: app.user.firstName || '',
-      lastName: app.user.lastName || '',
-      email: app.user.email,
-      mobile: app.mobile,
-      province: app.province,
-      providerType: app.providerType,
-      professionalLicenseType: app.professionalLicenseType,
-      isPRCLicensed: app.isPRCLicensed,
-      prcLicenseNumber: app.prcLicenseNumber,
-      practiceStartDate: app.practiceStartDate.toISOString(),
-      areasOfExpertise: app.areasOfExpertise,
-      assessmentTools: app.assessmentTools,
-      therapeuticApproachesUsedList: app.therapeuticApproachesUsedList,
-      languagesOffered: app.languagesOffered,
-      providedOnlineTherapyBefore: app.providedOnlineTherapyBefore ? 'yes' : 'no',
-      comfortableUsingVideoConferencing: app.comfortableUsingVideoConferencing ? 'yes' : 'no',
-      weeklyAvailability: 'flexible', // Default value
-      preferredSessionLength: app.sessionLength,
-      accepts: app.acceptTypes,
-      bio: app.educationBackground || undefined,
-      hourlyRate: app.hourlyRate ? Number(app.hourlyRate) : undefined,
-      files: app.therapistFiles.map(file => ({
-        id: file.id,
-        fileUrl: file.fileUrl,
-        fileName: path.basename(file.fileUrl),
-        uploadedAt: file.createdAt.toISOString(),
-      })),
-    }));
+    const transformedApplications: TherapistApplicationResponse[] =
+      await Promise.all(
+        applications.map(async (app) => {
+          const files = await this.getApplicationFiles(app.userId);
+
+          return {
+            id: app.userId,
+            status: app.status,
+            submissionDate: app.submissionDate.toISOString(),
+            processingDate: app.processingDate?.toISOString(),
+            firstName: app.user.firstName || '',
+            lastName: app.user.lastName || '',
+            email: app.user.email,
+            mobile: app.mobile,
+            province: app.province,
+            providerType: app.providerType,
+            professionalLicenseType: app.professionalLicenseType,
+            isPRCLicensed: app.isPRCLicensed,
+            prcLicenseNumber: app.prcLicenseNumber,
+            practiceStartDate: app.practiceStartDate.toISOString(),
+            areasOfExpertise: app.areasOfExpertise,
+            assessmentTools: app.assessmentTools,
+            therapeuticApproachesUsedList: app.therapeuticApproachesUsedList,
+            languagesOffered: app.languagesOffered,
+            providedOnlineTherapyBefore: app.providedOnlineTherapyBefore
+              ? 'yes'
+              : 'no',
+            comfortableUsingVideoConferencing:
+              app.comfortableUsingVideoConferencing ? 'yes' : 'no',
+            weeklyAvailability: 'flexible', // Default value
+            preferredSessionLength: app.sessionLength,
+            accepts: app.acceptTypes,
+            bio: app.educationBackground || undefined,
+            hourlyRate: app.hourlyRate ? Number(app.hourlyRate) : undefined,
+            files: files,
+          };
+        }),
+      );
 
     return {
       applications: transformedApplications,
@@ -200,18 +227,21 @@ export class TherapistApplicationService {
     };
   }
 
-  async getApplicationById(id: string): Promise<TherapistApplicationResponse | null> {
+  async getApplicationById(
+    id: string,
+  ): Promise<TherapistApplicationResponse | null> {
     const application = await this.prisma.therapist.findUnique({
       where: { userId: id },
       include: {
         user: true,
-        therapistFiles: true,
       },
     });
 
     if (!application) {
       return null;
     }
+
+    const files = await this.getApplicationFiles(application.userId);
 
     return {
       id: application.userId,
@@ -232,19 +262,19 @@ export class TherapistApplicationService {
       assessmentTools: application.assessmentTools,
       therapeuticApproachesUsedList: application.therapeuticApproachesUsedList,
       languagesOffered: application.languagesOffered,
-      providedOnlineTherapyBefore: application.providedOnlineTherapyBefore ? 'yes' : 'no',
-      comfortableUsingVideoConferencing: application.comfortableUsingVideoConferencing ? 'yes' : 'no',
+      providedOnlineTherapyBefore: application.providedOnlineTherapyBefore
+        ? 'yes'
+        : 'no',
+      comfortableUsingVideoConferencing:
+        application.comfortableUsingVideoConferencing ? 'yes' : 'no',
       weeklyAvailability: 'flexible',
       preferredSessionLength: application.sessionLength,
       accepts: application.acceptTypes,
       bio: application.educationBackground || undefined,
-      hourlyRate: application.hourlyRate ? Number(application.hourlyRate) : undefined,
-      files: application.therapistFiles.map(file => ({
-        id: file.id,
-        fileUrl: file.fileUrl,
-        fileName: path.basename(file.fileUrl),
-        uploadedAt: file.createdAt.toISOString(),
-      })),
+      hourlyRate: application.hourlyRate
+        ? Number(application.hourlyRate)
+        : undefined,
+      files: files,
     };
   }
 
@@ -289,7 +319,7 @@ export class TherapistApplicationService {
         // TODO: Implement Clerk account creation here
         // For now, we'll return placeholder credentials
         const temporaryPassword = this.generateTemporaryPassword();
-        
+
         const credentials = {
           email: application.user.email,
           password: temporaryPassword,
@@ -297,7 +327,8 @@ export class TherapistApplicationService {
 
         result = {
           ...result,
-          message: 'Application approved successfully. Therapist account credentials generated.',
+          message:
+            'Application approved successfully. Therapist account credentials generated.',
           credentials,
         };
 
@@ -305,8 +336,9 @@ export class TherapistApplicationService {
         try {
           await this.emailService.sendTherapistWelcomeEmail(
             application.user.email,
-            `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() || 'Therapist',
-            credentials
+            `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() ||
+              'Therapist',
+            credentials,
           );
           console.log('Approval email notification sent successfully');
         } catch (error) {
@@ -318,8 +350,9 @@ export class TherapistApplicationService {
         try {
           await this.emailService.sendTherapistRejectionEmail(
             application.user.email,
-            `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() || 'Therapist',
-            updateData.adminNotes
+            `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() ||
+              'Therapist',
+            updateData.adminNotes,
           );
           console.log('Rejection email notification sent successfully');
         } catch (error) {
@@ -350,40 +383,57 @@ export class TherapistApplicationService {
     }
 
     // Create uploads directory if it doesn't exist
-    // In production, files are served from dist/uploads, so we need to save there
-    const uploadsDir = path.join(process.cwd(), 'dist', 'uploads', 'therapist-documents');
+    const uploadsDir = path.join(
+      process.cwd(),
+      'uploads',
+      'therapist-documents',
+    );
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
-    const uploadedFiles: Array<{ id: string; fileName: string; url: string }> = [];
+    const uploadedFiles: Array<{ id: string; fileName: string; url: string }> =
+      [];
 
     for (const file of files) {
       try {
-        const fileId = uuidv4();
-        const fileExtension = path.extname(file.originalname);
-        const fileName = `${fileId}${fileExtension}`;
+        const fileName = `${Date.now()}-${file.originalname}`;
         const filePath = path.join(uploadsDir, fileName);
 
         // Save file to disk
         fs.writeFileSync(filePath, file.buffer);
 
-        // Generate file URL (adjust based on your server setup)
-        const fileUrl = `/uploads/therapist-documents/${fileName}`;
-
-        // Save file record to database
-        const fileRecord = await this.prisma.therapistFiles.create({
+        // Create file record using modern File system
+        const fileRecord = await this.prisma.file.create({
           data: {
-            id: fileId,
-            therapistId: userId,
-            fileUrl,
+            filename: file.originalname,
+            displayName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            storagePath: `uploads/therapist-documents/${fileName}`,
+            uploadedBy: userId,
+            status: FileStatus.UPLOADED,
+          },
+        });
+
+        // Determine the purpose based on file type mapping
+        const fileType = fileTypeMap[file.originalname] || 'document';
+        const purpose = this.mapFileTypeToPurpose(fileType);
+
+        // Attach file to therapist application
+        await this.prisma.fileAttachment.create({
+          data: {
+            fileId: fileRecord.id,
+            entityType: AttachmentEntityType.THERAPIST_APPLICATION,
+            entityId: userId,
+            purpose: purpose,
           },
         });
 
         uploadedFiles.push({
           id: fileRecord.id,
           fileName: file.originalname,
-          url: fileRecord.fileUrl,
+          url: `/api/files/serve/${fileRecord.id}`, // Use protected endpoint
         });
       } catch (error) {
         console.error('Error uploading file:', error);
@@ -395,21 +445,43 @@ export class TherapistApplicationService {
   }
 
   async getApplicationFiles(applicationId: string) {
-    const files = await this.prisma.therapistFiles.findMany({
-      where: { therapistId: applicationId },
+    const attachments = await this.prisma.fileAttachment.findMany({
+      where: {
+        entityType: AttachmentEntityType.THERAPIST_APPLICATION,
+        entityId: applicationId,
+      },
+      include: {
+        file: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
 
-    return files.map(file => ({
-      id: file.id,
-      fileName: path.basename(file.fileUrl),
-      fileUrl: file.fileUrl,
-      uploadedAt: file.createdAt.toISOString(),
+    return attachments.map((attachment) => ({
+      id: attachment.file.id,
+      fileName: attachment.file.filename,
+      fileUrl: `/api/files/serve/${attachment.file.id}`, // Use protected endpoint
+      uploadedAt: attachment.file.createdAt.toISOString(),
     }));
   }
 
+  private mapFileTypeToPurpose(fileType: string): AttachmentPurpose {
+    const typeMapping: Record<string, AttachmentPurpose> = {
+      license: AttachmentPurpose.LICENSE,
+      certificate: AttachmentPurpose.CERTIFICATE,
+      certification: AttachmentPurpose.CERTIFICATE,
+      resume: AttachmentPurpose.DOCUMENT,
+      cv: AttachmentPurpose.DOCUMENT,
+      transcript: AttachmentPurpose.DOCUMENT,
+      diploma: AttachmentPurpose.CERTIFICATE,
+      degree: AttachmentPurpose.CERTIFICATE,
+    };
+
+    return typeMapping[fileType.toLowerCase()] || AttachmentPurpose.DOCUMENT;
+  }
+
   private generateTemporaryPassword(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
     let password = '';
     for (let i = 0; i < 12; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));

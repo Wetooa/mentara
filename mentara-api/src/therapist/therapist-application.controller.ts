@@ -73,10 +73,10 @@ export class TherapistApplicationController {
   @Post('apply')
   async submitPublicApplication(
     @Body() applicationData: TherapistApplicationDto,
-  ): Promise<{ 
-    success: boolean; 
-    message: string; 
-    applicationId?: string; 
+  ): Promise<{
+    success: boolean;
+    message: string;
+    applicationId?: string;
   }> {
     try {
       console.log('Received public therapist application:', {
@@ -84,14 +84,15 @@ export class TherapistApplicationController {
         lastName: applicationData.lastName,
         email: applicationData.email,
       });
-      
+
       // For public applications, we need to create a temporary user ID or use email as identifier
       const tempUserId = `temp_${Date.now()}_${applicationData.email.replace('@', '_at_')}`;
       const applicationWithUserId = { ...applicationData, userId: tempUserId };
-      
-      const application = await this.therapistApplicationService.createApplication(
-        applicationWithUserId,
-      );
+
+      const application =
+        await this.therapistApplicationService.createApplication(
+          applicationWithUserId,
+        );
 
       return {
         success: true,
@@ -109,18 +110,19 @@ export class TherapistApplicationController {
   async submitApplication(
     @Body() applicationData: TherapistApplicationDto,
     @CurrentUserId() userId: string,
-  ): Promise<{ 
-    success: boolean; 
-    message: string; 
-    applicationId?: string; 
+  ): Promise<{
+    success: boolean;
+    message: string;
+    applicationId?: string;
   }> {
     try {
       // Use the authenticated user's ID instead of from the body
       const applicationWithUserId = { ...applicationData, userId };
-      
-      const application = await this.therapistApplicationService.createApplication(
-        applicationWithUserId,
-      );
+
+      const application =
+        await this.therapistApplicationService.createApplication(
+          applicationWithUserId,
+        );
 
       return {
         success: true,
@@ -152,7 +154,7 @@ export class TherapistApplicationController {
     try {
       const pageNum = page ? Math.max(1, page) : 1;
       const limitNum = limit ? Math.min(Math.max(1, limit), 100) : 10;
-      
+
       const result = await this.therapistApplicationService.getAllApplications({
         status,
         page: pageNum,
@@ -176,8 +178,9 @@ export class TherapistApplicationController {
       throw new ForbiddenException('Admin access required');
     }
     try {
-      const application = await this.therapistApplicationService.getApplicationById(id);
-      
+      const application =
+        await this.therapistApplicationService.getApplicationById(id);
+
       if (!application) {
         throw new NotFoundException('Application not found');
       }
@@ -198,19 +201,20 @@ export class TherapistApplicationController {
     @CurrentUserRole() role: string,
     @Param('id') id: string,
     @Body() updateData: ApplicationStatusUpdateDto,
-  ): Promise<{ 
-    success: boolean; 
-    message: string; 
-    credentials?: { email: string; password: string }; 
+  ): Promise<{
+    success: boolean;
+    message: string;
+    credentials?: { email: string; password: string };
   }> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
     try {
-      const result = await this.therapistApplicationService.updateApplicationStatus(
-        id,
-        updateData,
-      );
+      const result =
+        await this.therapistApplicationService.updateApplicationStatus(
+          id,
+          updateData,
+        );
 
       return result;
     } catch (error) {
@@ -218,30 +222,34 @@ export class TherapistApplicationController {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to update application status');
+      throw new InternalServerErrorException(
+        'Failed to update application status',
+      );
     }
   }
 
   @Post('upload-public')
-  @UseInterceptors(FilesInterceptor('files', 10, {
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
-    fileFilter: (req, file, callback) => {
-      const allowedMimeTypes = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ];
-      
-      if (allowedMimeTypes.includes(file.mimetype)) {
-        callback(null, true);
-      } else {
-        callback(new BadRequestException('Invalid file type'), false);
-      }
-    },
-  }))
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
+      fileFilter: (req, file, callback) => {
+        const allowedMimeTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/png',
+          'image/jpg',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+
+        if (allowedMimeTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(new BadRequestException('Invalid file type'), false);
+        }
+      },
+    }),
+  )
   async uploadDocumentsPublic(
     @UploadedFiles() files: Express.Multer.File[],
     @Body('fileTypes') fileTypes: string, // JSON string of file type mappings
@@ -257,27 +265,35 @@ export class TherapistApplicationController {
 
       console.log('Public upload request:', {
         fileCount: files.length,
-        fileNames: files.map(f => f.originalname),
-        fileTypes
+        fileNames: files.map((f) => f.originalname),
+        fileTypes,
       });
 
       let fileTypeMap: Record<string, string> = {};
       if (fileTypes) {
         try {
           fileTypeMap = JSON.parse(fileTypes);
-        } catch (error) {
+        } catch {
           console.warn('Invalid fileTypes JSON, proceeding without mapping');
         }
       }
 
-      // For public uploads, use a temporary user ID based on timestamp
-      const tempUserId = `temp_upload_${Date.now()}`;
-      
-      const uploadedFiles = await this.therapistApplicationService.uploadDocuments(
-        tempUserId,
-        files,
-        fileTypeMap,
-      );
+      // For public uploads, require an applicationId to be provided
+      // The applicationId should be from a previously submitted application
+      const applicationId = fileTypeMap.applicationId;
+
+      if (!applicationId) {
+        throw new BadRequestException(
+          'Application ID is required for public file uploads. Please submit your application first.',
+        );
+      }
+
+      const uploadedFiles =
+        await this.therapistApplicationService.uploadDocuments(
+          applicationId,
+          files,
+          fileTypeMap,
+        );
 
       return {
         success: true,
@@ -295,25 +311,27 @@ export class TherapistApplicationController {
 
   @Post('upload')
   @UseGuards(ClerkAuthGuard)
-  @UseInterceptors(FilesInterceptor('files', 10, {
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
-    fileFilter: (req, file, callback) => {
-      const allowedMimeTypes = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ];
-      
-      if (allowedMimeTypes.includes(file.mimetype)) {
-        callback(null, true);
-      } else {
-        callback(new BadRequestException('Invalid file type'), false);
-      }
-    },
-  }))
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
+      fileFilter: (req, file, callback) => {
+        const allowedMimeTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/png',
+          'image/jpg',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+
+        if (allowedMimeTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(new BadRequestException('Invalid file type'), false);
+        }
+      },
+    }),
+  )
   async uploadDocuments(
     @UploadedFiles() files: Express.Multer.File[],
     @CurrentUserId() userId: string,
@@ -332,16 +350,17 @@ export class TherapistApplicationController {
       if (fileTypes) {
         try {
           fileTypeMap = JSON.parse(fileTypes);
-        } catch (error) {
+        } catch {
           console.warn('Invalid fileTypes JSON, proceeding without mapping');
         }
       }
 
-      const uploadedFiles = await this.therapistApplicationService.uploadDocuments(
-        userId,
-        files,
-        fileTypeMap,
-      );
+      const uploadedFiles =
+        await this.therapistApplicationService.uploadDocuments(
+          userId,
+          files,
+          fileTypeMap,
+        );
 
       return {
         success: true,
@@ -362,24 +381,31 @@ export class TherapistApplicationController {
   async getApplicationFiles(
     @CurrentUserRole() role: string,
     @Param('id') applicationId: string,
-  ): Promise<Array<{
-    id: string;
-    fileName: string;
-    fileUrl: string;
-    uploadedAt: string;
-  }>> {
+  ): Promise<
+    Array<{
+      id: string;
+      fileName: string;
+      fileUrl: string;
+      uploadedAt: string;
+    }>
+  > {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
     try {
-      const files = await this.therapistApplicationService.getApplicationFiles(applicationId);
+      const files =
+        await this.therapistApplicationService.getApplicationFiles(
+          applicationId,
+        );
       return files;
     } catch (error) {
       console.error('Error fetching application files:', error);
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to fetch application files');
+      throw new InternalServerErrorException(
+        'Failed to fetch application files',
+      );
     }
   }
 }

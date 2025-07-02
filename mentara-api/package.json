@@ -22,6 +22,7 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:reset": "prisma migrate reset && npm run db:seed",
+    "migrate:therapist-files": "ts-node scripts/migrate-therapist-files.ts",
     "assign-therapist": "ts-node scripts/assign-therapist.ts",
     "assign-random-therapists": "ts-node scripts/assign-therapist.ts random",
     "test-accounts": "ts-node scripts/create-test-accounts.ts",
