@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useCallback, useMemo } from "react";
-import { useForm, FormProvider, Controller, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
   ChevronRight,
@@ -18,10 +17,8 @@ import {
   Shield,
   Upload,
   User,
-  Save,
   Loader2,
   AlertCircle,
-  Check,
   X,
 } from "lucide-react";
 
@@ -63,6 +60,8 @@ import {
 import useTherapistForm from "@/store/therapistform";
 import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { SaveIndicator } from "@/components/ui/save-indicator";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
@@ -376,6 +375,7 @@ export default function SinglePageTherapistApplication() {
     documents,
     updateDocuments,
     removeDocument,
+    formValues,
   } = useTherapistForm();
   const isMobile = useIsMobile();
 
@@ -383,63 +383,66 @@ export default function SinglePageTherapistApplication() {
   const [openSections, setOpenSections] = useState<Set<string>>(
     new Set(["basicInfo"])
   );
-  const [completedSections, setCompletedSections] = useState<Set<string>>(
-    new Set()
-  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   // Mobile navigation state
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
-  // Form setup
+  // Form setup with persisted values
   const form = useForm<UnifiedTherapistForm>({
     resolver: zodResolver(unifiedTherapistSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      mobile: "",
-      email: "",
-      province: "",
-      providerType: "",
-      professionalLicenseType: "",
-      professionalLicenseType_specify: "",
-      isPRCLicensed: "",
-      prcLicenseNumber: "",
-      expirationDateOfLicense: "",
-      isLicenseActive: "",
-      practiceStartDate: "",
-      providedOnlineTherapyBefore: "",
-      comfortableUsingVideoConferencing: "",
-      privateConfidentialSpace: "",
-      compliesWithDataPrivacyAct: "",
-      areasOfExpertise: [],
-      assessmentTools: [],
-      therapeuticApproachesUsedList: [],
-      therapeuticApproachesUsedList_specify: "",
-      languagesOffered: [],
-      languagesOffered_specify: "",
-      weeklyAvailability: "",
-      preferredSessionLength: "",
-      preferredSessionLength_specify: "",
-      accepts: [],
-      accepts_hmo_specify: "",
-      hourlyRate: undefined,
-      bio: "",
-      professionalLiabilityInsurance: "",
-      complaintsOrDisciplinaryActions: "",
-      complaintsOrDisciplinaryActions_specify: "",
-      willingToAbideByPlatformGuidelines: "",
-      documentsUploaded: {
+    values: {
+      firstName: formValues.firstName || "",
+      lastName: formValues.lastName || "",
+      mobile: formValues.mobile || "",
+      email: formValues.email || "",
+      province: formValues.province || "",
+      providerType: formValues.providerType || "",
+      professionalLicenseType: formValues.professionalLicenseType || "",
+      professionalLicenseType_specify: formValues.professionalLicenseType_specify || "",
+      isPRCLicensed: formValues.isPRCLicensed || "",
+      prcLicenseNumber: formValues.prcLicenseNumber || "",
+      expirationDateOfLicense: formValues.expirationDateOfLicense || "",
+      isLicenseActive: formValues.isLicenseActive || "",
+      practiceStartDate: formValues.practiceStartDate || "",
+      providedOnlineTherapyBefore: formValues.providedOnlineTherapyBefore || "",
+      comfortableUsingVideoConferencing: formValues.comfortableUsingVideoConferencing || "",
+      privateConfidentialSpace: formValues.privateConfidentialSpace || "",
+      compliesWithDataPrivacyAct: formValues.compliesWithDataPrivacyAct || "",
+      areasOfExpertise: formValues.areasOfExpertise || [],
+      assessmentTools: formValues.assessmentTools || [],
+      therapeuticApproachesUsedList: formValues.therapeuticApproachesUsedList || [],
+      therapeuticApproachesUsedList_specify: formValues.therapeuticApproachesUsedList_specify || "",
+      languagesOffered: formValues.languagesOffered || [],
+      languagesOffered_specify: formValues.languagesOffered_specify || "",
+      weeklyAvailability: formValues.weeklyAvailability || "",
+      preferredSessionLength: formValues.preferredSessionLength || "",
+      preferredSessionLength_specify: formValues.preferredSessionLength_specify || "",
+      accepts: formValues.accepts || [],
+      accepts_hmo_specify: formValues.accepts_hmo_specify || "",
+      hourlyRate: formValues.hourlyRate || undefined,
+      bio: formValues.bio || "",
+      professionalLiabilityInsurance: formValues.professionalLiabilityInsurance || "",
+      complaintsOrDisciplinaryActions: formValues.complaintsOrDisciplinaryActions || "",
+      complaintsOrDisciplinaryActions_specify: formValues.complaintsOrDisciplinaryActions_specify || "",
+      willingToAbideByPlatformGuidelines: formValues.willingToAbideByPlatformGuidelines || "",
+      documentsUploaded: formValues.documentsUploaded || {
         prcLicense: false,
         nbiClearance: false,
         resumeCV: false,
       },
-      consentChecked: false,
+      consentChecked: formValues.consentChecked || false,
     },
     mode: "onBlur",
     reValidateMode: "onChange",
+  });
+
+  // Auto-save integration
+  const { manualSave } = useAutoSave({
+    control: form.control,
+    interval: 30000, // 30 seconds
+    debounceMs: 2000, // 2 seconds
   });
 
   // Watch form values for conditional rendering
@@ -1011,25 +1014,10 @@ export default function SinglePageTherapistApplication() {
 
       {/* Auto-save status */}
       <div className="mt-auto">
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-          {lastSavedAt ? (
-            <>
-              <Save className="w-3 h-3 text-green-600" />
-              <span className="text-green-600">
-                Saved{" "}
-                {lastSavedAt.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </>
-          ) : (
-            <>
-              <Circle className="w-3 h-3" />
-              <span>Not saved yet</span>
-            </>
-          )}
-        </div>
+        <SaveIndicator 
+          onManualSave={manualSave}
+          className="mb-4"
+        />
         <div className="text-xs text-gray-500">
           © {new Date().getFullYear()} Mentara. All rights reserved.
         </div>
@@ -2854,7 +2842,7 @@ function ReviewSection({
             <p>
               <strong>Documents:</strong>{" "}
               {Object.values(documents).reduce(
-                (sum, docs) => sum + docs.length,
+                (sum: number, docs) => sum + (docs as File[]).length,
                 0
               )}{" "}
               files uploaded
