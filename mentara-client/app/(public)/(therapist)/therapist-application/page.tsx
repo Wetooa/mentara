@@ -53,7 +53,6 @@ import useTherapistForm from "@/store/therapistform";
 import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAutoSave } from "@/hooks/use-auto-save";
-import { SaveIndicator } from "@/components/ui/save-indicator";
 import { BasicInfoSection } from "@/components/therapist-application/BasicInfoSection";
 import { LicenseInfoSection } from "@/components/therapist-application/LicenseInfoSection";
 import { TeletherapySection } from "@/components/therapist-application/TeletherapySection";
@@ -483,7 +482,7 @@ export default function SinglePageTherapistApplication() {
   });
 
   // Auto-save integration
-  const { manualSave } = useAutoSave({
+  useAutoSave({
     control: form.control,
     interval: 30000, // 30 seconds
     debounceMs: 2000, // 2 seconds
@@ -759,14 +758,14 @@ export default function SinglePageTherapistApplication() {
           }
         });
 
-        setLastSavedAt(new Date());
-        showToast("Draft saved automatically", "info", 2000);
+        // Update last saved time in Zustand store
+        const { saveFormData } = useTherapistForm.getState();
+        saveFormData();
       } catch (error) {
         console.error("Error auto-saving:", error);
-        showToast("Failed to save draft", "error");
       }
     },
-    [updateField, updateNestedField, showToast]
+    [updateField, updateNestedField]
   );
 
   // Restart form handler
@@ -1117,13 +1116,8 @@ export default function SinglePageTherapistApplication() {
         })}
       </div>
 
-      {/* Auto-save status and actions */}
+      {/* Actions */}
       <div className="mt-auto space-y-3">
-        <SaveIndicator 
-          onManualSave={manualSave}
-          className="mb-2"
-        />
-        
         {/* Restart Form Button */}
         <Button
           type="button"
@@ -1135,6 +1129,10 @@ export default function SinglePageTherapistApplication() {
           <X className="w-4 h-4 mr-2" />
           Restart Form
         </Button>
+        
+        <div className="text-xs text-gray-500">
+          Form saves automatically as you type
+        </div>
         
         <div className="text-xs text-gray-500">
           © {new Date().getFullYear()} Mentara. All rights reserved.
