@@ -28,7 +28,8 @@
       "Bash(for file in ./src/test-utils/e2e-tests/*.ts)",
       "Bash(do echo \"=== $file line 345 ===\")",
       "Bash(ls:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

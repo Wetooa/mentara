@@ -304,7 +304,7 @@ describe('AuditLogsService', () => {
 
     it('should create system event with minimal required fields', async () => {
       const minimalData = {
-        eventType: SystemEventType.APPLICATION_START,
+        eventType: SystemEventType.SERVICE_START,
         severity: EventSeverity.INFO,
         title: 'App Started',
         description: 'Application started successfully',
@@ -341,7 +341,7 @@ describe('AuditLogsService', () => {
       },
       {
         id: 'event-2',
-        eventType: SystemEventType.APPLICATION_START,
+        eventType: SystemEventType.SERVICE_START,
         severity: EventSeverity.INFO,
         title: 'App Started',
         description: 'Application started',
@@ -904,7 +904,7 @@ describe('AuditLogsService', () => {
 
     it('should handle database errors in system events', async () => {
       const systemEventData = {
-        eventType: SystemEventType.APPLICATION_START,
+        eventType: SystemEventType.SERVICE_START,
         severity: EventSeverity.INFO,
         title: 'Test Event',
         description: 'Test Description',
