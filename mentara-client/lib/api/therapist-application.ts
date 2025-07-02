@@ -36,7 +36,7 @@ export async function submitTherapistApplication(
     }
 
     const data = await response.json();
-    return { id: data.applicationId || data.id };
+    return { id: data.applicationId || data.id || data.userId };
   } catch (error) {
     console.error("Error submitting therapist application:", error);
     throw error;
@@ -206,6 +206,7 @@ export async function uploadTherapistDocuments(
     if (applicationId) {
       fileTypesWithAppId.applicationId = applicationId;
     }
+    console.log("Upload fileTypes data:", JSON.stringify(fileTypesWithAppId));
     formData.append("fileTypes", JSON.stringify(fileTypesWithAppId));
 
     const response = await fetch(`${backendUrl}/api/therapist/upload-public`, {

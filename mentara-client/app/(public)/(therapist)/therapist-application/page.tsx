@@ -587,6 +587,7 @@ export default function SinglePageTherapistApplication() {
       // First, submit the application to create it in the database
       const result = await submitTherapistApplication(transformedData);
       console.log("Application submitted successfully:", result);
+      console.log("Application ID for document upload:", result.id);
       
       // Then upload documents and link them to the created application
       let uploadedFiles: any[] = [];
@@ -616,6 +617,7 @@ export default function SinglePageTherapistApplication() {
         
         try {
           // Use the application ID from the created application (result.id should be the userId)
+          console.log("Upload documents with application ID:", result.id);
           const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap, result.id);
           uploadedFiles = uploadResult.uploadedFiles;
           showToast(`Successfully uploaded ${uploadedFiles.length} document(s)`, "success", 3000);
