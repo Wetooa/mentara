@@ -3377,3 +3377,33 @@ The seed file fixes ensure:
 5. **Development Guidelines**: Include proper Prisma property usage in development standards
 
 The seed file TypeScript error resolution completes the development environment stabilization, ensuring seamless test account creation and reliable development server operation for the Mentara mental health platform.
+
+---
+
+## Latest Update: Therapist Application Submission Flow Bug Fix (2025-07-02)
+
+### CRITICAL SUBMISSION ORDER BUG RESOLVED ✅
+
+**Issue Identified**: During frontend testing, discovered that the application submission was failing with "Therapist application not found" errors when uploading documents.
+
+**Root Cause**: The frontend was attempting to upload documents **before** creating the therapist application in the database. The backend `uploadDocuments` method requires an existing therapist application record to link documents to.
+
+**Solution Implemented**:
+- **Reordered submission flow**: Create application first, then upload documents
+- **Enhanced error handling**: Document upload failures don't fail entire submission
+- **Improved user feedback**: Clear messaging for partial failures with retry guidance
+
+**New Submission Flow**:
+1. Validate all sections and documents (client-side)
+2. **Submit application data** → Creates database record and returns application ID
+3. **Upload documents** → Links to created application using real application ID
+4. Handle any upload failures gracefully (warn but don't block)
+5. Redirect to success page with application reference
+
+**Technical Changes**:
+- Removed premature applicationId generation from form data
+- Reordered `uploadDocuments` call to happen AFTER `submitTherapistApplication`
+- Use `result.id` from successful application creation for document linking
+- Enhanced error handling to distinguish between app creation and document upload failures
+
+**Result**: Robust submission flow that ensures applications are always created successfully, with document upload issues handled gracefully without blocking the entire process. Users now receive clear feedback and can retry document uploads if needed.
