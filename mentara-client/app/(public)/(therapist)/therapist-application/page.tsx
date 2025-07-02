@@ -557,10 +557,7 @@ export default function SinglePageTherapistApplication() {
         
         // Optional fields
         bio: values.bio || "",
-        hourlyRate: values.hourlyRate || 0,
-        
-        // Add application ID for document linking
-        applicationId: `temp_${Date.now()}_${values.email.replace('@', '_at_')}`
+        hourlyRate: values.hourlyRate || 0
       };
       
       // Validate that all required documents are uploaded
@@ -585,7 +582,13 @@ export default function SinglePageTherapistApplication() {
         return;
       }
 
-      // Upload documents with proper categorization
+      console.log("Submitting therapist application:", transformedData);
+      
+      // First, submit the application to create it in the database
+      const result = await submitTherapistApplication(transformedData);
+      console.log("Application submitted successfully:", result);
+      
+      // Then upload documents and link them to the created application
       let uploadedFiles: any[] = [];
       const allFiles = Object.entries(documents).flatMap(([type, files]) => 
         files.map(file => ({ file, type }))
@@ -612,7 +615,8 @@ export default function SinglePageTherapistApplication() {
         });
         
         try {
-          const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap, transformedData.applicationId);
+          // Use the application ID from the created application (result.id should be the userId)
+          const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap, result.id);
           uploadedFiles = uploadResult.uploadedFiles;
           showToast(`Successfully uploaded ${uploadedFiles.length} document(s)`, "success", 3000);
         } catch (uploadError) {
@@ -622,18 +626,15 @@ export default function SinglePageTherapistApplication() {
             ? uploadError.message 
             : "Document upload failed";
           
-          // Redirect to error page for upload failures
-          router.push(`/therapist-application/error?type=upload_error&message=${encodeURIComponent(errorMessage)}`);
-          return;
+          // Show warning but don't fail the entire submission since application was created
+          showToast(
+            `Application submitted successfully, but document upload failed: ${errorMessage}. You can upload documents later.`, 
+            "warning",
+            8000
+          );
         }
       }
       
-      console.log("Submitting therapist application:", transformedData);
-      
-      // Actually submit to the backend
-      const result = await submitTherapistApplication(transformedData);
-      
-      console.log("Application submitted successfully:", result);
       showToast("Application submitted successfully!", "success");
       
       // Navigate to success page after successful submission
