@@ -40,14 +40,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Form,
   FormField,
   FormItem,
@@ -66,8 +58,6 @@ import { BasicInfoSection } from "@/components/therapist-application/BasicInfoSe
 import { LicenseInfoSection } from "@/components/therapist-application/LicenseInfoSection";
 import { TeletherapySection } from "@/components/therapist-application/TeletherapySection";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
-import PROVIDER_TYPE from "@/constants/provider";
-import PHILIPPINE_PROVINCES from "@/constants/provinces";
 import { submitApplicationWithDocuments } from "@/lib/api/therapist-application";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
@@ -98,6 +88,20 @@ const unifiedTherapistSchema = z
     practiceStartDate: z
       .string()
       .min(1, "Please enter when you started practicing"),
+    
+    // Professional Experience
+    yearsOfExperience: z
+      .number()
+      .min(0, "Years of experience must be 0 or greater")
+      .max(50, "Please enter a valid number of years"),
+    educationBackground: z
+      .string()
+      .min(10, "Please provide details about your educational background")
+      .optional(),
+    practiceLocation: z
+      .string()
+      .min(1, "Please specify your primary practice location")
+      .optional(),
 
     // Teletherapy Readiness - Flattened for backend compatibility
     providedOnlineTherapyBefore: z
@@ -147,6 +151,11 @@ const unifiedTherapistSchema = z
       .refine((val) => val === undefined || val >= 0, {
         message: "Rate must be a positive number",
       }),
+    
+    // Insurance Information
+    acceptsInsurance: z.boolean().default(false),
+    acceptedInsuranceTypes: z.array(z.string()).optional(),
+    sessionLength: z.string().min(1, "Please specify your standard session length"),
 
     // Bio/About
     bio: z.string().optional(),
@@ -311,14 +320,17 @@ const sections: Section[] = [
   },
   {
     id: "licenseInfo",
-    title: "Professional License",
+    title: "Professional License & Experience",
     icon: <Shield className="w-5 h-5" />,
-    description: "Your professional license details and credentials",
-    estimatedTime: "3-4 minutes",
+    description: "Your professional license details, credentials, and experience",
+    estimatedTime: "4-5 minutes",
     fields: [
       "professionalLicenseType",
       "isPRCLicensed",
       "practiceStartDate",
+      "yearsOfExperience",
+      "educationBackground",
+      "practiceLocation",
     ],
     isRequired: true,
   },
@@ -363,7 +375,10 @@ const sections: Section[] = [
     fields: [
       "weeklyAvailability",
       "preferredSessionLength",
+      "sessionLength",
       "accepts",
+      "acceptsInsurance",
+      "acceptedInsuranceTypes",
       // Note: hourlyRate and bio are optional fields
     ],
     isRequired: true,
@@ -429,6 +444,9 @@ export default function SinglePageTherapistApplication() {
       expirationDateOfLicense: formValues.expirationDateOfLicense || "",
       isLicenseActive: formValues.isLicenseActive || "",
       practiceStartDate: formValues.practiceStartDate || "",
+      yearsOfExperience: formValues.yearsOfExperience || undefined,
+      educationBackground: formValues.educationBackground || "",
+      practiceLocation: formValues.practiceLocation || "",
       providedOnlineTherapyBefore: formValues.providedOnlineTherapyBefore || "",
       comfortableUsingVideoConferencing: formValues.comfortableUsingVideoConferencing || "",
       privateConfidentialSpace: formValues.privateConfidentialSpace || "",
@@ -445,6 +463,9 @@ export default function SinglePageTherapistApplication() {
       accepts: formValues.accepts || [],
       accepts_hmo_specify: formValues.accepts_hmo_specify || "",
       hourlyRate: formValues.hourlyRate || undefined,
+      acceptsInsurance: formValues.acceptsInsurance || false,
+      acceptedInsuranceTypes: formValues.acceptedInsuranceTypes || [],
+      sessionLength: formValues.sessionLength || "",
       bio: formValues.bio || "",
       professionalLiabilityInsurance: formValues.professionalLiabilityInsurance || "",
       complaintsOrDisciplinaryActions: formValues.complaintsOrDisciplinaryActions || "",
@@ -470,15 +491,6 @@ export default function SinglePageTherapistApplication() {
 
   // Watch form values for conditional rendering
   const watchedValues = useWatch({ control: form.control });
-  const {
-    professionalLicenseType,
-    isPRCLicensed,
-    therapeuticApproachesUsedList,
-    languagesOffered,
-    preferredSessionLength,
-    accepts,
-    complaintsOrDisciplinaryActions,
-  } = watchedValues;
 
   // Calculate completion status
   const getSectionCompletion = useCallback(
@@ -512,11 +524,16 @@ export default function SinglePageTherapistApplication() {
             "professionalLicenseType",
             "isPRCLicensed",
             "practiceStartDate",
+            "yearsOfExperience",
           ];
           let licenseCompleted = 0;
 
           licenseFields.forEach((field) => {
-            if (values[field] && values[field] !== "") licenseCompleted++;
+            if (field === "yearsOfExperience") {
+              if (values[field] !== undefined && values[field] !== null) licenseCompleted++;
+            } else if (values[field] && values[field] !== "") {
+              licenseCompleted++;
+            }
           });
 
           // Add conditional fields for PRC licensed professionals
@@ -536,6 +553,7 @@ export default function SinglePageTherapistApplication() {
             total += 1;
           }
 
+          // Optional fields (educationBackground, practiceLocation) - don't count toward completion
           completed = licenseCompleted;
           break;
 
@@ -590,7 +608,9 @@ export default function SinglePageTherapistApplication() {
           const availabilityRequiredFields = [
             "weeklyAvailability",
             "preferredSessionLength",
+            "sessionLength",
             "accepts",
+            "acceptsInsurance",
           ];
 
           let availCompleted = 0;
@@ -598,13 +618,23 @@ export default function SinglePageTherapistApplication() {
           availabilityRequiredFields.forEach((field) => {
             if (field === "accepts") {
               if (values[field]?.length > 0) availCompleted++;
+            } else if (field === "acceptsInsurance") {
+              // acceptsInsurance is a boolean, so check if it's defined
+              if (typeof values[field] === "boolean") availCompleted++;
             } else {
               if (values[field] && values[field] !== "") availCompleted++;
             }
           });
 
+          // Add conditional field for accepted insurance types
+          if (values.acceptsInsurance === true) {
+            if (values.acceptedInsuranceTypes?.length > 0) availCompleted++;
+            total = availabilityRequiredFields.length + 1; // +1 for acceptedInsuranceTypes
+          } else {
+            total = availabilityRequiredFields.length;
+          }
+
           completed = availCompleted;
-          total = availabilityRequiredFields.length;
           break;
 
         case "documents":
