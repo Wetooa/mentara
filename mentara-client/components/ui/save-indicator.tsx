@@ -98,10 +98,10 @@ export const SaveIndicator: React.FC<SaveIndicatorProps> = ({
               size="sm"
               onClick={onManualSave}
               disabled={isAutoSaving}
-              className="h-8 px-2"
+              className="min-h-[44px] h-auto px-3 py-2 touch-manipulation"
             >
-              <Save className="h-3 w-3" />
-              <span className="ml-1 hidden sm:inline">Save</span>
+              <Save className="h-4 w-4" />
+              <span className="ml-1 text-xs">Save</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -117,11 +117,11 @@ export const SaveIndicator: React.FC<SaveIndicatorProps> = ({
               variant={autoSaveEnabled ? "default" : "outline"}
               size="sm"
               onClick={toggleAutoSave}
-              className="h-8 px-2"
+              className="min-h-[44px] h-auto px-3 py-2 touch-manipulation"
             >
-              <Clock className="h-3 w-3" />
-              <span className="ml-1 hidden sm:inline">
-                Auto-save {autoSaveEnabled ? "ON" : "OFF"}
+              <Clock className="h-4 w-4" />
+              <span className="ml-1 text-xs">
+                Auto {autoSaveEnabled ? "ON" : "OFF"}
               </span>
             </Button>
           </TooltipTrigger>

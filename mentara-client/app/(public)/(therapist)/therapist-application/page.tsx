@@ -426,6 +426,9 @@ export default function SinglePageTherapistApplication() {
   // Mobile navigation state
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  
+  // Restart form modal state
+  const [showRestartModal, setShowRestartModal] = useState(false);
 
   // Form setup with persisted values
   const form = useForm<UnifiedTherapistForm>({
@@ -780,6 +783,31 @@ export default function SinglePageTherapistApplication() {
     [updateField, updateNestedField, showToast]
   );
 
+  // Restart form handler
+  const handleRestartForm = useCallback(() => {
+    try {
+      // Clear form data
+      form.reset();
+      
+      // Clear Zustand store
+      const { resetForm } = useTherapistForm.getState();
+      resetForm();
+      
+      // Reset UI state
+      setOpenSections(new Set(["basicInfo"]));
+      setCurrentSectionIndex(0);
+      setShowRestartModal(false);
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      
+      showToast("Form restarted successfully", "success");
+    } catch (error) {
+      console.error("Error restarting form:", error);
+      showToast("Failed to restart form", "error");
+    }
+  }, [form, showToast]);
+
   // Submit handler
   const onSubmit = useCallback(
     async (values: UnifiedTherapistForm) => {
@@ -1103,12 +1131,25 @@ export default function SinglePageTherapistApplication() {
         })}
       </div>
 
-      {/* Auto-save status */}
-      <div className="mt-auto">
+      {/* Auto-save status and actions */}
+      <div className="mt-auto space-y-3">
         <SaveIndicator 
           onManualSave={manualSave}
-          className="mb-4"
+          className="mb-2"
         />
+        
+        {/* Restart Form Button */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setShowRestartModal(true)}
+          className="w-full min-h-[44px] h-auto px-3 py-2 text-xs border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 touch-manipulation"
+        >
+          <X className="w-4 h-4 mr-2" />
+          Restart Form
+        </Button>
+        
         <div className="text-xs text-gray-500">
           © {new Date().getFullYear()} Mentara. All rights reserved.
         </div>
@@ -1278,6 +1319,50 @@ export default function SinglePageTherapistApplication() {
           </div>
         </div>
       </div>
+
+      {/* Restart Form Confirmation Modal */}
+      {showRestartModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Restart Form
+                </h3>
+                <p className="text-sm text-gray-600">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+            
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to restart the form? All your current progress will be lost permanently.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowRestartModal(false)}
+                className="min-h-[44px] px-4 py-2 touch-manipulation"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleRestartForm}
+                className="min-h-[44px] px-4 py-2 touch-manipulation"
+              >
+                Yes, Restart Form
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
