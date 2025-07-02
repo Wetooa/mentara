@@ -87,7 +87,7 @@ const unifiedTherapistSchema = z
     practiceStartDate: z
       .string()
       .min(1, "Please enter when you started practicing"),
-    
+
     // Professional Experience
     yearsOfExperience: z
       .number()
@@ -148,7 +148,7 @@ const unifiedTherapistSchema = z
       .refine((val) => val === undefined || val >= 0, {
         message: "Rate must be a positive number",
       }),
-    
+
     // Insurance Information (optional - not implemented in UI yet)
     acceptsInsurance: z.boolean().optional(),
     acceptedInsuranceTypes: z.array(z.string()).optional(),
@@ -319,7 +319,8 @@ const sections: Section[] = [
     id: "licenseInfo",
     title: "Professional License & Experience",
     icon: <Shield className="w-5 h-5" />,
-    description: "Your professional license details, credentials, and experience",
+    description:
+      "Your professional license details, credentials, and experience",
     estimatedTime: "4-5 minutes",
     fields: [
       "professionalLicenseType",
@@ -420,7 +421,7 @@ export default function SinglePageTherapistApplication() {
   // Mobile navigation state
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  
+
   // Restart form modal state
   const [showRestartModal, setShowRestartModal] = useState(false);
 
@@ -435,7 +436,8 @@ export default function SinglePageTherapistApplication() {
       province: formValues.province || "",
       providerType: formValues.providerType || "",
       professionalLicenseType: formValues.professionalLicenseType || "",
-      professionalLicenseType_specify: formValues.professionalLicenseType_specify || "",
+      professionalLicenseType_specify:
+        formValues.professionalLicenseType_specify || "",
       isPRCLicensed: formValues.isPRCLicensed || "",
       prcLicenseNumber: formValues.prcLicenseNumber || "",
       expirationDateOfLicense: formValues.expirationDateOfLicense || "",
@@ -445,18 +447,22 @@ export default function SinglePageTherapistApplication() {
       educationBackground: formValues.educationBackground || "",
       practiceLocation: formValues.practiceLocation || "",
       providedOnlineTherapyBefore: formValues.providedOnlineTherapyBefore || "",
-      comfortableUsingVideoConferencing: formValues.comfortableUsingVideoConferencing || "",
+      comfortableUsingVideoConferencing:
+        formValues.comfortableUsingVideoConferencing || "",
       privateConfidentialSpace: formValues.privateConfidentialSpace || "",
       compliesWithDataPrivacyAct: formValues.compliesWithDataPrivacyAct || "",
       areasOfExpertise: formValues.areasOfExpertise || [],
       assessmentTools: formValues.assessmentTools || [],
-      therapeuticApproachesUsedList: formValues.therapeuticApproachesUsedList || [],
-      therapeuticApproachesUsedList_specify: formValues.therapeuticApproachesUsedList_specify || "",
+      therapeuticApproachesUsedList:
+        formValues.therapeuticApproachesUsedList || [],
+      therapeuticApproachesUsedList_specify:
+        formValues.therapeuticApproachesUsedList_specify || "",
       languagesOffered: formValues.languagesOffered || [],
       languagesOffered_specify: formValues.languagesOffered_specify || "",
       weeklyAvailability: formValues.weeklyAvailability || "",
       preferredSessionLength: formValues.preferredSessionLength || "",
-      preferredSessionLength_specify: formValues.preferredSessionLength_specify || "",
+      preferredSessionLength_specify:
+        formValues.preferredSessionLength_specify || "",
       accepts: formValues.accepts || [],
       accepts_hmo_specify: formValues.accepts_hmo_specify || "",
       hourlyRate: formValues.hourlyRate || undefined,
@@ -464,10 +470,14 @@ export default function SinglePageTherapistApplication() {
       acceptedInsuranceTypes: formValues.acceptedInsuranceTypes || undefined,
       sessionLength: formValues.sessionLength || undefined,
       bio: formValues.bio || "",
-      professionalLiabilityInsurance: formValues.professionalLiabilityInsurance || "",
-      complaintsOrDisciplinaryActions: formValues.complaintsOrDisciplinaryActions || "",
-      complaintsOrDisciplinaryActions_specify: formValues.complaintsOrDisciplinaryActions_specify || "",
-      willingToAbideByPlatformGuidelines: formValues.willingToAbideByPlatformGuidelines || "",
+      professionalLiabilityInsurance:
+        formValues.professionalLiabilityInsurance || "",
+      complaintsOrDisciplinaryActions:
+        formValues.complaintsOrDisciplinaryActions || "",
+      complaintsOrDisciplinaryActions_specify:
+        formValues.complaintsOrDisciplinaryActions_specify || "",
+      willingToAbideByPlatformGuidelines:
+        formValues.willingToAbideByPlatformGuidelines || "",
       documentsUploaded: formValues.documentsUploaded || {
         prcLicense: false,
         nbiClearance: false,
@@ -486,7 +496,7 @@ export default function SinglePageTherapistApplication() {
     debounceMs: 2000, // 2 seconds
   });
 
-  // Watch form values for conditional rendering
+  // Watch form values for conditional rendering and progress calculation
   const watchedValues = useWatch({ control: form.control });
 
   // Calculate completion status
@@ -495,7 +505,7 @@ export default function SinglePageTherapistApplication() {
       const section = sections.find((s) => s.id === sectionId);
       if (!section) return { completed: 0, total: 0, percentage: 0 };
 
-      const values = form.getValues();
+      const values = watchedValues;
       let completed = 0;
       let total = section.fields.length;
 
@@ -529,7 +539,8 @@ export default function SinglePageTherapistApplication() {
 
           licenseFields.forEach((field) => {
             if (field === "yearsOfExperience") {
-              if (values[field] !== undefined && values[field] !== null) licenseCompleted++;
+              if (values[field] !== undefined && values[field] !== null)
+                licenseCompleted++;
             } else if (values[field] && values[field] !== "") {
               licenseCompleted++;
             }
@@ -537,7 +548,11 @@ export default function SinglePageTherapistApplication() {
 
           // Add conditional fields for PRC licensed professionals
           if (values.isPRCLicensed === "yes") {
-            const prcFields = ["prcLicenseNumber", "expirationDateOfLicense", "isLicenseActive"];
+            const prcFields = [
+              "prcLicenseNumber",
+              "expirationDateOfLicense",
+              "isLicenseActive",
+            ];
             prcFields.forEach((field) => {
               if (values[field] && values[field] !== "") licenseCompleted++;
             });
@@ -547,7 +562,10 @@ export default function SinglePageTherapistApplication() {
           }
 
           // Add conditional field for other license types
-          if (values.professionalLicenseType === "other" && values.professionalLicenseType_specify) {
+          if (
+            values.professionalLicenseType === "other" &&
+            values.professionalLicenseType_specify
+          ) {
             licenseCompleted++;
             total += 1;
           }
@@ -606,7 +624,7 @@ export default function SinglePageTherapistApplication() {
           // hourlyRate and bio are optional fields
           const availabilityRequiredFields = [
             "weeklyAvailability",
-            "preferredSessionLength", 
+            "preferredSessionLength",
             "accepts",
           ];
 
@@ -644,45 +662,47 @@ export default function SinglePageTherapistApplication() {
       const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
       return { completed, total, percentage };
     },
-    [form, documents]
+    [watchedValues, documents]
   );
+
+  // Memoized section completions to avoid recalculation
+  const sectionCompletions = useMemo(() => {
+    return sections.reduce((acc, section) => {
+      acc[section.id] = getSectionCompletion(section.id);
+      return acc;
+    }, {} as Record<string, { completed: number; total: number; percentage: number }>);
+  }, [getSectionCompletion]);
 
   // Overall progress calculation - only count required sections for submission eligibility
   const overallProgress = useMemo(() => {
     const requiredSections = sections.filter((section) => section.isRequired);
-    const sectionProgresses = requiredSections.map((section) =>
-      getSectionCompletion(section.id)
-    );
-    const totalCompleted = sectionProgresses.reduce(
-      (sum, prog) => sum + prog.completed,
+    const totalCompleted = requiredSections.reduce(
+      (sum, section) => sum + sectionCompletions[section.id].completed,
       0
     );
-    const totalFields = sectionProgresses.reduce(
-      (sum, prog) => sum + prog.total,
+    const totalFields = requiredSections.reduce(
+      (sum, section) => sum + sectionCompletions[section.id].total,
       0
     );
     return totalFields > 0
       ? Math.round((totalCompleted / totalFields) * 100)
       : 0;
-  }, [getSectionCompletion]);
+  }, [sectionCompletions]);
 
   // Separate progress for display that includes all sections
   const displayProgress = useMemo(() => {
-    const sectionProgresses = sections.map((section) =>
-      getSectionCompletion(section.id)
-    );
-    const totalCompleted = sectionProgresses.reduce(
-      (sum, prog) => sum + prog.completed,
+    const totalCompleted = sections.reduce(
+      (sum, section) => sum + sectionCompletions[section.id].completed,
       0
     );
-    const totalFields = sectionProgresses.reduce(
-      (sum, prog) => sum + prog.total,
+    const totalFields = sections.reduce(
+      (sum, section) => sum + sectionCompletions[section.id].total,
       0
     );
     return totalFields > 0
       ? Math.round((totalCompleted / totalFields) * 100)
       : 0;
-  }, [getSectionCompletion]);
+  }, [sectionCompletions]);
 
   // Section toggle handler
   const toggleSection = useCallback((sectionId: string) => {
@@ -772,19 +792,19 @@ export default function SinglePageTherapistApplication() {
     try {
       // Clear form data
       form.reset();
-      
+
       // Clear Zustand store
       const { resetForm } = useTherapistForm.getState();
       resetForm();
-      
+
       // Reset UI state
       setOpenSections(new Set(["basicInfo"]));
       setCurrentSectionIndex(0);
       setShowRestartModal(false);
-      
+
       // Scroll to top
       window.scrollTo({ top: 0, behavior: "smooth" });
-      
+
       showToast("Form restarted successfully", "success");
     } catch (error) {
       console.error("Error restarting form:", error);
@@ -1017,8 +1037,8 @@ export default function SinglePageTherapistApplication() {
     [autoSave, router, showToast]
   );
 
-  // Sidebar content component for reuse between desktop and mobile
-  const SidebarContent = () => (
+  // Sidebar content component for reuse between desktop and mobile - memoized to prevent jittery re-renders
+  const SidebarContent = useMemo(() => (
     <>
       <div className="mb-8">
         <Image
@@ -1048,7 +1068,7 @@ export default function SinglePageTherapistApplication() {
       {/* Section List */}
       <div className="space-y-3 flex-1">
         {sections.map((section) => {
-          const completion = getSectionCompletion(section.id);
+          const completion = sectionCompletions[section.id];
           const isOpen = openSections.has(section.id);
           const isCompleted = completion.percentage === 100;
 
@@ -1135,17 +1155,17 @@ export default function SinglePageTherapistApplication() {
           <X className="w-4 h-4 mr-2" />
           Restart Form
         </Button>
-        
+
         <div className="text-xs text-gray-500">
           Form saves automatically as you type
         </div>
-        
+
         <div className="text-xs text-gray-500">
           © {new Date().getFullYear()} Mentara. All rights reserved.
         </div>
       </div>
     </>
-  );
+  ), [sectionCompletions, openSections, displayProgress, toggleSection, isMobile, setMobileDrawerOpen]);
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
@@ -1216,7 +1236,7 @@ export default function SinglePageTherapistApplication() {
                     section={section}
                     isOpen={openSections.has(section.id)}
                     onToggle={() => toggleSection(section.id)}
-                    completion={getSectionCompletion(section.id)}
+                    completion={sectionCompletions[section.id]}
                     form={form}
                     watchedValues={watchedValues}
                     documents={documents}
@@ -1257,6 +1277,7 @@ export default function SinglePageTherapistApplication() {
                         <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                           <p className="text-sm text-yellow-800 font-medium mb-2">
                             <AlertCircle className="w-4 h-4 inline mr-2" />
+                            {overallProgress}
                             Please complete the following sections before
                             submitting:
                           </p>
@@ -1264,9 +1285,7 @@ export default function SinglePageTherapistApplication() {
                             {sections
                               .filter((section) => section.isRequired)
                               .map((section) => {
-                                const completion = getSectionCompletion(
-                                  section.id
-                                );
+                                const completion = sectionCompletions[section.id];
                                 if (completion.percentage < 100) {
                                   return (
                                     <li key={section.id}>
@@ -1327,11 +1346,12 @@ export default function SinglePageTherapistApplication() {
                 </p>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-6">
-              Are you sure you want to restart the form? All your current progress will be lost permanently.
+              Are you sure you want to restart the form? All your current
+              progress will be lost permanently.
             </p>
-            
+
             <div className="flex gap-3 justify-end">
               <Button
                 type="button"
@@ -1467,8 +1487,8 @@ function SectionComponent({
               <BasicInfoSection control={form.control} />
             )}
             {section.id === "licenseInfo" && (
-              <LicenseInfoSection 
-                control={form.control} 
+              <LicenseInfoSection
+                control={form.control}
                 watchedValues={watchedValues}
               />
             )}
@@ -1507,7 +1527,6 @@ function SectionComponent({
     </Collapsible>
   );
 }
-
 
 // Professional Profile Section Component
 function ProfessionalProfileSection({
