@@ -350,7 +350,8 @@ export class TherapistApplicationService {
     }
 
     // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'therapist-documents');
+    // In production, files are served from dist/uploads, so we need to save there
+    const uploadsDir = path.join(process.cwd(), 'dist', 'uploads', 'therapist-documents');
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }

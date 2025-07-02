@@ -14,8 +14,11 @@ export async function submitTherapistApplication(
   try {
     console.log("Submitting application data:", applicationData);
 
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
     // Use the public Next.js API route for therapist applications
-    const response = await fetch("/api/therapist/apply", {
+    const response = await fetch(`${backendUrl}/api/therapist/apply`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -24,8 +27,12 @@ export async function submitTherapistApplication(
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error(errorData.error || `Submit failed with status ${response.status}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Submit failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
@@ -45,16 +52,26 @@ export async function getTherapistApplication(
   id: string
 ): Promise<TherapistApplication> {
   try {
-    const response = await fetch(`/api/therapist/application/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const response = await fetch(
+      `${backendUrl}/api/therapist/application/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error(errorData.error || `Fetch failed with status ${response.status}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Fetch failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
@@ -74,21 +91,33 @@ export async function getAllTherapistApplications(
   status?: string
 ): Promise<TherapistApplication[]> {
   try {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
     const queryParams = new URLSearchParams();
     if (status) queryParams.append("status", status);
 
-    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
-    
-    const response = await fetch(`/api/therapist/application${queryString}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const queryString = queryParams.toString()
+      ? `?${queryParams.toString()}`
+      : "";
+
+    const response = await fetch(
+      `${backendUrl}/api/therapist/application${queryString}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error(errorData.error || `Fetch failed with status ${response.status}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Fetch failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
@@ -115,17 +144,27 @@ export async function updateTherapistApplicationStatus(
   credentials?: { email: string; password: string };
 }> {
   try {
-    const response = await fetch(`/api/therapist/application/${id}/status`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status, adminNotes }),
-    });
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const response = await fetch(
+      `${backendUrl}/api/therapist/application/${id}/status`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status, adminNotes }),
+      }
+    );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error(errorData.error || `Update failed with status ${response.status}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Update failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
@@ -151,24 +190,31 @@ export async function uploadTherapistDocuments(
   uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
 }> {
   try {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
     const formData = new FormData();
-    
+
     // Add files to form data
     files.forEach((file) => {
-      formData.append('files', file);
+      formData.append("files", file);
     });
-    
-    // Add file type mappings
-    formData.append('fileTypes', JSON.stringify(fileTypes));
 
-    const response = await fetch('/api/therapist/upload-public', {
-      method: 'POST',
+    // Add file type mappings
+    formData.append("fileTypes", JSON.stringify(fileTypes));
+
+    const response = await fetch(`${backendUrl}/api/therapist/upload-public`, {
+      method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Upload failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
