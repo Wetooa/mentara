@@ -39,8 +39,22 @@ import {
   CheckIcon,
 } from "lucide-react";
 
+interface ApplicationFile {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  uploadedAt: string;
+}
+
 interface TherapistApplicationDetailsProps {
-  application: TherapistApplication;
+  application: TherapistApplication & {
+    files?: ApplicationFile[];
+    uploadedDocuments?: Array<{
+      fileName: string;
+      fileType: string;
+      fileUrl: string;
+    }>;
+  };
   onStatusChange?: (
     id: string,
     status: "approved" | "rejected" | "pending"
@@ -112,21 +126,101 @@ export function TherapistApplicationDetails({
     }
   };
 
-  // Modify renderUploadedDocuments to use real data instead of mock data
+  // Handle protected file access with authentication
+  const handleFileAccess = async (fileUrl: string, action: 'view' | 'download' = 'view') => {
+    try {
+      // For protected file URLs, we need to handle authentication
+      const response = await fetch(fileUrl, {
+        credentials: 'include', // Include auth cookies
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to access file');
+      }
+
+      // Create blob URL for viewing/downloading
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      if (action === 'download') {
+        // Trigger download
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileUrl.split('/').pop() || 'file';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        // Open for viewing
+        window.open(blobUrl, '_blank');
+      }
+      
+      // Clean up blob URL
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+      
+    } catch (error) {
+      console.error('Error accessing file:', error);
+      toast.error('Failed to access file. Please try again.');
+    }
+  };
+
+  // Render uploaded documents using both new files format and legacy uploadedDocuments
   const renderUploadedDocuments = () => {
-    if (
-      !application.uploadedDocuments ||
-      !Array.isArray(application.uploadedDocuments) ||
-      application.uploadedDocuments.length === 0
-    ) {
+    const files = application.files || [];
+    const legacyDocs = application.uploadedDocuments || [];
+
+    if (files.length === 0 && legacyDocs.length === 0) {
       return <p className="text-gray-500 italic">No documents uploaded</p>;
     }
 
     return (
       <div className="grid grid-cols-1 gap-2">
-        {application.uploadedDocuments.map((file, index) => (
+        {/* Render new files format */}
+        {files.map((file) => (
           <div
-            key={index}
+            key={file.id}
+            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              {getFileIcon(file.fileName)}
+              <div>
+                <span className="block">{file.fileName}</span>
+                <span className="text-sm text-gray-500">
+                  Uploaded: {format(new Date(file.uploadedAt), "MMM dd, yyyy")}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => handleFileAccess(file.fileUrl, 'view')}
+              >
+                <ExternalLinkIcon className="w-4 h-4" />
+                <span>View</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => handleFileAccess(file.fileUrl, 'download')}
+              >
+                <DownloadIcon className="w-4 h-4" />
+                <span>Download</span>
+              </Button>
+            </div>
+          </div>
+        ))}
+        
+        {/* Render legacy uploadedDocuments format for backward compatibility */}
+        {legacyDocs.map((file, index) => (
+          <div
+            key={`legacy-${index}`}
             className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center space-x-3">
@@ -138,7 +232,7 @@ export function TherapistApplicationDetails({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => window.open(file.fileUrl, "_blank")}
+                onClick={() => handleFileAccess(file.fileUrl, 'view')}
               >
                 <ExternalLinkIcon className="w-4 h-4" />
                 <span>View</span>
@@ -148,7 +242,7 @@ export function TherapistApplicationDetails({
                 variant="ghost"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => window.open(file.fileUrl, "_blank", "download")}
+                onClick={() => handleFileAccess(file.fileUrl, 'download')}
               >
                 <DownloadIcon className="w-4 h-4" />
                 <span>Download</span>

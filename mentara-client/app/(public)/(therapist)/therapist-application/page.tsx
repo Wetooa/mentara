@@ -29,6 +29,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { MobileDrawer } from "@/components/ui/mobile-drawer";
+import { MobileProgressHeader } from "@/components/ui/mobile-progress-header";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -56,6 +58,7 @@ import {
 // Store and API
 import useTherapistForm from "@/store/therapistform";
 import { useToast } from "@/contexts/ToastContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
@@ -291,12 +294,17 @@ export default function SinglePageTherapistApplication() {
   const router = useRouter();
   const { showToast } = useToast();
   const { updateField, updateNestedField, documents, updateDocuments, removeDocument } = useTherapistForm();
+  const isMobile = useIsMobile();
   
   // Section state management
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["basicInfo"]));
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  
+  // Mobile navigation state
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
   // Form setup
   const form = useForm<UnifiedTherapistForm>({
@@ -483,6 +491,51 @@ export default function SinglePageTherapistApplication() {
     });
   }, []);
 
+  // Mobile navigation handlers
+  const handleMobileMenuClick = useCallback(() => {
+    setMobileDrawerOpen(true);
+  }, []);
+
+  const handleMobileDrawerClose = useCallback(() => {
+    setMobileDrawerOpen(false);
+  }, []);
+
+  const goToNextSection = useCallback(() => {
+    if (currentSectionIndex < sections.length - 1) {
+      const nextIndex = currentSectionIndex + 1;
+      const nextSection = sections[nextIndex];
+      setCurrentSectionIndex(nextIndex);
+      setOpenSections(prev => new Set([...prev, nextSection.id]));
+      
+      // Scroll to next section
+      setTimeout(() => {
+        const element = document.getElementById(`section-${nextSection.id}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [currentSectionIndex]);
+
+  const goToPreviousSection = useCallback(() => {
+    if (currentSectionIndex > 0) {
+      const prevIndex = currentSectionIndex - 1;
+      const prevSection = sections[prevIndex];
+      setCurrentSectionIndex(prevIndex);
+      setOpenSections(prev => new Set([...prev, prevSection.id]));
+      
+      // Scroll to previous section
+      setTimeout(() => {
+        const element = document.getElementById(`section-${prevSection.id}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [currentSectionIndex]);
+
+  const currentSection = sections[currentSectionIndex];
+
   // Auto-save functionality
   const autoSave = useCallback((values: UnifiedTherapistForm) => {
     try {
@@ -654,133 +707,175 @@ export default function SinglePageTherapistApplication() {
     }
   }, [autoSave, router, showToast]);
 
-  return (
-    <div className="w-full min-h-screen flex bg-gray-50">
-      {/* Left Sidebar */}
-      <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm">
-        <div className="mb-8">
-          <Image
-            src="/icons/mentara/mentara-landscape.png"
-            alt="Mentara logo"
-            width={250}
-            height={100}
-          />
-        </div>
-        
-        <div className="mt-4 mb-8">
-          <p className="text-sm text-gray-600 mb-1">You're working on</p>
-          <h1 className="text-2xl font-bold text-green-900">Application</h1>
-        </div>
-
-        {/* Overall Progress */}
-        <div className="mb-6" data-testid="overall-progress">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-            <span className="text-sm text-gray-600">{displayProgress}%</span>
-          </div>
-          <Progress value={displayProgress} className="h-2" />
-        </div>
-
-        {/* Section List */}
-        <div className="space-y-3 flex-1">
-          {sections.map((section) => {
-            const completion = getSectionCompletion(section.id);
-            const isOpen = openSections.has(section.id);
-            const isCompleted = completion.percentage === 100;
-            
-            return (
-              <div
-                key={section.id}
-                className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                  isOpen
-                    ? "bg-green-100 border-green-300"
-                    : isCompleted
-                    ? "bg-green-50 border-green-200"
-                    : "bg-white border-gray-200 hover:bg-gray-50"
-                }`}
-                onClick={() => {
-                  // Open the section if it's not already open
-                  if (!isOpen) {
-                    toggleSection(section.id);
-                  }
-                  // Smooth scroll to the section
-                  setTimeout(() => {
-                    const element = document.getElementById(`section-${section.id}`);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }, 100); // Small delay to allow section to open
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`flex-shrink-0 ${isCompleted ? "text-green-600" : "text-gray-400"}`}>
-                    {section.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-sm text-gray-900 truncate">
-                        {section.title}
-                      </h3>
-                      {isCompleted && (
-                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-gray-500">
-                        {completion.completed}/{completion.total} complete
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {completion.percentage}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {isOpen ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Auto-save status */}
-        <div className="mt-auto">
-          <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-            {lastSavedAt ? (
-              <>
-                <Save className="w-3 h-3 text-green-600" />
-                <span className="text-green-600">
-                  Saved {lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </>
-            ) : (
-              <>
-                <Circle className="w-3 h-3" />
-                <span>Not saved yet</span>
-              </>
-            )}
-          </div>
-          <div className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Mentara. All rights reserved.
-          </div>
-        </div>
+  // Sidebar content component for reuse between desktop and mobile
+  const SidebarContent = () => (
+    <>
+      <div className="mb-8">
+        <Image
+          src="/icons/mentara/mentara-landscape.png"
+          alt="Mentara logo"
+          width={250}
+          height={100}
+        />
+      </div>
+      
+      <div className="mt-4 mb-8">
+        <p className="text-sm text-gray-600 mb-1">You're working on</p>
+        <h1 className="text-2xl font-bold text-green-900">Application</h1>
       </div>
 
-      {/* Main Content */}
-      <div className="w-4/5 flex justify-center p-8" data-testid="main-content">
-        <div className="w-full max-w-4xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Therapist Application
-            </h1>
-            <p className="text-gray-600">
-              Complete all sections below to submit your application to join the Mentara therapist network.
-            </p>
+      {/* Overall Progress */}
+      <div className="mb-6" data-testid="overall-progress">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+          <span className="text-sm text-gray-600">{displayProgress}%</span>
+        </div>
+        <Progress value={displayProgress} className="h-2" />
+      </div>
+
+      {/* Section List */}
+      <div className="space-y-3 flex-1">
+        {sections.map((section) => {
+          const completion = getSectionCompletion(section.id);
+          const isOpen = openSections.has(section.id);
+          const isCompleted = completion.percentage === 100;
+          
+          return (
+            <div
+              key={section.id}
+              className={`p-3 rounded-lg border transition-all cursor-pointer ${
+                isOpen
+                  ? "bg-green-100 border-green-300"
+                  : isCompleted
+                  ? "bg-green-50 border-green-200"
+                  : "bg-white border-gray-200 hover:bg-gray-50"
+              }`}
+              onClick={() => {
+                // Open the section if it's not already open
+                if (!isOpen) {
+                  toggleSection(section.id);
+                }
+                // Close mobile drawer when clicking on section
+                if (isMobile) {
+                  setMobileDrawerOpen(false);
+                }
+                // Smooth scroll to the section
+                setTimeout(() => {
+                  const element = document.getElementById(`section-${section.id}`);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100); // Small delay to allow section to open
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`flex-shrink-0 ${isCompleted ? "text-green-600" : "text-gray-400"}`}>
+                  {section.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-sm text-gray-900 truncate">
+                      {section.title}
+                    </h3>
+                    {isCompleted && (
+                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-gray-500">
+                      {completion.completed}/{completion.total} complete
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {completion.percentage}%
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  {isOpen ? (
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Auto-save status */}
+      <div className="mt-auto">
+        <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+          {lastSavedAt ? (
+            <>
+              <Save className="w-3 h-3 text-green-600" />
+              <span className="text-green-600">
+                Saved {lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </>
+          ) : (
+            <>
+              <Circle className="w-3 h-3" />
+              <span>Not saved yet</span>
+            </>
+          )}
+        </div>
+        <div className="text-xs text-gray-500">
+          © {new Date().getFullYear()} Mentara. All rights reserved.
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="w-full min-h-screen bg-gray-50">
+      {/* Mobile Header - Only shown on mobile */}
+      {isMobile && (
+        <MobileProgressHeader
+          title="Therapist Application"
+          progress={displayProgress}
+          currentSection={currentSection?.title || ""}
+          onMenuClick={handleMobileMenuClick}
+          onPreviousSection={goToPreviousSection}
+          onNextSection={goToNextSection}
+          hasPrevious={currentSectionIndex > 0}
+          hasNext={currentSectionIndex < sections.length - 1}
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      {isMobile && (
+        <MobileDrawer
+          isOpen={mobileDrawerOpen}
+          onClose={handleMobileDrawerClose}
+          title="Application Progress"
+        >
+          <SidebarContent />
+        </MobileDrawer>
+      )}
+
+      <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`}>
+        {/* Desktop Sidebar - Only shown on desktop */}
+        {!isMobile && (
+          <div className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm" data-testid="sidebar">
+            <SidebarContent />
           </div>
+        )}
+
+        {/* Main Content */}
+        <div className={`${isMobile ? 'w-full' : 'w-4/5'} flex justify-center ${isMobile ? 'p-4' : 'p-8'}`} data-testid="main-content">
+        <div className="w-full max-w-4xl">
+          {/* Desktop Header - Hidden on mobile since we have mobile header */}
+          {!isMobile && (
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Therapist Application
+              </h1>
+              <p className="text-gray-600">
+                Complete all sections below to submit your application to join the Mentara therapist network.
+              </p>
+            </div>
+          )}
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -868,6 +963,7 @@ export default function SinglePageTherapistApplication() {
               </Card>
             </form>
           </Form>
+        </div>
         </div>
       </div>
     </div>
@@ -1148,28 +1244,28 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                 </FormLabel>
                 <FormControl>
                   <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="rpsy" id="rpsy" />
                       <Label htmlFor="rpsy" className="flex-1 cursor-pointer">
                         <div className="font-medium">RPsy (Registered Psychologist)</div>
                         <div className="text-sm text-gray-500">Licensed to practice psychology</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="rpm" id="rpm" />
                       <Label htmlFor="rpm" className="flex-1 cursor-pointer">
                         <div className="font-medium">RPm (Registered Psychometrician)</div>
                         <div className="text-sm text-gray-500">Licensed to administer psychological tests</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="rgc" id="rgc" />
                       <Label htmlFor="rgc" className="flex-1 cursor-pointer">
                         <div className="font-medium">RGC (Registered Guidance Counselor)</div>
                         <div className="text-sm text-gray-500">Licensed to provide guidance and counseling</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="other" id="other" />
                       <Label htmlFor="other" className="flex-1 cursor-pointer">
                         <div className="font-medium">Others (Please specify)</div>
@@ -1211,11 +1307,11 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                 </FormLabel>
                 <FormControl>
                   <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-6">
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="yes" id="prc-yes" />
                       <Label htmlFor="prc-yes" className="cursor-pointer font-medium">Yes</Label>
                     </div>
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="no" id="prc-no" />
                       <Label htmlFor="prc-no" className="cursor-pointer font-medium">No</Label>
                     </div>
@@ -1354,11 +1450,11 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                   </FormLabel>
                   <FormControl>
                     <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-6">
-                      <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                         <RadioGroupItem value="yes" id={`${item.id}-yes`} />
                         <Label htmlFor={`${item.id}-yes`} className="cursor-pointer font-medium">Yes</Label>
                       </div>
-                      <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                         <RadioGroupItem value="no" id={`${item.id}-no`} />
                         <Label htmlFor={`${item.id}-no`} className="cursor-pointer font-medium">No</Label>
                       </div>
@@ -1393,7 +1489,7 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                   {therapistProfileFormFields.areasOfExpertise.options.map((option) => (
                     <Label
                       key={option.value}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-orange-100 hover:border-orange-300 cursor-pointer transition-colors group"
+                      className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-orange-100 hover:border-orange-300 cursor-pointer transition-colors group"
                     >
                       <Checkbox
                         checked={field.value?.includes(option.value)}
@@ -1454,7 +1550,7 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                   {therapistProfileFormFields.assessmentTools.options.map((option) => (
                     <Label
                       key={option.value}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 cursor-pointer transition-colors group"
+                      className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 cursor-pointer transition-colors group"
                     >
                       <Checkbox
                         checked={field.value?.includes(option.value)}
@@ -1515,7 +1611,7 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                   {therapistProfileFormFields.therapeuticApproachesUsedList.options.map((option) => (
                     <Label
                       key={option.value}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-teal-100 hover:border-teal-300 cursor-pointer transition-colors group"
+                      className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-teal-100 hover:border-teal-300 cursor-pointer transition-colors group"
                     >
                       <Checkbox
                         checked={field.value?.includes(option.value)}
@@ -1582,7 +1678,7 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                   {therapistProfileFormFields.languagesOffered.options.map((option) => (
                     <Label
                       key={option.value}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
+                      className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
                     >
                       <Checkbox
                         checked={field.value?.includes(option.value)}
@@ -1677,14 +1773,14 @@ function ProfessionalProfileSection({ form, watchedValues }: { form: any, watche
                 </FormLabel>
                 <FormControl>
                   <RadioGroup value={field.value} onValueChange={field.onChange} className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="no" id="complaints-no" />
                       <Label htmlFor="complaints-no" className="flex-1 cursor-pointer">
                         <div className="font-medium">No</div>
                         <div className="text-sm text-gray-500">No complaints or disciplinary actions</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                       <RadioGroupItem value="yes" id="complaints-yes" />
                       <Label htmlFor="complaints-yes" className="flex-1 cursor-pointer">
                         <div className="font-medium">Yes (please briefly explain)</div>
@@ -1877,7 +1973,7 @@ function AvailabilityServicesSection({ form, watchedValues }: { form: any, watch
                   {therapistProfileFormFields.availabilityAndPayment.accepts.options.map((option) => (
                     <Label
                       key={option.value}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
+                      className="flex items-center gap-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-green-100 hover:border-green-300 cursor-pointer transition-colors group"
                     >
                       <Checkbox
                         checked={field.value?.includes(option.value)}
