@@ -59,7 +59,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
-import { submitTherapistApplication, uploadTherapistDocuments } from "@/lib/api/therapist-application";
+import { submitApplicationWithDocuments } from "@/lib/api/therapist-application";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
 const unifiedTherapistSchema = z.object({
@@ -582,83 +582,65 @@ export default function SinglePageTherapistApplication() {
         return;
       }
 
-      console.log("Submitting therapist application:", transformedData);
+      console.log("Submitting therapist application with documents:", transformedData);
       
-      // First, submit the application to create it in the database
-      const result = await submitTherapistApplication(transformedData);
-      console.log("Application submitted successfully:", result);
-      console.log("Application ID for document upload:", result.id);
-      
-      // Then upload documents and link them to the created application
-      let uploadedFiles: any[] = [];
+      // Prepare documents for upload
       const allFiles = Object.entries(documents).flatMap(([type, files]) => 
         files.map(file => ({ file, type }))
       );
       
-      if (allFiles.length > 0) {
-        showToast("Uploading documents...", "info");
-        
-        const fileTypeMap: Record<string, string> = {};
-        const filesToUpload: File[] = [];
-        
-        // Map document types to backend categories
-        const docTypeMapping = {
-          prcLicense: "license",
-          nbiClearance: "certificate",
-          resumeCV: "resume",
-          liabilityInsurance: "certificate",
-          birForm: "document"
-        };
-        
-        allFiles.forEach(({ file, type }) => {
-          filesToUpload.push(file);
-          fileTypeMap[file.name] = docTypeMapping[type as keyof typeof docTypeMapping] || "document";
-        });
-        
-        try {
-          // Use the application ID from the created application (result.id should be the userId)
-          console.log("Upload documents with application ID:", result.id);
-          const uploadResult = await uploadTherapistDocuments(filesToUpload, fileTypeMap, result.id);
-          uploadedFiles = uploadResult.uploadedFiles;
-          showToast(`Successfully uploaded ${uploadedFiles.length} document(s)`, "success", 3000);
-        } catch (uploadError) {
-          console.error("Document upload failed:", uploadError);
-          
-          const errorMessage = uploadError instanceof Error 
-            ? uploadError.message 
-            : "Document upload failed";
-          
-          // Show warning but don't fail the entire submission since application was created
-          showToast(
-            `Application submitted successfully, but document upload failed: ${errorMessage}. You can upload documents later.`, 
-            "warning",
-            8000
-          );
-        }
-      }
+      const fileTypeMap: Record<string, string> = {};
+      const filesToUpload: File[] = [];
+      
+      // Map document types to backend categories
+      const docTypeMapping = {
+        prcLicense: "license",
+        nbiClearance: "certificate", 
+        resumeCV: "resume",
+        liabilityInsurance: "certificate",
+        birForm: "document"
+      };
+      
+      allFiles.forEach(({ file, type }) => {
+        filesToUpload.push(file);
+        fileTypeMap[file.name] = docTypeMapping[type as keyof typeof docTypeMapping] || "document";
+      });
+      
+      showToast("Submitting application with documents...", "info");
+      
+      // Use consolidated API to submit application and upload documents in one atomic operation
+      const result = await submitApplicationWithDocuments(transformedData, filesToUpload, fileTypeMap);
+      console.log("Application and documents submitted successfully:", result);
+      
+      showToast(`Successfully submitted application with ${result.uploadedFiles.length} document(s)`, "success", 3000);
       
       showToast("Application submitted successfully!", "success");
       
       // Navigate to success page after successful submission
       setTimeout(() => {
-        router.push(`/therapist-application/success?id=${result.id}`);
+        router.push(`/therapist-application/success?id=${result.applicationId}`);
       }, 1500);
     } catch (error) {
       console.error("Error submitting application:", error);
       
-      // Handle specific error types
+      // Handle specific error types from consolidated submission
       if (error instanceof Error) {
         if (error.message.includes("email already exists") || error.message.includes("An application with this email")) {
           router.push(`/therapist-application/error?type=email_exists&message=${encodeURIComponent(error.message)}`);
           return;
         }
         
-        if (error.message.includes("validation") || error.message.includes("required")) {
+        if (error.message.includes("validation") || error.message.includes("required") || error.message.includes("check all required fields")) {
           router.push(`/therapist-application/error?type=validation_error&message=${encodeURIComponent(error.message)}`);
           return;
         }
         
-        if (error.message.includes("server") || error.message.includes("500")) {
+        if (error.message.includes("file") || error.message.includes("upload") || error.message.includes("document")) {
+          router.push(`/therapist-application/error?type=upload_error&message=${encodeURIComponent(error.message)}`);
+          return;
+        }
+        
+        if (error.message.includes("server") || error.message.includes("500") || error.message.includes("contact support")) {
           router.push(`/therapist-application/error?type=server_error&message=${encodeURIComponent(error.message)}`);
           return;
         }

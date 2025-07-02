@@ -70,6 +70,112 @@ export class TherapistApplicationController {
     private readonly therapistApplicationService: TherapistApplicationService,
   ) {}
 
+  @Post('apply-with-documents')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
+      fileFilter: (req, file, callback) => {
+        const allowedMimeTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/png',
+          'image/jpg',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+
+        if (allowedMimeTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(new BadRequestException('Invalid file type'), false);
+        }
+      },
+    }),
+  )
+  async applyWithDocuments(
+    @Body() applicationDataJson: string,
+    @Body('fileTypes') fileTypes: string,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<{
+    success: boolean;
+    message: string;
+    applicationId: string;
+    uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+  }> {
+    try {
+      // Parse application data from form
+      let applicationData: TherapistApplicationDto;
+      try {
+        applicationData = JSON.parse(applicationDataJson);
+      } catch (error) {
+        throw new BadRequestException('Invalid application data format');
+      }
+
+      console.log('Received consolidated application with documents:', {
+        firstName: applicationData.firstName,
+        lastName: applicationData.lastName,
+        email: applicationData.email,
+        fileCount: files?.length || 0,
+        fileNames: files?.map(f => f.originalname) || [],
+      });
+
+      // For public applications, create a temporary user ID
+      const tempUserId = `temp_${Date.now()}_${applicationData.email.replace('@', '_at_')}`;
+      const applicationWithUserId = { ...applicationData, userId: tempUserId };
+
+      // Parse file type mappings
+      let fileTypeMap: Record<string, string> = {};
+      if (fileTypes) {
+        try {
+          fileTypeMap = JSON.parse(fileTypes);
+        } catch {
+          console.warn('Invalid fileTypes JSON, proceeding without mapping');
+        }
+      }
+
+      // Use consolidated service method to create application and upload documents in one transaction
+      const result = await this.therapistApplicationService.createApplicationWithDocuments(
+        applicationWithUserId,
+        files || [],
+        fileTypeMap,
+      );
+
+      return {
+        success: true,
+        message: 'Application submitted successfully with documents',
+        applicationId: result.application.userId,
+        uploadedFiles: result.uploadedFiles,
+      };
+    } catch (error) {
+      console.error('Error submitting application with documents:', error);
+      
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      
+      // Enhanced error handling with specific error types
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes('email already exists')) {
+        throw new BadRequestException('An application with this email address already exists. Please check your email or contact support.');
+      }
+      
+      if (errorMessage.includes('file upload')) {
+        throw new BadRequestException('One or more files failed to upload. Please check file formats and sizes.');
+      }
+      
+      if (errorMessage.includes('validation')) {
+        throw new BadRequestException('Application data validation failed. Please check all required fields.');
+      }
+      
+      throw new InternalServerErrorException('Failed to submit application with documents. Please try again or contact support.');
+    }
+  }
+
   @Post('apply')
   async submitPublicApplication(
     @Body() applicationData: TherapistApplicationDto,

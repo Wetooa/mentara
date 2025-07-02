@@ -479,9 +479,211 @@ export class TherapistApplicationService {
     return typeMapping[fileType.toLowerCase()] || AttachmentPurpose.DOCUMENT;
   }
 
+  async createApplicationWithDocuments(
+    applicationData: TherapistApplicationDto,
+    files: Express.Multer.File[],
+    fileTypeMap: Record<string, string> = {},
+  ): Promise<{
+    application: any;
+    uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+  }> {
+    // Use database transaction to ensure atomicity
+    return await this.prisma.$transaction(async (prisma) => {
+      // Check if user already has an application
+      const existingApplication = await prisma.therapist.findUnique({
+        where: { userId: applicationData.userId },
+      });
+
+      if (existingApplication) {
+        throw new BadRequestException('User already has a therapist application');
+      }
+
+      // For public applications (temporary user IDs), skip user existence check
+      const isPublicApplication = applicationData.userId.startsWith('temp_');
+
+      if (!isPublicApplication) {
+        // Check if user exists for authenticated applications
+        const user = await prisma.user.findUnique({
+          where: { id: applicationData.userId },
+        });
+
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+      } else {
+        // For public applications, check if someone with this email already applied
+        const existingByEmail = await prisma.therapist.findFirst({
+          where: {
+            OR: [
+              { user: { email: applicationData.email } },
+              // Also check temp user IDs with this email pattern
+              {
+                userId: { contains: applicationData.email.replace('@', '_at_') },
+              },
+            ],
+          },
+        });
+
+        if (existingByEmail) {
+          throw new BadRequestException(
+            'An application with this email already exists',
+          );
+        }
+      }
+
+      // Process the application data
+      const convertedData = {
+        ...applicationData,
+        practiceStartDate: new Date(applicationData.practiceStartDate),
+        // Handle expiration date
+        expirationDateOfLicense: applicationData.expirationDateOfLicense
+          ? new Date(applicationData.expirationDateOfLicense)
+          : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Default to 1 year from now
+        // Set default values for required fields
+        licenseVerified: false,
+        acceptsInsurance: false,
+        hourlyRate: applicationData.hourlyRate || 0,
+      };
+
+      // For public applications, create the user record first
+      if (isPublicApplication) {
+        await prisma.user.create({
+          data: {
+            id: convertedData.userId,
+            email: convertedData.email,
+            firstName: convertedData.firstName,
+            lastName: convertedData.lastName,
+            role: 'client', // Temporary role until approved
+            isActive: false, // Inactive until approved
+          },
+        });
+      }
+
+      // Create the therapist application
+      const application = await prisma.therapist.create({
+        data: {
+          userId: convertedData.userId,
+          mobile: convertedData.mobile,
+          province: convertedData.province,
+          providerType: convertedData.providerType,
+          professionalLicenseType: convertedData.professionalLicenseType,
+          isPRCLicensed: convertedData.isPRCLicensed,
+          prcLicenseNumber: convertedData.prcLicenseNumber || '',
+          practiceStartDate: convertedData.practiceStartDate,
+          areasOfExpertise: convertedData.areasOfExpertise,
+          assessmentTools: convertedData.assessmentTools,
+          therapeuticApproachesUsedList:
+            convertedData.therapeuticApproachesUsedList,
+          languagesOffered: convertedData.languagesOffered,
+          providedOnlineTherapyBefore:
+            convertedData.providedOnlineTherapyBefore,
+          comfortableUsingVideoConferencing:
+            convertedData.comfortableUsingVideoConferencing,
+          privateConfidentialSpace: convertedData.privateConfidentialSpace
+            ? 'yes'
+            : 'no',
+          compliesWithDataPrivacyAct: convertedData.compliesWithDataPrivacyAct,
+          professionalLiabilityInsurance:
+            convertedData.professionalLiabilityInsurance,
+          complaintsOrDisciplinaryActions:
+            convertedData.complaintsOrDisciplinaryActions,
+          willingToAbideByPlatformGuidelines:
+            convertedData.willingToAbideByPlatformGuidelines,
+          sessionLength: convertedData.preferredSessionLength,
+          hourlyRate: convertedData.hourlyRate,
+          status: 'pending',
+          submissionDate: new Date(),
+          processingDate: new Date(),
+          expirationDateOfLicense: convertedData.expirationDateOfLicense,
+          licenseVerified: convertedData.licenseVerified,
+          acceptsInsurance: convertedData.acceptsInsurance,
+          acceptedInsuranceTypes: [],
+          specialCertifications: [],
+          expertise: convertedData.areasOfExpertise,
+          approaches: convertedData.therapeuticApproachesUsedList,
+          languages: convertedData.languagesOffered,
+          illnessSpecializations: [],
+          acceptTypes: convertedData.accepts || [],
+          treatmentSuccessRates: {},
+          preferredSessionLength: [30, 45, 60], // Default session lengths
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      // Process and upload documents if provided
+      let uploadedFiles: Array<{ id: string; fileName: string; url: string }> = [];
+      
+      if (files && files.length > 0) {
+        // Create uploads directory if it doesn't exist
+        const uploadsDir = path.join(
+          process.cwd(),
+          'uploads',
+          'therapist-documents',
+        );
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        for (const file of files) {
+          try {
+            const fileName = `${Date.now()}-${file.originalname}`;
+            const filePath = path.join(uploadsDir, fileName);
+
+            // Save file to disk
+            fs.writeFileSync(filePath, file.buffer);
+
+            // Create file record using modern File system
+            const fileRecord = await prisma.file.create({
+              data: {
+                filename: file.originalname,
+                displayName: file.originalname,
+                mimeType: file.mimetype,
+                size: file.size,
+                storagePath: `uploads/therapist-documents/${fileName}`,
+                uploadedBy: application.userId,
+                status: FileStatus.UPLOADED,
+              },
+            });
+
+            // Determine the purpose based on file type mapping
+            const fileType = fileTypeMap[file.originalname] || 'document';
+            const purpose = this.mapFileTypeToPurpose(fileType);
+
+            // Attach file to therapist application
+            await prisma.fileAttachment.create({
+              data: {
+                fileId: fileRecord.id,
+                entityType: AttachmentEntityType.THERAPIST_APPLICATION,
+                entityId: application.userId,
+                purpose: purpose,
+              },
+            });
+
+            uploadedFiles.push({
+              id: fileRecord.id,
+              fileName: file.originalname,
+              url: `/api/files/serve/${fileRecord.id}`, // Use protected endpoint
+            });
+          } catch (error) {
+            console.error('Error uploading file:', error);
+            // In a transaction, this will cause the entire operation to rollback
+            throw new BadRequestException(`Failed to upload file: ${file.originalname}`);
+          }
+        }
+      }
+
+      return {
+        application,
+        uploadedFiles,
+      };
+    });
+  }
+
   private generateTemporaryPassword(): string {
     const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
+      'ABCDEFGHIJ KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
     let password = '';
     for (let i = 0; i < 12; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));

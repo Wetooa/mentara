@@ -176,10 +176,73 @@ export async function updateTherapistApplicationStatus(
 }
 
 /**
- * Upload documents for therapist application
+ * Submit therapist application with documents in a single atomic operation
+ * @param applicationData Complete therapist application data
+ * @param files Files to upload with the application
+ * @param fileTypes Mapping of file types
+ * @returns The created application with uploaded files
+ */
+export async function submitApplicationWithDocuments(
+  applicationData: any,
+  files: File[],
+  fileTypes: Record<string, string> = {}
+): Promise<{
+  success: boolean;
+  message: string;
+  applicationId: string;
+  uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+}> {
+  try {
+    console.log("Submitting application with documents:", {
+      application: applicationData,
+      fileCount: files.length,
+      fileNames: files.map(f => f.name),
+    });
+
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const formData = new FormData();
+
+    // Add application data as JSON string
+    formData.append("applicationDataJson", JSON.stringify(applicationData));
+
+    // Add files to form data
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    // Add file type mappings
+    formData.append("fileTypes", JSON.stringify(fileTypes));
+
+    const response = await fetch(`${backendUrl}/api/therapist/apply-with-documents`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || errorData.message || `Submit failed with status ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error submitting application with documents:", error);
+    throw error;
+  }
+}
+
+/**
+ * Upload documents for therapist application (legacy method - use submitApplicationWithDocuments instead)
  * @param files Files to upload
  * @param fileTypes Mapping of file types
  * @returns Upload result with file URLs
+ * @deprecated Use submitApplicationWithDocuments for new implementations
  */
 export async function uploadTherapistDocuments(
   files: File[],
