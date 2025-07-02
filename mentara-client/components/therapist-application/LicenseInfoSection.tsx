@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FileText, Shield } from "lucide-react";
@@ -24,6 +25,9 @@ export interface LicenseInfoFormFields {
   expirationDateOfLicense?: string;
   isLicenseActive?: string;
   practiceStartDate: string;
+  yearsOfExperience: number;
+  educationBackground?: string;
+  practiceLocation?: string;
 }
 
 interface LicenseInfoSectionProps {
@@ -279,6 +283,74 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
             </FormItem>
           )}
         />
+
+        <FormField
+          control={control}
+          name="yearsOfExperience"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold">
+                Years of Experience{" "}
+                <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min="0" 
+                  max="50"
+                  {...field} 
+                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                  value={field.value || ""} 
+                  placeholder="e.g., 5" 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={control}
+            name="educationBackground"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Educational Background
+                  <span className="text-red-500"> *</span>
+                </FormLabel>
+                <FormControl>
+                  <Textarea 
+                    {...field} 
+                    placeholder="e.g., Master's in Clinical Psychology from University of the Philippines"
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="practiceLocation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base font-semibold">
+                  Primary Practice Location
+                  <span className="text-red-500"> *</span>
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="e.g., Makati City, Metro Manila" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </CardContent>
     </Card>
   );

@@ -95,12 +95,10 @@ const unifiedTherapistSchema = z
       .max(50, "Please enter a valid number of years"),
     educationBackground: z
       .string()
-      .min(10, "Please provide details about your educational background")
-      .optional(),
+      .min(10, "Please provide details about your educational background"),
     practiceLocation: z
       .string()
-      .min(1, "Please specify your primary practice location")
-      .optional(),
+      .min(1, "Please specify your primary practice location"),
 
     // Teletherapy Readiness - Flattened for backend compatibility
     providedOnlineTherapyBefore: z
@@ -524,6 +522,8 @@ export default function SinglePageTherapistApplication() {
             "isPRCLicensed",
             "practiceStartDate",
             "yearsOfExperience",
+            "educationBackground",
+            "practiceLocation",
           ];
           let licenseCompleted = 0;
 
@@ -552,7 +552,6 @@ export default function SinglePageTherapistApplication() {
             total += 1;
           }
 
-          // Optional fields (educationBackground, practiceLocation) - don't count toward completion
           completed = licenseCompleted;
           break;
 
@@ -898,10 +897,14 @@ export default function SinglePageTherapistApplication() {
           transformedData
         );
 
-        // Prepare documents for upload
-        const allFiles = Object.entries(documents).flatMap(([type, files]) =>
-          files.map((file) => ({ file, type }))
-        );
+        // Prepare documents for upload - filter out deleted/missing files
+        const allFiles = Object.entries(documents)
+          .filter(([type, files]) => files && files.length > 0) // Only include document types with actual files
+          .flatMap(([type, files]) =>
+            files
+              .filter((file) => file && file instanceof File) // Ensure file exists and is valid
+              .map((file) => ({ file, type }))
+          );
 
         const fileTypeMap: Record<string, string> = {};
         const filesToUpload: File[] = [];
@@ -916,9 +919,12 @@ export default function SinglePageTherapistApplication() {
         };
 
         allFiles.forEach(({ file, type }) => {
-          filesToUpload.push(file);
-          fileTypeMap[file.name] =
-            docTypeMapping[type as keyof typeof docTypeMapping] || "document";
+          // Additional safety check to ensure file is valid before processing
+          if (file && file instanceof File && file.name) {
+            filesToUpload.push(file);
+            fileTypeMap[file.name] =
+              docTypeMapping[type as keyof typeof docTypeMapping] || "document";
+          }
         });
 
         showToast("Submitting application with documents...", "info");
