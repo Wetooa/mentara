@@ -31,6 +31,7 @@ import { PrismaService } from './providers/prisma-client.provider';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { EventBusService } from './common/events/event-bus.service';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { EventBusService } from './common/events/event-bus.service';
       // Show event name in memory leaks message when more than maximum amount of listeners
       verboseMemoryLeak: false,
     }),
+    CommonModule,
     AuthModule,
     UsersModule,
     CommunitiesModule,

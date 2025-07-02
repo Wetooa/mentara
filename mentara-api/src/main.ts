@@ -64,7 +64,9 @@ async function bootstrap() {
   app.enableCors({
     origin:
       process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL?.split(',') || ['https://mentara.app']
+        ? process.env.FRONTEND_URL?.split(',')
+            .map((url) => url.trim())
+            .filter((url) => url.length > 0) || ['https://mentara.app']
         : ['http://localhost:3000', 'http://localhost:3001'], // Only allow local dev in development
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,

@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-} from './therapist-application.dto';
+} from './dto/therapist-application.dto';
 
 @Controller('therapist-recommendations')
 @UseGuards(ClerkAuthGuard)

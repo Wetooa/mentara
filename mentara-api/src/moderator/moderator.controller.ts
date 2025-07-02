@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ModeratorService } from './moderator.service';
 import { Moderator, Prisma } from '@prisma/client';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 
 @Controller('moderator')
 @UseGuards(ClerkAuthGuard)

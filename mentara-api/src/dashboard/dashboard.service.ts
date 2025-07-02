@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 
 @Injectable()
@@ -43,7 +47,7 @@ export class DashboardService {
       });
 
       if (!client) {
-        throw new Error('Client not found');
+        throw new NotFoundException('Client not found');
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -89,7 +93,10 @@ export class DashboardService {
         hasPreAssessment: !!client.preAssessment,
       };
     } catch (error) {
-      throw new Error(
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
         `Failed to get user dashboard data: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -132,7 +139,7 @@ export class DashboardService {
       });
 
       if (!therapist) {
-        throw new Error('Therapist not found');
+        throw new NotFoundException('Therapist not found');
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -173,7 +180,10 @@ export class DashboardService {
         recentSessions,
       };
     } catch (error) {
-      throw new Error(
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
         `Failed to get therapist dashboard data: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -226,7 +236,7 @@ export class DashboardService {
         pendingApplications: recentTherapistApplications,
       };
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to get admin dashboard data: ${error instanceof Error ? error.message : String(error)}`,
       );
     }

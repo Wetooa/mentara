@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { WorksheetsService } from './worksheets.service';
 import { PaginationQuery, FilterQuery } from 'src/types';

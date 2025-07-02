@@ -11,10 +11,19 @@ import {
   UpdateMessageDto,
 } from './dto/messaging.dto';
 import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
+import { EventBusService } from '../common/events/event-bus.service';
+import {
+  MessageSentEvent,
+  MessageReadEvent,
+  ConversationCreatedEvent,
+} from '../common/events/messaging-events';
 
 @Injectable()
 export class MessagingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBus: EventBusService,
+  ) {}
 
   // Conversation Management
   async createConversation(
@@ -90,6 +99,22 @@ export class MessagingService {
         },
       },
     });
+
+    // Publish conversation created event
+    await this.eventBus.emit(
+      new ConversationCreatedEvent({
+        conversationId: conversation.id,
+        createdBy: userId,
+        participantIds: [userId, ...participantIds],
+        conversationType: type.toLowerCase() as
+          | 'direct'
+          | 'group'
+          | 'support'
+          | 'therapy',
+        title: title || undefined,
+        isPrivate: type === ConversationType.DIRECT,
+      }),
+    );
 
     return conversation;
   }
@@ -226,6 +251,45 @@ export class MessagingService {
       where: { id: conversationId },
       data: { lastMessageAt: new Date() },
     });
+
+    // Get conversation participants for event
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: {
+          where: { isActive: true },
+          select: { userId: true },
+        },
+      },
+    });
+
+    const recipientIds =
+      conversation?.participants
+        .map((p) => p.userId)
+        .filter((id) => id !== userId) || [];
+
+    // Publish message sent event
+    await this.eventBus.emit(
+      new MessageSentEvent({
+        messageId: message.id,
+        conversationId,
+        senderId: userId,
+        content: message.content,
+        messageType: message.messageType.toLowerCase() as
+          | 'text'
+          | 'image'
+          | 'file'
+          | 'audio'
+          | 'video'
+          | 'system',
+        sentAt: message.createdAt,
+        recipientIds,
+        replyToMessageId: message.replyToId || undefined,
+        fileAttachments: message.attachmentUrl
+          ? [message.attachmentUrl]
+          : undefined,
+      }),
+    );
 
     return message;
   }
@@ -416,6 +480,17 @@ export class MessagingService {
         lastReadAt: new Date(),
       },
     });
+
+    // Publish message read event
+    await this.eventBus.emit(
+      new MessageReadEvent({
+        messageId,
+        readBy: userId,
+        readAt: new Date(),
+        conversationId: message.conversationId,
+        messagesSinceLastRead: 1, // Could be enhanced to calculate actual count
+      }),
+    );
   }
 
   // Message Reactions

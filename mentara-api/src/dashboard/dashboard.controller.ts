@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 

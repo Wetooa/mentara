@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 
 @Injectable()
@@ -68,7 +68,7 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to search therapists: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -125,7 +125,7 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to search posts: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -151,7 +151,7 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to search communities: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -186,7 +186,7 @@ export class SearchService {
         take: 20,
       });
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to search users: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -217,7 +217,7 @@ export class SearchService {
 
       return results;
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to perform global search: ${error instanceof Error ? error.message : String(error)}`,
       );
     }

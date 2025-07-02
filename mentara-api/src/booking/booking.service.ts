@@ -12,10 +12,20 @@ import {
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
 } from '../../schema/booking';
+import { EventBusService } from '../common/events/event-bus.service';
+import {
+  AppointmentBookedEvent,
+  AppointmentCancelledEvent,
+  AppointmentCompletedEvent,
+  AppointmentRescheduledEvent,
+} from '../common/events/booking-events';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBus: EventBusService,
+  ) {}
 
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
@@ -100,12 +110,14 @@ export class BookingService {
 
       // Verify therapist availability for this time slot
       const dayOfWeek = new Date(startTime).getDay();
-      const startTimeStr = new Date(startTime).toTimeString().slice(0, 5);
-      const endTimeStr = new Date(
-        new Date(startTime).getTime() + duration * 60 * 1000,
-      )
-        .toTimeString()
-        .slice(0, 5);
+      const timeString = new Date(startTime).toTimeString();
+      const startTimeStr =
+        timeString.length >= 5 ? timeString.slice(0, 5) : timeString;
+
+      const endTime = new Date(startTime).getTime() + duration * 60 * 1000;
+      const endTimeString = new Date(endTime).toTimeString();
+      const endTimeStr =
+        endTimeString.length >= 5 ? endTimeString.slice(0, 5) : endTimeString;
 
       const availability = await this.prisma.therapistAvailability.findFirst({
         where: {
@@ -161,6 +173,25 @@ export class BookingService {
           },
         },
       });
+
+      // Publish appointment booked event
+      await this.eventBus.emit(
+        new AppointmentBookedEvent({
+          appointmentId: meeting.id,
+          clientId: meeting.clientId,
+          therapistId: meeting.therapistId,
+          startTime: meeting.startTime,
+          meetingType: meeting.meetingType as
+            | 'video'
+            | 'audio'
+            | 'in_person'
+            | 'chat',
+          duration: meeting.duration,
+          title: meeting.title || 'Therapy Session',
+          description: meeting.description || undefined,
+          isInitialConsultation: false, // Could be enhanced to track this
+        }),
+      );
 
       return meeting;
     } catch (error) {
@@ -275,7 +306,7 @@ export class BookingService {
           'Cannot update completed or cancelled meetings',
         );
       }
-      return this.prisma.meeting.update({
+      const updatedMeeting = await this.prisma.meeting.update({
         where: { id },
         data: {
           title: updateMeetingDto.title,
@@ -313,6 +344,39 @@ export class BookingService {
           },
         },
       });
+
+      // Publish appropriate events based on what was updated
+      if (updateMeetingDto.status === 'COMPLETED') {
+        await this.eventBus.emit(
+          new AppointmentCompletedEvent({
+            appointmentId: updatedMeeting.id,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            completedAt: new Date(),
+            duration: updatedMeeting.duration,
+            sessionNotes: updateMeetingDto.description || '',
+            attendanceStatus: 'ATTENDED', // Default, could be enhanced
+          }),
+        );
+      } else if (
+        updateMeetingDto.startTime &&
+        new Date(updateMeetingDto.startTime).getTime() !==
+          meeting.startTime.getTime()
+      ) {
+        await this.eventBus.emit(
+          new AppointmentRescheduledEvent({
+            appointmentId: updatedMeeting.id,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            rescheduledBy: userId,
+            originalStartTime: meeting.startTime,
+            newStartTime: new Date(updateMeetingDto.startTime),
+            rescheduleReason: `Rescheduled by ${role}`,
+          }),
+        );
+      }
+
+      return updatedMeeting;
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -332,7 +396,7 @@ export class BookingService {
         throw new BadRequestException('Cannot cancel completed meetings');
       }
 
-      return this.prisma.meeting.update({
+      const cancelledMeeting = await this.prisma.meeting.update({
         where: { id },
         data: { status: 'CANCELLED' },
         include: {
@@ -360,6 +424,30 @@ export class BookingService {
           },
         },
       });
+
+      // Calculate cancellation notice in hours
+      const cancellationNotice = Math.floor(
+        (meeting.startTime.getTime() - Date.now()) / (1000 * 60 * 60),
+      );
+
+      // Publish appointment cancelled event
+      await this.eventBus.emit(
+        new AppointmentCancelledEvent({
+          appointmentId: cancelledMeeting.id,
+          clientId: cancelledMeeting.clientId,
+          therapistId: cancelledMeeting.therapistId,
+          cancelledBy: userId,
+          cancellationReason:
+            role === 'client'
+              ? 'Cancelled by client'
+              : 'Cancelled by therapist',
+          originalStartTime: meeting.startTime,
+          cancelledAt: new Date(),
+          cancellationNotice: Math.max(0, cancellationNotice),
+        }),
+      );
+
+      return cancelledMeeting;
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -626,10 +714,17 @@ export class BookingService {
     const startDate = new Date(startTime);
     const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
 
+    const startTimeString = startDate.toTimeString();
+    const endTimeString = endDate.toTimeString();
+
     return {
       dayOfWeek: startDate.getDay(),
-      startTimeStr: startDate.toTimeString().slice(0, 5),
-      endTimeStr: endDate.toTimeString().slice(0, 5),
+      startTimeStr:
+        startTimeString.length >= 5
+          ? startTimeString.slice(0, 5)
+          : startTimeString,
+      endTimeStr:
+        endTimeString.length >= 5 ? endTimeString.slice(0, 5) : endTimeString,
     };
   }
 

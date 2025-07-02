@@ -78,7 +78,9 @@ export class EventBusService implements IEventBus {
     };
 
     if (options.async !== false) {
-      this.eventEmitter.on(eventType, wrappedHandler);
+      this.eventEmitter.on(eventType, (event: DomainEvent<T>) => {
+        void wrappedHandler(event);
+      });
     } else {
       // For synchronous handlers, we still use async but without await
       this.eventEmitter.on(eventType, (event: DomainEvent<T>) => {

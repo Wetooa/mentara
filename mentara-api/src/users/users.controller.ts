@@ -13,7 +13,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { AdminAuthGuard } from 'src/guards/admin-auth.guard';
 import { AdminOnly } from 'src/decorators/admin-only.decorator';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';

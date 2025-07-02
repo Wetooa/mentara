@@ -40,6 +40,38 @@ export class AppointmentCancelledEvent extends BaseDomainEvent<AppointmentCancel
   }
 }
 
+export interface AppointmentCompletedData {
+  appointmentId: string;
+  clientId: string;
+  therapistId: string;
+  completedAt: Date;
+  duration: number; // actual duration in minutes
+  sessionNotes?: string;
+  attendanceStatus: 'ATTENDED' | 'NO_SHOW' | 'LATE';
+}
+
+export class AppointmentCompletedEvent extends BaseDomainEvent<AppointmentCompletedData> {
+  constructor(data: AppointmentCompletedData, metadata?: EventMetadata) {
+    super(data.appointmentId, 'Appointment', data, metadata);
+  }
+}
+
+export interface AppointmentRescheduledData {
+  appointmentId: string;
+  clientId: string;
+  therapistId: string;
+  rescheduledBy: string; // userId
+  originalStartTime: Date;
+  newStartTime: Date;
+  rescheduleReason: string;
+}
+
+export class AppointmentRescheduledEvent extends BaseDomainEvent<AppointmentRescheduledData> {
+  constructor(data: AppointmentRescheduledData, metadata?: EventMetadata) {
+    super(data.appointmentId, 'Appointment', data, metadata);
+  }
+}
+
 export interface AppointmentReminderData {
   appointmentId: string;
   clientId: string;

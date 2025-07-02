@@ -8,7 +8,7 @@ import { PreAssessment } from '@prisma/client';
 import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-} from './therapist-application.dto';
+} from './dto/therapist-application.dto';
 
 @Injectable()
 export class TherapistRecommendationService {

@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { BillingService } from './billing.service';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
 import {
@@ -72,7 +72,7 @@ export class BillingController {
     @Body() body: { reason?: string },
     @CurrentUserId() userId: string,
   ) {
-    return this.billingService.cancelSubscription(userId, body.reason);
+    return this.billingService.cancelSubscription(userId);
   }
 
   // Subscription Plans
@@ -280,7 +280,7 @@ export class BillingController {
       throw new UnauthorizedException('Insufficient permissions');
     }
 
-    return this.billingService.markInvoiceAsPaid(id, body.paymentId);
+    return this.billingService.markInvoiceAsPaid(id);
   }
 
   // Discounts

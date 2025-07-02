@@ -11,6 +11,8 @@ import {
   TherapistCreateDto,
   TherapistResponse,
 } from '../../schema/auth';
+import { EventBusService } from '../common/events/event-bus.service';
+import { UserRegisteredEvent } from '../common/events/user-events';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +20,10 @@ export class AuthService {
     secretKey: process.env.CLERK_SECRET_KEY,
   });
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBus: EventBusService,
+  ) {}
 
   async checkAdmin(id: string) {
     const admin = await this.prisma.user.findUnique({
@@ -62,6 +67,18 @@ export class AuthService {
           user: true,
         },
       });
+
+      // Publish user registration event
+      await this.eventBus.emit(
+        new UserRegisteredEvent({
+          userId,
+          email: client.user.email,
+          firstName: client.user.firstName,
+          lastName: client.user.lastName,
+          role: 'client',
+          registrationMethod: 'email', // Default, could be enhanced
+        }),
+      );
 
       return client;
     } catch (error) {
@@ -112,6 +129,18 @@ export class AuthService {
           user: true,
         },
       });
+
+      // Publish user registration event
+      await this.eventBus.emit(
+        new UserRegisteredEvent({
+          userId,
+          email: therapist.user.email,
+          firstName: therapist.user.firstName,
+          lastName: therapist.user.lastName,
+          role: 'therapist',
+          registrationMethod: 'email', // Default, could be enhanced
+        }),
+      );
 
       return {
         ...therapist,

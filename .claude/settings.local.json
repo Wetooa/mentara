@@ -21,7 +21,14 @@
       "Bash(npm outdated)",
       "Bash(npm audit:*)",
       "Bash(rg \"any\" src/ --type ts -n)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(npm i:*)",
+      "Bash(sed:*)",
+      "Bash(mv:*)",
+      "Bash(for file in ./src/test-utils/e2e-tests/*.ts)",
+      "Bash(do echo \"=== $file line 345 ===\")",
+      "Bash(ls:*)",
+      "Bash(git add:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

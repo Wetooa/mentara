@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { AdminOnly } from '../decorators/admin-only.decorator';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';

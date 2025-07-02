@@ -10,7 +10,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuditLogsService } from './audit-logs.service';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { AuditLoggingService } from '../common/services/audit-logging.service';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
 import {
@@ -23,7 +24,10 @@ import {
 @Controller('audit-logs')
 @UseGuards(ClerkAuthGuard)
 export class AuditLogsController {
-  constructor(private readonly auditLogsService: AuditLogsService) {}
+  constructor(
+    private readonly auditLogsService: AuditLogsService,
+    private readonly auditLoggingService: AuditLoggingService,
+  ) {}
 
   @Post()
   createAuditLog(
@@ -287,6 +291,61 @@ export class AuditLogsController {
       body.component,
       error,
       body.metadata,
+    );
+  }
+
+  // Enhanced search using audit logging service
+  @Get('enhanced/search')
+  searchAuditLogs(
+    @CurrentUserRole() userRole: string,
+    @Query('userId') userId?: string,
+    @Query('action') action?: AuditAction,
+    @Query('entity') entity?: string,
+    @Query('entityId') entityId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    // Only admins can perform enhanced searches
+    if (userRole !== 'admin' && userRole !== 'moderator') {
+      throw new UnauthorizedException('Admin role required');
+    }
+
+    return this.auditLoggingService.searchAuditLogs({
+      userId,
+      action,
+      entity,
+      entityId,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      limit: limit ? parseInt(limit) : 100,
+      offset: offset ? parseInt(offset) : 0,
+    });
+  }
+
+  @Get('enhanced/stats')
+  getAuditLogStats(@CurrentUserRole() userRole: string) {
+    // Only admins can view enhanced statistics
+    if (userRole !== 'admin') {
+      throw new UnauthorizedException('Admin role required');
+    }
+
+    return this.auditLoggingService.getAuditLogStats();
+  }
+
+  @Post('cleanup')
+  cleanupOldAuditLogs(
+    @CurrentUserRole() userRole: string,
+    @Body() body: { retentionDays?: number },
+  ) {
+    // Only admins can cleanup audit logs
+    if (userRole !== 'admin') {
+      throw new UnauthorizedException('Admin role required');
+    }
+
+    return this.auditLoggingService.cleanupOldAuditLogs(
+      body.retentionDays || 365,
     );
   }
 }

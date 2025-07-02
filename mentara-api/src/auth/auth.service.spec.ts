@@ -3,6 +3,7 @@ import { ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { TEST_USER_IDS } from '../test-utils';
+import { ClientCreateDto } from '../client/dto/client.dto';
 
 // Mock Clerk client
 const mockClerkClient = {
@@ -103,7 +104,7 @@ describe('AuthService', () => {
       const mockClientCreateDto = {
         user: {},
         hasSeenTherapistRecommendations: false,
-      } as any;
+      } as ClientCreateDto;
 
       await expect(
         service.registerClient(TEST_USER_IDS.CLIENT, mockClientCreateDto),

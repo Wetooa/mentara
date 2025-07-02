@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { SearchService } from './search.service';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 
 @Controller('search')
 @UseGuards(ClerkAuthGuard)
@@ -16,10 +16,27 @@ export class SearchController {
     @Query('minExp') minExperience?: string,
   ) {
     const filters: any = {};
-    if (province) filters.province = province;
-    if (expertise) filters.expertise = expertise.split(',');
-    if (maxHourlyRate) filters.maxHourlyRate = parseFloat(maxHourlyRate);
-    if (minExperience) filters.minExperience = parseInt(minExperience);
+    if (province && typeof province === 'string') {
+      filters.province = province.trim();
+    }
+    if (expertise && typeof expertise === 'string') {
+      filters.expertise = expertise
+        .split(',')
+        .map((e) => e.trim())
+        .filter((e) => e.length > 0);
+    }
+    if (maxHourlyRate && typeof maxHourlyRate === 'string') {
+      const rate = parseFloat(maxHourlyRate);
+      if (!isNaN(rate) && rate >= 0) {
+        filters.maxHourlyRate = rate;
+      }
+    }
+    if (minExperience && typeof minExperience === 'string') {
+      const exp = parseInt(minExperience, 10);
+      if (!isNaN(exp) && exp >= 0) {
+        filters.minExperience = exp;
+      }
+    }
 
     return this.searchService.searchTherapists(query, filters);
   }

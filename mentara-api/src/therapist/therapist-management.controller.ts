@@ -9,7 +9,7 @@ import {
   Param,
 } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import {
   ClientResponse,

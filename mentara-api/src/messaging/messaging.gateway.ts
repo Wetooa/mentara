@@ -95,6 +95,9 @@ export class MessagingGateway
       // Join user to their conversation rooms
       await this.joinUserConversations(client, authResult.userId);
 
+      // Subscribe user to their personal notification room
+      await this.subscribeUserToPersonalRoom(client, authResult.userId);
+
       // Notify successful connection
       client.emit('authenticated', {
         userId: authResult.userId,
@@ -128,6 +131,19 @@ export class MessagingGateway
         // If no more sockets for this user, remove from tracking
         if (userSockets.size === 0) {
           this.userSockets.delete(client.userId);
+
+          // Clean up conversation participants tracking
+          for (const [
+            conversationId,
+            participants,
+          ] of this.conversationParticipants.entries()) {
+            participants.delete(client.userId);
+            // Remove empty conversation sets
+            if (participants.size === 0) {
+              this.conversationParticipants.delete(conversationId);
+            }
+          }
+
           // Broadcast user offline status to their contacts
           await this.broadcastUserStatus(client.userId, 'offline');
         }
@@ -274,15 +290,11 @@ export class MessagingGateway
   }
 
   // Broadcast new message to conversation participants
-  async broadcastMessage(
-    conversationId: string,
-    message: any,
-    senderId: string,
-  ) {
+  broadcastMessage(conversationId: string, message: any) {
     this.server.to(conversationId).emit('new_message', message);
 
     // Send push notification to offline users (implement as needed)
-    await this.sendPushNotifications(conversationId, message, senderId);
+    this.sendPushNotifications(conversationId, message);
   }
 
   // Broadcast message update (edit/delete)
@@ -407,7 +419,7 @@ export class MessagingGateway
     // TODO: Implement push notifications for offline users
     // This could integrate with FCM, APNS, or other push notification services
     this.logger.log(
-      `TODO: Send push notification for message ${message.id} in conversation ${conversationId}`,
+      `Push notification would be sent for message ${message.id} in conversation ${conversationId}`,
     );
   }
 
@@ -422,5 +434,156 @@ export class MessagingGateway
         },
       },
     });
+  }
+
+  // Personal room subscription methods for real-time notifications
+  async subscribeUserToPersonalRoom(
+    client: AuthenticatedSocket,
+    userId: string,
+  ) {
+    const userRoom = `user_${userId}`;
+    await client.join(userRoom);
+    this.logger.debug(
+      `User ${userId} subscribed to personal room: ${userRoom}`,
+    );
+  }
+
+  async unsubscribeUserFromPersonalRoom(
+    client: AuthenticatedSocket,
+    userId: string,
+  ) {
+    const userRoom = `user_${userId}`;
+    await client.leave(userRoom);
+    this.logger.debug(
+      `User ${userId} unsubscribed from personal room: ${userRoom}`,
+    );
+  }
+
+  // Community and post room subscriptions for social features
+  @SubscribeMessage('join_community')
+  async handleJoinCommunity(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { communityId: string },
+  ) {
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
+    const { communityId } = data;
+    const userId = client.userId!;
+
+    try {
+      // Verify user is a member of this community
+      const membership = await this.prisma.membership.findFirst({
+        where: {
+          communityId,
+          userId,
+        },
+      });
+
+      if (!membership) {
+        client.emit('error', { message: 'Access denied to this community' });
+        return;
+      }
+
+      const communityRoom = `community_${communityId}`;
+      await client.join(communityRoom);
+
+      client.emit('community_joined', { communityId });
+      this.logger.log(`User ${userId} joined community room ${communityId}`);
+    } catch (error) {
+      this.logger.error('Error joining community:', error);
+      client.emit('error', { message: 'Failed to join community' });
+    }
+  }
+
+  @SubscribeMessage('leave_community')
+  async handleLeaveCommunity(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { communityId: string },
+  ) {
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
+    const { communityId } = data;
+    const userId = client.userId!;
+
+    const communityRoom = `community_${communityId}`;
+    await client.leave(communityRoom);
+
+    client.emit('community_left', { communityId });
+    this.logger.log(`User ${userId} left community room ${communityId}`);
+  }
+
+  @SubscribeMessage('join_post')
+  async handleJoinPost(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { postId: string },
+  ) {
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
+    const { postId } = data;
+    const userId = client.userId!;
+
+    try {
+      // Verify post exists and user has access
+      const post = await this.prisma.post.findFirst({
+        where: {
+          id: postId,
+          room: {
+            roomGroup: {
+              community: {
+                memberships: {
+                  some: {
+                    userId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!post) {
+        client.emit('error', { message: 'Access denied to this post' });
+        return;
+      }
+
+      const postRoom = `post_${postId}`;
+      await client.join(postRoom);
+
+      client.emit('post_joined', { postId });
+      this.logger.log(`User ${userId} joined post room ${postId}`);
+    } catch (error) {
+      this.logger.error('Error joining post:', error);
+      client.emit('error', { message: 'Failed to join post' });
+    }
+  }
+
+  @SubscribeMessage('leave_post')
+  async handleLeavePost(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { postId: string },
+  ) {
+    if (!this.isAuthenticated(client)) {
+      return;
+    }
+
+    const { postId } = data;
+    const userId = client.userId!;
+
+    const postRoom = `post_${postId}`;
+    await client.leave(postRoom);
+
+    client.emit('post_left', { postId });
+    this.logger.log(`User ${userId} left post room ${postId}`);
+  }
+
+  // Utility method to get server instance for event broadcasting
+  getServer(): Server {
+    return this.server;
   }
 }

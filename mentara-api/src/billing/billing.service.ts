@@ -441,7 +441,8 @@ export class BillingService {
       throw new BadRequestException('You have already used this discount code');
     }
 
-    if (discount.minAmount && amount < Number(discount.minAmount)) {
+    const minAmountNum = Number(discount.minAmount);
+    if (discount.minAmount && !isNaN(minAmountNum) && amount < minAmountNum) {
       throw new BadRequestException(
         `Minimum amount of ${String(discount.minAmount)} required`,
       );
@@ -522,8 +523,13 @@ export class BillingService {
 
     let nextNumber = 1;
     if (lastInvoice) {
-      const lastNumber = parseInt(lastInvoice.number.split('-')[2]);
-      nextNumber = lastNumber + 1;
+      const parts = lastInvoice.number.split('-');
+      if (parts.length >= 3 && parts[2]) {
+        const lastNumber = parseInt(parts[2], 10);
+        if (!isNaN(lastNumber)) {
+          nextNumber = lastNumber + 1;
+        }
+      }
     }
 
     return `INV-${year}-${nextNumber.toString().padStart(6, '0')}`;

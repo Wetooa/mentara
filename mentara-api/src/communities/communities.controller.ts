@@ -12,8 +12,9 @@ import {
   UseGuards,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import {
@@ -89,10 +90,20 @@ export class CommunitiesController {
     @Query('offset') offset?: string,
   ): Promise<CommunityWithMembersResponse> {
     try {
+      const limitNum = limit ? parseInt(limit, 10) : 50;
+      const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+      if (limit && isNaN(limitNum)) {
+        throw new BadRequestException('Invalid limit parameter');
+      }
+      if (offset && isNaN(offsetNum)) {
+        throw new BadRequestException('Invalid offset parameter');
+      }
+
       return await this.communitiesService.getMembers(
         id,
-        limit ? parseInt(limit) : 50,
-        offset ? parseInt(offset) : 0,
+        Math.max(1, Math.min(100, limitNum)), // Clamp between 1-100
+        Math.max(0, offsetNum), // Ensure non-negative
       );
     } catch (error) {
       throw new InternalServerErrorException(

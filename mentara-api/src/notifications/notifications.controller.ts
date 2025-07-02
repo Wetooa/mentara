@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { NotificationType, NotificationPriority } from '@prisma/client';
 

@@ -126,7 +126,7 @@ export class AnalyticsService {
         monthlyGrowth,
       };
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to get user growth stats: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -208,7 +208,7 @@ export class AnalyticsService {
         topCommunities,
       };
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to get engagement stats: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -265,7 +265,7 @@ export class AnalyticsService {
         topTherapists: therapistPerformance,
       };
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to get session stats: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -373,7 +373,7 @@ export class AnalyticsService {
         recentProgress: clientProgress,
       };
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to get therapist analytics: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
@@ -497,7 +497,7 @@ export class AnalyticsService {
         progressHistory,
       };
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Failed to get client analytics: ${error instanceof Error ? error.message : String(error)}`,
       );
     }

@@ -39,6 +39,8 @@ export default function AdminLoginPage() {
     }
   }, [isAdmin, isCheckingAdmin, router]);
 
+
+  // FIX: use react query here
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 

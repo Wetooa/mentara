@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { ReviewCreateDto, ReviewUpdateDto } from 'schema/review';
 
@@ -93,7 +93,7 @@ export class ReviewsController {
   // ) {
   //   // Only allow moderators and admins to moderate reviews
   //   if (!['moderator', 'admin'].includes(userRole)) {
-  //     throw new Error('Insufficient permissions');
+  //     throw new ForbiddenException('Insufficient permissions');
   //   }
 
   //   return this.reviewsService.moderateReview(
@@ -110,7 +110,7 @@ export class ReviewsController {
   // ) {
   //   // Only allow moderators and admins to view pending reviews
   //   if (!['moderator', 'admin'].includes(userRole)) {
-  //     throw new Error('Insufficient permissions');
+  //     throw new ForbiddenException('Insufficient permissions');
   //   }
 
   //   return this.reviewsService.getReviews({

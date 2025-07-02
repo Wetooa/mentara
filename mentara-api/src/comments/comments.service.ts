@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import {
@@ -26,7 +27,15 @@ export class CommentsService {
     try {
       return await this.prisma.user.findUnique({ where: { id } });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -82,7 +91,15 @@ export class CommentsService {
         },
       });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -107,10 +124,19 @@ export class CommentsService {
 
       return {
         ...comment,
-        files: [], // TODO: Include actual file attachments when implementing FileAttachment system
+        hearts: comment.hearts.length, // Count hearts instead of returning array
+        files: await this.getCommentAttachments(comment.id),
       };
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -160,7 +186,15 @@ export class CommentsService {
         },
       });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -183,10 +217,19 @@ export class CommentsService {
 
       return {
         ...comment,
-        files: [], // TODO: Include actual file attachments when implementing FileAttachment system
+        hearts: comment.hearts.length, // Count hearts instead of returning array
+        files: await this.getCommentAttachments(comment.id),
       };
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -213,7 +256,6 @@ export class CommentsService {
         where: { id, userId },
         data: {
           content: data.content,
-          // TODO: Implement file updates through FileAttachment system
         },
         include: {
           user: {
@@ -231,10 +273,18 @@ export class CommentsService {
       return {
         ...updatedComment,
         hearts: updatedComment.hearts.length,
-        files: [], // TODO: Load actual file attachments from FileAttachment system
+        files: await this.getCommentAttachments(updatedComment.id),
       };
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -257,7 +307,15 @@ export class CommentsService {
         where: { id },
       });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -306,7 +364,15 @@ export class CommentsService {
         },
       });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -349,7 +415,15 @@ export class CommentsService {
         return { hearted: true };
       }
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -369,7 +443,15 @@ export class CommentsService {
 
       return !!heart;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -392,7 +474,15 @@ export class CommentsService {
         },
       });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -425,7 +515,15 @@ export class CommentsService {
         orderBy: { createdAt: 'asc' },
       });
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -466,7 +564,15 @@ export class CommentsService {
         return { hearted: true };
       }
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -486,7 +592,15 @@ export class CommentsService {
       });
       return !!heart;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -510,7 +624,7 @@ export class CommentsService {
   }
 
   async getCommentAttachments(commentId: string) {
-    return this.prisma.fileAttachment.findMany({
+    const attachments = await this.prisma.fileAttachment.findMany({
       where: {
         entityType: AttachmentEntityType.COMMENT,
         entityId: commentId,
@@ -520,6 +634,13 @@ export class CommentsService {
       },
       orderBy: { order: 'asc' },
     });
+
+    return attachments.map((attachment) => ({
+      id: attachment.id,
+      commentId: attachment.entityId,
+      url: attachment.file.storageUrl || `/api/files/${attachment.file.id}`,
+      type: attachment.file.mimeType,
+    }));
   }
 
   async removeCommentAttachment(commentId: string, fileId: string) {

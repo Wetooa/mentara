@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { ClientService } from './client.service';
 import {
   ClientResponse,

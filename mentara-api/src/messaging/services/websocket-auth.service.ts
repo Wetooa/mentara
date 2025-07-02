@@ -53,8 +53,13 @@ export class WebSocketAuthService {
 
     // 1. Authorization header (Bearer token)
     const authHeader = socket.handshake.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      return authHeader.substring(7);
+    if (
+      authHeader &&
+      typeof authHeader === 'string' &&
+      authHeader.startsWith('Bearer ')
+    ) {
+      const token = authHeader.substring(7).trim();
+      return token.length > 0 ? token : null;
     }
 
     // 2. Auth object in handshake
@@ -82,8 +87,18 @@ export class WebSocketAuthService {
   }
 
   private extractCookieValue(cookies: string, name: string): string | null {
-    const match = cookies.match(new RegExp(`(^| )${name}=([^;]+)`));
-    return match ? decodeURIComponent(match[2]) : null;
+    try {
+      // Escape special regex characters in cookie name
+      const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const match = cookies.match(new RegExp(`(^| )${escapedName}=([^;]+)`));
+      if (match && match[2]) {
+        return decodeURIComponent(match[2]);
+      }
+      return null;
+    } catch (error) {
+      this.logger.warn(`Failed to extract cookie value for ${name}:`, error);
+      return null;
+    }
   }
 
   async refreshTokenIfNeeded(token: string): Promise<string | null> {

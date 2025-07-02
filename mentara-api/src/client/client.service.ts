@@ -46,7 +46,9 @@ export class ClientService {
         );
       }
 
-      this.logger.error(`Unexpected error in getProfile: ${error}`);
+      this.logger.error(
+        `Unexpected error in getProfile: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new InternalServerErrorException('An unexpected error occurred');
     }
   }
@@ -88,7 +90,9 @@ export class ClientService {
         }
       }
 
-      this.logger.error(`Unexpected error in updateProfile: ${error}`);
+      this.logger.error(
+        `Unexpected error in updateProfile: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new InternalServerErrorException(
         'An unexpected error occurred while updating profile',
       );
@@ -104,7 +108,7 @@ export class ClientService {
       return !client?.hasSeenTherapistRecommendations;
     } catch (error) {
       this.logger.error(
-        `Error checking therapist recommendations for userId ${userId}: ${error}`,
+        `Error checking therapist recommendations for userId ${userId}: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw new InternalServerErrorException(
         'Failed to check therapist recommendation status',
@@ -130,7 +134,7 @@ export class ClientService {
       }
 
       this.logger.error(
-        `Error marking therapist recommendations seen for userId ${userId}: ${error}`,
+        `Error marking therapist recommendations seen for userId ${userId}: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw new InternalServerErrorException(
         'Failed to update therapist recommendation status',
