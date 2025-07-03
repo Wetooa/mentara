@@ -1,8 +1,15 @@
 // API service for making requests to the NestJS backend
+// DEPRECATED: This file maintains backward compatibility
+// New code should use lib/api/api-client.ts with axios-based services
+
 import { useAuth } from "@clerk/nextjs";
+import { useApi as useNewApi, createStandaloneApiClient as createNewStandaloneApiClient } from './api-client';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+// Re-export new API for gradual migration
+export { useNewApi as useApiV2, createNewStandaloneApiClient as createStandaloneApiClientV2 };
 
 // Create a reusable API client with authentication
 export const createApiClient = (getToken: () => Promise<string | null>) => {
