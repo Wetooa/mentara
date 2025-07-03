@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
+import { useApi } from '@/lib/api/api-client';
+import { queryKeys } from '@/lib/queryKeys';
 import { 
   TherapistRecommendationResponse, 
   TherapistSearchParams,
@@ -13,12 +14,11 @@ export function useTherapistRecommendations(params: TherapistSearchParams = {}) 
   const api = useApi();
 
   return useQuery({
-    queryKey: ['therapist-recommendations', params],
-    queryFn: async (): Promise<TherapistRecommendationResponse> => {
-      return api.therapistRecommendations.getRecommendations(params);
+    queryKey: queryKeys.therapists.recommendations(params),
+    queryFn: (): Promise<TherapistRecommendationResponse> => {
+      return api.therapists.getRecommendations(params);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
   });
 }
 
