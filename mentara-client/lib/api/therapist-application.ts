@@ -1,4 +1,4 @@
-import { TherapistApplication } from "@/data/mockTherapistApplicationData";
+import { TherapistApplication } from "@/lib/api/services/therapists";
 
 // Client-side therapist application API functions
 // These should only be called from React components that have access to useAuth
