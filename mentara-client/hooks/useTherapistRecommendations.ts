@@ -81,6 +81,7 @@ export function usePrefetchTherapistProfile() {
  */
 export function useTherapistSearch() {
   const queryClient = useQueryClient();
+  const api = useApi();
   
   const invalidateRecommendations = () => {
     queryClient.invalidateQueries({ 
@@ -91,10 +92,7 @@ export function useTherapistSearch() {
   const refetchWithParams = (params: TherapistSearchParams) => {
     return queryClient.fetchQuery({
       queryKey: queryKeys.therapists.recommendations(params),
-      queryFn: () => {
-        const api = useApi();
-        return api.therapists.getRecommendations(params);
-      },
+      queryFn: () => api.therapists.getRecommendations(params),
     });
   };
   
