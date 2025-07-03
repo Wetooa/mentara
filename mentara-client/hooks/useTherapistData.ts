@@ -1,43 +1,31 @@
-import { useState, useEffect } from "react";
-import { mockTherapistData } from "@/data/mockTherapistData";
+// This file is deprecated - use useTherapistDashboard instead
+// Kept for backward compatibility during migration
 
+import { useTherapistDashboard } from './useTherapistDashboard';
+
+/**
+ * @deprecated Use useTherapistDashboard instead
+ * This hook is kept for backward compatibility during the migration from mock data
+ */
 export function useTherapistData() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState(mockTherapistData);
-
-  useEffect(() => {
-    // Simulate API fetch delay
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-
-        // In a real app, this would be a fetch call
-        // const response = await fetch('/api/therapist/dashboard');
-        // const data = await response.json();
-
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        setData(mockTherapistData);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Unknown error occurred")
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { data, isLoading, error } = useTherapistDashboard();
 
   return {
     isLoading,
     error,
-    therapist: data.therapist,
-    stats: data.stats,
-    upcomingAppointments: data.upcomingAppointments,
+    therapist: data?.therapist || { id: '', name: '', avatar: '' },
+    stats: data?.stats || { 
+      activePatients: 0, 
+      rescheduled: 0, 
+      cancelled: 0, 
+      income: 0,
+      patientStats: {
+        total: 0,
+        percentage: 0,
+        months: 0,
+        chartData: []
+      }
+    },
+    upcomingAppointments: data?.upcomingAppointments || [],
   };
 }

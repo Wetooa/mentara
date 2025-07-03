@@ -1,39 +1,54 @@
-import { useState, useEffect, useCallback } from "react";
-import { patientsApi } from "@/lib/api/patients";
-import { Patient, PatientFilters } from "@/types/patient";
-import { mockPatientsData } from "@/data/mockPatientsData";
+// This file is deprecated - use usePatientsList instead
+// Kept for backward compatibility during migration
 
+import { useState, useEffect, useCallback } from "react";
+import { usePatientsList } from "./usePatientsList";
+import type { PatientData } from "@/lib/api/services/therapists";
+
+// Legacy types for backward compatibility
+interface Patient extends PatientData {
+  status?: 'active' | 'completed' | 'inactive';
+  progress?: number;
+  assignedAt?: string;
+}
+
+interface PatientFilters {
+  status?: 'all' | 'active' | 'completed' | 'inactive';
+  diagnosis?: string;
+  treatmentPlan?: string;
+  progressRange?: { min: number; max: number };
+  sessionRange?: { min: number; max: number };
+  assignedDateRange?: { start: string; end: string };
+  hasOverdueWorksheets?: boolean;
+  hasUpcomingSessions?: boolean;
+}
+
+/**
+ * @deprecated Use usePatientsList instead
+ * This hook is kept for backward compatibility during the migration from mock data
+ */
 export function usePatientsData() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [patients, setPatients] = useState<Patient[]>([]);
+  // Use the new React Query hook
+  const { data: rawPatients, isLoading, error } = usePatientsList();
+  
+  // Transform data for backward compatibility
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<PatientFilters>({
     status: 'all',
   });
 
-  // Fetch all patients
+  // Convert PatientData to legacy Patient format
+  const patients: Patient[] = (rawPatients || []).map((patient: PatientData) => ({
+    ...patient,
+    status: 'active' as const, // Default status
+    progress: Math.round((patient.currentSession / patient.totalSessions) * 100) || 0,
+    assignedAt: new Date().toISOString(), // Default assignment date
+  }));
+
+  // Legacy function - now handled by React Query
   const fetchPatients = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Try to fetch from real API first
-      const patientsData = await patientsApi.getAllPatients();
-      setPatients(patientsData);
-      console.log("Successfully loaded patients from API:", patientsData.length);
-    } catch (err) {
-      console.error("Error fetching patients from API:", err);
-      setError(err instanceof Error ? err : new Error("Failed to load patients"));
-
-      // Fallback to mock data
-      console.log("Using mock data as fallback");
-      setPatients(mockPatientsData as Patient[]);
-      setError(new Error("Using mock data - API unavailable"));
-    } finally {
-      setIsLoading(false);
-    }
+    // No-op - data fetching is handled by React Query
   }, []);
 
   // Apply search and filters to patients
@@ -119,22 +134,9 @@ export function usePatientsData() {
     setFilteredPatients(filtered);
   }, [patients, searchQuery, filters]);
 
-  // Search patients
+  // Search patients - simplified for legacy compatibility
   const searchPatients = async (query: string) => {
     setSearchQuery(query);
-    
-    // If using API and search query, use server-side search
-    if (query.trim() && !error?.message.includes("mock data")) {
-      try {
-        const searchResults = await patientsApi.searchPatients(query);
-        setFilteredPatients(searchResults);
-        return;
-      } catch (err) {
-        console.error("Server-side search failed, using client-side:", err);
-      }
-    }
-    
-    // Client-side filtering will happen in useEffect
   };
 
   // Update filters
@@ -148,28 +150,21 @@ export function usePatientsData() {
     setSearchQuery("");
   };
 
-  // Add a new patient (optimistic update)
+  // Legacy functions - simplified for compatibility
   const addPatient = (newPatient: Patient) => {
-    setPatients(prev => [newPatient, ...prev]);
+    // No-op - mutations should use React Query hooks
   };
 
-  // Update a patient (optimistic update)
   const updatePatient = (patientId: string, updates: Partial<Patient>) => {
-    setPatients(prev => 
-      prev.map(patient => 
-        patient.id === patientId ? { ...patient, ...updates } : patient
-      )
-    );
+    // No-op - mutations should use React Query hooks
   };
 
-  // Remove a patient
   const removePatient = (patientId: string) => {
-    setPatients(prev => prev.filter(patient => patient.id !== patientId));
+    // No-op - mutations should use React Query hooks
   };
 
-  // Refresh patients list
   const refreshPatients = () => {
-    fetchPatients();
+    // No-op - React Query handles refetching
   };
 
   // Get patient statistics
@@ -212,11 +207,6 @@ export function usePatientsData() {
       recentAssignments,
     };
   };
-
-  // Load patients on mount
-  useEffect(() => {
-    fetchPatients();
-  }, [fetchPatients]);
 
   // Apply filters when dependencies change
   useEffect(() => {
