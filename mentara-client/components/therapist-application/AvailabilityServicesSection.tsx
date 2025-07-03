@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { CheckCircle, Clock, Shield, User } from "lucide-react";
 
@@ -27,7 +27,7 @@ interface AvailabilityServicesSectionProps {
   watchedValues: any;
 }
 
-export function AvailabilityServicesSection({
+export const AvailabilityServicesSection = memo(function AvailabilityServicesSection({
   form,
   watchedValues,
 }: AvailabilityServicesSectionProps) {
@@ -293,4 +293,4 @@ export function AvailabilityServicesSection({
       </Card>
     </div>
   );
-}
+});

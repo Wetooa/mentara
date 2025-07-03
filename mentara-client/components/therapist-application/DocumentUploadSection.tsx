@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, memo } from "react";
 import { FileText, Upload, X } from "lucide-react";
 
 // UI Components
@@ -24,7 +24,7 @@ interface DocumentUploadCardProps {
 }
 
 // Document Upload Card Component
-function DocumentUploadCard({
+const DocumentUploadCard = memo(function DocumentUploadCard({
   title,
   description,
   required,
@@ -140,10 +140,10 @@ function DocumentUploadCard({
       </CardContent>
     </Card>
   );
-}
+});
 
 // Main Document Upload Section Component
-export function DocumentUploadSection({
+export const DocumentUploadSection = memo(function DocumentUploadSection({
   documents,
   onFileChange,
   onRemoveFile,
@@ -228,4 +228,4 @@ export function DocumentUploadSection({
       </div>
     </div>
   );
-}
+});

@@ -5,10 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
-  ChevronDown,
-  ChevronRight,
   CheckCircle,
   FileText,
   Clock,
@@ -17,7 +14,6 @@ import {
   User,
   Loader2,
   AlertCircle,
-  X,
 } from "lucide-react";
 
 // UI Components
@@ -25,17 +21,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MobileDrawer } from "@/components/ui/mobile-drawer";
 import { MobileProgressHeader } from "@/components/ui/mobile-progress-header";
-import { Progress } from "@/components/ui/progress";
 import { Form } from "@/components/ui/form";
 
 // Extracted Section Components
 import { SectionComponent } from "@/components/therapist-application/SectionComponent";
+import { SidebarContent } from "@/components/therapist-application/SidebarContent";
 
 // Store and API
 import useTherapistForm from "@/store/therapistform";
 import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useSectionCompletion } from "@/hooks/use-section-completion";
 import { submitApplicationWithDocuments } from "@/lib/api/therapist-application";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
@@ -478,179 +475,14 @@ export default function SinglePageTherapistApplication() {
   // Watch form values for conditional rendering and progress calculation
   const watchedValues = useWatch({ control: form.control });
 
-  // Calculate completion status
-  const getSectionCompletion = useCallback(
-    (sectionId: string) => {
-      const section = sections.find((s) => s.id === sectionId);
-      if (!section) return { completed: 0, total: 0, percentage: 0 };
+  // Use optimized section completion hook
+  const sectionCompletions = useSectionCompletion(watchedValues, documents, sections);
 
-      const values = watchedValues;
-      let completed = 0;
-      let total = section.fields.length;
+  // Section completion logic has been moved to the useSectionCompletion hook for better performance
+  // and to avoid unnecessary re-renders. The previous getSectionCompletion_UNUSED function
+  // has been replaced by the optimized hook implementation.
 
-      // Custom completion logic for each section
-      switch (sectionId) {
-        case "basicInfo":
-          const basicFields = [
-            "firstName",
-            "lastName",
-            "mobile",
-            "email",
-            "province",
-            "providerType",
-          ];
-          completed = basicFields.filter(
-            (field) => values[field] && values[field] !== ""
-          ).length;
-          total = basicFields.length;
-          break;
-
-        case "licenseInfo":
-          const licenseFields = [
-            "professionalLicenseType",
-            "isPRCLicensed",
-            "practiceStartDate",
-            "yearsOfExperience",
-            "educationBackground",
-            "practiceLocation",
-          ];
-          let licenseCompleted = 0;
-
-          licenseFields.forEach((field) => {
-            if (field === "yearsOfExperience") {
-              if (values[field] !== undefined && values[field] !== null)
-                licenseCompleted++;
-            } else if (values[field] && values[field] !== "") {
-              licenseCompleted++;
-            }
-          });
-
-          // Add conditional fields for PRC licensed professionals
-          if (values.isPRCLicensed === "yes") {
-            const prcFields = [
-              "prcLicenseNumber",
-              "expirationDateOfLicense",
-              "isLicenseActive",
-            ];
-            prcFields.forEach((field) => {
-              if (values[field] && values[field] !== "") licenseCompleted++;
-            });
-            total = licenseFields.length + prcFields.length;
-          } else {
-            total = licenseFields.length;
-          }
-
-          // Add conditional field for other license types
-          if (
-            values.professionalLicenseType === "other" &&
-            values.professionalLicenseType_specify
-          ) {
-            licenseCompleted++;
-            total += 1;
-          }
-
-          completed = licenseCompleted;
-          break;
-
-        case "teletherapy":
-          const teletherapyFields = [
-            "providedOnlineTherapyBefore",
-            "comfortableUsingVideoConferencing",
-            "privateConfidentialSpace",
-            "compliesWithDataPrivacyAct",
-          ];
-          completed = teletherapyFields.filter(
-            (field) => values[field] && values[field] !== ""
-          ).length;
-          total = teletherapyFields.length;
-          break;
-
-        case "professionalProfile":
-          // Define required fields for professional profile (license and teletherapy fields moved to separate sections)
-          const professionalRequiredFields = [
-            "areasOfExpertise",
-            "assessmentTools",
-            "therapeuticApproachesUsedList",
-            "languagesOffered",
-            "professionalLiabilityInsurance",
-            "complaintsOrDisciplinaryActions",
-            "willingToAbideByPlatformGuidelines",
-          ];
-
-          let profCompleted = 0;
-
-          professionalRequiredFields.forEach((field) => {
-            if (
-              field === "areasOfExpertise" ||
-              field === "assessmentTools" ||
-              field === "therapeuticApproachesUsedList" ||
-              field === "languagesOffered"
-            ) {
-              if (values[field]?.length > 0) profCompleted++;
-            } else if (field === "willingToAbideByPlatformGuidelines") {
-              if (values[field] === "yes") profCompleted++;
-            } else {
-              if (values[field] && values[field] !== "") profCompleted++;
-            }
-          });
-
-          completed = profCompleted;
-          total = professionalRequiredFields.length;
-          break;
-
-        case "availability":
-          // Only count fields that are actually implemented in the UI
-          // hourlyRate and bio are optional fields
-          const availabilityRequiredFields = [
-            "weeklyAvailability",
-            "preferredSessionLength",
-            "accepts",
-          ];
-
-          let availCompleted = 0;
-
-          availabilityRequiredFields.forEach((field) => {
-            if (field === "accepts") {
-              if (values[field]?.length > 0) availCompleted++;
-            } else {
-              if (values[field] && values[field] !== "") availCompleted++;
-            }
-          });
-
-          completed = availCompleted;
-          total = availabilityRequiredFields.length;
-          break;
-
-        case "documents":
-          // Documents are required for submission
-          const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"];
-          const uploadedDocs = requiredDocs.filter(
-            (doc) => documents[doc]?.length > 0
-          ).length;
-
-          completed = uploadedDocs;
-          total = requiredDocs.length;
-          break;
-
-        case "review":
-          completed = values.consentChecked ? 1 : 0;
-          total = 1;
-          break;
-      }
-
-      const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-      return { completed, total, percentage };
-    },
-    [watchedValues, documents]
-  );
-
-  // Memoized section completions to avoid recalculation
-  const sectionCompletions = useMemo(() => {
-    return sections.reduce((acc, section) => {
-      acc[section.id] = getSectionCompletion(section.id);
-      return acc;
-    }, {} as Record<string, { completed: number; total: number; percentage: number }>);
-  }, [getSectionCompletion]);
+  // Section completions now handled by optimized hook above
 
   // Overall progress calculation - only count required sections for submission eligibility
   const overallProgress = useMemo(() => {
@@ -898,7 +730,7 @@ export default function SinglePageTherapistApplication() {
 
         // Prepare documents for upload - filter out deleted/missing files
         const allFiles = Object.entries(documents)
-          .filter(([_, files]) => files && files.length > 0) // Only include document types with actual files
+          .filter(([, files]) => files && files.length > 0) // Only include document types with actual files
           .flatMap(([type, files]) =>
             files
               .filter((file) => file && file instanceof File) // Ensure file exists and is valid
@@ -1016,135 +848,17 @@ export default function SinglePageTherapistApplication() {
     [autoSave, router, showToast, documents]
   );
 
-  // Sidebar content component for reuse between desktop and mobile - memoized to prevent jittery re-renders
-  const SidebarContent = useMemo(() => (
-    <>
-      <div className="mb-8">
-        <Image
-          src="/icons/mentara/mentara-landscape.png"
-          alt="Mentara logo"
-          width={250}
-          height={100}
-        />
-      </div>
-
-      <div className="mt-4 mb-8">
-        <p className="text-sm text-gray-600 mb-1">You&apos;re working on</p>
-        <h1 className="text-2xl font-bold text-green-900">Application</h1>
-      </div>
-
-      {/* Overall Progress */}
-      <div className="mb-6" data-testid="overall-progress">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
-            Overall Progress
-          </span>
-          <span className="text-sm text-gray-600">{displayProgress}%</span>
-        </div>
-        <Progress value={displayProgress} className="h-2" />
-      </div>
-
-      {/* Section List */}
-      <div className="space-y-3 flex-1">
-        {sections.map((section) => {
-          const completion = sectionCompletions[section.id];
-          const isOpen = openSections.has(section.id);
-          const isCompleted = completion.percentage === 100;
-
-          return (
-            <div
-              key={section.id}
-              className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                isOpen
-                  ? "bg-green-100 border-green-300"
-                  : isCompleted
-                    ? "bg-green-50 border-green-200"
-                    : "bg-white border-gray-200 hover:bg-gray-50"
-              }`}
-              onClick={() => {
-                // Open the section if it's not already open
-                if (!isOpen) {
-                  toggleSection(section.id);
-                }
-                // Close mobile drawer when clicking on section
-                if (isMobile) {
-                  setMobileDrawerOpen(false);
-                }
-                // Smooth scroll to the section
-                setTimeout(() => {
-                  const element = document.getElementById(
-                    `section-${section.id}`
-                  );
-                  if (element) {
-                    element.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    });
-                  }
-                }, 100); // Small delay to allow section to open
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex-shrink-0 ${isCompleted ? "text-green-600" : "text-gray-400"}`}
-                >
-                  {section.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-sm text-gray-900 truncate">
-                      {section.title}
-                    </h3>
-                    {isCompleted && (
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-gray-500">
-                      {completion.completed}/{completion.total} complete
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {completion.percentage}%
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  {isOpen ? (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Actions */}
-      <div className="mt-auto space-y-3">
-        {/* Restart Form Button */}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setShowRestartModal(true)}
-          className="w-full min-h-[44px] h-auto px-3 py-2 text-xs border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 touch-manipulation"
-        >
-          <X className="w-4 h-4 mr-2" />
-          Restart Form
-        </Button>
-
-        <div className="text-xs text-gray-500">
-          Form saves automatically as you type
-        </div>
-
-        <div className="text-xs text-gray-500">
-          © {new Date().getFullYear()} Mentara. All rights reserved.
-        </div>
-      </div>
-    </>
-  ), [sectionCompletions, openSections, displayProgress, toggleSection, isMobile, setMobileDrawerOpen]);
+  // Memoized sidebar content props to prevent unnecessary re-renders
+  const sidebarContentProps = useMemo(() => ({
+    displayProgress,
+    sections,
+    sectionCompletions,
+    openSections,
+    toggleSection,
+    isMobile,
+    setMobileDrawerOpen,
+    setShowRestartModal,
+  }), [displayProgress, sectionCompletions, openSections, toggleSection, isMobile, setMobileDrawerOpen, setShowRestartModal]);
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
@@ -1169,7 +883,7 @@ export default function SinglePageTherapistApplication() {
           onClose={handleMobileDrawerClose}
           title="Application Progress"
         >
-          {SidebarContent}
+          <SidebarContent {...sidebarContentProps} />
         </MobileDrawer>
       )}
 
@@ -1180,7 +894,7 @@ export default function SinglePageTherapistApplication() {
             className="w-1/5 bg-gradient-to-b from-green-100 via-green-50 to-gray-50 p-6 flex flex-col sticky top-0 h-screen shadow-sm"
             data-testid="sidebar"
           >
-            {SidebarContent}
+            <SidebarContent {...sidebarContentProps} />
           </div>
         )}
 

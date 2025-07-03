@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 // UI Components
@@ -19,7 +19,7 @@ interface ReviewSectionProps {
   documents: Record<string, File[]>;
 }
 
-export function ReviewSection({
+export const ReviewSection = memo(function ReviewSection({
   form,
   watchedValues,
   documents,
@@ -94,4 +94,4 @@ export function ReviewSection({
       />
     </div>
   );
-}
+});

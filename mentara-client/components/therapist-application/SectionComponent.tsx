@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, memo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { CheckCircle, Circle, ChevronDown, ChevronRight } from "lucide-react";
 
@@ -47,7 +47,7 @@ interface SectionComponentProps {
   removeDocument: (docType: string, index: number) => void;
 }
 
-export function SectionComponent({
+export const SectionComponent = memo(function SectionComponent({
   section,
   isOpen,
   onToggle,
@@ -195,4 +195,4 @@ export function SectionComponent({
       </Card>
     </Collapsible>
   );
-}
+});

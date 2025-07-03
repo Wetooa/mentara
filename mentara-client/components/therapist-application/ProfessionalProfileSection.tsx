@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { CheckCircle, Users, Shield } from "lucide-react";
 
@@ -28,7 +28,7 @@ interface ProfessionalProfileSectionProps {
   watchedValues: any;
 }
 
-export function ProfessionalProfileSection({
+export const ProfessionalProfileSection = memo(function ProfessionalProfileSection({
   form,
   watchedValues,
 }: ProfessionalProfileSectionProps) {
@@ -536,4 +536,4 @@ export function ProfessionalProfileSection({
       </Card>
     </div>
   );
-}
+});
