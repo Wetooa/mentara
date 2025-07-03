@@ -72,7 +72,7 @@ export class BillingController {
     @Body() body: { reason?: string },
     @CurrentUserId() userId: string,
   ) {
-    return this.billingService.cancelSubscription(userId, body.reason);
+    return this.billingService.cancelSubscription(userId);
   }
 
   // Subscription Plans
@@ -280,7 +280,7 @@ export class BillingController {
       throw new UnauthorizedException('Insufficient permissions');
     }
 
-    return this.billingService.markInvoiceAsPaid(id, body.paymentId);
+    return this.billingService.markInvoiceAsPaid(id);
   }
 
   // Discounts

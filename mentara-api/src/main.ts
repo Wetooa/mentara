@@ -91,10 +91,7 @@ async function bootstrap() {
     fs.mkdirSync(worksheetsDir);
   }
 
-  // Serve static files from the uploads directory
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
+  // Static file serving removed for security - files now served through protected endpoints
 
   // Global prefix for all API routes
   app.setGlobalPrefix('api');

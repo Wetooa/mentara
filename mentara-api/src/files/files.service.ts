@@ -13,6 +13,9 @@ import {
   FileShareType,
 } from '@prisma/client';
 import { randomBytes } from 'crypto';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import { ReadStream } from 'fs';
 
 @Injectable()
 export class FilesService {
@@ -301,5 +304,62 @@ export class FilesService {
   private generateShareToken(): string {
     // Generate cryptographically secure random token (32 bytes = 64 hex characters)
     return randomBytes(32).toString('hex');
+  }
+
+  async canUserAccessFile(fileId: string, userId: string): Promise<boolean> {
+    const file = await this.findOne(fileId);
+    if (!file) {
+      return false;
+    }
+
+    // Get user details to check if they're admin
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    // Admin can access all files
+    if (user.role === 'admin') {
+      return true;
+    }
+
+    // File uploader can access their own files
+    if (file.uploadedBy === userId) {
+      return true;
+    }
+
+    // Check if user has access through file attachments (e.g., therapist application)
+    const attachment = await this.prisma.fileAttachment.findFirst({
+      where: {
+        fileId,
+        entityType: 'THERAPIST_APPLICATION',
+        entityId: userId, // For therapist applications, entityId is the user ID
+      },
+    });
+
+    return !!attachment;
+  }
+
+  async getFileStream(fileId: string): Promise<ReadStream> {
+    const file = await this.findOne(fileId);
+    if (!file) {
+      throw new NotFoundException(`File with ID ${fileId} not found`);
+    }
+
+    // Construct the full file path
+    const filePath = join(process.cwd(), file.storagePath);
+
+    try {
+      const stream = createReadStream(filePath);
+      return stream;
+    } catch {
+      throw new NotFoundException(
+        `File not found on disk: ${file.storagePath}`,
+      );
+    }
   }
 }

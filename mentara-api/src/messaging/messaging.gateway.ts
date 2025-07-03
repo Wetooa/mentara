@@ -282,7 +282,7 @@ export class MessagingGateway
     this.server.to(conversationId).emit('new_message', message);
 
     // Send push notification to offline users (implement as needed)
-    await this.sendPushNotifications(conversationId, message, senderId);
+    await this.sendPushNotifications(conversationId, message);
   }
 
   // Broadcast message update (edit/delete)

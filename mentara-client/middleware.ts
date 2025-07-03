@@ -18,10 +18,16 @@ const publicRoutes = [
   "/sign-in",
   "/sign-up",
   "/pre-assessment",
-  "/therapist_signup",
+  "/therapist-application",
   "/about",
   "/community",
   "/for-therapists",
+];
+
+// Define public API routes that don't require authentication
+const publicApiRoutes = [
+  "/api/therapist/apply",
+  "/api/therapist/upload-public",
 ];
 
 // Helper to get required role for a path
@@ -69,8 +75,14 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL(redirectPath, req.url));
   }
 
-  // Allow all public routes
-  if (publicRoutes.includes(req.nextUrl.pathname)) {
+  // Allow all public routes (exact match or path prefix for therapist-application)
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || 
+                       req.nextUrl.pathname.startsWith('/therapist-application/');
+  
+  // Allow public API routes (exact match)
+  const isPublicApiRoute = publicApiRoutes.includes(req.nextUrl.pathname);
+  
+  if (isPublicRoute || isPublicApiRoute) {
     return NextResponse.next();
   }
 
