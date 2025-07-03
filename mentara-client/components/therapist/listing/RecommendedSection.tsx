@@ -1,13 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { mockRecommendedTherapists } from "@/data/mockTherapistListingData";
+import { useTherapistRecommendations } from "@/hooks/useTherapistRecommendations";
 
 export default function RecommendedSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  
+  // Fetch therapist recommendations using React Query
+  const { 
+    data: recommendationsData, 
+    isLoading, 
+    error 
+  } = useTherapistRecommendations({ 
+    limit: 10,
+    includeInactive: false 
+  });
+  
+  const therapists = recommendationsData?.therapists || [];
 
   const checkScrollButtons = () => {
     if (!carouselRef.current) return;
@@ -17,10 +29,10 @@ export default function RecommendedSection() {
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
   };
 
-  // Initialize scroll buttons visibility when component mounts
+  // Initialize scroll buttons visibility when component mounts and when data changes
   useEffect(() => {
     checkScrollButtons();
-  }, []);
+  }, [therapists]);
 
   const scroll = (direction: "left" | "right") => {
     if (!carouselRef.current) return;
@@ -37,6 +49,66 @@ export default function RecommendedSection() {
     });
   };
 
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-4 h-full flex flex-col">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Recommended</h2>
+          <Button variant="ghost" size="sm" disabled>
+            See all
+          </Button>
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground" data-testid="recommendations-loading">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Loading recommendations...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="space-y-4 h-full flex flex-col">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Recommended</h2>
+          <Button variant="ghost" size="sm" disabled>
+            See all
+          </Button>
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="flex items-center gap-2 text-destructive" data-testid="error-message">
+            <AlertCircle className="h-5 w-5" />
+            <span>Failed to load recommendations. Please try again later.</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle empty state
+  if (therapists.length === 0) {
+    return (
+      <div className="space-y-4 h-full flex flex-col">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Recommended</h2>
+          <Button variant="ghost" size="sm" disabled>
+            See all
+          </Button>
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center text-muted-foreground" data-testid="empty-state">
+            <p>No therapist recommendations available at the moment.</p>
+            <p className="text-sm">Please check back later.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex justify-between items-center">
@@ -46,7 +118,7 @@ export default function RecommendedSection() {
         </Button>
       </div>
 
-      <div className="relative flex-grow">
+      <div className="relative flex-grow" data-testid="therapist-recommendations">
         {/* Scroll buttons */}
         {canScrollLeft && (
           <Button
@@ -77,15 +149,16 @@ export default function RecommendedSection() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           onScroll={checkScrollButtons}
         >
-          {mockRecommendedTherapists.map((therapist) => (
+          {therapists.map((therapist) => (
             <div
               key={therapist.id}
               className="relative flex-none w-[300px] h-full snap-start"
+              data-testid="therapist-card"
             >
               {/* Plus Button */}
               <Button
                 size="icon"
-                aria-label="Add"
+                aria-label="Add therapist to favorites"
                 className="absolute top-2 right-2 z-20 bg-primary text-white hover:bg-white hover:text-primary transition-colors"
               >
                 <Plus className="w-5 h-5" />
@@ -95,7 +168,9 @@ export default function RecommendedSection() {
                 {/* Background image */}
                 <div
                   className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${therapist.photoUrl})` }}
+                  style={{ 
+                    backgroundImage: `url(${therapist.profileImage || '/placeholder-therapist.jpg'})` 
+                  }}
                 />
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
@@ -108,6 +183,7 @@ export default function RecommendedSection() {
                         <div
                           key={i}
                           className="bg-white rounded-sm px-2 py-0.5"
+                          data-testid="therapist-specialties"
                         >
                           <span className="text-primary text-xs font-medium">
                             {specialty}
@@ -123,12 +199,22 @@ export default function RecommendedSection() {
                   </div>
 
                   <div className="bg-amber-900/90 rounded-lg p-3 w-full">
-                    <h3 className="font-semibold mb-1">
+                    <h3 className="font-semibold mb-1" data-testid="therapist-name">
                       {therapist.firstName} {therapist.lastName}
                     </h3>
                     <p className="text-sm text-white/90 line-clamp-2">
-                      {therapist.description}
+                      {therapist.bio || 'Experienced therapist dedicated to helping you achieve your mental health goals.'}
                     </p>
+                    {therapist.rating && (
+                      <div className="flex items-center gap-1 mt-2" data-testid="therapist-rating">
+                        <span className="text-xs">⭐ {therapist.rating.toFixed(1)}</span>
+                        {therapist.totalReviews && (
+                          <span className="text-xs text-white/70">
+                            ({therapist.totalReviews} reviews)
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
