@@ -34,6 +34,75 @@ export interface TherapistSearchParams {
   offset?: number;
 }
 
+export interface TherapistDashboardData {
+  therapist: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  stats: {
+    activePatients: number;
+    rescheduled: number;
+    cancelled: number;
+    income: number;
+    patientStats: {
+      total: number;
+      percentage: number;
+      months: number;
+      chartData: Array<{
+        month: string;
+        value: number;
+      }>;
+    };
+  };
+  upcomingAppointments: Array<{
+    id: string;
+    patientId: string;
+    patientName: string;
+    time: string;
+    date: string;
+    type: string;
+    status: string;
+  }>;
+}
+
+export interface PatientData {
+  id: string;
+  name: string;
+  fullName: string;
+  avatar: string;
+  email: string;
+  phone: string;
+  age: number;
+  diagnosis: string;
+  treatmentPlan: string;
+  currentSession: number;
+  totalSessions: number;
+  sessions: Array<{
+    id: string;
+    number: number;
+    date: string;
+    notes: string;
+  }>;
+  worksheets: Array<{
+    id: string;
+    title: string;
+    assignedDate: string;
+    status: 'pending' | 'completed' | 'in_progress';
+  }>;
+}
+
+export interface MeetingData {
+  id: string;
+  title: string;
+  therapistId: string;
+  therapistName: string;
+  status: "scheduled" | "started" | "completed" | "cancelled";
+  dateTime: string;
+  duration: number;
+  timeToStart?: string;
+}
+
 export interface TherapistApplication {
   id: string;
   status: 'pending' | 'approved' | 'rejected' | 'under_review';
@@ -126,6 +195,75 @@ export const createTherapistService = (client: AxiosInstance) => ({
     // Get my application (for therapists)
     getMy: (): Promise<TherapistApplication> =>
       client.get('/therapist/application/me'),
+  },
+
+  // Dashboard and patient management
+  dashboard: {
+    // Get therapist dashboard data
+    getData: (): Promise<TherapistDashboardData> =>
+      client.get('/therapist/dashboard'),
+
+    // Get dashboard stats
+    getStats: (): Promise<TherapistDashboardData['stats']> =>
+      client.get('/therapist/dashboard/stats'),
+
+    // Get upcoming appointments
+    getUpcomingAppointments: (): Promise<TherapistDashboardData['upcomingAppointments']> =>
+      client.get('/therapist/dashboard/appointments'),
+  },
+
+  // Patient management
+  patients: {
+    // Get assigned patients list
+    getList: (): Promise<PatientData[]> =>
+      client.get('/therapist/patients'),
+
+    // Get specific patient details
+    getById: (patientId: string): Promise<PatientData> =>
+      client.get(`/therapist/patients/${patientId}`),
+
+    // Update patient notes
+    updateNotes: (patientId: string, sessionId: string, notes: string): Promise<void> =>
+      client.patch(`/therapist/patients/${patientId}/sessions/${sessionId}/notes`, { notes }),
+
+    // Get patient sessions
+    getSessions: (patientId: string): Promise<PatientData['sessions']> =>
+      client.get(`/therapist/patients/${patientId}/sessions`),
+
+    // Get patient worksheets
+    getWorksheets: (patientId: string): Promise<PatientData['worksheets']> =>
+      client.get(`/therapist/patients/${patientId}/worksheets`),
+
+    // Assign worksheet to patient
+    assignWorksheet: (patientId: string, worksheetData: any): Promise<void> =>
+      client.post(`/therapist/patients/${patientId}/worksheets`, worksheetData),
+  },
+
+  // Meetings and sessions
+  meetings: {
+    // Get therapist meetings/sessions
+    getList: (params: { status?: string; limit?: number; offset?: number } = {}): Promise<MeetingData[]> => {
+      const searchParams = new URLSearchParams();
+      
+      if (params.status) searchParams.append('status', params.status);
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (params.offset) searchParams.append('offset', params.offset.toString());
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/therapist/meetings${queryString}`);
+    },
+
+    // Get meeting by ID
+    getById: (meetingId: string): Promise<MeetingData> =>
+      client.get(`/therapist/meetings/${meetingId}`),
+
+    // Update meeting status
+    updateStatus: (meetingId: string, status: MeetingData['status']): Promise<MeetingData> =>
+      client.patch(`/therapist/meetings/${meetingId}/status`, { status }),
+
+    // Start a meeting
+    start: (meetingId: string): Promise<{ meetingUrl: string }> =>
+      client.post(`/therapist/meetings/${meetingId}/start`),
   },
 });
 
