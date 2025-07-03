@@ -229,6 +229,48 @@ export function useAuth() {
     }
   };
 
+  const forceLogout = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Call backend to revoke sessions
+      const token = await getToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      await fetch(`${API_BASE_URL}/auth/force-logout`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+      });
+
+      // Sign out on frontend
+      await signOut();
+      router.push("/sign-in");
+      toast.success("Force logout successful!");
+      queryClient.clear();
+    } catch (error) {
+      // Even if backend call fails, still try to sign out locally
+      try {
+        await signOut();
+        router.push("/sign-in");
+        toast.success("Logged out locally!");
+        queryClient.clear();
+      } catch (signOutError) {
+        toast.error("Failed to logout. Please try again.");
+        console.error("Force logout error:", error);
+        console.error("Sign out error:", signOutError);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     user: getAuthUser(),
     backendUser,
@@ -238,6 +280,7 @@ export function useAuth() {
     signUpWithEmail,
     signInWithOAuth,
     handleSignOut,
+    forceLogout,
     clientRegisterMutation,
     therapistRegisterMutation,
     refetchBackendUser,
