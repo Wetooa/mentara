@@ -476,7 +476,11 @@ export default function SinglePageTherapistApplication() {
   const watchedValues = useWatch({ control: form.control });
 
   // Use optimized section completion hook
-  const sectionCompletions = useSectionCompletion(watchedValues, documents, sections);
+  const sectionCompletions = useSectionCompletion(
+    watchedValues,
+    documents,
+    sections
+  );
 
   // Section completion logic has been moved to the useSectionCompletion hook for better performance
   // and to avoid unnecessary re-renders. The previous getSectionCompletion_UNUSED function
@@ -849,16 +853,27 @@ export default function SinglePageTherapistApplication() {
   );
 
   // Memoized sidebar content props to prevent unnecessary re-renders
-  const sidebarContentProps = useMemo(() => ({
-    displayProgress,
-    sections,
-    sectionCompletions,
-    openSections,
-    toggleSection,
-    isMobile,
-    setMobileDrawerOpen,
-    setShowRestartModal,
-  }), [displayProgress, sectionCompletions, openSections, toggleSection, isMobile, setMobileDrawerOpen, setShowRestartModal]);
+  const sidebarContentProps = useMemo(
+    () => ({
+      displayProgress,
+      sections,
+      sectionCompletions,
+      openSections,
+      toggleSection,
+      isMobile,
+      setMobileDrawerOpen,
+      setShowRestartModal,
+    }),
+    [
+      displayProgress,
+      sectionCompletions,
+      openSections,
+      toggleSection,
+      isMobile,
+      setMobileDrawerOpen,
+      setShowRestartModal,
+    ]
+  );
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
@@ -977,7 +992,8 @@ export default function SinglePageTherapistApplication() {
                             {sections
                               .filter((section) => section.isRequired)
                               .map((section) => {
-                                const completion = sectionCompletions[section.id];
+                                const completion =
+                                  sectionCompletions[section.id];
                                 if (completion.percentage < 100) {
                                   return (
                                     <li key={section.id}>

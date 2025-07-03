@@ -35,6 +35,10 @@ interface LicenseInfoSectionProps {
   watchedValues: {
     professionalLicenseType?: string;
     isPRCLicensed?: string;
+    yearsOfExperience?: string;
+    practiceStartDate?: string;
+    educationalBackground?: string;
+    practiceLocation?: string;
   };
 }
 
@@ -104,9 +108,7 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
                   <div className="flex items-center space-x-3 p-4 min-h-[44px] border border-gray-200 rounded-lg hover:bg-gray-50 touch-manipulation">
                     <RadioGroupItem value="other" id="other" />
                     <Label htmlFor="other" className="flex-1 cursor-pointer">
-                      <div className="font-medium">
-                        Others (Please specify)
-                      </div>
+                      <div className="font-medium">Others (Please specify)</div>
                       <div className="text-sm text-gray-500">
                         Other recognized mental health license
                       </div>
@@ -196,8 +198,7 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">
-                      PRC License Number{" "}
-                      <span className="text-red-500">*</span>
+                      PRC License Number <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="e.g., 1234567" />
@@ -290,18 +291,21 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base font-semibold">
-                Years of Experience{" "}
-                <span className="text-red-500">*</span>
+                Years of Experience <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  min="0" 
+                <Input
+                  type="number"
+                  min="0"
                   max="50"
-                  {...field} 
-                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                  value={field.value || ""} 
-                  placeholder="e.g., 5" 
+                  {...field}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value ? parseInt(e.target.value) : undefined
+                    )
+                  }
+                  value={field.value || ""}
+                  placeholder="e.g., 5"
                 />
               </FormControl>
               <FormMessage />
@@ -320,8 +324,8 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
                   <span className="text-red-500"> *</span>
                 </FormLabel>
                 <FormControl>
-                  <Textarea 
-                    {...field} 
+                  <Textarea
+                    {...field}
                     placeholder="e.g., Master's in Clinical Psychology from University of the Philippines"
                     rows={3}
                   />
@@ -341,9 +345,9 @@ export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({
                   <span className="text-red-500"> *</span>
                 </FormLabel>
                 <FormControl>
-                  <Input 
-                    {...field} 
-                    placeholder="e.g., Makati City, Metro Manila" 
+                  <Input
+                    {...field}
+                    placeholder="e.g., Makati City, Metro Manila"
                   />
                 </FormControl>
                 <FormMessage />
