@@ -40,20 +40,13 @@ export function useSectionCompletion(
         case "basicInfo":
           const basicFields = [
             "firstName",
-            "lastName",
+            "lastName", 
             "mobile",
             "email",
             "province",
             "providerType",
-            "practiceStartDate",
-            "yearsOfExperience",
-            "educationBackground",
-            "practiceLocation",
           ];
           completed = basicFields.filter((field) => {
-            if (field === "yearsOfExperience") {
-              return values[field] !== undefined && values[field] !== null;
-            }
             return values[field] && values[field].toString().trim() !== "";
           }).length;
           total = basicFields.length;
@@ -63,11 +56,28 @@ export function useSectionCompletion(
           const licenseRequiredFields = [
             "professionalLicenseType",
             "isPRCLicensed",
+            "practiceStartDate",
+            "yearsOfExperience", 
+            "educationBackground",
+            "practiceLocation",
           ];
 
-          let licenseCompleted = licenseRequiredFields.filter(
-            (field) => values[field] && values[field] !== ""
-          ).length;
+          let licenseCompleted = 0;
+          
+          // Check each required field
+          licenseRequiredFields.forEach((field) => {
+            if (field === "yearsOfExperience") {
+              // Special handling for number field
+              if (values[field] !== undefined && values[field] !== null && values[field] !== "") {
+                licenseCompleted++;
+              }
+            } else {
+              // String fields
+              if (values[field] && values[field].toString().trim() !== "") {
+                licenseCompleted++;
+              }
+            }
+          });
 
           // Add conditional fields
           if (
