@@ -56,4 +56,11 @@ export class AuthController {
   checkAdmin(@CurrentUserId() id: string): Promise<boolean> {
     return this.authService.checkAdmin(id);
   }
+
+  @UseGuards(ClerkAuthGuard)
+  @Post('force-logout')
+  @HttpCode(HttpStatus.OK)
+  async forceLogout(@CurrentUserId() id: string) {
+    return await this.authService.forceLogout(id);
+  }
 }

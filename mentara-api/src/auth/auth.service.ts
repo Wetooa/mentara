@@ -137,4 +137,28 @@ export class AuthService {
   async getUser(userId: string) {
     return this.clerkClient.users.getUser(userId);
   }
+
+  async forceLogout(userId: string) {
+    try {
+      // Revoke all sessions for the user
+      const sessions = await this.clerkClient.sessions.getSessionList({
+        userId: userId,
+      });
+
+      // Revoke each active session
+      const revokePromises = sessions.data.map((session) =>
+        this.clerkClient.sessions.revokeSession(session.id),
+      );
+
+      await Promise.all(revokePromises);
+
+      return { success: true, message: 'User sessions revoked successfully' };
+    } catch (error) {
+      console.error(
+        'Force logout error:',
+        error instanceof Error ? error.message : error,
+      );
+      throw new InternalServerErrorException('Force logout failed');
+    }
+  }
 }
