@@ -250,20 +250,20 @@ export const createTherapistService = (client: AxiosInstance) => ({
       if (params.offset) searchParams.append('offset', params.offset.toString());
 
       const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      return client.get(`/therapist/meetings${queryString}`);
+      return client.get(`/booking/meetings${queryString}`);
     },
 
     // Get meeting by ID
     getById: (meetingId: string): Promise<MeetingData> =>
-      client.get(`/therapist/meetings/${meetingId}`),
+      client.get(`/booking/meetings/${meetingId}`),
 
     // Update meeting status
     updateStatus: (meetingId: string, status: MeetingData['status']): Promise<MeetingData> =>
-      client.patch(`/therapist/meetings/${meetingId}/status`, { status }),
+      client.patch(`/booking/meetings/${meetingId}/status`, { status }),
 
     // Start a meeting
     start: (meetingId: string): Promise<{ meetingUrl: string }> =>
-      client.post(`/therapist/meetings/${meetingId}/start`),
+      client.post(`/booking/meetings/${meetingId}/start`),
   },
 });
 

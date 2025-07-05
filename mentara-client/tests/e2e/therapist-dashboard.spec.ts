@@ -53,7 +53,7 @@ test.describe('Therapist Dashboard', () => {
       await startButton.click();
       
       // Wait for meeting start API call
-      await waitForApiCall(page, '/api/therapist/meetings/*/start', 'POST');
+      await waitForApiCall(page, '/api/booking/meetings/*/start', 'POST');
       
       // Verify success feedback
       await expect(page.locator('text=Meeting started successfully')).toBeVisible();
@@ -184,7 +184,7 @@ test.describe('Meeting Management', () => {
     await page.goto('/therapist/meetings');
     
     // Wait for meetings API call
-    await waitForApiCall(page, '/api/therapist/meetings', 'GET');
+    await waitForApiCall(page, '/api/booking/meetings', 'GET');
     
     // Verify meetings list is displayed
     await expect(page.locator('[data-testid="meetings-list"]')).toBeVisible();
@@ -193,7 +193,7 @@ test.describe('Meeting Management', () => {
   test('should update meeting status', async ({ page }) => {
     // Navigate to meetings page
     await page.goto('/therapist/meetings');
-    await waitForApiCall(page, '/api/therapist/meetings', 'GET');
+    await waitForApiCall(page, '/api/booking/meetings', 'GET');
     
     // Look for a meeting with status update options
     const statusButton = page.locator('[data-testid="meeting-status-button"]').first();
@@ -207,7 +207,7 @@ test.describe('Meeting Management', () => {
         await completedOption.click();
         
         // Wait for status update API call
-        await waitForApiCall(page, '/api/therapist/meetings/*/status', 'PATCH');
+        await waitForApiCall(page, '/api/booking/meetings/*/status', 'PATCH');
         
         // Verify success message
         await expect(page.locator('text=Meeting completed successfully')).toBeVisible();
