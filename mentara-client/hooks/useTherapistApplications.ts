@@ -76,7 +76,7 @@ export function useSubmitTherapistApplication() {
       
       // Invalidate applications list for admin
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all 
+        queryKey: queryKeys.therapists.applications.all() 
       });
     },
     onError: (error: any) => {
@@ -137,7 +137,7 @@ export function useUpdateTherapistApplicationStatus() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all 
+        queryKey: queryKeys.therapists.applications.all() 
       });
       
       // If approved, also invalidate therapist-related queries
@@ -150,7 +150,7 @@ export function useUpdateTherapistApplicationStatus() {
     onSettled: () => {
       // Always refetch applications list
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all 
+        queryKey: queryKeys.therapists.applications.all() 
       });
     },
   });
@@ -190,7 +190,7 @@ export function useBulkUpdateApplications() {
       
       // Invalidate all applications queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all 
+        queryKey: queryKeys.therapists.applications.all() 
       });
     },
     onError: (error: any) => {

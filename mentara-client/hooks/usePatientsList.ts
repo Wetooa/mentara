@@ -11,7 +11,7 @@ export function usePatientsList() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.clients.assigned,
+    queryKey: queryKeys.clients.assigned(),
     queryFn: () => api.therapists.patients.getList(),
     staleTime: 1000 * 60 * 5, // Patient list is relatively stable
     retry: (failureCount, error: any) => {
