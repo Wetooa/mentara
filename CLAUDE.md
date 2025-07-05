@@ -65,10 +65,13 @@ python api.py                     # Start Flask development server
 ### Frontend (mentara-client/)
 - **Framework**: Next.js 15.2.4 with App Router
 - **Styling**: Tailwind CSS 4.x with shadcn/ui components
-- **State Management**: Zustand (client state) + React Query (server state)  
+- **State Management**: Zustand (client state) + React Query v5 (server state)
+- **HTTP Client**: Axios with interceptors for auth and error handling
 - **Authentication**: Clerk with role-based access control
 - **Forms**: React Hook Form with Zod validation
 - **UI Components**: Radix UI primitives with shadcn/ui
+- **Error Handling**: React Error Boundary with MentaraApiError
+- **Testing**: Jest with React Testing Library
 
 ### Backend (mentara-api/)
 - **Framework**: NestJS 11.x with TypeScript
@@ -207,6 +210,37 @@ Comprehensive mock data in `data/` directory:
 - Always generate Prisma client after schema changes: `npm run db:generate`
 - Use existing mock data patterns when adding new features
 
+### React Query + Axios Development Guidelines
+
+#### API Client Usage
+- **Always use `useApi()` hook** in React components for API calls
+- **Use service methods** instead of direct axios calls: `api.reviews.create()` not `axios.post()`
+- **Use proper query keys** from `lib/queryKeys.ts` for consistency
+
+#### Query Patterns
+- **Centralized query keys**: Always use `queryKeys.entity.method()` pattern
+- **Enable conditions**: Use `enabled: !!dependency` for conditional queries
+- **Proper dependencies**: Include all dynamic values in query keys
+- **Smart invalidation**: Use `getRelatedQueryKeys()` for mutations
+
+#### Mutation Best Practices
+- **Optimistic updates**: Implement for better UX where appropriate
+- **Error rollback**: Always handle rollback in `onError`
+- **Toast feedback**: Provide user feedback for mutations
+- **Cache invalidation**: Invalidate related queries in `onSuccess`
+
+#### Error Handling
+- **Use error boundaries**: Wrap components with `QueryErrorBoundary`
+- **Handle specific errors**: Check for `MentaraApiError` instances
+- **Meaningful messages**: Provide context-specific error messages
+- **Graceful degradation**: Show fallback UI for failed queries
+
+#### Testing
+- **Mock axios**: Use `jest.mock('axios')` for API client tests
+- **Mock services**: Test individual service functions
+- **Query testing**: Use React Query testing utilities
+- **Error scenarios**: Test error handling and retry logic
+
 ### Testing Strategy  
 - API unit tests: `npm run test` (in mentara-api/)
 - API e2e tests: `npm run test:e2e` (in mentara-api/)
@@ -223,3 +257,90 @@ Comprehensive mock data in `data/` directory:
 - Always specify which directory commands should run in
 - Use relative paths consistently within each service
 - The current branch strategy uses `dev` for development, `master` for production
+
+## React Query + Axios Integration Patterns
+
+### API Client Architecture
+The frontend uses a modern axios-based HTTP client with React Query v5 for server state management:
+
+```typescript
+// Use the main API client hook
+import { useApi } from '@/lib/api';
+
+const api = useApi(); // Automatically includes authentication
+const data = await api.therapists.getRecommendations({ limit: 10 });
+```
+
+### Service Layer Structure
+```
+lib/api/
+├── client.ts              # Core axios instance with interceptors
+├── api-client.ts          # Main entry point with useApi hook
+├── errorHandler.ts        # Centralized error handling
+├── services/              # Domain-specific service modules
+│   ├── users.ts
+│   ├── therapists.ts
+│   ├── reviews.ts
+│   └── ...
+└── index.ts              # Backward-compatible exports
+```
+
+### Query Patterns
+Use centralized query keys and enhanced patterns:
+
+```typescript
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+
+// Query with proper key management
+export function useTherapistReviews(therapistId: string) {
+  const api = useApi();
+  
+  return useQuery({
+    queryKey: queryKeys.reviews.byTherapist(therapistId),
+    queryFn: () => api.reviews.getTherapistReviews(therapistId),
+    enabled: !!therapistId,
+  });
+}
+
+// Mutation with optimistic updates
+export function useCreateReview() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data) => api.reviews.create(data),
+    onMutate: async (newReview) => {
+      // Optimistic update logic
+      await queryClient.cancelQueries({ queryKey: queryKeys.reviews.all });
+      // ... optimistic update implementation
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic update
+    },
+    onSuccess: (data) => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
+    },
+  });
+}
+```
+
+### Error Handling Patterns
+- **MentaraApiError**: Custom error class with status codes and details
+- **Error Boundaries**: React Query error boundaries with fallback UI
+- **Interceptors**: Automatic error transformation and auth handling
+- **Toast Notifications**: User-friendly error messages
+
+### Authentication Integration
+- Automatic token injection via axios interceptors
+- Server-side and client-side token handling
+- 401 error handling with potential redirect to login
+
+### Query Configuration
+Enhanced QueryClient with smart defaults:
+- **Retry Logic**: Don't retry on auth errors, smart retry on server errors
+- **Cache Management**: 5-minute stale time, 10-minute garbage collection
+- **Dev Tools**: React Query DevTools in development
+- **Error Boundaries**: Global error handling for queries

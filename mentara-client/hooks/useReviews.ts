@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
+import { useApi } from '@/lib/api/api-client';
+import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
 import { 
   Review, 
   ReviewsResponse, 
@@ -16,12 +17,11 @@ export function useReviews(params: GetReviewsParams = {}) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['reviews', params],
-    queryFn: async (): Promise<ReviewsResponse> => {
+    queryKey: queryKeys.reviews.list(params),
+    queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getAll(params);
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    retry: 2,
   });
 }
 
@@ -30,13 +30,12 @@ export function useTherapistReviews(therapistId: string, params: Omit<GetReviews
   const api = useApi();
 
   return useQuery({
-    queryKey: ['therapist-reviews', therapistId, params],
-    queryFn: async (): Promise<ReviewsResponse> => {
+    queryKey: queryKeys.reviews.byTherapist(therapistId, params),
+    queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getTherapistReviews(therapistId, params);
     },
     enabled: !!therapistId,
     staleTime: 2 * 60 * 1000, // 2 minutes
-    retry: 2,
   });
 }
 
@@ -45,13 +44,12 @@ export function useTherapistReviewStats(therapistId: string) {
   const api = useApi();
 
   return useQuery({
-    queryKey: ['therapist-review-stats', therapistId],
-    queryFn: async (): Promise<ReviewStats> => {
+    queryKey: queryKeys.reviews.therapistStats(therapistId),
+    queryFn: (): Promise<ReviewStats> => {
       return api.reviews.getTherapistStats(therapistId);
     },
     enabled: !!therapistId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
   });
 }
 
@@ -61,23 +59,65 @@ export function useCreateReview() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateReviewRequest): Promise<Review> => {
+    mutationFn: (data: CreateReviewRequest): Promise<Review> => {
       return api.reviews.create(data);
+    },
+    onMutate: async (newReview) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.reviews.all });
+      
+      // Snapshot the previous value
+      const previousReviews = queryClient.getQueryData(queryKeys.reviews.all);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(queryKeys.reviews.list({}), (old: any) => {
+        if (!old?.reviews) return old;
+        
+        const optimisticReview = {
+          id: 'temp-' + Date.now(),
+          ...newReview,
+          status: 'pending',
+          helpfulCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        
+        return {
+          ...old,
+          reviews: [optimisticReview, ...old.reviews],
+          total: old.total + 1,
+        };
+      });
+      
+      // Return a context object with the snapshotted value
+      return { previousReviews };
+    },
+    onError: (err, newReview, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData(queryKeys.reviews.all, context?.previousReviews);
+      
+      toast.error('Failed to submit review', {
+        description: err.message || 'Please try again later.',
+      });
     },
     onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-reviews', data.therapistId] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-review-stats', data.therapistId] });
+      const relatedKeys = getRelatedQueryKeys('review');
+      relatedKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
+      
+      // Also invalidate therapist-specific queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byTherapist(data.therapistId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.therapistStats(data.therapistId) });
       
       toast.success('Review submitted successfully!', {
         description: 'Your review will be visible after moderation.',
       });
     },
-    onError: (error: any) => {
-      toast.error('Failed to submit review', {
-        description: error.message || 'Please try again later.',
-      });
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
     },
   });
 }
@@ -88,14 +128,14 @@ export function useUpdateReview() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ reviewId, data }: { reviewId: string; data: UpdateReviewRequest }): Promise<Review> => {
+    mutationFn: ({ reviewId, data }: { reviewId: string; data: UpdateReviewRequest }): Promise<Review> => {
       return api.reviews.update(reviewId, data);
     },
     onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-reviews', data.therapistId] });
-      queryClient.invalidateQueries({ queryKey: ['therapist-review-stats', data.therapistId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byTherapist(data.therapistId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.therapistStats(data.therapistId) });
       
       toast.success('Review updated successfully!');
     },
@@ -207,11 +247,10 @@ export function usePendingReviews(params: { page?: number; limit?: number } = {}
   const api = useApi();
 
   return useQuery({
-    queryKey: ['pending-reviews', params],
-    queryFn: async (): Promise<ReviewsResponse> => {
+    queryKey: queryKeys.reviews.pending(params),
+    queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getPending(params);
     },
     staleTime: 1 * 60 * 1000, // 1 minute
-    retry: 2,
   });
 }

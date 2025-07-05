@@ -3,6 +3,9 @@ import { TherapistRecommendationController } from './therapist-recommendation.co
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { TherapistManagementController } from './therapist-management.controller';
 import { TherapistManagementService } from './therapist-management.service';
+import { TherapistApplicationController } from './therapist-application.controller';
+import { TherapistApplicationService } from './therapist-application.service';
+import { EmailService } from '../services/email.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
 
@@ -10,13 +13,16 @@ import { RoleUtils } from 'src/utils/role-utils';
   controllers: [
     TherapistRecommendationController,
     TherapistManagementController,
+    TherapistApplicationController,
   ],
   providers: [
     TherapistRecommendationService,
     TherapistManagementService,
+    TherapistApplicationService,
+    EmailService,
     PrismaService,
     RoleUtils,
   ],
-  exports: [TherapistManagementService],
+  exports: [TherapistManagementService, TherapistApplicationService],
 })
 export class TherapistModule {}

@@ -183,7 +183,7 @@ export function UserManagement() {
     if (!selectedUser || !actionType) return;
 
     // In a real application, you would make API calls to perform these actions
-    let updatedUsers = [...users];
+    const updatedUsers = [...users];
     const index = updatedUsers.findIndex((u) => u.id === selectedUser.id);
 
     if (index !== -1) {

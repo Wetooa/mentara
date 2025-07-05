@@ -114,7 +114,7 @@ export default function MessageChatArea({
   const handleSend = async () => {
     if (message.trim() || selectedFile) {
       try {
-        let fileAttachments: { name: string; url: string; type: string }[] = [];
+        const fileAttachments: { name: string; url: string; type: string }[] = [];
         if (selectedFile) {
           // In a real app, you'd upload the file first and get a URL
           // For now, simulate file upload by creating a dummy URL
