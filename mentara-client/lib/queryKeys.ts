@@ -22,10 +22,10 @@ export const queryKeys = {
     recommendations: (params: Record<string, any>) => 
       [...queryKeys.therapists.all, 'recommendations', params] as const,
     applications: {
-      all: [...queryKeys.therapists.all, 'applications'] as const,
-      lists: () => [...queryKeys.therapists.applications.all, 'list'] as const,
+      all: () => [...queryKeys.therapists.all, 'applications'] as const,
+      lists: () => [...queryKeys.therapists.applications.all(), 'list'] as const,
       list: (filters: Record<string, any>) => [...queryKeys.therapists.applications.lists(), { filters }] as const,
-      details: () => [...queryKeys.therapists.applications.all, 'detail'] as const,
+      details: () => [...queryKeys.therapists.applications.all(), 'detail'] as const,
       detail: (id: string) => [...queryKeys.therapists.applications.details(), id] as const,
     },
   },
@@ -80,15 +80,15 @@ export const queryKeys = {
   booking: {
     all: ['booking'] as const,
     meetings: {
-      all: [...queryKeys.booking.all, 'meetings'] as const,
-      lists: () => [...queryKeys.booking.meetings.all, 'list'] as const,
+      all: () => [...queryKeys.booking.all, 'meetings'] as const,
+      lists: () => [...queryKeys.booking.meetings.all(), 'list'] as const,
       list: (filters: Record<string, any>) => [...queryKeys.booking.meetings.lists(), { filters }] as const,
-      details: () => [...queryKeys.booking.meetings.all, 'detail'] as const,
+      details: () => [...queryKeys.booking.meetings.all(), 'detail'] as const,
       detail: (id: string) => [...queryKeys.booking.meetings.details(), id] as const,
     },
     slots: (therapistId: string, date: string) => 
       [...queryKeys.booking.all, 'slots', therapistId, date] as const,
-    durations: [...queryKeys.booking.all, 'durations'] as const,
+    durations: () => [...queryKeys.booking.all, 'durations'] as const,
   },
 
   // Analytics-related queries
@@ -106,21 +106,21 @@ export const queryKeys = {
   billing: {
     all: ['billing'] as const,
     subscriptions: {
-      all: [...queryKeys.billing.all, 'subscriptions'] as const,
-      my: [...queryKeys.billing.subscriptions.all, 'my'] as const,
+      all: () => [...queryKeys.billing.all, 'subscriptions'] as const,
+      my: () => [...queryKeys.billing.subscriptions.all(), 'my'] as const,
     },
     plans: {
-      all: [...queryKeys.billing.all, 'plans'] as const,
-      lists: () => [...queryKeys.billing.plans.all, 'list'] as const,
+      all: () => [...queryKeys.billing.all, 'plans'] as const,
+      lists: () => [...queryKeys.billing.plans.all(), 'list'] as const,
       list: (filters: Record<string, any>) => [...queryKeys.billing.plans.lists(), { filters }] as const,
     },
     paymentMethods: {
-      all: [...queryKeys.billing.all, 'paymentMethods'] as const,
-      my: [...queryKeys.billing.paymentMethods.all, 'my'] as const,
+      all: () => [...queryKeys.billing.all, 'paymentMethods'] as const,
+      my: () => [...queryKeys.billing.paymentMethods.all(), 'my'] as const,
     },
     invoices: {
-      all: [...queryKeys.billing.all, 'invoices'] as const,
-      lists: () => [...queryKeys.billing.invoices.all, 'list'] as const,
+      all: () => [...queryKeys.billing.all, 'invoices'] as const,
+      lists: () => [...queryKeys.billing.invoices.all(), 'list'] as const,
       list: (filters: Record<string, any>) => [...queryKeys.billing.invoices.lists(), { filters }] as const,
     },
   },
@@ -143,7 +143,7 @@ export const queryKeys = {
   // Client management queries (for therapists)
   clients: {
     all: ['clients'] as const,
-    assigned: [...queryKeys.clients.all, 'assigned'] as const,
+    assigned: () => [...queryKeys.clients.all, 'assigned'] as const,
     details: () => [...queryKeys.clients.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.clients.details(), id] as const,
     progress: (id: string) => [...queryKeys.clients.detail(id), 'progress'] as const,
@@ -166,13 +166,13 @@ export const queryKeys = {
     lists: () => [...queryKeys.notifications.all, 'list'] as const,
     list: (filters: Record<string, any>) => [...queryKeys.notifications.lists(), { filters }] as const,
     my: (filters: Record<string, any>) => [...queryKeys.notifications.all, 'my', { filters }] as const,
-    unreadCount: [...queryKeys.notifications.all, 'unreadCount'] as const,
+    unreadCount: () => [...queryKeys.notifications.all, 'unreadCount'] as const,
   },
 
   // Admin-related queries
   admin: {
     all: ['admin'] as const,
-    checkAdmin: [...queryKeys.admin.all, 'checkAdmin'] as const,
+    checkAdmin: () => [...queryKeys.admin.all, 'checkAdmin'] as const,
   },
 } as const;
 

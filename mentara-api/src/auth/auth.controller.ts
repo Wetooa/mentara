@@ -58,6 +58,7 @@ export class AuthController {
   }
 
   @UseGuards(ClerkAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 logout attempts per 5 minutes
   @Post('force-logout')
   @HttpCode(HttpStatus.OK)
   async forceLogout(@CurrentUserId() id: string) {

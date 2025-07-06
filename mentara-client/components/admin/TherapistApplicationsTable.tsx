@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { TherapistApplication } from "@/data/mockTherapistApplicationData";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,18 +25,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useUpdateTherapistApplicationStatus } from "@/hooks/useTherapistApplications";
+import type { TherapistApplication } from "@/lib/api/services/therapists";
 
 interface TherapistApplicationsTableProps {
   applications: TherapistApplication[];
-  onStatusChange: (
-    id: string,
-    status: "approved" | "rejected" | "pending"
-  ) => void;
 }
 
 export function TherapistApplicationsTable({
   applications,
-  onStatusChange,
 }: TherapistApplicationsTableProps) {
   const router = useRouter();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -44,7 +41,9 @@ export function TherapistApplicationsTable({
     id: string;
     status: "approved" | "rejected" | "pending";
   } | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Use React Query mutation for updating application status
+  const updateStatusMutation = useUpdateTherapistApplicationStatus();
 
   const formatDate = (dateString: string) => {
     try {
@@ -66,55 +65,29 @@ export function TherapistApplicationsTable({
     router.push(`/admin/therapist-applications/${id}`);
   };
 
-  const confirmStatusChange = async () => {
+  const confirmStatusChange = () => {
     if (pendingAction) {
-      setIsProcessing(true);
-      try {
-        // Call the API to update the status
-        const response = await fetch(
-          `/api/therapist/application/${pendingAction.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status: pendingAction.status }),
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to update application status");
+      updateStatusMutation.mutate(
+        {
+          applicationId: pendingAction.id,
+          data: { 
+            status: pendingAction.status,
+            reviewedBy: 'Admin', // This could be dynamic based on current user
+            notes: `Status changed to ${pendingAction.status}`,
+          },
+        },
+        {
+          onSuccess: () => {
+            setConfirmationOpen(false);
+            setPendingAction(null);
+          },
+          onError: () => {
+            // Error is already handled in the hook with toast
+            setConfirmationOpen(false);
+            setPendingAction(null);
+          },
         }
-
-        // Update the UI with the new status
-        onStatusChange(pendingAction.id, pendingAction.status);
-
-        // Show success message
-        toast.success(
-          `Application ${pendingAction.status === "approved" ? "approved" : "rejected"} successfully`
-        );
-
-        // If this was an approval with a generated password, we could save it for EmailJS
-        if (pendingAction.status === "approved" && data.generatedPassword) {
-          // Store the generated password in the application object for EmailJS
-          const applicationIndex = applications.findIndex(
-            (app) => app.id === pendingAction.id
-          );
-          if (applicationIndex >= 0) {
-            applications[applicationIndex].generatedPassword =
-              data.generatedPassword;
-          }
-        }
-      } catch (error) {
-        console.error("Error updating application:", error);
-        toast.error("Failed to update application status. Please try again.");
-      } finally {
-        setIsProcessing(false);
-        setConfirmationOpen(false);
-        setPendingAction(null);
-      }
+      );
     }
   };
 
@@ -144,10 +117,10 @@ export function TherapistApplicationsTable({
                 </Button>
               </TableCell>
               <TableCell className="font-medium">
-                {application.lastName}, {application.firstName}
+                {application.personalInfo?.lastName || 'Unknown'}, {application.personalInfo?.firstName || 'Unknown'}
               </TableCell>
-              <TableCell>{application.providerType}</TableCell>
-              <TableCell>{formatDate(application.submissionDate)}</TableCell>
+              <TableCell>{application.professionalProfile?.providerType || 'Not specified'}</TableCell>
+              <TableCell>{formatDate(application.submittedAt)}</TableCell>
               <TableCell>
                 <Badge
                   className={
@@ -208,12 +181,12 @@ export function TherapistApplicationsTable({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>
+            <AlertDialogCancel disabled={updateStatusMutation.isPending}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmStatusChange}
-              disabled={isProcessing}
+              disabled={updateStatusMutation.isPending}
               className={
                 pendingAction?.status === "approved"
                   ? "bg-green-600 hover:bg-green-700"
@@ -222,28 +195,9 @@ export function TherapistApplicationsTable({
                     : ""
               }
             >
-              {isProcessing ? (
+              {updateStatusMutation.isPending ? (
                 <span className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
                   Processing...
                 </span>
               ) : pendingAction?.status === "approved" ? (
