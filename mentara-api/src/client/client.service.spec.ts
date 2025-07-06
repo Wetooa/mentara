@@ -71,7 +71,7 @@ describe('ClientService', () => {
 
   describe('getProfile', () => {
     it('should return client profile successfully', async () => {
-      prismaService.client.findUnique.mockResolvedValue(mockClient);
+      (prismaService.client.findUnique as jest.Mock).mockResolvedValue(mockClient);
 
       const result = await service.getProfile('user-123');
 
@@ -83,7 +83,7 @@ describe('ClientService', () => {
     });
 
     it('should throw NotFoundException when client not found', async () => {
-      prismaService.client.findUnique.mockResolvedValue(null);
+      (prismaService.client.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(service.getProfile('nonexistent-user')).rejects.toThrow(
         NotFoundException,
@@ -99,7 +99,7 @@ describe('ClientService', () => {
         code: 'P2002',
         clientVersion: '4.0.0',
       });
-      prismaService.client.findUnique.mockRejectedValue(dbError);
+      (prismaService.client.findUnique as jest.Mock).mockRejectedValue(dbError);
 
       await expect(service.getProfile('user-123')).rejects.toThrow(
         InternalServerErrorException,
@@ -107,7 +107,7 @@ describe('ClientService', () => {
     });
 
     it('should throw InternalServerErrorException on unexpected error', async () => {
-      prismaService.client.findUnique.mockRejectedValue(
+      (prismaService.client.findUnique as jest.Mock).mockRejectedValue(
         new Error('Unexpected error'),
       );
 
@@ -119,8 +119,17 @@ describe('ClientService', () => {
 
   describe('updateProfile', () => {
     const updateData = {
+      email: 'updated@example.com',
       firstName: 'UpdatedName',
+      middleName: 'UpdatedMiddle',
       lastName: 'UpdatedLastName',
+      birthDate: '1990-01-01',
+      address: '123 Updated St',
+      avatarUrl: 'https://example.com/avatar.jpg',
+      role: 'client',
+      bio: 'Updated bio',
+      coverImageUrl: 'https://example.com/cover.jpg',
+      isActive: true,
     };
 
     it('should update client profile successfully', async () => {
@@ -128,7 +137,7 @@ describe('ClientService', () => {
         ...mockClient,
         user: { ...mockClient.user, ...updateData },
       };
-      prismaService.client.update.mockResolvedValue(updatedClient);
+      (prismaService.client.update as jest.Mock).mockResolvedValue(updatedClient);
 
       const result = await service.updateProfile('user-123', updateData);
 
@@ -149,7 +158,7 @@ describe('ClientService', () => {
         code: 'P2025',
         clientVersion: '4.0.0',
       });
-      prismaService.client.update.mockRejectedValue(dbError);
+      (prismaService.client.update as jest.Mock).mockRejectedValue(dbError);
 
       await expect(
         service.updateProfile('nonexistent-user', updateData),
@@ -164,7 +173,7 @@ describe('ClientService', () => {
           clientVersion: '4.0.0',
         },
       );
-      prismaService.client.update.mockRejectedValue(dbError);
+      (prismaService.client.update as jest.Mock).mockRejectedValue(dbError);
 
       await expect(
         service.updateProfile('user-123', updateData),
@@ -179,7 +188,7 @@ describe('ClientService', () => {
           clientVersion: '4.0.0',
         },
       );
-      prismaService.client.update.mockRejectedValue(dbError);
+      (prismaService.client.update as jest.Mock).mockRejectedValue(dbError);
 
       await expect(
         service.updateProfile('user-123', updateData),
@@ -189,7 +198,7 @@ describe('ClientService', () => {
 
   describe('needsTherapistRecommendations', () => {
     it('should return true when client has not seen recommendations', async () => {
-      prismaService.client.findUnique.mockResolvedValue({
+      (prismaService.client.findUnique as jest.Mock).mockResolvedValue({
         hasSeenTherapistRecommendations: false,
       });
 
@@ -203,7 +212,7 @@ describe('ClientService', () => {
     });
 
     it('should return false when client has seen recommendations', async () => {
-      prismaService.client.findUnique.mockResolvedValue({
+      (prismaService.client.findUnique as jest.Mock).mockResolvedValue({
         hasSeenTherapistRecommendations: true,
       });
 
@@ -213,7 +222,7 @@ describe('ClientService', () => {
     });
 
     it('should return true when client not found', async () => {
-      prismaService.client.findUnique.mockResolvedValue(null);
+      (prismaService.client.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await service.needsTherapistRecommendations('user-123');
 
@@ -221,7 +230,7 @@ describe('ClientService', () => {
     });
 
     it('should throw InternalServerErrorException on database error', async () => {
-      prismaService.client.findUnique.mockRejectedValue(
+      (prismaService.client.findUnique as jest.Mock).mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -237,7 +246,7 @@ describe('ClientService', () => {
         ...mockClient,
         hasSeenTherapistRecommendations: true,
       };
-      prismaService.client.update.mockResolvedValue(updatedClient);
+      (prismaService.client.update as jest.Mock).mockResolvedValue(updatedClient);
 
       await service.markTherapistRecommendationsSeen('user-123');
 
@@ -252,7 +261,7 @@ describe('ClientService', () => {
         code: 'P2025',
         clientVersion: '4.0.0',
       });
-      prismaService.client.update.mockRejectedValue(dbError);
+      (prismaService.client.update as jest.Mock).mockRejectedValue(dbError);
 
       await expect(
         service.markTherapistRecommendationsSeen('nonexistent-user'),
@@ -260,7 +269,7 @@ describe('ClientService', () => {
     });
 
     it('should throw InternalServerErrorException on other errors', async () => {
-      prismaService.client.update.mockRejectedValue(
+      (prismaService.client.update as jest.Mock).mockRejectedValue(
         new Error('Unexpected error'),
       );
 
@@ -275,7 +284,7 @@ describe('ClientService', () => {
       const mockAssignment = {
         therapist: mockTherapist,
       };
-      prismaService.clientTherapist.findFirst.mockResolvedValue(mockAssignment);
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(mockAssignment);
 
       const result = await service.getAssignedTherapist('user-123');
 
@@ -295,7 +304,7 @@ describe('ClientService', () => {
     });
 
     it('should return null when no active assignment found', async () => {
-      prismaService.clientTherapist.findFirst.mockResolvedValue(null);
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await service.getAssignedTherapist('user-123');
 
@@ -303,7 +312,7 @@ describe('ClientService', () => {
     });
 
     it('should return null when assignment has no therapist', async () => {
-      prismaService.clientTherapist.findFirst.mockResolvedValue({
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue({
         therapist: null,
       });
 

@@ -38,7 +38,11 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "mcp__mcp-sequentialthinking-tools__sequentialthinking_tools",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(for file in src/comments/comments.service.spec.ts src/client/client.service.spec.ts)",
+      "Bash(do)"
     ]
   },
   "enableAllProjectMcpServers": true,
