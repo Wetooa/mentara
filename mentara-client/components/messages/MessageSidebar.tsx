@@ -8,12 +8,16 @@ interface MessageSidebarProps {
   onSelectContact: (contactId: string) => void;
   selectedContactId: string | null;
   contacts?: Contact[]; // Make it optional to support both passing data and loading from API
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 export default function MessageSidebar({
   onSelectContact,
   selectedContactId,
   contacts: propContacts,
+  isLoading: propIsLoading,
+  error: propError,
 }: MessageSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -24,6 +28,8 @@ export default function MessageSidebar({
   useEffect(() => {
     if (propContacts) {
       setContacts(propContacts);
+      setIsLoading(propIsLoading || false);
+      setError(propError || null);
     } else {
       const loadContacts = async () => {
         setIsLoading(true);
@@ -41,7 +47,7 @@ export default function MessageSidebar({
 
       loadContacts();
     }
-  }, [propContacts]);
+  }, [propContacts, propIsLoading, propError]);
 
   const filteredContacts = searchQuery
     ? contacts.filter((c) =>

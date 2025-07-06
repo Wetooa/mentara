@@ -6,13 +6,15 @@ async function setupBookingDemo() {
   console.log('Setting up booking demo data...');
 
   // Get some therapists and clients
-  const therapists = await prisma.user.findMany({
-    where: { role: 'therapist' },
+  const therapists = await prisma.therapist.findMany({
+    where: { 
+      status: 'approved'
+    },
     take: 3,
   });
 
   const clients = await prisma.user.findMany({
-    where: { role: 'client' },
+    where: { role: 'user' },
     take: 5,
   });
 
@@ -31,17 +33,18 @@ async function setupBookingDemo() {
   for (const client of clients) {
     const therapist = therapists[Math.floor(Math.random() * therapists.length)];
 
-    await prisma.userTherapist.upsert({
+    await prisma.clientTherapist.upsert({
       where: {
-        userId_therapistId: {
-          userId: client.id,
-          therapistId: therapist.id,
+        clientId_therapistId: {
+          clientId: client.id,
+          therapistId: therapist.userId,
         },
       },
       update: {},
       create: {
-        userId: client.id,
-        therapistId: therapist.id,
+        clientId: client.id,
+        therapistId: therapist.userId,
+        status: 'active',
       },
     });
   }
@@ -55,7 +58,7 @@ async function setupBookingDemo() {
       await prisma.therapistAvailability.upsert({
         where: {
           therapistId_dayOfWeek_startTime_endTime: {
-            therapistId: therapist.id,
+            therapistId: therapist.userId,
             dayOfWeek: day,
             startTime: '09:00',
             endTime: '17:00',
@@ -63,7 +66,7 @@ async function setupBookingDemo() {
         },
         update: { isAvailable: true },
         create: {
-          therapistId: therapist.id,
+          therapistId: therapist.userId,
           dayOfWeek: day,
           startTime: '09:00',
           endTime: '17:00',
@@ -76,7 +79,7 @@ async function setupBookingDemo() {
     await prisma.therapistAvailability.upsert({
       where: {
         therapistId_dayOfWeek_startTime_endTime: {
-          therapistId: therapist.id,
+          therapistId: therapist.userId,
           dayOfWeek: 6,
           startTime: '09:00',
           endTime: '12:00',
@@ -84,7 +87,7 @@ async function setupBookingDemo() {
       },
       update: { isAvailable: true },
       create: {
-        therapistId: therapist.id,
+        therapistId: therapist.userId,
         dayOfWeek: 6,
         startTime: '09:00',
         endTime: '12:00',
@@ -118,11 +121,10 @@ async function setupBookingDemo() {
         title: `Sample Session ${i + 1}`,
         description: 'This is a sample therapy session',
         startTime,
-        endTime,
         duration: 60,
         meetingType: 'video',
         clientId: client.id,
-        therapistId: therapist.id,
+        therapistId: therapist.userId,
         status: 'SCHEDULED',
       },
     });

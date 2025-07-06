@@ -1,106 +1,72 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
-import { v4 as uuidv4 } from "uuid";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-export const config = {
-  api: {
-    bodyParser: false, // Disable built-in parser to handle FormData
-  },
-};
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-
-    // Check if the request is multipart/form-data
-    const contentType = req.headers.get("content-type") || "";
-    if (!contentType.includes("multipart/form-data")) {
+    // Get the authenticated user
+    const { userId, getToken } = auth();
+    
+    if (!userId) {
       return NextResponse.json(
-        { error: "Expected multipart/form-data" },
-        { status: 400 }
+        { error: 'Authentication required' },
+        { status: 401 }
       );
     }
 
-    // Parse the FormData
-    const formData = await req.formData();
-    const file = formData.get("file") as File;
-    const docType = formData.get("docType") as string;
-
-    if (!file || !docType) {
+    // Get the auth token for backend requests
+    const token = await getToken();
+    
+    if (!token) {
       return NextResponse.json(
-        { error: "Missing file or document type" },
-        { status: 400 }
+        { error: 'Failed to get authentication token' },
+        { status: 401 }
       );
     }
 
-    // Get the file details
-    const fileBytes = await file.arrayBuffer();
-    const buffer = Buffer.from(fileBytes);
-    const fileName = file.name;
-    const fileType = file.type;
-
-    // Generate a unique file id
-    const fileId = uuidv4();
-    const filePath = `therapist-applications/${docType}/${fileId}-${fileName}`;
-
-    // Upload the file to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from("applicants-files") // Using your bucket name
-      .upload(filePath, buffer, {
-        contentType: fileType,
-        cacheControl: "3600",
-      });
-
-    if (error) {
-      console.error("Supabase storage upload error:", error);
-      return NextResponse.json(
-        { error: "Failed to upload file to storage: " + error.message },
-        { status: 500 }
-      );
-    }
-
-    // Get the public URL for the uploaded file
-    const { data: publicUrlData } = supabase.storage
-      .from("applicants-files")
-      .getPublicUrl(filePath);
-
-    const fileUrl = publicUrlData.publicUrl;
-
-    // Create a record in the database
-    const fileUpload = await prisma.fileUpload.create({
-      data: {
-        id: fileId,
-        fileName,
-        fileSize: buffer.length,
-        fileType,
-        fileUrl,
-        docType,
-        uploadedBy: userId || undefined,
+    // Get the form data from the request
+    const formData = await request.formData();
+    
+    // Forward the request to the backend API
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const backendResponse = await fetch(`${backendUrl}/api/therapist/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
       },
+      body: formData, // Forward the FormData directly
     });
 
-    return NextResponse.json({
-      success: true,
-      fileUrl,
-      uploadId: fileId,
-      message: "File uploaded successfully",
-    });
+    if (!backendResponse.ok) {
+      const errorText = await backendResponse.text();
+      console.error('Backend upload error:', errorText);
+      
+      return NextResponse.json(
+        { 
+          error: 'File upload failed',
+          details: errorText 
+        },
+        { status: backendResponse.status }
+      );
+    }
+
+    const result = await backendResponse.json();
+    return NextResponse.json(result);
+
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('File upload error:', error);
     return NextResponse.json(
-      {
-        error:
-          "Failed to upload file: " +
-          (error instanceof Error ? error.message : "Unknown error"),
+      { 
+        error: 'Internal server error during file upload',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method not allowed' },
+    { status: 405 }
+  );
 }

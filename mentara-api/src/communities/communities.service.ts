@@ -1,120 +1,165 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Community } from '@prisma/client';
 import {
-  CreateCommunityDto,
-  UpdateCommunityDto,
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/providers/prisma-client.provider';
+import { RoomGroup, Room } from '@prisma/client';
+import {
   CommunityResponse,
-} from './dto/community.dto';
-import { CommunityWithMembers, CommunityStats } from 'src/types';
+  CommunityWithMembersResponse,
+  CommunityStatsResponse,
+  CommunityWithRoomGroupsResponse,
+  CommunityCreateInputDto,
+  CommunityUpdateInputDto,
+} from 'schema/community';
 
 @Injectable()
 export class CommunitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<CommunityResponse[]> {
+  async findAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
+    return await this.prisma.community.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        roomGroups: {
+          include: {
+            rooms: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findOneWithStructure(
+    id: string,
+  ): Promise<CommunityWithRoomGroupsResponse | null> {
+    return await this.prisma.community.findUniqueOrThrow({
+      where: { id },
+      include: {
+        roomGroups: {
+          include: {
+            rooms: true,
+          },
+        },
+      },
+    });
+  }
+
+  async createRoomGroup(
+    communityId: string,
+    name: string,
+    order: number,
+  ): Promise<RoomGroup> {
     try {
-      const communities = await this.prisma.community.findMany({
-        orderBy: { createdAt: 'desc' },
+      return await this.prisma.roomGroup.create({
+        data: {
+          name,
+          order,
+          community: {
+            connect: {
+              id: communityId,
+            },
+          },
+        },
       });
-      return communities.map((community) =>
-        this.mapToCommunityResponse(community),
-      );
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      throw new ConflictException(
+        error instanceof Error ? error.message : String(error),
+      );
     }
+  }
+
+  async createRoom(
+    roomGroupId: string,
+    name: string,
+    order: number,
+  ): Promise<Room> {
+    return await this.prisma.room.create({
+      data: {
+        name,
+        order,
+        roomGroupId,
+      },
+    });
+  }
+
+  async findRoomsByGroup(roomGroupId: string): Promise<Room[]> {
+    return await this.prisma.room.findMany({
+      where: { roomGroupId },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async findAll(): Promise<CommunityResponse[]> {
+    const communities = await this.prisma.community.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return communities.map((community) => community);
   }
 
   async findOne(id: string): Promise<CommunityResponse | null> {
-    try {
-      const community = await this.prisma.community.findUnique({
-        where: { id },
-      });
-      if (!community) return null;
-      return this.mapToCommunityResponse(community);
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    const community = await this.prisma.community.findUnique({
+      where: { id },
+    });
+    if (!community) return null;
+    return community;
   }
 
   async findBySlug(slug: string): Promise<CommunityResponse | null> {
-    try {
-      const community = await this.prisma.community.findUnique({
-        where: { slug },
-      });
-      if (!community) return null;
-      return this.mapToCommunityResponse(community);
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    const community = await this.prisma.community.findUnique({
+      where: { slug },
+    });
+    if (!community) return null;
+    return community;
   }
 
-  async findByIllness(): Promise<CommunityResponse[]> {
-    // This method is now a stub, as illness is not a field. Return all communities for now.
-    return this.findAll();
-  }
-
-  async create(data: CreateCommunityDto): Promise<CommunityResponse> {
-    try {
-      const community = await this.prisma.community.create({
-        data: {
-          name: data.name,
-          slug: data.slug,
-          description: data.description,
-          imageUrl: data.imageUrl,
-        },
-      });
-      return this.mapToCommunityResponse(community);
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+  async createCommunity(
+    data: CommunityCreateInputDto,
+  ): Promise<CommunityResponse> {
+    const community = await this.prisma.community.create({
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        imageUrl: data.imageUrl,
+      },
+    });
+    return community;
   }
 
   async update(
     id: string,
-    data: UpdateCommunityDto,
+    data: CommunityUpdateInputDto,
   ): Promise<CommunityResponse> {
-    try {
-      const community = await this.prisma.community.update({
-        where: { id },
-        data: {
-          name: data.name,
-          slug: data.slug,
-          description: data.description,
-          imageUrl: data.imageUrl,
-        },
-      });
-      return this.mapToCommunityResponse(community);
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    const community = await this.prisma.community.update({
+      where: { id },
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        imageUrl: data.imageUrl,
+      },
+    });
+    return community;
   }
 
   async remove(id: string): Promise<CommunityResponse> {
-    try {
-      const community = await this.prisma.community.delete({
-        where: { id },
-      });
-      return this.mapToCommunityResponse(community);
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    const community = await this.prisma.community.delete({
+      where: { id },
+    });
+    return community;
   }
 
   async findByUserId(userId: string): Promise<CommunityResponse[]> {
-    try {
-      const memberships = await this.prisma.membership.findMany({
-        where: { userId },
-        include: {
-          community: true,
-        },
-      });
-      return memberships.map((membership) =>
-        this.mapToCommunityResponse(membership.community),
-      );
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    const memberships = await this.prisma.membership.findMany({
+      where: { userId },
+      include: {
+        community: true,
+      },
+    });
+    return memberships.map((membership) => membership.community);
   }
 
   async joinCommunity(
@@ -122,111 +167,93 @@ export class CommunitiesService {
     userId: string,
     role: string = 'member',
   ): Promise<void> {
-    try {
-      const existingMembership = await this.prisma.membership.findFirst({
-        where: {
-          communityId,
-          userId,
-        },
-      });
-      if (existingMembership) {
-        throw new Error('User is already a member of this community');
-      }
-      await this.prisma.membership.create({
-        data: {
-          userId,
-          communityId,
-          role,
-        },
-      });
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+    const existingMembership = await this.prisma.membership.findFirst({
+      where: {
+        communityId,
+        userId,
+      },
+    });
+
+    if (existingMembership) {
+      throw new ConflictException('User is already a member of this community');
     }
+
+    await this.prisma.membership.create({
+      data: {
+        userId,
+        communityId,
+        role,
+      },
+    });
   }
 
   async leaveCommunity(communityId: string, userId: string): Promise<void> {
-    try {
-      const membership = await this.prisma.membership.findFirst({
-        where: {
-          communityId,
-          userId,
-        },
-      });
-      if (!membership) {
-        throw new Error('User is not a member of this community');
-      }
-      await this.prisma.membership.delete({
-        where: { id: membership.id },
-      });
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
+    const membership = await this.prisma.membership.findFirstOrThrow({
+      where: {
+        communityId,
+        userId,
+      },
+    });
+    await this.prisma.membership.delete({
+      where: { id: membership.id },
+    });
   }
 
   async getMembers(
     communityId: string,
     limit: number = 50,
     offset: number = 0,
-  ): Promise<CommunityWithMembers> {
-    try {
-      const community = await this.prisma.community.findUnique({
-        where: { id: communityId },
-        include: {
-          memberships: {
-            skip: offset,
-            take: limit,
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  avatarUrl: true,
-                },
+  ): Promise<CommunityWithMembersResponse> {
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId },
+      include: {
+        memberships: {
+          skip: offset,
+          take: limit,
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
               },
             },
-            orderBy: { joinedAt: 'desc' },
           },
+          orderBy: { joinedAt: 'desc' },
         },
-      });
-      if (!community) {
-        throw new Error('Community not found');
-      }
-      // You may want to map memberships to a DTO if needed
-      return community as unknown as CommunityWithMembers;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
+      },
+    });
+    if (!community) {
+      throw new NotFoundException('Community not found');
     }
-  }
-
-  async getStats(): Promise<CommunityStats> {
-    try {
-      const [totalMembers, totalPosts, activeCommunities] = await Promise.all([
-        this.prisma.membership.count(),
-        this.prisma.post.count(),
-        this.prisma.community.count(),
-      ]);
-
-      return {
-        totalMembers,
-        totalPosts,
-        activeCommunities,
-        illnessCommunities: [],
-      };
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    }
-  }
-
-  private mapToCommunityResponse(community: Community): CommunityResponse {
     return {
-      id: community.id,
-      name: community.name,
-      slug: community.slug,
-      description: community.description ?? undefined,
-      imageUrl: community.imageUrl ?? undefined,
-      createdAt: community.createdAt,
-      updatedAt: community.updatedAt,
+      ...community,
+      members: community.memberships
+        .filter(
+          (membership) =>
+            membership.userId !== null && membership.user !== null,
+        )
+        .map((membership) => ({
+          ...membership,
+          userId: membership.userId!,
+          user: membership.user!,
+        })),
+    };
+  }
+
+  async getStats(): Promise<CommunityStatsResponse> {
+    const [totalMembers, totalPosts, activeCommunities] = await Promise.all([
+      this.prisma.membership.count(),
+      this.prisma.post.count(),
+      this.prisma.community.count(),
+    ]);
+
+    return {
+      totalMembers,
+      totalPosts,
+      activeCommunities,
+      illnessCommunities: [],
     };
   }
 }

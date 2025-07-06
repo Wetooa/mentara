@@ -12,16 +12,20 @@ import {
   UseGuards,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { CommunityStats, CommunityWithMembers } from 'src/types';
 import { CommunitiesService } from './communities.service';
 import {
-  CreateCommunityDto,
-  UpdateCommunityDto,
+  CommunityCreateInputDto,
   CommunityResponse,
-} from './dto/community.dto';
+  CommunityStatsResponse,
+  CommunityUpdateInputDto,
+  CommunityWithMembersResponse,
+  CommunityWithRoomGroupsResponse,
+} from 'schema/community';
+import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 
 @Controller('communities')
 @UseGuards(ClerkAuthGuard)
@@ -43,20 +47,9 @@ export class CommunitiesController {
   }
 
   @Get('stats')
-  async getStats(): Promise<CommunityStats> {
+  async getStats(): Promise<CommunityStatsResponse> {
     try {
       return await this.communitiesService.getStats();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Unknown error',
-      );
-    }
-  }
-
-  @Get('illness/:illness')
-  async findByIllness(): Promise<CommunityResponse[]> {
-    try {
-      return await this.communitiesService.findByIllness();
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
@@ -95,12 +88,22 @@ export class CommunitiesController {
     @Param('id') id: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-  ): Promise<CommunityWithMembers> {
+  ): Promise<CommunityWithMembersResponse> {
     try {
+      const limitNum = limit ? parseInt(limit, 10) : 50;
+      const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+      if (limit && isNaN(limitNum)) {
+        throw new BadRequestException('Invalid limit parameter');
+      }
+      if (offset && isNaN(offsetNum)) {
+        throw new BadRequestException('Invalid offset parameter');
+      }
+
       return await this.communitiesService.getMembers(
         id,
-        limit ? parseInt(limit) : 50,
-        offset ? parseInt(offset) : 0,
+        Math.max(1, Math.min(100, limitNum)), // Clamp between 1-100
+        Math.max(0, offsetNum), // Ensure non-negative
       );
     } catch (error) {
       throw new InternalServerErrorException(
@@ -112,10 +115,10 @@ export class CommunitiesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @Body() communityData: CreateCommunityDto,
+    @Body() communityData: CommunityCreateInputDto,
   ): Promise<CommunityResponse> {
     try {
-      return await this.communitiesService.create(communityData);
+      return await this.communitiesService.createCommunity(communityData);
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
@@ -127,7 +130,7 @@ export class CommunitiesController {
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
-    @Body() communityData: UpdateCommunityDto,
+    @Body() communityData: CommunityUpdateInputDto,
   ): Promise<CommunityResponse> {
     try {
       return await this.communitiesService.update(id, communityData);
@@ -152,16 +155,34 @@ export class CommunitiesController {
 
   @Post(':id/join')
   @HttpCode(HttpStatus.OK)
-  joinCommunity(): void {
-    // Membership logic would go here, if needed
-    return;
+  async joinCommunity(
+    @Param('id') communityId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<{ joined: boolean }> {
+    try {
+      await this.communitiesService.joinCommunity(communityId, userId);
+      return { joined: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
   }
 
   @Post(':id/leave')
   @HttpCode(HttpStatus.OK)
-  leaveCommunity(): void {
-    // Membership logic would go here, if needed
-    return;
+  async leaveCommunity(
+    @Param('id') communityId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<{ left: boolean }> {
+    try {
+      await this.communitiesService.leaveCommunity(communityId, userId);
+      return { left: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
   }
 
   @Get('user/:userId')
@@ -175,5 +196,44 @@ export class CommunitiesController {
         error instanceof Error ? error.message : 'Unknown error',
       );
     }
+  }
+
+  @Get('with-structure')
+  async getAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
+    return await this.communitiesService.findAllWithStructure();
+  }
+
+  @Get(':id/with-structure')
+  async getOneWithStructure(@Param('id') id: string) {
+    return await this.communitiesService.findOneWithStructure(id);
+  }
+
+  @Post(':id/room-group')
+  async createRoomGroup(
+    @Param('id') communityId: string,
+    @Body() dto: { name: string; order: number },
+  ) {
+    return await this.communitiesService.createRoomGroup(
+      communityId,
+      dto.name,
+      dto.order,
+    );
+  }
+
+  @Post('room-group/:roomGroupId/room')
+  async createRoom(
+    @Param('roomGroupId') roomGroupId: string,
+    @Body() dto: { name: string; order: number },
+  ) {
+    return await this.communitiesService.createRoom(
+      roomGroupId,
+      dto.name,
+      dto.order,
+    );
+  }
+
+  @Get('room-group/:roomGroupId/rooms')
+  async getRoomsByGroup(@Param('roomGroupId') roomGroupId: string) {
+    return await this.communitiesService.findRoomsByGroup(roomGroupId);
   }
 }

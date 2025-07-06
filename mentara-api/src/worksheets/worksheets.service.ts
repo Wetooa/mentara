@@ -1,21 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../providers/prisma-client.provider';
+import { PrismaService } from 'src/providers/prisma-client.provider';
 import {
-  CreateWorksheetDto,
-  UpdateWorksheetDto,
-  CreateSubmissionDto,
-  SubmitWorksheetDto,
-} from './dto/worksheet.dto';
+  WorksheetCreateInputDto,
+  WorksheetSubmissionCreateInputDto,
+  WorksheetUpdateInputDto,
+} from 'schema/worksheet';
 
 @Injectable()
 export class WorksheetsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(userId?: string, therapistId?: string, status?: string) {
+  async findAll(
+    userId?: string,
+    therapistId?: string,
+    status?: string,
+  ): Promise<any[]> {
     const where = {};
 
     if (userId) {
-      where['userId'] = userId;
+      where['clientId'] = userId; // Use clientId for proper relation
     }
 
     if (therapistId) {
@@ -31,51 +34,37 @@ export class WorksheetsService {
       include: {
         materials: true,
         submissions: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+        client: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
         therapist: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profileImageUrl: true,
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
       },
       orderBy: {
-        dueDate: 'desc',
+        createdAt: 'desc',
       },
     });
 
-    // Transform the data to match the expected format for the client
-    return worksheets.map((worksheet) => ({
-      id: worksheet.id,
-      title: worksheet.title,
-      therapistName: `${worksheet.therapist.firstName} ${worksheet.therapist.lastName}`,
-      patientName: `${worksheet.user.firstName} ${worksheet.user.lastName}`,
-      date: worksheet.dueDate.toISOString(),
-      status: worksheet.status,
-      isCompleted: worksheet.isCompleted,
-      instructions: worksheet.instructions,
-      materials: worksheet.materials.map((material) => ({
-        id: material.id,
-        filename: material.filename,
-        url: material.url,
-      })),
-      myWork: worksheet.submissions.map((submission) => ({
-        id: submission.id,
-        filename: submission.filename,
-        url: submission.url,
-      })),
-      submittedAt: worksheet.submittedAt?.toISOString(),
-      feedback: worksheet.feedback,
-    }));
+    return worksheets;
   }
 
   async findById(id: string) {
@@ -84,20 +73,28 @@ export class WorksheetsService {
       include: {
         materials: true,
         submissions: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+        client: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
         therapist: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profileImageUrl: true,
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+              },
+            },
           },
         },
       },
@@ -107,32 +104,14 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Transform to match expected client format
-    return {
-      id: worksheet.id,
-      title: worksheet.title,
-      therapistName: `${worksheet.therapist.firstName} ${worksheet.therapist.lastName}`,
-      patientName: `${worksheet.user.firstName} ${worksheet.user.lastName}`,
-      date: worksheet.dueDate.toISOString(),
-      status: worksheet.status,
-      isCompleted: worksheet.isCompleted,
-      instructions: worksheet.instructions,
-      materials: worksheet.materials.map((material) => ({
-        id: material.id,
-        filename: material.filename,
-        url: material.url,
-      })),
-      myWork: worksheet.submissions.map((submission) => ({
-        id: submission.id,
-        filename: submission.filename,
-        url: submission.url,
-      })),
-      submittedAt: worksheet.submittedAt?.toISOString(),
-      feedback: worksheet.feedback,
-    };
+    return worksheet;
   }
 
-  async create(data: CreateWorksheetDto) {
+  async create(
+    data: WorksheetCreateInputDto,
+    clientId: string,
+    therapistId: string,
+  ) {
     // Start a transaction to create the worksheet and any materials
     return this.prisma.$transaction(async (prisma) => {
       // Create the worksheet
@@ -140,32 +119,21 @@ export class WorksheetsService {
         data: {
           title: data.title,
           instructions: data.instructions,
-          dueDate: new Date(data.dueDate),
-          userId: data.userId,
-          therapistId: data.therapistId,
+          description: data.description,
+          dueDate: data.dueDate,
+          status: data.status || 'assigned',
+          isCompleted: data.isCompleted || false,
+          clientId,
+          therapistId,
         },
       });
-
-      // Create materials if provided
-      if (data.materials && data.materials.length > 0) {
-        await Promise.all(
-          data.materials.map((material) =>
-            prisma.worksheetMaterial.create({
-              data: {
-                ...material,
-                worksheetId: worksheet.id,
-              },
-            }),
-          ),
-        );
-      }
 
       // Return the newly created worksheet with materials
       return this.findById(worksheet.id);
     });
   }
 
-  async update(id: string, data: UpdateWorksheetDto) {
+  async update(id: string, data: WorksheetUpdateInputDto) {
     // Check if worksheet exists
     const exists = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -178,17 +146,7 @@ export class WorksheetsService {
     // Update the worksheet
     await this.prisma.worksheet.update({
       where: { id },
-      data: {
-        ...(data.title && { title: data.title }),
-        ...(data.instructions && { instructions: data.instructions }),
-        ...(data.dueDate && { dueDate: new Date(data.dueDate) }),
-        ...(data.status && { status: data.status }),
-        ...(data.isCompleted !== undefined && {
-          isCompleted: data.isCompleted,
-        }),
-        ...(data.submittedAt && { submittedAt: new Date(data.submittedAt) }),
-        ...(data.feedback && { feedback: data.feedback }),
-      },
+      data,
     });
 
     // Return the updated worksheet
@@ -213,10 +171,14 @@ export class WorksheetsService {
     return { success: true, message: 'Worksheet deleted successfully' };
   }
 
-  async addSubmission(data: CreateSubmissionDto) {
+  async addSubmission(
+    data: WorksheetSubmissionCreateInputDto,
+    clientId: string,
+  ) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id: data.worksheetId },
+      include: { client: true },
     });
 
     if (!worksheet) {
@@ -228,18 +190,23 @@ export class WorksheetsService {
     // Create the submission
     const submission = await this.prisma.worksheetSubmission.create({
       data: {
+        worksheetId: data.worksheetId,
+        clientId,
+        content: data.content,
         filename: data.filename,
         url: data.url,
-        fileSize: data.fileSize,
         fileType: data.fileType,
-        worksheetId: data.worksheetId,
       },
     });
 
     return submission;
   }
 
-  async submitWorksheet(id: string, data: SubmitWorksheetDto) {
+  async submitWorksheet(
+    id: string,
+    data: WorksheetSubmissionCreateInputDto,
+    clientId: string,
+  ) {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
@@ -251,34 +218,26 @@ export class WorksheetsService {
 
     // Use transaction to ensure all operations succeed or fail together
     return this.prisma.$transaction(async (prisma) => {
-      // Add all submissions
-      if (data.submissions && data.submissions.length > 0) {
-        await Promise.all(
-          data.submissions.map((submission) =>
-            prisma.worksheetSubmission.create({
-              data: {
-                filename: submission.filename,
-                url: submission.url,
-                fileSize: submission.fileSize,
-                fileType: submission.fileType,
-                worksheetId: id,
-              },
-            }),
-          ),
-        );
-      }
+      await prisma.worksheetSubmission.create({
+        data: {
+          worksheetId: id,
+          clientId,
+          content: data.content,
+          filename: data.filename,
+          url: data.url,
+          fileType: data.fileType,
+        },
+      });
 
       // Update worksheet status if completing submission
-      if (data.complete) {
-        await prisma.worksheet.update({
-          where: { id },
-          data: {
-            isCompleted: true,
-            status: 'completed',
-            submittedAt: new Date(),
-          },
-        });
-      }
+      await prisma.worksheet.update({
+        where: { id },
+        data: {
+          isCompleted: true,
+          status: 'completed',
+          submittedAt: new Date(),
+        },
+      });
 
       // Return the updated worksheet
       return this.findById(id);

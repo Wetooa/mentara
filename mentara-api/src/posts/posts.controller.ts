@@ -10,11 +10,11 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
-import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
+import { PostCreateInputDto, PostUpdateInputDto } from 'schema/post';
 
 @Controller('posts')
 @UseGuards(ClerkAuthGuard)
@@ -58,7 +58,7 @@ export class PostsController {
   @Post()
   async create(
     @CurrentUserId() id: string,
-    @Body() postData: CreatePostDto,
+    @Body() postData: PostCreateInputDto,
   ): Promise<PostEntity> {
     try {
       const user = await this.postsService.findUserById(id);
@@ -71,9 +71,7 @@ export class PostsController {
         title: postData.title,
         content: postData.content,
         user: { connect: { id: user.id } },
-        community: {
-          connect: { id: postData.communityId },
-        },
+        room: { connect: { id: postData.roomId } },
       };
       return await this.postsService.create(createData);
     } catch (error) {
@@ -88,7 +86,7 @@ export class PostsController {
   async update(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
-    @Body() postData: UpdatePostDto,
+    @Body() postData: PostUpdateInputDto,
   ): Promise<PostEntity> {
     try {
       return await this.postsService.update(postId, postData, userId);
@@ -127,13 +125,13 @@ export class PostsController {
     }
   }
 
-  @Get('community/:communityId')
-  async findByCommunityId(
-    @Param('communityId') communityId: string,
+  @Get('room/:roomId')
+  async findByRoomId(
+    @Param('roomId') roomId: string,
     @CurrentUserId() userId: string,
   ): Promise<PostEntity[]> {
     try {
-      return await this.postsService.findByCommunityId(communityId, userId);
+      return await this.postsService.findByRoomId(roomId, userId);
     } catch (error) {
       throw new HttpException(
         `Failed to fetch posts for community: ${error instanceof Error ? error.message : 'Unknown error'}`,

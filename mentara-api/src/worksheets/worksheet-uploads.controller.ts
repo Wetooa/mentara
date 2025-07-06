@@ -3,7 +3,6 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  Param,
   Body,
   BadRequestException,
 } from '@nestjs/common';
@@ -109,7 +108,18 @@ export class WorksheetUploadsController {
         fileType: material.fileType,
       };
     } else {
-      // Default to submission
+      // Default to submission - need to get the worksheet's clientId
+      const worksheetData = await this.prisma.worksheet.findUnique({
+        where: { id: worksheetId },
+        select: { clientId: true },
+      });
+
+      if (!worksheetData) {
+        throw new BadRequestException(
+          `Worksheet with ID ${worksheetId} not found`,
+        );
+      }
+
       const submission = await this.prisma.worksheetSubmission.create({
         data: {
           filename: file.originalname,
@@ -117,6 +127,7 @@ export class WorksheetUploadsController {
           fileSize: file.size,
           fileType: file.mimetype,
           worksheetId,
+          clientId: worksheetData.clientId,
         },
       });
 

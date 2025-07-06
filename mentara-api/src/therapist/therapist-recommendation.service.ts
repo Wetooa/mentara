@@ -4,12 +4,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { PreAssessment } from '@prisma/client';
 import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-} from '../types';
-import { PreAssessment } from '@prisma/client';
-import { TherapistWithUser } from 'src/types';
+} from './dto/therapist-application.dto';
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -53,15 +52,17 @@ export class TherapistRecommendationService {
       // Fetch therapists
       const therapists = await this.prisma.therapist.findMany({
         where: {
-          isActive: request.includeInactive ? undefined : true,
+          status: 'approved',
           ...(request.province && { province: request.province }),
           ...(request.maxHourlyRate && {
             hourlyRate: { lte: request.maxHourlyRate },
           }),
         },
-        orderBy: { patientSatisfaction: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: request.limit ?? 10,
-        include: { user: true },
+        include: {
+          user: true,
+        },
       });
 
       // Calculate match scores
@@ -71,7 +72,7 @@ export class TherapistRecommendationService {
       });
 
       // Sort by matchScore descending
-      const sortedTherapists = therapistsWithScores.sort(
+      const sortedTherapists = therapistsWithScores.toSorted(
         (a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0),
       );
 
@@ -118,7 +119,7 @@ export class TherapistRecommendationService {
   }
 
   private calculateMatchScore(
-    therapist: TherapistWithUser,
+    therapist: any,
     userConditions: Record<string, string>,
   ): number {
     let score = 0;
@@ -127,11 +128,11 @@ export class TherapistRecommendationService {
       if (expertise.includes(condition)) score += 20;
     });
     score += Math.min(
-      this.calculateYearsOfExperience(therapist.practiceStartDate as Date) * 2,
+      this.calculateYearsOfExperience(therapist.practiceStartDate) * 2,
       20,
     );
-    if (therapist.patientSatisfaction)
-      score += Number(therapist.patientSatisfaction) * 10;
+    // Add base score for experience
+    score += therapist.yearsOfExperience ? therapist.yearsOfExperience * 2 : 0;
     return score;
   }
 

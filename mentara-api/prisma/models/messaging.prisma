@@ -1,0 +1,160 @@
+// Messaging System Models
+// This file contains all models related to the messaging/chat functionality
+
+model Conversation {
+  id            String            @id @default(uuid())
+  type          ConversationType  @default(DIRECT)
+  title         String?           // Optional for group conversations
+  isActive      Boolean           @default(true)
+  lastMessageAt DateTime?
+  
+  // Relations
+  participants  ConversationParticipant[]
+  messages      Message[]
+  
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  @@index([lastMessageAt])
+  @@index([isActive])
+  @@index([type])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime?
+  role           ParticipantRole @default(MEMBER)
+  isActive       Boolean      @default(true)
+  isMuted        Boolean      @default(false)
+  
+  // Relations
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user          User         @relation("UserConversations", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@index([conversationId])
+  @@index([isActive])
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String      @db.Text
+  messageType    MessageType @default(TEXT)
+  attachmentUrl  String?     // For file attachments
+  attachmentName String?     // Original filename
+  attachmentSize Int?        // File size in bytes
+  replyToId      String?     // For message replies
+  isEdited       Boolean     @default(false)
+  isDeleted      Boolean     @default(false)
+  editedAt       DateTime?   // When message was last edited
+  
+  // Relations
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender        User         @relation("UserMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo       Message?     @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies       Message[]    @relation("MessageReplies")
+  readReceipts  MessageReadReceipt[]
+  reactions     MessageReaction[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@index([messageType])
+  @@index([isDeleted])
+}
+
+model MessageReadReceipt {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+  
+  // Relations
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user     User     @relation("UserReadReceipts", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String   // Unicode emoji
+  
+  // Relations
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user     User     @relation("UserMessageReactions", fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model TypingIndicator {
+  id             String   @id @default(uuid())
+  conversationId String
+  userId         String
+  isTyping       Boolean  @default(true)
+  lastTypingAt   DateTime @default(now())
+  
+  // Relations - Note: No foreign key constraints for performance (temporary records)
+  
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([lastTypingAt])
+}
+
+model UserBlock {
+  id        String   @id @default(uuid())
+  blockerId String   // User who is blocking
+  blockedId String   // User being blocked
+  reason    String?  // Optional reason for blocking
+  
+  // Relations
+  blocker   User     @relation("UserBlocking", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("UserBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+// Enums
+enum ConversationType {
+  DIRECT      // 1-on-1 conversation
+  GROUP       // Multiple participants
+  SESSION     // Linked to therapy session
+  SUPPORT     // Support/admin conversation
+}
+
+enum ParticipantRole {
+  MEMBER      // Regular participant
+  MODERATOR   // Can moderate conversation
+  ADMIN       // Full admin rights
+}
+
+enum MessageType {
+  TEXT        // Regular text message
+  IMAGE       // Image attachment
+  FILE        // File attachment
+  VOICE       // Voice message
+  VIDEO       // Video attachment
+  SYSTEM      // System messages (user joined, etc.)
+  LOCATION    // Location sharing
+  POLL        // Poll/survey message
+}

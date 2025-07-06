@@ -5,40 +5,37 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { MeetingStatus } from '@prisma/client';
 import {
-  CreateMeetingDto,
-  UpdateMeetingDto,
-  CreateAvailabilityDto,
-  UpdateAvailabilityDto,
-  MeetingStatus,
-} from './dto/booking.dto';
+  MeetingCreateDto,
+  MeetingUpdateDto,
+  TherapistAvailabilityCreateDto,
+  TherapistAvailabilityUpdateDto,
+} from '../../schema/booking';
+import { EventBusService } from '../common/events/event-bus.service';
+import {
+  AppointmentBookedEvent,
+  AppointmentCancelledEvent,
+  AppointmentCompletedEvent,
+  AppointmentRescheduledEvent,
+} from '../common/events/booking-events';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventBus: EventBusService,
+  ) {}
 
   // Meeting Management
-  async createMeeting(createMeetingDto: CreateMeetingDto, clientId: string) {
+  async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     try {
-      const {
-        therapistId,
-        startTime,
-        endTime,
-        duration,
-        title,
-        description,
-        meetingType,
-      } = createMeetingDto;
+      const { startTime, therapistId, duration } = createMeetingDto;
 
       // Verify therapist exists and is active
-      const therapist = await this.prisma.user.findFirst({
+      const therapist = await this.prisma.therapist.findFirst({
         where: {
-          id: therapistId,
-          role: 'therapist',
-          isActive: true,
-          therapist: {
-            isActive: true,
-          },
+          userId: therapistId,
         },
       });
 
@@ -61,19 +58,44 @@ export class BookingService {
       }
 
       // Check for scheduling conflicts
+      const startTimeDate = new Date(startTime);
+      const endTimeDate = new Date(
+        startTimeDate.getTime() + duration * 60 * 1000,
+      ); // Convert duration (minutes) to milliseconds
+
       const conflicts = await this.prisma.meeting.findMany({
         where: {
           OR: [
             {
               therapistId,
-              startTime: { lt: new Date(endTime) },
-              endTime: { gt: new Date(startTime) },
+              AND: [
+                {
+                  startTime: {
+                    lt: endTimeDate,
+                  },
+                },
+                {
+                  startTime: {
+                    gte: startTimeDate,
+                  },
+                },
+              ],
               status: { in: ['SCHEDULED', 'CONFIRMED'] },
             },
             {
               clientId,
-              startTime: { lt: new Date(endTime) },
-              endTime: { gt: new Date(startTime) },
+              AND: [
+                {
+                  startTime: {
+                    lt: endTimeDate,
+                  },
+                },
+                {
+                  startTime: {
+                    gte: startTimeDate,
+                  },
+                },
+              ],
               status: { in: ['SCHEDULED', 'CONFIRMED'] },
             },
           ],
@@ -88,8 +110,14 @@ export class BookingService {
 
       // Verify therapist availability for this time slot
       const dayOfWeek = new Date(startTime).getDay();
-      const startTimeStr = new Date(startTime).toTimeString().slice(0, 5);
-      const endTimeStr = new Date(endTime).toTimeString().slice(0, 5);
+      const timeString = new Date(startTime).toTimeString();
+      const startTimeStr =
+        timeString.length >= 5 ? timeString.slice(0, 5) : timeString;
+
+      const endTime = new Date(startTime).getTime() + duration * 60 * 1000;
+      const endTimeString = new Date(endTime).toTimeString();
+      const endTimeStr =
+        endTimeString.length >= 5 ? endTimeString.slice(0, 5) : endTimeString;
 
       const availability = await this.prisma.therapistAvailability.findFirst({
         where: {
@@ -103,27 +131,26 @@ export class BookingService {
 
       if (!availability) {
         throw new BadRequestException(
-          'Therapist is not available during this time slot',
+          'Therapist is not available at this time',
         );
+      }
+
+      // Validate time format
+      const timeRegex = /^([0-1]?[\d]|2[0-3]):[0-5][\d]$/;
+      if (!timeRegex.test(startTimeStr)) {
+        throw new BadRequestException('Invalid time format. Use HH:MM format');
       }
 
       // Create the meeting
       const meeting = await this.prisma.meeting.create({
         data: {
-          title,
-          description,
-          startTime: new Date(startTime),
-          endTime: new Date(endTime),
-          duration,
-          meetingType,
-          clientId,
-          therapistId,
+          ...createMeetingDto,
           status: 'SCHEDULED',
+          clientId,
         },
         include: {
           client: {
             select: {
-              id: true,
               user: {
                 select: {
                   firstName: true,
@@ -135,15 +162,36 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
             },
           },
-          durationConfig: true,
         },
       });
+
+      // Publish appointment booked event
+      await this.eventBus.emit(
+        new AppointmentBookedEvent({
+          appointmentId: meeting.id,
+          clientId: meeting.clientId,
+          therapistId: meeting.therapistId,
+          startTime: meeting.startTime,
+          meetingType: meeting.meetingType as
+            | 'video'
+            | 'audio'
+            | 'in_person'
+            | 'chat',
+          duration: meeting.duration,
+          title: meeting.title || 'Therapy Session',
+          description: meeting.description || undefined,
+          isInitialConsultation: false, // Could be enhanced to track this
+        }),
+      );
 
       return meeting;
     } catch (error) {
@@ -158,12 +206,11 @@ export class BookingService {
       const where =
         role === 'therapist' ? { therapistId: userId } : { clientId: userId };
 
-      return this.prisma.meeting.findMany({
+      return await this.prisma.meeting.findMany({
         where,
         include: {
           client: {
             select: {
-              id: true,
               user: {
                 select: {
                   firstName: true,
@@ -175,13 +222,15 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
             },
           },
-          durationConfig: true,
         },
         orderBy: { startTime: 'desc' },
       });
@@ -199,7 +248,6 @@ export class BookingService {
         include: {
           client: {
             select: {
-              id: true,
               user: {
                 select: {
                   firstName: true,
@@ -211,13 +259,15 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
             },
           },
-          durationConfig: true,
         },
       });
 
@@ -243,7 +293,7 @@ export class BookingService {
 
   async updateMeeting(
     id: string,
-    updateMeetingDto: UpdateMeetingDto,
+    updateMeetingDto: MeetingUpdateDto,
     userId: string,
     role: string,
   ) {
@@ -256,30 +306,22 @@ export class BookingService {
           'Cannot update completed or cancelled meetings',
         );
       }
-
-      const updateData: {
-        status?: MeetingStatus;
-        notes?: string;
-        meetingUrl?: string;
-      } = {};
-
-      if (updateMeetingDto.status) {
-        updateData.status = updateMeetingDto.status;
-      }
-      if (updateMeetingDto.notes) {
-        updateData.notes = updateMeetingDto.notes;
-      }
-      if (updateMeetingDto.meetingUrl) {
-        updateData.meetingUrl = updateMeetingDto.meetingUrl;
-      }
-
-      return this.prisma.meeting.update({
+      const updatedMeeting = await this.prisma.meeting.update({
         where: { id },
-        data: updateData,
+        data: {
+          title: updateMeetingDto.title,
+          description: updateMeetingDto.description,
+          startTime: updateMeetingDto.startTime,
+          duration: updateMeetingDto.duration,
+          meetingType: updateMeetingDto.meetingType,
+          therapistId: updateMeetingDto.therapistId,
+          ...(updateMeetingDto.status && {
+            status: updateMeetingDto.status as MeetingStatus,
+          }),
+        },
         include: {
           client: {
             select: {
-              id: true,
               user: {
                 select: {
                   firstName: true,
@@ -291,15 +333,50 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
             },
           },
-          durationConfig: true,
         },
       });
+
+      // Publish appropriate events based on what was updated
+      if (updateMeetingDto.status === 'COMPLETED') {
+        await this.eventBus.emit(
+          new AppointmentCompletedEvent({
+            appointmentId: updatedMeeting.id,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            completedAt: new Date(),
+            duration: updatedMeeting.duration,
+            sessionNotes: updateMeetingDto.description || '',
+            attendanceStatus: 'ATTENDED', // Default, could be enhanced
+          }),
+        );
+      } else if (
+        updateMeetingDto.startTime &&
+        new Date(updateMeetingDto.startTime).getTime() !==
+          meeting.startTime.getTime()
+      ) {
+        await this.eventBus.emit(
+          new AppointmentRescheduledEvent({
+            appointmentId: updatedMeeting.id,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            rescheduledBy: userId,
+            originalStartTime: meeting.startTime,
+            newStartTime: new Date(updateMeetingDto.startTime),
+            rescheduleReason: `Rescheduled by ${role}`,
+          }),
+        );
+      }
+
+      return updatedMeeting;
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -319,13 +396,12 @@ export class BookingService {
         throw new BadRequestException('Cannot cancel completed meetings');
       }
 
-      return this.prisma.meeting.update({
+      const cancelledMeeting = await this.prisma.meeting.update({
         where: { id },
         data: { status: 'CANCELLED' },
         include: {
           client: {
             select: {
-              id: true,
               user: {
                 select: {
                   firstName: true,
@@ -337,15 +413,41 @@ export class BookingService {
           },
           therapist: {
             select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
             },
           },
-          durationConfig: true,
         },
       });
+
+      // Calculate cancellation notice in hours
+      const cancellationNotice = Math.floor(
+        (meeting.startTime.getTime() - Date.now()) / (1000 * 60 * 60),
+      );
+
+      // Publish appointment cancelled event
+      await this.eventBus.emit(
+        new AppointmentCancelledEvent({
+          appointmentId: cancelledMeeting.id,
+          clientId: cancelledMeeting.clientId,
+          therapistId: cancelledMeeting.therapistId,
+          cancelledBy: userId,
+          cancellationReason:
+            role === 'client'
+              ? 'Cancelled by client'
+              : 'Cancelled by therapist',
+          originalStartTime: meeting.startTime,
+          cancelledAt: new Date(),
+          cancellationNotice: Math.max(0, cancellationNotice),
+        }),
+      );
+
+      return cancelledMeeting;
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -355,14 +457,14 @@ export class BookingService {
 
   // Availability Management
   async createAvailability(
-    createAvailabilityDto: CreateAvailabilityDto,
+    createAvailabilityDto: TherapistAvailabilityCreateDto,
     therapistId: string,
   ) {
     try {
       const { dayOfWeek, startTime, endTime, notes } = createAvailabilityDto;
 
       // Validate time format
-      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      const timeRegex = /^([0-1]?[\d]|2[0-3]):[0-5][\d]$/;
       if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
         throw new BadRequestException('Invalid time format. Use HH:MM format');
       }
@@ -410,7 +512,7 @@ export class BookingService {
 
   async getAvailability(therapistId: string) {
     try {
-      return this.prisma.therapistAvailability.findMany({
+      return await this.prisma.therapistAvailability.findMany({
         where: { therapistId },
         orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
       });
@@ -423,7 +525,7 @@ export class BookingService {
 
   async updateAvailability(
     id: string,
-    updateAvailabilityDto: UpdateAvailabilityDto,
+    updateAvailabilityDto: TherapistAvailabilityUpdateDto,
     therapistId: string,
   ) {
     try {
@@ -435,29 +537,9 @@ export class BookingService {
         throw new NotFoundException('Availability slot not found');
       }
 
-      const updateData: {
-        startTime?: string;
-        endTime?: string;
-        isAvailable?: boolean;
-        notes?: string;
-      } = {};
-
-      if (updateAvailabilityDto.startTime !== undefined) {
-        updateData.startTime = updateAvailabilityDto.startTime;
-      }
-      if (updateAvailabilityDto.endTime !== undefined) {
-        updateData.endTime = updateAvailabilityDto.endTime;
-      }
-      if (updateAvailabilityDto.isAvailable !== undefined) {
-        updateData.isAvailable = updateAvailabilityDto.isAvailable;
-      }
-      if (updateAvailabilityDto.notes !== undefined) {
-        updateData.notes = updateAvailabilityDto.notes;
-      }
-
       return this.prisma.therapistAvailability.update({
         where: { id },
-        data: updateData,
+        data: updateAvailabilityDto,
       });
     } catch (error) {
       throw new BadRequestException(
@@ -487,17 +569,13 @@ export class BookingService {
   }
 
   // Duration Management
-  async getDurations() {
-    try {
-      return await this.prisma.meetingDuration.findMany({
-        where: { isActive: true },
-        orderBy: { sortOrder: 'asc' },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : String(error),
-      );
-    }
+  private getDurations() {
+    return [
+      { id: '30', name: '30 minutes', duration: 30 },
+      { id: '60', name: '60 minutes', duration: 60 },
+      { id: '90', name: '90 minutes', duration: 90 },
+      { id: '120', name: '120 minutes', duration: 120 },
+    ];
   }
 
   // Get available time slots for a therapist on a specific date
@@ -536,12 +614,11 @@ export class BookingService {
       });
 
       // Get available durations
-      const durations = await this.getDurations();
+      const durations = this.getDurations();
 
       // Generate available slots
       const availableSlots: {
         startTime: string;
-        endTime: string;
         availableDurations: {
           id: string;
           name: string;
@@ -570,11 +647,14 @@ export class BookingService {
           if (slotEnd <= endTime) {
             // Check if this slot conflicts with existing bookings
             const conflicts = existingBookings.filter((booking) => {
+              const bookingEnd = new Date(
+                booking.startTime.getTime() + booking.duration * 60000,
+              );
               return (
                 (currentTime >= booking.startTime &&
-                  currentTime < booking.endTime) ||
-                (slotEnd > booking.startTime && slotEnd <= booking.endTime) ||
-                (currentTime <= booking.startTime && slotEnd >= booking.endTime)
+                  currentTime < bookingEnd) ||
+                (slotEnd > booking.startTime && slotEnd <= bookingEnd) ||
+                (currentTime <= booking.startTime && slotEnd >= bookingEnd)
               );
             });
 
@@ -587,13 +667,16 @@ export class BookingService {
                 return (
                   durationEnd <= endTime &&
                   !existingBookings.some((booking) => {
+                    const bookingEnd = new Date(
+                      booking.startTime.getTime() + booking.duration * 60000,
+                    );
                     return (
                       (currentTime >= booking.startTime &&
-                        currentTime < booking.endTime) ||
+                        currentTime < bookingEnd) ||
                       (durationEnd > booking.startTime &&
-                        durationEnd <= booking.endTime) ||
+                        durationEnd <= bookingEnd) ||
                       (currentTime <= booking.startTime &&
-                        durationEnd >= booking.endTime)
+                        durationEnd >= bookingEnd)
                     );
                   })
                 );
@@ -602,7 +685,6 @@ export class BookingService {
               if (availableDurations.length > 0) {
                 availableSlots.push({
                   startTime: currentTime.toISOString(),
-                  endTime: slotEnd.toISOString(),
                   availableDurations,
                 });
               }
@@ -619,5 +701,137 @@ export class BookingService {
         error instanceof Error ? error.message : String(error),
       );
     }
+  }
+
+  private validateTimeFormat(timeStr: string) {
+    const timeRegex = /^([0-1]?[\d]|2[0-3]):[0-5][\d]$/;
+    if (!timeRegex.test(timeStr)) {
+      throw new BadRequestException('Invalid time format. Use HH:MM format');
+    }
+  }
+
+  private getTimeInfo(startTime: string | Date, duration: number) {
+    const startDate = new Date(startTime);
+    const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
+
+    const startTimeString = startDate.toTimeString();
+    const endTimeString = endDate.toTimeString();
+
+    return {
+      dayOfWeek: startDate.getDay(),
+      startTimeStr:
+        startTimeString.length >= 5
+          ? startTimeString.slice(0, 5)
+          : startTimeString,
+      endTimeStr:
+        endTimeString.length >= 5 ? endTimeString.slice(0, 5) : endTimeString,
+    };
+  }
+
+  private async checkTherapistAvailability(
+    therapistId: string,
+    timeInfo: { dayOfWeek: number; startTimeStr: string; endTimeStr: string },
+  ) {
+    const { dayOfWeek, startTimeStr, endTimeStr } = timeInfo;
+
+    const availability = await this.prisma.therapistAvailability.findFirst({
+      where: {
+        therapistId,
+        dayOfWeek,
+        startTime: { lte: startTimeStr },
+        endTime: { gte: endTimeStr },
+        isAvailable: true,
+      },
+    });
+
+    if (!availability) {
+      throw new BadRequestException('Therapist is not available at this time');
+    }
+  }
+
+  private validateDuration(duration: number) {
+    const validDurations = this.getDurations().map((d) => d.duration);
+    if (!validDurations.includes(duration)) {
+      throw new BadRequestException('Invalid meeting duration');
+    }
+  }
+
+  private async checkSchedulingConflicts(
+    therapistId: string,
+    clientId: string,
+    startTime: Date,
+    duration: number,
+  ) {
+    const endTimeDate = new Date(startTime.getTime() + duration * 60 * 1000);
+
+    const conflicts = await this.prisma.meeting.findMany({
+      where: {
+        OR: [
+          {
+            therapistId,
+            AND: [
+              {
+                startTime: {
+                  lt: endTimeDate,
+                },
+              },
+              {
+                startTime: {
+                  gte: startTime,
+                },
+              },
+            ],
+            status: { in: ['SCHEDULED', 'CONFIRMED'] },
+          },
+          {
+            clientId,
+            AND: [
+              {
+                startTime: {
+                  lt: endTimeDate,
+                },
+              },
+              {
+                startTime: {
+                  gte: startTime,
+                },
+              },
+            ],
+            status: { in: ['SCHEDULED', 'CONFIRMED'] },
+          },
+        ],
+      },
+    });
+
+    if (conflicts.length > 0) {
+      throw new BadRequestException(
+        'Time slot conflicts with existing meetings',
+      );
+    }
+  }
+
+  async validateMeetingTime(
+    therapistId: string,
+    clientId: string,
+    startTime: string | Date,
+    duration: number,
+  ) {
+    // Validate duration
+    this.validateDuration(duration);
+
+    // Get time information
+    const timeInfo = this.getTimeInfo(startTime, duration);
+    this.validateTimeFormat(timeInfo.startTimeStr);
+
+    // Check therapist availability
+    await this.checkTherapistAvailability(therapistId, timeInfo);
+
+    // Check for scheduling conflicts
+    await this.checkSchedulingConflicts(
+      therapistId,
+      clientId,
+      new Date(startTime),
+      duration,
+    );
   }
 }

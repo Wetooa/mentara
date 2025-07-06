@@ -4,7 +4,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { Post, Prisma, User } from '@prisma/client';
+import {
+  Post,
+  Prisma,
+  User,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
+import { PostUpdateInputDto } from 'schema/post';
 
 @Injectable()
 export class PostsService {
@@ -27,11 +34,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         comments: {
@@ -61,7 +67,6 @@ export class PostsService {
             createdAt: 'desc',
           },
         },
-        files: true,
         hearts: userId
           ? {
               where: {
@@ -94,11 +99,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         comments: {
@@ -128,7 +132,6 @@ export class PostsService {
             createdAt: 'desc',
           },
         },
-        files: true,
         hearts: userId
           ? {
               where: {
@@ -158,21 +161,19 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
-        files: true,
       },
     });
   }
 
   async update(
     id: string,
-    data: Prisma.PostUpdateInput,
+    data: PostUpdateInputDto,
     userId: string,
   ): Promise<Post> {
     const post = await this.prisma.post.findUnique({
@@ -190,7 +191,11 @@ export class PostsService {
 
     return this.prisma.post.update({
       where: { id },
-      data,
+      data: {
+        title: data.title,
+        content: data.content,
+        room: { connect: { id: data.roomId } },
+      },
       include: {
         user: {
           select: {
@@ -200,14 +205,12 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
-        files: true,
       },
     });
   }
@@ -245,14 +248,12 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
-        files: true,
         _count: {
           select: {
             comments: true,
@@ -266,13 +267,10 @@ export class PostsService {
     });
   }
 
-  async findByCommunityId(
-    communityId: string,
-    userId?: string,
-  ): Promise<Post[]> {
+  async findByRoomId(roomId: string, userId?: string): Promise<Post[]> {
     return this.prisma.post.findMany({
       where: {
-        communityId,
+        roomId,
       },
       include: {
         user: {
@@ -283,11 +281,10 @@ export class PostsService {
             avatarUrl: true,
           },
         },
-        community: {
+        room: {
           select: {
             id: true,
             name: true,
-            slug: true,
           },
         },
         comments: {
@@ -317,7 +314,6 @@ export class PostsService {
             createdAt: 'desc',
           },
         },
-        files: true,
         hearts: userId
           ? {
               where: {
@@ -388,5 +384,47 @@ export class PostsService {
     });
 
     return !!heart;
+  }
+
+  // File attachment methods
+  async attachFilesToPost(
+    postId: string,
+    fileIds: string[],
+    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
+  ) {
+    const attachments = fileIds.map((fileId, index) => ({
+      fileId,
+      entityType: AttachmentEntityType.POST,
+      entityId: postId,
+      purpose,
+      order: index,
+    }));
+
+    return this.prisma.fileAttachment.createMany({
+      data: attachments,
+    });
+  }
+
+  async getPostAttachments(postId: string) {
+    return this.prisma.fileAttachment.findMany({
+      where: {
+        entityType: AttachmentEntityType.POST,
+        entityId: postId,
+      },
+      include: {
+        file: true,
+      },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async removePostAttachment(postId: string, fileId: string) {
+    return this.prisma.fileAttachment.deleteMany({
+      where: {
+        entityType: AttachmentEntityType.POST,
+        entityId: postId,
+        fileId,
+      },
+    });
   }
 }

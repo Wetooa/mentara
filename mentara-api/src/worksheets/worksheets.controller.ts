@@ -9,17 +9,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/clerk-auth.guard';
+import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { WorksheetsService } from './worksheets.service';
+import { PaginationQuery, FilterQuery } from 'src/types';
 import {
-  CreateWorksheetDto,
-  UpdateWorksheetDto,
-  CreateSubmissionDto,
-  SubmitWorksheetDto,
-  PaginationQuery,
-  FilterQuery,
-} from 'src/types';
+  WorksheetCreateInputDto,
+  WorksheetUpdateInputDto,
+  WorksheetSubmissionCreateInputDto,
+} from 'schema/worksheet';
 
 @Controller('worksheets')
 @UseGuards(ClerkAuthGuard)
@@ -46,16 +44,24 @@ export class WorksheetsController {
   @Post()
   create(
     @CurrentUserId() clerkId: string,
-    @Body() createWorksheetDto: CreateWorksheetDto,
+    @Body()
+    createWorksheetDto: WorksheetCreateInputDto & {
+      clientId: string;
+      therapistId: string;
+    },
   ) {
-    return this.worksheetsService.create(createWorksheetDto);
+    return this.worksheetsService.create(
+      createWorksheetDto,
+      createWorksheetDto.clientId,
+      createWorksheetDto.therapistId,
+    );
   }
 
   @Put(':id')
   update(
     @CurrentUserId() clerkId: string,
     @Param('id') id: string,
-    @Body() updateWorksheetDto: UpdateWorksheetDto,
+    @Body() updateWorksheetDto: WorksheetUpdateInputDto,
   ) {
     return this.worksheetsService.update(id, updateWorksheetDto);
   }
@@ -68,18 +74,22 @@ export class WorksheetsController {
   @Post('submissions')
   addSubmission(
     @CurrentUserId() clerkId: string,
-    @Body() createSubmissionDto: CreateSubmissionDto,
+    @Body() createSubmissionDto: WorksheetSubmissionCreateInputDto,
   ) {
-    return this.worksheetsService.addSubmission(createSubmissionDto);
+    return this.worksheetsService.addSubmission(createSubmissionDto, clerkId);
   }
 
   @Post(':id/submit')
   submitWorksheet(
     @CurrentUserId() clerkId: string,
     @Param('id') id: string,
-    @Body() submitWorksheetDto: SubmitWorksheetDto,
+    @Body() submitWorksheetDto: WorksheetSubmissionCreateInputDto,
   ) {
-    return this.worksheetsService.submitWorksheet(id, submitWorksheetDto);
+    return this.worksheetsService.submitWorksheet(
+      id,
+      submitWorksheetDto,
+      clerkId,
+    );
   }
 
   @Delete('submissions/:id')

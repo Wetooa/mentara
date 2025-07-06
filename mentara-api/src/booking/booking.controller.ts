@@ -8,17 +8,18 @@ import {
   Put,
   Query,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { BookingService } from './booking.service';
 import {
-  CreateAvailabilityDto,
-  CreateMeetingDto,
-  UpdateAvailabilityDto,
-  UpdateMeetingDto,
-} from './dto/booking.dto';
+  TherapistAvailabilityCreateDto,
+  TherapistAvailabilityUpdateDto,
+  MeetingCreateDto,
+  MeetingUpdateDto,
+} from '../../schema/booking';
 
 @Controller('booking')
 @UseGuards(ClerkAuthGuard)
@@ -28,7 +29,7 @@ export class BookingController {
   // Meeting endpoints
   @Post('meetings')
   async createMeeting(
-    @Body() createMeetingDto: CreateMeetingDto,
+    @Body() createMeetingDto: MeetingCreateDto,
     @CurrentUserId() userId: string,
   ) {
     return this.bookingService.createMeeting(createMeetingDto, userId);
@@ -54,7 +55,7 @@ export class BookingController {
   @Put('meetings/:id')
   async updateMeeting(
     @Param('id') id: string,
-    @Body() updateMeetingDto: UpdateMeetingDto,
+    @Body() updateMeetingDto: MeetingUpdateDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
@@ -78,12 +79,14 @@ export class BookingController {
   // Availability endpoints (therapist only)
   @Post('availability')
   async createAvailability(
-    @Body() createAvailabilityDto: CreateAvailabilityDto,
+    @Body() createAvailabilityDto: TherapistAvailabilityCreateDto,
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can manage availability');
+      throw new UnauthorizedException(
+        'Only therapists can manage availability',
+      );
     }
     return this.bookingService.createAvailability(
       createAvailabilityDto,
@@ -97,7 +100,9 @@ export class BookingController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can view their availability');
+      throw new UnauthorizedException(
+        'Only therapists can view their availability',
+      );
     }
     return this.bookingService.getAvailability(therapistId);
   }
@@ -105,12 +110,14 @@ export class BookingController {
   @Put('availability/:id')
   async updateAvailability(
     @Param('id') id: string,
-    @Body() updateAvailabilityDto: UpdateAvailabilityDto,
+    @Body() updateAvailabilityDto: TherapistAvailabilityUpdateDto,
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can update availability');
+      throw new UnauthorizedException(
+        'Only therapists can update availability',
+      );
     }
     return this.bookingService.updateAvailability(
       id,
@@ -126,16 +133,18 @@ export class BookingController {
     @CurrentUserRole() role: string,
   ) {
     if (role !== 'therapist') {
-      throw new Error('Only therapists can delete availability');
+      throw new UnauthorizedException(
+        'Only therapists can delete availability',
+      );
     }
     return this.bookingService.deleteAvailability(id, therapistId);
   }
 
   // Duration endpoints (public)
-  @Get('durations')
-  async getDurations() {
+  /* @Get('durations')
+  getDurations() {
     return this.bookingService.getDurations();
-  }
+  } */
 
   // Available slots endpoint
   @Get('slots')

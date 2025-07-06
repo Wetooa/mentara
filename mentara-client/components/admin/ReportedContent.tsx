@@ -175,7 +175,7 @@ export function ReportedContent() {
     if (!selectedReport || !actionType) return;
 
     // In a real application, you would make API calls to perform these actions
-    let updatedReports = [...reports];
+    const updatedReports = [...reports];
     const index = updatedReports.findIndex((r) => r.id === selectedReport.id);
 
     if (index !== -1) {

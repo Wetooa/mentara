@@ -1,9 +1,13 @@
-import { TherapistApplication } from "@/data/mockTherapistApplicationData";
+import { TherapistApplication } from "@/lib/api/services/therapists";
+
+// Client-side therapist application API functions
+// These should only be called from React components that have access to useAuth
 
 /**
  * Submit a therapist application to the API
  * @param applicationData Complete therapist application data
  * @returns The created application object with ID
+ * @deprecated Use submitApplicationWithDocuments for new implementations
  */
 export async function submitTherapistApplication(
   applicationData: any
@@ -11,36 +15,29 @@ export async function submitTherapistApplication(
   try {
     console.log("Submitting application data:", applicationData);
 
-    // Ensure applicationData is properly sanitized for JSON
-    const sanitizedData = JSON.parse(JSON.stringify(applicationData));
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-    const response = await fetch("/api/therapist/application", {
+    // Use the public Next.js API route for therapist applications
+    const response = await fetch(`${backendUrl}/api/therapist/apply`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(sanitizedData),
-      cache: "no-store",
+      body: JSON.stringify(applicationData),
     });
 
-    // Handle non-JSON responses
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error("Received non-JSON response:", text);
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
       throw new Error(
-        "Server returned non-JSON response. Please try again later."
+        errorData.error || `Submit failed with status ${response.status}`
       );
     }
 
-    // Process the JSON response normally
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to submit application");
-    }
-
-    return { id: data.applicationId };
+    return { id: data.applicationId || data.id || data.userId };
   } catch (error) {
     console.error("Error submitting therapist application:", error);
     throw error;
@@ -56,17 +53,30 @@ export async function getTherapistApplication(
   id: string
 ): Promise<TherapistApplication> {
   try {
-    const response = await fetch(`/api/therapist/application/${id}`, {
-      method: "GET",
-    });
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const response = await fetch(
+      `${backendUrl}/api/therapist/application/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch application");
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Fetch failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
-    return data.application;
+    return data.application || data;
   } catch (error) {
     console.error("Error fetching therapist application:", error);
     throw error;
@@ -82,25 +92,37 @@ export async function getAllTherapistApplications(
   status?: string
 ): Promise<TherapistApplication[]> {
   try {
-    const params = new URLSearchParams();
-    if (status) {
-      params.append("status", status);
-    }
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const queryParams = new URLSearchParams();
+    if (status) queryParams.append("status", status);
+
+    const queryString = queryParams.toString()
+      ? `?${queryParams.toString()}`
+      : "";
 
     const response = await fetch(
-      `/api/therapist/application?${params.toString()}`,
+      `${backendUrl}/api/therapist/application${queryString}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch applications");
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Fetch failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
-    return data.applications;
+    return data.applications || data;
   } catch (error) {
     console.error("Error fetching therapist applications:", error);
     throw error;
@@ -115,34 +137,165 @@ export async function getAllTherapistApplications(
  */
 export async function updateTherapistApplicationStatus(
   id: string,
-  status: "approved" | "rejected"
+  status: "approved" | "rejected",
+  adminNotes?: string
 ): Promise<{
-  application: TherapistApplication;
-  therapistAccount?: any;
-  generatedPassword?: string;
+  success: boolean;
+  message: string;
+  credentials?: { email: string; password: string };
 }> {
   try {
-    const response = await fetch(`/api/therapist/application/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status }),
-    });
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const response = await fetch(
+      `${backendUrl}/api/therapist/application/${id}/status`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status, adminNotes }),
+      }
+    );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to update application status");
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Update failed with status ${response.status}`
+      );
     }
 
     const data = await response.json();
-    return {
-      application: data.application,
-      therapistAccount: data.therapistAccount || null,
-      generatedPassword: data.generatedPassword || null,
-    };
+    return data;
   } catch (error) {
     console.error("Error updating therapist application status:", error);
+    throw error;
+  }
+}
+
+/**
+ * Submit therapist application with documents in a single atomic operation
+ * @param applicationData Complete therapist application data
+ * @param files Files to upload with the application
+ * @param fileTypes Mapping of file types
+ * @returns The created application with uploaded files
+ */
+export async function submitApplicationWithDocuments(
+  applicationData: any,
+  files: File[],
+  fileTypes: Record<string, string> = {}
+): Promise<{
+  success: boolean;
+  message: string;
+  applicationId: string;
+  uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+}> {
+  try {
+    console.log("Submitting application with documents:", {
+      application: applicationData,
+      fileCount: files.length,
+      fileNames: files.map((f) => f.name),
+    });
+
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const formData = new FormData();
+
+    // Add application data as JSON string
+    formData.append("applicationDataJson", JSON.stringify(applicationData));
+
+    // Add files to form data
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    // Add file type mappings
+    formData.append("fileTypes", JSON.stringify(fileTypes));
+
+    const response = await fetch(
+      `${backendUrl}/api/therapist/apply-with-documents`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error ||
+          errorData.message ||
+          `Submit failed with status ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error submitting application with documents:", error);
+    throw error;
+  }
+}
+
+/**
+ * Upload documents for therapist application (legacy method - use submitApplicationWithDocuments instead)
+ * @param files Files to upload
+ * @param fileTypes Mapping of file types
+ * @returns Upload result with file URLs
+ * @deprecated Use submitApplicationWithDocuments for new implementations
+ */
+export async function uploadTherapistDocuments(
+  files: File[],
+  fileTypes: Record<string, string> = {},
+  applicationId?: string
+): Promise<{
+  success: boolean;
+  message: string;
+  uploadedFiles: Array<{ id: string; fileName: string; url: string }>;
+}> {
+  try {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+    const formData = new FormData();
+
+    // Add files to form data
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    // Add file type mappings and application ID
+    const fileTypesWithAppId = { ...fileTypes };
+    if (applicationId) {
+      fileTypesWithAppId.applicationId = applicationId;
+    }
+    console.log("Upload fileTypes data:", JSON.stringify(fileTypesWithAppId));
+    formData.append("fileTypes", JSON.stringify(fileTypesWithAppId));
+
+    const response = await fetch(`${backendUrl}/api/therapist/upload-public`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        errorData.error || `Upload failed with status ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error uploading therapist documents:", error);
     throw error;
   }
 }

@@ -1,0 +1,61 @@
+model Review {
+    id          String  @id @default(uuid())
+    rating      Int // 1-5 star rating
+    title       String? // Optional review title
+    content     String? @db.Text // Review content
+    isAnonymous Boolean @default(false) // Whether the review is anonymous
+
+    // Relations
+    clientId    String
+    therapistId String
+    meetingId   String? // Optional - link to specific meeting
+
+    client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+    meeting   Meeting?  @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+
+    // Moderation
+    status         ReviewStatus @default(PENDING)
+    moderatedBy    String?
+    moderatedAt    DateTime?
+    moderationNote String?
+
+    // Metadata
+    isVerified Boolean @default(false) // Verified as from actual client
+
+    // Relations
+    helpfulVotes ReviewHelpful[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Prevent duplicate reviews for same client-therapist pair
+    @@unique([clientId, therapistId, meetingId])
+    @@index([therapistId])
+    @@index([clientId])
+    @@index([rating])
+    @@index([status])
+    @@index([createdAt])
+}
+
+model ReviewHelpful {
+    id       String @id @default(uuid())
+    reviewId String
+    userId   String
+
+    review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+
+    @@unique([reviewId, userId])
+    @@index([reviewId])
+    @@index([userId])
+}
+
+enum ReviewStatus {
+    PENDING
+    APPROVED
+    REJECTED
+    FLAGGED
+}

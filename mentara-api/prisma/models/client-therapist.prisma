@@ -1,0 +1,38 @@
+// Many-to-many relationship between clients and therapists
+model ClientTherapist {
+    id          String   @id @default(uuid())
+    clientId    String
+    therapistId String
+    assignedAt  DateTime @default(now())
+    status      String   @default("active") // active, inactive, pending
+    notes       String? // Optional notes about the relationship
+
+    score Int? // Optional score for the therapist by the client
+
+    client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+
+    @@unique([clientId, therapistId])
+    @@index([clientId])
+    @@index([therapistId])
+}
+
+model ClientMedicalHistory {
+    id        String  @id @default(uuid())
+    clientId  String
+    condition String
+    notes     String?
+    client    Client  @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+    @@index([clientId])
+}
+
+model ClientPreference {
+    id       String @id @default(uuid())
+    clientId String
+    key      String
+    value    String
+    client   Client @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+
+    @@index([clientId])
+}

@@ -1,45 +1,31 @@
-import { useState, useEffect } from "react";
-import { mockPatientsData } from "@/data/mockPatientsData";
+// This file is deprecated - use usePatientData from usePatientsList instead
+// Kept for backward compatibility during migration
 
+import { usePatientData as usePatientDataNew } from './usePatientsList';
+import type { PatientData } from '@/lib/api/services/therapists';
+
+/**
+ * @deprecated Use usePatientData from usePatientsList instead
+ * This hook is kept for backward compatibility during the migration from mock data
+ */
 export function usePatientData(patientId: string) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [patient, setPatient] = useState<any>(null);
+  const { data: patient, isLoading, error } = usePatientDataNew(patientId);
 
-  useEffect(() => {
-    // Simulate API fetch delay
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
+  // Function to refresh patient data (now handled by React Query)
+  const refreshPatient = async () => {
+    // No-op - React Query handles refetching
+  };
 
-        // In a real app, this would be a fetch call
-        // const response = await fetch(`/api/patients/${patientId}`);
-        // const data = await response.json();
+  // Function to update patient data optimistically (now handled by React Query mutations)
+  const updatePatient = (updates: Partial<PatientData>) => {
+    // No-op - mutations should use React Query hooks
+  };
 
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const foundPatient = mockPatientsData.find((p) => p.id === patientId);
-
-        if (!foundPatient) {
-          throw new Error("Patient not found");
-        }
-
-        setPatient(foundPatient);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Unknown error occurred")
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (patientId) {
-      fetchData();
-    }
-  }, [patientId]);
-
-  return { isLoading, error, patient };
+  return { 
+    isLoading, 
+    error, 
+    patient, 
+    refreshPatient, 
+    updatePatient 
+  };
 }

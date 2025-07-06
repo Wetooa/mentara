@@ -10,8 +10,19 @@ export interface QuestionnaireScores {
   [questionnaireName: string]: QuestionnaireScore;
 }
 
+interface SeverityLevel {
+  range: [number, number];
+  label: string;
+}
+
+interface QuestionnaireConfig {
+  scoreMapping: Record<number, number>;
+  reverseScoredQuestions?: number[];
+  severityLevels: Record<string, SeverityLevel>;
+}
+
 // Questionnaire scoring configurations
-const QUESTIONNAIRE_SCORING = {
+const QUESTIONNAIRE_SCORING: Record<string, QuestionnaireConfig> = {
   Stress: {
     scoreMapping: { 0: 4, 1: 3, 2: 2, 3: 1, 4: 0 },
     reverseScoredQuestions: [3, 4, 6, 7],
@@ -170,7 +181,7 @@ export function calculateQuestionnaireScore(
     // Handle reverse scoring for specific questionnaires
     if (
       questionnaireName === 'Stress' &&
-      config.reverseScoredQuestions.includes(i)
+      (config as any).reverseScoredQuestions.includes(i)
     ) {
       questionScore = 4 - questionScore; // Reverse the score
     }
@@ -180,8 +191,8 @@ export function calculateQuestionnaireScore(
 
   // Determine severity level
   let severity = 'Unknown severity';
-  for (const [level, range] of Object.entries(config.severityLevels)) {
-    if (score >= range.range[0] && score <= range.range[1]) {
+  for (const [, range] of Object.entries(config.severityLevels)) {
+    if (score >= (range as any).range[0] && score <= (range as any).range[1]) {
       severity = range.label;
       break;
     }

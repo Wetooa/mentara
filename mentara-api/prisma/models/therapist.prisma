@@ -1,81 +1,101 @@
 model Therapist {
+    // User relation
     userId String @id @unique
     user   User   @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
 
-    // Application/approval
-    approved        Boolean   @default(false)
-    status          String    @default("pending") // pending, approved, rejected
-    submissionDate  DateTime  @default(now())
-    processingDate  DateTime?
-    processedBy     String?
-    applicationData Json?
+    // Contact information
+    mobile   String
+    province String
 
-    // Personal Info
-    firstName String
-    lastName  String
-    email     String
-    mobile    String
-    province  String
+    // Application status
+    status         String   @default("pending") // pending, approved, rejected
+    submissionDate DateTime @default(now())
+    processingDate DateTime @default(now())
 
-    // Professional Info
-    providerType                  String
-    professionalLicenseType       String
-    isPRCLicensed                 String
-    prcLicenseNumber              String
-    expirationDateOfLicense       DateTime?
-    isLicenseActive               String
-    practiceStartDate             DateTime
-    areasOfExpertise              Json
-    assessmentTools               Json
-    therapeuticApproachesUsedList Json
-    languagesOffered              Json
+    processedByAdminId String?
+    processedByAdmin   Admin?  @relation(fields: [processedByAdminId], references: [userId])
 
-    // Practice Details
-    providedOnlineTherapyBefore       String
-    comfortableUsingVideoConferencing String
-    weeklyAvailability                String
-    preferredSessionLength            String
-    accepts                           Json
-
-    // Denormalized fields (moved from separate tables)
-    expertise              Json? // Array of expertise strings
-    approaches             Json? // Array of approach strings
-    languages              Json? // Array of language strings
-    illnessSpecializations Json? // Array of illness specializations
-    acceptTypes            Json? // Array of accept types
-    treatmentSuccessRates  Json? // Object with illness -> success rate mapping
-    uploadedFiles          Json? // Array of file objects
-
+    // Professional credentials
+    providerType            String
+    professionalLicenseType String
+    isPRCLicensed           String
+    prcLicenseNumber        String
+    expirationDateOfLicense DateTime
+    practiceStartDate       DateTime
+    
+    // License verification
+    licenseVerified         Boolean   @default(false)
+    licenseVerifiedAt       DateTime?
+    licenseVerifiedBy       String?   // Admin who verified
+    
+    // Additional certifications
+    certifications          Json?     // Array of certification objects
+    
+    // Professional background
+    yearsOfExperience       Int?
+    educationBackground     String?   @db.Text
+    specialCertifications   String[]
+    
     // Practice details
-    sessionLength String?
-    hourlyRate    Decimal? @db.Decimal(10, 2)
+    practiceLocation        String?
+    acceptsInsurance        Boolean   @default(false)
+    acceptedInsuranceTypes  String[]
 
-    // Profile and verification
-    bio             String? @db.Text
-    profileImageUrl String?
-    profileComplete Boolean @default(false)
-    isActive        Boolean @default(true)
+    // Professional expertise
+    areasOfExpertise              String[] // @db.JsonB
+    assessmentTools               String[] // @db.JsonB
+    therapeuticApproachesUsedList String[] // @db.JsonB
+    languagesOffered              String[] // @db.JsonB
 
-    // Performance metrics
-    patientSatisfaction Decimal? @db.Decimal(3, 2)
-    totalPatients       Int      @default(0)
+    // Online therapy preferences
+    providedOnlineTherapyBefore       Boolean
+    comfortableUsingVideoConferencing Boolean
+    preferredSessionLength            Int[] // @db.JsonB
 
-    // Meetings (meetings with clients)
-    meetings Meeting[] @relation("TherapistMeetings")
+    // Compliance and guidelines
+    privateConfidentialSpace           String?
+    compliesWithDataPrivacyAct         Boolean
+    professionalLiabilityInsurance     String?
+    complaintsOrDisciplinaryActions    String?
+    willingToAbideByPlatformGuidelines Boolean
 
-    // Therapist availabilities
+    // Specializations and approaches
+    expertise              String[] // @db.JsonB
+    approaches             String[] // @db.JsonB
+    languages              String[] // @db.JsonB
+    illnessSpecializations String[] // @db.JsonB
+    acceptTypes            String[] // @db.JsonB
+    treatmentSuccessRates  Json // Record<string, number>
+
+    // Session details
+    sessionLength String
+    hourlyRate    Decimal @db.Decimal(10, 2)
+
+    // Relations
+    meetings                Meeting[]               @relation("TherapistMeetings")
     therapistAvailabilities TherapistAvailability[]
+    worksheets              Worksheet[]
+    assignedClients         ClientTherapist[]
+    reviews                 Review[]
+    therapistFiles          TherapistFiles[]
+    sessionLogs             SessionLog[]
+    therapyProgress         TherapyProgress[]
 
-    // Therapist-specific relations
-    worksheets Worksheet[]
-
-    // Many-to-many with clients
-    assignedClients ClientTherapist[]
-
+    // Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([userId])
-    @@index([isActive])
-    @@index([approved])
+    @@index([status])
+}
+
+model TherapistFiles {
+    id          String    @id @unique
+    therapistId String
+    therapist   Therapist @relation(fields: [therapistId], references: [userId])
+    fileUrl     String
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([therapistId])
 }

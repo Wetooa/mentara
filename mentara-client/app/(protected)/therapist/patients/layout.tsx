@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, ChevronDown, ChevronRight } from "lucide-react";
-import { mockPatientsData } from "@/data/mockPatientsData";
+import { Search, ChevronDown, ChevronRight, RefreshCw, AlertCircle } from "lucide-react";
+import { usePatientsData } from "@/hooks/usePatientsData";
 
 export default function PatientsLayout({
   children,
@@ -13,16 +13,18 @@ export default function PatientsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-
-  // Mock patient data list
-  const patients = mockPatientsData || [];
-
-  // Filter patients based on search query
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  
+  const {
+    isLoading,
+    error,
+    filteredPatients,
+    searchQuery,
+    filters,
+    searchPatients,
+    updateFilters,
+    refreshPatients,
+  } = usePatientsData();
 
   // Check if a patient is selected
   const isPatientSelected = pathname.split("/").length > 3;
@@ -100,26 +102,49 @@ export default function PatientsLayout({
 
         {/* Patient list section */}
         <div className="p-3 flex-1 overflow-hidden flex flex-col">
-          <div className="mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <h3 className="font-medium">My Patients</h3>
+            <button
+              onClick={refreshPatients}
+              className="p-1.5 text-gray-500 hover:text-primary rounded-md hover:bg-gray-100"
+              title="Refresh patients list"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
+
+          {/* Error notification */}
+          {error && (
+            <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="flex items-center">
+                <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
+                <p className="text-xs text-yellow-800">
+                  {error.message.includes("mock data") 
+                    ? "Using offline data - API unavailable"
+                    : "Failed to load patients"}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Search and filter */}
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search"
+              placeholder="Search patients..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => searchPatients(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+              disabled={isLoading}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
               <button
                 className="text-gray-500 hover:text-gray-700 flex items-center text-xs"
                 onClick={() => setFilterOpen(!filterOpen)}
+                disabled={isLoading}
               >
-                All{" "}
+                {filters.status === 'all' ? 'All' : filters.status?.charAt(0).toUpperCase() + filters.status?.slice(1)}{" "}
                 {filterOpen ? (
                   <ChevronDown size={14} />
                 ) : (
@@ -129,106 +154,159 @@ export default function PatientsLayout({
             </div>
           </div>
 
+          {/* Filter dropdown */}
+          {filterOpen && (
+            <div className="mb-3 p-2 bg-gray-50 rounded-md border">
+              <div className="space-y-2">
+                <div>
+                  <label className="text-xs font-medium text-gray-700">Status</label>
+                  <select
+                    value={filters.status || 'all'}
+                    onChange={(e) => updateFilters({ status: e.target.value as 'active' | 'inactive' | 'completed' | 'all' })}
+                    className="w-full mt-1 text-xs border border-gray-300 rounded px-2 py-1"
+                  >
+                    <option value="all">All Patients</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Patient list */}
           <div className="flex-1 overflow-y-auto">
-            {filteredPatients.map((patient) => {
-              const isActive = pathname.includes(`/patients/${patient.id}`);
+            {isLoading && filteredPatients.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="flex flex-col items-center">
+                  <RefreshCw className="h-6 w-6 text-gray-400 animate-spin mb-2" />
+                  <p className="text-sm text-gray-500">Loading patients...</p>
+                </div>
+              </div>
+            ) : filteredPatients.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <p className="text-sm text-gray-500 mb-1">No patients found</p>
+                  {searchQuery && (
+                    <p className="text-xs text-gray-400">
+                      Try adjusting your search or filters
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              filteredPatients.map((patient) => {
+                const isActive = pathname.includes(`/patients/${patient.id}`);
 
-              return (
-                <Link
-                  key={patient.id}
-                  href={`/therapist/patients/${patient.id}`}
-                >
-                  <div
-                    className={`flex items-center p-2 rounded-md mb-2 ${
-                      isActive ? "bg-primary/10" : "hover:bg-gray-100"
-                    }`}
+                return (
+                  <Link
+                    key={patient.id}
+                    href={`/therapist/patients/${patient.id}`}
                   >
-                    <div className="w-8 h-8 rounded-full overflow-hidden mr-3 bg-gray-200">
-                      <Image
-                        src={patient.avatar || "/avatar-placeholder.png"}
-                        alt={patient.name}
-                        width={32}
-                        height={32}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4
-                        className={`text-sm ${isActive ? "font-medium" : ""}`}
-                      >
-                        {patient.name}
-                      </h4>
-                      <p className="text-xs text-gray-500 truncate">
-                        {patient.diagnosis}
-                      </p>
-                    </div>
-                    <div className="flex space-x-1">
-                      <button className="p-1 text-gray-400 hover:text-gray-600">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                    <div
+                      className={`flex items-center p-2 rounded-md mb-2 ${
+                        isActive ? "bg-primary/10" : "hover:bg-gray-100"
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-full overflow-hidden mr-3 bg-gray-200">
+                        <Image
+                          src={patient.avatar || "/avatar-placeholder.png"}
+                          alt={patient.name}
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4
+                          className={`text-sm truncate ${isActive ? "font-medium" : ""}`}
                         >
-                          <rect
-                            x="4"
-                            y="4"
+                          {patient.name}
+                        </h4>
+                        <p className="text-xs text-gray-500 truncate">
+                          {patient.diagnosis}
+                        </p>
+                        <div className="flex items-center mt-1">
+                          <div 
+                            className={`w-2 h-2 rounded-full mr-2 ${
+                              patient.status === 'active' ? 'bg-green-400' :
+                              patient.status === 'completed' ? 'bg-blue-400' :
+                              patient.status === 'inactive' ? 'bg-gray-400' : 'bg-yellow-400'
+                            }`}
+                          />
+                          <span className="text-xs text-gray-400">
+                            Session {patient.currentSession}/{patient.totalSessions}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-1">
+                        <button className="p-1 text-gray-400 hover:text-gray-600">
+                          <svg
                             width="16"
                             height="16"
-                            rx="2"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                          />
-                          <path
-                            d="M16 2V6"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                          />
-                          <path
-                            d="M8 2V6"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                          />
-                          <path
-                            d="M4 10H20"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </button>
-                      <button className="p-1 text-gray-400 hover:text-gray-600">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12 5V19"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M19 12L5 12"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <rect
+                              x="4"
+                              y="4"
+                              width="16"
+                              height="16"
+                              rx="2"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                            />
+                            <path
+                              d="M16 2V6"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                            <path
+                              d="M8 2V6"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                            <path
+                              d="M4 10H20"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </button>
+                        <button className="p-1 text-gray-400 hover:text-gray-600">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M12 5V19"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M19 12L5 12"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

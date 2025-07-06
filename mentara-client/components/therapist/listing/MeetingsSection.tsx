@@ -1,20 +1,76 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
+import { Calendar, Loader2, AlertCircle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { mockMeetings } from "@/data/mockTherapistListingData";
+import { useTherapistMeetings } from "@/hooks/useTherapistDashboard";
 import { format, parseISO } from "date-fns";
 
 export default function MeetingsSection() {
+  // Fetch meetings using React Query
+  const { data: meetingsData, isLoading, error } = useTherapistMeetings({ limit: 3 });
+  const meetings = meetingsData || [];
+  
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-4 mt-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Meetings</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Loading meetings...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="space-y-4 mt-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Meetings</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertCircle className="h-5 w-5" />
+            <span>Failed to load meetings. Please try again later.</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   // Get only the first 3 meetings to display
-  const displayMeetings = mockMeetings.slice(0, 3);
+  const displayMeetings = meetings.slice(0, 3);
+
+  // Handle empty state
+  if (meetings.length === 0) {
+    return (
+      <div className="space-y-4 mt-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Meetings</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center text-muted-foreground">
+            <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>No upcoming meetings</p>
+            <p className="text-sm">Your scheduled sessions will appear here.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 mt-8">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Meetings</h2>
-        {mockMeetings.length > 3 && (
+        {meetings.length > 3 && (
           <Button variant="ghost" size="sm">
             See all
           </Button>

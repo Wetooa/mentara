@@ -1,5 +1,5 @@
 model User {
-    id         String    @id @unique // Clerk user ID for authentication
+    id         String    @id @unique @default(uuid()) // Clerk user ID for authentication
     email      String    @unique // User's email address
     firstName  String
     middleName String?
@@ -8,9 +8,34 @@ model User {
     address    String?
     avatarUrl  String? // Profile image URL
     role       String    @default("client") // client, therapist, moderator, admin
-    isActive   Boolean   @default(true)
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
+
+    // Profile and verification
+    bio           String?
+    coverImageUrl String?
+    isActive      Boolean @default(true)
+    isVerified    Boolean @default(false)
+    
+    // Contact information
+    phoneNumber   String?
+    phoneVerified Boolean @default(false)
+    
+    // Preferences
+    timezone      String? @default("UTC")
+    language      String? @default("en")
+    theme         String? @default("light")
+    
+    // Privacy settings
+    profileVisibility String @default("private") // public, private, therapists_only
+    allowMessagesFrom String @default("therapists") // all, therapists, none
+    
+    // Account status
+    lastLoginAt   DateTime?
+    lastActiveAt  DateTime?
+    suspendedAt   DateTime?
+    suspendedBy   String?
+    suspensionReason String?
 
     // Community and content relations (available to all users)
     memberships   Membership[]
@@ -25,8 +50,36 @@ model User {
     moderator Moderator? @relation("UserModerator")
     admin     Admin?     @relation("UserAdmin")
 
-    replies     Reply[]
-    replyHearts ReplyHeart[]
+    replies        Reply[]
+    replyHearts    ReplyHeart[]
+    reviewsHelpful ReviewHelpful[]
+
+    // Messaging relations
+    conversations      ConversationParticipant[] @relation("UserConversations")
+    sentMessages       Message[]                 @relation("UserMessages")
+    messageReadReceipts MessageReadReceipt[]    @relation("UserReadReceipts")
+    messageReactions   MessageReaction[]        @relation("UserMessageReactions")
+    blocking           UserBlock[]              @relation("UserBlocking")
+    blockedBy          UserBlock[]              @relation("UserBlocked")
+    
+    // Notification relations
+    notifications      Notification[]           @relation("UserNotifications")
+    notificationSettings NotificationSettings?  @relation("UserNotificationSettings")
+    
+    // Audit and activity relations
+    auditLogs          AuditLog[]               @relation("UserAuditLogs")
+    activities         UserActivity[]           @relation("UserActivities")
+    
+    // File relations
+    uploadedFiles      File[]                   @relation("UserUploadedFiles")
+    fileVersions       FileVersion[]            @relation("UserFileVersions")
+    fileShares         FileShare[]              @relation("UserFileShares")
+    fileDownloads      FileDownload[]           @relation("UserFileDownloads")
+    
+    // Billing relations
+    subscription       Subscription?            @relation("UserSubscription")
+    paymentMethods     PaymentMethod[]          @relation("UserPaymentMethods")
+    discountRedemptions DiscountRedemption[]    @relation("UserDiscountRedemptions")
 
     @@index([email])
     @@index([role])
@@ -44,6 +97,11 @@ model Client {
     clientPreferences    ClientPreference[]
     assignedTherapists   ClientTherapist[]
     meetings             Meeting[]              @relation("ClientMeetings")
+    reviews              Review[] // Reviews written by this client
+    sessionLogs          SessionLog[]
+    therapyProgress      TherapyProgress[]
+    assessments          Assessment[]
+    mentalHealthIndicators MentalHealthIndicator[]
 
     hasSeenTherapistRecommendations Boolean @default(false)
 
@@ -51,23 +109,6 @@ model Client {
     updatedAt DateTime @default(now())
 
     @@index([userId])
-}
-
-// Many-to-many relationship between clients and therapists
-model ClientTherapist {
-    id          String   @id @default(uuid())
-    clientId    String
-    therapistId String
-    assignedAt  DateTime @default(now())
-    status      String   @default("active") // active, inactive, pending
-    notes       String? // Optional notes about the relationship
-
-    client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
-
-    @@unique([clientId, therapistId])
-    @@index([clientId])
-    @@index([therapistId])
 }
 
 model Moderator {
@@ -90,45 +131,12 @@ model Admin {
     user   User   @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
 
     // Admin-specific fields
-    permissions String[] // Array of admin permissions
-    adminLevel  String   @default("admin") // admin, super_admin, etc.
+    permissions         String[] // Array of admin permissions
+    adminLevel          String      @default("admin") // admin, super_admin, etc.
+    processedTherapists Therapist[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([userId])
-}
-
-model ClientMedicalHistory {
-    id        String  @id @default(uuid())
-    clientId  String
-    condition String
-    notes     String?
-    client    Client  @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-
-    @@index([clientId])
-}
-
-model ClientPreference {
-    id       String @id @default(uuid())
-    clientId String
-    key      String
-    value    String
-    client   Client @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-
-    @@index([clientId])
-}
-
-model ModeratorCommunity {
-    id          String   @id @default(uuid())
-    moderatorId String
-    communityId String
-    assignedAt  DateTime @default(now())
-
-    moderator Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
-    community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
-    @@unique([moderatorId, communityId])
-    @@index([moderatorId])
-    @@index([communityId])
 }

@@ -1,12 +1,13 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createClerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getUserRoleFromPublicMetadata } from "@/lib/auth";
+import { UserRole } from "@/lib/auth";
 
 // Define protected routes and their required roles
 const protectedRoutes: Record<string, string[]> = {
-  "/user": ["user"],
+  "/user": ["client"],
   "/therapist": ["therapist"],
+  "/moderator": ["moderator"],
   "/admin": ["admin"],
 };
 
@@ -14,13 +15,20 @@ const protectedRoutes: Record<string, string[]> = {
 const publicRoutes = [
   "/",
   "/landing",
+  "/admin-login",
   "/sign-in",
   "/sign-up",
   "/pre-assessment",
-  "/therapist_signup",
+  "/therapist-application",
   "/about",
   "/community",
   "/for-therapists",
+];
+
+// Define public API routes that don't require authentication
+const publicApiRoutes = [
+  "/api/therapist/apply",
+  "/api/therapist/upload-public",
 ];
 
 // Helper to get required role for a path
@@ -33,24 +41,49 @@ function getRequiredRole(pathname: string): string | null {
   return null;
 }
 
+function getHandleAllowedPath(userRole: UserRole) {
+  let redirectPath = "/";
+  if (userRole === "client") redirectPath = "/user";
+  else if (userRole === "therapist") redirectPath = "/therapist";
+  else if (userRole === "moderator") redirectPath = "/moderator";
+  else if (userRole === "admin") redirectPath = "/admin";
+  return redirectPath;
+}
+
+// Utility to extract role from Clerk sessionClaims or publicMetadata
+export async function getUserRoleFromPublicMetadata(
+  userId: string
+): Promise<UserRole | null> {
+  const clerkClient = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY,
+  });
+  const user = await clerkClient.users.getUser(userId);
+  return user?.publicMetadata.role as UserRole;
+}
+
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const authObj = await auth();
 
   // If user is authenticated and visits the root page, redirect to their dashboard
   if (authObj.userId && req.nextUrl.pathname === "/") {
-    const userRole = getUserRoleFromPublicMetadata(authObj.sessionClaims);
+    const userRole = await getUserRoleFromPublicMetadata(authObj.userId);
 
-    let redirectPath = "/";
-    if (userRole === "user") redirectPath = "/user";
-    else if (userRole === "therapist") redirectPath = "/therapist";
-    else if (userRole === "admin") redirectPath = "/admin";
-    if (redirectPath !== "/") {
-      return NextResponse.redirect(new URL(redirectPath, req.url));
+    if (!userRole) {
+      return NextResponse.next();
     }
+
+    const redirectPath = getHandleAllowedPath(userRole);
+    return NextResponse.redirect(new URL(redirectPath, req.url));
   }
 
-  // Allow all public routes
-  if (publicRoutes.includes(req.nextUrl.pathname)) {
+  // Allow all public routes (exact match or path prefix for therapist-application)
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || 
+                       req.nextUrl.pathname.startsWith('/therapist-application/');
+  
+  // Allow public API routes (exact match)
+  const isPublicApiRoute = publicApiRoutes.includes(req.nextUrl.pathname);
+  
+  if (isPublicRoute || isPublicApiRoute) {
     return NextResponse.next();
   }
 
@@ -64,15 +97,16 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Role-based access control
   const requiredRole = getRequiredRole(req.nextUrl.pathname);
   if (requiredRole) {
-    const userRole = getUserRoleFromPublicMetadata(authObj.sessionClaims);
-    if (userRole !== requiredRole) {
-      // Redirect to the correct dashboard for their role, or home
-      let redirectPath = "/";
-      if (userRole === "user") redirectPath = "/user";
-      else if (userRole === "therapist") redirectPath = "/therapist";
-      else if (userRole === "admin") redirectPath = "/admin";
-      return NextResponse.redirect(new URL(redirectPath, req.url));
+    const userRole = await getUserRoleFromPublicMetadata(authObj.userId);
+
+    if (!userRole) {
+      return NextResponse.next();
     }
+
+    if (userRole !== requiredRole) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next();
   }
 
   return NextResponse.next();

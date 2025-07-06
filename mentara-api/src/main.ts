@@ -1,15 +1,55 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as bodyParser from 'body-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
+import helmet from 'helmet';
+import {
+  validateEnvironmentVariables,
+  logEnvironmentInfo,
+} from './config/env-validation';
 
 async function bootstrap() {
+  // Validate environment variables before starting the application
+  try {
+    validateEnvironmentVariables();
+    logEnvironmentInfo();
+  } catch (error) {
+    console.error(
+      '❌ Failed to start application:',
+      error instanceof Error ? error.message : error,
+    );
+    process.exit(1);
+  }
   // Create with raw body parsing for webhooks
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
+
+  // Enable security headers with helmet
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Disable for API compatibility
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
 
   // Parse JSON payloads
   // app.use(
@@ -20,18 +60,27 @@ async function bootstrap() {
   //   }),
   // );
 
-  // Enable CORS with proper configuration
+  // Enable CORS with secure configuration
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://localhost:3000',
-      'http://localhost:4000',
-      'https://localhost:4000',
-    ],
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL?.split(',')
+            .map((url) => url.trim())
+            .filter((url) => url.length > 0) || ['https://mentara.app']
+        : ['http://localhost:3000', 'http://localhost:3001'], // Only allow local dev in development
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    allowedHeaders:
-      'Content-Type, Accept, Authorization, X-Requested-With, svix-id, svix-signature, svix-timestamp',
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+      'svix-id',
+      'svix-signature',
+      'svix-timestamp',
+      'x-clerk-auth-token',
+    ],
+    optionsSuccessStatus: 200,
   });
 
   // Ensure uploads directory exists
@@ -44,10 +93,7 @@ async function bootstrap() {
     fs.mkdirSync(worksheetsDir);
   }
 
-  // Serve static files from the uploads directory
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
+  // Static file serving removed for security - files now served through protected endpoints
 
   // Global prefix for all API routes
   app.setGlobalPrefix('api');

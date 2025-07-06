@@ -1,472 +1,740 @@
-// NOTE: For seeding database
-
+// NOTE: Comprehensive database seeding with realistic data
 import { PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
 import { ILLNESS_COMMUNITIES } from '../src/communities/illness-communities.config';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Starting database seeding...');
+// Test accounts from test-accounts.md
+const TEST_ACCOUNTS = {
+  CLIENTS: [
+    {
+      id: 'user_2z5S2iaKkRuHpe3BygkU0R3NnDu',
+      email: 'test.client.basic@mentaratest.dev',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      role: 'client',
+    },
+    {
+      id: 'user_2z5S4N84dgKfWuXzXGYjtXbkWVC',
+      email: 'test.client.complete@mentaratest.dev',
+      firstName: 'Marcus',
+      lastName: 'Rodriguez',
+      role: 'client',
+    },
+    {
+      id: 'user_2z5S76EFlCdnil28daogAv2A4bB',
+      email: 'test.client.inactive@mentaratest.dev',
+      firstName: 'Jennifer',
+      lastName: 'Chen',
+      role: 'client',
+      isActive: false,
+    },
+  ],
+  THERAPISTS: [
+    {
+      id: 'user_2z5S92KNAdBfAg5sBvMAtZvMiIz',
+      email: 'test.therapist.approved@mentaratest.dev',
+      firstName: 'Dr. Michael',
+      lastName: 'Thompson',
+      role: 'therapist',
+    },
+    {
+      id: 'user_2z5SBGCUI2ypqCYmIMEanA335FT',
+      email: 'test.therapist.pending@mentaratest.dev',
+      firstName: 'Dr. Lisa',
+      lastName: 'Park',
+      role: 'therapist',
+    },
+    {
+      id: 'user_2z5SDHpsxW80HEoqRHkQCon9bHZ',
+      email: 'test.therapist.specialist@mentaratest.dev',
+      firstName: 'Dr. Amanda',
+      lastName: 'Williams',
+      role: 'therapist',
+    },
+  ],
+  ADMINS: [
+    {
+      id: 'user_2z5SQlOzBOgmVn6KStIDToQViDA',
+      email: 'test.admin.super@mentaratest.dev',
+      firstName: 'Robert',
+      lastName: 'Anderson',
+      role: 'admin',
+    },
+    {
+      id: 'user_2z5STvOT1aof3ypYHO0KpKFto0S',
+      email: 'test.admin.user.manager@mentaratest.dev',
+      firstName: 'Linda',
+      lastName: 'Martinez',
+      role: 'admin',
+    },
+  ],
+  MODERATORS: [
+    {
+      id: 'user_2z5SGmYtYcImUQ8tTOnmM166iZV',
+      email: 'test.moderator.primary@mentaratest.dev',
+      firstName: 'Alex',
+      lastName: 'Morgan',
+      role: 'moderator',
+    },
+    {
+      id: 'user_2z5SL6dkZ1D1Yq9WBI3rKb2QN1P',
+      email: 'test.moderator.community@mentaratest.dev',
+      firstName: 'Taylor',
+      lastName: 'Davis',
+      role: 'moderator',
+    },
+  ],
+};
 
-  // Create illness communities
-  console.log('📚 Creating illness communities...');
+// Configuration constants
+const SEED_CONFIG = {
+  USERS: {
+    CLIENTS: 50,
+    THERAPISTS: 15,
+    ADMINS: 2,
+    MODERATORS: 3,
+  },
+  COMMUNITIES: {
+    ADDITIONAL: 5, // Additional to illness communities
+    POSTS_PER_COMMUNITY: 8,
+    COMMENTS_PER_POST: 4,
+  },
+  RELATIONSHIPS: {
+    CLIENT_THERAPIST_RATIO: 0.7, // 70% of clients get assigned to therapists
+    MEETINGS_PER_RELATIONSHIP: 3,
+  },
+  ASSESSMENTS: {
+    COMPLETION_RATE: 0.8, // 80% of clients complete pre-assessments
+  },
+};
+
+// Seed data generators
+class SeedDataGenerator {
+  static generateUserData(role: string, specificData: any = {}) {
+    return {
+      email: faker.internet.email(),
+      firstName: faker.person.firstName(),
+      middleName: faker.person.middleName(),
+      lastName: faker.person.lastName(),
+      birthDate: faker.date.birthdate({ min: 18, max: 80, mode: 'age' }),
+      address: faker.location.streetAddress({ useFullAddress: true }),
+      avatarUrl: faker.image.avatar(),
+      role,
+      bio: faker.lorem.paragraph(),
+      coverImageUrl: faker.image.url(),
+      isActive: true,
+      ...specificData,
+    };
+  }
+
+  static generateTherapistData() {
+    return {
+      mobile: faker.phone.number(),
+      province: faker.location.state(),
+      providerType: faker.helpers.arrayElement(['Individual', 'Group Practice', 'Hospital']),
+      professionalLicenseType: faker.helpers.arrayElement(['LCSW', 'LPC', 'LMFT', 'Psychologist', 'MD']),
+      isPRCLicensed: faker.datatype.boolean() ? 'Yes' : 'No',
+      prcLicenseNumber: `PRC-${faker.string.numeric(8)}`,
+      expirationDateOfLicense: faker.date.future({ years: 3 }),
+      practiceStartDate: faker.date.past({ years: 15 }),
+      areasOfExpertise: faker.helpers.arrayElements([
+        'Anxiety Disorders', 'Depression', 'PTSD', 'Couples Therapy', 'Family Therapy',
+        'Addiction Recovery', 'Eating Disorders', 'Bipolar Disorder', 'ADHD', 'Autism Spectrum',
+        'Grief Counseling', 'Anger Management', 'Sleep Disorders', 'Chronic Pain', 'OCD'
+      ], { min: 2, max: 6 }),
+      assessmentTools: faker.helpers.arrayElements([
+        'PHQ-9', 'GAD-7', 'AUDIT', 'BDI-II', 'MMPI-2', 'ASRS', 'PCL-5', 'MDQ'
+      ], { min: 2, max: 5 }),
+      therapeuticApproachesUsedList: faker.helpers.arrayElements([
+        'CBT', 'DBT', 'Psychodynamic', 'Humanistic', 'EMDR', 'ACT', 'IFS', 'Gestalt'
+      ], { min: 2, max: 4 }),
+      languagesOffered: faker.helpers.arrayElements([
+        'English', 'Spanish', 'Mandarin', 'Tagalog', 'French', 'Korean', 'Arabic'
+      ], { min: 1, max: 3 }),
+      providedOnlineTherapyBefore: faker.datatype.boolean(),
+      comfortableUsingVideoConferencing: true,
+      preferredSessionLength: faker.helpers.arrayElements([30, 45, 60, 90], { min: 1, max: 3 }),
+      privateConfidentialSpace: 'Yes',
+      compliesWithDataPrivacyAct: true,
+      professionalLiabilityInsurance: 'Yes',
+      complaintsOrDisciplinaryActions: faker.datatype.boolean({ probability: 0.1 }) ? faker.lorem.sentence() : 'None',
+      willingToAbideByPlatformGuidelines: true,
+      expertise: faker.helpers.arrayElements([
+        'Anxiety Disorders', 'Mood Disorders', 'Trauma Recovery', 'Relationship Issues',
+        'Addiction Treatment', 'Eating Disorder Recovery', 'LGBTQ+ Affirmative Therapy'
+      ], { min: 2, max: 4 }),
+      approaches: faker.helpers.arrayElements([
+        'Cognitive Behavioral Therapy', 'Mindfulness-Based Therapy', 'Solution-Focused Therapy',
+        'Psychodynamic Therapy', 'Dialectical Behavior Therapy'
+      ], { min: 1, max: 3 }),
+      languages: faker.helpers.arrayElements(['English', 'Spanish', 'Tagalog', 'Mandarin'], { min: 1, max: 2 }),
+      illnessSpecializations: faker.helpers.arrayElements([
+        'Depression', 'Anxiety', 'PTSD', 'Bipolar Disorder', 'ADHD', 'Eating Disorders'
+      ], { min: 1, max: 4 }),
+      acceptTypes: faker.helpers.arrayElements([
+        'Individual', 'Couples', 'Family', 'Group'
+      ], { min: 1, max: 3 }),
+      treatmentSuccessRates: {
+        anxiety: faker.number.float({ min: 0.65, max: 0.95, fractionDigits: 2 }),
+        depression: faker.number.float({ min: 0.60, max: 0.90, fractionDigits: 2 }),
+        trauma: faker.number.float({ min: 0.70, max: 0.88, fractionDigits: 2 }),
+      },
+      sessionLength: faker.helpers.arrayElement(['45 minutes', '60 minutes', '90 minutes']),
+      hourlyRate: faker.number.float({ min: 80, max: 250, fractionDigits: 2 }),
+      status: 'approved',
+      submissionDate: faker.date.past(),
+      processingDate: faker.date.past(),
+    };
+  }
+
+  static generateAssessmentResponses() {
+    const responses = {};
+    // Generate responses for 201 questions across different assessment tools
+    for (let i = 1; i <= 201; i++) {
+      responses[`q${i}`] = faker.number.int({ min: 0, max: 4 });
+    }
+    return responses;
+  }
+
+  static generateAssessmentScores() {
+    return {
+      PHQ: faker.number.int({ min: 0, max: 27 }),
+      GAD7: faker.number.int({ min: 0, max: 21 }),
+      AUDIT: faker.number.int({ min: 0, max: 40 }),
+      ASRS: faker.number.int({ min: 0, max: 72 }),
+      BES: faker.number.int({ min: 0, max: 46 }),
+      DAST10: faker.number.int({ min: 0, max: 10 }),
+      ISI: faker.number.int({ min: 0, max: 28 }),
+      MBI: faker.number.int({ min: 0, max: 132 }),
+      MDQ: faker.number.int({ min: 0, max: 13 }),
+      OCI_R: faker.number.int({ min: 0, max: 72 }),
+      PCL5: faker.number.int({ min: 0, max: 80 }),
+      PDSS: faker.number.int({ min: 0, max: 28 }),
+      PSS: faker.number.int({ min: 0, max: 40 }),
+    };
+  }
+
+  static generateSeverityLevels() {
+    return {
+      depression: faker.helpers.arrayElement(['minimal', 'mild', 'moderate', 'moderately_severe', 'severe']),
+      anxiety: faker.helpers.arrayElement(['minimal', 'mild', 'moderate', 'severe']),
+      substance_use: faker.helpers.arrayElement(['low_risk', 'hazardous', 'harmful', 'dependent']),
+      sleep_disorder: faker.helpers.arrayElement(['no_clinically_significant', 'subthreshold', 'moderate', 'severe']),
+      panic_disorder: faker.helpers.arrayElement(['minimal', 'mild', 'moderate', 'severe']),
+    };
+  }
+
+  static generateQuestionnaires() {
+    return [
+      { id: 'PHQ-9', name: 'Patient Health Questionnaire-9', questions: 9 },
+      { id: 'GAD-7', name: 'General Anxiety Disorder-7', questions: 7 },
+      { id: 'AUDIT', name: 'Alcohol Use Disorders Identification Test', questions: 10 },
+      { id: 'ASRS', name: 'Adult ADHD Self-Report Scale', questions: 18 },
+      { id: 'BES', name: 'Binge Eating Scale', questions: 16 },
+      { id: 'DAST-10', name: 'Drug Abuse Screening Test', questions: 10 },
+      { id: 'ISI', name: 'Insomnia Severity Index', questions: 7 },
+      { id: 'MBI', name: 'Maslach Burnout Inventory', questions: 22 },
+      { id: 'MDQ', name: 'Mood Disorder Questionnaire', questions: 13 },
+      { id: 'OCI-R', name: 'Obsessive-Compulsive Inventory-Revised', questions: 18 },
+      { id: 'PCL-5', name: 'PTSD Checklist for DSM-5', questions: 20 },
+      { id: 'PDSS', name: 'Panic Disorder Severity Scale', questions: 7 },
+      { id: 'PSS', name: 'Perceived Stress Scale', questions: 10 }
+    ];
+  }
+
+  static generateAnswerMatrix() {
+    const matrix: any[] = [];
+    for (let questionIndex = 0; questionIndex < 201; questionIndex++) {
+      matrix.push({
+        questionId: questionIndex + 1,
+        scale: faker.helpers.arrayElement(['PHQ-9', 'GAD-7', 'AUDIT', 'ASRS', 'BES', 'DAST-10', 'ISI', 'MBI', 'MDQ', 'OCI-R', 'PCL-5', 'PDSS', 'PSS']),
+        weight: faker.number.float({ min: 0.1, max: 1.0, fractionDigits: 2 }),
+        reverse_scored: faker.datatype.boolean({ probability: 0.1 })
+      });
+    }
+    return matrix;
+  }
+
+  static generateAiEstimate() {
+    return {
+      confidence: faker.number.float({ min: 0.7, max: 0.98, fractionDigits: 3 }),
+      risk_factors: faker.helpers.arrayElements([
+        'substance_abuse', 'trauma_history', 'family_history', 'chronic_stress',
+        'social_isolation', 'financial_stress', 'relationship_issues'
+      ], { min: 1, max: 4 }),
+      recommendations: faker.helpers.arrayElements([
+        'CBT therapy', 'medication_evaluation', 'lifestyle_changes',
+        'support_group', 'stress_management', 'mindfulness_practice'
+      ], { min: 2, max: 5 }),
+      estimated_severity: {
+        overall: faker.helpers.arrayElement(['low', 'moderate', 'high']),
+        depression: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        anxiety: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        stress: faker.number.float({ min: 0, max: 1, fractionDigits: 2 })
+      }
+    };
+  }
+}
+
+async function seedUsers() {
+  console.log('👥 Creating users...');
+  
+  const users: any[] = [];
+  const clients: any[] = [];
+  const therapists: any[] = [];
+  
+  // Create test accounts first with real Clerk IDs
+  console.log('🧪 Creating test accounts with real Clerk IDs...');
+  
+  // Create test admin users
+  for (const adminData of TEST_ACCOUNTS.ADMINS) {
+    const userData = SeedDataGenerator.generateUserData('admin', adminData);
+    const user = await prisma.user.create({ data: userData });
+    users.push(user);
+    console.log(`✅ Created test admin: ${adminData.firstName} ${adminData.lastName}`);
+  }
+
+  // Create test moderator users
+  for (const moderatorData of TEST_ACCOUNTS.MODERATORS) {
+    const userData = SeedDataGenerator.generateUserData('moderator', moderatorData);
+    const user = await prisma.user.create({ data: userData });
+    users.push(user);
+    console.log(`✅ Created test moderator: ${moderatorData.firstName} ${moderatorData.lastName}`);
+  }
+
+  // Create test client users
+  for (const clientData of TEST_ACCOUNTS.CLIENTS) {
+    const userData = SeedDataGenerator.generateUserData('client', clientData);
+    const user = await prisma.user.create({ data: userData });
+    const client = await prisma.client.create({
+      data: {
+        userId: user.id,
+        hasSeenTherapistRecommendations: faker.datatype.boolean(),
+      },
+    });
+    clients.push({ user, client });
+    users.push(user);
+    console.log(`✅ Created test client: ${clientData.firstName} ${clientData.lastName}`);
+  }
+
+  // Create test therapist users
+  for (const therapistData of TEST_ACCOUNTS.THERAPISTS) {
+    const userData = SeedDataGenerator.generateUserData('therapist', therapistData);
+    const user = await prisma.user.create({ data: userData });
+    const therapistProfileData = SeedDataGenerator.generateTherapistData();
+    const therapist = await prisma.therapist.create({
+      data: {
+        userId: user.id,
+        ...therapistProfileData,
+      },
+    });
+    therapists.push({ user, therapist });
+    users.push(user);
+    console.log(`✅ Created test therapist: ${therapistData.firstName} ${therapistData.lastName}`);
+  }
+
+  // Create additional fake users for testing (if needed)
+  console.log('🤖 Creating additional fake users...');
+  
+  // Create additional admin users
+  const additionalAdmins = SEED_CONFIG.USERS.ADMINS - TEST_ACCOUNTS.ADMINS.length;
+  for (let i = 0; i < additionalAdmins; i++) {
+    const userData = SeedDataGenerator.generateUserData('admin', {
+      id: `fake_admin_${i + 1}`,
+      email: `admin${i + 1}@mentara.com`,
+      firstName: 'Admin',
+      lastName: `User ${i + 1}`,
+    });
+    const user = await prisma.user.create({ data: userData });
+    users.push(user);
+    console.log(`✅ Created additional admin: ${userData.firstName} ${userData.lastName}`);
+  }
+
+  // Create additional moderator users  
+  const additionalModerators = SEED_CONFIG.USERS.MODERATORS - TEST_ACCOUNTS.MODERATORS.length;
+  for (let i = 0; i < additionalModerators; i++) {
+    const userData = SeedDataGenerator.generateUserData('moderator', {
+      id: `fake_moderator_${i + 1}`,
+      email: `moderator${i + 1}@mentara.com`,
+      firstName: 'Moderator',
+      lastName: `User ${i + 1}`,
+    });
+    const user = await prisma.user.create({ data: userData });
+    users.push(user);
+    console.log(`✅ Created additional moderator: ${userData.firstName} ${userData.lastName}`);
+  }
+
+  // Create additional client users
+  const additionalClients = SEED_CONFIG.USERS.CLIENTS - TEST_ACCOUNTS.CLIENTS.length;
+  for (let i = 0; i < additionalClients; i++) {
+    const userData = SeedDataGenerator.generateUserData('client', {
+      id: `fake_client_${i + 1}`,
+    });
+    const user = await prisma.user.create({ data: userData });
+    const client = await prisma.client.create({
+      data: {
+        userId: user.id,
+        hasSeenTherapistRecommendations: faker.datatype.boolean(),
+      },
+    });
+    clients.push({ user, client });
+    users.push(user);
+    console.log(`✅ Created additional client: ${userData.firstName} ${userData.lastName}`);
+  }
+
+  // Create additional therapist users
+  const additionalTherapists = SEED_CONFIG.USERS.THERAPISTS - TEST_ACCOUNTS.THERAPISTS.length;
+  for (let i = 0; i < additionalTherapists; i++) {
+    const userData = SeedDataGenerator.generateUserData('therapist', {
+      id: `fake_therapist_${i + 1}`,
+    });
+    const user = await prisma.user.create({ data: userData });
+    const therapistProfileData = SeedDataGenerator.generateTherapistData();
+    const therapist = await prisma.therapist.create({
+      data: {
+        userId: user.id,
+        ...therapistProfileData,
+      },
+    });
+    therapists.push({ user, therapist });
+    users.push(user);
+    console.log(`✅ Created additional therapist: ${userData.firstName} ${userData.lastName}`);
+  }
+
+  return { users, clients, therapists };
+}
+
+async function seedCommunities() {
+  console.log('🏘️  Creating communities...');
+  
+  const communities: any[] = [];
+
+  // Create illness communities from config
   for (const communityConfig of ILLNESS_COMMUNITIES) {
     const existingCommunity = await prisma.community.findUnique({
       where: { slug: communityConfig.slug },
     });
 
+    let community;
     if (!existingCommunity) {
-      await prisma.community.create({
+      community = await prisma.community.create({
         data: {
           name: communityConfig.name,
           description: communityConfig.description,
           slug: communityConfig.slug,
-          illness: communityConfig.illness,
-          isActive: true,
-          isPrivate: false,
-          memberCount: 0,
-          postCount: 0,
+          imageUrl: faker.image.url(),
         },
       });
-      console.log(`✅ Created community: ${communityConfig.name}`);
+      console.log(`✅ Created illness community: ${communityConfig.name}`);
     } else {
+      community = existingCommunity;
       console.log(`⏭️  Community already exists: ${communityConfig.name}`);
     }
+    communities.push(community);
   }
 
-  // Create sample users if they don't exist
-  console.log('👥 Creating sample users...');
-  const sampleUsers = [
-    {
-      clerkId: 'sample_user_1',
-      email: 'john.doe@example.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      role: 'user',
-    },
-    {
-      clerkId: 'sample_user_2',
-      email: 'jane.smith@example.com',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      role: 'user',
-    },
-    {
-      clerkId: 'sample_therapist_1',
-      email: 'dr.wilson@example.com',
-      firstName: 'Dr. Sarah',
-      lastName: 'Wilson',
-      role: 'therapist',
-    },
+  // Create additional general communities
+  const additionalCommunityTypes = [
+    { name: 'Mindfulness & Meditation', description: 'A space for sharing mindfulness practices and meditation experiences' },
+    { name: 'Support Circle', description: 'General support for anyone going through difficult times' },
+    { name: 'Wellness Warriors', description: 'Focusing on physical and mental wellness together' },
+    { name: 'Creative Therapy', description: 'Using art, music, and creativity for healing' },
+    { name: 'Family & Relationships', description: 'Navigating family dynamics and relationship challenges' },
   ];
 
-  for (const userData of sampleUsers) {
-    const existingUser = await prisma.user.findUnique({
-      where: { clerkId: userData.clerkId },
-    });
-
-    if (!existingUser) {
-      await prisma.user.create({
-        data: userData,
-      });
-      console.log(
-        `✅ Created user: ${userData.firstName} ${userData.lastName}`,
-      );
-    } else {
-      console.log(
-        `⏭️  User already exists: ${userData.firstName} ${userData.lastName}`,
-      );
-    }
-  }
-
-  // Create sample therapist
-  console.log('👨‍⚕️ Creating sample therapist...');
-  const existingTherapist = await prisma.therapist.findUnique({
-    where: { clerkUserId: 'sample_therapist_1' },
-  });
-
-  if (!existingTherapist) {
-    await prisma.therapist.create({
+  for (const type of additionalCommunityTypes) {
+    const community = await prisma.community.create({
       data: {
-        clerkUserId: 'sample_therapist_1',
-        email: 'dr.wilson@example.com',
-        firstName: 'Dr. Sarah',
-        lastName: 'Wilson',
-        mobile: '+1234567890',
-        province: 'Metro Manila',
-        providerType: 'Clinical Psychologist',
-        professionalLicenseType: 'PRC Licensed',
-        prcLicenseNumber: 'PSY-12345',
-        yearsOfExperience: 8,
-        areasOfExpertise: ['Anxiety', 'Depression', 'Stress'],
-        therapeuticApproaches: ['CBT', 'Mindfulness', 'Solution-Focused'],
-        languages: ['English', 'Tagalog'],
-        illnessSpecializations: [
-          'Anxiety',
-          'Depression',
-          'Stress',
-          'Insomnia',
-          'Burnout',
-        ],
-        expertiseLevels: {
-          Anxiety: 5,
-          Depression: 4,
-          Stress: 5,
-          Insomnia: 3,
-          Burnout: 4,
-        },
-        patientSatisfaction: 4.8,
-        totalPatients: 150,
-        isActive: true,
-        isVerified: true,
-        profileComplete: true,
+        name: type.name,
+        description: type.description,
+        slug: faker.lorem.slug() + '-' + Date.now(),
+        imageUrl: faker.image.url(),
       },
     });
-    console.log('✅ Created sample therapist: Dr. Sarah Wilson');
-  } else {
-    console.log('⏭️  Sample therapist already exists');
+    communities.push(community);
+    console.log(`✅ Created additional community: ${type.name}`);
   }
 
-  // Create sample posts in communities
-  console.log('📝 Creating sample posts...');
-  const communities = await prisma.community.findMany({
-    take: 5, // Get first 5 communities
-  });
+  return communities;
+}
 
-  const sampleUser = await prisma.user.findUnique({
-    where: { clerkId: 'sample_user_1' },
-  });
-
-  if (sampleUser && communities.length > 0) {
-    const samplePosts = [
-      {
-        title: 'Welcome to our community!',
-        content:
-          "Hi everyone! I'm new here and looking forward to connecting with others who understand what I'm going through. Looking forward to sharing experiences and supporting each other.",
-        communityId: communities[0].id,
-      },
-      {
-        title: 'Coping strategies that work for me',
-        content:
-          'I wanted to share some techniques that have been helping me lately: 1) Deep breathing exercises, 2) Regular exercise, 3) Journaling my thoughts. What works for you?',
-        communityId: communities[0].id,
-      },
-      {
-        title: 'Feeling overwhelmed today',
-        content:
-          "Today has been really tough. Just needed to vent and know I'm not alone in this journey. Thanks for being here, everyone.",
-        communityId: communities[1]?.id || communities[0].id,
-      },
-    ];
-
-    for (const postData of samplePosts) {
-      const existingPost = await prisma.post.findFirst({
-        where: {
-          title: postData.title,
-          communityId: postData.communityId,
-        },
-      });
-
-      if (!existingPost) {
-        await prisma.post.create({
+async function seedMemberships(users: any[], communities: any[]) {
+  console.log('👥 Creating community memberships...');
+  
+  const memberships: any[] = [];
+  
+  // Get only client and therapist users for community memberships
+  const memberUsers = users.filter(user => ['client', 'therapist'].includes(user.role));
+  
+  for (const community of communities) {
+    // Each community gets 60-80% of users as members
+    const memberCount = Math.floor(memberUsers.length * faker.number.float({ min: 0.6, max: 0.8 }));
+    const communityMembers = faker.helpers.arrayElements(memberUsers, memberCount);
+    
+    for (const user of communityMembers) {
+      try {
+        const membership = await prisma.membership.create({
           data: {
-            ...postData,
-            userId: sampleUser.id,
-          },
-        });
-        console.log(`✅ Created post: ${postData.title}`);
-
-        // Update post count for community
-        await prisma.community.update({
-          where: { id: postData.communityId },
-          data: {
-            postCount: {
-              increment: 1,
-            },
-          },
-        });
-      } else {
-        console.log(`⏭️  Post already exists: ${postData.title}`);
-      }
-    }
-  }
-
-  // Create sample memberships
-  console.log('👥 Creating sample memberships...');
-  if (sampleUser && communities.length > 0) {
-    for (const community of communities.slice(0, 3)) {
-      const existingMembership = await prisma.membership.findFirst({
-        where: {
-          userId: sampleUser.id,
-          communityId: community.id,
-        },
-      });
-
-      if (!existingMembership) {
-        await prisma.membership.create({
-          data: {
-            userId: sampleUser.id,
+            userId: user.id,
             communityId: community.id,
-            role: 'member',
+            role: faker.helpers.arrayElement(['member', 'member', 'member', 'moderator']), // 75% members, 25% moderators
+            joinedAt: faker.date.past({ years: 2 }),
           },
         });
-        console.log(`✅ Added user to community: ${community.name}`);
-
-        // Update member count
-        await prisma.community.update({
-          where: { id: community.id },
-          data: {
-            memberCount: {
-              increment: 1,
-            },
-          },
-        });
-      } else {
-        console.log(`⏭️  Membership already exists for: ${community.name}`);
+        memberships.push(membership);
+      } catch (error) {
+        // Skip if membership already exists
       }
     }
+    console.log(`✅ Created memberships for ${community.name}: ${communityMembers.length} members`);
   }
+  
+  return memberships;
+}
 
-  // Create posts with hearts and hierarchical comments
-  console.log('💖 Creating posts with hearts and comments...');
-  const sampleUser2 = await prisma.user.findUnique({
-    where: { clerkId: 'sample_user_2' },
-  });
-
-  if (sampleUser && sampleUser2 && communities.length > 0) {
-    // Create a post with hearts in the Stress community
-    const stressCommunity =
-      communities.find((c) => c.illness === 'Stress') || communities[0];
-    const heartedPost = await prisma.post.create({
+async function seedClientTherapistRelationships(clients: any[], therapists: any[]) {
+  console.log('🤝 Creating client-therapist relationships...');
+  
+  const relationships: any[] = [];
+  const assignmentCount = Math.floor(clients.length * SEED_CONFIG.RELATIONSHIPS.CLIENT_THERAPIST_RATIO);
+  const clientsToAssign = faker.helpers.arrayElements(clients, assignmentCount);
+  
+  for (const client of clientsToAssign) {
+    const therapist = faker.helpers.arrayElement(therapists);
+    const relationship = await prisma.clientTherapist.create({
       data: {
-        title: 'This community has been so supportive! 💖',
-        content:
-          'I just wanted to say thank you to everyone here. Your support and understanding have made such a difference in my journey. This community truly feels like a safe space.',
-        userId: sampleUser.id,
-        communityId: stressCommunity.id,
-        heartCount: 0, // Will be updated by hearts
+        clientId: client.user.id,
+        therapistId: therapist.user.id,
+        assignedAt: faker.date.past({ years: 1 }),
+        notes: faker.lorem.paragraph(),
       },
     });
-
-    // Add hearts to the post
-    await prisma.postHeart.createMany({
-      data: [
-        { postId: heartedPost.id, userId: sampleUser.id },
-        { postId: heartedPost.id, userId: sampleUser2.id },
-      ],
-    });
-
-    // Update heart count
-    await prisma.post.update({
-      where: { id: heartedPost.id },
-      data: { heartCount: 2 },
-    });
-
-    console.log(`✅ Created hearted post: ${heartedPost.title}`);
-
-    // Create comments with hierarchy
-    const parentComment = await prisma.comment.create({
-      data: {
-        content:
-          'I completely agree! This community has been a lifeline for me too.',
-        userId: sampleUser2.id,
-        postId: heartedPost.id,
-        heartCount: 0,
-      },
-    });
-
-    // Add heart to parent comment
-    await prisma.commentHeart.create({
-      data: {
-        commentId: parentComment.id,
-        userId: sampleUser.id,
-      },
-    });
-
-    // Update comment heart count
-    await prisma.comment.update({
-      where: { id: parentComment.id },
-      data: { heartCount: 1 },
-    });
-
-    // Create reply to parent comment
-    const replyComment = await prisma.comment.create({
-      data: {
-        content:
-          'Same here! The support is incredible. How long have you been part of this community?',
-        userId: sampleUser.id,
-        postId: heartedPost.id,
-        parentId: parentComment.id,
-        heartCount: 0,
-      },
-    });
-
-    // Create another reply to the same parent
-    const replyComment2 = await prisma.comment.create({
-      data: {
-        content: "I joined last month and it's been amazing so far!",
-        userId: sampleUser2.id,
-        postId: heartedPost.id,
-        parentId: parentComment.id,
-        heartCount: 0,
-      },
-    });
-
-    // Create a nested reply (reply to a reply)
-    const nestedReply = await prisma.comment.create({
-      data: {
-        content: "Welcome! I'm glad you found us. What brought you here?",
-        userId: sampleUser.id,
-        postId: heartedPost.id,
-        parentId: replyComment2.id,
-        heartCount: 0,
-      },
-    });
-
-    console.log('✅ Created hierarchical comments with hearts');
-
-    // Create another post with Anxiety community
-    const anxietyCommunity =
-      communities.find((c) => c.illness === 'Anxiety') || communities[1];
-    if (anxietyCommunity) {
-      const discussionPost = await prisma.post.create({
-        data: {
-          title: 'What coping strategies work best for you?',
-          content:
-            "I'm looking for new ways to manage my symptoms. Currently, I use meditation and exercise, but I'd love to hear what works for others in this community.",
-          userId: sampleUser2.id,
-          communityId: anxietyCommunity.id,
-          heartCount: 0,
-        },
-      });
-
-      // Add some hearts
-      await prisma.postHeart.create({
-        data: {
-          postId: discussionPost.id,
-          userId: sampleUser.id,
-        },
-      });
-
-      await prisma.post.update({
-        where: { id: discussionPost.id },
-        data: { heartCount: 1 },
-      });
-
-      // Create a comment with multiple replies
-      const strategyComment = await prisma.comment.create({
-        data: {
-          content:
-            'I find that journaling really helps me process my thoughts and feelings.',
-          userId: sampleUser.id,
-          postId: discussionPost.id,
-          heartCount: 0,
-        },
-      });
-
-      const strategyReply1 = await prisma.comment.create({
-        data: {
-          content:
-            'Journaling is great! Do you have any specific prompts you use?',
-          userId: sampleUser2.id,
-          postId: discussionPost.id,
-          parentId: strategyComment.id,
-          heartCount: 0,
-        },
-      });
-
-      const strategyReply2 = await prisma.comment.create({
-        data: {
-          content:
-            "I like to write about three things I'm grateful for each day.",
-          userId: sampleUser.id,
-          postId: discussionPost.id,
-          parentId: strategyReply1.id,
-          heartCount: 0,
-        },
-      });
-
-      console.log(
-        `✅ Created discussion post with comments: ${discussionPost.title}`,
-      );
-    }
-
-    // Create a post in the Depression community
-    const depressionCommunity = communities.find(
-      (c) => c.illness === 'Depression',
-    );
-    if (depressionCommunity) {
-      const depressionPost = await prisma.post.create({
-        data: {
-          title: 'Finding hope in dark times',
-          content:
-            "Today I managed to get out of bed and take a shower. It might seem small, but it's a victory for me. Just wanted to share this win with people who understand.",
-          userId: sampleUser.id,
-          communityId: depressionCommunity.id,
-          heartCount: 0,
-        },
-      });
-
-      // Add hearts to show support
-      await prisma.postHeart.createMany({
-        data: [{ postId: depressionPost.id, userId: sampleUser2.id }],
-      });
-
-      await prisma.post.update({
-        where: { id: depressionPost.id },
-        data: { heartCount: 1 },
-      });
-
-      // Create supportive comments
-      const supportComment = await prisma.comment.create({
-        data: {
-          content:
-            "That's amazing! Every small step counts. You're doing great!",
-          userId: sampleUser2.id,
-          postId: depressionPost.id,
-          heartCount: 0,
-        },
-      });
-
-      console.log(
-        `✅ Created depression support post: ${depressionPost.title}`,
-      );
-    }
-
-    // Update post count for communities
-    await prisma.community.update({
-      where: { id: stressCommunity.id },
-      data: {
-        postCount: {
-          increment: 1,
-        },
-      },
-    });
-
-    if (anxietyCommunity) {
-      await prisma.community.update({
-        where: { id: anxietyCommunity.id },
-        data: {
-          postCount: {
-            increment: 1,
-          },
-        },
-      });
-    }
-
-    if (depressionCommunity) {
-      await prisma.community.update({
-        where: { id: depressionCommunity.id },
-        data: {
-          postCount: {
-            increment: 1,
-          },
-        },
-      });
-    }
+    relationships.push({ relationship, client, therapist });
+    console.log(`✅ Assigned ${client.user.firstName} to therapist ${therapist.user.firstName}`);
   }
+  
+  return relationships;
+}
 
-  console.log('🎉 Database seeding completed successfully!');
+async function seedPreAssessments(clients: any[]) {
+  console.log('📋 Creating pre-assessments...');
+  
+  const assessments: any[] = [];
+  const assessmentCount = Math.floor(clients.length * SEED_CONFIG.ASSESSMENTS.COMPLETION_RATE);
+  const clientsWithAssessments = faker.helpers.arrayElements(clients, assessmentCount);
+  
+  for (const client of clientsWithAssessments) {
+    const assessment = await prisma.preAssessment.create({
+      data: {
+        clientId: client.user.id,
+        questionnaires: SeedDataGenerator.generateQuestionnaires(),
+        answers: SeedDataGenerator.generateAssessmentResponses(),
+        answerMatrix: SeedDataGenerator.generateAnswerMatrix(),
+        scores: SeedDataGenerator.generateAssessmentScores(),
+        severityLevels: SeedDataGenerator.generateSeverityLevels(),
+        aiEstimate: SeedDataGenerator.generateAiEstimate(),
+      },
+    });
+    assessments.push(assessment);
+    console.log(`✅ Created pre-assessment for ${client.user.firstName}`);
+  }
+  
+  return assessments;
+}
+
+async function seedMeetings(relationships: any[]) {
+  console.log('📅 Creating meetings...');
+  
+  const meetings: any[] = [];
+  
+  for (const { relationship, client, therapist } of relationships) {
+    const meetingCount = faker.number.int({ min: 1, max: SEED_CONFIG.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP });
+    
+    for (let i = 0; i < meetingCount; i++) {
+      const startTime = faker.date.between({
+        from: relationship.assignedAt,
+        to: new Date(),
+      });
+      
+      const meeting = await prisma.meeting.create({
+        data: {
+          clientId: client.user.id,
+          therapistId: therapist.user.id,
+          startTime,
+          duration: faker.helpers.arrayElement([45, 60, 90]),
+          status: faker.helpers.arrayElement(['COMPLETED', 'COMPLETED', 'SCHEDULED', 'CANCELLED']),
+          description: faker.lorem.paragraph(),
+          meetingType: faker.helpers.arrayElement(['initial', 'followup', 'crisis', 'assessment']),
+        },
+      });
+      meetings.push(meeting);
+    }
+    console.log(`✅ Created ${meetingCount} meetings for ${client.user.firstName} with ${therapist.user.firstName}`);
+  }
+  
+  return meetings;
+}
+
+async function seedCommunityContent(communities: any[], users: any[]) {
+  console.log('📝 Creating community content...');
+  
+  const posts: any[] = [];
+  const comments: any[] = [];
+  
+  for (const community of communities) {
+    // Get community members
+    const memberships = await prisma.membership.findMany({
+      where: { communityId: community.id },
+      include: { user: true },
+    });
+    
+    if (memberships.length === 0) continue;
+    
+    // Create posts
+    for (let i = 0; i < SEED_CONFIG.COMMUNITIES.POSTS_PER_COMMUNITY; i++) {
+      const author = faker.helpers.arrayElement(memberships).user;
+      const post = await prisma.post.create({
+        data: {
+          title: faker.lorem.sentence(),
+          content: faker.lorem.paragraphs(faker.number.int({ min: 2, max: 5 })),
+          userId: author?.id,
+          roomId: community.id,
+          createdAt: faker.date.past({ years: 0.5 }),
+        },
+      });
+      posts.push(post);
+      
+      // Create comments for each post
+      for (let j = 0; j < SEED_CONFIG.COMMUNITIES.COMMENTS_PER_POST; j++) {
+        const commenter = faker.helpers.arrayElement(memberships).user!;
+        const comment = await prisma.comment.create({
+          data: {
+            content: faker.lorem.paragraph(),
+            postId: post.id,
+            userId: commenter.id,
+            createdAt: faker.date.between({
+              from: post.createdAt,
+              to: new Date(),
+            }),
+          },
+        });
+        comments.push(comment);
+        
+        // Add some hearts to comments
+        if (faker.datatype.boolean({ probability: 0.6 })) {
+          const heartGiver = faker.helpers.arrayElement(memberships).user!;
+          try {
+            await prisma.commentHeart.create({
+              data: {
+                userId: heartGiver.id,
+                commentId: comment.id,
+              },
+            });
+          } catch (error) {
+            // Skip if heart already exists
+          }
+        }
+      }
+      
+      // Add some hearts to posts
+      const heartCount = faker.number.int({ min: 0, max: Math.min(5, memberships.length) });
+      const heartGivers = faker.helpers.arrayElements(memberships, heartCount);
+      for (const heartGiver of heartGivers) {
+        try {
+          await prisma.postHeart.create({
+            data: {
+              userId: heartGiver.user!.id,
+              postId: post.id,
+            },
+          });
+        } catch (error) {
+          // Skip if heart already exists
+        }
+      }
+    }
+    console.log(`✅ Created content for ${community.name}: ${SEED_CONFIG.COMMUNITIES.POSTS_PER_COMMUNITY} posts with comments`);
+  }
+  
+  return { posts, comments };
+}
+
+async function seedTherapistAvailability(therapists: any[]) {
+  console.log('📅 Creating therapist availability...');
+  
+  const availabilities: any[] = [];
+  
+  for (const { therapist, user } of therapists) {
+    // Create availability for each day of the week
+    const daysOfWeek = [1, 2, 3, 4, 5]; // Monday to Friday (1-5)
+    const selectedDays = faker.helpers.arrayElements(daysOfWeek, faker.number.int({ min: 3, max: 5 }));
+    
+    for (const dayOfWeek of selectedDays) {
+      const availability = await prisma.therapistAvailability.create({
+        data: {
+          therapistId: user.id,
+          dayOfWeek,
+          startTime: faker.helpers.arrayElement(['09:00', '10:00', '11:00']),
+          endTime: faker.helpers.arrayElement(['16:00', '17:00', '18:00']),
+        },
+      });
+      availabilities.push(availability);
+    }
+    console.log(`✅ Created availability for therapist ${user.firstName}`);
+  }
+  
+  return availabilities;
+}
+
+async function main() {
+  console.log('🌱 Starting comprehensive database seeding...');
+  console.log('📊 Seed configuration:', SEED_CONFIG);
+
+  try {
+    // Phase 1: Users
+    const { users, clients, therapists } = await seedUsers();
+    
+    // Phase 2: Communities
+    const communities = await seedCommunities();
+    
+    // Phase 3: Memberships
+    await seedMemberships(users, communities);
+    
+    // Phase 4: Client-Therapist Relationships
+    const relationships = await seedClientTherapistRelationships(clients, therapists);
+    
+    // Phase 5: Pre-assessments
+    await seedPreAssessments(clients);
+    
+    // Phase 6: Meetings
+    await seedMeetings(relationships);
+    
+    // Phase 7: Community Content
+    await seedCommunityContent(communities, users);
+    
+    // Phase 8: Therapist Availability
+    await seedTherapistAvailability(therapists);
+
+    // Summary
+    console.log('\n🎉 Database seeding completed successfully!');
+    console.log('📈 Summary:');
+    console.log(`   👥 Users: ${users.length} total`);
+    console.log(`   🔹 Clients: ${clients.length}`);
+    console.log(`   🔹 Therapists: ${therapists.length}`);
+    console.log(`   🔹 Admins: ${SEED_CONFIG.USERS.ADMINS}`);
+    console.log(`   🔹 Moderators: ${SEED_CONFIG.USERS.MODERATORS}`);
+    console.log(`   🏘️  Communities: ${communities.length}`);
+    console.log(`   🤝 Client-Therapist Relationships: ${relationships.length}`);
+    console.log(`   📅 Meetings: ${relationships.length * SEED_CONFIG.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP} (average)`);
+    console.log(`   📋 Pre-assessments: ${Math.floor(clients.length * SEED_CONFIG.ASSESSMENTS.COMPLETION_RATE)}`);
+    console.log(`   📝 Posts per community: ${SEED_CONFIG.COMMUNITIES.POSTS_PER_COMMUNITY}`);
+    console.log(`   💬 Comments per post: ${SEED_CONFIG.COMMUNITIES.COMMENTS_PER_POST}`);
+
+  } catch (error) {
+    console.error('❌ Error during seeding:', error);
+    throw error;
+  }
 }
 
 main()

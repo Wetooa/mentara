@@ -17,11 +17,25 @@ const Picker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 interface MessageChatAreaProps {
   contactId: string;
   conversation?: Conversation;
+  onSendMessage?: (text: string, attachments?: any[]) => Promise<void>;
+  onMarkAsRead?: (messageId: string) => void;
+  onAddReaction?: (messageId: string, emoji: string) => void;
+  onRemoveReaction?: (messageId: string, emoji: string) => void;
+  onSendTyping?: (isTyping: boolean) => void;
+  isLoadingMessages?: boolean;
+  error?: string | null;
 }
 
 export default function MessageChatArea({
   contactId,
   conversation: propConversation,
+  onSendMessage,
+  onMarkAsRead,
+  onAddReaction,
+  onRemoveReaction,
+  onSendTyping,
+  isLoadingMessages: propIsLoadingMessages,
+  error: propError,
 }: MessageChatAreaProps) {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -32,15 +46,18 @@ export default function MessageChatArea({
   const [messageGroups, setMessageGroups] = useState<
     { date: string; messages: Message[] }[]
   >([]);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load conversation if not provided in props
+  // Load conversation from props or fallback to mock data
   useEffect(() => {
     if (propConversation) {
       setMessages(propConversation.messages);
+      setIsLoading(propIsLoadingMessages || false);
+      setError(propError || null);
     } else {
       const loadConversation = async () => {
         setIsLoading(true);
@@ -63,7 +80,7 @@ export default function MessageChatArea({
 
       loadConversation();
     }
-  }, [contactId, propConversation]);
+  }, [contactId, propConversation, propIsLoadingMessages, propError]);
 
   // Group messages by date whenever messages change
   useEffect(() => {
@@ -97,11 +114,10 @@ export default function MessageChatArea({
   const handleSend = async () => {
     if (message.trim() || selectedFile) {
       try {
-        // In a real app, you'd upload the file first and get a URL
-
-        let fileAttachments: { name: string; url: string; type: string }[] = [];
+        const fileAttachments: { name: string; url: string; type: string }[] = [];
         if (selectedFile) {
-          // Simulate file upload by creating a dummy URL
+          // In a real app, you'd upload the file first and get a URL
+          // For now, simulate file upload by creating a dummy URL
           const fakeUrl = `/files/${selectedFile.name}`;
           fileAttachments.push({
             name: selectedFile.name,
@@ -110,19 +126,23 @@ export default function MessageChatArea({
           });
         }
 
-        // Send message to API
-        const newMessage = await sendMessage(
-          contactId,
-          message,
-          fileAttachments
-        );
-
-        // Update local state with new message
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        // Use provided callback or fallback to mock function
+        if (onSendMessage) {
+          await onSendMessage(message, fileAttachments);
+        } else {
+          // Fallback to mock behavior
+          const newMessage = await sendMessage(contactId, message, fileAttachments);
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        }
 
         // Clear input
         setMessage("");
         setSelectedFile(null);
+
+        // Stop typing indicator
+        if (onSendTyping) {
+          onSendTyping(false);
+        }
 
         // Scroll to bottom after sending a message
         setTimeout(scrollToBottom, 100);
@@ -155,6 +175,44 @@ export default function MessageChatArea({
   const handleEmojiClick = (emojiData: any) => {
     setMessage((prev) => prev + emojiData.emoji);
   };
+
+  // Handle typing indicators
+  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMessage = e.target.value;
+    setMessage(newMessage);
+
+    // Send typing indicator
+    if (onSendTyping && newMessage.trim()) {
+      onSendTyping(true);
+
+      // Clear previous timeout
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+
+      // Set new timeout to stop typing indicator
+      const timeout = setTimeout(() => {
+        onSendTyping(false);
+      }, 2000);
+      setTypingTimeout(timeout);
+    } else if (onSendTyping && !newMessage.trim()) {
+      // Stop typing indicator if message is empty
+      onSendTyping(false);
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        setTypingTimeout(null);
+      }
+    }
+  };
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+    };
+  }, [typingTimeout]);
 
   // Format date string for display
   const formatDateLabel = (dateString: string) => {
@@ -283,7 +341,7 @@ export default function MessageChatArea({
               className="flex-1 bg-transparent border-none focus:outline-none text-gray-700 py-1"
               placeholder="Your message..."
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={handleMessageChange}
               onKeyDown={handleKeyDown}
             />
 

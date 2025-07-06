@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/.87b1654b5fdd6d984de9d353936d8f839faee998-audit.json",
+    "files": [
+        {
+            "date": 1751713893265,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-05.log",
+            "hash": "612df85ac7c6cf880d9abbcd847b9dc3221ffee964f919dcb42b7e7e2ab3c859"
+        }
+    ],
+    "hashType": "sha256"
+}

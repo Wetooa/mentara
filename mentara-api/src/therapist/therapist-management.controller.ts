@@ -9,10 +9,13 @@ import {
   Param,
 } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { Prisma } from '@prisma/client';
-import { ClientWithUser, TherapistWithUser } from 'src/types';
+import {
+  ClientResponse,
+  TherapistResponse,
+  TherapistUpdateDto,
+} from 'schema/auth';
 
 @Controller('therapist-management')
 @UseGuards(ClerkAuthGuard)
@@ -25,7 +28,7 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async getTherapistProfile(
     @CurrentUserId() therapistId: string,
-  ): Promise<TherapistWithUser> {
+  ): Promise<TherapistResponse> {
     return this.therapistManagementService.getTherapistProfile(therapistId);
   }
 
@@ -33,8 +36,8 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async updateTherapistProfile(
     @CurrentUserId() therapistId: string,
-    @Body() data: Prisma.TherapistUpdateInput,
-  ): Promise<TherapistWithUser> {
+    @Body() data: TherapistUpdateDto,
+  ): Promise<TherapistResponse> {
     return this.therapistManagementService.updateTherapistProfile(
       therapistId,
       data,
@@ -45,8 +48,8 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async updateTherapistSpecializations(
     @CurrentUserId() therapistId: string,
-    @Body() data: Prisma.TherapistUpdateInput,
-  ): Promise<TherapistWithUser> {
+    @Body() data: TherapistUpdateDto,
+  ): Promise<TherapistResponse> {
     return this.therapistManagementService.updateTherapistProfile(
       therapistId,
       data,
@@ -57,7 +60,7 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async getAssignedPatients(
     @CurrentUserId() therapistId: string,
-  ): Promise<any[]> {
+  ): Promise<ClientResponse[]> {
     return this.therapistManagementService.getAssignedPatients(therapistId);
   }
 
@@ -65,7 +68,7 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async getAllClients(
     @CurrentUserId() therapistId: string,
-  ): Promise<ClientWithUser[]> {
+  ): Promise<ClientResponse[]> {
     return this.therapistManagementService.getAllClients(therapistId);
   }
 
@@ -74,7 +77,7 @@ export class TherapistManagementController {
   async getClientById(
     @CurrentUserId() therapistId: string,
     @Param('id') clientId: string,
-  ): Promise<ClientWithUser> {
+  ): Promise<ClientResponse> {
     return this.therapistManagementService.getClientById(therapistId, clientId);
   }
 
@@ -82,7 +85,7 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async getProfile(
     @CurrentUserId() therapistId: string,
-  ): Promise<TherapistWithUser> {
+  ): Promise<TherapistResponse> {
     return this.therapistManagementService.getProfile(therapistId);
   }
 
@@ -90,8 +93,8 @@ export class TherapistManagementController {
   @HttpCode(HttpStatus.OK)
   async updateProfile(
     @CurrentUserId() therapistId: string,
-    @Body() data: Prisma.TherapistUpdateInput,
-  ): Promise<TherapistWithUser> {
+    @Body() data: TherapistUpdateDto,
+  ): Promise<TherapistResponse> {
     return this.therapistManagementService.updateProfile(therapistId, data);
   }
 }

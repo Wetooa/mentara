@@ -1,97 +1,172 @@
-import { IsString, IsOptional, IsDateString, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsDateString,
+  IsBoolean,
+  IsJSON,
+  IsDecimal,
+} from 'class-validator';
 
 export class RegisterTherapistDto {
   @IsString()
-  email: string;
+  userId!: string; // Clerk user ID
+
+  @IsEmail()
+  email!: string;
 
   @IsString()
-  firstName: string;
+  firstName!: string;
 
   @IsString()
-  lastName: string;
+  lastName!: string;
 
   @IsString()
-  role: string;
-
-  @IsOptional()
-  @IsString()
-  middleName?: string;
-
-  @IsOptional()
-  @IsDateString()
-  birthDate?: Date;
-
-  @IsOptional()
-  @IsString()
-  address?: string;
+  mobile!: string;
 
   @IsString()
-  mobile: string;
+  province!: string;
 
   @IsString()
-  province: string;
+  providerType!: string;
 
   @IsString()
-  providerType: string;
+  professionalLicenseType!: string;
 
   @IsString()
-  professionalLicenseType: string;
+  isPRCLicensed!: string;
 
   @IsString()
-  isPRCLicensed: string;
-
-  @IsString()
-  prcLicenseNumber: string;
+  prcLicenseNumber!: string;
 
   @IsOptional()
   @IsDateString()
-  expirationDateOfLicense?: Date;
+  expirationDateOfLicense?: string;
 
   @IsString()
-  isLicenseActive: string;
+  isLicenseActive!: string;
 
   @IsDateString()
-  practiceStartDate: Date;
+  practiceStartDate!: string;
 
-  @IsObject()
-  areasOfExpertise: Record<string, any>;
+  @IsOptional()
+  @IsString()
+  yearsOfExperience?: string;
 
-  @IsObject()
-  assessmentTools: Record<string, any>;
+  @IsJSON()
+  areasOfExpertise!: any;
 
-  @IsObject()
-  therapeuticApproachesUsedList: Record<string, any>;
+  @IsJSON()
+  assessmentTools!: any;
 
-  @IsObject()
-  languagesOffered: Record<string, any>;
+  @IsJSON()
+  therapeuticApproachesUsedList!: any;
+
+  @IsJSON()
+  languagesOffered!: any;
 
   @IsString()
-  providedOnlineTherapyBefore: string;
+  providedOnlineTherapyBefore!: string;
 
   @IsString()
-  comfortableUsingVideoConferencing: string;
+  comfortableUsingVideoConferencing!: string;
 
   @IsString()
-  weeklyAvailability: string;
+  weeklyAvailability!: string;
 
   @IsString()
-  preferredSessionLength: string;
+  preferredSessionLength!: string;
 
-  @IsObject()
-  accepts: Record<string, any>;
+  @IsJSON()
+  accepts!: any;
 
+  @IsOptional()
   @IsString()
-  privateConfidentialSpace: string;
+  privateConfidentialSpace?: string;
 
+  @IsOptional()
   @IsString()
-  compliesWithDataPrivacyAct: string;
+  compliesWithDataPrivacyAct?: string;
 
+  @IsOptional()
   @IsString()
-  professionalLiabilityInsurance: string;
+  professionalLiabilityInsurance?: string;
 
+  @IsOptional()
   @IsString()
-  complaintsOrDisciplinaryActions: string;
+  complaintsOrDisciplinaryActions?: string;
 
+  @IsOptional()
   @IsString()
-  willingToAbideByPlatformGuidelines: string;
+  willingToAbideByPlatformGuidelines?: string;
+
+  @IsOptional()
+  @IsString()
+  sessionLength?: string;
+
+  @IsOptional()
+  @IsDecimal()
+  hourlyRate?: number;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsString()
+  profileImageUrl?: string;
+
+  @IsOptional()
+  @IsJSON()
+  applicationData?: any;
+}
+
+export class UpdateTherapistDto {
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  mobile?: string;
+
+  @IsOptional()
+  @IsString()
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsString()
+  profileImageUrl?: string;
+
+  @IsOptional()
+  @IsDecimal()
+  hourlyRate?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
+  @IsJSON()
+  expertise?: any;
+
+  @IsOptional()
+  @IsJSON()
+  approaches?: any;
+
+  @IsOptional()
+  @IsJSON()
+  languages?: any;
+
+  @IsOptional()
+  @IsJSON()
+  illnessSpecializations?: any;
 }

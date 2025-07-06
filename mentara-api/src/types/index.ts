@@ -1,48 +1,4 @@
-import { Post, Comment, Prisma } from '@prisma/client';
-
-// Prisma types for relations
-export type ClientWithUser = Prisma.ClientGetPayload<{
-  include: { user: true };
-}>;
-export type TherapistWithUser = Prisma.TherapistGetPayload<{
-  include: { user: true };
-}>;
-export type ModeratorWithUser = Prisma.ModeratorGetPayload<{
-  include: { user: true };
-}>;
-export type AdminWithUser = Prisma.AdminGetPayload<{
-  include: { user: true };
-}>;
-export type CommunityWithMembers = Prisma.CommunityGetPayload<{
-  include: { memberships: { include: { user: true } } };
-}>;
-export type PostResponse = Post;
-export type CommentResponse = Comment;
-export type PostWithUserAndComments = Prisma.PostGetPayload<{
-  include: {
-    user: true;
-    comments: {
-      include: {
-        user: true;
-        replies: { include: { user: true } };
-        files: true;
-        hearts: true;
-        _count: true;
-      };
-    };
-    files: true;
-    hearts: true;
-    _count: true;
-  };
-}>;
-export type CommentWithUserAndReplies = Prisma.CommentGetPayload<{
-  include: {
-    user: true;
-    replies: { include: { user: true } };
-    files: true;
-    hearts: true;
-  };
-}>;
+import { Therapist, User } from '@prisma/client';
 
 export interface CommunityStats {
   totalMembers: number;
@@ -55,6 +11,12 @@ export interface CommunityStats {
   }[];
 }
 
+// Therapist with User relationship type
+export type TherapistWithUser = Therapist & {
+  user: User;
+  matchScore?: number;
+};
+
 // Query parameters
 export interface FilterQuery {
   userId?: string;
@@ -63,6 +25,7 @@ export interface FilterQuery {
   postId?: string;
   type?: string;
   difficulty?: string;
+  status?: string;
 }
 
 // Therapist Specialization Types
@@ -81,15 +44,23 @@ export interface TherapistRecommendationRequest {
   maxHourlyRate?: number;
 }
 
-export interface TherapistRecommendationResponse {
-  totalCount: number;
-  userConditions: string[];
-  therapists: (TherapistWithUser & { matchScore?: number })[];
-  matchCriteria: {
-    primaryConditions: string[];
-    secondaryConditions: string[];
-    severityLevels: Record<string, string>;
-  };
+// Worksheet types
+export interface PaginationQuery {
   page?: number;
-  pageSize?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+// Pre-assessment types
+export interface PreAssessmentResponse {
+  id: string;
+  userId: string;
+  questionnaires: string[];
+  answers: number[][];
+  answerMatrix: number[];
+  scores: Record<string, number>;
+  severityLevels: Record<string, string>;
+  createdAt: Date;
+  updatedAt: Date;
 }

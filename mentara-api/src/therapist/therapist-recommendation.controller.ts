@@ -6,15 +6,16 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-} from '../types';
+} from './dto/therapist-application.dto';
 
 @Controller('therapist-recommendations')
 @UseGuards(ClerkAuthGuard)
@@ -34,13 +35,14 @@ export class TherapistRecommendationController {
     @Query('maxHourlyRate') maxHourlyRate?: string,
   ): Promise<TherapistRecommendationResponse> {
     try {
-      // Find user by clerkId
       const user = await this.prisma.user.findUnique({
         where: { id: clerkId },
       });
+      
       if (!user) {
-        throw new InternalServerErrorException('User not found');
+        throw new NotFoundException(`User with ID ${clerkId} not found`);
       }
+      
       const request: TherapistRecommendationRequest = {
         userId: user.id,
         limit: limit ? parseInt(limit) : 10,
@@ -52,6 +54,9 @@ export class TherapistRecommendationController {
         request,
       );
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,
       );

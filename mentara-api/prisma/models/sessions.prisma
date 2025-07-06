@@ -1,0 +1,210 @@
+// Session and Activity Tracking Models
+// This file contains models for tracking therapy sessions, user activities, and platform usage
+
+model SessionLog {
+  id          String       @id @default(uuid())
+  
+  // Session identification
+  meetingId   String?      // Link to actual meeting if applicable
+  sessionType SessionType
+  
+  // Participants
+  clientId    String
+  therapistId String?      // Null for self-guided sessions
+  
+  // Session details
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int?         // Duration in minutes
+  status      SessionStatus @default(IN_PROGRESS)
+  
+  // Session metadata
+  platform    String?      // video, phone, chat, in-person
+  quality     Int?         // 1-5 quality rating
+  notes       String?      @db.Text
+  
+  // Technical details
+  connectionIssues Boolean  @default(false)
+  recordingUrl     String?  // If session was recorded
+  recordingSize    Int?     // Recording file size in bytes
+  
+  // Relations
+  client      Client       @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist   Therapist?   @relation(fields: [therapistId], references: [userId], onDelete: SetNull)
+  meeting     Meeting?     @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+  activities  SessionActivity[]
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@index([clientId])
+  @@index([therapistId])
+  @@index([meetingId])
+  @@index([sessionType])
+  @@index([status])
+  @@index([startTime])
+}
+
+model SessionActivity {
+  id          String         @id @default(uuid())
+  sessionId   String
+  
+  // Activity details
+  activityType ActivityType
+  timestamp   DateTime       @default(now())
+  duration    Int?           // Duration in seconds
+  
+  // Activity data
+  description String?
+  metadata    Json?          // Additional activity-specific data
+  
+  // Relations
+  session     SessionLog     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId])
+  @@index([activityType])
+  @@index([timestamp])
+}
+
+model UserActivity {
+  id          String         @id @default(uuid())
+  userId      String
+  
+  // Activity details
+  action      UserActionType
+  timestamp   DateTime       @default(now())
+  
+  // Context
+  page        String?        // Page or screen where action occurred
+  component   String?        // UI component interacted with
+  metadata    Json?          // Additional context data
+  
+  // Session tracking
+  sessionId   String?        // Browser/app session ID
+  deviceInfo  Json?          // Device and browser information
+  
+  // Relations
+  user        User           @relation("UserActivities", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([sessionId])
+}
+
+model TherapyProgress {
+  id                String    @id @default(uuid())
+  clientId         String
+  therapistId      String
+  
+  // Progress tracking
+  assessmentDate   DateTime  @default(now())
+  progressScore    Decimal   @db.Decimal(5, 2) // 0.00 to 100.00
+  improvementAreas String[]  // Areas showing improvement
+  concernAreas     String[]  // Areas needing attention
+  
+  // Goals tracking
+  goalsSet         Json?     // Goals established
+  goalsAchieved    Json?     // Goals that have been met
+  nextMilestones   Json?     // Upcoming targets
+  
+  // Assessments
+  moodScore        Int?      // 1-10 mood rating
+  anxietyScore     Int?      // 1-10 anxiety rating
+  depressionScore  Int?      // 1-10 depression rating
+  functionalScore  Int?      // 1-10 daily functioning
+  
+  // Notes
+  therapistNotes   String?   @db.Text
+  clientFeedback   String?   @db.Text
+  recommendations  String[]  // Recommended next steps
+  
+  // Relations
+  client          Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist       Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([clientId])
+  @@index([therapistId])
+  @@index([assessmentDate])
+  @@index([progressScore])
+}
+
+// Enums
+enum SessionType {
+  INITIAL_CONSULTATION    // First meeting
+  REGULAR_THERAPY         // Standard therapy session
+  CRISIS_INTERVENTION     // Emergency session
+  GROUP_THERAPY           // Group session
+  FAMILY_THERAPY          // Family session
+  FOLLOW_UP               // Check-in session
+  ASSESSMENT              // Evaluation session
+  SELF_GUIDED             // Client using platform tools independently
+}
+
+enum SessionStatus {
+  SCHEDULED     // Session is scheduled
+  IN_PROGRESS   // Session is ongoing
+  COMPLETED     // Session finished normally
+  CANCELLED     // Session was cancelled
+  NO_SHOW       // Client didn't attend
+  TECHNICAL_ISSUE // Session had technical problems
+  RESCHEDULED   // Session was moved to different time
+}
+
+enum ActivityType {
+  // Session activities
+  SESSION_START
+  SESSION_END
+  SCREEN_SHARE
+  FILE_SHARE
+  WHITEBOARD_USE
+  CHAT_MESSAGE
+  
+  // Therapeutic activities
+  GOAL_SETTING
+  PROGRESS_REVIEW
+  HOMEWORK_ASSIGNMENT
+  ASSESSMENT_COMPLETION
+  MOOD_CHECK_IN
+  
+  // Technical activities
+  CONNECTION_ISSUE
+  AUDIO_PROBLEM
+  VIDEO_PROBLEM
+  RECONNECTION
+  RECORDING_START
+  RECORDING_STOP
+}
+
+enum UserActionType {
+  // Navigation
+  PAGE_VIEW
+  PAGE_EXIT
+  CLICK
+  SCROLL
+  SEARCH
+  
+  // Content interaction
+  POST_CREATE
+  POST_VIEW
+  POST_LIKE
+  COMMENT_CREATE
+  COMMENT_LIKE
+  
+  // Platform features
+  THERAPIST_SEARCH
+  THERAPIST_PROFILE_VIEW
+  APPOINTMENT_BOOK
+  APPOINTMENT_CANCEL
+  MESSAGE_SEND
+  WORKSHEET_COMPLETE
+  
+  // Account actions
+  PROFILE_UPDATE
+  SETTINGS_CHANGE
+  PASSWORD_CHANGE
+  LOGOUT
+}

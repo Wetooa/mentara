@@ -3,10 +3,18 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
+import { AdminAuthGuard } from 'src/guards/admin-auth.guard';
+import { EventBusService } from '../common/events/event-bus.service';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService, PrismaService, RoleUtils],
+  providers: [
+    UsersService,
+    PrismaService,
+    RoleUtils,
+    AdminAuthGuard,
+    EventBusService,
+  ],
   exports: [UsersService],
 })
 export class UsersModule {}
