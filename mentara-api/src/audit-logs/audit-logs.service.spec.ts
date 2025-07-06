@@ -367,7 +367,9 @@ describe('AuditLogsService', () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
-      prismaService.systemEvent.findMany.mockResolvedValue([mockSystemEvents[0]]);
+      prismaService.systemEvent.findMany.mockResolvedValue([
+        mockSystemEvents[0],
+      ]);
 
       await service.findSystemEvents(
         SystemEventType.THIRD_PARTY_API_ERROR,
@@ -396,14 +398,11 @@ describe('AuditLogsService', () => {
     });
 
     it('should handle boolean filter for isResolved', async () => {
-      prismaService.systemEvent.findMany.mockResolvedValue([mockSystemEvents[1]]);
+      prismaService.systemEvent.findMany.mockResolvedValue([
+        mockSystemEvents[1],
+      ]);
 
-      await service.findSystemEvents(
-        undefined,
-        undefined,
-        undefined,
-        true,
-      );
+      await service.findSystemEvents(undefined, undefined, undefined, true);
 
       expect(prismaService.systemEvent.findMany).toHaveBeenCalledWith({
         where: { isResolved: true },
@@ -521,7 +520,9 @@ describe('AuditLogsService', () => {
     ];
 
     it('should return all data change logs when no filters provided', async () => {
-      prismaService.dataChangeLog.findMany.mockResolvedValue(mockDataChangeLogs);
+      prismaService.dataChangeLog.findMany.mockResolvedValue(
+        mockDataChangeLogs,
+      );
 
       const result = await service.findDataChangeLogs();
 
@@ -534,7 +535,9 @@ describe('AuditLogsService', () => {
     });
 
     it('should filter data change logs by table name and operation', async () => {
-      prismaService.dataChangeLog.findMany.mockResolvedValue([mockDataChangeLogs[0]]);
+      prismaService.dataChangeLog.findMany.mockResolvedValue([
+        mockDataChangeLogs[0],
+      ]);
 
       await service.findDataChangeLogs('users', undefined, 'UPDATE');
 
@@ -875,9 +878,13 @@ describe('AuditLogsService', () => {
     });
 
     it('should handle errors in statistics calculation', async () => {
-      prismaService.auditLog.count.mockRejectedValue(new Error('Database error'));
+      prismaService.auditLog.count.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.getAuditStatistics()).rejects.toThrow('Database error');
+      await expect(service.getAuditStatistics()).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -889,7 +896,9 @@ describe('AuditLogsService', () => {
         entityId: TEST_USER_IDS.CLIENT,
       };
 
-      prismaService.auditLog.create.mockRejectedValue(new Error('Database connection failed'));
+      prismaService.auditLog.create.mockRejectedValue(
+        new Error('Database connection failed'),
+      );
 
       await expect(service.createAuditLog(mockAuditData)).rejects.toThrow(
         'Database connection failed',
@@ -897,7 +906,9 @@ describe('AuditLogsService', () => {
     });
 
     it('should handle database errors in findAuditLogs', async () => {
-      prismaService.auditLog.findMany.mockRejectedValue(new Error('Query timeout'));
+      prismaService.auditLog.findMany.mockRejectedValue(
+        new Error('Query timeout'),
+      );
 
       await expect(service.findAuditLogs()).rejects.toThrow('Query timeout');
     });
@@ -910,7 +921,9 @@ describe('AuditLogsService', () => {
         description: 'Test Description',
       };
 
-      prismaService.systemEvent.create.mockRejectedValue(new Error('Constraint violation'));
+      prismaService.systemEvent.create.mockRejectedValue(
+        new Error('Constraint violation'),
+      );
 
       await expect(service.createSystemEvent(systemEventData)).rejects.toThrow(
         'Constraint violation',

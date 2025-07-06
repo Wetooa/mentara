@@ -3,7 +3,11 @@ import { TherapistApplicationService } from './therapist-application.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EmailService } from '../services/email.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { FileStatus, AttachmentEntityType, AttachmentPurpose } from '@prisma/client';
+import {
+  FileStatus,
+  AttachmentEntityType,
+  AttachmentPurpose,
+} from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -169,7 +173,9 @@ describe('TherapistApplicationService', () => {
       ],
     }).compile();
 
-    service = module.get<TherapistApplicationService>(TherapistApplicationService);
+    service = module.get<TherapistApplicationService>(
+      TherapistApplicationService,
+    );
     prismaService = module.get(PrismaService);
     emailService = module.get(EmailService);
 
@@ -192,7 +198,9 @@ describe('TherapistApplicationService', () => {
     beforeEach(() => {
       prismaService.therapist.findUnique.mockResolvedValue(null);
       prismaService.user.findUnique.mockResolvedValue(mockUser);
-      prismaService.therapist.create.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.create.mockResolvedValue(
+        mockTherapistApplication,
+      );
     });
 
     it('should create application successfully for authenticated user', async () => {
@@ -224,7 +232,9 @@ describe('TherapistApplicationService', () => {
           OR: [
             { user: { email: publicApplicationDto.email } },
             {
-              userId: { contains: publicApplicationDto.email.replace('@', '_at_') },
+              userId: {
+                contains: publicApplicationDto.email.replace('@', '_at_'),
+              },
             },
           ],
         },
@@ -242,9 +252,13 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should throw BadRequestException if user already has application', async () => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
 
-      await expect(service.createApplication(mockApplicationDto)).rejects.toThrow(
+      await expect(
+        service.createApplication(mockApplicationDto),
+      ).rejects.toThrow(
         new BadRequestException('User already has a therapist application'),
       );
     });
@@ -252,9 +266,9 @@ describe('TherapistApplicationService', () => {
     it('should throw NotFoundException if authenticated user not found', async () => {
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.createApplication(mockApplicationDto)).rejects.toThrow(
-        new NotFoundException('User not found'),
-      );
+      await expect(
+        service.createApplication(mockApplicationDto),
+      ).rejects.toThrow(new NotFoundException('User not found'));
     });
 
     it('should throw BadRequestException if public user email already exists', async () => {
@@ -263,10 +277,16 @@ describe('TherapistApplicationService', () => {
         userId: 'temp_12345',
       };
 
-      prismaService.therapist.findFirst.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findFirst.mockResolvedValue(
+        mockTherapistApplication,
+      );
 
-      await expect(service.createApplication(publicApplicationDto)).rejects.toThrow(
-        new BadRequestException('An application with this email already exists'),
+      await expect(
+        service.createApplication(publicApplicationDto),
+      ).rejects.toThrow(
+        new BadRequestException(
+          'An application with this email already exists',
+        ),
       );
     });
 
@@ -291,9 +311,13 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should handle database errors during creation', async () => {
-      prismaService.therapist.create.mockRejectedValue(new Error('Database error'));
+      prismaService.therapist.create.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.createApplication(mockApplicationDto)).rejects.toThrow(
+      await expect(
+        service.createApplication(mockApplicationDto),
+      ).rejects.toThrow(
         new BadRequestException('Failed to create application'),
       );
     });
@@ -449,7 +473,9 @@ describe('TherapistApplicationService', () => {
         ...mockTherapistApplication,
         user: { ...mockUser, firstName: null, lastName: null },
       };
-      prismaService.therapist.findMany.mockResolvedValue([applicationWithNullNames]);
+      prismaService.therapist.findMany.mockResolvedValue([
+        applicationWithNullNames,
+      ]);
 
       const result = await service.getAllApplications({ page: 1, limit: 10 });
 
@@ -461,7 +487,9 @@ describe('TherapistApplicationService', () => {
       const result = await service.getAllApplications({ page: 1, limit: 10 });
 
       expect(result.applications[0].providedOnlineTherapyBefore).toBe('yes');
-      expect(result.applications[0].comfortableUsingVideoConferencing).toBe('yes');
+      expect(result.applications[0].comfortableUsingVideoConferencing).toBe(
+        'yes',
+      );
     });
 
     it('should handle hourly rate conversion', async () => {
@@ -477,7 +505,9 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should get application by ID successfully', async () => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
 
       const result = await service.getApplicationById('user-123');
 
@@ -510,7 +540,9 @@ describe('TherapistApplicationService', () => {
           uploadedAt: '2024-01-15T00:00:00.000Z',
         },
       ];
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       jest.spyOn(service, 'getApplicationFiles').mockResolvedValue(mockFiles);
 
       const result = await service.getApplicationById('user-123');
@@ -522,8 +554,12 @@ describe('TherapistApplicationService', () => {
 
   describe('updateApplicationStatus', () => {
     beforeEach(() => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
-      prismaService.therapist.update.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
+      prismaService.therapist.update.mockResolvedValue(
+        mockTherapistApplication,
+      );
       emailService.sendTherapistWelcomeEmail.mockResolvedValue(undefined);
       emailService.sendTherapistRejectionEmail.mockResolvedValue(undefined);
     });
@@ -531,7 +567,10 @@ describe('TherapistApplicationService', () => {
     it('should update application status successfully', async () => {
       const updateData = { status: 'pending' as const };
 
-      const result = await service.updateApplicationStatus('user-123', updateData);
+      const result = await service.updateApplicationStatus(
+        'user-123',
+        updateData,
+      );
 
       expect(prismaService.therapist.update).toHaveBeenCalledWith({
         where: { userId: 'user-123' },
@@ -557,11 +596,15 @@ describe('TherapistApplicationService', () => {
     it('should handle approval status with credentials generation', async () => {
       const updateData = { status: 'approved' as const };
 
-      const result = await service.updateApplicationStatus('user-123', updateData);
+      const result = await service.updateApplicationStatus(
+        'user-123',
+        updateData,
+      );
 
       expect(result).toEqual({
         success: true,
-        message: 'Application approved successfully. Therapist account credentials generated.',
+        message:
+          'Application approved successfully. Therapist account credentials generated.',
         credentials: {
           email: mockUser.email,
           password: expect.any(String),
@@ -583,7 +626,10 @@ describe('TherapistApplicationService', () => {
         adminNotes: 'Incomplete documentation',
       };
 
-      const result = await service.updateApplicationStatus('user-123', updateData);
+      const result = await service.updateApplicationStatus(
+        'user-123',
+        updateData,
+      );
 
       expect(result.success).toBe(true);
       expect(emailService.sendTherapistRejectionEmail).toHaveBeenCalledWith(
@@ -594,10 +640,15 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should continue if email sending fails', async () => {
-      emailService.sendTherapistWelcomeEmail.mockRejectedValue(new Error('Email error'));
+      emailService.sendTherapistWelcomeEmail.mockRejectedValue(
+        new Error('Email error'),
+      );
       const updateData = { status: 'approved' as const };
 
-      const result = await service.updateApplicationStatus('user-123', updateData);
+      const result = await service.updateApplicationStatus(
+        'user-123',
+        updateData,
+      );
 
       expect(result.success).toBe(true);
     });
@@ -607,7 +658,9 @@ describe('TherapistApplicationService', () => {
         ...mockTherapistApplication,
         user: { ...mockUser, firstName: null, lastName: null },
       };
-      prismaService.therapist.findUnique.mockResolvedValue(applicationWithNullNames);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        applicationWithNullNames,
+      );
 
       const updateData = { status: 'approved' as const };
 
@@ -621,17 +674,23 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should handle database errors during update', async () => {
-      prismaService.therapist.update.mockRejectedValue(new Error('Database error'));
+      prismaService.therapist.update.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(
         service.updateApplicationStatus('user-123', { status: 'approved' }),
-      ).rejects.toThrow(new BadRequestException('Failed to update application status'));
+      ).rejects.toThrow(
+        new BadRequestException('Failed to update application status'),
+      );
     });
   });
 
   describe('uploadDocuments', () => {
     beforeEach(() => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       prismaService.file.create.mockResolvedValue(mockFileRecord);
       prismaService.fileAttachment.create.mockResolvedValue(mockFileAttachment);
     });
@@ -640,7 +699,11 @@ describe('TherapistApplicationService', () => {
       const files = [mockFile];
       const fileTypeMap = { 'license.pdf': 'license' };
 
-      const result = await service.uploadDocuments('user-123', files, fileTypeMap);
+      const result = await service.uploadDocuments(
+        'user-123',
+        files,
+        fileTypeMap,
+      );
 
       expect(prismaService.therapist.findUnique).toHaveBeenCalledWith({
         where: { userId: 'user-123' },
@@ -670,7 +733,9 @@ describe('TherapistApplicationService', () => {
     it('should throw NotFoundException if application not found', async () => {
       prismaService.therapist.findUnique.mockResolvedValue(null);
 
-      await expect(service.uploadDocuments('nonexistent', [mockFile])).rejects.toThrow(
+      await expect(
+        service.uploadDocuments('nonexistent', [mockFile]),
+      ).rejects.toThrow(
         new NotFoundException('Therapist application not found'),
       );
     });
@@ -701,7 +766,10 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should continue uploading other files if one fails', async () => {
-      const files = [mockFile, { ...mockFile, originalname: 'certificate.pdf' }];
+      const files = [
+        mockFile,
+        { ...mockFile, originalname: 'certificate.pdf' },
+      ];
       prismaService.file.create
         .mockRejectedValueOnce(new Error('File error'))
         .mockResolvedValueOnce(mockFileRecord);
@@ -725,7 +793,9 @@ describe('TherapistApplicationService', () => {
 
   describe('getApplicationFiles', () => {
     beforeEach(() => {
-      prismaService.fileAttachment.findMany.mockResolvedValue([mockFileAttachment]);
+      prismaService.fileAttachment.findMany.mockResolvedValue([
+        mockFileAttachment,
+      ]);
     });
 
     it('should get application files successfully', async () => {
@@ -770,10 +840,14 @@ describe('TherapistApplicationService', () => {
 
   describe('createApplicationWithDocuments', () => {
     beforeEach(() => {
-      prismaService.$transaction.mockImplementation((callback) => callback(prismaService));
+      prismaService.$transaction.mockImplementation((callback) =>
+        callback(prismaService),
+      );
       prismaService.therapist.findUnique.mockResolvedValue(null);
       prismaService.user.findUnique.mockResolvedValue(mockUser);
-      prismaService.therapist.create.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.create.mockResolvedValue(
+        mockTherapistApplication,
+      );
       prismaService.file.create.mockResolvedValue(mockFileRecord);
       prismaService.fileAttachment.create.mockResolvedValue(mockFileAttachment);
     });
@@ -802,7 +876,10 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should create application without files', async () => {
-      const result = await service.createApplicationWithDocuments(mockApplicationDto, []);
+      const result = await service.createApplicationWithDocuments(
+        mockApplicationDto,
+        [],
+      );
 
       expect(result).toEqual({
         application: mockTherapistApplication,
@@ -812,11 +889,15 @@ describe('TherapistApplicationService', () => {
 
     it('should handle file upload errors in transaction', async () => {
       const files = [mockFile];
-      prismaService.file.create.mockRejectedValue(new Error('File upload error'));
+      prismaService.file.create.mockRejectedValue(
+        new Error('File upload error'),
+      );
 
       await expect(
         service.createApplicationWithDocuments(mockApplicationDto, files),
-      ).rejects.toThrow(new BadRequestException('Failed to upload file: license.pdf'));
+      ).rejects.toThrow(
+        new BadRequestException('Failed to upload file: license.pdf'),
+      );
     });
 
     it('should validate application data before creating user', async () => {
@@ -843,7 +924,9 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should rollback transaction if application creation fails', async () => {
-      prismaService.therapist.create.mockRejectedValue(new Error('Application error'));
+      prismaService.therapist.create.mockRejectedValue(
+        new Error('Application error'),
+      );
 
       await expect(
         service.createApplicationWithDocuments(mockApplicationDto, []),
@@ -861,7 +944,9 @@ describe('TherapistApplicationService', () => {
 
       prismaService.therapist.findUnique.mockResolvedValue(null);
       prismaService.user.findUnique.mockResolvedValue(mockUser);
-      prismaService.therapist.create.mockRejectedValue(new Error('Invalid date format'));
+      prismaService.therapist.create.mockRejectedValue(
+        new Error('Invalid date format'),
+      );
 
       // The service should catch database errors and throw BadRequestException
       await expect(service.createApplication(malformedData)).rejects.toThrow(
@@ -870,9 +955,15 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should handle email service failures gracefully', async () => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
-      prismaService.therapist.update.mockResolvedValue(mockTherapistApplication);
-      emailService.sendTherapistWelcomeEmail.mockRejectedValue(new Error('SMTP error'));
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
+      prismaService.therapist.update.mockResolvedValue(
+        mockTherapistApplication,
+      );
+      emailService.sendTherapistWelcomeEmail.mockRejectedValue(
+        new Error('SMTP error'),
+      );
 
       const result = await service.updateApplicationStatus('user-123', {
         status: 'approved',
@@ -900,7 +991,9 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should handle file system errors during document upload', async () => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       (fs.writeFileSync as jest.Mock).mockImplementation(() => {
         throw new Error('Disk full');
       });
@@ -916,10 +1009,14 @@ describe('TherapistApplicationService', () => {
         originalname: 'document',
       };
 
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       prismaService.file.create.mockResolvedValue(mockFileRecord);
 
-      const result = await service.uploadDocuments('user-123', [fileWithoutExtension]);
+      const result = await service.uploadDocuments('user-123', [
+        fileWithoutExtension,
+      ]);
 
       expect(result).toHaveLength(1);
     });
@@ -930,7 +1027,9 @@ describe('TherapistApplicationService', () => {
         size: 100 * 1024 * 1024, // 100MB
       };
 
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       prismaService.file.create.mockResolvedValue({
         ...mockFileRecord,
         size: largeFile.size,
@@ -944,12 +1043,16 @@ describe('TherapistApplicationService', () => {
 
   describe('Performance and scaling', () => {
     it('should handle bulk document uploads efficiently', async () => {
-      const manyFiles = Array(20).fill(mockFile).map((file, i) => ({
-        ...file,
-        originalname: `document-${i}.pdf`,
-      }));
+      const manyFiles = Array(20)
+        .fill(mockFile)
+        .map((file, i) => ({
+          ...file,
+          originalname: `document-${i}.pdf`,
+        }));
 
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       prismaService.file.create.mockResolvedValue(mockFileRecord);
       prismaService.fileAttachment.create.mockResolvedValue(mockFileAttachment);
 
@@ -972,23 +1075,35 @@ describe('TherapistApplicationService', () => {
     });
 
     it('should handle concurrent status updates', async () => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
-      prismaService.therapist.update.mockResolvedValue(mockTherapistApplication);
-
-      const promises = Array(5).fill(null).map(() =>
-        service.updateApplicationStatus('user-123', { status: 'pending' }),
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
       );
+      prismaService.therapist.update.mockResolvedValue(
+        mockTherapistApplication,
+      );
+
+      const promises = Array(5)
+        .fill(null)
+        .map(() =>
+          service.updateApplicationStatus('user-123', { status: 'pending' }),
+        );
 
       const results = await Promise.allSettled(promises);
 
-      expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+      expect(results.every((result) => result.status === 'fulfilled')).toBe(
+        true,
+      );
     });
   });
 
   describe('Business logic validation', () => {
     it('should generate secure temporary passwords', async () => {
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
-      prismaService.therapist.update.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
+      prismaService.therapist.update.mockResolvedValue(
+        mockTherapistApplication,
+      );
 
       const result = await service.updateApplicationStatus('user-123', {
         status: 'approved',
@@ -1006,7 +1121,9 @@ describe('TherapistApplicationService', () => {
         { fileType: 'unknown', expected: AttachmentPurpose.DOCUMENT },
       ];
 
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
       prismaService.file.create.mockResolvedValue(mockFileRecord);
 
       for (const testCase of testCases) {
@@ -1021,7 +1138,9 @@ describe('TherapistApplicationService', () => {
         });
 
         jest.clearAllMocks();
-        prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
+        prismaService.therapist.findUnique.mockResolvedValue(
+          mockTherapistApplication,
+        );
         prismaService.file.create.mockResolvedValue(mockFileRecord);
       }
     });
@@ -1050,11 +1169,17 @@ describe('TherapistApplicationService', () => {
     it('should handle application status transitions correctly', async () => {
       const statuses = ['pending', 'approved', 'rejected'] as const;
 
-      prismaService.therapist.findUnique.mockResolvedValue(mockTherapistApplication);
-      prismaService.therapist.update.mockResolvedValue(mockTherapistApplication);
+      prismaService.therapist.findUnique.mockResolvedValue(
+        mockTherapistApplication,
+      );
+      prismaService.therapist.update.mockResolvedValue(
+        mockTherapistApplication,
+      );
 
       for (const status of statuses) {
-        const result = await service.updateApplicationStatus('user-123', { status });
+        const result = await service.updateApplicationStatus('user-123', {
+          status,
+        });
 
         expect(result.success).toBe(true);
         expect(result.message).toContain(status);

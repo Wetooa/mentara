@@ -47,7 +47,8 @@ describe('EmailService', () => {
         },
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emailData);
 
       expect(result).toEqual({
         success: true,
@@ -65,7 +66,9 @@ describe('EmailService', () => {
         expect.objectContaining({
           subject: 'Mentara Therapist Application Approved',
           greeting: 'Dear Dr. John Doe,',
-          body: expect.stringContaining('Congratulations! Your therapist application has been approved.'),
+          body: expect.stringContaining(
+            'Congratulations! Your therapist application has been approved.',
+          ),
         }),
       );
     });
@@ -77,7 +80,8 @@ describe('EmailService', () => {
         adminNotes: 'Insufficient experience in required specializations.',
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emailData);
 
       expect(result).toEqual({
         success: true,
@@ -95,7 +99,9 @@ describe('EmailService', () => {
         expect.objectContaining({
           subject: 'Mentara Therapist Application Update',
           greeting: 'Dear Dr. John Doe,',
-          body: expect.stringContaining('we have decided not to approve your application'),
+          body: expect.stringContaining(
+            'we have decided not to approve your application',
+          ),
         }),
       );
     });
@@ -106,7 +112,8 @@ describe('EmailService', () => {
         status: 'approved',
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emailData);
 
       expect(result).toEqual({
         success: true,
@@ -131,13 +138,16 @@ describe('EmailService', () => {
         },
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emailData);
 
       expect(result.success).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Generated email content:',
         expect.objectContaining({
-          body: expect.stringContaining('Welcome to our premium therapist network!'),
+          body: expect.stringContaining(
+            'Welcome to our premium therapist network!',
+          ),
         }),
       );
     });
@@ -148,7 +158,8 @@ describe('EmailService', () => {
         status: 'rejected',
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emailData);
 
       expect(result.success).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -166,7 +177,8 @@ describe('EmailService', () => {
         throw new Error('Email template generation failed');
       });
 
-      const result = await service.sendTherapistApplicationNotification(baseEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(baseEmailData);
 
       expect(result).toEqual({
         success: false,
@@ -186,10 +198,11 @@ describe('EmailService', () => {
       // Mock generateEmailContent to throw a non-Error
       const originalGenerateEmailContent = service['generateEmailContent'];
       service['generateEmailContent'] = jest.fn().mockImplementation(() => {
-        throw 'Non-error exception';
+        throw new Error('Non-error exception');
       });
 
-      const result = await service.sendTherapistApplicationNotification(baseEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(baseEmailData);
 
       expect(result).toEqual({
         success: false,
@@ -207,7 +220,8 @@ describe('EmailService', () => {
         status: 'approved',
       };
 
-      const result = await service.sendTherapistApplicationNotification(emptyEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emptyEmailData);
 
       expect(result.success).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
@@ -224,7 +238,10 @@ describe('EmailService', () => {
         status: 'approved',
       };
 
-      const result = await service.sendTherapistApplicationNotification(specialCharEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(
+          specialCharEmailData,
+        );
 
       expect(result.success).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -243,7 +260,8 @@ describe('EmailService', () => {
         adminNotes: longNotes,
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailData);
+      const result =
+        await service.sendTherapistApplicationNotification(emailData);
 
       expect(result.success).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -263,7 +281,8 @@ describe('EmailService', () => {
         credentials: undefined,
       };
 
-      const result = await service.sendTherapistApplicationNotification(emailDataWithNulls);
+      const result =
+        await service.sendTherapistApplicationNotification(emailDataWithNulls);
 
       expect(result.success).toBe(true);
     });
@@ -279,8 +298,10 @@ describe('EmailService', () => {
         status: 'rejected',
       };
 
-      const approvedResult = await service.sendTherapistApplicationNotification(approvedData);
-      const rejectedResult = await service.sendTherapistApplicationNotification(rejectedData);
+      const approvedResult =
+        await service.sendTherapistApplicationNotification(approvedData);
+      const rejectedResult =
+        await service.sendTherapistApplicationNotification(rejectedData);
 
       expect(approvedResult.success).toBe(true);
       expect(rejectedResult.success).toBe(true);
@@ -306,16 +327,23 @@ describe('EmailService', () => {
       expect(content).toEqual({
         subject: 'Mentara Therapist Application Approved',
         greeting: 'Dear Dr. Sarah Wilson,',
-        companySignature: 'Best regards,\nThe Mentara Team\nsupport@mentara.com',
-        body: expect.stringContaining('Congratulations! Your therapist application has been approved.'),
+        companySignature:
+          'Best regards,\nThe Mentara Team\nsupport@mentara.com',
+        body: expect.stringContaining(
+          'Congratulations! Your therapist application has been approved.',
+        ),
       });
 
       expect(content.body).toContain('Your account credentials:');
       expect(content.body).toContain('Email: therapist@example.com');
       expect(content.body).toContain('Temporary Password: temp987654');
-      expect(content.body).toContain('Please log in and change your password immediately.');
+      expect(content.body).toContain(
+        'Please log in and change your password immediately.',
+      );
       expect(content.body).toContain('https://mentara.com/therapist');
-      expect(content.body).toContain('Welcome to the Mentara therapist network!');
+      expect(content.body).toContain(
+        'Welcome to the Mentara therapist network!',
+      );
     });
 
     it('should generate approved email content without credentials', () => {
@@ -329,8 +357,12 @@ describe('EmailService', () => {
 
       expect(content.body).not.toContain('Your account credentials:');
       expect(content.body).not.toContain('Temporary Password:');
-      expect(content.body).toContain('Congratulations! Your therapist application has been approved.');
-      expect(content.body).toContain('Welcome to the Mentara therapist network!');
+      expect(content.body).toContain(
+        'Congratulations! Your therapist application has been approved.',
+      );
+      expect(content.body).toContain(
+        'Welcome to the Mentara therapist network!',
+      );
     });
 
     it('should generate approved email content with admin notes', () => {
@@ -344,7 +376,9 @@ describe('EmailService', () => {
       const content = service['generateEmailContent'](emailData);
 
       expect(content.body).toContain('Additional notes from our team:');
-      expect(content.body).toContain('We are particularly excited about your expertise in CBT.');
+      expect(content.body).toContain(
+        'We are particularly excited about your expertise in CBT.',
+      );
     });
 
     it('should generate rejected email content with admin notes', () => {
@@ -352,7 +386,8 @@ describe('EmailService', () => {
         to: 'therapist@example.com',
         name: 'Dr. Alex Taylor',
         status: 'rejected',
-        adminNotes: 'Please obtain additional certification in trauma therapy and reapply.',
+        adminNotes:
+          'Please obtain additional certification in trauma therapy and reapply.',
       };
 
       const content = service['generateEmailContent'](emailData);
@@ -360,14 +395,23 @@ describe('EmailService', () => {
       expect(content).toEqual({
         subject: 'Mentara Therapist Application Update',
         greeting: 'Dear Dr. Alex Taylor,',
-        companySignature: 'Best regards,\nThe Mentara Team\nsupport@mentara.com',
-        body: expect.stringContaining('we have decided not to approve your application at this time'),
+        companySignature:
+          'Best regards,\nThe Mentara Team\nsupport@mentara.com',
+        body: expect.stringContaining(
+          'we have decided not to approve your application at this time',
+        ),
       });
 
       expect(content.body).toContain('Feedback from our review team:');
-      expect(content.body).toContain('Please obtain additional certification in trauma therapy and reapply.');
-      expect(content.body).toContain('We encourage you to address any concerns mentioned above');
-      expect(content.body).toContain("If you have any questions, please don't hesitate to contact our support team.");
+      expect(content.body).toContain(
+        'Please obtain additional certification in trauma therapy and reapply.',
+      );
+      expect(content.body).toContain(
+        'We encourage you to address any concerns mentioned above',
+      );
+      expect(content.body).toContain(
+        "If you have any questions, please don't hesitate to contact our support team.",
+      );
     });
 
     it('should generate rejected email content without admin notes', () => {
@@ -380,9 +424,15 @@ describe('EmailService', () => {
       const content = service['generateEmailContent'](emailData);
 
       expect(content.body).not.toContain('Feedback from our review team:');
-      expect(content.body).toContain('Thank you for your interest in joining the Mentara therapist network.');
-      expect(content.body).toContain('we have decided not to approve your application at this time');
-      expect(content.body).toContain('We encourage you to address any concerns mentioned above');
+      expect(content.body).toContain(
+        'Thank you for your interest in joining the Mentara therapist network.',
+      );
+      expect(content.body).toContain(
+        'we have decided not to approve your application at this time',
+      );
+      expect(content.body).toContain(
+        'We encourage you to address any concerns mentioned above',
+      );
     });
 
     it('should handle empty name gracefully', () => {
@@ -395,7 +445,9 @@ describe('EmailService', () => {
       const content = service['generateEmailContent'](emailData);
 
       expect(content.greeting).toBe('Dear ,');
-      expect(content.body).toContain('Congratulations! Your therapist application has been approved.');
+      expect(content.body).toContain(
+        'Congratulations! Your therapist application has been approved.',
+      );
     });
 
     it('should handle whitespace-only name', () => {
@@ -468,7 +520,9 @@ describe('EmailService', () => {
       expect(rejectedContent).toHaveProperty('companySignature');
 
       // Company signature should be the same
-      expect(approvedContent.companySignature).toBe(rejectedContent.companySignature);
+      expect(approvedContent.companySignature).toBe(
+        rejectedContent.companySignature,
+      );
     });
   });
 
@@ -520,7 +574,7 @@ describe('EmailService', () => {
 
       const result = await service.sendTherapistWelcomeEmail(
         'therapist@example.com',
-        'Dr. François O\'Connor-Smith',
+        "Dr. François O'Connor-Smith",
         credentials,
       );
 
@@ -528,13 +582,14 @@ describe('EmailService', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         'Generated email content:',
         expect.objectContaining({
-          greeting: 'Dear Dr. François O\'Connor-Smith,',
+          greeting: "Dear Dr. François O'Connor-Smith,",
         }),
       );
     });
 
     it('should handle very long email addresses', async () => {
-      const longEmail = 'very.long.therapist.email.address.that.is.extremely.long@example.com';
+      const longEmail =
+        'very.long.therapist.email.address.that.is.extremely.long@example.com';
       const credentials = {
         email: longEmail,
         password: 'temp123',
@@ -624,7 +679,9 @@ describe('EmailService', () => {
     });
 
     it('should handle very long rejection reason', async () => {
-      const longReason = 'Unfortunately, '.repeat(100) + 'we cannot approve your application at this time.';
+      const longReason =
+        'Unfortunately, '.repeat(100) +
+        'we cannot approve your application at this time.';
 
       const result = await service.sendTherapistRejectionEmail(
         'rejected@example.com',
@@ -642,7 +699,8 @@ describe('EmailService', () => {
     });
 
     it('should handle rejection reason with HTML characters', async () => {
-      const reasonWithHtml = 'Missing certifications: <strong>CBT</strong> & <em>EMDR</em>';
+      const reasonWithHtml =
+        'Missing certifications: <strong>CBT</strong> & <em>EMDR</em>';
 
       const result = await service.sendTherapistRejectionEmail(
         'rejected@example.com',
@@ -660,7 +718,8 @@ describe('EmailService', () => {
     });
 
     it('should handle rejection reason with newlines and special characters', async () => {
-      const reasonWithSpecialChars = 'Reasons:\n1. License not verified\n2. Missing references\n3. Application incomplete';
+      const reasonWithSpecialChars =
+        'Reasons:\n1. License not verified\n2. Missing references\n3. Application incomplete';
 
       const result = await service.sendTherapistRejectionEmail(
         'rejected@example.com',
@@ -687,13 +746,17 @@ describe('EmailService', () => {
         message: 'Email service configuration test passed',
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Testing email service configuration...');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Testing email service configuration...',
+      );
       expect(consoleSpy).toHaveBeenCalledWith(
         'Test email content generated successfully:',
         expect.objectContaining({
           subject: 'Mentara Therapist Application Approved',
           greeting: 'Dear Test Therapist,',
-          body: expect.stringContaining('Congratulations! Your therapist application has been approved.'),
+          body: expect.stringContaining(
+            'Congratulations! Your therapist application has been approved.',
+          ),
         }),
       );
     });
@@ -725,7 +788,7 @@ describe('EmailService', () => {
       // Mock generateEmailContent to throw a non-Error during test
       const originalGenerateEmailContent = service['generateEmailContent'];
       service['generateEmailContent'] = jest.fn().mockImplementation(() => {
-        throw 'Non-error test failure';
+        throw new Error('Non-error test failure');
       });
 
       const result = await service.testConfiguration();
@@ -746,7 +809,9 @@ describe('EmailService', () => {
         'Test email content generated successfully:',
         expect.objectContaining({
           greeting: 'Dear Test Therapist,',
-          body: expect.stringMatching(/Email: test@example\.com.*Temporary Password: temp123/s),
+          body: expect.stringMatching(
+            /Email: test@example\.com.*Temporary Password: temp123/s,
+          ),
         }),
       );
     });
@@ -756,7 +821,10 @@ describe('EmailService', () => {
 
       expect(result.success).toBe(true);
       expect(consoleSpy).toHaveBeenCalledTimes(2);
-      expect(consoleSpy).toHaveBeenNthCalledWith(1, 'Testing email service configuration...');
+      expect(consoleSpy).toHaveBeenNthCalledWith(
+        1,
+        'Testing email service configuration...',
+      );
       expect(consoleSpy).toHaveBeenNthCalledWith(
         2,
         'Test email content generated successfully:',
@@ -768,8 +836,15 @@ describe('EmailService', () => {
   describe('Error handling and edge cases', () => {
     it('should handle concurrent email operations', async () => {
       const operations = [
-        service.sendTherapistWelcomeEmail('user1@example.com', 'User 1', { email: 'user1@example.com', password: 'pass1' }),
-        service.sendTherapistRejectionEmail('user2@example.com', 'User 2', 'Reason 2'),
+        service.sendTherapistWelcomeEmail('user1@example.com', 'User 1', {
+          email: 'user1@example.com',
+          password: 'pass1',
+        }),
+        service.sendTherapistRejectionEmail(
+          'user2@example.com',
+          'User 2',
+          'Reason 2',
+        ),
         service.testConfiguration(),
         service.sendTherapistApplicationNotification({
           to: 'user3@example.com',
@@ -780,7 +855,7 @@ describe('EmailService', () => {
 
       const results = await Promise.all(operations);
 
-      expect(results.every(result => result.success)).toBe(true);
+      expect(results.every((result) => result.success)).toBe(true);
     });
 
     it('should handle memory-intensive operations', async () => {
@@ -795,23 +870,26 @@ describe('EmailService', () => {
         },
       };
 
-      const result = await service.sendTherapistApplicationNotification(largeEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(largeEmailData);
 
       expect(result.success).toBe(true);
     });
 
     it('should handle rapid successive operations', async () => {
-      const rapidOperations = Array(20).fill(null).map((_, i) =>
-        service.sendTherapistApplicationNotification({
-          to: `therapist${i}@example.com`,
-          name: `Dr. Test ${i}`,
-          status: i % 2 === 0 ? 'approved' : 'rejected',
-        })
-      );
+      const rapidOperations = Array(20)
+        .fill(null)
+        .map((_, i) =>
+          service.sendTherapistApplicationNotification({
+            to: `therapist${i}@example.com`,
+            name: `Dr. Test ${i}`,
+            status: i % 2 === 0 ? 'approved' : 'rejected',
+          }),
+        );
 
       const results = await Promise.all(rapidOperations);
 
-      expect(results.every(result => result.success)).toBe(true);
+      expect(results.every((result) => result.success)).toBe(true);
       expect(results).toHaveLength(20);
     });
 
@@ -827,7 +905,8 @@ describe('EmailService', () => {
         },
       };
 
-      const result = await service.sendTherapistApplicationNotification(unicodeEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(unicodeEmailData);
 
       expect(result.success).toBe(true);
     });
@@ -840,7 +919,8 @@ describe('EmailService', () => {
         adminNotes: 'B'.repeat(50000), // Very long admin notes
       };
 
-      const result = await service.sendTherapistApplicationNotification(longEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(longEmailData);
 
       expect(result.success).toBe(true);
     });
@@ -863,7 +943,8 @@ describe('EmailService', () => {
       };
 
       const startTime = Date.now();
-      const result = await service.sendTherapistApplicationNotification(complexEmailData);
+      const result =
+        await service.sendTherapistApplicationNotification(complexEmailData);
       const endTime = Date.now();
 
       expect(result.success).toBe(true);
@@ -876,7 +957,8 @@ describe('EmailService', () => {
       nullProtoData.name = 'Dr. Test';
       nullProtoData.status = 'approved';
 
-      const result = await service.sendTherapistApplicationNotification(nullProtoData);
+      const result =
+        await service.sendTherapistApplicationNotification(nullProtoData);
 
       expect(result.success).toBe(true);
     });
@@ -888,16 +970,20 @@ describe('EmailService', () => {
         status: 'approved',
       });
 
-      const result = await service.sendTherapistApplicationNotification(frozenData);
+      const result =
+        await service.sendTherapistApplicationNotification(frozenData);
 
       expect(result.success).toBe(true);
     });
 
     it('should maintain consistent behavior across different execution contexts', async () => {
       // Test in setTimeout to simulate different execution context
-      const asyncResult = await new Promise<{ success: boolean; message: string }>((resolve) => {
-        setTimeout(async () => {
-          const result = await service.sendTherapistApplicationNotification({
+      const asyncResult = await new Promise<{
+        success: boolean;
+        message: string;
+      }>((resolve) => {
+        setTimeout(() => {
+          const result = service.sendTherapistApplicationNotification({
             to: 'async@example.com',
             name: 'Dr. Async',
             status: 'approved',

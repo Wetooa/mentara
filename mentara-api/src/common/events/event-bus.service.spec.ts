@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventBusService } from './event-bus.service';
@@ -169,7 +168,7 @@ describe('EventBusService', () => {
       const wrappedHandler = eventEmitter.on.mock.calls[0][1];
 
       // Act
-      // eslint-disable-next-line @typescript-eslint/await-thenable
+
       await wrappedHandler(testEvent);
 
       // Assert

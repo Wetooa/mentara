@@ -7,13 +7,8 @@ import {
 import { MessagingService } from './messaging.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
+import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
 import {
-  ConversationType,
-  MessageType,
-  ParticipantRole,
-} from '@prisma/client';
-import {
-  MessageSentEvent,
   MessageReadEvent,
   ConversationCreatedEvent,
 } from '../common/events/messaging-events';
@@ -93,8 +88,12 @@ describe('MessagingService', () => {
       };
 
       it('should create a direct conversation successfully', async () => {
-        jest.spyOn(service as any, 'findDirectConversation').mockResolvedValue(null);
-        prismaService.conversation.create.mockResolvedValue(mockCreatedConversation);
+        jest
+          .spyOn(service as any, 'findDirectConversation')
+          .mockResolvedValue(null);
+        prismaService.conversation.create.mockResolvedValue(
+          mockCreatedConversation,
+        );
 
         const result = await service.createConversation(
           TEST_USER_IDS.CLIENT,
@@ -109,7 +108,10 @@ describe('MessagingService', () => {
             participants: {
               create: [
                 { userId: TEST_USER_IDS.CLIENT, role: ParticipantRole.ADMIN },
-                { userId: TEST_USER_IDS.THERAPIST, role: ParticipantRole.MEMBER },
+                {
+                  userId: TEST_USER_IDS.THERAPIST,
+                  role: ParticipantRole.MEMBER,
+                },
               ],
             },
           },
@@ -125,8 +127,13 @@ describe('MessagingService', () => {
       });
 
       it('should return existing direct conversation if it already exists', async () => {
-        const existingConversation = { ...mockCreatedConversation, id: 'existing-1' };
-        jest.spyOn(service as any, 'findDirectConversation').mockResolvedValue(existingConversation);
+        const existingConversation = {
+          ...mockCreatedConversation,
+          id: 'existing-1',
+        };
+        jest
+          .spyOn(service as any, 'findDirectConversation')
+          .mockResolvedValue(existingConversation);
 
         const result = await service.createConversation(
           TEST_USER_IDS.CLIENT,
@@ -163,7 +170,10 @@ describe('MessagingService', () => {
 
         prismaService.conversation.create.mockResolvedValue(groupConversation);
 
-        const result = await service.createConversation(TEST_USER_IDS.CLIENT, groupDto);
+        const result = await service.createConversation(
+          TEST_USER_IDS.CLIENT,
+          groupDto,
+        );
 
         expect(result).toEqual(groupConversation);
         expect(prismaService.conversation.create).toHaveBeenCalledWith({
@@ -173,7 +183,10 @@ describe('MessagingService', () => {
             participants: {
               create: [
                 { userId: TEST_USER_IDS.CLIENT, role: ParticipantRole.ADMIN },
-                { userId: TEST_USER_IDS.THERAPIST, role: ParticipantRole.MEMBER },
+                {
+                  userId: TEST_USER_IDS.THERAPIST,
+                  role: ParticipantRole.MEMBER,
+                },
                 { userId: TEST_USER_IDS.ADMIN, role: ParticipantRole.MEMBER },
               ],
             },
@@ -183,10 +196,17 @@ describe('MessagingService', () => {
       });
 
       it('should emit ConversationCreatedEvent with correct data', async () => {
-        jest.spyOn(service as any, 'findDirectConversation').mockResolvedValue(null);
-        prismaService.conversation.create.mockResolvedValue(mockCreatedConversation);
+        jest
+          .spyOn(service as any, 'findDirectConversation')
+          .mockResolvedValue(null);
+        prismaService.conversation.create.mockResolvedValue(
+          mockCreatedConversation,
+        );
 
-        await service.createConversation(TEST_USER_IDS.CLIENT, mockCreateConversationDto);
+        await service.createConversation(
+          TEST_USER_IDS.CLIENT,
+          mockCreateConversationDto,
+        );
 
         expect(eventBusService.emit).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -238,9 +258,15 @@ describe('MessagingService', () => {
       ];
 
       it('should return user conversations with pagination', async () => {
-        prismaService.conversation.findMany.mockResolvedValue(mockConversations);
+        prismaService.conversation.findMany.mockResolvedValue(
+          mockConversations,
+        );
 
-        const result = await service.getUserConversations(TEST_USER_IDS.CLIENT, 1, 20);
+        const result = await service.getUserConversations(
+          TEST_USER_IDS.CLIENT,
+          1,
+          20,
+        );
 
         expect(result).toEqual(mockConversations);
         expect(prismaService.conversation.findMany).toHaveBeenCalledWith({
@@ -265,7 +291,9 @@ describe('MessagingService', () => {
       });
 
       it('should handle pagination correctly', async () => {
-        prismaService.conversation.findMany.mockResolvedValue(mockConversations);
+        prismaService.conversation.findMany.mockResolvedValue(
+          mockConversations,
+        );
 
         await service.getUserConversations(TEST_USER_IDS.CLIENT, 3, 10);
 
@@ -321,8 +349,12 @@ describe('MessagingService', () => {
       it('should send message successfully', async () => {
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
         prismaService.message.create.mockResolvedValue(mockCreatedMessage);
-        prismaService.conversation.update.mockResolvedValue({ lastMessageAt: new Date() });
-        prismaService.conversation.findUnique.mockResolvedValue(mockConversation);
+        prismaService.conversation.update.mockResolvedValue({
+          lastMessageAt: new Date(),
+        });
+        prismaService.conversation.findUnique.mockResolvedValue(
+          mockConversation,
+        );
 
         const result = await service.sendMessage(
           TEST_USER_IDS.CLIENT,
@@ -353,8 +385,12 @@ describe('MessagingService', () => {
       it('should update conversation lastMessageAt', async () => {
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
         prismaService.message.create.mockResolvedValue(mockCreatedMessage);
-        prismaService.conversation.update.mockResolvedValue({ lastMessageAt: new Date() });
-        prismaService.conversation.findUnique.mockResolvedValue(mockConversation);
+        prismaService.conversation.update.mockResolvedValue({
+          lastMessageAt: new Date(),
+        });
+        prismaService.conversation.findUnique.mockResolvedValue(
+          mockConversation,
+        );
 
         await service.sendMessage(
           TEST_USER_IDS.CLIENT,
@@ -371,8 +407,12 @@ describe('MessagingService', () => {
       it('should emit MessageSentEvent', async () => {
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
         prismaService.message.create.mockResolvedValue(mockCreatedMessage);
-        prismaService.conversation.update.mockResolvedValue({ lastMessageAt: new Date() });
-        prismaService.conversation.findUnique.mockResolvedValue(mockConversation);
+        prismaService.conversation.update.mockResolvedValue({
+          lastMessageAt: new Date(),
+        });
+        prismaService.conversation.findUnique.mockResolvedValue(
+          mockConversation,
+        );
 
         await service.sendMessage(
           TEST_USER_IDS.CLIENT,
@@ -403,10 +443,18 @@ describe('MessagingService', () => {
           ...mockCreatedMessage,
           replyToId: 'original-message-id',
         });
-        prismaService.conversation.update.mockResolvedValue({ lastMessageAt: new Date() });
-        prismaService.conversation.findUnique.mockResolvedValue(mockConversation);
+        prismaService.conversation.update.mockResolvedValue({
+          lastMessageAt: new Date(),
+        });
+        prismaService.conversation.findUnique.mockResolvedValue(
+          mockConversation,
+        );
 
-        await service.sendMessage(TEST_USER_IDS.CLIENT, 'conversation-1', replyDto);
+        await service.sendMessage(
+          TEST_USER_IDS.CLIENT,
+          'conversation-1',
+          replyDto,
+        );
 
         expect(prismaService.message.create).toHaveBeenCalledWith({
           data: expect.objectContaining({
@@ -431,10 +479,18 @@ describe('MessagingService', () => {
           messageType: MessageType.FILE,
           attachmentUrl: 'https://storage.com/file.pdf',
         });
-        prismaService.conversation.update.mockResolvedValue({ lastMessageAt: new Date() });
-        prismaService.conversation.findUnique.mockResolvedValue(mockConversation);
+        prismaService.conversation.update.mockResolvedValue({
+          lastMessageAt: new Date(),
+        });
+        prismaService.conversation.findUnique.mockResolvedValue(
+          mockConversation,
+        );
 
-        await service.sendMessage(TEST_USER_IDS.CLIENT, 'conversation-1', fileDto);
+        await service.sendMessage(
+          TEST_USER_IDS.CLIENT,
+          'conversation-1',
+          fileDto,
+        );
 
         expect(eventBusService.emit).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -556,7 +612,11 @@ describe('MessagingService', () => {
         prismaService.message.findUnique.mockResolvedValue(null);
 
         await expect(
-          service.updateMessage(TEST_USER_IDS.CLIENT, 'non-existent', mockUpdateDto),
+          service.updateMessage(
+            TEST_USER_IDS.CLIENT,
+            'non-existent',
+            mockUpdateDto,
+          ),
         ).rejects.toThrow(NotFoundException);
       });
 
@@ -569,7 +629,11 @@ describe('MessagingService', () => {
         prismaService.message.findUnique.mockResolvedValue(otherUserMessage);
 
         await expect(
-          service.updateMessage(TEST_USER_IDS.CLIENT, 'message-1', mockUpdateDto),
+          service.updateMessage(
+            TEST_USER_IDS.CLIENT,
+            'message-1',
+            mockUpdateDto,
+          ),
         ).rejects.toThrow(ForbiddenException);
       });
 
@@ -582,7 +646,11 @@ describe('MessagingService', () => {
         prismaService.message.findUnique.mockResolvedValue(deletedMessage);
 
         await expect(
-          service.updateMessage(TEST_USER_IDS.CLIENT, 'message-1', mockUpdateDto),
+          service.updateMessage(
+            TEST_USER_IDS.CLIENT,
+            'message-1',
+            mockUpdateDto,
+          ),
         ).rejects.toThrow(BadRequestException);
       });
     });
@@ -595,9 +663,15 @@ describe('MessagingService', () => {
 
       it('should delete message successfully', async () => {
         prismaService.message.findUnique.mockResolvedValue(mockMessage);
-        prismaService.message.update.mockResolvedValue({ ...mockMessage, isDeleted: true });
+        prismaService.message.update.mockResolvedValue({
+          ...mockMessage,
+          isDeleted: true,
+        });
 
-        const result = await service.deleteMessage(TEST_USER_IDS.CLIENT, 'message-1');
+        const result = await service.deleteMessage(
+          TEST_USER_IDS.CLIENT,
+          'message-1',
+        );
 
         expect(result).toEqual({ success: true });
         expect(prismaService.message.update).toHaveBeenCalledWith({
@@ -645,7 +719,9 @@ describe('MessagingService', () => {
           userId: TEST_USER_IDS.CLIENT,
           readAt: new Date(),
         });
-        prismaService.conversationParticipant.updateMany.mockResolvedValue({ count: 1 });
+        prismaService.conversationParticipant.updateMany.mockResolvedValue({
+          count: 1,
+        });
 
         await service.markMessageAsRead(TEST_USER_IDS.CLIENT, 'message-1');
 
@@ -748,14 +824,20 @@ describe('MessagingService', () => {
         prismaService.message.findUnique.mockResolvedValue(null);
 
         await expect(
-          service.addMessageReaction(TEST_USER_IDS.CLIENT, 'non-existent', '👍'),
+          service.addMessageReaction(
+            TEST_USER_IDS.CLIENT,
+            'non-existent',
+            '👍',
+          ),
         ).rejects.toThrow(NotFoundException);
       });
     });
 
     describe('removeMessageReaction', () => {
       it('should remove reaction successfully', async () => {
-        prismaService.messageReaction.deleteMany.mockResolvedValue({ count: 1 });
+        prismaService.messageReaction.deleteMany.mockResolvedValue({
+          count: 1,
+        });
 
         const result = await service.removeMessageReaction(
           TEST_USER_IDS.CLIENT,
@@ -846,7 +928,9 @@ describe('MessagingService', () => {
           participants: [],
         };
 
-        prismaService.conversation.findFirst.mockResolvedValue(mockConversation);
+        prismaService.conversation.findFirst.mockResolvedValue(
+          mockConversation,
+        );
 
         const result = await service['findDirectConversation'](
           TEST_USER_IDS.CLIENT,
@@ -877,7 +961,9 @@ describe('MessagingService', () => {
           isActive: true,
         };
 
-        prismaService.conversationParticipant.findUnique.mockResolvedValue(mockParticipant);
+        prismaService.conversationParticipant.findUnique.mockResolvedValue(
+          mockParticipant,
+        );
 
         const result = await service['verifyParticipant'](
           TEST_USER_IDS.CLIENT,
@@ -888,7 +974,9 @@ describe('MessagingService', () => {
       });
 
       it('should throw ForbiddenException when participant not found', async () => {
-        prismaService.conversationParticipant.findUnique.mockResolvedValue(null);
+        prismaService.conversationParticipant.findUnique.mockResolvedValue(
+          null,
+        );
 
         await expect(
           service['verifyParticipant'](TEST_USER_IDS.CLIENT, 'conversation-1'),
@@ -903,7 +991,9 @@ describe('MessagingService', () => {
           isActive: false,
         };
 
-        prismaService.conversationParticipant.findUnique.mockResolvedValue(inactiveParticipant);
+        prismaService.conversationParticipant.findUnique.mockResolvedValue(
+          inactiveParticipant,
+        );
 
         await expect(
           service['verifyParticipant'](TEST_USER_IDS.CLIENT, 'conversation-1'),

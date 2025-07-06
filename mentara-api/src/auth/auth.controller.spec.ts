@@ -5,8 +5,6 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { createMockPrismaService, TEST_USER_IDS } from '../test-utils';
 
-/* eslint-disable @typescript-eslint/unbound-method */
-
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;

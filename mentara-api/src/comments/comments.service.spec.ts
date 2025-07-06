@@ -62,13 +62,19 @@ describe('CommentsService', () => {
     });
 
     it('should re-throw NotFoundException', async () => {
-      prismaService.user.findUnique.mockRejectedValue(new NotFoundException('User not found'));
+      prismaService.user.findUnique.mockRejectedValue(
+        new NotFoundException('User not found'),
+      );
 
-      await expect(service.findUserById(TEST_USER_IDS.CLIENT)).rejects.toThrow(NotFoundException);
+      await expect(service.findUserById(TEST_USER_IDS.CLIENT)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should wrap database errors in InternalServerErrorException', async () => {
-      prismaService.user.findUnique.mockRejectedValue(new Error('Database error'));
+      prismaService.user.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.findUserById(TEST_USER_IDS.CLIENT)).rejects.toThrow(
         InternalServerErrorException,
@@ -174,9 +180,13 @@ describe('CommentsService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.comment.findMany.mockRejectedValue(new Error('Database error'));
+      prismaService.comment.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.findAll()).rejects.toThrow(InternalServerErrorException);
+      await expect(service.findAll()).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -223,13 +233,19 @@ describe('CommentsService', () => {
     it('should throw NotFoundException when comment not found', async () => {
       prismaService.comment.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should handle database errors', async () => {
-      prismaService.comment.findUnique.mockRejectedValue(new Error('Database error'));
+      prismaService.comment.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.findOne('comment-1')).rejects.toThrow(InternalServerErrorException);
+      await expect(service.findOne('comment-1')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -303,7 +319,10 @@ describe('CommentsService', () => {
       prismaService.comment.create.mockResolvedValue(mockCreatedComment);
       jest.spyOn(service, 'getCommentAttachments').mockResolvedValue(mockFiles);
 
-      const result = await service.create(mockCommentData, TEST_USER_IDS.CLIENT);
+      const result = await service.create(
+        mockCommentData,
+        TEST_USER_IDS.CLIENT,
+      );
 
       expect(result).toEqual({
         ...mockCreatedComment,
@@ -324,11 +343,13 @@ describe('CommentsService', () => {
     });
 
     it('should handle creation errors', async () => {
-      prismaService.comment.create.mockRejectedValue(new Error('Creation failed'));
-
-      await expect(service.create(mockCommentData, TEST_USER_IDS.CLIENT)).rejects.toThrow(
-        InternalServerErrorException,
+      prismaService.comment.create.mockRejectedValue(
+        new Error('Creation failed'),
       );
+
+      await expect(
+        service.create(mockCommentData, TEST_USER_IDS.CLIENT),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -362,7 +383,11 @@ describe('CommentsService', () => {
       prismaService.comment.update.mockResolvedValue(mockUpdatedComment);
       jest.spyOn(service, 'getCommentAttachments').mockResolvedValue(mockFiles);
 
-      const result = await service.update('comment-1', mockUpdateData, TEST_USER_IDS.CLIENT);
+      const result = await service.update(
+        'comment-1',
+        mockUpdateData,
+        TEST_USER_IDS.CLIENT,
+      );
 
       expect(result).toEqual({
         ...mockUpdatedComment,
@@ -435,9 +460,9 @@ describe('CommentsService', () => {
     it('should throw NotFoundException when comment not found', async () => {
       prismaService.comment.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove('non-existent-id', TEST_USER_IDS.CLIENT)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.remove('non-existent-id', TEST_USER_IDS.CLIENT),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException when user is not comment owner', async () => {
@@ -448,9 +473,9 @@ describe('CommentsService', () => {
 
       prismaService.comment.findUnique.mockResolvedValue(otherUserComment);
 
-      await expect(service.remove('comment-1', TEST_USER_IDS.CLIENT)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.remove('comment-1', TEST_USER_IDS.CLIENT),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -496,7 +521,10 @@ describe('CommentsService', () => {
           userId: TEST_USER_IDS.CLIENT,
         });
 
-        const result = await service.heartComment('comment-1', TEST_USER_IDS.CLIENT);
+        const result = await service.heartComment(
+          'comment-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toEqual({ hearted: true });
         expect(prismaService.commentHeart.create).toHaveBeenCalledWith({
@@ -517,7 +545,10 @@ describe('CommentsService', () => {
         prismaService.commentHeart.findUnique.mockResolvedValue(existingHeart);
         prismaService.commentHeart.delete.mockResolvedValue(existingHeart);
 
-        const result = await service.heartComment('comment-1', TEST_USER_IDS.CLIENT);
+        const result = await service.heartComment(
+          'comment-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toEqual({ hearted: false });
         expect(prismaService.commentHeart.delete).toHaveBeenCalledWith({
@@ -531,11 +562,13 @@ describe('CommentsService', () => {
       });
 
       it('should handle database errors', async () => {
-        prismaService.commentHeart.findUnique.mockRejectedValue(new Error('Database error'));
-
-        await expect(service.heartComment('comment-1', TEST_USER_IDS.CLIENT)).rejects.toThrow(
-          InternalServerErrorException,
+        prismaService.commentHeart.findUnique.mockRejectedValue(
+          new Error('Database error'),
         );
+
+        await expect(
+          service.heartComment('comment-1', TEST_USER_IDS.CLIENT),
+        ).rejects.toThrow(InternalServerErrorException);
       });
     });
 
@@ -549,7 +582,10 @@ describe('CommentsService', () => {
 
         prismaService.commentHeart.findUnique.mockResolvedValue(existingHeart);
 
-        const result = await service.isCommentHeartedByUser('comment-1', TEST_USER_IDS.CLIENT);
+        const result = await service.isCommentHeartedByUser(
+          'comment-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toBe(true);
       });
@@ -557,7 +593,10 @@ describe('CommentsService', () => {
       it('should return false when comment is not hearted', async () => {
         prismaService.commentHeart.findUnique.mockResolvedValue(null);
 
-        const result = await service.isCommentHeartedByUser('comment-1', TEST_USER_IDS.CLIENT);
+        const result = await service.isCommentHeartedByUser(
+          'comment-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toBe(false);
       });
@@ -614,7 +653,9 @@ describe('CommentsService', () => {
       });
 
       it('should handle creation errors', async () => {
-        prismaService.reply.create.mockRejectedValue(new Error('Creation failed'));
+        prismaService.reply.create.mockRejectedValue(
+          new Error('Creation failed'),
+        );
 
         await expect(service.createReply(mockReplyData)).rejects.toThrow(
           InternalServerErrorException,
@@ -686,7 +727,10 @@ describe('CommentsService', () => {
           userId: TEST_USER_IDS.CLIENT,
         });
 
-        const result = await service.heartReply('reply-1', TEST_USER_IDS.CLIENT);
+        const result = await service.heartReply(
+          'reply-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toEqual({ hearted: true });
         expect(prismaService.replyHeart.create).toHaveBeenCalledWith({
@@ -707,7 +751,10 @@ describe('CommentsService', () => {
         prismaService.replyHeart.findUnique.mockResolvedValue(existingHeart);
         prismaService.replyHeart.delete.mockResolvedValue(existingHeart);
 
-        const result = await service.heartReply('reply-1', TEST_USER_IDS.CLIENT);
+        const result = await service.heartReply(
+          'reply-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toEqual({ hearted: false });
         expect(prismaService.replyHeart.delete).toHaveBeenCalledWith({
@@ -731,7 +778,10 @@ describe('CommentsService', () => {
 
         prismaService.replyHeart.findUnique.mockResolvedValue(existingHeart);
 
-        const result = await service.isReplyHeartedByUser('reply-1', TEST_USER_IDS.CLIENT);
+        const result = await service.isReplyHeartedByUser(
+          'reply-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toBe(true);
       });
@@ -739,7 +789,10 @@ describe('CommentsService', () => {
       it('should return false when reply is not hearted', async () => {
         prismaService.replyHeart.findUnique.mockResolvedValue(null);
 
-        const result = await service.isReplyHeartedByUser('reply-1', TEST_USER_IDS.CLIENT);
+        const result = await service.isReplyHeartedByUser(
+          'reply-1',
+          TEST_USER_IDS.CLIENT,
+        );
 
         expect(result).toBe(false);
       });
@@ -768,9 +821,14 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.createMany.mockResolvedValue({ count: 2 });
+          prismaService.fileAttachment.createMany.mockResolvedValue({
+            count: 2,
+          });
 
-          const result = await service.attachFilesToComment('comment-1', fileIds);
+          const result = await service.attachFilesToComment(
+            'comment-1',
+            fileIds,
+          );
 
           expect(result).toEqual({ count: 2 });
           expect(prismaService.fileAttachment.createMany).toHaveBeenCalledWith({
@@ -781,7 +839,11 @@ describe('CommentsService', () => {
         it('should attach files with custom purpose', async () => {
           const fileIds = ['file-1'];
 
-          await service.attachFilesToComment('comment-1', fileIds, AttachmentPurpose.DOCUMENT);
+          await service.attachFilesToComment(
+            'comment-1',
+            fileIds,
+            AttachmentPurpose.DOCUMENT,
+          );
 
           expect(prismaService.fileAttachment.createMany).toHaveBeenCalledWith({
             data: [
@@ -816,7 +878,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.findMany.mockResolvedValue(mockAttachments);
+          prismaService.fileAttachment.findMany.mockResolvedValue(
+            mockAttachments,
+          );
 
           const result = await service.getCommentAttachments('comment-1');
 
@@ -850,9 +914,14 @@ describe('CommentsService', () => {
 
       describe('removeCommentAttachment', () => {
         it('should remove comment attachment', async () => {
-          prismaService.fileAttachment.deleteMany.mockResolvedValue({ count: 1 });
+          prismaService.fileAttachment.deleteMany.mockResolvedValue({
+            count: 1,
+          });
 
-          const result = await service.removeCommentAttachment('comment-1', 'file-1');
+          const result = await service.removeCommentAttachment(
+            'comment-1',
+            'file-1',
+          );
 
           expect(result).toEqual({ count: 1 });
           expect(prismaService.fileAttachment.deleteMany).toHaveBeenCalledWith({
@@ -880,7 +949,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.createMany.mockResolvedValue({ count: 1 });
+          prismaService.fileAttachment.createMany.mockResolvedValue({
+            count: 1,
+          });
 
           const result = await service.attachFilesToReply('reply-1', fileIds);
 
@@ -905,7 +976,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.findMany.mockResolvedValue(mockAttachments);
+          prismaService.fileAttachment.findMany.mockResolvedValue(
+            mockAttachments,
+          );
 
           const result = await service.getReplyAttachments('reply-1');
 
@@ -925,9 +998,14 @@ describe('CommentsService', () => {
 
       describe('removeReplyAttachment', () => {
         it('should remove reply attachment', async () => {
-          prismaService.fileAttachment.deleteMany.mockResolvedValue({ count: 1 });
+          prismaService.fileAttachment.deleteMany.mockResolvedValue({
+            count: 1,
+          });
 
-          const result = await service.removeReplyAttachment('reply-1', 'file-1');
+          const result = await service.removeReplyAttachment(
+            'reply-1',
+            'file-1',
+          );
 
           expect(result).toEqual({ count: 1 });
           expect(prismaService.fileAttachment.deleteMany).toHaveBeenCalledWith({
@@ -946,17 +1024,23 @@ describe('CommentsService', () => {
     it('should handle non-Error objects in catch blocks', async () => {
       prismaService.comment.findMany.mockRejectedValue('String error');
 
-      await expect(service.findAll()).rejects.toThrow(InternalServerErrorException);
+      await expect(service.findAll()).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
 
     it('should re-throw ForbiddenException from database operations', async () => {
-      prismaService.comment.findMany.mockRejectedValue(new ForbiddenException('Access denied'));
+      prismaService.comment.findMany.mockRejectedValue(
+        new ForbiddenException('Access denied'),
+      );
 
       await expect(service.findAll()).rejects.toThrow(ForbiddenException);
     });
 
     it('should handle complex database operations errors', async () => {
-      prismaService.reply.create.mockRejectedValue(new Error('Complex database error'));
+      prismaService.reply.create.mockRejectedValue(
+        new Error('Complex database error'),
+      );
 
       await expect(
         service.createReply({

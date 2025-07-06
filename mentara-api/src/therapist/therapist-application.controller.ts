@@ -15,10 +15,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ClerkAuthGuard } from '../clerk-auth.guard';
+import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { TherapistApplicationService } from './therapist-application.service';
-import { TherapistApplicationDto } from './therapist-application.dto';
+import { TherapistApplicationDto } from './dto/therapist-application.dto';
 
 export interface TherapistApplicationResponse {
   id: string;

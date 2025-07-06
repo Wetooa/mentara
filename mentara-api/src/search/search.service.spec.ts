@@ -276,9 +276,13 @@ describe('SearchService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.therapist.findMany.mockRejectedValue(new Error('Database error'));
+      prismaService.therapist.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.searchTherapists('anxiety')).rejects.toThrow('Database error');
+      await expect(service.searchTherapists('anxiety')).rejects.toThrow(
+        'Database error',
+      );
     });
 
     it('should handle empty expertise filter', async () => {
@@ -402,9 +406,13 @@ describe('SearchService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.post.findMany.mockRejectedValue(new Error('Database error'));
+      prismaService.post.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.searchPosts('anxiety')).rejects.toThrow('Database error');
+      await expect(service.searchPosts('anxiety')).rejects.toThrow(
+        'Database error',
+      );
     });
 
     it('should search in post titles', async () => {
@@ -503,9 +511,13 @@ describe('SearchService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.community.findMany.mockRejectedValue(new Error('Database error'));
+      prismaService.community.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.searchCommunities('support')).rejects.toThrow('Database error');
+      await expect(service.searchCommunities('support')).rejects.toThrow(
+        'Database error',
+      );
     });
 
     it('should search in community names', async () => {
@@ -618,9 +630,13 @@ describe('SearchService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.user.findMany.mockRejectedValue(new Error('Database error'));
+      prismaService.user.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.searchUsers('john')).rejects.toThrow('Database error');
+      await expect(service.searchUsers('john')).rejects.toThrow(
+        'Database error',
+      );
     });
 
     it('should search in first names', async () => {
@@ -685,9 +701,13 @@ describe('SearchService', () => {
   describe('globalSearch', () => {
     beforeEach(() => {
       // Mock all individual search methods
-      jest.spyOn(service, 'searchTherapists').mockResolvedValue([mockTherapist]);
+      jest
+        .spyOn(service, 'searchTherapists')
+        .mockResolvedValue([mockTherapist]);
       jest.spyOn(service, 'searchPosts').mockResolvedValue([mockPost]);
-      jest.spyOn(service, 'searchCommunities').mockResolvedValue([mockCommunity]);
+      jest
+        .spyOn(service, 'searchCommunities')
+        .mockResolvedValue([mockCommunity]);
       jest.spyOn(service, 'searchUsers').mockResolvedValue([mockUser]);
     });
 
@@ -760,7 +780,9 @@ describe('SearchService', () => {
     });
 
     it('should handle errors in individual search methods', async () => {
-      jest.spyOn(service, 'searchTherapists').mockRejectedValue(new Error('Search failed'));
+      jest
+        .spyOn(service, 'searchTherapists')
+        .mockRejectedValue(new Error('Search failed'));
 
       await expect(service.globalSearch('anxiety')).rejects.toThrow(
         InternalServerErrorException,
@@ -840,9 +862,13 @@ describe('SearchService', () => {
     });
 
     it('should handle database connection timeouts', async () => {
-      prismaService.user.findMany.mockRejectedValue(new Error('Connection timeout'));
+      prismaService.user.findMany.mockRejectedValue(
+        new Error('Connection timeout'),
+      );
 
-      await expect(service.searchUsers('test')).rejects.toThrow('Connection timeout');
+      await expect(service.searchUsers('test')).rejects.toThrow(
+        'Connection timeout',
+      );
     });
 
     it('should handle concurrent search requests', async () => {
@@ -855,7 +881,9 @@ describe('SearchService', () => {
 
       const results = await Promise.allSettled(searches);
 
-      expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+      expect(results.every((result) => result.status === 'fulfilled')).toBe(
+        true,
+      );
     });
 
     it('should handle malformed filter objects', async () => {
@@ -875,16 +903,20 @@ describe('SearchService', () => {
       const nonStringError = { message: 'Database error' };
       prismaService.therapist.findMany.mockRejectedValue(nonStringError);
 
-      await expect(service.searchTherapists('test')).rejects.toBe(nonStringError);
+      await expect(service.searchTherapists('test')).rejects.toBe(
+        nonStringError,
+      );
     });
   });
 
   describe('Performance and scaling', () => {
     it('should handle large result sets efficiently', async () => {
-      const manyTherapists = Array(1000).fill(mockTherapist).map((therapist, i) => ({
-        ...therapist,
-        id: `therapist-${i}`,
-      }));
+      const manyTherapists = Array(1000)
+        .fill(mockTherapist)
+        .map((therapist, i) => ({
+          ...therapist,
+          id: `therapist-${i}`,
+        }));
 
       prismaService.therapist.findMany.mockResolvedValue(manyTherapists);
 
@@ -915,9 +947,9 @@ describe('SearchService', () => {
     });
 
     it('should handle rapid successive searches', async () => {
-      const rapidSearches = Array(10).fill(null).map(() =>
-        service.searchTherapists('anxiety')
-      );
+      const rapidSearches = Array(10)
+        .fill(null)
+        .map(() => service.searchTherapists('anxiety'));
 
       const results = await Promise.all(rapidSearches);
 

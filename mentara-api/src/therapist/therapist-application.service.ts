@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EmailService } from '../services/email.service';
-import { TherapistApplicationDto } from './therapist-application.dto';
+import { TherapistApplicationDto } from './dto/therapist-application.dto';
 import {
   ApplicationStatusUpdateDto,
   TherapistApplicationResponse,
@@ -628,7 +628,6 @@ export class TherapistApplicationService {
         fileName: string;
         url: string;
       }> = [];
-      [];
 
       if (files && files.length > 0) {
         // Create uploads directory if it doesn't exist

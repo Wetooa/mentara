@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { TherapistRecommendationRequest } from './dto/therapist-application.dto';
 
 describe('TherapistRecommendationService', () => {
@@ -148,7 +148,9 @@ describe('TherapistRecommendationService', () => {
       ],
     }).compile();
 
-    service = module.get<TherapistRecommendationService>(TherapistRecommendationService);
+    service = module.get<TherapistRecommendationService>(
+      TherapistRecommendationService,
+    );
     prismaService = module.get(PrismaService);
   });
 
@@ -162,8 +164,14 @@ describe('TherapistRecommendationService', () => {
 
   describe('getRecommendedTherapists', () => {
     beforeEach(() => {
-      prismaService.client.findUnique.mockResolvedValue(mockClientWithAssessment);
-      prismaService.therapist.findMany.mockResolvedValue([mockTherapist1, mockTherapist2, mockTherapist3]);
+      prismaService.client.findUnique.mockResolvedValue(
+        mockClientWithAssessment,
+      );
+      prismaService.therapist.findMany.mockResolvedValue([
+        mockTherapist1,
+        mockTherapist2,
+        mockTherapist3,
+      ]);
     });
 
     it('should return therapist recommendations successfully', async () => {
@@ -217,13 +225,13 @@ describe('TherapistRecommendationService', () => {
 
       const scores = result.therapists.map((t: any) => t.matchScore);
       const sortedScores = [...scores].sort((a, b) => b - a);
-      
+
       expect(scores).toEqual(sortedScores);
     });
 
     it('should handle request without optional filters', async () => {
       const minimalRequest = { userId: 'user-123' };
-      
+
       await service.getRecommendedTherapists(minimalRequest);
 
       expect(prismaService.therapist.findMany).toHaveBeenCalledWith({
@@ -236,7 +244,7 @@ describe('TherapistRecommendationService', () => {
 
     it('should apply province filter when provided', async () => {
       const requestWithProvince = { ...mockRequest, province: 'Quebec' };
-      
+
       await service.getRecommendedTherapists(requestWithProvince);
 
       expect(prismaService.therapist.findMany).toHaveBeenCalledWith(
@@ -250,7 +258,7 @@ describe('TherapistRecommendationService', () => {
 
     it('should apply max hourly rate filter when provided', async () => {
       const requestWithRate = { ...mockRequest, maxHourlyRate: 90 };
-      
+
       await service.getRecommendedTherapists(requestWithRate);
 
       expect(prismaService.therapist.findMany).toHaveBeenCalledWith(
@@ -264,7 +272,7 @@ describe('TherapistRecommendationService', () => {
 
     it('should use default limit when not provided', async () => {
       const requestWithoutLimit = { userId: 'user-123' };
-      
+
       await service.getRecommendedTherapists(requestWithoutLimit);
 
       expect(prismaService.therapist.findMany).toHaveBeenCalledWith(
@@ -277,12 +285,12 @@ describe('TherapistRecommendationService', () => {
     it('should throw InternalServerErrorException when user not found', async () => {
       prismaService.client.findUnique.mockResolvedValue(null);
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        'User not found',
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow('User not found');
     });
 
     it('should throw InternalServerErrorException when user has no pre-assessment', async () => {
@@ -291,12 +299,12 @@ describe('TherapistRecommendationService', () => {
         preAssessment: null,
       });
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        'No pre-assessment found for user',
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow('No pre-assessment found for user');
     });
 
     it('should handle empty therapist results', async () => {
@@ -319,11 +327,13 @@ describe('TherapistRecommendationService', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      prismaService.client.findUnique.mockRejectedValue(new Error('Database connection failed'));
-
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
+      prismaService.client.findUnique.mockRejectedValue(
+        new Error('Database connection failed'),
       );
+
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle therapists with no expertise', async () => {
@@ -331,8 +341,10 @@ describe('TherapistRecommendationService', () => {
         ...mockTherapist1,
         expertise: null,
       };
-      
-      prismaService.therapist.findMany.mockResolvedValue([therapistWithoutExpertise]);
+
+      prismaService.therapist.findMany.mockResolvedValue([
+        therapistWithoutExpertise,
+      ]);
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -345,8 +357,10 @@ describe('TherapistRecommendationService', () => {
         ...mockTherapist1,
         expertise: [],
       };
-      
-      prismaService.therapist.findMany.mockResolvedValue([therapistWithEmptyExpertise]);
+
+      prismaService.therapist.findMany.mockResolvedValue([
+        therapistWithEmptyExpertise,
+      ]);
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -363,8 +377,10 @@ describe('TherapistRecommendationService', () => {
           severityLevels: {},
         },
       };
-      
-      prismaService.client.findUnique.mockResolvedValue(clientWithEmptyAssessment);
+
+      prismaService.client.findUnique.mockResolvedValue(
+        clientWithEmptyAssessment,
+      );
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -381,12 +397,14 @@ describe('TherapistRecommendationService', () => {
           questionnaires: null,
         },
       };
-      
-      prismaService.client.findUnique.mockResolvedValue(clientWithNullQuestionnaires);
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
+      prismaService.client.findUnique.mockResolvedValue(
+        clientWithNullQuestionnaires,
       );
+
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle different severity levels correctly', async () => {
@@ -403,16 +421,22 @@ describe('TherapistRecommendationService', () => {
           },
         },
       };
-      
-      prismaService.client.findUnique.mockResolvedValue(clientWithVariedSeverity);
+
+      prismaService.client.findUnique.mockResolvedValue(
+        clientWithVariedSeverity,
+      );
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
       expect(result.matchCriteria.primaryConditions).toContain('anxiety');
       expect(result.matchCriteria.primaryConditions).toContain('trauma');
       expect(result.matchCriteria.secondaryConditions).toContain('stress');
-      expect(result.matchCriteria.primaryConditions).not.toContain('depression');
-      expect(result.matchCriteria.secondaryConditions).not.toContain('depression');
+      expect(result.matchCriteria.primaryConditions).not.toContain(
+        'depression',
+      );
+      expect(result.matchCriteria.secondaryConditions).not.toContain(
+        'depression',
+      );
     });
 
     it('should calculate match scores correctly for expertise matching', async () => {
@@ -420,12 +444,12 @@ describe('TherapistRecommendationService', () => {
         ...mockTherapist1,
         expertise: ['anxiety', 'depression'],
       };
-      
+
       const therapistWithoutMatchingExpertise = {
         ...mockTherapist2,
         expertise: ['trauma', 'ptsd'],
       };
-      
+
       prismaService.therapist.findMany.mockResolvedValue([
         therapistWithMatchingExpertise,
         therapistWithoutMatchingExpertise,
@@ -433,10 +457,16 @@ describe('TherapistRecommendationService', () => {
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
-      const matchingTherapist = result.therapists.find((t: any) => t.userId === 'therapist-1');
-      const nonMatchingTherapist = result.therapists.find((t: any) => t.userId === 'therapist-2');
+      const matchingTherapist = result.therapists.find(
+        (t: any) => t.userId === 'therapist-1',
+      );
+      const nonMatchingTherapist = result.therapists.find(
+        (t: any) => t.userId === 'therapist-2',
+      );
 
-      expect(matchingTherapist.matchScore).toBeGreaterThan(nonMatchingTherapist.matchScore);
+      expect(matchingTherapist.matchScore).toBeGreaterThan(
+        nonMatchingTherapist.matchScore,
+      );
     });
 
     it('should calculate years of experience correctly', async () => {
@@ -446,13 +476,13 @@ describe('TherapistRecommendationService', () => {
         practiceStartDate: new Date(`${currentYear - 2}-01-01`),
         yearsOfExperience: 2,
       };
-      
+
       const therapistWithOldStart = {
         ...mockTherapist2,
         practiceStartDate: new Date(`${currentYear - 10}-01-01`),
         yearsOfExperience: 10,
       };
-      
+
       prismaService.therapist.findMany.mockResolvedValue([
         therapistWithRecentStart,
         therapistWithOldStart,
@@ -460,10 +490,16 @@ describe('TherapistRecommendationService', () => {
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
-      const recentTherapist = result.therapists.find((t: any) => t.userId === 'therapist-1');
-      const experiencedTherapist = result.therapists.find((t: any) => t.userId === 'therapist-2');
+      const recentTherapist = result.therapists.find(
+        (t: any) => t.userId === 'therapist-1',
+      );
+      const experiencedTherapist = result.therapists.find(
+        (t: any) => t.userId === 'therapist-2',
+      );
 
-      expect(experiencedTherapist.matchScore).toBeGreaterThan(recentTherapist.matchScore);
+      expect(experiencedTherapist.matchScore).toBeGreaterThan(
+        recentTherapist.matchScore,
+      );
     });
 
     it('should handle therapists with no yearsOfExperience field', async () => {
@@ -471,8 +507,10 @@ describe('TherapistRecommendationService', () => {
         ...mockTherapist1,
         yearsOfExperience: null,
       };
-      
-      prismaService.therapist.findMany.mockResolvedValue([therapistWithoutYearsField]);
+
+      prismaService.therapist.findMany.mockResolvedValue([
+        therapistWithoutYearsField,
+      ]);
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -483,13 +521,15 @@ describe('TherapistRecommendationService', () => {
     it('should handle future practice start dates', async () => {
       const futureDate = new Date();
       futureDate.setFullYear(futureDate.getFullYear() + 1);
-      
+
       const therapistWithFutureStart = {
         ...mockTherapist1,
         practiceStartDate: futureDate,
       };
-      
-      prismaService.therapist.findMany.mockResolvedValue([therapistWithFutureStart]);
+
+      prismaService.therapist.findMany.mockResolvedValue([
+        therapistWithFutureStart,
+      ]);
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -509,8 +549,10 @@ describe('TherapistRecommendationService', () => {
           },
         },
       };
-      
-      prismaService.client.findUnique.mockResolvedValue(clientWithMalformedSeverity);
+
+      prismaService.client.findUnique.mockResolvedValue(
+        clientWithMalformedSeverity,
+      );
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -522,17 +564,19 @@ describe('TherapistRecommendationService', () => {
     });
 
     it('should handle very large datasets efficiently', async () => {
-      const manyTherapists = Array(100).fill(null).map((_, i) => ({
-        ...mockTherapist1,
-        userId: `therapist-${i}`,
-        id: `therapist-${i}`,
-        expertise: i % 2 === 0 ? ['anxiety'] : ['depression'],
-        user: {
-          ...mockTherapist1.user,
-          id: `therapist-user-${i}`,
-        },
-      }));
-      
+      const manyTherapists = Array(100)
+        .fill(null)
+        .map((_, i) => ({
+          ...mockTherapist1,
+          userId: `therapist-${i}`,
+          id: `therapist-${i}`,
+          expertise: i % 2 === 0 ? ['anxiety'] : ['depression'],
+          user: {
+            ...mockTherapist1.user,
+            id: `therapist-user-${i}`,
+          },
+        }));
+
       prismaService.therapist.findMany.mockResolvedValue(manyTherapists);
 
       const result = await service.getRecommendedTherapists(mockRequest);
@@ -542,14 +586,14 @@ describe('TherapistRecommendationService', () => {
     });
 
     it('should handle concurrent requests', async () => {
-      const requests = Array(5).fill(null).map(() => 
-        service.getRecommendedTherapists(mockRequest)
-      );
+      const requests = Array(5)
+        .fill(null)
+        .map(() => service.getRecommendedTherapists(mockRequest));
 
       const results = await Promise.all(requests);
 
       expect(results).toHaveLength(5);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toHaveProperty('therapists');
         expect(result).toHaveProperty('totalCount');
       });
@@ -568,8 +612,10 @@ describe('TherapistRecommendationService', () => {
           },
         },
       };
-      
-      prismaService.client.findUnique.mockResolvedValue(clientWithEdgeCaseSeverity);
+
+      prismaService.client.findUnique.mockResolvedValue(
+        clientWithEdgeCaseSeverity,
+      );
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -587,12 +633,12 @@ describe('TherapistRecommendationService', () => {
           severityLevels: null,
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithNullSeverity);
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle malformed request parameters', async () => {
@@ -604,7 +650,7 @@ describe('TherapistRecommendationService', () => {
 
       // The service doesn't validate request parameters, so it won't throw
       const result = await service.getRecommendedTherapists(malformedRequest);
-      
+
       expect(result).toHaveProperty('therapists');
       expect(result.pageSize).toBe(-1);
     });
@@ -617,8 +663,10 @@ describe('TherapistRecommendationService', () => {
       };
 
       // Should not throw error and handle conversion
-      const result = await service.getRecommendedTherapists(requestWithStringNumbers);
-      
+      const result = await service.getRecommendedTherapists(
+        requestWithStringNumbers,
+      );
+
       expect(result).toHaveProperty('therapists');
       expect(result.pageSize).toBe('5');
     });
@@ -631,13 +679,15 @@ describe('TherapistRecommendationService', () => {
         practiceStartDate: null,
         hourlyRate: undefined,
       };
-      
-      prismaService.therapist.findMany.mockResolvedValue([therapistWithNullFields]);
+
+      prismaService.therapist.findMany.mockResolvedValue([
+        therapistWithNullFields,
+      ]);
 
       // This will throw because practiceStartDate is null and calculateYearsOfExperience tries to call getFullYear on null
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle empty request object', async () => {
@@ -647,9 +697,9 @@ describe('TherapistRecommendationService', () => {
       prismaService.client.findUnique.mockResolvedValue(null);
 
       // Empty request will cause userId to be undefined, which will cause user not found error
-      await expect(service.getRecommendedTherapists(emptyRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.getRecommendedTherapists(emptyRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle assessment with mixed data types', async () => {
@@ -665,12 +715,12 @@ describe('TherapistRecommendationService', () => {
           },
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithMixedData);
 
       // Should handle gracefully without throwing
       const result = await service.getRecommendedTherapists(mockRequest);
-      
+
       expect(result.userConditions).toContain('anxiety');
       expect(result.userConditions).toContain('depression');
     });
@@ -694,9 +744,9 @@ describe('TherapistRecommendationService', () => {
       const nonErrorException = { message: 'Custom error', code: 500 };
       prismaService.client.findUnique.mockRejectedValue(nonErrorException);
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle assessment with duplicate questionnaires', async () => {
@@ -707,7 +757,7 @@ describe('TherapistRecommendationService', () => {
           questionnaires: ['anxiety', 'depression', 'anxiety', 'depression'],
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithDuplicates);
 
       const result = await service.getRecommendedTherapists(mockRequest);
@@ -722,8 +772,10 @@ describe('TherapistRecommendationService', () => {
         practiceStartDate: new Date('1980-01-01'),
         yearsOfExperience: 44,
       };
-      
-      prismaService.therapist.findMany.mockResolvedValue([therapistWithVeryOldStart]);
+
+      prismaService.therapist.findMany.mockResolvedValue([
+        therapistWithVeryOldStart,
+      ]);
 
       const result = await service.getRecommendedTherapists(mockRequest);
 
@@ -736,12 +788,12 @@ describe('TherapistRecommendationService', () => {
         ...mockTherapist1,
         hourlyRate: 0,
       };
-      
+
       const therapistWithNegativeRate = {
         ...mockTherapist2,
         hourlyRate: -50,
       };
-      
+
       prismaService.therapist.findMany.mockResolvedValue([
         therapistWithZeroRate,
         therapistWithNegativeRate,
@@ -759,15 +811,19 @@ describe('TherapistRecommendationService', () => {
         ...mockUser,
         preAssessment: {
           ...mockPreAssessment,
-          questionnaires: ['anxiety-disorder', 'depression_scale', 'stress/trauma'],
+          questionnaires: [
+            'anxiety-disorder',
+            'depression_scale',
+            'stress/trauma',
+          ],
           severityLevels: {
             'anxiety-disorder': 'Moderate',
-            'depression_scale': 'Mild',
+            depression_scale: 'Mild',
             'stress/trauma': 'Severe',
           },
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithSpecialChars);
 
       const result = await service.getRecommendedTherapists(mockRequest);
@@ -783,7 +839,9 @@ describe('TherapistRecommendationService', () => {
         limit: 999999,
       };
 
-      const result = await service.getRecommendedTherapists(requestWithLargeLimit);
+      const result = await service.getRecommendedTherapists(
+        requestWithLargeLimit,
+      );
 
       expect(result.pageSize).toBe(999999);
     });
@@ -794,7 +852,8 @@ describe('TherapistRecommendationService', () => {
         limit: 0,
       };
 
-      const result = await service.getRecommendedTherapists(requestWithZeroLimit);
+      const result =
+        await service.getRecommendedTherapists(requestWithZeroLimit);
 
       expect(result.pageSize).toBe(0);
     });
@@ -812,7 +871,7 @@ describe('TherapistRecommendationService', () => {
           },
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithUnicode);
 
       const result = await service.getRecommendedTherapists(mockRequest);
@@ -835,7 +894,7 @@ describe('TherapistRecommendationService', () => {
           },
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithLongNames);
 
       const result = await service.getRecommendedTherapists(mockRequest);
@@ -847,27 +906,33 @@ describe('TherapistRecommendationService', () => {
 
   describe('Error handling and edge cases', () => {
     it('should handle database timeout errors', async () => {
-      prismaService.client.findUnique.mockRejectedValue(new Error('Connection timeout'));
-
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
+      prismaService.client.findUnique.mockRejectedValue(
+        new Error('Connection timeout'),
       );
+
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle network errors', async () => {
-      prismaService.client.findUnique.mockRejectedValue(new Error('Network error'));
-
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
+      prismaService.client.findUnique.mockRejectedValue(
+        new Error('Network error'),
       );
+
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle memory errors gracefully', async () => {
-      prismaService.client.findUnique.mockRejectedValue(new Error('Out of memory'));
-
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
+      prismaService.client.findUnique.mockRejectedValue(
+        new Error('Out of memory'),
       );
+
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle JSON parsing errors in severity levels', async () => {
@@ -878,18 +943,18 @@ describe('TherapistRecommendationService', () => {
           severityLevels: 'invalid json string' as any,
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithInvalidJson);
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should handle circular reference errors', async () => {
       const circularObj: any = {};
       circularObj.self = circularObj;
-      
+
       const clientWithCircularRef = {
         ...mockUser,
         preAssessment: {
@@ -897,12 +962,12 @@ describe('TherapistRecommendationService', () => {
           severityLevels: circularObj,
         },
       };
-      
+
       prismaService.client.findUnique.mockResolvedValue(clientWithCircularRef);
 
-      await expect(service.getRecommendedTherapists(mockRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.getRecommendedTherapists(mockRequest),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

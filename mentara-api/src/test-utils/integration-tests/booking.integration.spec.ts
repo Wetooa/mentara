@@ -71,6 +71,7 @@ describe('Booking Integration Tests', () => {
         id: 'therapist-test-123',
         firstName: 'Test',
         lastName: 'Therapist',
+        email: 'therapist@test.com',
         role: 'therapist',
       },
     });
@@ -79,15 +80,12 @@ describe('Booking Integration Tests', () => {
     await prisma.therapist.create({
       data: {
         userId: therapistId,
-        firstName: 'Test',
-        lastName: 'Therapist',
         mobile: '+1234567890',
         province: 'Ontario',
         providerType: 'Clinical Psychologist',
         professionalLicenseType: 'Licensed',
         isPRCLicensed: 'yes',
         prcLicenseNumber: 'PRC123456',
-        isLicenseActive: 'yes',
         practiceStartDate: new Date('2020-01-01'),
         yearsOfExperience: 5,
         areasOfExpertise: ['Anxiety'],
@@ -96,12 +94,15 @@ describe('Booking Integration Tests', () => {
         languagesOffered: ['English'],
         providedOnlineTherapyBefore: true,
         comfortableUsingVideoConferencing: true,
-        weeklyAvailability: '20',
         preferredSessionLength: [60],
-        accepts: JSON.stringify(['Individual']),
-        applicationStatus: 'APPROVED',
+        acceptTypes: ['Individual'],
+        status: 'approved',
         hourlyRate: 150,
-        isActive: true,
+        expirationDateOfLicense: new Date('2025-01-01'),
+        compliesWithDataPrivacyAct: true,
+        willingToAbideByPlatformGuidelines: true,
+        treatmentSuccessRates: {},
+        sessionLength: '60 minutes',
       },
     });
   }

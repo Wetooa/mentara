@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { CreateAdminDto, UpdateAdminDto, AdminResponseDto } from './dto/admin.dto';
+import { CreateAdminDto, UpdateAdminDto } from './dto/admin.dto';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
@@ -106,16 +106,20 @@ describe('AdminService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.admin.findMany.mockRejectedValue(new Error('Database error'));
+      prismaService.admin.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.findAll()).rejects.toThrow('Database error');
     });
 
     it('should handle many admins efficiently', async () => {
-      const manyAdmins = Array(100).fill(mockAdmin).map((admin, i) => ({
-        ...admin,
-        userId: `admin-${i}`,
-      }));
+      const manyAdmins = Array(100)
+        .fill(mockAdmin)
+        .map((admin, i) => ({
+          ...admin,
+          userId: `admin-${i}`,
+        }));
       prismaService.admin.findMany.mockResolvedValue(manyAdmins);
 
       const result = await service.findAll();
@@ -162,9 +166,13 @@ describe('AdminService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.admin.findUnique.mockRejectedValue(new Error('Database error'));
+      prismaService.admin.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.findOne('admin-123')).rejects.toThrow('Database error');
+      await expect(service.findOne('admin-123')).rejects.toThrow(
+        'Database error',
+      );
     });
 
     it('should handle empty string userId', async () => {
@@ -222,7 +230,9 @@ describe('AdminService', () => {
       prismaService.user.findUnique.mockResolvedValue(null);
 
       await expect(service.create(mockCreateAdminDto)).rejects.toThrow(
-        new NotFoundException(`User with ID ${mockCreateAdminDto.userId} not found`),
+        new NotFoundException(
+          `User with ID ${mockCreateAdminDto.userId} not found`,
+        ),
       );
 
       expect(prismaService.admin.create).not.toHaveBeenCalled();
@@ -232,16 +242,22 @@ describe('AdminService', () => {
       prismaService.admin.findUnique.mockResolvedValue(mockAdmin);
 
       await expect(service.create(mockCreateAdminDto)).rejects.toThrow(
-        new ConflictException(`User ${mockCreateAdminDto.userId} is already an admin`),
+        new ConflictException(
+          `User ${mockCreateAdminDto.userId} is already an admin`,
+        ),
       );
 
       expect(prismaService.admin.create).not.toHaveBeenCalled();
     });
 
     it('should handle database errors during creation', async () => {
-      prismaService.admin.create.mockRejectedValue(new Error('Creation failed'));
+      prismaService.admin.create.mockRejectedValue(
+        new Error('Creation failed'),
+      );
 
-      await expect(service.create(mockCreateAdminDto)).rejects.toThrow('Creation failed');
+      await expect(service.create(mockCreateAdminDto)).rejects.toThrow(
+        'Creation failed',
+      );
     });
 
     it('should handle Prisma unique constraint violation', async () => {
@@ -252,7 +268,9 @@ describe('AdminService', () => {
       prismaService.admin.create.mockRejectedValue(prismaError);
 
       await expect(service.create(mockCreateAdminDto)).rejects.toThrow(
-        new ConflictException(`User ${mockCreateAdminDto.userId} is already an admin`),
+        new ConflictException(
+          `User ${mockCreateAdminDto.userId} is already an admin`,
+        ),
       );
     });
 
@@ -264,7 +282,9 @@ describe('AdminService', () => {
       prismaService.admin.create.mockRejectedValue(prismaError);
 
       await expect(service.create(mockCreateAdminDto)).rejects.toThrow(
-        new NotFoundException(`User with ID ${mockCreateAdminDto.userId} not found`),
+        new NotFoundException(
+          `User with ID ${mockCreateAdminDto.userId} not found`,
+        ),
       );
     });
 
@@ -363,7 +383,9 @@ describe('AdminService', () => {
       );
       prismaService.admin.update.mockRejectedValue(prismaError);
 
-      await expect(service.update('nonexistent', mockUpdateAdminDto)).rejects.toThrow(
+      await expect(
+        service.update('nonexistent', mockUpdateAdminDto),
+      ).rejects.toThrow(
         new NotFoundException('Admin with ID nonexistent not found'),
       );
     });
@@ -371,9 +393,9 @@ describe('AdminService', () => {
     it('should handle database errors during update', async () => {
       prismaService.admin.update.mockRejectedValue(new Error('Update failed'));
 
-      await expect(service.update('admin-123', mockUpdateAdminDto)).rejects.toThrow(
-        'Update failed',
-      );
+      await expect(
+        service.update('admin-123', mockUpdateAdminDto),
+      ).rejects.toThrow('Update failed');
     });
 
     it('should handle partial updates', async () => {
@@ -426,7 +448,12 @@ describe('AdminService', () => {
 
     it('should handle permission hierarchy updates', async () => {
       const hierarchyUpdate: UpdateAdminDto = {
-        permissions: ['VIEW_CONTENT', 'MODERATE_CONTENT', 'MANAGE_CONTENT', 'SUPER_ADMIN'],
+        permissions: [
+          'VIEW_CONTENT',
+          'MODERATE_CONTENT',
+          'MANAGE_CONTENT',
+          'SUPER_ADMIN',
+        ],
         adminLevel: 'super_admin',
       };
 
@@ -468,9 +495,13 @@ describe('AdminService', () => {
     });
 
     it('should handle database errors during removal', async () => {
-      prismaService.admin.delete.mockRejectedValue(new Error('Deletion failed'));
+      prismaService.admin.delete.mockRejectedValue(
+        new Error('Deletion failed'),
+      );
 
-      await expect(service.remove('admin-123')).rejects.toThrow('Deletion failed');
+      await expect(service.remove('admin-123')).rejects.toThrow(
+        'Deletion failed',
+      );
     });
 
     it('should handle concurrent deletion attempts', async () => {
@@ -563,7 +594,9 @@ describe('AdminService', () => {
     });
 
     it('should handle very large permissions arrays', async () => {
-      const largePermissions = Array(1000).fill('PERMISSION').map((p, i) => `${p}_${i}`);
+      const largePermissions = Array(1000)
+        .fill('PERMISSION')
+        .map((p, i) => `${p}_${i}`);
       const largeUpdate: UpdateAdminDto = {
         permissions: largePermissions,
       };
@@ -607,7 +640,9 @@ describe('AdminService', () => {
     });
 
     it('should handle database connection timeouts', async () => {
-      prismaService.admin.findMany.mockRejectedValue(new Error('Connection timeout'));
+      prismaService.admin.findMany.mockRejectedValue(
+        new Error('Connection timeout'),
+      );
 
       await expect(service.findAll()).rejects.toThrow('Connection timeout');
     });
@@ -635,18 +670,20 @@ describe('AdminService', () => {
 
   describe('Performance and scaling', () => {
     it('should handle bulk admin creation efficiently', async () => {
-      const bulkCreatePromises = Array(50).fill(mockCreateAdminDto).map((data, i) => {
-        prismaService.user.findUnique.mockResolvedValueOnce(mockUser);
-        prismaService.admin.findUnique.mockResolvedValueOnce(null);
-        prismaService.admin.create.mockResolvedValueOnce({
-          ...mockAdmin,
-          userId: `admin-${i}`,
+      const bulkCreatePromises = Array(50)
+        .fill(mockCreateAdminDto)
+        .map((data, i) => {
+          prismaService.user.findUnique.mockResolvedValueOnce(mockUser);
+          prismaService.admin.findUnique.mockResolvedValueOnce(null);
+          prismaService.admin.create.mockResolvedValueOnce({
+            ...mockAdmin,
+            userId: `admin-${i}`,
+          });
+          return service.create({
+            ...data,
+            userId: `user-${i}`,
+          });
         });
-        return service.create({
-          ...data,
-          userId: `user-${i}`,
-        });
-      });
 
       const results = await Promise.all(bulkCreatePromises);
 
@@ -655,13 +692,15 @@ describe('AdminService', () => {
     });
 
     it('should handle bulk admin updates efficiently', async () => {
-      const bulkUpdatePromises = Array(50).fill(mockUpdateAdminDto).map((data, i) => {
-        prismaService.admin.update.mockResolvedValueOnce({
-          ...mockAdmin,
-          userId: `admin-${i}`,
+      const bulkUpdatePromises = Array(50)
+        .fill(mockUpdateAdminDto)
+        .map((data, i) => {
+          prismaService.admin.update.mockResolvedValueOnce({
+            ...mockAdmin,
+            userId: `admin-${i}`,
+          });
+          return service.update(`admin-${i}`, data);
         });
-        return service.update(`admin-${i}`, data);
-      });
 
       const results = await Promise.all(bulkUpdatePromises);
 
@@ -670,18 +709,22 @@ describe('AdminService', () => {
     });
 
     it('should handle system with many admins', async () => {
-      const manyAdmins = Array(200).fill(mockAdmin).map((admin, i) => ({
-        ...admin,
-        userId: `admin-${i}`,
-        adminLevel: i < 10 ? 'super_admin' : 'admin',
-      }));
+      const manyAdmins = Array(200)
+        .fill(mockAdmin)
+        .map((admin, i) => ({
+          ...admin,
+          userId: `admin-${i}`,
+          adminLevel: i < 10 ? 'super_admin' : 'admin',
+        }));
 
       prismaService.admin.findMany.mockResolvedValue(manyAdmins);
 
       const result = await service.findAll();
 
       expect(result).toHaveLength(200);
-      expect(result.filter((admin) => admin.adminLevel === 'super_admin')).toHaveLength(10);
+      expect(
+        result.filter((admin) => admin.adminLevel === 'super_admin'),
+      ).toHaveLength(10);
     });
 
     it('should handle admin with extensive permissions', async () => {

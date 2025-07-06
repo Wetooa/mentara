@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
@@ -260,17 +257,22 @@ describe('SessionsService', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      prismaService.sessionLog.create.mockRejectedValue(new Error('Database error'));
+      prismaService.sessionLog.create.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(
-        service.createSessionLog(createSessionData),
-      ).rejects.toThrow('Database error');
+      await expect(service.createSessionLog(createSessionData)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
   describe('findAllSessions', () => {
     beforeEach(() => {
-      prismaService.sessionLog.findMany.mockResolvedValue([mockSessionLog, mockCompletedSession]);
+      prismaService.sessionLog.findMany.mockResolvedValue([
+        mockSessionLog,
+        mockCompletedSession,
+      ]);
     });
 
     it('should find all sessions without filters', async () => {
@@ -331,7 +333,11 @@ describe('SessionsService', () => {
     });
 
     it('should find sessions with status filter', async () => {
-      await service.findAllSessions(undefined, undefined, SessionStatus.COMPLETED);
+      await service.findAllSessions(
+        undefined,
+        undefined,
+        SessionStatus.COMPLETED,
+      );
 
       expect(prismaService.sessionLog.findMany).toHaveBeenCalledWith({
         where: { status: SessionStatus.COMPLETED },
@@ -341,7 +347,12 @@ describe('SessionsService', () => {
     });
 
     it('should find sessions with session type filter', async () => {
-      await service.findAllSessions(undefined, undefined, undefined, SessionType.GROUP_THERAPY);
+      await service.findAllSessions(
+        undefined,
+        undefined,
+        undefined,
+        SessionType.GROUP_THERAPY,
+      );
 
       expect(prismaService.sessionLog.findMany).toHaveBeenCalledWith({
         where: { sessionType: SessionType.GROUP_THERAPY },
@@ -483,7 +494,9 @@ describe('SessionsService', () => {
 
       await expect(
         service.updateSession('nonexistent', updateData),
-      ).rejects.toThrow(new NotFoundException('Session with ID nonexistent not found'));
+      ).rejects.toThrow(
+        new NotFoundException('Session with ID nonexistent not found'),
+      );
     });
 
     it('should handle partial updates', async () => {
@@ -527,7 +540,9 @@ describe('SessionsService', () => {
     it('should calculate duration correctly', async () => {
       const startTime = new Date('2024-01-15T10:00:00Z');
       const sessionWithStartTime = { ...mockSessionLog, startTime };
-      prismaService.sessionLog.findUnique.mockResolvedValue(sessionWithStartTime);
+      prismaService.sessionLog.findUnique.mockResolvedValue(
+        sessionWithStartTime,
+      );
 
       // Mock Date to ensure consistent timing
       const mockEndTime = new Date('2024-01-15T11:30:00Z');
@@ -557,18 +572,21 @@ describe('SessionsService', () => {
     it('should throw NotFoundException when session not found', async () => {
       prismaService.sessionLog.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.endSession('nonexistent'),
-      ).rejects.toThrow(new NotFoundException('Session with ID nonexistent not found'));
+      await expect(service.endSession('nonexistent')).rejects.toThrow(
+        new NotFoundException('Session with ID nonexistent not found'),
+      );
     });
 
     it('should throw BadRequestException when session not in progress', async () => {
-      const completedSession = { ...mockSessionLog, status: SessionStatus.COMPLETED };
+      const completedSession = {
+        ...mockSessionLog,
+        status: SessionStatus.COMPLETED,
+      };
       prismaService.sessionLog.findUnique.mockResolvedValue(completedSession);
 
-      await expect(
-        service.endSession('session-123'),
-      ).rejects.toThrow(new BadRequestException('Session is not in progress'));
+      await expect(service.endSession('session-123')).rejects.toThrow(
+        new BadRequestException('Session is not in progress'),
+      );
     });
 
     it('should end session without optional parameters', async () => {
@@ -591,7 +609,9 @@ describe('SessionsService', () => {
   describe('addSessionActivity', () => {
     beforeEach(() => {
       prismaService.sessionLog.findUnique.mockResolvedValue(mockSessionLog);
-      prismaService.sessionActivity.create.mockResolvedValue(mockSessionActivity);
+      prismaService.sessionActivity.create.mockResolvedValue(
+        mockSessionActivity,
+      );
     });
 
     it('should add session activity successfully', async () => {
@@ -616,7 +636,10 @@ describe('SessionsService', () => {
     });
 
     it('should add activity with minimal data', async () => {
-      await service.addSessionActivity('session-123', ActivityType.PROGRESS_REVIEW);
+      await service.addSessionActivity(
+        'session-123',
+        ActivityType.PROGRESS_REVIEW,
+      );
 
       expect(prismaService.sessionActivity.create).toHaveBeenCalledWith({
         data: {
@@ -634,13 +657,17 @@ describe('SessionsService', () => {
 
       await expect(
         service.addSessionActivity('nonexistent', ActivityType.MOOD_CHECK_IN),
-      ).rejects.toThrow(new NotFoundException('Session with ID nonexistent not found'));
+      ).rejects.toThrow(
+        new NotFoundException('Session with ID nonexistent not found'),
+      );
     });
   });
 
   describe('getSessionActivities', () => {
     beforeEach(() => {
-      prismaService.sessionActivity.findMany.mockResolvedValue([mockSessionActivity]);
+      prismaService.sessionActivity.findMany.mockResolvedValue([
+        mockSessionActivity,
+      ]);
     });
 
     it('should get session activities', async () => {
@@ -739,7 +766,12 @@ describe('SessionsService', () => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-31T23:59:59Z');
 
-      await service.getUserActivities('user-123', undefined, startDate, endDate);
+      await service.getUserActivities(
+        'user-123',
+        undefined,
+        startDate,
+        endDate,
+      );
 
       expect(prismaService.userActivity.findMany).toHaveBeenCalledWith({
         where: {
@@ -755,7 +787,12 @@ describe('SessionsService', () => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-31T23:59:59Z');
 
-      await service.getUserActivities('user-123', UserActionType.PAGE_VIEW, startDate, endDate);
+      await service.getUserActivities(
+        'user-123',
+        UserActionType.PAGE_VIEW,
+        startDate,
+        endDate,
+      );
 
       expect(prismaService.userActivity.findMany).toHaveBeenCalledWith({
         where: {
@@ -789,7 +826,9 @@ describe('SessionsService', () => {
     };
 
     beforeEach(() => {
-      prismaService.therapyProgress.create.mockResolvedValue(mockTherapyProgress);
+      prismaService.therapyProgress.create.mockResolvedValue(
+        mockTherapyProgress,
+      );
     });
 
     it('should create therapy progress successfully', async () => {
@@ -845,7 +884,9 @@ describe('SessionsService', () => {
 
   describe('getTherapyProgress', () => {
     beforeEach(() => {
-      prismaService.therapyProgress.findMany.mockResolvedValue([mockTherapyProgress]);
+      prismaService.therapyProgress.findMany.mockResolvedValue([
+        mockTherapyProgress,
+      ]);
     });
 
     it('should get therapy progress without filters', async () => {
@@ -908,7 +949,12 @@ describe('SessionsService', () => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-31T23:59:59Z');
 
-      await service.getTherapyProgress(undefined, undefined, startDate, endDate);
+      await service.getTherapyProgress(
+        undefined,
+        undefined,
+        startDate,
+        endDate,
+      );
 
       expect(prismaService.therapyProgress.findMany).toHaveBeenCalledWith({
         where: {
@@ -923,7 +969,12 @@ describe('SessionsService', () => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-31T23:59:59Z');
 
-      await service.getTherapyProgress('client-123', 'therapist-123', startDate, endDate);
+      await service.getTherapyProgress(
+        'client-123',
+        'therapist-123',
+        startDate,
+        endDate,
+      );
 
       expect(prismaService.therapyProgress.findMany).toHaveBeenCalledWith({
         where: {
@@ -938,25 +989,18 @@ describe('SessionsService', () => {
   });
 
   describe('getSessionStatistics', () => {
-    const mockStatistics = {
-      totalSessions: 10,
-      completedSessions: 8,
-      averageDuration: 55.5,
-      sessionsByType: [
-        { sessionType: SessionType.REGULAR_THERAPY, _count: { sessionType: 6 } },
-        { sessionType: SessionType.GROUP_THERAPY, _count: { sessionType: 2 } },
-        { sessionType: SessionType.SELF_GUIDED, _count: { sessionType: 2 } },
-      ],
-      completionRate: 80,
-    };
-
     beforeEach(() => {
-      prismaService.sessionLog.count.mockResolvedValueOnce(10).mockResolvedValueOnce(8);
+      prismaService.sessionLog.count
+        .mockResolvedValueOnce(10)
+        .mockResolvedValueOnce(8);
       prismaService.sessionLog.aggregate.mockResolvedValue({
         _avg: { duration: 55.5 },
       });
       prismaService.sessionLog.groupBy.mockResolvedValue([
-        { sessionType: SessionType.REGULAR_THERAPY, _count: { sessionType: 6 } },
+        {
+          sessionType: SessionType.REGULAR_THERAPY,
+          _count: { sessionType: 6 },
+        },
         { sessionType: SessionType.GROUP_THERAPY, _count: { sessionType: 2 } },
         { sessionType: SessionType.SELF_GUIDED, _count: { sessionType: 2 } },
       ]);
@@ -965,7 +1009,9 @@ describe('SessionsService', () => {
     it('should get session statistics without filters', async () => {
       const result = await service.getSessionStatistics();
 
-      expect(prismaService.sessionLog.count).toHaveBeenCalledWith({ where: {} });
+      expect(prismaService.sessionLog.count).toHaveBeenCalledWith({
+        where: {},
+      });
       expect(prismaService.sessionLog.count).toHaveBeenCalledWith({
         where: { status: SessionStatus.COMPLETED },
       });
@@ -984,8 +1030,14 @@ describe('SessionsService', () => {
         completedSessions: 8,
         averageDuration: 55.5,
         sessionsByType: [
-          { sessionType: SessionType.REGULAR_THERAPY, _count: { sessionType: 6 } },
-          { sessionType: SessionType.GROUP_THERAPY, _count: { sessionType: 2 } },
+          {
+            sessionType: SessionType.REGULAR_THERAPY,
+            _count: { sessionType: 6 },
+          },
+          {
+            sessionType: SessionType.GROUP_THERAPY,
+            _count: { sessionType: 2 },
+          },
           { sessionType: SessionType.SELF_GUIDED, _count: { sessionType: 2 } },
         ],
         completionRate: 80,
@@ -1025,8 +1077,10 @@ describe('SessionsService', () => {
       prismaService.sessionLog.count.mockReset();
       prismaService.sessionLog.aggregate.mockReset();
       prismaService.sessionLog.groupBy.mockReset();
-      
-      prismaService.sessionLog.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+
+      prismaService.sessionLog.count
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0);
       prismaService.sessionLog.aggregate.mockResolvedValue({
         _avg: { duration: null },
       });
@@ -1056,7 +1110,9 @@ describe('SessionsService', () => {
 
   describe('Error handling', () => {
     it('should handle database connection errors', async () => {
-      prismaService.sessionLog.create.mockRejectedValue(new Error('Connection timeout'));
+      prismaService.sessionLog.create.mockRejectedValue(
+        new Error('Connection timeout'),
+      );
 
       await expect(
         service.createSessionLog({
@@ -1067,9 +1123,13 @@ describe('SessionsService', () => {
     });
 
     it('should handle invalid session type in statistics', async () => {
-      prismaService.sessionLog.count.mockRejectedValue(new Error('Invalid session type'));
+      prismaService.sessionLog.count.mockRejectedValue(
+        new Error('Invalid session type'),
+      );
 
-      await expect(service.getSessionStatistics()).rejects.toThrow('Invalid session type');
+      await expect(service.getSessionStatistics()).rejects.toThrow(
+        'Invalid session type',
+      );
     });
   });
 
@@ -1096,7 +1156,9 @@ describe('SessionsService', () => {
       };
 
       prismaService.sessionLog.findUnique.mockResolvedValue(mockSessionLog);
-      prismaService.sessionActivity.create.mockResolvedValue(mockSessionActivity);
+      prismaService.sessionActivity.create.mockResolvedValue(
+        mockSessionActivity,
+      );
 
       await service.addSessionActivity(
         'session-123',
@@ -1127,7 +1189,9 @@ describe('SessionsService', () => {
         recommendations: [],
       };
 
-      prismaService.therapyProgress.create.mockResolvedValue(mockTherapyProgress);
+      prismaService.therapyProgress.create.mockResolvedValue(
+        mockTherapyProgress,
+      );
 
       await service.createTherapyProgress(dataWithEmptyArrays);
 

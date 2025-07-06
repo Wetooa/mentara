@@ -21,9 +21,10 @@ export class EmailService {
    * @param data Email notification data
    * @returns Promise with operation result
    */
-  async sendTherapistApplicationNotification(
-    data: EmailNotificationData,
-  ): Promise<{ success: boolean; message: string }> {
+  sendTherapistApplicationNotification(data: EmailNotificationData): {
+    success: boolean;
+    message: string;
+  } {
     try {
       console.log('Email notification requested:', {
         recipient: data.to,
@@ -162,7 +163,7 @@ export class EmailService {
    * Test email service configuration
    * @returns Promise with test result
    */
-  async testConfiguration(): Promise<{ success: boolean; message: string }> {
+  testConfiguration(): { success: boolean; message: string } {
     try {
       console.log('Testing email service configuration...');
 

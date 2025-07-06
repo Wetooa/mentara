@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ClientService } from './client.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -81,7 +85,9 @@ describe('ClientService', () => {
     it('should throw NotFoundException when client not found', async () => {
       prismaService.client.findUnique.mockResolvedValue(null);
 
-      await expect(service.getProfile('nonexistent-user')).rejects.toThrow(NotFoundException);
+      await expect(service.getProfile('nonexistent-user')).rejects.toThrow(
+        NotFoundException,
+      );
       expect(prismaService.client.findUnique).toHaveBeenCalledWith({
         where: { userId: 'nonexistent-user' },
         include: { user: true },
@@ -95,13 +101,19 @@ describe('ClientService', () => {
       });
       prismaService.client.findUnique.mockRejectedValue(dbError);
 
-      await expect(service.getProfile('user-123')).rejects.toThrow(InternalServerErrorException);
+      await expect(service.getProfile('user-123')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
 
     it('should throw InternalServerErrorException on unexpected error', async () => {
-      prismaService.client.findUnique.mockRejectedValue(new Error('Unexpected error'));
+      prismaService.client.findUnique.mockRejectedValue(
+        new Error('Unexpected error'),
+      );
 
-      await expect(service.getProfile('user-123')).rejects.toThrow(InternalServerErrorException);
+      await expect(service.getProfile('user-123')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -112,7 +124,10 @@ describe('ClientService', () => {
     };
 
     it('should update client profile successfully', async () => {
-      const updatedClient = { ...mockClient, user: { ...mockClient.user, ...updateData } };
+      const updatedClient = {
+        ...mockClient,
+        user: { ...mockClient.user, ...updateData },
+      };
       prismaService.client.update.mockResolvedValue(updatedClient);
 
       const result = await service.updateProfile('user-123', updateData);
@@ -136,27 +151,39 @@ describe('ClientService', () => {
       });
       prismaService.client.update.mockRejectedValue(dbError);
 
-      await expect(service.updateProfile('nonexistent-user', updateData)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateProfile('nonexistent-user', updateData),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException on unique constraint violation', async () => {
-      const dbError = new PrismaClientKnownRequestError('Unique constraint violation', {
-        code: 'P2002',
-        clientVersion: '4.0.0',
-      });
+      const dbError = new PrismaClientKnownRequestError(
+        'Unique constraint violation',
+        {
+          code: 'P2002',
+          clientVersion: '4.0.0',
+        },
+      );
       prismaService.client.update.mockRejectedValue(dbError);
 
-      await expect(service.updateProfile('user-123', updateData)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateProfile('user-123', updateData),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw InternalServerErrorException on other database errors', async () => {
-      const dbError = new PrismaClientKnownRequestError('Other database error', {
-        code: 'P2001',
-        clientVersion: '4.0.0',
-      });
+      const dbError = new PrismaClientKnownRequestError(
+        'Other database error',
+        {
+          code: 'P2001',
+          clientVersion: '4.0.0',
+        },
+      );
       prismaService.client.update.mockRejectedValue(dbError);
 
-      await expect(service.updateProfile('user-123', updateData)).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.updateProfile('user-123', updateData),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -194,15 +221,22 @@ describe('ClientService', () => {
     });
 
     it('should throw InternalServerErrorException on database error', async () => {
-      prismaService.client.findUnique.mockRejectedValue(new Error('Database error'));
+      prismaService.client.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.needsTherapistRecommendations('user-123')).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.needsTherapistRecommendations('user-123'),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 
   describe('markTherapistRecommendationsSeen', () => {
     it('should mark recommendations as seen successfully', async () => {
-      const updatedClient = { ...mockClient, hasSeenTherapistRecommendations: true };
+      const updatedClient = {
+        ...mockClient,
+        hasSeenTherapistRecommendations: true,
+      };
       prismaService.client.update.mockResolvedValue(updatedClient);
 
       await service.markTherapistRecommendationsSeen('user-123');
@@ -220,13 +254,19 @@ describe('ClientService', () => {
       });
       prismaService.client.update.mockRejectedValue(dbError);
 
-      await expect(service.markTherapistRecommendationsSeen('nonexistent-user')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.markTherapistRecommendationsSeen('nonexistent-user'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw InternalServerErrorException on other errors', async () => {
-      prismaService.client.update.mockRejectedValue(new Error('Unexpected error'));
+      prismaService.client.update.mockRejectedValue(
+        new Error('Unexpected error'),
+      );
 
-      await expect(service.markTherapistRecommendationsSeen('user-123')).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.markTherapistRecommendationsSeen('user-123'),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -263,7 +303,9 @@ describe('ClientService', () => {
     });
 
     it('should return null when assignment has no therapist', async () => {
-      prismaService.clientTherapist.findFirst.mockResolvedValue({ therapist: null });
+      prismaService.clientTherapist.findFirst.mockResolvedValue({
+        therapist: null,
+      });
 
       const result = await service.getAssignedTherapist('user-123');
 

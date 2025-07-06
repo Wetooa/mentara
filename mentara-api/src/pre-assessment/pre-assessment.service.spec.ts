@@ -35,7 +35,7 @@ describe('PreAssessmentService', () => {
   const mockValidQuestionnaires = ['Anxiety', 'Depression', 'Stress'];
   const mockValidAnswers = [
     [2, 3, 1, 4, 2, 3, 1], // Anxiety: 7 questions
-    [1, 2, 3, 2, 1, 4, 3, 2, 1], // Depression: 9 questions  
+    [1, 2, 3, 2, 1, 4, 3, 2, 1], // Depression: 9 questions
     [3, 4, 2, 1, 3, 4, 2, 1, 3, 2], // Stress: 10 questions
   ];
 
@@ -53,7 +53,7 @@ describe('PreAssessmentService', () => {
 
   const mockSeverityLevels = {
     Anxiety: 'moderate',
-    Depression: 'mild', 
+    Depression: 'mild',
     Stress: 'high',
   };
 
@@ -115,8 +115,12 @@ describe('PreAssessmentService', () => {
     aiServiceClient = module.get(AiServiceClient);
 
     // Setup utility mocks
-    (PreAssessmentUtils.calculateAllScores as jest.Mock).mockReturnValue(mockCalculatedScores);
-    (PreAssessmentUtils.generateSeverityLevels as jest.Mock).mockReturnValue(mockSeverityLevels);
+    (PreAssessmentUtils.calculateAllScores as jest.Mock).mockReturnValue(
+      mockCalculatedScores,
+    );
+    (PreAssessmentUtils.generateSeverityLevels as jest.Mock).mockReturnValue(
+      mockSeverityLevels,
+    );
 
     // Setup logger spy
     loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
@@ -152,7 +156,10 @@ describe('PreAssessmentService', () => {
     });
 
     it('should create a pre-assessment successfully', async () => {
-      const result = await service.createPreAssessment('user-123', validCreateData);
+      const result = await service.createPreAssessment(
+        'user-123',
+        validCreateData,
+      );
 
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user-123', isActive: true },
@@ -203,7 +210,9 @@ describe('PreAssessmentService', () => {
     });
 
     it('should throw BadRequestException when pre-assessment already exists', async () => {
-      prismaService.preAssessment.findUnique.mockResolvedValue(mockPreAssessment);
+      prismaService.preAssessment.findUnique.mockResolvedValue(
+        mockPreAssessment,
+      );
 
       await expect(
         service.createPreAssessment('user-123', validCreateData),
@@ -218,7 +227,7 @@ describe('PreAssessmentService', () => {
         answers: mockValidAnswers,
         answerMatrix: mockValidAnswerMatrix,
         scores: undefined, // Explicitly undefined to trigger calculation
-        severityLevels: undefined, // Explicitly undefined to trigger calculation  
+        severityLevels: undefined, // Explicitly undefined to trigger calculation
         aiEstimate: {},
       };
 
@@ -251,9 +260,15 @@ describe('PreAssessmentService', () => {
     });
 
     it('should continue without AI prediction when AI service fails', async () => {
-      aiServiceClient.predict.mockResolvedValue({ success: false, error: 'AI service unavailable' });
+      aiServiceClient.predict.mockResolvedValue({
+        success: false,
+        error: 'AI service unavailable',
+      });
 
-      const result = await service.createPreAssessment('user-123', validCreateData);
+      const result = await service.createPreAssessment(
+        'user-123',
+        validCreateData,
+      );
 
       expect(result).toBeDefined();
       expect(loggerSpy).toHaveBeenCalledWith(
@@ -308,7 +323,9 @@ describe('PreAssessmentService', () => {
         await expect(
           service.createPreAssessment('user-123', mismatchedData),
         ).rejects.toThrow(
-          new BadRequestException('Number of questionnaires must match number of answer arrays'),
+          new BadRequestException(
+            'Number of questionnaires must match number of answer arrays',
+          ),
         );
       });
 
@@ -360,10 +377,16 @@ describe('PreAssessmentService', () => {
         const dataWithUnknownQuestionnaire = {
           ...validCreateData,
           questionnaires: ['Anxiety', 'UnknownType'],
-          answers: [[1, 2, 3], [4, 5, 6]], // Match the questionnaire count
+          answers: [
+            [1, 2, 3],
+            [4, 5, 6],
+          ], // Match the questionnaire count
         };
 
-        await service.createPreAssessment('user-123', dataWithUnknownQuestionnaire);
+        await service.createPreAssessment(
+          'user-123',
+          dataWithUnknownQuestionnaire,
+        );
 
         expect(Logger.prototype.warn).toHaveBeenCalledWith(
           'Unknown questionnaire type: UnknownType',
@@ -373,7 +396,9 @@ describe('PreAssessmentService', () => {
 
     describe('Error handling', () => {
       it('should handle database errors gracefully', async () => {
-        prismaService.preAssessment.create.mockRejectedValue(new Error('Database error'));
+        prismaService.preAssessment.create.mockRejectedValue(
+          new Error('Database error'),
+        );
 
         await expect(
           service.createPreAssessment('user-123', validCreateData),
@@ -393,7 +418,9 @@ describe('PreAssessmentService', () => {
 
   describe('getPreAssessmentByUserId', () => {
     it('should return pre-assessment for valid user ID', async () => {
-      prismaService.preAssessment.findUnique.mockResolvedValue(mockPreAssessment);
+      prismaService.preAssessment.findUnique.mockResolvedValue(
+        mockPreAssessment,
+      );
 
       const result = await service.getPreAssessmentByUserId('user-123');
 
@@ -412,7 +439,9 @@ describe('PreAssessmentService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.preAssessment.findUnique.mockRejectedValue(new Error('Database error'));
+      prismaService.preAssessment.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(
         service.getPreAssessmentByUserId('user-123'),
@@ -428,7 +457,9 @@ describe('PreAssessmentService', () => {
           user: mockUser,
         },
       };
-      prismaService.preAssessment.findUnique.mockResolvedValue(mockPreAssessmentWithClient);
+      prismaService.preAssessment.findUnique.mockResolvedValue(
+        mockPreAssessmentWithClient,
+      );
 
       const result = await service.getPreAssessmentByClientId('user-123');
 
@@ -451,8 +482,14 @@ describe('PreAssessmentService', () => {
   describe('updatePreAssessment', () => {
     const updateData = {
       questionnaires: ['Anxiety', 'Stress'],
-      answers: [[1, 2, 3], [4, 5, 6]],
-      answerMatrix: [[1, 2], [3, 4]],
+      answers: [
+        [1, 2, 3],
+        [4, 5, 6],
+      ],
+      answerMatrix: [
+        [1, 2],
+        [3, 4],
+      ],
     };
 
     beforeEach(() => {
@@ -567,17 +604,23 @@ describe('PreAssessmentService', () => {
     });
 
     it('should handle deletion errors', async () => {
-      prismaService.preAssessment.delete.mockRejectedValue(new Error('Delete failed'));
+      prismaService.preAssessment.delete.mockRejectedValue(
+        new Error('Delete failed'),
+      );
 
-      await expect(
-        service.deletePreAssessment('user-123'),
-      ).rejects.toThrow(InternalServerErrorException);
+      await expect(service.deletePreAssessment('user-123')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
   describe('flattenAnswers', () => {
     it('should flatten 2D array correctly', () => {
-      const answers = [[1, 2, 3], [4, 5], [6, 7, 8, 9]];
+      const answers = [
+        [1, 2, 3],
+        [4, 5],
+        [6, 7, 8, 9],
+      ];
       // Access private method through service instance
       const result = (service as any).flattenAnswers(answers);
 
@@ -593,7 +636,10 @@ describe('PreAssessmentService', () => {
     });
 
     it('should validate all values are finite numbers', () => {
-      const invalidAnswers = [[1, 2, NaN], [4, 5]];
+      const invalidAnswers = [
+        [1, 2, NaN],
+        [4, 5],
+      ];
 
       expect(() => (service as any).flattenAnswers(invalidAnswers)).toThrow(
         new BadRequestException('All answer values must be finite numbers'),
@@ -614,15 +660,20 @@ describe('PreAssessmentService', () => {
 
   describe('validateAnswersStructure', () => {
     it('should pass validation for valid answers structure', () => {
-      const validAnswers = [[1, 2, 3], [4, 5, 6]];
+      const validAnswers = [
+        [1, 2, 3],
+        [4, 5, 6],
+      ];
 
-      expect(() => (service as any).validateAnswersStructure(validAnswers)).not.toThrow();
+      expect(() =>
+        (service as any).validateAnswersStructure(validAnswers),
+      ).not.toThrow();
     });
 
     it('should throw error for non-array input', () => {
-      expect(() => (service as any).validateAnswersStructure('invalid')).toThrow(
-        new BadRequestException('Answers must be an array of arrays'),
-      );
+      expect(() =>
+        (service as any).validateAnswersStructure('invalid'),
+      ).toThrow(new BadRequestException('Answers must be an array of arrays'));
     });
 
     it('should throw error for empty answers array', () => {
@@ -634,7 +685,9 @@ describe('PreAssessmentService', () => {
     it('should throw error for non-array questionnaire answers', () => {
       const invalidAnswers = [[1, 2, 3], 'invalid', [4, 5, 6]]; // First element is valid numbers
 
-      expect(() => (service as any).validateAnswersStructure(invalidAnswers)).toThrow(
+      expect(() =>
+        (service as any).validateAnswersStructure(invalidAnswers),
+      ).toThrow(
         new BadRequestException('Questionnaire 1 answers must be an array'),
       );
     });
@@ -642,24 +695,40 @@ describe('PreAssessmentService', () => {
     it('should throw error for empty questionnaire answers', () => {
       const invalidAnswers = [[1, 2, 3], [], [4, 5, 6]];
 
-      expect(() => (service as any).validateAnswersStructure(invalidAnswers)).toThrow(
+      expect(() =>
+        (service as any).validateAnswersStructure(invalidAnswers),
+      ).toThrow(
         new BadRequestException('Questionnaire 1 cannot have empty answers'),
       );
     });
 
     it('should throw error for out-of-range values', () => {
-      const invalidAnswers = [[1, 2, 15], [4, 5, 6]]; // 15 is out of range
+      const invalidAnswers = [
+        [1, 2, 15],
+        [4, 5, 6],
+      ]; // 15 is out of range
 
-      expect(() => (service as any).validateAnswersStructure(invalidAnswers)).toThrow(
-        new BadRequestException('Answer value out of range (0-10) at questionnaire 0, question 2: 15'),
+      expect(() =>
+        (service as any).validateAnswersStructure(invalidAnswers),
+      ).toThrow(
+        new BadRequestException(
+          'Answer value out of range (0-10) at questionnaire 0, question 2: 15',
+        ),
       );
     });
 
     it('should throw error for negative values', () => {
-      const invalidAnswers = [[1, 2, -1], [4, 5, 6]]; // -1 is out of range
+      const invalidAnswers = [
+        [1, 2, -1],
+        [4, 5, 6],
+      ]; // -1 is out of range
 
-      expect(() => (service as any).validateAnswersStructure(invalidAnswers)).toThrow(
-        new BadRequestException('Answer value out of range (0-10) at questionnaire 0, question 2: -1'),
+      expect(() =>
+        (service as any).validateAnswersStructure(invalidAnswers),
+      ).toThrow(
+        new BadRequestException(
+          'Answer value out of range (0-10) at questionnaire 0, question 2: -1',
+        ),
       );
     });
   });
@@ -668,7 +737,9 @@ describe('PreAssessmentService', () => {
     it('should pass validation for valid questionnaires', () => {
       const validQuestionnaires = ['Anxiety', 'Depression', 'Stress'];
 
-      expect(() => (service as any).validateQuestionnaires(validQuestionnaires)).not.toThrow();
+      expect(() =>
+        (service as any).validateQuestionnaires(validQuestionnaires),
+      ).not.toThrow();
     });
 
     it('should throw error for non-array input', () => {
@@ -686,16 +757,24 @@ describe('PreAssessmentService', () => {
     it('should throw error for non-string questionnaire names', () => {
       const invalidQuestionnaires = ['Valid', 123, 'Another'];
 
-      expect(() => (service as any).validateQuestionnaires(invalidQuestionnaires)).toThrow(
-        new BadRequestException('All questionnaire names must be non-empty strings'),
+      expect(() =>
+        (service as any).validateQuestionnaires(invalidQuestionnaires),
+      ).toThrow(
+        new BadRequestException(
+          'All questionnaire names must be non-empty strings',
+        ),
       );
     });
 
     it('should throw error for empty string questionnaire names', () => {
       const invalidQuestionnaires = ['Valid', '', 'Another'];
 
-      expect(() => (service as any).validateQuestionnaires(invalidQuestionnaires)).toThrow(
-        new BadRequestException('All questionnaire names must be non-empty strings'),
+      expect(() =>
+        (service as any).validateQuestionnaires(invalidQuestionnaires),
+      ).toThrow(
+        new BadRequestException(
+          'All questionnaire names must be non-empty strings',
+        ),
       );
     });
   });
@@ -704,7 +783,9 @@ describe('PreAssessmentService', () => {
     it('should handle successful AI prediction', async () => {
       aiServiceClient.predict.mockResolvedValue(mockAiResponse);
 
-      const result = await (service as any).getAiEstimate(new Array(201).fill(1));
+      const result = await (service as any).getAiEstimate(
+        new Array(201).fill(1),
+      );
 
       expect(result).toEqual(mockAiResponse.predictions);
       expect(Logger.prototype.log).toHaveBeenCalledWith(
@@ -716,7 +797,9 @@ describe('PreAssessmentService', () => {
       const failureResponse = { success: false, error: 'Model unavailable' };
       aiServiceClient.predict.mockResolvedValue(failureResponse);
 
-      const result = await (service as any).getAiEstimate(new Array(201).fill(1));
+      const result = await (service as any).getAiEstimate(
+        new Array(201).fill(1),
+      );
 
       expect(result).toBeNull();
       expect(Logger.prototype.warn).toHaveBeenCalledWith(
@@ -727,7 +810,9 @@ describe('PreAssessmentService', () => {
     it('should handle AI service exceptions', async () => {
       aiServiceClient.predict.mockRejectedValue(new Error('Network error'));
 
-      const result = await (service as any).getAiEstimate(new Array(201).fill(1));
+      const result = await (service as any).getAiEstimate(
+        new Array(201).fill(1),
+      );
 
       expect(result).toBeNull();
       expect(Logger.prototype.error).toHaveBeenCalledWith(
@@ -739,7 +824,9 @@ describe('PreAssessmentService', () => {
     it('should handle AI service timeout', async () => {
       aiServiceClient.predict.mockRejectedValue(new Error('Timeout'));
 
-      const result = await (service as any).getAiEstimate(new Array(201).fill(1));
+      const result = await (service as any).getAiEstimate(
+        new Array(201).fill(1),
+      );
 
       expect(result).toBeNull();
     });
@@ -794,7 +881,7 @@ describe('PreAssessmentService', () => {
 
     it('should handle null and undefined in scores validation', () => {
       const isValidScores = (service as any).isValidScores;
-      
+
       expect(isValidScores(null)).toBe(false);
       expect(isValidScores(undefined)).toBe(false);
       expect(isValidScores({})).toBe(true);
@@ -804,7 +891,7 @@ describe('PreAssessmentService', () => {
 
     it('should handle null and undefined in severity levels validation', () => {
       const isValidSeverityLevels = (service as any).isValidSeverityLevels;
-      
+
       expect(isValidSeverityLevels(null)).toBe(false);
       expect(isValidSeverityLevels(undefined)).toBe(false);
       expect(isValidSeverityLevels({})).toBe(true);
