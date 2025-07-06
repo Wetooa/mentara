@@ -91,7 +91,7 @@ describe('MessagingService', () => {
         jest
           .spyOn(service as any, 'findDirectConversation')
           .mockResolvedValue(null);
-        prismaService.conversation.create.mockResolvedValue(
+        (prismaService.conversation.create as jest.Mock).mockResolvedValue(
           mockCreatedConversation,
         );
 
@@ -168,7 +168,7 @@ describe('MessagingService', () => {
           title: 'Group Chat',
         };
 
-        prismaService.conversation.create.mockResolvedValue(groupConversation);
+        (prismaService.conversation.create as jest.Mock).mockResolvedValue(groupConversation);
 
         const result = await service.createConversation(
           TEST_USER_IDS.CLIENT,
@@ -199,7 +199,7 @@ describe('MessagingService', () => {
         jest
           .spyOn(service as any, 'findDirectConversation')
           .mockResolvedValue(null);
-        prismaService.conversation.create.mockResolvedValue(
+        (prismaService.conversation.create as jest.Mock).mockResolvedValue(
           mockCreatedConversation,
         );
 
@@ -258,7 +258,7 @@ describe('MessagingService', () => {
       ];
 
       it('should return user conversations with pagination', async () => {
-        prismaService.conversation.findMany.mockResolvedValue(
+        (prismaService.conversation.findMany as jest.Mock).mockResolvedValue(
           mockConversations,
         );
 
@@ -291,7 +291,7 @@ describe('MessagingService', () => {
       });
 
       it('should handle pagination correctly', async () => {
-        prismaService.conversation.findMany.mockResolvedValue(
+        (prismaService.conversation.findMany as jest.Mock).mockResolvedValue(
           mockConversations,
         );
 
@@ -312,9 +312,6 @@ describe('MessagingService', () => {
       const mockSendMessageDto = {
         content: 'Hello there!',
         messageType: MessageType.TEXT,
-        attachmentUrl: null,
-        attachmentName: null,
-        attachmentSize: null,
       };
 
       const mockCreatedMessage = {
@@ -348,11 +345,11 @@ describe('MessagingService', () => {
 
       it('should send message successfully', async () => {
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
-        prismaService.message.create.mockResolvedValue(mockCreatedMessage);
-        prismaService.conversation.update.mockResolvedValue({
+        (prismaService.message.create as jest.Mock).mockResolvedValue(mockCreatedMessage);
+        (prismaService.conversation.update as jest.Mock).mockResolvedValue({
           lastMessageAt: new Date(),
         });
-        prismaService.conversation.findUnique.mockResolvedValue(
+        (prismaService.conversation.findUnique as jest.Mock).mockResolvedValue(
           mockConversation,
         );
 
@@ -384,11 +381,11 @@ describe('MessagingService', () => {
 
       it('should update conversation lastMessageAt', async () => {
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
-        prismaService.message.create.mockResolvedValue(mockCreatedMessage);
-        prismaService.conversation.update.mockResolvedValue({
+        (prismaService.message.create as jest.Mock).mockResolvedValue(mockCreatedMessage);
+        (prismaService.conversation.update as jest.Mock).mockResolvedValue({
           lastMessageAt: new Date(),
         });
-        prismaService.conversation.findUnique.mockResolvedValue(
+        (prismaService.conversation.findUnique as jest.Mock).mockResolvedValue(
           mockConversation,
         );
 
@@ -406,11 +403,11 @@ describe('MessagingService', () => {
 
       it('should emit MessageSentEvent', async () => {
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
-        prismaService.message.create.mockResolvedValue(mockCreatedMessage);
-        prismaService.conversation.update.mockResolvedValue({
+        (prismaService.message.create as jest.Mock).mockResolvedValue(mockCreatedMessage);
+        (prismaService.conversation.update as jest.Mock).mockResolvedValue({
           lastMessageAt: new Date(),
         });
-        prismaService.conversation.findUnique.mockResolvedValue(
+        (prismaService.conversation.findUnique as jest.Mock).mockResolvedValue(
           mockConversation,
         );
 
@@ -439,14 +436,14 @@ describe('MessagingService', () => {
         };
 
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
-        prismaService.message.create.mockResolvedValue({
+        (prismaService.message.create as jest.Mock).mockResolvedValue({
           ...mockCreatedMessage,
           replyToId: 'original-message-id',
         });
-        prismaService.conversation.update.mockResolvedValue({
+        (prismaService.conversation.update as jest.Mock).mockResolvedValue({
           lastMessageAt: new Date(),
         });
-        prismaService.conversation.findUnique.mockResolvedValue(
+        (prismaService.conversation.findUnique as jest.Mock).mockResolvedValue(
           mockConversation,
         );
 
@@ -474,15 +471,15 @@ describe('MessagingService', () => {
         };
 
         jest.spyOn(service as any, 'verifyParticipant').mockResolvedValue(true);
-        prismaService.message.create.mockResolvedValue({
+        (prismaService.message.create as jest.Mock).mockResolvedValue({
           ...mockCreatedMessage,
           messageType: MessageType.FILE,
           attachmentUrl: 'https://storage.com/file.pdf',
         });
-        prismaService.conversation.update.mockResolvedValue({
+        (prismaService.conversation.update as jest.Mock).mockResolvedValue({
           lastMessageAt: new Date(),
         });
-        prismaService.conversation.findUnique.mockResolvedValue(
+        (prismaService.conversation.findUnique as jest.Mock).mockResolvedValue(
           mockConversation,
         );
 
