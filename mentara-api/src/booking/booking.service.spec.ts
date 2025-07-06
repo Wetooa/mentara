@@ -7,11 +7,12 @@ import {
 import { BookingService } from './booking.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
-import { createMockPrismaService, TEST_USER_IDS } from '../test-utils';
+import { createMockPrismaService, TEST_USER_IDS, TestDataFactory } from '../test-utils';
 
 describe('BookingService', () => {
   let service: BookingService;
   let prismaService: jest.Mocked<PrismaService>;
+  let testFactory: TestDataFactory;
 
   beforeEach(async () => {
     const mockPrisma = createMockPrismaService();
@@ -37,7 +38,7 @@ describe('BookingService', () => {
 
   describe('createMeeting', () => {
     const mockCreateMeetingDto = {
-      startTime: new Date('2024-01-15T14:00:00Z'),
+      startTime: '2024-01-15T14:00:00Z',
       duration: 60,
       therapistId: TEST_USER_IDS.THERAPIST,
       title: 'Therapy Session',
@@ -389,6 +390,9 @@ describe('BookingService', () => {
 
   describe('updateMeeting', () => {
     const mockUpdateDto = {
+      startTime: '2024-01-15T14:00:00Z',
+      duration: 60,
+      therapistId: TEST_USER_IDS.THERAPIST,
       title: 'Updated Session',
       description: 'Updated description',
       status: 'CONFIRMED' as MeetingStatus,
@@ -670,6 +674,7 @@ describe('BookingService', () => {
 
   describe('updateAvailability', () => {
     const mockUpdateDto = {
+      dayOfWeek: 1,
       startTime: '10:00',
       endTime: '16:00',
       notes: 'Updated hours',
@@ -952,7 +957,14 @@ describe('BookingService', () => {
       await expect(
         service.updateMeeting(
           'meeting-id',
-          { status: 'SCHEDULED' as MeetingStatus },
+          { 
+            startTime: '2024-01-15T14:00:00Z',
+            duration: 60,
+            therapistId: TEST_USER_IDS.THERAPIST,
+            title: 'Test Session',
+            description: 'Test description',
+            status: 'SCHEDULED' as MeetingStatus 
+          },
           TEST_USER_IDS.CLIENT,
           'client',
         ),

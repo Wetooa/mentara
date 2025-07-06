@@ -31,6 +31,7 @@ describe('ClientService', () => {
     id: 'therapist-123',
     userId: 'therapist-user-123',
     hourlyRate: 150,
+    treatmentSuccessRates: {},
     user: {
       id: 'therapist-user-123',
       email: 'therapist@example.com',
