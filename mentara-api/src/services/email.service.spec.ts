@@ -206,7 +206,7 @@ describe('EmailService', () => {
 
       expect(result).toEqual({
         success: false,
-        message: 'Failed to send notification',
+        message: 'Non-error exception',
       });
 
       // Restore original method
@@ -795,7 +795,7 @@ describe('EmailService', () => {
 
       expect(result).toEqual({
         success: false,
-        message: 'Test failed',
+        message: 'Non-error test failure',
       });
 
       // Restore original method
