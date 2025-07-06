@@ -67,8 +67,8 @@ describe('BillingService', () => {
           defaultPaymentMethod: null,
         };
 
-        prismaService.subscriptionPlan.findUnique.mockResolvedValue(mockPlan);
-        prismaService.subscription.create.mockResolvedValue(
+        (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue(mockPlan);
+        (prismaService.subscription.create as jest.Mock).mockResolvedValue(
           expectedSubscription,
         );
 
@@ -104,8 +104,8 @@ describe('BillingService', () => {
           billingCycle: BillingCycle.YEARLY,
         };
 
-        prismaService.subscriptionPlan.findUnique.mockResolvedValue(mockPlan);
-        prismaService.subscription.create.mockResolvedValue(
+        (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue(mockPlan);
+        (prismaService.subscription.create as jest.Mock).mockResolvedValue(
           expectedSubscription,
         );
 
@@ -133,8 +133,8 @@ describe('BillingService', () => {
           trialEnd,
         };
 
-        prismaService.subscriptionPlan.findUnique.mockResolvedValue(mockPlan);
-        prismaService.subscription.create.mockResolvedValue(
+        (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue(mockPlan);
+        (prismaService.subscription.create as jest.Mock).mockResolvedValue(
           expectedSubscription,
         );
 
@@ -152,7 +152,7 @@ describe('BillingService', () => {
       });
 
       it('should throw NotFoundException when plan does not exist', async () => {
-        prismaService.subscriptionPlan.findUnique.mockResolvedValue(null);
+        (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue(null);
 
         await expect(
           service.createSubscription(mockSubscriptionData),
@@ -172,7 +172,7 @@ describe('BillingService', () => {
           invoices: [{ id: 'invoice-1' }],
         };
 
-        prismaService.subscription.findUnique.mockResolvedValue(
+        (prismaService.subscription.findUnique as jest.Mock).mockResolvedValue(
           mockSubscription,
         );
 
@@ -193,7 +193,7 @@ describe('BillingService', () => {
       });
 
       it('should return null when subscription does not exist', async () => {
-        prismaService.subscription.findUnique.mockResolvedValue(null);
+        (prismaService.subscription.findUnique as jest.Mock).mockResolvedValue(null);
 
         const result = await service.findUserSubscription('non-existent-user');
 
@@ -231,10 +231,10 @@ describe('BillingService', () => {
         jest
           .spyOn(service, 'findUserSubscription')
           .mockResolvedValue(mockSubscription as any);
-        prismaService.subscriptionPlan.findUnique.mockResolvedValue(
+        (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue(
           mockNewPlan,
         );
-        prismaService.subscription.update.mockResolvedValue(
+        (prismaService.subscription.update as jest.Mock).mockResolvedValue(
           updatedSubscription,
         );
 
@@ -270,7 +270,7 @@ describe('BillingService', () => {
         jest
           .spyOn(service, 'findUserSubscription')
           .mockResolvedValue(mockSubscription as any);
-        prismaService.subscriptionPlan.findUnique.mockResolvedValue(null);
+        (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue(null);
 
         await expect(
           service.updateSubscription(TEST_USER_IDS.CLIENT, {
@@ -323,7 +323,7 @@ describe('BillingService', () => {
           ...planData,
         };
 
-        prismaService.subscriptionPlan.create.mockResolvedValue(expectedPlan);
+        (prismaService.subscriptionPlan.create as jest.Mock).mockResolvedValue(expectedPlan);
 
         const result = await service.createSubscriptionPlan(planData);
 
@@ -341,7 +341,7 @@ describe('BillingService', () => {
           { id: 'plan-2', name: 'Premium', monthlyPrice: 29.99 },
         ];
 
-        prismaService.subscriptionPlan.findMany.mockResolvedValue(mockPlans);
+        (prismaService.subscriptionPlan.findMany as jest.Mock).mockResolvedValue(mockPlans);
 
         const result = await service.findAllPlans();
 
@@ -375,7 +375,7 @@ describe('BillingService', () => {
           ...updateData,
         };
 
-        prismaService.subscriptionPlan.update.mockResolvedValue(updatedPlan);
+        (prismaService.subscriptionPlan.update as jest.Mock).mockResolvedValue(updatedPlan);
 
         const result = await service.updatePlan('plan-id', updateData);
 
@@ -406,8 +406,8 @@ describe('BillingService', () => {
           ...paymentMethodData,
         };
 
-        prismaService.paymentMethod.updateMany.mockResolvedValue({ count: 1 });
-        prismaService.paymentMethod.create.mockResolvedValue(
+        (prismaService.paymentMethod.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+        (prismaService.paymentMethod.create as jest.Mock).mockResolvedValue(
           expectedPaymentMethod,
         );
 
@@ -430,7 +430,7 @@ describe('BillingService', () => {
           cardLast4: '4242',
         };
 
-        prismaService.paymentMethod.create.mockResolvedValue(paymentMethodData);
+        (prismaService.paymentMethod.create as jest.Mock).mockResolvedValue(paymentMethodData);
 
         await service.createPaymentMethod(paymentMethodData);
 
@@ -445,7 +445,7 @@ describe('BillingService', () => {
           { id: 'pm-2', isDefault: false, cardLast4: '1234' },
         ];
 
-        prismaService.paymentMethod.findMany.mockResolvedValue(
+        (prismaService.paymentMethod.findMany as jest.Mock).mockResolvedValue(
           mockPaymentMethods,
         );
 
@@ -471,11 +471,11 @@ describe('BillingService', () => {
         const updateData = { isDefault: true };
         const updatedPaymentMethod = { ...mockPaymentMethod, ...updateData };
 
-        prismaService.paymentMethod.findUnique.mockResolvedValue(
+        (prismaService.paymentMethod.findUnique as jest.Mock).mockResolvedValue(
           mockPaymentMethod,
         );
-        prismaService.paymentMethod.updateMany.mockResolvedValue({ count: 1 });
-        prismaService.paymentMethod.update.mockResolvedValue(
+        (prismaService.paymentMethod.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+        (prismaService.paymentMethod.update as jest.Mock).mockResolvedValue(
           updatedPaymentMethod,
         );
 
@@ -492,7 +492,7 @@ describe('BillingService', () => {
       });
 
       it('should throw NotFoundException when payment method does not exist', async () => {
-        prismaService.paymentMethod.findUnique.mockResolvedValue(null);
+        (prismaService.paymentMethod.findUnique as jest.Mock).mockResolvedValue(null);
 
         await expect(
           service.updatePaymentMethod('non-existent-id', { isDefault: true }),
@@ -507,7 +507,7 @@ describe('BillingService', () => {
           isActive: false,
         };
 
-        prismaService.paymentMethod.update.mockResolvedValue(
+        (prismaService.paymentMethod.update as jest.Mock).mockResolvedValue(
           deactivatedPaymentMethod,
         );
 
@@ -542,7 +542,7 @@ describe('BillingService', () => {
           invoice: null,
         };
 
-        prismaService.payment.create.mockResolvedValue(expectedPayment);
+        (prismaService.payment.create as jest.Mock).mockResolvedValue(expectedPayment);
 
         const result = await service.createPayment(paymentData);
 
@@ -567,7 +567,7 @@ describe('BillingService', () => {
           currency: 'EUR',
         };
 
-        prismaService.payment.create.mockResolvedValue({
+        (prismaService.payment.create as jest.Mock).mockResolvedValue({
           id: 'payment-id',
           currency: 'EUR',
         });
@@ -591,7 +591,7 @@ describe('BillingService', () => {
           processedAt: expect.any(Date),
         };
 
-        prismaService.payment.update.mockResolvedValue(updatedPayment);
+        (prismaService.payment.update as jest.Mock).mockResolvedValue(updatedPayment);
 
         const result = await service.updatePaymentStatus(
           'payment-id',
@@ -622,7 +622,7 @@ describe('BillingService', () => {
           failureMessage: 'Your card was declined.',
         };
 
-        prismaService.payment.update.mockResolvedValue(updatedPayment);
+        (prismaService.payment.update as jest.Mock).mockResolvedValue(updatedPayment);
 
         const result = await service.updatePaymentStatus(
           'payment-id',
@@ -653,7 +653,7 @@ describe('BillingService', () => {
         const startDate = new Date('2024-01-01');
         const endDate = new Date('2024-01-31');
 
-        prismaService.payment.findMany.mockResolvedValue(mockPayments);
+        (prismaService.payment.findMany as jest.Mock).mockResolvedValue(mockPayments);
 
         const result = await service.findPayments(
           'subscription-id',
@@ -707,7 +707,7 @@ describe('BillingService', () => {
         jest
           .spyOn(service as any, 'generateInvoiceNumber')
           .mockResolvedValue('INV-2024-000001');
-        prismaService.invoice.create.mockResolvedValue(expectedInvoice);
+        (prismaService.invoice.create as jest.Mock).mockResolvedValue(expectedInvoice);
 
         const result = await service.createInvoice(invoiceData);
 
@@ -735,7 +735,7 @@ describe('BillingService', () => {
           { id: 'invoice-2', status: InvoiceStatus.PAID },
         ];
 
-        prismaService.invoice.findMany.mockResolvedValue(mockInvoices);
+        (prismaService.invoice.findMany as jest.Mock).mockResolvedValue(mockInvoices);
 
         const result = await service.findInvoices(
           'subscription-id',
@@ -778,8 +778,8 @@ describe('BillingService', () => {
           paidAt: expect.any(Date),
         };
 
-        prismaService.invoice.findUnique.mockResolvedValue(mockInvoice);
-        prismaService.invoice.update.mockResolvedValue(updatedInvoice);
+        (prismaService.invoice.findUnique as jest.Mock).mockResolvedValue(mockInvoice);
+        (prismaService.invoice.update as jest.Mock).mockResolvedValue(updatedInvoice);
 
         const result = await service.markInvoiceAsPaid('invoice-id');
 
@@ -804,8 +804,8 @@ describe('BillingService', () => {
           ],
         };
 
-        prismaService.invoice.findUnique.mockResolvedValue(mockInvoice);
-        prismaService.invoice.update.mockResolvedValue({
+        (prismaService.invoice.findUnique as jest.Mock).mockResolvedValue(mockInvoice);
+        (prismaService.invoice.update as jest.Mock).mockResolvedValue({
           ...mockInvoice,
           status: InvoiceStatus.OPEN,
           amountPaid: 30,
@@ -818,7 +818,7 @@ describe('BillingService', () => {
       });
 
       it('should throw NotFoundException when invoice does not exist', async () => {
-        prismaService.invoice.findUnique.mockResolvedValue(null);
+        (prismaService.invoice.findUnique as jest.Mock).mockResolvedValue(null);
 
         await expect(
           service.markInvoiceAsPaid('non-existent-id'),
@@ -833,7 +833,7 @@ describe('BillingService', () => {
         const discountData = {
           code: 'SAVE20',
           name: '20% Off',
-          type: DiscountType.PERCENT,
+          type: DiscountType.PERCENTAGE,
           percentOff: 20,
         };
 
@@ -843,7 +843,7 @@ describe('BillingService', () => {
           validFrom: expect.any(Date),
         };
 
-        prismaService.discount.create.mockResolvedValue(expectedDiscount);
+        (prismaService.discount.create as jest.Mock).mockResolvedValue(expectedDiscount);
 
         const result = await service.createDiscount(discountData);
 
@@ -871,7 +871,7 @@ describe('BillingService', () => {
       };
 
       it('should return valid discount', async () => {
-        prismaService.discount.findUnique.mockResolvedValue(mockDiscount);
+        (prismaService.discount.findUnique as jest.Mock).mockResolvedValue(mockDiscount);
 
         const result = await service.validateDiscount(
           'SAVE20',
@@ -883,7 +883,7 @@ describe('BillingService', () => {
       });
 
       it('should throw BadRequestException for invalid discount code', async () => {
-        prismaService.discount.findUnique.mockResolvedValue(null);
+        (prismaService.discount.findUnique as jest.Mock).mockResolvedValue(null);
 
         await expect(
           service.validateDiscount('INVALID', TEST_USER_IDS.CLIENT, 100),
@@ -891,7 +891,7 @@ describe('BillingService', () => {
       });
 
       it('should throw BadRequestException for inactive discount', async () => {
-        prismaService.discount.findUnique.mockResolvedValue({
+        (prismaService.discount.findUnique as jest.Mock).mockResolvedValue({
           ...mockDiscount,
           isActive: false,
         });
@@ -902,7 +902,7 @@ describe('BillingService', () => {
       });
 
       it('should throw BadRequestException for expired discount', async () => {
-        prismaService.discount.findUnique.mockResolvedValue({
+        (prismaService.discount.findUnique as jest.Mock).mockResolvedValue({
           ...mockDiscount,
           validUntil: new Date('2020-01-01'), // Expired
         });
@@ -913,7 +913,7 @@ describe('BillingService', () => {
       });
 
       it('should throw BadRequestException when max uses reached', async () => {
-        prismaService.discount.findUnique.mockResolvedValue({
+        (prismaService.discount.findUnique as jest.Mock).mockResolvedValue({
           ...mockDiscount,
           maxUses: 50,
           currentUses: 50, // Reached limit
@@ -925,7 +925,7 @@ describe('BillingService', () => {
       });
 
       it('should throw BadRequestException when user has already used discount', async () => {
-        prismaService.discount.findUnique.mockResolvedValue({
+        (prismaService.discount.findUnique as jest.Mock).mockResolvedValue({
           ...mockDiscount,
           redemptions: [{ userId: TEST_USER_IDS.CLIENT }], // User already used
         });
@@ -945,6 +945,7 @@ describe('BillingService', () => {
     describe('redeemDiscount', () => {
       it('should redeem discount in transaction', async () => {
         const mockTransaction = {
+          ...createMockPrismaService(),
           discountRedemption: {
             create: jest.fn(),
           },
@@ -953,7 +954,7 @@ describe('BillingService', () => {
           },
         };
 
-        prismaService.$transaction.mockImplementation(async (callback) => {
+        (prismaService.$transaction as jest.Mock).mockImplementation(async (callback) => {
           return callback(mockTransaction);
         });
 
@@ -994,7 +995,7 @@ describe('BillingService', () => {
           usageDate: expect.any(Date),
         };
 
-        prismaService.usageRecord.create.mockResolvedValue(expectedUsage);
+        (prismaService.usageRecord.create as jest.Mock).mockResolvedValue(expectedUsage);
 
         const result = await service.recordUsage(usageData);
 
@@ -1018,7 +1019,7 @@ describe('BillingService', () => {
         const startDate = new Date('2024-01-01');
         const endDate = new Date('2024-01-31');
 
-        prismaService.usageRecord.findMany.mockResolvedValue(mockUsageRecords);
+        (prismaService.usageRecord.findMany as jest.Mock).mockResolvedValue(mockUsageRecords);
 
         const result = await service.getUsageRecords(
           'subscription-id',
@@ -1046,7 +1047,7 @@ describe('BillingService', () => {
   describe('Helper Methods', () => {
     describe('generateInvoiceNumber', () => {
       it('should generate first invoice number for year', async () => {
-        prismaService.invoice.findFirst.mockResolvedValue(null);
+        (prismaService.invoice.findFirst as jest.Mock).mockResolvedValue(null);
 
         const result = await (service as any).generateInvoiceNumber();
 
@@ -1060,7 +1061,7 @@ describe('BillingService', () => {
           number: `INV-${currentYear}-000005`,
         };
 
-        prismaService.invoice.findFirst.mockResolvedValue(lastInvoice);
+        (prismaService.invoice.findFirst as jest.Mock).mockResolvedValue(lastInvoice);
 
         const result = await (service as any).generateInvoiceNumber();
 
@@ -1072,7 +1073,7 @@ describe('BillingService', () => {
           number: 'INVALID-FORMAT',
         };
 
-        prismaService.invoice.findFirst.mockResolvedValue(lastInvoice);
+        (prismaService.invoice.findFirst as jest.Mock).mockResolvedValue(lastInvoice);
 
         const result = await (service as any).generateInvoiceNumber();
 
@@ -1094,14 +1095,14 @@ describe('BillingService', () => {
           ],
         };
 
-        prismaService.payment.aggregate.mockResolvedValue(
+        (prismaService.payment.aggregate as jest.Mock).mockResolvedValue(
           mockStats.totalRevenue,
         );
-        prismaService.subscription.count
+        (prismaService.subscription.count as jest.Mock)
           .mockResolvedValueOnce(mockStats.activeSubscriptions)
           .mockResolvedValueOnce(mockStats.trialSubscriptions)
           .mockResolvedValueOnce(mockStats.canceledSubscriptions);
-        prismaService.subscription.groupBy.mockResolvedValue(
+        (prismaService.subscription.groupBy as jest.Mock).mockResolvedValue(
           mockStats.subscriptionsByTier,
         );
 
@@ -1117,11 +1118,11 @@ describe('BillingService', () => {
       });
 
       it('should handle null revenue sum', async () => {
-        prismaService.payment.aggregate.mockResolvedValue({
+        (prismaService.payment.aggregate as jest.Mock).mockResolvedValue({
           _sum: { amount: null },
         });
-        prismaService.subscription.count.mockResolvedValue(0);
-        prismaService.subscription.groupBy.mockResolvedValue([]);
+        (prismaService.subscription.count as jest.Mock).mockResolvedValue(0);
+        (prismaService.subscription.groupBy as jest.Mock).mockResolvedValue([]);
 
         const result = await service.getBillingStatistics();
 
@@ -1132,11 +1133,11 @@ describe('BillingService', () => {
 
   describe('Error Handling', () => {
     it('should handle database errors in createSubscription', async () => {
-      prismaService.subscriptionPlan.findUnique.mockResolvedValue({
+      (prismaService.subscriptionPlan.findUnique as jest.Mock).mockResolvedValue({
         id: 'plan-id',
         monthlyPrice: 29.99,
       });
-      prismaService.subscription.create.mockRejectedValue(
+      (prismaService.subscription.create as jest.Mock).mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -1149,7 +1150,7 @@ describe('BillingService', () => {
     });
 
     it('should handle database errors in payment operations', async () => {
-      prismaService.payment.create.mockRejectedValue(
+      (prismaService.payment.create as jest.Mock).mockRejectedValue(
         new Error('Payment creation failed'),
       );
 

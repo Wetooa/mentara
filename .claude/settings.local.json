@@ -52,14 +52,13 @@
       "mcp__serena__onboarding",
       "mcp__serena__list_dir",
       "mcp__serena__insert_after_symbol",
-      "mcp__supabase__execute_sql"
+      "mcp__supabase__execute_sql",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(for file in src/comments/comments.service.spec.ts src/client/client.service.spec.ts)",
+      "Bash(do)"
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "supabase",
-    "Prisma-Local",
-    "clerk",
-    "puppeteer"
-  ]
+  "enabledMcpjsonServers": ["supabase", "Prisma-Local", "clerk", "puppeteer"]
 }
