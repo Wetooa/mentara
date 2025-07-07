@@ -8,11 +8,6 @@ import { createCommunitiesService } from './communities';
 // Additional services for completeness
 import { AxiosInstance as Client } from 'axios';
 
-// Admin service
-export const createAdminService = (client: Client) => ({
-  checkAdmin: (): Promise<{ isAdmin: boolean }> =>
-    client.post('/auth/admin'),
-});
 
 // Search service
 export const createSearchService = (client: Client) => ({
@@ -146,7 +141,6 @@ export const createApiServices = (client: AxiosInstance) => ({
   reviews: createReviewsService(client),
   booking: createBookingService(client),
   communities: createCommunitiesService(client),
-  admin: createAdminService(client),
   search: createSearchService(client),
   files: createFilesService(client),
   notifications: createNotificationsService(client),

@@ -25,13 +25,6 @@ export class AuthService {
     private readonly eventBus: EventBusService,
   ) {}
 
-  async checkAdmin(id: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { role: 'admin', id },
-    });
-
-    return !!admin;
-  }
 
   async registerClient(
     userId: string,

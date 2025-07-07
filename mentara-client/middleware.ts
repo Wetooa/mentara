@@ -15,7 +15,6 @@ const protectedRoutes: Record<string, string[]> = {
 const publicRoutes = [
   "/",
   "/landing",
-  "/admin-login",
   "/sign-in",
   "/sign-up",
   "/pre-assessment",
