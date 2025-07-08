@@ -164,6 +164,24 @@ export const createTherapistService = (client: AxiosInstance) => ({
   getProfile: (id: string): Promise<TherapistRecommendation> =>
     client.get(`/therapists/${id}`),
 
+  // Admin methods for application management
+  getApplications: (params: ApplicationListParams = {}): Promise<{ applications: TherapistApplication[]; totalCount: number; page: number; totalPages: number }> => {
+    const searchParams = new URLSearchParams();
+    
+    if (params.status) searchParams.append('status', params.status);
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+    if (params.offset) searchParams.append('page', Math.floor((params.offset || 0) / (params.limit || 10) + 1).toString());
+
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return client.get(`/therapist/application${queryString}`);
+  },
+
+  getApplicationById: (id: string): Promise<TherapistApplication> =>
+    client.get(`/therapist/application/${id}`),
+
+  updateApplicationStatus: (applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }> =>
+    client.put(`/therapist/application/${applicationId}/status`, data),
+
   // Application management
   application: {
     // Submit new application
