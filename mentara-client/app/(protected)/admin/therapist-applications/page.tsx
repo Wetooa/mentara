@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TherapistApplicationsTable } from "@/components/admin/TherapistApplicationsTable";
-import { toast } from "sonner";
-import { useApi } from "@/lib/api"; // Import the API client
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
-import { TherapistApplication } from "@/lib/api/services/therapists"; // Import the correct type
+import { useTherapistApplications } from "@/hooks/useTherapistApplications";
+import type { TherapistApplication } from "@/lib/api/services/therapists";
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -28,63 +27,39 @@ const APPLICATION_STATUS = {
 export default function TherapistApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [applications, setApplications] = useState<TherapistApplication[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const api = useApi(); // Use the API client
 
-  // Fetch applications from the API
-  const fetchApplications = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Use the API client to fetch applications instead of fetch directly
-      const data = await api.therapists.getApplications({
-        status: statusFilter || undefined,
-      });
+  // Use React Query hook for data fetching
+  const { 
+    data: applications = [], 
+    isLoading, 
+    error, 
+    refetch 
+  } = useTherapistApplications({
+    status: statusFilter || undefined,
+  });
 
-      console.log(data);
-
-      // Make sure we're handling the data structure correctly
-      setApplications(data.applications || []);
-    } catch (err) {
-      console.error("Error fetching therapist applications:", err);
-      setError("Failed to load applications. Please try again.");
-      toast.error("Error loading applications");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch applications on initial load and when status filter changes
-  useEffect(() => {
-    fetchApplications();
-  }, [statusFilter]);
-
-  // Filter applications based on search query
-  const filteredApplications = applications.filter((app) => {
-    if (!searchQuery) return true;
+  // Filter applications based on search query using useMemo for performance
+  const filteredApplications = useMemo(() => {
+    if (!applications || applications.length === 0) return [];
+    if (!searchQuery) return applications;
 
     const searchLower = searchQuery.toLowerCase();
-    return (
+    return applications.filter((app) =>
       app.firstName?.toLowerCase().includes(searchLower) ||
       app.lastName?.toLowerCase().includes(searchLower) ||
       app.email?.toLowerCase().includes(searchLower) ||
       app.providerType?.toLowerCase().includes(searchLower) ||
       app.province?.toLowerCase().includes(searchLower)
     );
-  });
+  }, [applications, searchQuery]);
 
-  // Handle status change
+  // Handle status change - React Query will automatically update the cache
   const handleStatusChange = async (
     id: string,
     status: "approved" | "rejected" | "pending"
   ) => {
-    // This is called after the API request succeeds in the TherapistApplicationsTable component
-    // Update the local state to reflect the change
-    setApplications((prevApplications) =>
-      prevApplications.map((app) => (app.id === id ? { ...app, status } : app))
-    );
+    // React Query mutation in TherapistApplicationsTable will handle the update
+    // No manual state management needed - React Query cache will be invalidated
   };
 
   return (
@@ -132,7 +107,7 @@ export default function TherapistApplicationsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => fetchApplications()}>
+            <Button variant="outline" onClick={() => refetch()}>
               Refresh
             </Button>
           </div>
@@ -147,9 +122,11 @@ export default function TherapistApplicationsPage() {
           </div>
         ) : error ? (
           <div className="py-8 text-center">
-            <p className="text-red-500">{error}</p>
+            <p className="text-red-500">
+              {error instanceof Error ? error.message : 'Failed to load applications. Please try again.'}
+            </p>
             <Button
-              onClick={() => fetchApplications()}
+              onClick={() => refetch()}
               variant="outline"
               className="mt-4"
             >
