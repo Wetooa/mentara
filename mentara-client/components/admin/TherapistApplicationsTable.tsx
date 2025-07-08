@@ -117,10 +117,10 @@ export function TherapistApplicationsTable({
                 </Button>
               </TableCell>
               <TableCell className="font-medium">
-                {application.personalInfo?.lastName || 'Unknown'}, {application.personalInfo?.firstName || 'Unknown'}
+                {application.lastName || 'Unknown'}, {application.firstName || 'Unknown'}
               </TableCell>
-              <TableCell>{application.professionalProfile?.providerType || 'Not specified'}</TableCell>
-              <TableCell>{formatDate(application.submittedAt)}</TableCell>
+              <TableCell>{application.providerType || 'Not specified'}</TableCell>
+              <TableCell>{formatDate(application.submissionDate)}</TableCell>
               <TableCell>
                 <Badge
                   className={
