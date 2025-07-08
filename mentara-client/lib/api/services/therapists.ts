@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+import { AxiosInstance } from "axios";
 
 // Types
 export interface TherapistRecommendation {
@@ -88,7 +88,7 @@ export interface PatientData {
     id: string;
     title: string;
     assignedDate: string;
-    status: 'pending' | 'completed' | 'in_progress';
+    status: "pending" | "completed" | "in_progress";
   }>;
 }
 
@@ -105,18 +105,36 @@ export interface MeetingData {
 
 export interface TherapistApplication {
   id: string;
-  status: 'pending' | 'approved' | 'rejected' | 'under_review';
-  submittedAt: string;
-  reviewedAt?: string;
-  reviewedBy?: string;
-  notes?: string;
-  // Application data
-  personalInfo: any;
-  licenseInfo: any;
-  professionalProfile: any;
-  availabilityServices: any;
-  teletherapy: any;
-  documents: any;
+  status: "pending" | "approved" | "rejected" | "under_review";
+  submissionDate: string;
+  processingDate?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  province: string;
+  providerType: string;
+  professionalLicenseType: string;
+  isPRCLicensed: string;
+  prcLicenseNumber: string;
+  practiceStartDate: string;
+  areasOfExpertise: string[];
+  assessmentTools: string[];
+  therapeuticApproachesUsedList: string[];
+  languagesOffered: string[];
+  providedOnlineTherapyBefore: string;
+  comfortableUsingVideoConferencing: string;
+  weeklyAvailability: string;
+  preferredSessionLength: string;
+  accepts: string[];
+  bio?: string;
+  hourlyRate?: number;
+  files?: Array<{
+    id: string;
+    fileUrl: string;
+    fileName: string;
+    uploadedAt: string;
+  }>;
 }
 
 export interface CreateApplicationRequest {
@@ -139,24 +157,32 @@ export interface ApplicationListParams {
   limit?: number;
   offset?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // Therapist service factory
 export const createTherapistService = (client: AxiosInstance) => ({
   // Get therapist recommendations
-  getRecommendations: (params: TherapistSearchParams = {}): Promise<TherapistRecommendationResponse> => {
+  getRecommendations: (
+    params: TherapistSearchParams = {}
+  ): Promise<TherapistRecommendationResponse> => {
     const searchParams = new URLSearchParams();
-    
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.includeInactive !== undefined) searchParams.append('includeInactive', params.includeInactive.toString());
-    if (params.province) searchParams.append('province', params.province);
-    if (params.maxHourlyRate) searchParams.append('maxHourlyRate', params.maxHourlyRate.toString());
-    if (params.specialties?.length) searchParams.append('specialties', params.specialties.join(','));
-    if (params.minRating) searchParams.append('minRating', params.minRating.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
 
-    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    if (params.limit) searchParams.append("limit", params.limit.toString());
+    if (params.includeInactive !== undefined)
+      searchParams.append("includeInactive", params.includeInactive.toString());
+    if (params.province) searchParams.append("province", params.province);
+    if (params.maxHourlyRate)
+      searchParams.append("maxHourlyRate", params.maxHourlyRate.toString());
+    if (params.specialties?.length)
+      searchParams.append("specialties", params.specialties.join(","));
+    if (params.minRating)
+      searchParams.append("minRating", params.minRating.toString());
+    if (params.offset) searchParams.append("offset", params.offset.toString());
+
+    const queryString = searchParams.toString()
+      ? `?${searchParams.toString()}`
+      : "";
     return client.get(`/therapist-recommendations${queryString}`);
   },
 
@@ -165,40 +191,61 @@ export const createTherapistService = (client: AxiosInstance) => ({
     client.get(`/therapists/${id}`),
 
   // Admin methods for application management
-  getApplications: (params: ApplicationListParams = {}): Promise<{ applications: TherapistApplication[]; totalCount: number; page: number; totalPages: number }> => {
+  getApplications: (
+    params: ApplicationListParams = {}
+  ): Promise<{
+    applications: TherapistApplication[];
+    totalCount: number;
+    page: number;
+    totalPages: number;
+  }> => {
     const searchParams = new URLSearchParams();
-    
-    if (params.status) searchParams.append('status', params.status);
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('page', Math.floor((params.offset || 0) / (params.limit || 10) + 1).toString());
 
-    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    if (params.status) searchParams.append("status", params.status);
+    if (params.limit) searchParams.append("limit", params.limit.toString());
+    if (params.offset)
+      searchParams.append(
+        "page",
+        Math.floor((params.offset || 0) / (params.limit || 10) + 1).toString()
+      );
+
+    const queryString = searchParams.toString()
+      ? `?${searchParams.toString()}`
+      : "";
     return client.get(`/therapist/application${queryString}`);
   },
 
   getApplicationById: (id: string): Promise<TherapistApplication> =>
     client.get(`/therapist/application/${id}`),
 
-  updateApplicationStatus: (applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }> =>
+  updateApplicationStatus: (
+    applicationId: string,
+    data: { status: string; reviewedBy?: string; notes?: string }
+  ): Promise<{ success: boolean; message: string; credentials?: any }> =>
     client.put(`/therapist/application/${applicationId}/status`, data),
 
   // Application management
   application: {
     // Submit new application
     submit: (data: CreateApplicationRequest): Promise<TherapistApplication> =>
-      client.post('/therapist/application', data),
+      client.post("/therapist/application", data),
 
     // Get applications list
-    getList: (params: ApplicationListParams = {}): Promise<{ applications: TherapistApplication[]; total: number }> => {
+    getList: (
+      params: ApplicationListParams = {}
+    ): Promise<{ applications: TherapistApplication[]; total: number }> => {
       const searchParams = new URLSearchParams();
-      
-      if (params.status) searchParams.append('status', params.status);
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
-      if (params.sortBy) searchParams.append('sortBy', params.sortBy);
-      if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
 
-      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      if (params.status) searchParams.append("status", params.status);
+      if (params.limit) searchParams.append("limit", params.limit.toString());
+      if (params.offset)
+        searchParams.append("offset", params.offset.toString());
+      if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+      if (params.sortOrder) searchParams.append("sortOrder", params.sortOrder);
+
+      const queryString = searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "";
       return client.get(`/therapist/application${queryString}`);
     },
 
@@ -207,49 +254,59 @@ export const createTherapistService = (client: AxiosInstance) => ({
       client.get(`/therapist/application/${id}`),
 
     // Update application
-    update: (id: string, data: UpdateApplicationRequest): Promise<TherapistApplication> =>
+    update: (
+      id: string,
+      data: UpdateApplicationRequest
+    ): Promise<TherapistApplication> =>
       client.put(`/therapist/application/${id}`, data),
 
     // Get my application (for therapists)
     getMy: (): Promise<TherapistApplication> =>
-      client.get('/therapist/application/me'),
+      client.get("/therapist/application/me"),
   },
 
   // Dashboard and patient management
   dashboard: {
     // Get therapist dashboard data
     getData: (): Promise<TherapistDashboardData> =>
-      client.get('/therapist/dashboard'),
+      client.get("/therapist/dashboard"),
 
     // Get dashboard stats
-    getStats: (): Promise<TherapistDashboardData['stats']> =>
-      client.get('/therapist/dashboard/stats'),
+    getStats: (): Promise<TherapistDashboardData["stats"]> =>
+      client.get("/therapist/dashboard/stats"),
 
     // Get upcoming appointments
-    getUpcomingAppointments: (): Promise<TherapistDashboardData['upcomingAppointments']> =>
-      client.get('/therapist/dashboard/appointments'),
+    getUpcomingAppointments: (): Promise<
+      TherapistDashboardData["upcomingAppointments"]
+    > => client.get("/therapist/dashboard/appointments"),
   },
 
   // Patient management
   patients: {
     // Get assigned patients list
-    getList: (): Promise<PatientData[]> =>
-      client.get('/therapist/patients'),
+    getList: (): Promise<PatientData[]> => client.get("/therapist/patients"),
 
     // Get specific patient details
     getById: (patientId: string): Promise<PatientData> =>
       client.get(`/therapist/patients/${patientId}`),
 
     // Update patient notes
-    updateNotes: (patientId: string, sessionId: string, notes: string): Promise<void> =>
-      client.patch(`/therapist/patients/${patientId}/sessions/${sessionId}/notes`, { notes }),
+    updateNotes: (
+      patientId: string,
+      sessionId: string,
+      notes: string
+    ): Promise<void> =>
+      client.patch(
+        `/therapist/patients/${patientId}/sessions/${sessionId}/notes`,
+        { notes }
+      ),
 
     // Get patient sessions
-    getSessions: (patientId: string): Promise<PatientData['sessions']> =>
+    getSessions: (patientId: string): Promise<PatientData["sessions"]> =>
       client.get(`/therapist/patients/${patientId}/sessions`),
 
     // Get patient worksheets
-    getWorksheets: (patientId: string): Promise<PatientData['worksheets']> =>
+    getWorksheets: (patientId: string): Promise<PatientData["worksheets"]> =>
       client.get(`/therapist/patients/${patientId}/worksheets`),
 
     // Assign worksheet to patient
@@ -260,14 +317,19 @@ export const createTherapistService = (client: AxiosInstance) => ({
   // Meetings and sessions
   meetings: {
     // Get therapist meetings/sessions
-    getList: (params: { status?: string; limit?: number; offset?: number } = {}): Promise<MeetingData[]> => {
+    getList: (
+      params: { status?: string; limit?: number; offset?: number } = {}
+    ): Promise<MeetingData[]> => {
       const searchParams = new URLSearchParams();
-      
-      if (params.status) searchParams.append('status', params.status);
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
 
-      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      if (params.status) searchParams.append("status", params.status);
+      if (params.limit) searchParams.append("limit", params.limit.toString());
+      if (params.offset)
+        searchParams.append("offset", params.offset.toString());
+
+      const queryString = searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "";
       return client.get(`/booking/meetings${queryString}`);
     },
 
@@ -276,7 +338,10 @@ export const createTherapistService = (client: AxiosInstance) => ({
       client.get(`/booking/meetings/${meetingId}`),
 
     // Update meeting status
-    updateStatus: (meetingId: string, status: MeetingData['status']): Promise<MeetingData> =>
+    updateStatus: (
+      meetingId: string,
+      status: MeetingData["status"]
+    ): Promise<MeetingData> =>
       client.patch(`/booking/meetings/${meetingId}/status`, { status }),
 
     // Start a meeting

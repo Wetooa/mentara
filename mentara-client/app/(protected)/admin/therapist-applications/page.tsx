@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import { toast } from "sonner";
 import { useApi } from "@/lib/api"; // Import the API client
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
+import { TherapistApplication } from "@/lib/api/services/therapists"; // Import the correct type
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -24,20 +24,6 @@ const APPLICATION_STATUS = {
   APPROVED: "approved",
   REJECTED: "rejected",
 };
-
-interface TherapistApplication {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  mobile: string;
-  province: string;
-  providerType: string;
-  professionalLicenseType: string;
-  status: string;
-  submissionDate: string;
-  [key: string]: any; // For other properties
-}
 
 export default function TherapistApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,9 +39,11 @@ export default function TherapistApplicationsPage() {
     setError(null);
     try {
       // Use the API client to fetch applications instead of fetch directly
-      const data = await api.therapist.getApplications({
+      const data = await api.therapists.getApplications({
         status: statusFilter || undefined,
       });
+
+      console.log(data);
 
       // Make sure we're handling the data structure correctly
       setApplications(data.applications || []);
@@ -79,11 +67,11 @@ export default function TherapistApplicationsPage() {
 
     const searchLower = searchQuery.toLowerCase();
     return (
-      app.firstName.toLowerCase().includes(searchLower) ||
-      app.lastName.toLowerCase().includes(searchLower) ||
-      app.email.toLowerCase().includes(searchLower) ||
-      app.providerType.toLowerCase().includes(searchLower) ||
-      app.province.toLowerCase().includes(searchLower)
+      app.firstName?.toLowerCase().includes(searchLower) ||
+      app.lastName?.toLowerCase().includes(searchLower) ||
+      app.email?.toLowerCase().includes(searchLower) ||
+      app.providerType?.toLowerCase().includes(searchLower) ||
+      app.province?.toLowerCase().includes(searchLower)
     );
   });
 
