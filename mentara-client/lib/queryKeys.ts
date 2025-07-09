@@ -2,6 +2,14 @@
 // This ensures type safety and consistency across all queries
 
 export const queryKeys = {
+  // Auth-related queries
+  auth: {
+    all: ["auth"] as const,
+    currentUser: () => [...queryKeys.auth.all, "currentUser"] as const,
+    isFirstSignIn: () => [...queryKeys.auth.all, "isFirstSignIn"] as const,
+    checkAdmin: () => [...queryKeys.auth.all, "checkAdmin"] as const,
+  },
+
   // User-related queries
   users: {
     all: ["users"] as const,

@@ -4,12 +4,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSignUp } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
 
 export default function VerifyPage() {
   const router = useRouter();
   const { signUp, setActive } = useSignUp();
-  const { validateSession } = useAuth();
 
   useEffect(() => {
     const handleVerification = async () => {
@@ -32,27 +30,17 @@ export default function VerifyPage() {
           
           toast.success("Email verified successfully! Welcome to Mentara!");
           
-          // Validate session with backend
-          await validateSession();
-          
-          // Check if user has pre-assessment data
-          const assessmentAnswers = localStorage.getItem("assessmentAnswers");
-          
-          if (assessmentAnswers) {
-            // Clear assessment data (backend registration already happened during sign-up)
-            localStorage.removeItem("assessmentAnswers");
-            router.push("/user/welcome");
-          } else {
-            router.push("/user/dashboard");
-          }
+          // Backend registration and pre-assessment already happened during sign-up
+          // Just redirect to onboarding profile
+          router.push("/user/onboarding/profile");
         } else {
           toast.error("Verification incomplete. Please try again.");
-          router.push("/pre-assessment");
+          router.push("/verify-account");
         }
       } catch (error) {
         console.error("Verification error:", error);
         toast.error("Verification failed. Please try again.");
-        router.push("/pre-assessment");
+        router.push("/verify-account");
       }
     };
 

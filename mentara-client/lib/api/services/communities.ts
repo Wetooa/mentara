@@ -1,135 +1,21 @@
 import { AxiosInstance } from 'axios';
-
-// Types for Community API (matching backend structure)
-export interface Community {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  imageUrl: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RoomGroup {
-  id: string;
-  name: string;
-  order: number;
-  communityId: string;
-  rooms: Room[];
-}
-
-export interface Room {
-  id: string;
-  name: string;
-  order: number;
-  postingRole: string; // member, moderator, admin
-  roomGroupId: string;
-}
-
-export interface CommunityWithStructure extends Community {
-  roomGroups: RoomGroup[];
-}
-
-export interface Post {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  roomId: string;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string;
-  };
-  hearts: PostHeart[];
-  comments: Comment[];
-  _count: {
-    hearts: number;
-    comments: number;
-  };
-}
-
-export interface PostHeart {
-  id: string;
-  postId: string;
-  userId: string;
-  createdAt: string;
-}
-
-export interface Comment {
-  id: string;
-  postId: string;
-  userId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string;
-  };
-  hearts: CommentHeart[];
-  replies: Reply[];
-}
-
-export interface CommentHeart {
-  id: string;
-  commentId: string;
-  userId: string;
-  createdAt: string;
-}
-
-export interface Reply {
-  id: string;
-  commentId: string;
-  userId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string;
-  };
-}
-
-export interface Membership {
-  id: string;
-  communityId: string;
-  userId: string;
-  role: string; // member, moderator, admin
-  joinedAt: string;
-  community: Community;
-}
-
-export interface CommunityStats {
-  totalCommunities: number;
-  totalMembers: number;
-  totalPosts: number;
-  totalComments: number;
-}
-
-export interface CreatePostRequest {
-  title: string;
-  content: string;
-  roomId: string;
-}
-
-export interface CreateCommentRequest {
-  content: string;
-  postId: string;
-}
-
-export interface CreateReplyRequest {
-  content: string;
-  commentId: string;
-}
+import {
+  Community,
+  RoomGroup,
+  Room,
+  CommunityWithStructure,
+  Post,
+  PostHeart,
+  Comment,
+  CommentHeart,
+  Reply,
+  Membership,
+  CommunityMember,
+  CommunityStats,
+  CreatePostRequest,
+  CreateCommentRequest,
+  CreateReplyRequest,
+} from '../../types/api/communities';
 
 // Community service factory
 export const createCommunityService = (client: AxiosInstance) => ({
@@ -166,7 +52,7 @@ export const createCommunityService = (client: AxiosInstance) => ({
   leaveCommunity: (communityId: string): Promise<{ left: boolean }> =>
     client.post(`/communities/${communityId}/leave`),
 
-  getCommunityMembers: (communityId: string, limit = 50, offset = 0): Promise<{ members: any[]; total: number }> => {
+  getCommunityMembers: (communityId: string, limit = 50, offset = 0): Promise<{ members: CommunityMember[]; total: number }> => {
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     params.append('offset', offset.toString());

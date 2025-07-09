@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ForceLogoutPage() {
-  const { forceLogout, isLoading } = useAuth();
+  const { handleSignOut, isLoading } = useAuth();
 
   useEffect(() => {
-    forceLogout();
-  }, [forceLogout]);
+    handleSignOut();
+  }, [handleSignOut]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
