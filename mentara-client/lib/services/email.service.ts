@@ -1,4 +1,4 @@
-import emailjs from '@emailjs/browser';
+import emailjs from "@emailjs/browser";
 
 // EmailJS configuration interface
 interface EmailJSConfig {
@@ -11,7 +11,7 @@ interface EmailJSConfig {
 interface TherapistApplicationEmailParams {
   to_email: string;
   to_name: string;
-  application_status: 'approved' | 'rejected';
+  application_status: "approved" | "rejected";
   admin_notes?: string;
   credentials?: {
     email: string;
@@ -24,9 +24,9 @@ export class EmailService {
   private isInitialized = false;
 
   private config: EmailJSConfig = {
-    serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
-    templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '',
-    publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '',
+    serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "",
+    templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "",
+    publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "",
   };
 
   private constructor() {
@@ -45,12 +45,12 @@ export class EmailService {
       if (this.config.publicKey) {
         emailjs.init(this.config.publicKey);
         this.isInitialized = true;
-        console.log('EmailJS initialized successfully');
+        console.log("EmailJS initialized successfully");
       } else {
-        console.warn('EmailJS public key not found in environment variables');
+        console.warn("EmailJS public key not found in environment variables");
       }
     } catch (error) {
-      console.error('Failed to initialize EmailJS:', error);
+      console.error("Failed to initialize EmailJS:", error);
     }
   }
 
@@ -65,14 +65,15 @@ export class EmailService {
     if (!this.isInitialized) {
       return {
         success: false,
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          "EmailJS not properly initialized. Check environment variables.",
       };
     }
 
     if (!this.config.serviceId || !this.config.templateId) {
       return {
         success: false,
-        message: 'EmailJS service ID or template ID not configured.',
+        message: "EmailJS service ID or template ID not configured.",
       };
     }
 
@@ -83,21 +84,23 @@ export class EmailService {
         to_name: params.to_name,
         application_status: params.application_status,
         status_message: this.getStatusMessage(params.application_status),
-        admin_notes: params.admin_notes || '',
+        admin_notes: params.admin_notes || "",
         // Include credentials for approved applications
-        ...(params.application_status === 'approved' && params.credentials && {
-          login_email: params.credentials.email,
-          temporary_password: params.credentials.password,
-          login_instructions: 'Please use these credentials to log in to your therapist account. You will be prompted to change your password on first login.',
-        }),
+        ...(params.application_status === "approved" &&
+          params.credentials && {
+            login_email: params.credentials.email,
+            temporary_password: params.credentials.password,
+            login_instructions:
+              "Please use these credentials to log in to your therapist account. You will be prompted to change your password on first login.",
+          }),
         // Additional template variables
-        company_name: 'Mentara',
-        support_email: 'support@mentara.com',
-        website_url: process.env.NEXT_PUBLIC_APP_URL || 'https://mentara.com',
+        company_name: "Mentara",
+        support_email: "support@mentara.com",
+        website_url: process.env.NEXT_PUBLIC_APP_URL || "https://mentara.com",
         current_year: new Date().getFullYear(),
       };
 
-      console.log('Sending email notification for therapist application:', {
+      console.log("Sending email notification for therapist application:", {
         to: params.to_email,
         status: params.application_status,
       });
@@ -108,19 +111,22 @@ export class EmailService {
         templateParams
       );
 
-      console.log('Email sent successfully:', response);
+      console.log("Email sent successfully:", response);
 
       return {
         success: true,
-        message: 'Notification email sent successfully',
+        message: "Notification email sent successfully",
         emailId: response.text,
       };
     } catch (error) {
-      console.error('Failed to send email notification:', error);
-      
+      console.error("Failed to send email notification:", error);
+
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to send email notification',
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to send email notification",
       };
     }
   }
@@ -142,19 +148,20 @@ export class EmailService {
     if (!this.isInitialized) {
       return {
         success: false,
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          "EmailJS not properly initialized. Check environment variables.",
       };
     }
 
     try {
       const templateParams = {
         to_email: to,
-        to_name: recipientName || 'User',
+        to_name: recipientName || "User",
         subject: subject,
         message: message,
-        company_name: 'Mentara',
-        support_email: 'support@mentara.com',
-        website_url: process.env.NEXT_PUBLIC_APP_URL || 'https://mentara.com',
+        company_name: "Mentara",
+        support_email: "support@mentara.com",
+        website_url: process.env.NEXT_PUBLIC_APP_URL || "https://mentara.com",
         current_year: new Date().getFullYear(),
       };
 
@@ -166,15 +173,16 @@ export class EmailService {
 
       return {
         success: true,
-        message: 'Email sent successfully',
+        message: "Email sent successfully",
         emailId: response.text,
       };
     } catch (error) {
-      console.error('Failed to send general notification:', error);
-      
+      console.error("Failed to send general notification:", error);
+
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to send email',
+        message:
+          error instanceof Error ? error.message : "Failed to send email",
       };
     }
   }
@@ -183,43 +191,47 @@ export class EmailService {
    * Test EmailJS configuration
    * @returns Promise with test result
    */
-  public async testConfiguration(): Promise<{ success: boolean; message: string }> {
+  public async testConfiguration(): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     if (!this.isInitialized) {
       return {
         success: false,
-        message: 'EmailJS not initialized',
+        message: "EmailJS not initialized",
       };
     }
 
     if (!this.config.serviceId || !this.config.templateId) {
       return {
         success: false,
-        message: 'Missing EmailJS configuration (service ID or template ID)',
+        message: "Missing EmailJS configuration (service ID or template ID)",
       };
     }
 
     try {
       // Send a test email to a test address (you can modify this)
       const testParams = {
-        to_email: 'test@example.com',
-        to_name: 'Test User',
-        subject: 'EmailJS Configuration Test',
-        message: 'This is a test email to verify EmailJS configuration.',
-        company_name: 'Mentara',
+        to_email: "test@example.com",
+        to_name: "Test User",
+        subject: "EmailJS Configuration Test",
+        message: "This is a test email to verify EmailJS configuration.",
+        company_name: "Mentara",
         current_year: new Date().getFullYear(),
       };
 
       // Note: This won't actually send in production unless you have a test email
-      console.log('EmailJS configuration test parameters:', testParams);
+      console.log("EmailJS configuration test parameters:", testParams);
 
       return {
         success: true,
-        message: 'EmailJS configuration appears valid',
+        message: "EmailJS configuration appears valid",
       };
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Configuration test failed',
+        message:
+          error instanceof Error ? error.message : "Configuration test failed",
       };
     }
   }
@@ -229,14 +241,14 @@ export class EmailService {
    * @param status Application status
    * @returns Human-readable status message
    */
-  private getStatusMessage(status: 'approved' | 'rejected'): string {
+  private getStatusMessage(status: "approved" | "rejected"): string {
     switch (status) {
-      case 'approved':
-        return 'Congratulations! Your therapist application has been approved. You can now start providing therapy services through the Mentara platform.';
-      case 'rejected':
-        return 'Thank you for your interest in joining Mentara. Unfortunately, your application was not approved at this time. Please feel free to reapply in the future.';
+      case "approved":
+        return "Congratulations! Your therapist application has been approved. You can now start providing therapy services through the Mentara platform.";
+      case "rejected":
+        return "Thank you for your interest in joining Mentara. Unfortunately, your application was not approved at this time. Please feel free to reapply in the future.";
       default:
-        return 'Your application status has been updated.';
+        return "Your application status has been updated.";
     }
   }
 

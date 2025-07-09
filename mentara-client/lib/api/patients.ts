@@ -53,13 +53,16 @@ interface ApiWorksheet {
 export const patientsApi = {
   // Get all patients assigned to the current therapist
   async getAllPatients(): Promise<Patient[]> {
-    const response = await fetch(`${API_URL}/therapist-management/all-clients`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        // Add authorization header if needed
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/therapist-management/all-clients`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authorization header if needed
+        },
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -69,21 +72,24 @@ export const patientsApi = {
     }
 
     const clients = await response.json();
-    
+
     // Transform API response to match frontend Patient interface
     return clients.map((client: ApiClient) => ({
       id: client.userId,
-      name: `${client.user?.firstName || ''} ${client.user?.lastName || ''}`.trim() || 'Unknown',
-      fullName: `${client.user?.firstName || ''} ${client.user?.middleName || ''} ${client.user?.lastName || ''}`.trim(),
+      name:
+        `${client.user?.firstName || ""} ${client.user?.lastName || ""}`.trim() ||
+        "Unknown",
+      fullName:
+        `${client.user?.firstName || ""} ${client.user?.middleName || ""} ${client.user?.lastName || ""}`.trim(),
       avatar: client.user?.avatarUrl || null,
-      email: client.user?.email || '',
-      phone: client.user?.phone || '',
+      email: client.user?.email || "",
+      phone: client.user?.phone || "",
       age: client.age || calculateAge(client.user?.birthDate),
-      diagnosis: client.diagnosis || 'Not specified',
-      treatmentPlan: client.treatmentPlan || 'To be determined',
+      diagnosis: client.diagnosis || "Not specified",
+      treatmentPlan: client.treatmentPlan || "To be determined",
       currentSession: client.currentSession || 0,
       totalSessions: client.totalSessions || 0,
-      status: client.status || 'active',
+      status: client.status || "active",
       assignedAt: client.assignedAt,
       lastSession: client.lastSession,
       nextSession: client.nextSession,
@@ -95,12 +101,15 @@ export const patientsApi = {
 
   // Get specific patient by ID with detailed information
   async getPatientById(patientId: string): Promise<Patient> {
-    const response = await fetch(`${API_URL}/therapist-management/client/${patientId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${API_URL}/therapist-management/client/${patientId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -110,7 +119,7 @@ export const patientsApi = {
     }
 
     const client: ApiClient = await response.json();
-    
+
     // Fetch related data (sessions, worksheets) in parallel
     const [sessions, worksheets] = await Promise.allSettled([
       this.getPatientSessions(patientId),
@@ -119,35 +128,54 @@ export const patientsApi = {
 
     return {
       id: client.userId,
-      name: `${client.user?.firstName || ''} ${client.user?.lastName || ''}`.trim() || 'Unknown',
-      fullName: `${client.user?.firstName || ''} ${client.user?.middleName || ''} ${client.user?.lastName || ''}`.trim(),
+      name:
+        `${client.user?.firstName || ""} ${client.user?.lastName || ""}`.trim() ||
+        "Unknown",
+      fullName:
+        `${client.user?.firstName || ""} ${client.user?.middleName || ""} ${client.user?.lastName || ""}`.trim(),
       avatar: client.user?.avatarUrl || null,
-      email: client.user?.email || '',
-      phone: client.user?.phone || '',
+      email: client.user?.email || "",
+      phone: client.user?.phone || "",
       age: client.age || calculateAge(client.user?.birthDate),
-      diagnosis: client.diagnosis || 'Not specified',
-      treatmentPlan: client.treatmentPlan || 'To be determined',
+      diagnosis: client.diagnosis || "Not specified",
+      treatmentPlan: client.treatmentPlan || "To be determined",
       currentSession: client.currentSession || 0,
       totalSessions: client.totalSessions || 0,
-      status: client.status || 'active',
+      status: client.status || "active",
       assignedAt: client.assignedAt,
       lastSession: client.lastSession,
       nextSession: client.nextSession,
       progress: client.progress || 0,
-      sessions: sessions.status === 'fulfilled' ? sessions.value : [],
-      worksheets: worksheets.status === 'fulfilled' ? worksheets.value : [],
+      sessions: sessions.status === "fulfilled" ? sessions.value : [],
+      worksheets: worksheets.status === "fulfilled" ? worksheets.value : [],
     };
   },
 
   // Get patient sessions/meetings
-  async getPatientSessions(patientId: string): Promise<{ id: string; number: number; date: string; duration: number; status: string; notes: string; meetingType?: string; meetingUrl?: string }[]> {
+  async getPatientSessions(
+    patientId: string
+  ): Promise<
+    {
+      id: string;
+      number: number;
+      date: string;
+      duration: number;
+      status: string;
+      notes: string;
+      meetingType?: string;
+      meetingUrl?: string;
+    }[]
+  > {
     try {
-      const response = await fetch(`${API_URL}/booking/meetings?clientId=${patientId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/booking/meetings?clientId=${patientId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         console.warn(`Failed to fetch sessions for patient ${patientId}`);
@@ -155,14 +183,14 @@ export const patientsApi = {
       }
 
       const meetings: ApiMeeting[] = await response.json();
-      
+
       return meetings.map((meeting: ApiMeeting) => ({
         id: meeting.id,
         number: meeting.sessionNumber || 1,
         date: meeting.startTime,
         duration: meeting.duration,
         status: meeting.status,
-        notes: meeting.notes || '',
+        notes: meeting.notes || "",
         meetingType: meeting.meetingType,
         meetingUrl: meeting.meetingUrl,
       }));
@@ -173,14 +201,29 @@ export const patientsApi = {
   },
 
   // Get patient worksheets
-  async getPatientWorksheets(patientId: string): Promise<{ id: string; title: string; assignedDate: string; dueDate?: string; status: string; instructions?: string; progress: number }[]> {
+  async getPatientWorksheets(
+    patientId: string
+  ): Promise<
+    {
+      id: string;
+      title: string;
+      assignedDate: string;
+      dueDate?: string;
+      status: string;
+      instructions?: string;
+      progress: number;
+    }[]
+  > {
     try {
-      const response = await fetch(`${API_URL}/worksheets?userId=${patientId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/worksheets?userId=${patientId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         console.warn(`Failed to fetch worksheets for patient ${patientId}`);
@@ -188,19 +231,25 @@ export const patientsApi = {
       }
 
       const worksheets: ApiWorksheet[] = await response.json();
-      
+
       return worksheets.map((worksheet: ApiWorksheet) => ({
         id: worksheet.id,
         title: worksheet.title,
         assignedDate: worksheet.createdAt,
         dueDate: worksheet.dueDate,
-        status: worksheet.isCompleted ? 'completed' : 
-                (new Date(worksheet.dueDate) < new Date() ? 'overdue' : 'pending'),
+        status: worksheet.isCompleted
+          ? "completed"
+          : new Date(worksheet.dueDate) < new Date()
+            ? "overdue"
+            : "pending",
         instructions: worksheet.instructions,
         progress: worksheet.isCompleted ? 100 : 0,
       }));
     } catch (error) {
-      console.error(`Error fetching worksheets for patient ${patientId}:`, error);
+      console.error(
+        `Error fetching worksheets for patient ${patientId}:`,
+        error
+      );
       return [];
     }
   },
@@ -208,7 +257,7 @@ export const patientsApi = {
   // Search patients by name, diagnosis, or treatment plan
   async searchPatients(query: string): Promise<Patient[]> {
     const patients = await this.getAllPatients();
-    
+
     if (!query.trim()) {
       return patients;
     }
@@ -235,13 +284,16 @@ export const patientsApi = {
       progress?: number;
     }
   ): Promise<Patient> {
-    const response = await fetch(`${API_URL}/therapist-management/client/${patientId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updates),
-    });
+    const response = await fetch(
+      `${API_URL}/therapist-management/client/${patientId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -341,15 +393,15 @@ export const patientsApi = {
 // Helper function to calculate age from birth date
 function calculateAge(birthDate?: string): number {
   if (!birthDate) return 0;
-  
+
   const today = new Date();
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-  
+
   return age;
 }

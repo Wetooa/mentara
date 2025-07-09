@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import SinglePageTherapistApplication from '../page';
 
 // Mock necessary modules
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@/hooks/useMobile', () => ({
   useIsMobile: jest.fn(() => false),
 }));
 

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useTherapistRecommendations } from "@/hooks/useTherapistRecommendations";
+import { useTherapistRecommendations } from "@/hooks/useTherapists";
 
 export default function RecommendedSection() {
   const carouselRef = useRef<HTMLDivElement>(null);

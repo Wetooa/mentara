@@ -1,7 +1,7 @@
 "use client";
 
-import FormFooter from "@/components/footer/form-footer";
-import Logo from "@/components/logo";
+import FormFooter from "@/components/footer/FormFooter";
+import Logo from "@/components/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {

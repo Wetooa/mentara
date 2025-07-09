@@ -110,3 +110,23 @@ export const useSignUpStore = create<SignUpStore>()((set) => ({
   details: { email: "", nickName: "" },
   setDetails: (details) => set({ details }),
 }));
+
+// Assessment data store for registration flow
+export interface PreAssessmentStore {
+  assessmentData: {
+    questionnaires: ListOfQuestionnaires[];
+    answers: number[][];
+    step: number;
+    miniStep: number;
+  } | null;
+  setAssessmentData: (data: any) => void;
+  getAssessmentData: () => any;
+  clearAssessmentData: () => void;
+}
+
+export const usePreAssessmentStore = create<PreAssessmentStore>()((set, get) => ({
+  assessmentData: null,
+  setAssessmentData: (data) => set({ assessmentData: data }),
+  getAssessmentData: () => get().assessmentData,
+  clearAssessmentData: () => set({ assessmentData: null }),
+}));

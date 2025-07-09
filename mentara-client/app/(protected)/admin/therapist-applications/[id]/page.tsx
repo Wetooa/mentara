@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TherapistApplicationDetails } from "@/components/admin/TherapistApplicationDetails";
 import { toast } from "sonner";
+import { useApi } from "@/lib/api";
 
 interface TherapistApplication {
   id: string;
@@ -28,6 +29,7 @@ export default function TherapistApplicationPage(
 ) {
   const params = use(props.params);
   const router = useRouter();
+  const api = useApi();
   const [application, setApplication] = useState<TherapistApplication | null>(
     null
   );
@@ -39,17 +41,9 @@ export default function TherapistApplicationPage(
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/therapist/application/${params.id}`);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error("Application not found");
-          }
-          throw new Error("Failed to fetch application details");
-        }
-
-        const data = await response.json();
-        setApplication(data.application);
+        // Use the API client instead of direct fetch
+        const application = await api.therapists.application.getById(params.id);
+        setApplication(application);
       } catch (err) {
         console.error("Error fetching therapist application:", err);
         setError(

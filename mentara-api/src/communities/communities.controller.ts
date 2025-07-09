@@ -17,6 +17,7 @@ import {
 import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
+import { CommunityAssignmentService } from './community-assignment.service';
 import {
   CommunityCreateInputDto,
   CommunityResponse,
@@ -32,6 +33,7 @@ import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 export class CommunitiesController {
   constructor(
     private readonly communitiesService: CommunitiesService,
+    private readonly communityAssignmentService: CommunityAssignmentService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -235,5 +237,65 @@ export class CommunitiesController {
   @Get('room-group/:roomGroupId/rooms')
   async getRoomsByGroup(@Param('roomGroupId') roomGroupId: string) {
     return await this.communitiesService.findRoomsByGroup(roomGroupId);
+  }
+
+  // Community Assignment Endpoints
+  @Post('assign/me')
+  @HttpCode(HttpStatus.OK)
+  async assignCommunitiesToMe(
+    @CurrentUserId() userId: string,
+  ): Promise<{ assignedCommunities: string[] }> {
+    try {
+      const assignedCommunities = await this.communityAssignmentService.assignCommunitiesToUser(userId);
+      return { assignedCommunities };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  @Post('assign/:userId')
+  @HttpCode(HttpStatus.OK)
+  async assignCommunitiesToUser(
+    @Param('userId') userId: string,
+  ): Promise<{ assignedCommunities: string[] }> {
+    try {
+      const assignedCommunities = await this.communityAssignmentService.assignCommunitiesToUser(userId);
+      return { assignedCommunities };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  @Get('recommended/me')
+  async getMyRecommendedCommunities(
+    @CurrentUserId() userId: string,
+  ): Promise<{ recommendedCommunities: string[] }> {
+    try {
+      const recommendedCommunities = await this.communityAssignmentService.getRecommendedCommunities(userId);
+      return { recommendedCommunities };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  @Post('assign/bulk')
+  @HttpCode(HttpStatus.OK)
+  async bulkAssignCommunities(
+    @Body() body: { userIds: string[] },
+  ): Promise<{ results: { [userId: string]: string[] } }> {
+    try {
+      const results = await this.communityAssignmentService.bulkAssignCommunities(body.userIds);
+      return { results };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
   }
 }

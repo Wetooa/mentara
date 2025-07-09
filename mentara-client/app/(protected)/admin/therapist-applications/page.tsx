@@ -52,8 +52,8 @@ export default function TherapistApplicationsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Use the API client to fetch applications instead of fetch directly
-      const data = await api.therapist.getApplications({
+      // Use the correct API client method for therapist applications
+      const data = await api.therapists.application.getList({
         status: statusFilter || undefined,
       });
 

@@ -16,25 +16,25 @@ model User {
     coverImageUrl String?
     isActive      Boolean @default(true)
     isVerified    Boolean @default(false)
-    
+
     // Contact information
     phoneNumber   String?
     phoneVerified Boolean @default(false)
-    
+
     // Preferences
-    timezone      String? @default("UTC")
-    language      String? @default("en")
-    theme         String? @default("light")
-    
+    timezone String? @default("UTC")
+    language String? @default("en")
+    theme    String? @default("light")
+
     // Privacy settings
     profileVisibility String @default("private") // public, private, therapists_only
     allowMessagesFrom String @default("therapists") // all, therapists, none
-    
+
     // Account status
-    lastLoginAt   DateTime?
-    lastActiveAt  DateTime?
-    suspendedAt   DateTime?
-    suspendedBy   String?
+    lastLoginAt      DateTime?
+    lastActiveAt     DateTime?
+    suspendedAt      DateTime?
+    suspendedBy      String?
     suspensionReason String?
 
     // Community and content relations (available to all users)
@@ -55,31 +55,31 @@ model User {
     reviewsHelpful ReviewHelpful[]
 
     // Messaging relations
-    conversations      ConversationParticipant[] @relation("UserConversations")
-    sentMessages       Message[]                 @relation("UserMessages")
-    messageReadReceipts MessageReadReceipt[]    @relation("UserReadReceipts")
-    messageReactions   MessageReaction[]        @relation("UserMessageReactions")
-    blocking           UserBlock[]              @relation("UserBlocking")
-    blockedBy          UserBlock[]              @relation("UserBlocked")
-    
+    conversations       ConversationParticipant[] @relation("UserConversations")
+    sentMessages        Message[]                 @relation("UserMessages")
+    messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
+    messageReactions    MessageReaction[]         @relation("UserMessageReactions")
+    blocking            UserBlock[]               @relation("UserBlocking")
+    blockedBy           UserBlock[]               @relation("UserBlocked")
+
     // Notification relations
-    notifications      Notification[]           @relation("UserNotifications")
-    notificationSettings NotificationSettings?  @relation("UserNotificationSettings")
-    
+    notifications        Notification[]        @relation("UserNotifications")
+    notificationSettings NotificationSettings? @relation("UserNotificationSettings")
+
     // Audit and activity relations
-    auditLogs          AuditLog[]               @relation("UserAuditLogs")
-    activities         UserActivity[]           @relation("UserActivities")
-    
+    auditLogs  AuditLog[]     @relation("UserAuditLogs")
+    activities UserActivity[] @relation("UserActivities")
+
     // File relations
-    uploadedFiles      File[]                   @relation("UserUploadedFiles")
-    fileVersions       FileVersion[]            @relation("UserFileVersions")
-    fileShares         FileShare[]              @relation("UserFileShares")
-    fileDownloads      FileDownload[]           @relation("UserFileDownloads")
-    
+    uploadedFiles File[]         @relation("UserUploadedFiles")
+    fileVersions  FileVersion[]  @relation("UserFileVersions")
+    fileShares    FileShare[]    @relation("UserFileShares")
+    fileDownloads FileDownload[] @relation("UserFileDownloads")
+
     // Billing relations
-    subscription       Subscription?            @relation("UserSubscription")
-    paymentMethods     PaymentMethod[]          @relation("UserPaymentMethods")
-    discountRedemptions DiscountRedemption[]    @relation("UserDiscountRedemptions")
+    subscription        Subscription?        @relation("UserSubscription")
+    paymentMethods      PaymentMethod[]      @relation("UserPaymentMethods")
+    discountRedemptions DiscountRedemption[] @relation("UserDiscountRedemptions")
 
     @@index([email])
     @@index([role])
@@ -90,17 +90,17 @@ model Client {
     user   User   @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
 
     // Patient-specific relations
-    worksheets           Worksheet[]
-    preAssessment        PreAssessment?
-    worksheetSubmissions WorksheetSubmission[]
-    clientMedicalHistory ClientMedicalHistory[]
-    clientPreferences    ClientPreference[]
-    assignedTherapists   ClientTherapist[]
-    meetings             Meeting[]              @relation("ClientMeetings")
-    reviews              Review[] // Reviews written by this client
-    sessionLogs          SessionLog[]
-    therapyProgress      TherapyProgress[]
-    assessments          Assessment[]
+    worksheets             Worksheet[]
+    preAssessment          PreAssessment?
+    worksheetSubmissions   WorksheetSubmission[]
+    clientMedicalHistory   ClientMedicalHistory[]
+    clientPreferences      ClientPreference[]
+    assignedTherapists     ClientTherapist[]
+    meetings               Meeting[]               @relation("ClientMeetings")
+    reviews                Review[] // Reviews written by this client
+    sessionLogs            SessionLog[]
+    therapyProgress        TherapyProgress[]
+    assessments            Assessment[]
     mentalHealthIndicators MentalHealthIndicator[]
 
     hasSeenTherapistRecommendations Boolean @default(false)

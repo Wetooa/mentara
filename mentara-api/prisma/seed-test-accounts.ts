@@ -81,7 +81,7 @@ async function createTestUser(account: any) {
   }
 
   // Create base user
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
       id: account.clerkId,
       email: account.email,
@@ -157,12 +157,13 @@ async function createRoleSpecificRecord(account: any) {
           sessionLength: '60 minutes',
           hourlyRate: getHourlyRate(account.description),
           submissionDate: new Date(),
-          processingDate: account.status === 'approved' ? new Date() : undefined,
+          processingDate:
+            account.status === 'approved' ? new Date() : undefined,
         },
       });
       break;
 
-    case 'moderator':
+    case 'moderator': {
       // Get communities for assignment
       const communities = await prisma.community.findMany({ take: 2 });
       await prisma.moderator.create({
@@ -175,6 +176,7 @@ async function createRoleSpecificRecord(account: any) {
         },
       });
       break;
+    }
 
     case 'admin':
       await prisma.admin.create({
@@ -231,7 +233,6 @@ async function createTestCommunities() {
   });
 
   const clients = await getTestUsers('client');
-  const moderators = await getTestUsers('moderator');
 
   // Add clients to communities
   for (const client of clients.slice(0, 2)) {

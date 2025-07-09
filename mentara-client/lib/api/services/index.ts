@@ -3,7 +3,8 @@ import { createUserService } from './users';
 import { createTherapistService } from './therapists';
 import { createReviewsService } from './reviews';
 import { createBookingService } from './booking';
-import { createCommunitiesService } from './communities';
+import { createCommunityService } from './communities';
+import { createClientService } from './client';
 
 // Additional services for completeness
 import { AxiosInstance as Client } from 'axios';
@@ -12,6 +13,107 @@ import { AxiosInstance as Client } from 'axios';
 export const createAdminService = (client: Client) => ({
   checkAdmin: (): Promise<{ isAdmin: boolean }> =>
     client.post('/auth/admin'),
+
+  // Admin user management
+  users: {
+    getList: (params: { role?: string; status?: string; limit?: number; offset?: number } = {}): Promise<any> => {
+      const searchParams = new URLSearchParams();
+      if (params.role) searchParams.append('role', params.role);
+      if (params.status) searchParams.append('status', params.status);
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (params.offset) searchParams.append('offset', params.offset.toString());
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/users${queryString}`);
+    },
+
+    getById: (userId: string): Promise<any> =>
+      client.get(`/admin/users/${userId}`),
+
+    create: (userData: any): Promise<any> =>
+      client.post('/admin/users', userData),
+
+    update: (userId: string, userData: any): Promise<any> =>
+      client.put(`/admin/users/${userId}`, userData),
+
+    delete: (userId: string): Promise<void> =>
+      client.delete(`/admin/users/${userId}`),
+
+    updateRole: (userId: string, role: string): Promise<any> =>
+      client.patch(`/admin/users/${userId}/role`, { role }),
+
+    suspend: (userId: string, reason?: string): Promise<any> =>
+      client.patch(`/admin/users/${userId}/suspend`, { reason }),
+
+    unsuspend: (userId: string): Promise<any> =>
+      client.patch(`/admin/users/${userId}/unsuspend`),
+  },
+
+  // Analytics and reports
+  analytics: {
+    getSystemStats: (): Promise<any> =>
+      client.get('/admin/analytics/system-stats'),
+
+    getUserGrowth: (params: { startDate?: string; endDate?: string } = {}): Promise<any> => {
+      const searchParams = new URLSearchParams();
+      if (params.startDate) searchParams.append('startDate', params.startDate);
+      if (params.endDate) searchParams.append('endDate', params.endDate);
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/analytics/user-growth${queryString}`);
+    },
+
+    getEngagement: (params: { startDate?: string; endDate?: string } = {}): Promise<any> => {
+      const searchParams = new URLSearchParams();
+      if (params.startDate) searchParams.append('startDate', params.startDate);
+      if (params.endDate) searchParams.append('endDate', params.endDate);
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/analytics/engagement${queryString}`);
+    },
+  },
+
+  // Content moderation
+  moderation: {
+    getReports: (params: { type?: string; status?: string; limit?: number; offset?: number } = {}): Promise<any> => {
+      const searchParams = new URLSearchParams();
+      if (params.type) searchParams.append('type', params.type);
+      if (params.status) searchParams.append('status', params.status);
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (params.offset) searchParams.append('offset', params.offset.toString());
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/moderation/reports${queryString}`);
+    },
+
+    updateReport: (reportId: string, action: string, notes?: string): Promise<any> =>
+      client.patch(`/admin/moderation/reports/${reportId}`, { action, notes }),
+
+    getFlaggedContent: (params: { type?: string; limit?: number; offset?: number } = {}): Promise<any> => {
+      const searchParams = new URLSearchParams();
+      if (params.type) searchParams.append('type', params.type);
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (params.offset) searchParams.append('offset', params.offset.toString());
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/moderation/flagged-content${queryString}`);
+    },
+  },
+
+  // System configuration
+  config: {
+    get: (): Promise<any> =>
+      client.get('/admin/config'),
+
+    update: (config: any): Promise<any> =>
+      client.put('/admin/config', config),
+
+    getFeatureFlags: (): Promise<any> =>
+      client.get('/admin/config/feature-flags'),
+
+    updateFeatureFlag: (flagName: string, enabled: boolean): Promise<any> =>
+      client.patch(`/admin/config/feature-flags/${flagName}`, { enabled }),
+  },
 });
 
 // Search service
@@ -80,6 +182,29 @@ export const createFilesService = (client: Client) => ({
   getById: (fileId: string): Promise<any> =>
     client.get(`/files/${fileId}`),
 
+  // Secure file download with authentication
+  download: (fileId: string): Promise<Blob> =>
+    client.get(`/files/${fileId}/download`, {
+      responseType: 'blob',
+    }),
+
+  // Get secure file URL with temporary token
+  getSecureUrl: (fileId: string, expirationMinutes: number = 60): Promise<{ url: string; expiresAt: string }> =>
+    client.post(`/files/${fileId}/secure-url`, { expirationMinutes }),
+
+  // Admin-only file access
+  adminGetFile: (fileId: string): Promise<any> =>
+    client.get(`/admin/files/${fileId}`),
+
+  adminDownloadFile: (fileId: string): Promise<Blob> =>
+    client.get(`/admin/files/${fileId}/download`, {
+      responseType: 'blob',
+    }),
+
+  // Bulk file operations for admin
+  adminGetFilesByApplication: (applicationId: string): Promise<any[]> =>
+    client.get(`/admin/files/application/${applicationId}`),
+
   delete: (fileId: string): Promise<void> =>
     client.delete(`/files/${fileId}`),
 
@@ -93,6 +218,10 @@ export const createFilesService = (client: Client) => ({
     const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
     return client.get(`/files${queryString}`);
   },
+
+  // Therapist application document access
+  getApplicationDocuments: (applicationId: string): Promise<any[]> =>
+    client.get(`/files/application/${applicationId}/documents`),
 });
 
 // Notifications service
@@ -121,8 +250,8 @@ export const createNotificationsService = (client: Client) => ({
     client.get('/notifications/unread-count'),
 });
 
-// Client management service (for therapists)
-export const createClientService = (client: Client) => ({
+// Client management service (for therapists) - legacy
+export const createClientManagementService = (client: Client) => ({
   getAssigned: (): Promise<any[]> =>
     client.get('/client/assigned'),
 
@@ -145,12 +274,13 @@ export const createApiServices = (client: AxiosInstance) => ({
   therapists: createTherapistService(client),
   reviews: createReviewsService(client),
   booking: createBookingService(client),
-  communities: createCommunitiesService(client),
+  communities: createCommunityService(client),
   admin: createAdminService(client),
   search: createSearchService(client),
   files: createFilesService(client),
   notifications: createNotificationsService(client),
-  clients: createClientService(client),
+  client: createClientService(client),
+  clientManagement: createClientManagementService(client),
 });
 
 export type ApiServices = ReturnType<typeof createApiServices>;
@@ -160,7 +290,8 @@ export type { UserService } from './users';
 export type { TherapistService } from './therapists';
 export type { ReviewsService } from './reviews';
 export type { BookingService } from './booking';
-export type { CommunitiesService } from './communities';
+export type { CommunityService } from './communities';
+export type { ClientService } from './client';
 
 // Export all types
 export * from './users';
@@ -168,3 +299,4 @@ export * from './therapists';
 export * from './reviews';
 export * from './booking';
 export * from './communities';
+export * from './client';

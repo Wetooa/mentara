@@ -10,9 +10,13 @@ import ProgressTracking from "@/components/dashboard/ProgressTracking";
 import NotificationsCenter from "@/components/dashboard/NotificationsCenter";
 import AssignedTherapist from "@/components/dashboard/AssignedTherapist";
 import RecentCommunications from "@/components/dashboard/RecentCommunications";
+import { useOnboardingRedirect } from "@/hooks/useOnboardingRedirect";
 
 export default function DashboardPage() {
   const [dashboardData] = useState(mockUserDashboardData);
+  
+  // Handle onboarding redirect for first-time users
+  useOnboardingRedirect();
 
   const handleMessageTherapist = () => {
     // TODO: Navigate to messages page

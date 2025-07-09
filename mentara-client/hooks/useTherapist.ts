@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "./useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { toast } from "sonner";
 
 interface Therapist {
   id: string;
@@ -22,105 +23,115 @@ interface Therapist {
   isVerified: boolean;
 }
 
-interface UseTherapistReturn {
-  therapist: Therapist | null;
-  loading: boolean;
-  error: string | null;
-  assignTherapist: (therapistId: string) => Promise<void>;
-  removeTherapist: () => Promise<void>;
-  refetch: () => Promise<void>;
+/**
+ * Hook for managing client-therapist relationship
+ * Uses React Query for better state management and caching
+ */
+export function useTherapist() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  // Query to get assigned therapist
+  const {
+    data: therapist,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.client.assignedTherapist(),
+    queryFn: () => api.client.getAssignedTherapist(),
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on 404 (no therapist assigned)
+      if (error?.response?.status === 404) return false;
+      return failureCount < 3;
+    },
+  });
+
+  // Mutation to assign a therapist
+  const assignTherapistMutation = useMutation({
+    mutationFn: async (therapistId: string) => {
+      // For now, use the request therapist change endpoint as assignment
+      // This needs a proper assignment endpoint in the backend
+      return api.client.requestTherapistChange(`Requesting assignment to therapist ${therapistId}`);
+    },
+    onSuccess: (data, therapistId) => {
+      toast.success("Therapist assignment requested successfully!");
+      // Invalidate and refetch the assigned therapist
+      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
+      // Note: In a real implementation, this would directly assign the therapist
+      // For now, it creates a change request that admin needs to approve
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
+      toast.error(message);
+    },
+  });
+
+  // Mutation to remove/change therapist
+  const removeTherapistMutation = useMutation({
+    mutationFn: async (reason: string = "Client requested therapist change") => {
+      return api.client.requestTherapistChange(reason);
+    },
+    onSuccess: () => {
+      toast.success("Therapist change request submitted successfully!");
+      // Invalidate the assigned therapist query
+      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || error?.message || "Failed to submit therapist change request";
+      toast.error(message);
+    },
+  });
+
+  // Helper functions for backward compatibility
+  const assignTherapist = async (therapistId: string): Promise<void> => {
+    await assignTherapistMutation.mutateAsync(therapistId);
+  };
+
+  const removeTherapist = async (reason?: string): Promise<void> => {
+    await removeTherapistMutation.mutateAsync(reason);
+  };
+
+  return {
+    therapist: therapist || null,
+    loading: loading || assignTherapistMutation.isPending || removeTherapistMutation.isPending,
+    error: error?.message || null,
+    assignTherapist,
+    removeTherapist,
+    refetch: () => refetch(),
+    // Expose mutation states for more granular control
+    isAssigning: assignTherapistMutation.isPending,
+    isRemoving: removeTherapistMutation.isPending,
+    assignError: assignTherapistMutation.error,
+    removeError: removeTherapistMutation.error,
+  };
 }
 
-export function useTherapist(): UseTherapistReturn {
-  const { user } = useAuth();
-  const api = useApi();
-  const [therapist, setTherapist] = useState<Therapist | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+/**
+ * Hook for requesting therapist assignment (simplified version)
+ */
+export function useTherapistAssignment() {
+  const { assignTherapist, removeTherapist, isAssigning, isRemoving } = useTherapist();
 
-  const fetchTherapist = async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Use the user's assigned therapist endpoint (needs to be added to NestJS backend)
-      const data = await api.request<{ therapist: Therapist | null }>("/client/therapist");
-      setTherapist(data.therapist);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch therapist"
-      );
-    } finally {
-      setLoading(false);
-    }
+  return {
+    assignTherapist,
+    removeTherapist,
+    isAssigning,
+    isRemoving,
   };
+}
 
-  const assignTherapist = async (therapistId: string) => {
-    if (!user?.id) {
-      throw new Error("User not authenticated");
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Use the client-therapist assignment endpoint (needs to be added to NestJS backend)
-      const data = await api.request<{ therapist: Therapist }>("/client/therapist", {
-        method: "POST",
-        body: { therapistId },
-      });
-      
-      setTherapist(data.therapist);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to assign therapist"
-      );
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeTherapist = async () => {
-    if (!user?.id) {
-      throw new Error("User not authenticated");
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Use the client-therapist removal endpoint (needs to be added to NestJS backend)
-      await api.request("/client/therapist", {
-        method: "DELETE",
-      });
-
-      setTherapist(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to remove therapist"
-      );
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTherapist();
-  }, [user?.id]);
+/**
+ * Hook for just getting assigned therapist data
+ */
+export function useAssignedTherapist() {
+  const { therapist, loading, error, refetch } = useTherapist();
 
   return {
     therapist,
-    loading,
+    isLoading: loading,
     error,
-    assignTherapist,
-    removeTherapist,
-    refetch: fetchTherapist,
+    refetch,
   };
 }

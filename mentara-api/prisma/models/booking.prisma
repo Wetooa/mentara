@@ -16,9 +16,9 @@ model Meeting {
     therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId])
 
     // Reviews for this meeting
-    reviews Review[]
+    reviews     Review[]
     sessionLogs SessionLog[]
-    payments Payment[]
+    payments    Payment[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
