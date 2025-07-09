@@ -246,6 +246,12 @@ export class TherapistApplicationService {
 
     const files = await this.getApplicationFiles(application.userId);
 
+    // Helper function to determine if license is active
+    const isLicenseActive = (expirationDate: Date): boolean => {
+      const today = new Date();
+      return expirationDate > today;
+    };
+
     return {
       id: application.userId,
       status: application.status,
@@ -260,11 +266,14 @@ export class TherapistApplicationService {
       professionalLicenseType: application.professionalLicenseType,
       isPRCLicensed: application.isPRCLicensed,
       prcLicenseNumber: application.prcLicenseNumber,
+      expirationDateOfLicense: application.expirationDateOfLicense.toISOString(),
+      isLicenseActive: isLicenseActive(application.expirationDateOfLicense) ? 'yes' : 'no',
       practiceStartDate: application.practiceStartDate.toISOString(),
-      areasOfExpertise: application.areasOfExpertise,
-      assessmentTools: application.assessmentTools,
-      therapeuticApproachesUsedList: application.therapeuticApproachesUsedList,
-      languagesOffered: application.languagesOffered,
+      yearsOfExperience: application.yearsOfExperience?.toString() || 'N/A',
+      areasOfExpertise: application.areasOfExpertise || [],
+      assessmentTools: application.assessmentTools || [],
+      therapeuticApproachesUsedList: application.therapeuticApproachesUsedList || [],
+      languagesOffered: application.languagesOffered || [],
       providedOnlineTherapyBefore: application.providedOnlineTherapyBefore
         ? 'yes'
         : 'no',
@@ -272,7 +281,12 @@ export class TherapistApplicationService {
         application.comfortableUsingVideoConferencing ? 'yes' : 'no',
       weeklyAvailability: 'flexible',
       preferredSessionLength: application.sessionLength,
-      accepts: application.acceptTypes,
+      accepts: application.acceptTypes || [],
+      privateConfidentialSpace: application.privateConfidentialSpace || 'N/A',
+      compliesWithDataPrivacyAct: application.compliesWithDataPrivacyAct ? 'yes' : 'no',
+      professionalLiabilityInsurance: application.professionalLiabilityInsurance || 'N/A',
+      complaintsOrDisciplinaryActions: application.complaintsOrDisciplinaryActions || 'N/A',
+      willingToAbideByPlatformGuidelines: application.willingToAbideByPlatformGuidelines ? 'yes' : 'no',
       bio: application.educationBackground || undefined,
       hourlyRate: application.hourlyRate
         ? Number(application.hourlyRate)

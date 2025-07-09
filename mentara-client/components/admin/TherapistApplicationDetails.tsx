@@ -94,28 +94,51 @@ export function TherapistApplicationDetails({
     return value || 'N/A';
   };
 
-  // Helper function to render object with boolean values
-  const renderObjectItems = (obj: { [key: string]: boolean }) => {
-    if (!obj || typeof obj !== 'object') {
+  // Helper function to render object with boolean values or array of strings
+  const renderObjectItems = (data: { [key: string]: boolean } | string[] | null | undefined) => {
+    if (!data) {
       return <span className="text-gray-500 italic">None</span>;
     }
     
-    const items = Object.entries(obj)
-      .filter(([, value]) => value)
-      .map(([key]) => key.replace(/-/g, " "));
+    // Handle array of strings
+    if (Array.isArray(data)) {
+      if (data.length === 0) {
+        return <span className="text-gray-500 italic">None</span>;
+      }
+      
+      return (
+        <div className="flex flex-wrap gap-2">
+          {data.map((item, index) => (
+            <Badge key={index} variant="outline" className="capitalize">
+              {item.replace(/-/g, " ")}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+    
+    // Handle object with boolean values
+    if (typeof data === 'object') {
+      const items = Object.entries(data)
+        .filter(([, value]) => value)
+        .map(([key]) => key.replace(/-/g, " "));
 
-    if (items.length === 0)
-      return <span className="text-gray-500 italic">None</span>;
+      if (items.length === 0) {
+        return <span className="text-gray-500 italic">None</span>;
+      }
 
-    return (
-      <div className="flex flex-wrap gap-2">
-        {items.map((item, index) => (
-          <Badge key={index} variant="outline" className="capitalize">
-            {item}
-          </Badge>
-        ))}
-      </div>
-    );
+      return (
+        <div className="flex flex-wrap gap-2">
+          {items.map((item, index) => (
+            <Badge key={index} variant="outline" className="capitalize">
+              {item}
+            </Badge>
+          ))}
+        </div>
+      );
+    }
+    
+    return <span className="text-gray-500 italic">None</span>;
   };
 
   // Get appropriate icon for file type
