@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import MessageSidebar from "./MessageSidebar";
 import MessageChatArea from "./MessageChatArea";
-import { initialMessagesState } from "@/data/mockMessagesData";
 import { MessagesState } from "./types";
 
 interface MessageLayoutProps {
@@ -11,9 +10,17 @@ interface MessageLayoutProps {
   initialData?: MessagesState;
 }
 
+const defaultMessagesState: MessagesState = {
+  contacts: [],
+  conversations: [],
+  selectedContactId: null,
+  isLoadingMessages: false,
+  error: null,
+};
+
 export default function MessageLayout({ initialData }: MessageLayoutProps) {
   const [messagesState, setMessagesState] = useState<MessagesState>(
-    initialData || initialMessagesState
+    initialData || defaultMessagesState
   );
 
   const handleSelectContact = (contactId: string) => {

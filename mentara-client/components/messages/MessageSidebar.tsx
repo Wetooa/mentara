@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import MessageContactItem from "./MessageContactItem";
 import { Contact } from "./types";
-import { fetchContacts } from "@/data/mockMessagesData";
 
 interface MessageSidebarProps {
   onSelectContact: (contactId: string) => void;
@@ -31,21 +30,10 @@ export default function MessageSidebar({
       setIsLoading(propIsLoading || false);
       setError(propError || null);
     } else {
-      const loadContacts = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const fetchedContacts = await fetchContacts();
-          setContacts(fetchedContacts);
-        } catch (err) {
-          console.error("Error fetching contacts:", err);
-          setError("Failed to load contacts. Please try again later.");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadContacts();
+      // If no contacts are passed, show empty state
+      setContacts([]);
+      setIsLoading(false);
+      setError(null);
     }
   }, [propContacts, propIsLoading, propError]);
 

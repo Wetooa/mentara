@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Settings, UserX, Trash2, X, Phone, Video } from "lucide-react";
 import { Contact } from "./types";
-import { getContactById } from "@/data/mockMessagesData";
 
 interface ChatHeaderProps {
   contactId: string;
@@ -23,26 +22,10 @@ export default function ChatHeader({
     if (propContact) {
       setContact(propContact);
     } else {
-      const loadContact = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          // In a real app, this would be an API call
-          const fetchedContact = getContactById(contactId);
-          if (fetchedContact) {
-            setContact(fetchedContact);
-          } else {
-            setError("Contact not found");
-          }
-        } catch (err) {
-          console.error("Error fetching contact:", err);
-          setError("Failed to load contact info");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadContact();
+      // If no contact is passed, show error state
+      setContact(null);
+      setError("Contact information not available");
+      setIsLoading(false);
     }
   }, [contactId, propContact]);
 

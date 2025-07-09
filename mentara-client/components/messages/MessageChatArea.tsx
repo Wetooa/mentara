@@ -4,15 +4,55 @@ import { Paperclip, Smile, Send, X } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
 import { Attachment, Conversation, Message } from "./types";
-import {
-  fetchConversation,
-  sendMessage,
-  groupMessagesByDate,
-} from "@/data/mockMessagesData";
+import { format } from "date-fns";
 
 // Import a simple emoji picker or use a library like emoji-mart
 import dynamic from "next/dynamic";
 const Picker = dynamic(() => import("emoji-picker-react"), { ssr: false });
+
+// Helper function to group messages by date for display
+const groupMessagesByDate = (messages: Message[]) => {
+  const groups: { [date: string]: Message[] } = {};
+
+  messages.forEach((message) => {
+    // Extract date from ISO string if available, or use current date with time
+    let dateKey: string;
+
+    try {
+      // Check if the time string has a valid date component
+      if (message.time.includes("T") || message.time.includes("-")) {
+        // It's likely an ISO date string
+        const messageDate = new Date(message.time);
+        dateKey = format(messageDate, "yyyy-MM-dd");
+      } else {
+        // It's just a time string like "14:30" - use current date
+        const today = new Date();
+        const [hours, minutes] = message.time.split(":").map(Number);
+
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          today.setHours(hours, minutes, 0, 0);
+        }
+
+        dateKey = format(today, "yyyy-MM-dd");
+      }
+    } catch (err) {
+      // Fallback to current date if there's any parsing error
+      console.error("Error parsing message time:", message.time);
+      dateKey = format(new Date(), "yyyy-MM-dd");
+    }
+
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+
+    groups[dateKey].push(message);
+  });
+
+  return Object.entries(groups).map(([date, messages]) => ({
+    date,
+    messages,
+  }));
+};
 
 interface MessageChatAreaProps {
   contactId: string;
@@ -52,33 +92,17 @@ export default function MessageChatArea({
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load conversation from props or fallback to mock data
+  // Load conversation from props or show empty state
   useEffect(() => {
     if (propConversation) {
       setMessages(propConversation.messages);
       setIsLoading(propIsLoadingMessages || false);
       setError(propError || null);
     } else {
-      const loadConversation = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const fetchedConversation = await fetchConversation(contactId);
-          if (fetchedConversation) {
-            setMessages(fetchedConversation.messages);
-          } else {
-            // Create an empty conversation if none exists yet
-            setMessages([]);
-          }
-        } catch (err) {
-          console.error("Error fetching conversation:", err);
-          setError("Failed to load messages. Please try again later.");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadConversation();
+      // If no conversation is passed, show empty state
+      setMessages([]);
+      setIsLoading(false);
+      setError(null);
     }
   }, [contactId, propConversation, propIsLoadingMessages, propError]);
 
@@ -126,13 +150,12 @@ export default function MessageChatArea({
           });
         }
 
-        // Use provided callback or fallback to mock function
+        // Use provided callback or show error
         if (onSendMessage) {
           await onSendMessage(message, fileAttachments);
         } else {
-          // Fallback to mock behavior
-          const newMessage = await sendMessage(contactId, message, fileAttachments);
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
+          // If no send handler is provided, show error
+          throw new Error("No send message handler provided");
         }
 
         // Clear input
