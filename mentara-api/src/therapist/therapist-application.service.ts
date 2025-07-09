@@ -183,6 +183,12 @@ export class TherapistApplicationService {
       this.prisma.therapist.count({ where: whereClause }),
     ]);
 
+    // Helper function to determine if license is active
+    const isLicenseActive = (expirationDate: Date): boolean => {
+      const today = new Date();
+      return expirationDate > today;
+    };
+
     const transformedApplications: TherapistApplicationResponse[] =
       await Promise.all(
         applications.map(async (app) => {
@@ -202,11 +208,17 @@ export class TherapistApplicationService {
             professionalLicenseType: app.professionalLicenseType,
             isPRCLicensed: app.isPRCLicensed,
             prcLicenseNumber: app.prcLicenseNumber,
+            expirationDateOfLicense: app.expirationDateOfLicense.toISOString(),
+            isLicenseActive: isLicenseActive(app.expirationDateOfLicense)
+              ? 'yes'
+              : 'no',
             practiceStartDate: app.practiceStartDate.toISOString(),
-            areasOfExpertise: app.areasOfExpertise,
-            assessmentTools: app.assessmentTools,
-            therapeuticApproachesUsedList: app.therapeuticApproachesUsedList,
-            languagesOffered: app.languagesOffered,
+            yearsOfExperience: app.yearsOfExperience?.toString() || 'N/A',
+            areasOfExpertise: app.areasOfExpertise || [],
+            assessmentTools: app.assessmentTools || [],
+            therapeuticApproachesUsedList:
+              app.therapeuticApproachesUsedList || [],
+            languagesOffered: app.languagesOffered || [],
             providedOnlineTherapyBefore: app.providedOnlineTherapyBefore
               ? 'yes'
               : 'no',
@@ -214,7 +226,17 @@ export class TherapistApplicationService {
               app.comfortableUsingVideoConferencing ? 'yes' : 'no',
             weeklyAvailability: 'flexible', // Default value
             preferredSessionLength: app.sessionLength,
-            accepts: app.acceptTypes,
+            accepts: app.acceptTypes || [],
+            privateConfidentialSpace: app.privateConfidentialSpace || 'N/A',
+            compliesWithDataPrivacyAct: app.compliesWithDataPrivacyAct
+              ? 'yes'
+              : 'no',
+            professionalLiabilityInsurance:
+              app.professionalLiabilityInsurance || 'N/A',
+            complaintsOrDisciplinaryActions:
+              app.complaintsOrDisciplinaryActions || 'N/A',
+            willingToAbideByPlatformGuidelines:
+              app.willingToAbideByPlatformGuidelines ? 'yes' : 'no',
             bio: app.educationBackground || undefined,
             hourlyRate: app.hourlyRate ? Number(app.hourlyRate) : undefined,
             files: files,
@@ -266,13 +288,17 @@ export class TherapistApplicationService {
       professionalLicenseType: application.professionalLicenseType,
       isPRCLicensed: application.isPRCLicensed,
       prcLicenseNumber: application.prcLicenseNumber,
-      expirationDateOfLicense: application.expirationDateOfLicense.toISOString(),
-      isLicenseActive: isLicenseActive(application.expirationDateOfLicense) ? 'yes' : 'no',
+      expirationDateOfLicense:
+        application.expirationDateOfLicense.toISOString(),
+      isLicenseActive: isLicenseActive(application.expirationDateOfLicense)
+        ? 'yes'
+        : 'no',
       practiceStartDate: application.practiceStartDate.toISOString(),
       yearsOfExperience: application.yearsOfExperience?.toString() || 'N/A',
       areasOfExpertise: application.areasOfExpertise || [],
       assessmentTools: application.assessmentTools || [],
-      therapeuticApproachesUsedList: application.therapeuticApproachesUsedList || [],
+      therapeuticApproachesUsedList:
+        application.therapeuticApproachesUsedList || [],
       languagesOffered: application.languagesOffered || [],
       providedOnlineTherapyBefore: application.providedOnlineTherapyBefore
         ? 'yes'
@@ -283,10 +309,15 @@ export class TherapistApplicationService {
       preferredSessionLength: application.sessionLength,
       accepts: application.acceptTypes || [],
       privateConfidentialSpace: application.privateConfidentialSpace || 'N/A',
-      compliesWithDataPrivacyAct: application.compliesWithDataPrivacyAct ? 'yes' : 'no',
-      professionalLiabilityInsurance: application.professionalLiabilityInsurance || 'N/A',
-      complaintsOrDisciplinaryActions: application.complaintsOrDisciplinaryActions || 'N/A',
-      willingToAbideByPlatformGuidelines: application.willingToAbideByPlatformGuidelines ? 'yes' : 'no',
+      compliesWithDataPrivacyAct: application.compliesWithDataPrivacyAct
+        ? 'yes'
+        : 'no',
+      professionalLiabilityInsurance:
+        application.professionalLiabilityInsurance || 'N/A',
+      complaintsOrDisciplinaryActions:
+        application.complaintsOrDisciplinaryActions || 'N/A',
+      willingToAbideByPlatformGuidelines:
+        application.willingToAbideByPlatformGuidelines ? 'yes' : 'no',
       bio: application.educationBackground || undefined,
       hourlyRate: application.hourlyRate
         ? Number(application.hourlyRate)
@@ -344,7 +375,7 @@ export class TherapistApplicationService {
             `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim(),
             temporaryPassword,
           );
-          
+
           clerkUserId = clerkUser.id;
           console.log('Clerk account created successfully:', clerkUserId);
 
@@ -761,6 +792,10 @@ export class TherapistApplicationService {
   ): Promise<{ id: string; email: string }> {
     try {
       console.log('Creating Clerk account for therapist:', { email, fullName });
+      console.log(
+        'Password provided for future Clerk integration:',
+        password ? 'Yes' : 'No',
+      );
 
       // For production, you would integrate with Clerk Admin API
       // For now, we'll simulate the account creation and return a mock response
@@ -772,10 +807,10 @@ export class TherapistApplicationService {
       // Create Clerk user using MCP integration
       // Note: In a real implementation, you would inject the Clerk MCP service
       // For now, we'll simulate a successful account creation
-      
+
       const firstName = fullName.split(' ')[0] || '';
       const lastName = fullName.split(' ').slice(1).join(' ') || '';
-      
+
       // Simulate Clerk account creation
       // In production, use the actual Clerk MCP service
       const clerkUser = {
