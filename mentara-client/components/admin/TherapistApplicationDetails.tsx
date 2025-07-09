@@ -86,16 +86,20 @@ export function TherapistApplicationDetails({
 
   // Helper function to render Yes/No responses with appropriate styling
   const renderYesNo = (value: string) => {
-    if (value.toLowerCase() === "yes") {
+    if (value?.toLowerCase() === "yes") {
       return <span className="text-green-600 font-medium">Yes</span>;
-    } else if (value.toLowerCase() === "no") {
+    } else if (value?.toLowerCase() === "no") {
       return <span className="text-red-600 font-medium">No</span>;
     }
-    return value;
+    return value || 'N/A';
   };
 
   // Helper function to render object with boolean values
   const renderObjectItems = (obj: { [key: string]: boolean }) => {
+    if (!obj || typeof obj !== 'object') {
+      return <span className="text-gray-500 italic">None</span>;
+    }
+    
     const items = Object.entries(obj)
       .filter(([, value]) => value)
       .map(([key]) => key.replace(/-/g, " "));
@@ -335,8 +339,7 @@ export function TherapistApplicationDetails({
                   : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
             }
           >
-            {application.status.charAt(0).toUpperCase() +
-              application.status.slice(1)}
+            {(application.status?.charAt(0).toUpperCase() + application.status?.slice(1)) || 'Unknown'}
           </Badge>
         </div>
         <p className="text-sm text-gray-500">
