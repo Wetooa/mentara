@@ -247,6 +247,7 @@ export const createClientService = (client: Client) => ({
 
 // Main service factory that creates all services
 export const createApiServices = (client: AxiosInstance) => ({
+  auth: createAuthService(client),
   users: createUserService(client),
   therapists: createTherapistService(client),
   reviews: createReviewsService(client),

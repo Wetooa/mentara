@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { clientSession } from '@/lib/session';
 import { UserRole } from '@/lib/auth';
 
 interface RoleProtectionProps {
@@ -48,26 +47,15 @@ export function RoleProtection({
 }: RoleProtectionProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isLoaded, validateSession } = useAuth();
+  const { user, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     if (!isLoaded) return;
 
     // If user is not authenticated, let Clerk middleware handle it
-    if (!user) return;
+    if (!isSignedIn || !user) return;
 
-    // Get current session
-    const sessionInfo = clientSession.getSessionInfo();
-    
-    // If no session exists, try to validate and create one
-    if (!sessionInfo?.isValid) {
-      validateSession().catch(() => {
-        // If validation fails, user will be redirected by Clerk
-      });
-      return;
-    }
-
-    const userRole = sessionInfo.role;
+    const userRole = user.role;
     if (!userRole) return;
 
     // Check role-based access
@@ -97,10 +85,10 @@ export function RoleProtection({
       return;
     }
 
-  }, [isLoaded, user, pathname, router, allowedRoles, fallbackPath, validateSession]);
+  }, [isLoaded, isSignedIn, user, pathname, router, allowedRoles, fallbackPath]);
 
   // Only render children if user is properly authenticated and authorized
-  if (!isLoaded || !user) {
+  if (!isLoaded || !isSignedIn || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -111,8 +99,7 @@ export function RoleProtection({
     );
   }
 
-  const sessionInfo = clientSession.getSessionInfo();
-  const userRole = sessionInfo?.role;
+  const userRole = user.role;
 
   // Check access permissions
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
@@ -143,10 +130,11 @@ export function RoleProtection({
  * Hook for role-based conditional rendering
  */
 export function useRoleAccess(requiredRoles: UserRole[]): boolean {
-  const sessionInfo = clientSession.getSessionInfo();
-  const userRole = sessionInfo?.role;
+  const { user, isSignedIn } = useAuth();
   
-  return userRole ? requiredRoles.includes(userRole) : false;
+  if (!isSignedIn || !user) return false;
+  
+  return requiredRoles.includes(user.role);
 }
 
 /**

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export default function SSOCallbackPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { validateSession, clientRegisterMutation } = useAuth();
+  const { registerUser, submitPreAssessment, isRegistering, isSubmittingAssessment } = useAuth();
 
   useEffect(() => {
     const handleSSOCallback = async () => {
@@ -29,17 +29,31 @@ export default function SSOCallbackPage() {
           // New user from pre-assessment flow - register with backend
           try {
             const answersList = JSON.parse(assessmentAnswers);
-            const backendData = {
-              nickname: user.firstName || "User",
-              email: user.primaryEmailAddress?.emailAddress || user.emailAddresses[0]?.emailAddress || "user@example.com",
-              preAssessmentAnswers: answersList,
-              source: "preAssessment_oauth",
+            
+            // Create user data for backend registration
+            const userData = {
+              user: {
+                email: user.primaryEmailAddress?.emailAddress || user.emailAddresses[0]?.emailAddress || "user@example.com",
+                firstName: user.firstName || "User",
+                middleName: "",
+                lastName: user.lastName || "",
+                birthDate: new Date().toISOString(),
+                address: "",
+                avatarUrl: user.imageUrl || "",
+                role: "client" as const,
+                bio: "",
+                coverImageUrl: "",
+                isActive: true,
+              },
             };
 
             // Register with backend
-            await clientRegisterMutation.mutateAsync({
-              userId: user.id,
-              data: backendData,
+            await registerUser(userData);
+            
+            // Submit pre-assessment data
+            await submitPreAssessment({
+              answerMatrix: answersList,
+              metadata: { source: "preAssessment_oauth" },
             });
             
             toast.success("Welcome! Your account has been created.");
@@ -48,9 +62,6 @@ export default function SSOCallbackPage() {
             toast.error("Account created but registration incomplete. Please contact support.");
           }
         }
-        
-        // Validate session with backend (for both new and existing users)
-        await validateSession();
         
         if (assessmentAnswers) {
           // Clear assessment data and redirect to welcome
@@ -71,7 +82,7 @@ export default function SSOCallbackPage() {
     if (user) {
       handleSSOCallback();
     }
-  }, [user, router, validateSession]);
+  }, [user, router, registerUser, submitPreAssessment]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

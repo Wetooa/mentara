@@ -9,6 +9,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
+import { useEffect } from "react";
 
 export default function VerifyAccount() {
   const { isLoaded, signUp } = useSignUp();
@@ -18,7 +19,26 @@ export default function VerifyAccount() {
     return;
   }
 
-  const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
+  useEffect(() => {
+    const sendVerificationEmail = async () => {
+      if (isLoaded && signUp) {
+        try {
+          const protocol = window.location.protocol;
+          const host = window.location.host;
+
+          const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
+          
+          await startEmailLinkFlow({
+            redirectUrl: `${protocol}//${host}/verify`,
+          });
+        } catch (error) {
+          console.error("Failed to send initial verification email:", error);
+        }
+      }
+    };
+
+    sendVerificationEmail();
+  }, [isLoaded, signUp]);
 
   async function handleResendEmail() {
     if (isLoaded) {
