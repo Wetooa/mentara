@@ -16,12 +16,22 @@ export interface TherapistRecommendation {
   bio?: string;
   profileImage?: string;
   availability?: any;
+  matchScore?: number; // Added for recommendation scoring
+}
+
+export interface MatchCriteria {
+  primaryConditions: string[];
+  secondaryConditions: string[];
+  severityLevels: Record<string, string>;
 }
 
 export interface TherapistRecommendationResponse {
   therapists: TherapistRecommendation[];
-  total: number;
-  hasMore: boolean;
+  totalCount: number;
+  userConditions: string[];
+  matchCriteria: MatchCriteria;
+  page: number;
+  pageSize: number;
 }
 
 export interface TherapistSearchParams {

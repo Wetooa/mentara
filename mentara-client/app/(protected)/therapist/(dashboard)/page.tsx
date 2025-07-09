@@ -5,11 +5,15 @@ import DashboardGreeting from "@/components/therapist/dashboard/DashboardGreetin
 import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
 import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
 import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
-import { useTherapistData } from "@/hooks/useTherapistData";
+import { useTherapistDashboard } from "@/hooks/useTherapistDashboard";
 
 export default function TherapistDashboardPage() {
-  const { therapist, stats, upcomingAppointments, isLoading, error } =
-    useTherapistData();
+  const { data, isLoading, error } = useTherapistDashboard();
+  
+  // Destructure from data object for backward compatibility
+  const therapist = data?.therapist;
+  const stats = data?.stats;
+  const upcomingAppointments = data?.upcomingAppointments || [];
 
   if (isLoading) {
     return <div className="p-6">Loading dashboard data...</div>;
@@ -25,7 +29,7 @@ export default function TherapistDashboardPage() {
 
   return (
     <div className="p-6">
-      <DashboardGreeting name={therapist.name} />
+      <DashboardGreeting name={therapist?.name || 'Therapist'} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <div className="lg:col-span-2">
@@ -44,7 +48,7 @@ export default function TherapistDashboardPage() {
 
         <div>
           <h2 className="text-lg font-medium mb-4">Overview</h2>
-          <DashboardOverview patientStats={stats.patientStats} />
+          <DashboardOverview patientStats={stats?.patientStats} />
         </div>
       </div>
     </div>

@@ -55,6 +55,7 @@ model Room {
     id          String    @id @default(uuid())
     name        String
     order       Int
+    postingRole String    @default("member") // member, moderator, admin - minimum role required to post
     roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id])
     roomGroupId String
     posts       Post[]

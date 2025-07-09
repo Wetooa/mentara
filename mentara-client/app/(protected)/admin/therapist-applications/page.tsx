@@ -29,11 +29,11 @@ export default function TherapistApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   // Use React Query hook for data fetching
-  const { 
-    data: applications = [], 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: applications = [],
+    isLoading,
+    error,
+    refetch,
   } = useTherapistApplications({
     status: statusFilter || undefined,
   });
@@ -44,12 +44,13 @@ export default function TherapistApplicationsPage() {
     if (!searchQuery) return applications;
 
     const searchLower = searchQuery.toLowerCase();
-    return applications.filter((app) =>
-      app.firstName?.toLowerCase().includes(searchLower) ||
-      app.lastName?.toLowerCase().includes(searchLower) ||
-      app.email?.toLowerCase().includes(searchLower) ||
-      app.providerType?.toLowerCase().includes(searchLower) ||
-      app.province?.toLowerCase().includes(searchLower)
+    return applications.filter(
+      (app) =>
+        app.firstName?.toLowerCase().includes(searchLower) ||
+        app.lastName?.toLowerCase().includes(searchLower) ||
+        app.email?.toLowerCase().includes(searchLower) ||
+        app.providerType?.toLowerCase().includes(searchLower) ||
+        app.province?.toLowerCase().includes(searchLower)
     );
   }, [applications, searchQuery]);
 
@@ -123,7 +124,9 @@ export default function TherapistApplicationsPage() {
         ) : error ? (
           <div className="py-8 text-center">
             <p className="text-red-500">
-              {error instanceof Error ? error.message : 'Failed to load applications. Please try again.'}
+              {error instanceof Error
+                ? error.message
+                : "Failed to load applications. Please try again."}
             </p>
             <Button
               onClick={() => refetch()}

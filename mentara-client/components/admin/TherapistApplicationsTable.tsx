@@ -30,10 +30,12 @@ import type { TherapistApplication } from "@/lib/api/services/therapists";
 
 interface TherapistApplicationsTableProps {
   applications: TherapistApplication[];
+  onStatusChange?: (id: string, status: "approved" | "rejected" | "pending") => void;
 }
 
 export function TherapistApplicationsTable({
   applications,
+  onStatusChange,
 }: TherapistApplicationsTableProps) {
   const router = useRouter();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -78,6 +80,10 @@ export function TherapistApplicationsTable({
         },
         {
           onSuccess: () => {
+            // Call the parent component's callback if provided
+            if (onStatusChange && pendingAction) {
+              onStatusChange(pendingAction.id, pendingAction.status);
+            }
             setConfirmationOpen(false);
             setPendingAction(null);
           },

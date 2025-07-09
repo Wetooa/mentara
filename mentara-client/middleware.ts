@@ -1,4 +1,4 @@
-import { clerkMiddleware, createClerkClient } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { UserRole } from "@/lib/auth";
@@ -28,6 +28,10 @@ const publicRoutes = [
 const publicApiRoutes = [
   "/api/therapist/apply",
   "/api/therapist/upload-public",
+  "/api/auth/validate-role",
+  "/api/auth/session-info",
+  "/api/auth/refresh-session",
+  "/api/auth/clear-session",
 ];
 
 // Helper to get required role for a path
@@ -40,74 +44,43 @@ function getRequiredRole(pathname: string): string | null {
   return null;
 }
 
-function getHandleAllowedPath(userRole: UserRole) {
-  let redirectPath = "/";
-  if (userRole === "client") redirectPath = "/user";
-  else if (userRole === "therapist") redirectPath = "/therapist";
-  else if (userRole === "moderator") redirectPath = "/moderator";
-  else if (userRole === "admin") redirectPath = "/admin";
-  return redirectPath;
+function getDefaultPathForRole(userRole: UserRole): string {
+  switch (userRole) {
+    case "client": return "/user";
+    case "therapist": return "/therapist";
+    case "moderator": return "/moderator";
+    case "admin": return "/admin";
+    default: return "/";
+  }
 }
 
-// Utility to extract role from Clerk sessionClaims or publicMetadata
-export async function getUserRoleFromPublicMetadata(
-  userId: string
-): Promise<UserRole | null> {
-  const clerkClient = createClerkClient({
-    secretKey: process.env.CLERK_SECRET_KEY,
-  });
-  const user = await clerkClient.users.getUser(userId);
-  return user?.publicMetadata.role as UserRole;
-}
+// Since we're using localStorage, role checking will happen on client-side
+// Middleware will only handle Clerk authentication
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const authObj = await auth();
-
-  // If user is authenticated and visits the root page, redirect to their dashboard
-  if (authObj.userId && req.nextUrl.pathname === "/") {
-    const userRole = await getUserRoleFromPublicMetadata(authObj.userId);
-
-    if (!userRole) {
-      return NextResponse.next();
-    }
-
-    const redirectPath = getHandleAllowedPath(userRole);
-    return NextResponse.redirect(new URL(redirectPath, req.url));
-  }
+  const { pathname } = req.nextUrl;
 
   // Allow all public routes (exact match or path prefix for therapist-application)
-  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname) || 
-                       req.nextUrl.pathname.startsWith('/therapist-application/');
+  const isPublicRoute = publicRoutes.includes(pathname) || 
+                       pathname.startsWith('/therapist-application/');
   
   // Allow public API routes (exact match)
-  const isPublicApiRoute = publicApiRoutes.includes(req.nextUrl.pathname);
+  const isPublicApiRoute = publicApiRoutes.includes(pathname);
   
   if (isPublicRoute || isPublicApiRoute) {
     return NextResponse.next();
   }
 
-  // If not authenticated, redirect to sign-in
+  // If not authenticated with Clerk, redirect to sign-in
   if (!authObj.userId) {
     const signInUrl = new URL("/sign-in", req.url);
     signInUrl.searchParams.set("redirect_url", req.url);
     return NextResponse.redirect(signInUrl);
   }
 
-  // Role-based access control
-  const requiredRole = getRequiredRole(req.nextUrl.pathname);
-  if (requiredRole) {
-    const userRole = await getUserRoleFromPublicMetadata(authObj.userId);
-
-    if (!userRole) {
-      return NextResponse.next();
-    }
-
-    if (userRole !== requiredRole) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
-  }
-
+  // For authenticated users, allow access to protected routes
+  // Role-based access control will be handled on the client-side using localStorage session
   return NextResponse.next();
 });
 

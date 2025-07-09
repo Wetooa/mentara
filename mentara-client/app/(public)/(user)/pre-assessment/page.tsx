@@ -1,11 +1,11 @@
 "use client";
 
-import Logo from "@/components/logo";
+import Logo from "@/components/Logo";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/checklist";
-import QuestionnaireForm from "@/components/pre-assessment/forms/questionnaire-form";
-import PreAssessmentSignUp from "@/components/auth/sign-up";
-import VerifyAccount from "@/components/auth/verify-account";
-import PreAssessmentProgressBar from "@/components/pre-assessment/progress-bar";
+import QuestionnaireForm from "@/components/pre-assessment/forms/QuestionnaireForm";
+import PreAssessmentSignUp from "@/components/auth/SignUp";
+import VerifyAccount from "@/components/auth/VerifyAccount";
+import PreAssessmentProgressBar from "@/components/pre-assessment/ProgressBar";
 import { Button } from "@/components/ui/button";
 import { fade, fadeDown, reset, slide, start } from "@/lib/animations";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";

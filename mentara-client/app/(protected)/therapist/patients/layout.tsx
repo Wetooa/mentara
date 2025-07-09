@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, ChevronDown, ChevronRight, RefreshCw, AlertCircle } from "lucide-react";
-import { usePatientsData } from "@/hooks/usePatientsData";
+import { usePatientsList } from "@/hooks/usePatientsList";
 
 export default function PatientsLayout({
   children,
@@ -15,16 +15,39 @@ export default function PatientsLayout({
   const pathname = usePathname();
   const [filterOpen, setFilterOpen] = useState(false);
   
-  const {
-    isLoading,
-    error,
-    filteredPatients,
-    searchQuery,
-    filters,
-    searchPatients,
-    updateFilters,
-    refreshPatients,
-  } = usePatientsData();
+  // Use modern hook and implement filtering locally
+  const { data: rawPatients, isLoading, error, refetch } = usePatientsList();
+  
+  // Local state for search and filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<{
+    status: 'all' | 'active' | 'completed' | 'inactive';
+  }>({
+    status: 'all',
+  });
+
+  // Transform and filter patients
+  const patients = rawPatients || [];
+  
+  const filteredPatients = patients.filter((patient) => {
+    // Search filter
+    const matchesSearch = 
+      searchQuery === "" ||
+      patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.diagnosis?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Status filter (for now, just show all active patients since status isn't in PatientData)
+    const matchesStatus = filters.status === 'all' || filters.status === 'active';
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Helper functions
+  const searchPatients = (query: string) => setSearchQuery(query);
+  const updateFilters = (newFilters: Partial<typeof filters>) => 
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  const refreshPatients = () => refetch();
 
   // Check if a patient is selected
   const isPatientSelected = pathname.split("/").length > 3;
@@ -229,9 +252,7 @@ export default function PatientsLayout({
                         <div className="flex items-center mt-1">
                           <div 
                             className={`w-2 h-2 rounded-full mr-2 ${
-                              patient.status === 'active' ? 'bg-green-400' :
-                              patient.status === 'completed' ? 'bg-blue-400' :
-                              patient.status === 'inactive' ? 'bg-gray-400' : 'bg-yellow-400'
+                              patient.currentSession >= patient.totalSessions ? 'bg-blue-400' : 'bg-green-400'
                             }`}
                           />
                           <span className="text-xs text-gray-400">

@@ -1,22 +1,21 @@
-
 model Worksheet {
-    id          String                @id @default(uuid())
-    clientId    String                // Use clientId for proper relation with Client model
-    therapistId String?
-    title       String
-    instructions String?              // Added instructions field
-    description String?
-    dueDate     DateTime              // Added due date
-    status      String                @default("upcoming") // upcoming, past_due, completed, assigned
-    isCompleted Boolean               @default(false)      // Completion status
-    submittedAt DateTime?             // When the worksheet was submitted
-    feedback    String?               // Therapist feedback
-    createdAt   DateTime              @default(now())
-    updatedAt   DateTime              @updatedAt
-    materials   WorksheetMaterial[]
-    submissions WorksheetSubmission[]
-    client      Client                @relation(fields: [clientId], references: [userId])
-    therapist   Therapist?            @relation(fields: [therapistId], references: [userId])
+    id           String                @id @default(uuid())
+    clientId     String // Use clientId for proper relation with Client model
+    therapistId  String?
+    title        String
+    instructions String? // Added instructions field
+    description  String?
+    dueDate      DateTime // Added due date
+    status       String                @default("upcoming") // upcoming, past_due, completed, assigned
+    isCompleted  Boolean               @default(false) // Completion status
+    submittedAt  DateTime? // When the worksheet was submitted
+    feedback     String? // Therapist feedback
+    createdAt    DateTime              @default(now())
+    updatedAt    DateTime              @updatedAt
+    materials    WorksheetMaterial[]
+    submissions  WorksheetSubmission[]
+    client       Client                @relation(fields: [clientId], references: [userId])
+    therapist    Therapist?            @relation(fields: [therapistId], references: [userId])
 
     @@index([clientId])
     @@index([therapistId])
@@ -27,10 +26,10 @@ model Worksheet {
 model WorksheetMaterial {
     id          String    @id @default(uuid())
     worksheetId String
-    filename    String    // Original filename
-    url         String    // URL to the file
-    fileSize    Int?      // File size in bytes
-    fileType    String?   // MIME type
+    filename    String // Original filename
+    url         String // URL to the file
+    fileSize    Int? // File size in bytes
+    fileType    String? // MIME type
     createdAt   DateTime  @default(now())
     worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
 
@@ -40,11 +39,11 @@ model WorksheetMaterial {
 model WorksheetSubmission {
     id          String    @id @default(uuid())
     worksheetId String
-    clientId    String    // Use clientId for proper relation with Client model
-    filename    String    // Original filename
-    url         String    // URL to the file
-    fileSize    Int?      // File size in bytes
-    fileType    String?   // MIME type
+    clientId    String // Use clientId for proper relation with Client model
+    filename    String // Original filename
+    url         String // URL to the file
+    fileSize    Int? // File size in bytes
+    fileType    String? // MIME type
     content     String?   @db.Text // Optional text content
     createdAt   DateTime  @default(now())
     worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)

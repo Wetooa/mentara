@@ -61,7 +61,9 @@ describe('AuditLogsService', () => {
         user: mockUser,
       };
 
-      (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createAuditLog(mockAuditData);
 
@@ -96,7 +98,9 @@ describe('AuditLogsService', () => {
         user: null,
       };
 
-      (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createAuditLog(minimalData);
 
@@ -133,7 +137,9 @@ describe('AuditLogsService', () => {
         user: mockUser,
       };
 
-      (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createAuditLog(auditDataWithChanges);
 
@@ -178,7 +184,9 @@ describe('AuditLogsService', () => {
     ];
 
     it('should return all audit logs when no filters provided', async () => {
-      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue(mockAuditLogs);
+      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue(
+        mockAuditLogs,
+      );
 
       const result = await service.findAuditLogs();
 
@@ -202,7 +210,9 @@ describe('AuditLogsService', () => {
     });
 
     it('should filter audit logs by user ID', async () => {
-      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue([mockAuditLogs[0]]);
+      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue([
+        mockAuditLogs[0],
+      ]);
 
       const result = await service.findAuditLogs(TEST_USER_IDS.CLIENT);
 
@@ -219,7 +229,9 @@ describe('AuditLogsService', () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
-      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue(mockAuditLogs);
+      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue(
+        mockAuditLogs,
+      );
 
       await service.findAuditLogs(
         TEST_USER_IDS.CLIENT,
@@ -251,7 +263,9 @@ describe('AuditLogsService', () => {
     it('should handle date range filters correctly', async () => {
       const startDate = new Date('2024-01-01');
 
-      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue(mockAuditLogs);
+      (prismaService.auditLog.findMany as jest.Mock).mockResolvedValue(
+        mockAuditLogs,
+      );
 
       await service.findAuditLogs(
         undefined,
@@ -292,7 +306,9 @@ describe('AuditLogsService', () => {
         isResolved: false,
       };
 
-      (prismaService.systemEvent.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.systemEvent.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createSystemEvent(mockSystemEventData);
 
@@ -317,7 +333,9 @@ describe('AuditLogsService', () => {
         isResolved: false,
       };
 
-      (prismaService.systemEvent.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.systemEvent.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createSystemEvent(minimalData);
 
@@ -351,7 +369,9 @@ describe('AuditLogsService', () => {
     ];
 
     it('should return all system events when no filters provided', async () => {
-      (prismaService.systemEvent.findMany as jest.Mock).mockResolvedValue(mockSystemEvents);
+      (prismaService.systemEvent.findMany as jest.Mock).mockResolvedValue(
+        mockSystemEvents,
+      );
 
       const result = await service.findSystemEvents();
 
@@ -422,7 +442,9 @@ describe('AuditLogsService', () => {
         resolution: 'Fixed API endpoint',
       };
 
-      (prismaService.systemEvent.update as jest.Mock).mockResolvedValue(resolvedEvent);
+      (prismaService.systemEvent.update as jest.Mock).mockResolvedValue(
+        resolvedEvent,
+      );
 
       const result = await service.resolveSystemEvent(
         'event-id',
@@ -463,7 +485,9 @@ describe('AuditLogsService', () => {
         createdAt: new Date(),
       };
 
-      (prismaService.dataChangeLog.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.dataChangeLog.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createDataChangeLog(mockDataChangeData);
 
@@ -487,7 +511,9 @@ describe('AuditLogsService', () => {
         createdAt: new Date(),
       };
 
-      (prismaService.dataChangeLog.create as jest.Mock).mockResolvedValue(expectedResult);
+      (prismaService.dataChangeLog.create as jest.Mock).mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.createDataChangeLog(dataWithoutClass);
 
@@ -566,7 +592,9 @@ describe('AuditLogsService', () => {
           userAgent: 'Mozilla/5.0',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logUserLogin(
           TEST_USER_IDS.CLIENT,
@@ -601,7 +629,9 @@ describe('AuditLogsService', () => {
           description: 'User logged out',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logUserLogout(TEST_USER_IDS.CLIENT);
 
@@ -625,7 +655,9 @@ describe('AuditLogsService', () => {
           description: 'User updated profile',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logProfileUpdate(
           TEST_USER_IDS.CLIENT,
@@ -651,7 +683,9 @@ describe('AuditLogsService', () => {
           description: 'Therapist application submitted',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logTherapistApplicationSubmit(
           TEST_USER_IDS.THERAPIST,
@@ -675,7 +709,9 @@ describe('AuditLogsService', () => {
           description: 'Therapist application approved',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logTherapistApplicationReview(
           TEST_USER_IDS.THERAPIST,
@@ -699,7 +735,9 @@ describe('AuditLogsService', () => {
           description: 'Therapist application rejected',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logTherapistApplicationReview(
           TEST_USER_IDS.THERAPIST,
@@ -726,7 +764,9 @@ describe('AuditLogsService', () => {
           description: 'Meeting created',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logMeetingCreate(
           'meeting-id',
@@ -754,7 +794,9 @@ describe('AuditLogsService', () => {
           description: 'Meeting updated',
         };
 
-        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.auditLog.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logMeetingUpdate(
           'meeting-id',
@@ -787,7 +829,9 @@ describe('AuditLogsService', () => {
           stackTrace: 'Error stack trace',
         };
 
-        (prismaService.systemEvent.create as jest.Mock).mockResolvedValue(expectedResult);
+        (prismaService.systemEvent.create as jest.Mock).mockResolvedValue(
+          expectedResult,
+        );
 
         const result = await service.logSystemError('PaymentService', error, {
           sessionId: 'session-123',
@@ -846,7 +890,9 @@ describe('AuditLogsService', () => {
       });
 
       expect(prismaService.auditLog.count).toHaveBeenCalledWith({ where: {} });
-      expect((prismaService.auditLog.groupBy as jest.Mock)).toHaveBeenCalledTimes(3);
+      expect(prismaService.auditLog.groupBy as jest.Mock).toHaveBeenCalledTimes(
+        3,
+      );
     });
 
     it('should return audit statistics with date filters', async () => {
@@ -870,7 +916,7 @@ describe('AuditLogsService', () => {
       expect(prismaService.auditLog.count).toHaveBeenCalledWith({
         where: expectedWhere,
       });
-      expect((prismaService.auditLog.groupBy as jest.Mock)).toHaveBeenCalledWith({
+      expect(prismaService.auditLog.groupBy as jest.Mock).toHaveBeenCalledWith({
         by: ['action'],
         where: expectedWhere,
         _count: { action: true },

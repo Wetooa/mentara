@@ -1,6 +1,6 @@
-export { default as SignUp } from "./sign-up";
-export { default as VerifyAccount } from "./verify-account";
-export { default as ContinueWithGoogle } from "./continue-with-google";
-export { default as ContinueWithMicrosoft } from "./continue-with-microsoft";
-export { default as SignIn } from "./sign-in";
-export { withRole } from "./with-role";
+export { default as SignUp } from "./SignUp";
+export { default as VerifyAccount } from "./VerifyAccount";
+export { default as ContinueWithGoogle } from "./ContinueWithGoogle";
+export { default as ContinueWithMicrosoft } from "./ContinueWithMicrosoft";
+export { default as SignIn } from "./SignIn";
+export { withRole } from "./WithRole";

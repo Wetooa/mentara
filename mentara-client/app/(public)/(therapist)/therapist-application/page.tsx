@@ -30,9 +30,9 @@ import { SidebarContent } from "@/components/therapist-application/SidebarConten
 // Store and API
 import useTherapistForm from "@/store/therapistform";
 import { useToast } from "@/contexts/ToastContext";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useAutoSave } from "@/hooks/use-auto-save";
-import { useSectionCompletion } from "@/hooks/use-section-completion";
+import { useIsMobile } from "@/hooks/useMobile";
+import { useAutoSave } from "@/hooks/useAutoSave";
+import { useSectionCompletion } from "@/hooks/useSectionCompletion";
 import { submitApplicationWithDocuments } from "@/lib/api/therapist-application";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO

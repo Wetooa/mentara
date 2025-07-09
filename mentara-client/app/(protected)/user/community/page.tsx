@@ -1,145 +1,333 @@
-import CommunitySidebar from "@/components/community/sidebar";
+"use client";
+
+import { formatDistanceToNow } from "date-fns";
+import CommunitySidebar from "@/components/community/Sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatDistanceToNow } from "date-fns";
-import { ChevronDown, Heart, MessageCircle, Plus, Share2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Heart, 
+  MessageCircle, 
+  Plus, 
+  Hash, 
+  Users, 
+  Calendar,
+  PenSquare,
+  Send,
+  Lock,
+  AlertCircle,
+  Activity
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useCommunityPage } from "@/hooks/useCommunityPage";
+import type { Post } from "@/lib/api/services/communities";
 
 export default function UserCommunity() {
-  const items = [
-    {
-      id: 1,
-      author: "John Doe",
-      authorImage: "/avatars/john-doe.png",
-      title: "Lorem ipsum dolor sit amet",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatibus.",
-      createdAt: new Date(),
-      likes: 24,
-      comments: 8,
-    },
-    {
-      id: 2,
-      author: "Jane Smith",
-      authorImage: "/avatars/jane-smith.png",
-      title: "Dealing with anxiety during stressful periods",
-      description:
-        "I've been trying various techniques to manage anxiety during work deadlines. Meditation has been incredibly helpful along with regular exercise. What strategies have worked for you?",
-      createdAt: new Date(Date.now() - 86400000), // 1 day ago
-      likes: 42,
-      comments: 15,
-    },
-    {
-      id: 3,
-      author: "Alex Johnson",
-      authorImage: "/avatars/alex-johnson.png",
-      title: "Weekly gratitude practice",
-      description:
-        "I've started a weekly gratitude journal and it's been transformative for my mental health. Even on difficult days, finding three things to be grateful for shifts my perspective dramatically.",
-      createdAt: new Date(Date.now() - 172800000), // 2 days ago
-      likes: 36,
-      comments: 11,
-    },
-  ];
+  const {
+    selectedCommunityId,
+    selectedRoomId,
+    selectedRoom,
+    isCreatePostOpen,
+    newPostTitle,
+    newPostContent,
+    postsData,
+    postsLoading,
+    postsError,
+    communityStats,
+    createPostMutation,
+    heartPostMutation,
+    handleCommunitySelect,
+    handleRoomSelect,
+    handleCreatePost,
+    handleHeartPost,
+    retryLoadPosts,
+    setIsCreatePostOpen,
+    setNewPostTitle,
+    setNewPostContent,
+    getUserInitials,
+    getRoomBreadcrumb,
+    isPostingAllowed,
+    isPostHearted,
+  } = useCommunityPage();
+
+  const breadcrumb = getRoomBreadcrumb();
 
   return (
-    <main className="w-full flex gap-6 h-full">
-      <CommunitySidebar />
+    <main className="w-full flex h-full">
+      <CommunitySidebar
+        selectedCommunityId={selectedCommunityId}
+        selectedRoomId={selectedRoomId}
+        onCommunitySelect={handleCommunitySelect}
+        onRoomSelect={handleRoomSelect}
+      />
 
-      <div className="flex-1 p-6 w-full bg-slate-50">
-        <div className="w-full flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-slate-800">Safe Space</h1>
-          <div className="flex gap-4 items-center">
-            <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border border-slate-200 cursor-pointer hover:bg-slate-50">
-              <span className="text-sm font-medium">Latest</span>
-              <ChevronDown className="h-4 w-4" />
-            </div>
-
-            <Button className="rounded-full">Joined</Button>
-          </div>
-        </div>
-
-        <div className="flex gap-6">
-          <section className="flex-1">
-            <Card className="mb-6 overflow-visible relative">
-              <CardContent className="p-4 flex items-center gap-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback>You</AvatarFallback>
-                </Avatar>
-                <p className="text-slate-500 flex-1">Share your thoughts...</p>
-
-                <Button
-                  size="icon"
-                  className="absolute top-4 right-4 rounded-full h-9 w-9 bg-primary text-white hover:bg-primary/90"
-                >
-                  <Plus className="w-5 h-5" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-6">
-              {items.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <CardHeader className="p-4 pb-2 flex flex-row items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={item.authorImage} alt={item.author} />
-                      <AvatarFallback>{item.author[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-medium">{item.author}</h3>
-                      <p className="text-xs text-slate-500">
-                        {formatDistanceToNow(item.createdAt, {
-                          addSuffix: true,
-                        })}
-                      </p>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-2">
-                    <h4 className="font-medium mb-2">{item.title}</h4>
-                    <p className="text-slate-600">{item.description}</p>
-                  </CardContent>
-                  <CardFooter className="p-4 pt-2 flex gap-4 text-slate-500">
-                    <button className="flex items-center gap-1 hover:text-primary">
-                      <Heart className="h-4 w-4" /> {item.likes}
-                    </button>
-                    <button className="flex items-center gap-1 hover:text-primary">
-                      <MessageCircle className="h-4 w-4" /> {item.comments}
-                    </button>
-                    <button className="flex items-center gap-1 hover:text-primary ml-auto">
-                      <Share2 className="h-4 w-4" />
-                    </button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </section>
-
-          <aside className="w-72 shrink-0">
-            <Card>
-              <CardHeader className="pb-2">
-                <h4 className="font-semibold text-lg">About Safe Space</h4>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-600">
-                  A community dedicated to sharing mental health experiences in
-                  a judgment-free environment. Feel free to share your thoughts,
-                  ask questions, and support others on their journey.
-                </p>
-                <Separator className="my-4" />
-                <div className="text-sm text-slate-500">
-                  <p>👥 1,248 members</p>
-                  <p>📅 Created January 2023</p>
+      <div className="flex-1 flex flex-col h-full">
+        {/* Main Content Area */}
+        {!selectedRoomId ? (
+          // Welcome/No Room Selected State
+          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div className="text-center max-w-md">
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Users className="h-8 w-8 text-secondary" />
+              </div>
+              <h2 className="text-2xl font-bold text-neutral-800 mb-2">Welcome to Communities</h2>
+              <p className="text-neutral-600 mb-6">
+                Select a community and room from the sidebar to start engaging with others who share similar experiences.
+              </p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <Activity className="h-5 w-5 text-green-600 mx-auto mb-1" />
+                  <p className="font-medium">Active Communities</p>
+                  <p className="text-neutral-500">{communityStats?.totalCommunities || 0}</p>
                 </div>
-              </CardContent>
-            </Card>
-          </aside>
-        </div>
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <MessageCircle className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                  <p className="font-medium">Total Posts</p>
+                  <p className="text-neutral-500">{communityStats?.totalPosts || 0}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Room Content
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Room Header */}
+            <div className="bg-white border-b border-neutral-200 p-4">
+              {breadcrumb && (
+                <div className="flex items-center gap-2 text-sm text-neutral-600 mb-4">
+                  <span className="font-medium">{breadcrumb.communityName}</span>
+                  <span>/</span>
+                  <span className="text-neutral-500">{breadcrumb.roomGroupName}</span>
+                  <span>/</span>
+                  <div className="flex items-center gap-1">
+                    {breadcrumb.roomPostingRole === "moderator" || breadcrumb.roomPostingRole === "admin" ? (
+                      <Lock className="h-3 w-3 text-amber-500" />
+                    ) : (
+                      <Hash className="h-3 w-3" />
+                    )}
+                    <span className="font-medium text-neutral-800">{breadcrumb.roomName}</span>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    {selectedRoom?.postingRole === "moderator" || selectedRoom?.postingRole === "admin" ? (
+                      <Lock className="h-5 w-5 text-amber-500" />
+                    ) : (
+                      <Hash className="h-5 w-5 text-neutral-500" />
+                    )}
+                    <h1 className="text-xl font-semibold text-neutral-800">
+                      {selectedRoom?.name}
+                    </h1>
+                  </div>
+                  {selectedRoom?.postingRole !== "member" && (
+                    <Badge variant="outline" className="text-xs">
+                      {selectedRoom?.postingRole === "moderator" ? "Moderators Only" : "Admins Only"}
+                    </Badge>
+                  )}
+                </div>
+
+                <Dialog open={isCreatePostOpen} onOpenChange={setIsCreatePostOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="flex items-center gap-2"
+                      disabled={!isPostingAllowed()}
+                    >
+                      <PenSquare className="h-4 w-4" />
+                      New Post
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Create New Post in {selectedRoom?.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="title">Title</Label>
+                        <Input
+                          id="title"
+                          value={newPostTitle}
+                          onChange={(e) => setNewPostTitle(e.target.value)}
+                          placeholder="What's on your mind?"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="content">Content</Label>
+                        <Textarea
+                          id="content"
+                          value={newPostContent}
+                          onChange={(e) => setNewPostContent(e.target.value)}
+                          placeholder="Share your thoughts, experiences, or ask for support..."
+                          rows={6}
+                          className="mt-1 resize-none"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsCreatePostOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleCreatePost}
+                          disabled={createPostMutation.isPending || !newPostTitle.trim() || !newPostContent.trim()}
+                        >
+                          {createPostMutation.isPending ? (
+                            <div className="flex items-center gap-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                              Posting...
+                            </div>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Post
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+
+            {/* Posts Content */}
+            <div className="flex-1 overflow-y-auto bg-neutral-50">
+              <div className="max-w-4xl mx-auto p-6">
+                {postsLoading ? (
+                  // Loading state
+                  <div className="space-y-6">
+                    {[1, 2, 3].map(i => (
+                      <Card key={i}>
+                        <CardHeader className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="space-y-1">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-3 w-16" />
+                            </div>
+                          </div>
+                          <Skeleton className="h-6 w-3/4" />
+                        </CardHeader>
+                        <CardContent>
+                          <Skeleton className="h-20 w-full" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : postsError ? (
+                  // Error state
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-neutral-800 mb-2">Failed to load posts</h3>
+                      <p className="text-neutral-600 mb-4">
+                        There was an error loading posts from this room.
+                      </p>
+                      <Button onClick={retryLoadPosts}>
+                        Try Again
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : !postsData?.posts.length ? (
+                  // Empty state
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <MessageCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-neutral-800 mb-2">No posts yet</h3>
+                      <p className="text-neutral-600 mb-4">
+                        Be the first to start a conversation in this room!
+                      </p>
+                      {isPostingAllowed() ? (
+                        <Button onClick={() => setIsCreatePostOpen(true)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create First Post
+                        </Button>
+                      ) : (
+                        <p className="text-sm text-neutral-500">
+                          Only moderators can post in this room.
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  // Posts list
+                  <div className="space-y-6">
+                    {postsData.posts.map((post: Post) => (
+                      (
+                        <Card key={post.id} className="hover:shadow-md transition-shadow">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage src={post.user.avatarUrl} />
+                                  <AvatarFallback>
+                                    {getUserInitials(post.user.firstName, post.user.lastName)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <h3 className="font-medium text-neutral-800">
+                                    {post.user.firstName} {post.user.lastName}
+                                  </h3>
+                                  <p className="text-xs text-neutral-500 flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <h2 className="text-lg font-semibold text-neutral-900 mt-3">
+                              {post.title}
+                            </h2>
+                          </CardHeader>
+                          
+                          <CardContent>
+                            <p className="text-neutral-700 whitespace-pre-wrap leading-relaxed">
+                              {post.content}
+                            </p>
+                            
+                            <Separator className="my-4" />
+                            
+                            <div className="flex items-center gap-6 text-sm">
+                              <button
+                                onClick={() => handleHeartPost(post)}
+                                className={cn(
+                                  "flex items-center gap-2 hover:text-red-500 transition-colors",
+                                  isPostHearted(post) && "text-red-500"
+                                )}
+                                disabled={heartPostMutation.isPending}
+                              >
+                                <Heart className={cn("h-4 w-4", isPostHearted(post) && "fill-current")} />
+                                <span>{post._count.hearts}</span>
+                              </button>
+                              
+                              <div className="flex items-center gap-2 text-neutral-500">
+                                <MessageCircle className="h-4 w-4" />
+                                <span>{post._count.comments}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

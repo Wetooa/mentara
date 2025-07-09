@@ -72,7 +72,9 @@ describe('ClientService', () => {
 
   describe('getProfile', () => {
     it('should return client profile successfully', async () => {
-      (prismaService.client.findUnique as jest.Mock).mockResolvedValue(mockClient);
+      (prismaService.client.findUnique as jest.Mock).mockResolvedValue(
+        mockClient,
+      );
 
       const result = await service.getProfile('user-123');
 
@@ -138,7 +140,9 @@ describe('ClientService', () => {
         ...mockClient,
         user: { ...mockClient.user, ...updateData },
       };
-      (prismaService.client.update as jest.Mock).mockResolvedValue(updatedClient);
+      (prismaService.client.update as jest.Mock).mockResolvedValue(
+        updatedClient,
+      );
 
       const result = await service.updateProfile('user-123', updateData);
 
@@ -247,7 +251,9 @@ describe('ClientService', () => {
         ...mockClient,
         hasSeenTherapistRecommendations: true,
       };
-      (prismaService.client.update as jest.Mock).mockResolvedValue(updatedClient);
+      (prismaService.client.update as jest.Mock).mockResolvedValue(
+        updatedClient,
+      );
 
       await service.markTherapistRecommendationsSeen('user-123');
 
@@ -285,7 +291,9 @@ describe('ClientService', () => {
       const mockAssignment = {
         therapist: mockTherapist,
       };
-      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(mockAssignment);
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
+        mockAssignment,
+      );
 
       const result = await service.getAssignedTherapist('user-123');
 
@@ -305,7 +313,9 @@ describe('ClientService', () => {
     });
 
     it('should return null when no active assignment found', async () => {
-      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(null);
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       const result = await service.getAssignedTherapist('user-123');
 

@@ -2,35 +2,35 @@
 // This file contains models for tracking important system activities and changes
 
 model AuditLog {
-  id        String      @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Core audit information
-  action    AuditAction
-  entity    String      // Table/model name (e.g., "User", "Meeting", "Review")
-  entityId  String      // ID of the affected record
-  
+  action   AuditAction
+  entity   String // Table/model name (e.g., "User", "Meeting", "Review")
+  entityId String // ID of the affected record
+
   // User who performed the action
-  userId    String?     // Null for system actions
-  userRole  String?     // Role at time of action
-  
+  userId   String? // Null for system actions
+  userRole String? // Role at time of action
+
   // Change tracking
-  oldValues Json?       // Previous values (for updates)
-  newValues Json?       // New values (for creates/updates)
-  
+  oldValues Json? // Previous values (for updates)
+  newValues Json? // New values (for creates/updates)
+
   // Context
-  description String?   // Human-readable description
-  metadata    Json?     // Additional context data
-  
+  description String? // Human-readable description
+  metadata    Json? // Additional context data
+
   // Request tracking
-  ipAddress   String?
-  userAgent   String?
-  requestId   String?   // For correlating related actions
-  
+  ipAddress String?
+  userAgent String?
+  requestId String? // For correlating related actions
+
   // Relations
-  user        User?     @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
-  
-  createdAt   DateTime  @default(now())
-  
+  user User? @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@index([action])
   @@index([entity])
@@ -40,31 +40,31 @@ model AuditLog {
 }
 
 model SystemEvent {
-  id          String           @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Event details
   eventType   SystemEventType
-  severity    EventSeverity    @default(INFO)
+  severity    EventSeverity   @default(INFO)
   title       String
-  description String           @db.Text
-  
+  description String          @db.Text
+
   // Context
-  component   String?          // System component (e.g., "auth", "messaging", "booking")
-  metadata    Json?            // Additional event data
-  
+  component String? // System component (e.g., "auth", "messaging", "booking")
+  metadata  Json? // Additional event data
+
   // Error tracking
-  errorCode   String?
-  stackTrace  String?          @db.Text
-  
+  errorCode  String?
+  stackTrace String? @db.Text
+
   // Resolution tracking
-  isResolved  Boolean          @default(false)
-  resolvedAt  DateTime?
-  resolvedBy  String?          // Admin user ID
-  resolution  String?          @db.Text
-  
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  
+  isResolved Boolean   @default(false)
+  resolvedAt DateTime?
+  resolvedBy String? // Admin user ID
+  resolution String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([eventType])
   @@index([severity])
   @@index([component])
@@ -73,28 +73,28 @@ model SystemEvent {
 }
 
 model DataChangeLog {
-  id          String    @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Change details
-  tableName   String    // Database table name
-  recordId    String    // ID of the changed record
-  operation   String    // INSERT, UPDATE, DELETE
-  
+  tableName String // Database table name
+  recordId  String // ID of the changed record
+  operation String // INSERT, UPDATE, DELETE
+
   // Change data
-  changedFields Json?   // Array of field names that changed
-  oldData     Json?     // Complete old record (for sensitive data tracking)
-  newData     Json?     // Complete new record
-  
+  changedFields Json? // Array of field names that changed
+  oldData       Json? // Complete old record (for sensitive data tracking)
+  newData       Json? // Complete new record
+
   // Context
-  changedBy   String?   // User ID who made the change
-  reason      String?   // Reason for the change
-  
+  changedBy String? // User ID who made the change
+  reason    String? // Reason for the change
+
   // Compliance
-  dataClass   DataClassification @default(INTERNAL)
-  retentionDate DateTime?        // When this log can be deleted
-  
-  createdAt   DateTime  @default(now())
-  
+  dataClass     DataClassification @default(INTERNAL)
+  retentionDate DateTime? // When this log can be deleted
+
+  createdAt DateTime @default(now())
+
   @@index([tableName])
   @@index([recordId])
   @@index([operation])
@@ -113,45 +113,45 @@ enum AuditAction {
   USER_DELETE_ACCOUNT
   USER_CHANGE_PASSWORD
   USER_RESET_PASSWORD
-  
+
   // Therapist actions
   THERAPIST_APPLICATION_SUBMIT
   THERAPIST_APPLICATION_APPROVE
   THERAPIST_APPLICATION_REJECT
   THERAPIST_PROFILE_UPDATE
   THERAPIST_AVAILABILITY_UPDATE
-  
+
   // Meeting actions
   MEETING_CREATE
   MEETING_UPDATE
   MEETING_CANCEL
   MEETING_COMPLETE
   MEETING_NO_SHOW
-  
+
   // Worksheet actions
   WORKSHEET_CREATE
   WORKSHEET_ASSIGN
   WORKSHEET_SUBMIT
   WORKSHEET_GRADE
-  
+
   // Review actions
   REVIEW_CREATE
   REVIEW_UPDATE
   REVIEW_DELETE
   REVIEW_MODERATE
-  
+
   // Message actions
   MESSAGE_SEND
   MESSAGE_EDIT
   MESSAGE_DELETE
   MESSAGE_REPORT
-  
+
   // Admin actions
   ADMIN_USER_SUSPEND
   ADMIN_USER_ACTIVATE
   ADMIN_CONTENT_MODERATE
   ADMIN_SYSTEM_CONFIG
-  
+
   // System actions
   SYSTEM_BACKUP
   SYSTEM_MAINTENANCE
@@ -166,26 +166,26 @@ enum SystemEventType {
   HIGH_MEMORY_USAGE
   SLOW_QUERY
   HIGH_ERROR_RATE
-  
+
   // Security events
   FAILED_LOGIN_ATTEMPTS
   SUSPICIOUS_ACTIVITY
   DATA_BREACH_ATTEMPT
   UNAUTHORIZED_ACCESS
-  
+
   // Business events
   HIGH_USER_LOAD
   PAYMENT_PROCESSING_ERROR
   EMAIL_DELIVERY_FAILURE
   THIRD_PARTY_API_ERROR
-  
+
   // System events
   SERVICE_START
   SERVICE_STOP
   DEPLOYMENT
   CONFIGURATION_CHANGE
   DATABASE_MIGRATION
-  
+
   // User events
   UNUSUAL_USER_BEHAVIOR
   MASS_USER_ACTIONS
@@ -201,8 +201,8 @@ enum EventSeverity {
 }
 
 enum DataClassification {
-  PUBLIC      // No restrictions
-  INTERNAL    // Internal use only
+  PUBLIC // No restrictions
+  INTERNAL // Internal use only
   CONFIDENTIAL // Sensitive business data
-  RESTRICTED  // Highly sensitive data (PHI, PII)
+  RESTRICTED // Highly sensitive data (PHI, PII)
 }

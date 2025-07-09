@@ -57,7 +57,9 @@
       "Bash(git stash:*)",
       "Bash(for file in src/comments/comments.service.spec.ts src/client/client.service.spec.ts)",
       "Bash(do)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(python:*)",
+      "mcp__serena__initial_instructions"
     ]
   },
   "enableAllProjectMcpServers": true,

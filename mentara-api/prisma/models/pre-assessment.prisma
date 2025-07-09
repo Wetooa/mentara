@@ -13,4 +13,4 @@ model PreAssessment {
     aiEstimate     Json // Array of ai estimate objects
 
     @@index([clientId])
-} 
+}

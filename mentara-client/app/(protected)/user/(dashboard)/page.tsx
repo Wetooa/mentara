@@ -1,8 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
-import { useDashboardData, useNotifications, useRecentCommunications } from "@/hooks/useDashboard";
-import { transformDashboardData, createFallbackDashboardData } from "@/lib/transformers/dashboardTransformer";
+import {
+  useDashboardData,
+  useNotifications,
+  useRecentCommunications,
+} from "@/hooks/useDashboard";
+import {
+  transformDashboardData,
+  createFallbackDashboardData,
+} from "@/lib/transformers/dashboardTransformer";
 import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
@@ -26,15 +33,11 @@ export default function DashboardPage() {
     refetch: refetchDashboard,
   } = useDashboardData();
 
-  const {
-    data: notificationsData,
-    isLoading: isNotificationsLoading,
-  } = useNotifications({ limit: 10, isRead: false });
+  const { data: notificationsData, isLoading: isNotificationsLoading } =
+    useNotifications({ limit: 10, isRead: false });
 
-  const {
-    data: communicationsData,
-    isLoading: isCommunicationsLoading,
-  } = useRecentCommunications();
+  const { data: communicationsData, isLoading: isCommunicationsLoading } =
+    useRecentCommunications();
 
   // Transform backend data to frontend format
   const dashboardData = useMemo(() => {
@@ -49,7 +52,8 @@ export default function DashboardPage() {
     );
   }, [dashboardApiData, notificationsData, communicationsData]);
 
-  const isLoading = isDashboardLoading || isNotificationsLoading || isCommunicationsLoading;
+  const isLoading =
+    isDashboardLoading || isNotificationsLoading || isCommunicationsLoading;
 
   const handleMessageTherapist = () => {
     // TODO: Navigate to messages page
@@ -88,7 +92,12 @@ export default function DashboardPage() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <span>Failed to load dashboard data</span>
-            <Button variant="outline" size="sm" onClick={handleRetry} className="ml-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRetry}
+              className="ml-4"
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Retry
             </Button>
@@ -139,8 +148,8 @@ export default function DashboardPage() {
   return (
     <div className="w-full h-full p-6 space-y-8">
       {/* Page Header */}
-      <DashboardHeader 
-        user={dashboardData.user} 
+      <DashboardHeader
+        user={dashboardData.user}
         onBookSession={handleBookSession}
       />
 
