@@ -18,6 +18,7 @@ export function useTherapistRecommendations(params: TherapistSearchParams = {}) 
     queryFn: (): Promise<TherapistRecommendationResponse> => {
       return api.therapists.getRecommendations(params);
     },
+    select: (response) => response.data || { therapists: [], totalCount: 0 },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }

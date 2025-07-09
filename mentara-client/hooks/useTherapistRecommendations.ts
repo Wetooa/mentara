@@ -16,6 +16,7 @@ export function useTherapistRecommendations(params: TherapistSearchParams = {}) 
   return useQuery({
     queryKey: queryKeys.therapists.recommendations(params),
     queryFn: () => api.therapists.getRecommendations(params),
+    select: (response) => response.data || null,
     enabled: true, // Always enabled since this is the main recommendations query
     staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
@@ -30,6 +31,7 @@ export function useTherapistProfile(therapistId: string | null) {
   return useQuery({
     queryKey: queryKeys.therapists.detail(therapistId || ''),
     queryFn: () => api.therapists.getProfile(therapistId!),
+    select: (response) => response.data || null,
     enabled: !!therapistId,
     staleTime: 1000 * 60 * 10, // Profile data is more stable, cache for 10 minutes
   });
@@ -51,9 +53,13 @@ export function useInfiniteTherapistRecommendations(
         offset: pageParam,
         limit: baseParams.limit || 10 
       }),
+    select: (data) => ({
+      pages: data.pages.map(page => page.data || {}),
+      pageParams: data.pageParams,
+    }),
     getNextPageParam: (lastPage, allPages) => {
       const totalLoaded = allPages.length * (baseParams.limit || 10);
-      return lastPage.hasMore ? totalLoaded : undefined;
+      return lastPage.data?.hasMore ? totalLoaded : undefined;
     },
     enabled: true,
   });

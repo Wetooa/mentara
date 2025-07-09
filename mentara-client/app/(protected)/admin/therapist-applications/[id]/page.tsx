@@ -1,78 +1,27 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TherapistApplicationDetails } from "@/components/admin/TherapistApplicationDetails";
-import { toast } from "sonner";
+import { useTherapistApplication } from "@/hooks/useTherapistApplications";
 
-interface TherapistApplication {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  mobile: string;
-  province: string;
-  providerType: string;
-  professionalLicenseType: string;
-  status: string;
-  submissionDate: string;
-  [key: string]: any; // For other properties
-}
-
-export default function TherapistApplicationPage(
-  props: {
-    params: Promise<{ id: string }>;
-  }
-) {
+export default function TherapistApplicationPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = use(props.params);
   const router = useRouter();
-  const [application, setApplication] = useState<TherapistApplication | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchApplication = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/therapist/application/${params.id}`);
+  // Use React Query hook for data fetching
+  const {
+    data: application,
+    isLoading,
+    error,
+    refetch,
+  } = useTherapistApplication(params.id);
 
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error("Application not found");
-          }
-          throw new Error("Failed to fetch application details");
-        }
-
-        const data = await response.json();
-        setApplication(data.application);
-      } catch (err) {
-        console.error("Error fetching therapist application:", err);
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
-        toast.error("Error loading application details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (params.id) {
-      fetchApplication();
-    }
-  }, [params.id]);
-
-  // Handle status change
-  const handleStatusChange = async (
-    id: string,
-    status: "approved" | "rejected" | "pending"
-  ) => {
-    setApplication((prev) => (prev ? { ...prev, status } : null));
-  };
+  console.log(application);
 
   return (
     <div className="space-y-6">
@@ -98,19 +47,27 @@ export default function TherapistApplicationPage(
         </div>
       ) : error ? (
         <div className="py-8 text-center">
-          <p className="text-red-500">{error}</p>
-          <Button
-            onClick={() => router.push("/admin/therapist-applications")}
-            variant="outline"
-            className="mt-4"
-          >
-            Return to Applications
-          </Button>
+          <p className="text-red-500">
+            {error instanceof Error
+              ? error.message
+              : "Failed to load application. Please try again."}
+          </p>
+          <div className="flex gap-2 justify-center mt-4">
+            <Button onClick={() => refetch()} variant="outline">
+              Try Again
+            </Button>
+            <Button
+              onClick={() => router.push("/admin/therapist-applications")}
+              variant="outline"
+            >
+              Return to Applications
+            </Button>
+          </div>
         </div>
       ) : application ? (
         <TherapistApplicationDetails
-          application={application}
-          onStatusChange={handleStatusChange}
+          application={application.data}
+          onStatusChange={() => {}}
         />
       ) : (
         <div className="py-8 text-center text-gray-500">

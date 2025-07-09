@@ -25,7 +25,6 @@ export class AuthService {
     private readonly eventBus: EventBusService,
   ) {}
 
-
   async registerClient(
     userId: string,
     registerClientDto: ClientCreateDto,

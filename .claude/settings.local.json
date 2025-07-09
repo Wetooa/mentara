@@ -38,7 +38,15 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "mcp__mcp-sequentialthinking-tools__sequentialthinking_tools",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__find_symbol",
+      "mcp__serena__find_file",
+      "mcp__serena__replace_regex",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__serena__initial_instructions",
+      "mcp__serena__replace_symbol_body"
     ]
   },
   "enableAllProjectMcpServers": true,

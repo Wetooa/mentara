@@ -21,6 +21,7 @@ export function useReviews(params: GetReviewsParams = {}) {
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getAll(params);
     },
+    select: (response) => response.data || { reviews: [], total: 0 },
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -34,6 +35,7 @@ export function useTherapistReviews(therapistId: string, params: Omit<GetReviews
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getTherapistReviews(therapistId, params);
     },
+    select: (response) => response.data || { reviews: [], total: 0 },
     enabled: !!therapistId,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
@@ -48,6 +50,7 @@ export function useTherapistReviewStats(therapistId: string) {
     queryFn: (): Promise<ReviewStats> => {
       return api.reviews.getTherapistStats(therapistId);
     },
+    select: (response) => response.data || { averageRating: 0, totalReviews: 0 },
     enabled: !!therapistId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -251,6 +254,7 @@ export function usePendingReviews(params: { page?: number; limit?: number } = {}
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getPending(params);
     },
+    select: (response) => response.data || { reviews: [], total: 0 },
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
