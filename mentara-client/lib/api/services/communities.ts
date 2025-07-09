@@ -15,7 +15,7 @@ import {
   CreatePostRequest,
   CreateCommentRequest,
   CreateReplyRequest,
-} from '../../types/api/communities';
+} from '@/types/api/communities';
 
 // Community service factory
 export const createCommunityService = (client: AxiosInstance) => ({

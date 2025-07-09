@@ -6,7 +6,7 @@ import {
   AssignedTherapist,
   AssessmentSubmission,
   AssessmentResults,
-} from "../../types/api/client";
+} from "@/types/api/client";
 
 export interface ClientService {
   completeOnboarding: (

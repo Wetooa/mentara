@@ -7,7 +7,7 @@ import {
   PreAssessmentListResponse,
   AIServiceHealthResponse,
   ReprocessRequest,
-} from '../../types/api/pre-assessment';
+} from '@/types/api/pre-assessment';
 
 export interface PreAssessmentService {
   create(data: CreatePreAssessmentDto): Promise<PreAssessment>;

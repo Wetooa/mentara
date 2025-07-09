@@ -18,7 +18,7 @@ import {
   FeatureFlag,
   UpdateFeatureFlagRequest,
   User,
-} from '../../types/api';
+} from '@/types/api';
 
 export interface AdminService {
   checkAdmin(): Promise<{ isAdmin: boolean }>;

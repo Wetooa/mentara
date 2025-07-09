@@ -10,7 +10,7 @@ import {
   PlatformAnalytics,
   AnalyticsQuery,
   CustomAnalyticsReport,
-} from '../../types/api/analytics';
+} from '@/types/api/analytics';
 
 export interface AnalyticsService {
   // Platform overview

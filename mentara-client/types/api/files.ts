@@ -6,7 +6,7 @@ export interface FileUploadRequest {
 }
 
 export interface FileMetadata {
-  type?: 'avatar' | 'document' | 'worksheet' | 'message' | 'post';
+  type?: "avatar" | "document" | "worksheet" | "message" | "post";
   description?: string;
   associatedId?: string; // ID of related entity (user, worksheet, etc.)
   isPublic?: boolean;
@@ -33,14 +33,14 @@ export interface UploadedFile {
 }
 
 export interface FileListParams {
-  type?: 'avatar' | 'document' | 'worksheet' | 'message' | 'post';
+  type?: "avatar" | "document" | "worksheet" | "message" | "post";
   uploadedBy?: string;
   associatedId?: string;
   isPublic?: boolean;
   limit?: number;
   offset?: number;
-  sortBy?: 'createdAt' | 'filename' | 'fileSize';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "createdAt" | "filename" | "fileSize";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface FileListResponse {
@@ -72,7 +72,7 @@ export interface ApplicationDocument {
   filename: string;
   originalName: string;
   url: string;
-  fileType: 'resume' | 'license' | 'certification' | 'transcript' | 'other';
+  fileType: "resume" | "license" | "certification" | "transcript" | "other";
   fileSize: number;
   uploadedAt: string;
 }

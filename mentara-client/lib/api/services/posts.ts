@@ -7,7 +7,7 @@ import {
   PostListResponse,
   HeartPostResponse,
   CheckHeartedResponse,
-} from "../../types/api/posts";
+} from "@/types/api/posts";
 
 export interface PostsService {
   getAll(params?: PostListParams): Promise<PostListResponse>;

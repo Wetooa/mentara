@@ -7,7 +7,7 @@ import {
   MarkReadResponse,
   CreateNotificationRequest,
   NotificationSettings,
-} from '../../types/api/notifications';
+} from '@/types/api/notifications';
 
 export interface NotificationsService {
   getMy(params?: NotificationListParams): Promise<NotificationListResponse>;

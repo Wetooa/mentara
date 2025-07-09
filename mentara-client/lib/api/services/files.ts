@@ -10,7 +10,7 @@ import {
   FileStats,
   ApplicationDocument,
   ApplicationDocumentListResponse,
-} from '../../types/api/files';
+} from '@/types/api/files';
 
 export interface FilesService {
   upload(file: File, metadata?: FileMetadata): Promise<UploadedFile>;

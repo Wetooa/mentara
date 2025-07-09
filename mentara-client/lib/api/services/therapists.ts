@@ -19,7 +19,7 @@ import {
   TeletherapyInfo,
   DocumentInfo,
   WorksheetAssignment,
-} from "../../types/api/therapists";
+} from "@/types/api/therapists";
 
 // Therapist service factory
 export const createTherapistService = (client: AxiosInstance) => ({
