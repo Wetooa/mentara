@@ -1,52 +1,54 @@
 // Re-export all API types for easy importing
+// NOTE: To avoid naming conflicts, we use qualified re-exports where needed
 
-// Auth types
+// Core auth and user types
 export * from './auth';
-
-// User types
 export * from './users';
 
-// Messaging types
-export * from './messaging';
-
-// Posts types
-export * from './posts';
-
-// Comments types
-export * from './comments';
-
-// Worksheets types
-export * from './worksheets';
-
-// Files types
-export * from './files';
-
-// Admin types
-export * from './admin';
-
-// Search types
-export * from './search';
-
-// Notifications types
-export * from './notifications';
-
-// Pre-assessment types
-export * from './pre-assessment';
-
-// Therapist Application types
-export * from './therapist-application';
-
-// Session types
-export * from './sessions';
-
-// Communities types
-export * from './communities';
-
-// Client types
+// Client-specific types  
 export * from './client';
 
-// Therapist types
+// Communication types
+export * from './messaging';
+
+// Content types (avoiding conflicts by being selective)
+export {
+  // Posts-specific types
+  PostCreateInputDto,
+  PostUpdateInputDto,
+  PostListParams,
+  PostListResponse,
+  HeartPostResponse,
+  CheckHeartedResponse,
+} from './posts';
+
+export {
+  // Comments-specific types
+  CommentCreateInputDto,
+  CommentUpdateInputDto,
+  CommentListParams,
+  CommentListResponse,
+  HeartCommentResponse,
+  CreateReplyRequest as CommentReplyRequest,
+} from './comments';
+
+// Community types (these are the primary ones we use)
+export * from './communities';
+
+// Therapist and application types
 export * from './therapists';
+export * from './therapist-application';
+
+// Service-specific types
+export * from './worksheets';
+export * from './files';
+export * from './admin';
+export * from './search';
+export * from './notifications';
+export * from './pre-assessment';
+export * from './sessions';
+export * from './analytics';
+export * from './audit-logs';
 
 // Keep existing service types for backward compatibility
 export * from '../booking';

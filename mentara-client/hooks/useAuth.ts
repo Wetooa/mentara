@@ -9,14 +9,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
+import { api } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { usePreAssessmentStore } from "@/store/pre-assessment";
 import type {
   AuthUser,
   RegisterUserRequest,
   PreAssessmentSubmission,
-} from "@/lib/api/services/auth";
+} from "@/types/api/auth";
 
 /**
  * Simplified authentication hook following proper data flow:
@@ -27,9 +27,7 @@ export function useAuth() {
   const { signOut } = useClerk();
   const { signIn } = useSignIn();
   const { signUp } = useSignUp();
-  const { getToken } = useClerkAuth();
   const router = useRouter();
-  const api = useApi();
   const queryClient = useQueryClient();
   const { getAssessmentData, clearAssessmentData } = usePreAssessmentStore();
 
