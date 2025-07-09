@@ -13,7 +13,7 @@ import {
   SearchMessagesResponse,
   ConversationListParams,
   MessagesListParams,
-} from '../../types/api/messaging';
+} from '@/types/api/messaging';
 
 export interface MessagingService {
   // Conversations

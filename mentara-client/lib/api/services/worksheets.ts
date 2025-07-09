@@ -9,7 +9,7 @@ import {
   WorksheetSubmission,
   SubmitWorksheetRequest,
   WorksheetStats,
-} from '../../types/api/worksheets';
+} from '@/types/api/worksheets';
 
 export interface WorksheetsService {
   getAll(params?: WorksheetListParams): Promise<WorksheetListResponse>;

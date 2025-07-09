@@ -6,7 +6,7 @@ import {
   SessionListParams,
   SessionListResponse,
   SessionStats,
-} from '../../types/api/sessions';
+} from '@/types/api/sessions';
 
 export interface SessionService {
   // Session CRUD operations

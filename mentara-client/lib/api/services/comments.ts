@@ -7,7 +7,7 @@ import {
   CommentListResponse,
   HeartCommentResponse,
   CreateReplyRequest,
-} from '../../types/api/comments';
+} from '@/types/api/comments';
 
 export interface CommentsService {
   getAll(params?: CommentListParams): Promise<CommentListResponse>;

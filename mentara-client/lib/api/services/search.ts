@@ -11,7 +11,7 @@ import {
   UserSearchResult,
   CommunitySearchResult,
   GlobalSearchResult,
-} from '../../types/api/search';
+} from '@/types/api/search';
 
 export interface SearchService {
   therapists(params: TherapistSearchParams): Promise<SearchResult<TherapistSearchResult>>;

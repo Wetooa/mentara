@@ -8,7 +8,7 @@ import {
   SubmitApplicationWithDocumentsRequest,
   SubmitApplicationResponse,
   ApplicationStatusUpdateResponse,
-} from '../../types/api/therapist-application';
+} from '@/types/api/therapist-application';
 
 export interface TherapistApplicationService {
   // Public submission (no auth required)

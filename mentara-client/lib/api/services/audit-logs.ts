@@ -8,7 +8,7 @@ import {
   SecurityEvent,
   SecurityEventQuery,
   ComplianceReport,
-} from '../../types/api/audit-logs';
+} from '@/types/api/audit-logs';
 
 export interface AuditLogService {
   // Audit log management
