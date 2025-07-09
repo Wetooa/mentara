@@ -16,6 +16,9 @@ import { createCommentsService } from './comments';
 import { createWorksheetsService } from './worksheets';
 import { createPreAssessmentService } from './pre-assessment';
 import { createTherapistApplicationService } from './therapist-application';
+import { createSessionsService } from './sessions';
+import { createAnalyticsService } from './analytics';
+import { createAuditLogService } from './audit-logs';
 
 // Main service factory that creates all services
 export const createApiServices = (client: AxiosInstance) => ({
@@ -36,6 +39,9 @@ export const createApiServices = (client: AxiosInstance) => ({
   worksheets: createWorksheetsService(client),
   preAssessment: createPreAssessmentService(client),
   therapistApplication: createTherapistApplicationService(client),
+  sessions: createSessionsService(client),
+  analytics: createAnalyticsService(client),
+  auditLogs: createAuditLogService(client),
 });
 
 export type ApiServices = ReturnType<typeof createApiServices>;
@@ -58,6 +64,9 @@ export type { CommentsService } from './comments';
 export type { WorksheetsService } from './worksheets';
 export type { PreAssessmentService } from './pre-assessment';
 export type { TherapistApplicationService } from './therapist-application';
+export type { SessionService } from './sessions';
+export type { AnalyticsService } from './analytics';
+export type { AuditLogService } from './audit-logs';
 
 // Export all types
 export * from './auth';
@@ -77,3 +86,6 @@ export * from './comments';
 export * from './worksheets';
 export * from './pre-assessment';
 export * from './therapist-application';
+export * from './sessions';
+export * from './analytics';
+export * from './audit-logs';

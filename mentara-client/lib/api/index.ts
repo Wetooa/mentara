@@ -1,14 +1,38 @@
-// API service for making requests to the NestJS backend
-// MIGRATION COMPLETE: This file now uses the new axios-based implementation
+// Main API entry point - provides the complete API object with all services
+// Usage: import { api } from '@/lib/api'
+// Then: api.auth.getCurrentUser(), api.client.getProfile(), etc.
 
-import { useApi as useNewApi, createStandaloneApiClient as createNewStandaloneApiClient } from './api-client';
+import { createAxiosClient, setTokenProvider } from "./client";
+import { createApiServices, type ApiServices } from "./services";
 
-// Export the new axios-based API as the main API
-export { useNewApi as useApi, createNewStandaloneApiClient as createStandaloneApiClient };
+// Create the axios client
+const axiosClient = createAxiosClient();
 
-// Legacy exports for backward compatibility (deprecated)
-export { useNewApi as useApiV2, createNewStandaloneApiClient as createStandaloneApiClientV2 };
+// Create all API services using the axios client
+const apiServices = createApiServices(axiosClient);
 
-// Re-export all service types for convenience
-export * from './services';
-export * from './api-client';
+// Create the main API object with additional utilities
+export const api = {
+  ...apiServices,
+
+  // Utility methods
+  setAuthToken: (tokenProvider: () => Promise<string | null>) => {
+    setTokenProvider(tokenProvider);
+  },
+
+  // Direct axios client access if needed
+  client: axiosClient,
+} as ApiServices & {
+  setAuthToken: (tokenProvider: () => Promise<string | null>) => void;
+  client: typeof axiosClient;
+};
+
+// Export the type for the complete API
+export type MentaraApi = typeof api;
+
+// Re-export service types for convenience
+export type { ApiServices } from "./services";
+export * from "./services";
+
+// Export error handler types
+export * from "./errorHandler";
