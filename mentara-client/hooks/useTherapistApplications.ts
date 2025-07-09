@@ -11,14 +11,37 @@ import type {
 
 /**
  * Hook for fetching therapist applications list (admin functionality)
+ * Uses the admin endpoint for comprehensive application data
  */
 export function useTherapistApplications(params: ApplicationListParams = {}) {
   const api = useApi();
   
   return useQuery({
     queryKey: queryKeys.therapists.applications.list(params),
-    queryFn: () => api.therapists.application.getList(params),
+    queryFn: () => api.therapists.getApplications(params),
+    select: (response) => {
+      // Transform axios response structure: response.data.applications -> applications
+      return response.data?.applications || [];
+    },
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (admin data changes frequently)
+  });
+}
+
+/**
+ * Hook for fetching therapist applications list with full response metadata (admin functionality)
+ * Returns the complete response including pagination data
+ */
+export function useTherapistApplicationsWithMetadata(params: ApplicationListParams = {}) {
+  const api = useApi();
+  
+  return useQuery({
+    queryKey: [...queryKeys.therapists.applications.list(params), 'metadata'],
+    queryFn: () => api.therapists.getApplications(params),
+    select: (response) => {
+      // Return the full response data structure for pagination
+      return response.data || { applications: [], totalCount: 0, page: 1, totalPages: 1 };
+    },
+    staleTime: 1000 * 60 * 2,
   });
 }
 

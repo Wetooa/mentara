@@ -26,9 +26,12 @@ export function useTherapistRecommendations(
 
   return useQuery({
     queryKey: queryKeys.therapists.recommendations(params),
-    queryFn: () => api.therapists.getRecommendations(params),
+    queryFn: (): Promise<TherapistRecommendationResponse> => {
+      return api.therapists.getRecommendations(params);
+    },
+    select: (response) => response.data || { therapists: [], totalCount: 0 },
     enabled: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

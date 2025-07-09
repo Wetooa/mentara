@@ -52,12 +52,6 @@ export class AuthController {
   }
 
   @UseGuards(ClerkAuthGuard)
-  @Post('is-admin')
-  checkAdmin(@CurrentUserId() id: string): Promise<boolean> {
-    return this.authService.checkAdmin(id);
-  }
-
-  @UseGuards(ClerkAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 logout attempts per 5 minutes
   @Post('force-logout')
   @HttpCode(HttpStatus.OK)

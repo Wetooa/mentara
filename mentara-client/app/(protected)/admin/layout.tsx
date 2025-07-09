@@ -29,8 +29,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAdminRequired } from "@/hooks/useAdminAuth";
 import { useClerk, useUser } from "@clerk/nextjs";
+import { useRole } from "@/hooks/useRole";
 
 export default function AdminLayout({
   children,
@@ -40,9 +40,9 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAdmin, isLoading } = useAdminRequired();
+  const { isAdmin } = useRole();
   const { signOut } = useClerk();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
   // Admin data from Clerk user
   const admin = {
@@ -95,29 +95,30 @@ export default function AdminLayout({
       // Use Clerk's signOut method to properly sign out the user
       await signOut();
 
-      // After successful logout, redirect to admin login page
-      router.push("/admin-login");
+      // After successful logout, redirect to main page
+      router.push("/");
     } catch (error) {
       console.error("Error during logout:", error);
-      // Even if there's an error, try to redirect to login
-      router.push("/admin-login");
+      // Even if there's an error, try to redirect to main page
+      router.push("/");
     }
   };
 
-  // Show loading state while checking admin status
-  if (isLoading) {
+  // Show loading state while user data is loading
+  if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-gray-500">Verifying admin access...</p>
+          <p className="text-sm text-gray-500">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
-  // If not an admin and not loading, the useAdminRequired hook will redirect to login page
-  if (!isAdmin && !isLoading) {
+  // If not an admin, redirect to main page (middleware should handle this)
+  if (!isAdmin) {
+    router.push("/");
     return null;
   }
 

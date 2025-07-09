@@ -38,11 +38,11 @@ export class TherapistRecommendationController {
       const user = await this.prisma.user.findUnique({
         where: { id: clerkId },
       });
-      
+
       if (!user) {
         throw new NotFoundException(`User with ID ${clerkId} not found`);
       }
-      
+
       const request: TherapistRecommendationRequest = {
         userId: user.id,
         limit: limit ? parseInt(limit) : 10,

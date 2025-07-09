@@ -13,6 +13,7 @@ export function usePatientsList() {
   return useQuery({
     queryKey: queryKeys.clients.assigned(),
     queryFn: () => api.therapists.patients.getList(),
+    select: (response) => response.data || [],
     staleTime: 1000 * 60 * 5, // Patient list is relatively stable
     retry: (failureCount, error: any) => {
       // Don't retry if not authorized to access patient data
@@ -33,6 +34,7 @@ export function usePatientData(patientId: string | null) {
   return useQuery({
     queryKey: queryKeys.clients.detail(patientId || ''),
     queryFn: () => api.therapists.patients.getById(patientId!),
+    select: (response) => response.data || null,
     enabled: !!patientId,
     staleTime: 1000 * 60 * 10, // Patient details change less frequently
   });
@@ -47,6 +49,7 @@ export function usePatientSessions(patientId: string | null) {
   return useQuery({
     queryKey: queryKeys.clients.sessions(patientId || ''),
     queryFn: () => api.therapists.patients.getSessions(patientId!),
+    select: (response) => response.data || [],
     enabled: !!patientId,
     staleTime: 1000 * 60 * 5,
   });
@@ -61,6 +64,7 @@ export function usePatientWorksheets(patientId: string | null) {
   return useQuery({
     queryKey: queryKeys.clients.detail(patientId || '').concat(['worksheets']),
     queryFn: () => api.therapists.patients.getWorksheets(patientId!),
+    select: (response) => response.data || [],
     enabled: !!patientId,
     staleTime: 1000 * 60 * 3, // Worksheets may change more frequently
   });
@@ -167,6 +171,7 @@ export function usePatientProgress(patientId: string | null) {
   return useQuery({
     queryKey: queryKeys.clients.progress(patientId || ''),
     queryFn: () => api.clients.getProgress(patientId!),
+    select: (response) => response.data || null,
     enabled: !!patientId,
     staleTime: 1000 * 60 * 10, // Progress data changes slowly
   });

@@ -34,7 +34,10 @@ export interface TherapistApplicationResponse {
   professionalLicenseType: string;
   isPRCLicensed: string;
   prcLicenseNumber: string;
+  expirationDateOfLicense: string;
+  isLicenseActive: string;
   practiceStartDate: string;
+  yearsOfExperience: string;
   areasOfExpertise: string[];
   assessmentTools: string[];
   therapeuticApproachesUsedList: string[];
@@ -44,6 +47,11 @@ export interface TherapistApplicationResponse {
   weeklyAvailability: string;
   preferredSessionLength: string;
   accepts: string[];
+  privateConfidentialSpace: string;
+  compliesWithDataPrivacyAct: string;
+  professionalLiabilityInsurance: string;
+  complaintsOrDisciplinaryActions: string;
+  willingToAbideByPlatformGuidelines: string;
   bio?: string;
   hourlyRate?: number;
   files?: Array<{
