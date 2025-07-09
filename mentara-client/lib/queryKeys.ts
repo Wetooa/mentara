@@ -233,6 +233,31 @@ export const queryKeys = {
     all: ["admin"] as const,
     checkAdmin: () => [...queryKeys.admin.all, "checkAdmin"] as const,
   },
+
+  // Messaging-related queries
+  messaging: {
+    all: ['messaging'] as const,
+    conversations: {
+      all: () => [...queryKeys.messaging.all, 'conversations'] as const,
+      lists: () => [...queryKeys.messaging.conversations.all(), 'list'] as const,
+      list: (filters: Record<string, any>) => [...queryKeys.messaging.conversations.lists(), { filters }] as const,
+      details: () => [...queryKeys.messaging.conversations.all(), 'detail'] as const,
+      detail: (id: string) => [...queryKeys.messaging.conversations.details(), id] as const,
+    },
+    contacts: {
+      all: () => [...queryKeys.messaging.all, 'contacts'] as const,
+      lists: () => [...queryKeys.messaging.contacts.all(), 'list'] as const,
+      list: (filters: Record<string, any>) => [...queryKeys.messaging.contacts.lists(), { filters }] as const,
+    },
+    messages: {
+      all: () => [...queryKeys.messaging.all, 'messages'] as const,
+      byConversation: (conversationId: string, params?: Record<string, any>) => 
+        [...queryKeys.messaging.messages.all(), 'conversation', conversationId, { params }] as const,
+      search: (query: string, conversationId?: string) => 
+        [...queryKeys.messaging.messages.all(), 'search', query, { conversationId }] as const,
+    },
+    currentUser: () => [...queryKeys.messaging.all, 'currentUser'] as const,
+  },
 } as const;
 
 // Helper function to invalidate related queries
@@ -267,7 +292,20 @@ export const getRelatedQueryKeys = (entity: string, id?: string) => {
       keys.push(queryKeys.communities.all);
       keys.push(queryKeys.posts.all);
       break;
-
+      
+    case 'message':
+      keys.push(queryKeys.messaging.all);
+      keys.push(queryKeys.messaging.conversations.all);
+      keys.push(queryKeys.messaging.contacts.all);
+      break;
+      
+    case 'conversation':
+      keys.push(queryKeys.messaging.conversations.all);
+      keys.push(queryKeys.messaging.contacts.all);
+      if (id) {
+        keys.push(queryKeys.messaging.messages.byConversation(id));
+      }
+      break;
     default:
       break;
   }
