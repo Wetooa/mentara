@@ -266,7 +266,7 @@ export const createTherapistService = (client: AxiosInstance) => ({
       id: string,
       data: UpdateApplicationRequest
     ): Promise<TherapistApplication> =>
-      client.put(`/therapist/application/${id}`, data),
+      client.put(`/therapist/application/${id}/status`, data),
 
     // Get my application (for therapists)
     getMy: (): Promise<TherapistApplication> =>

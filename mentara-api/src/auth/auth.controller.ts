@@ -51,7 +51,6 @@ export class AuthController {
     return await this.authService.getUsers();
   }
 
-
   @UseGuards(ClerkAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 logout attempts per 5 minutes
   @Post('force-logout')

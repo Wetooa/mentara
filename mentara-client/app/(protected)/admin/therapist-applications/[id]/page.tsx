@@ -7,22 +7,21 @@ import { Button } from "@/components/ui/button";
 import { TherapistApplicationDetails } from "@/components/admin/TherapistApplicationDetails";
 import { useTherapistApplication } from "@/hooks/useTherapistApplications";
 
-export default function TherapistApplicationPage(
-  props: {
-    params: Promise<{ id: string }>;
-  }
-) {
+export default function TherapistApplicationPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = use(props.params);
   const router = useRouter();
-  
+
   // Use React Query hook for data fetching
-  const { 
-    data: application, 
-    isLoading, 
+  const {
+    data: application,
+    isLoading,
     error,
-    refetch 
+    refetch,
   } = useTherapistApplication(params.id);
 
+  console.log(application);
 
   return (
     <div className="space-y-6">
@@ -49,13 +48,12 @@ export default function TherapistApplicationPage(
       ) : error ? (
         <div className="py-8 text-center">
           <p className="text-red-500">
-            {error instanceof Error ? error.message : 'Failed to load application. Please try again.'}
+            {error instanceof Error
+              ? error.message
+              : "Failed to load application. Please try again."}
           </p>
           <div className="flex gap-2 justify-center mt-4">
-            <Button
-              onClick={() => refetch()}
-              variant="outline"
-            >
+            <Button onClick={() => refetch()} variant="outline">
               Try Again
             </Button>
             <Button
@@ -68,7 +66,7 @@ export default function TherapistApplicationPage(
         </div>
       ) : application ? (
         <TherapistApplicationDetails
-          application={application}
+          application={application.data}
           onStatusChange={() => {}}
         />
       ) : (
