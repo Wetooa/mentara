@@ -1,11 +1,10 @@
-import type { DashboardResponse } from '@/lib/api/services/dashboard';
-import type { UserDashboardData } from '@/data/mockUserDashboardData';
+import type { ApiDashboardResponse, UserDashboardData } from '@/lib/api/types/dashboard';
 
 /**
  * Transform backend dashboard response to frontend UserDashboardData format
  */
 export function transformDashboardData(
-  backendData: DashboardResponse,
+  backendData: ApiDashboardResponse,
   notifications: any[] = [],
   recentCommunications: any[] = []
 ): UserDashboardData {

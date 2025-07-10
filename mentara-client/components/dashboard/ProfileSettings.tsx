@@ -30,7 +30,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 
 interface ProfileSettingsProps {
   user: UserDashboardData["user"];

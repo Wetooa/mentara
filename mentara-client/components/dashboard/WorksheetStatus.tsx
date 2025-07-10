@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import {
   ArrowRight,
   FileText,

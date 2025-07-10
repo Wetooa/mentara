@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar, FileCheck, FileClock, Users } from "lucide-react";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 
 interface StatsOverviewProps {
   stats: UserDashboardData["stats"];
