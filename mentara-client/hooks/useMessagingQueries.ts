@@ -23,37 +23,58 @@ export function useMessagingContacts() {
   return useQuery({
     queryKey: queryKeys.messaging.contacts.all(),
     queryFn: async () => {
-      const currentUser = await api.messaging.getCurrentUser();
-      const conversations = await api.messaging.getConversations();
-      
-      return (conversations || []).map((conv: any) => {
-        // Find the other participant (not the current user)
-        const otherParticipant = conv.participants.find(
-          (p: any) => p.userId !== currentUser.id
-        );
+      try {
+        const currentUser = await api.messaging.getCurrentUser();
+        const conversations = await api.messaging.getConversations();
         
-        if (!otherParticipant) {
-          throw new Error('No other participant found in conversation');
+        // Ensure conversations is an array
+        if (!Array.isArray(conversations)) {
+          console.warn('getConversations returned non-array:', conversations);
+          return [];
         }
         
-        const lastMessage = conv.messages?.[0];
-        
-        const contact: Contact = {
-          id: conv.id, // Use conversation ID as contact ID
-          name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`,
-          status: "offline" as const, // Will be updated via WebSocket
-          lastMessage: lastMessage?.content || "",
-          time: lastMessage?.createdAt || conv.updatedAt,
-          unread: conv._count?.messages || 0,
-          avatar: otherParticipant.user.avatarUrl || "/avatar-placeholder.png",
-          isTyping: false,
-        };
-        
-        return contact;
-      });
+        return (conversations || []).map((conv: any) => {
+          // Find the other participant (not the current user)
+          const otherParticipant = conv.participants?.find(
+            (p: any) => p.userId !== currentUser.id
+          );
+          
+          if (!otherParticipant) {
+            console.warn('No other participant found in conversation:', conv.id);
+            return null;
+          }
+          
+          const lastMessage = conv.messages?.[0];
+          
+          const contact: Contact = {
+            id: conv.id, // Use conversation ID as contact ID
+            name: `${otherParticipant.user?.firstName || ''} ${otherParticipant.user?.lastName || ''}`.trim() || 'Unknown User',
+            status: "offline" as const, // Will be updated via WebSocket
+            lastMessage: lastMessage?.content || "",
+            time: lastMessage?.createdAt || conv.updatedAt,
+            unread: conv._count?.messages || 0,
+            avatar: otherParticipant.user?.avatarUrl || "/avatar-placeholder.png",
+            isTyping: false,
+          };
+          
+          return contact;
+        }).filter(Boolean); // Remove null entries
+      } catch (error) {
+        console.error('Error fetching messaging contacts:', error);
+        // Return empty array on error to prevent app crashes
+        return [];
+      }
     },
     staleTime: 30 * 1000, // 30 seconds
-    retry: 2,
+    retry: (failureCount, error: any) => {
+      // Don't retry on auth errors (401, 403)
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
 
