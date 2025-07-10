@@ -7,70 +7,6 @@ import { Task } from "@/components/worksheets/types";
 import { createWorksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
 
-// Fallback mock data in case API is not available
-const mockTasks: Task[] = [
-  {
-    id: "task-2",
-    title: "Exercise 5",
-    therapistName: "Therapist Jackson",
-    date: "2025-03-22",
-    status: "upcoming",
-    isCompleted: true,
-    instructions: "None",
-    materials: [
-      {
-        id: "mat-1",
-        filename: "CSIT337Exercise5.pdf",
-        url: "/files/CSIT337Exercise5.pdf",
-      },
-    ],
-    myWork: [
-      {
-        id: "work-1",
-        filename: "TolentinoTristanJamesExercise5.pdf",
-        url: "/files/TolentinoTristanJamesExercise5.pdf",
-      },
-    ],
-    submittedAt: "2025-03-22T20:53:00",
-  },
-  {
-    id: "task-1",
-    title: "Task 1",
-    therapistName: "Therapist Jackson",
-    date: "2025-04-22",
-    status: "upcoming",
-    isCompleted: false,
-    instructions: "Complete the worksheet on cognitive restructuring",
-  },
-  {
-    id: "task-3",
-    title: "Weekly reflection",
-    therapistName: "Therapist Jackson",
-    date: "2025-04-18",
-    status: "past_due",
-    isCompleted: false,
-    instructions:
-      "Reflect on your week and identify three challenging situations and how you responded to them.",
-  },
-  {
-    id: "task-4",
-    title: "Mindfulness exercise",
-    therapistName: "Therapist Williams",
-    date: "2025-04-15",
-    status: "completed",
-    isCompleted: true,
-    instructions:
-      "Complete the 15-minute mindfulness exercise and write about your experience.",
-    myWork: [
-      {
-        id: "work-2",
-        filename: "MindfulnessReflection.pdf",
-        url: "/files/MindfulnessReflection.pdf",
-      },
-    ],
-    submittedAt: "2025-04-15T15:30:00",
-  },
-];
 
 export default function WorksheetsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
@@ -107,8 +43,7 @@ export default function WorksheetsPage() {
         setTasks(worksheets);
       } catch (err) {
         console.error("Error fetching worksheets:", err);
-        setError("Failed to load worksheets. Using mock data instead.");
-        setTasks(mockTasks);
+        setError("Failed to load worksheets. Please try again.");
       } finally {
         setIsLoading(false);
       }

@@ -18,55 +18,6 @@ import { useAuth } from "@clerk/nextjs";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 import { useToast } from "@/contexts/ToastContext";
 
-// Mock data - fallback if API fails
-const getMockTask = (taskId: string): Task | undefined => {
-  const mockTasks: Task[] = [
-    {
-      id: "task-2",
-      title: "Exercise 5",
-      therapistName: "Therapist Jackson",
-      date: "2025-03-22",
-      status: "completed",
-      isCompleted: true,
-      instructions: "None",
-      materials: [
-        {
-          id: "mat-1",
-          filename: "CSIT337Exercise5.pdf",
-          url: "/files/CSIT337Exercise5.pdf",
-        },
-      ],
-      myWork: [
-        {
-          id: "work-1",
-          filename: "TolentinoTristanJamesExercise5.pdf",
-          url: "/files/TolentinoTristanJamesExercise5.pdf",
-        },
-      ],
-      submittedAt: "2025-03-22T20:53:00",
-    },
-    {
-      id: "task-1",
-      title: "Weekly Reflection",
-      therapistName: "Therapist Williams",
-      date: "2025-04-10",
-      status: "upcoming",
-      isCompleted: false,
-      instructions:
-        "Complete the reflection worksheet about your progress this week.",
-      materials: [
-        {
-          id: "mat-2",
-          filename: "ReflectionTemplate.pdf",
-          url: "/files/ReflectionTemplate.pdf",
-        },
-      ],
-      myWork: [],
-    },
-  ];
-
-  return mockTasks.find((task) => task.id === taskId);
-};
 
 export default function TaskDetailPage() {
   const params = useParams();
@@ -102,11 +53,7 @@ export default function TaskDetailPage() {
         setTask(worksheetData);
       } catch (err) {
         console.error("Error fetching worksheet:", err);
-        setError("Failed to load worksheet details. Using mock data instead.");
-
-        // Fallback to mock data
-        const mockData = getMockTask(taskId);
-        setTask(mockData);
+        setError("Failed to load worksheet details. Please try again.");
       } finally {
         setIsLoading(false);
       }
