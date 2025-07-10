@@ -8,10 +8,7 @@ import { format } from "date-fns";
 import { createAxiosClient, setTokenProvider } from './api/client';
 
 // Helper function to determine message status
-const getMessageStatus = (
-  backendMessage: any,
-  currentUserId: string
-): MessageStatus => {
+const getMessageStatus = (backendMessage: Record<string, unknown>, currentUserId: string): MessageStatus => {
   if (backendMessage.senderId !== currentUserId) {
     return "read"; // Other user's messages are always marked as read for display
   }
@@ -44,7 +41,7 @@ const getAttachmentType = (
 };
 
 // Enhanced conversion function for frontend format with proper time formatting
-const convertBackendMessageToFrontendFormat = (backendMessage: any, currentUserId: string): Message => {
+const convertBackendMessageToFrontendFormat = (backendMessage: Record<string, unknown>, currentUserId: string): Message => {
   return {
     id: backendMessage.id,
     sender: backendMessage.senderId === currentUserId ? "me" : "them",
@@ -58,7 +55,7 @@ const convertBackendMessageToFrontendFormat = (backendMessage: any, currentUserI
       name: backendMessage.attachmentName || 'Attachment',
       size: backendMessage.attachmentSize,
     }] : undefined,
-    reactions: backendMessage.reactions?.map((reaction: any) => ({
+    reactions: backendMessage.reactions?.map((reaction: Record<string, unknown>) => ({
       emoji: reaction.emoji,
       count: 1,
       users: [reaction.user.id],
@@ -70,12 +67,12 @@ const convertBackendMessageToFrontendFormat = (backendMessage: any, currentUserI
 
 // Enhanced conversion function for frontend format with proper time formatting
 const convertBackendConversationToFrontendFormat = (
-  backendConversation: any,
+  backendConversation: Record<string, unknown>, 
   currentUserId: string
 ): { contact: Contact; conversation: Conversation } => {
   // Find the other participant (not the current user)
   const otherParticipant = backendConversation.participants.find(
-    (p: any) => p.userId !== currentUserId
+    (p: Record<string, unknown>) => p.userId !== currentUserId
   );
 
   if (!otherParticipant) {
@@ -153,7 +150,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
         const currentUserId = await getCurrentUserId();
         const conversations = await client.get('/messaging/conversations');
         
-        return conversations.data.map((conv: any) => {
+        return conversations.data.map((conv: Record<string, unknown>) => {
           const { contact } = convertBackendConversationToFrontendFormat(conv, currentUserId);
           return contact;
         });
@@ -171,7 +168,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
         const currentUserId = await getCurrentUserId();
         const messages = await client.get(`/messaging/conversations/${conversationId}/messages`);
         
-        const convertedMessages = messages.data.map((msg: any) => 
+        const convertedMessages = messages.data.map((msg: Record<string, unknown>) => 
           convertBackendMessageToFrontendFormat(msg, currentUserId)
         );
 
@@ -207,7 +204,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
         };
         
         const backendMessage = await client.post(`/messaging/conversations/${conversationId}/messages`, messageData);
-        return convertBackendMessageToFrontendFormat(backendMessage.data, currentUserId);
+        return convertBackendMessageToFrontendFormat(backendMessage.data as Record<string, unknown>, currentUserId);
       } catch (error) {
         console.error("Error sending message:", error);
         throw error;
@@ -261,7 +258,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
 
         const messages = await client.get(`/messaging/search?${params.toString()}`);
         
-        return messages.data.map((msg: any) => convertBackendMessageToFrontendFormat(msg, currentUserId));
+        return messages.data.map((msg: Record<string, unknown>) => convertBackendMessageToFrontendFormat(msg, currentUserId));
       } catch (error) {
         console.error("Error searching messages:", error);
         return [];
