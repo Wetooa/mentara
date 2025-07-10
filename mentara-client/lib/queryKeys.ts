@@ -174,6 +174,14 @@ export const queryKeys = {
     all: ['admin'] as const,
     checkAdmin: () => [...queryKeys.admin.all, 'checkAdmin'] as const,
   },
+
+  // Dashboard-related queries
+  dashboard: {
+    all: ['dashboard'] as const,
+    user: () => [...queryKeys.dashboard.all, 'user'] as const,
+    therapist: () => [...queryKeys.dashboard.all, 'therapist'] as const,
+    admin: () => [...queryKeys.dashboard.all, 'admin'] as const,
+  },
 } as const;
 
 // Helper function to invalidate related queries

@@ -4,6 +4,7 @@ import { createTherapistService } from './therapists';
 import { createReviewsService } from './reviews';
 import { createBookingService } from './booking';
 import { createCommunitiesService } from './communities';
+import { createDashboardService } from './dashboard';
 
 // Additional services for completeness
 import { AxiosInstance as Client } from 'axios';
@@ -145,6 +146,7 @@ export const createApiServices = (client: AxiosInstance) => ({
   files: createFilesService(client),
   notifications: createNotificationsService(client),
   clients: createClientService(client),
+  dashboard: createDashboardService(client),
 });
 
 export type ApiServices = ReturnType<typeof createApiServices>;
@@ -155,6 +157,7 @@ export type { TherapistService } from './therapists';
 export type { ReviewsService } from './reviews';
 export type { BookingService } from './booking';
 export type { CommunitiesService } from './communities';
+export type { DashboardService } from './dashboard';
 
 // Export all types
 export * from './users';
@@ -162,3 +165,4 @@ export * from './therapists';
 export * from './reviews';
 export * from './booking';
 export * from './communities';
+export * from './dashboard';

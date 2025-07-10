@@ -47,7 +47,10 @@
       "mcp__playwright__browser_click",
       "mcp__serena__initial_instructions",
       "mcp__serena__replace_symbol_body",
-      "mcp__serena__get_symbols_overview"
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir"
     ]
   },
   "enableAllProjectMcpServers": true,
