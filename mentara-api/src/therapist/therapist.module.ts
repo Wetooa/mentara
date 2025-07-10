@@ -5,6 +5,7 @@ import { TherapistManagementController } from './therapist-management.controller
 import { TherapistManagementService } from './therapist-management.service';
 import { TherapistApplicationController } from './therapist-application.controller';
 import { TherapistApplicationService } from './therapist-application.service';
+import { WorksheetsService } from '../worksheets/worksheets.service';
 import { EmailService } from '../services/email.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
@@ -19,6 +20,7 @@ import { RoleUtils } from 'src/utils/role-utils';
     TherapistRecommendationService,
     TherapistManagementService,
     TherapistApplicationService,
+    WorksheetsService,
     EmailService,
     PrismaService,
     RoleUtils,
