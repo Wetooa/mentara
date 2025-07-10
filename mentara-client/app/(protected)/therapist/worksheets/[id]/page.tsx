@@ -1,78 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TherapistTaskDetailPage from "@/components/worksheets/TherapistTaskDetailPage";
 import { Task } from "@/components/worksheets/types";
-
-// Mock data for worksheets tasks with more detailed information
-const mockTasks: Task[] = [
-  {
-    id: "task-1",
-    title: "Task 1",
-    patientName: "John Doe",
-    date: "2025-04-22",
-    status: "assigned",
-    isCompleted: false,
-    instructions: "Complete the worksheet on cognitive restructuring",
-  },
-  {
-    id: "task-2",
-    title: "Exercise 5",
-    patientName: "Sarah Williams",
-    date: "2025-03-22",
-    status: "completed",
-    isCompleted: true,
-    instructions: "Complete the graded exposure exercise",
-    materials: [
-      {
-        id: "mat-1",
-        filename: "ExposureWorksheet.pdf",
-        url: "/files/ExposureWorksheet.pdf",
-      },
-    ],
-    myWork: [
-      {
-        id: "work-1",
-        filename: "SarahWilliamsExposureWorksheet.pdf",
-        url: "/files/SarahWilliamsExposureWorksheet.pdf",
-      },
-    ],
-    submittedAt: "2025-03-22T20:53:00",
-    feedback:
-      "Great job identifying triggers and responses. Keep practicing the techniques we discussed.",
-  },
-  {
-    id: "task-3",
-    title: "Weekly reflection",
-    patientName: "Mike Chen",
-    date: "2025-04-18",
-    status: "past_due",
-    isCompleted: false,
-    instructions:
-      "Reflect on your week and identify three challenging situations and how you responded to them.",
-  },
-  {
-    id: "task-4",
-    title: "Mindfulness exercise",
-    patientName: "Emma Johnson",
-    date: "2025-04-15",
-    status: "completed",
-    isCompleted: true,
-    instructions:
-      "Complete the 15-minute mindfulness exercise and write about your experience.",
-    myWork: [
-      {
-        id: "work-2",
-        filename: "EmmaJohnsonMindfulnessReflection.pdf",
-        url: "/files/EmmaJohnsonMindfulnessReflection.pdf",
-      },
-    ],
-    submittedAt: "2025-04-15T15:30:00",
-    feedback:
-      "I'm glad you found the exercise helpful. Your observations about being more present are insightful.",
-  },
-];
+import { useApi } from "@/lib/api";
 
 interface WorksheetDetailPageProps {
   params: {
@@ -84,13 +16,84 @@ export default function WorksheetDetailPage({
   params,
 }: WorksheetDetailPageProps) {
   const router = useRouter();
+  const api = useApi();
+  
+  const [task, setTask] = useState<Task | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Find the task that matches the ID from the URL
-  const task = mockTasks.find((task) => task.id === params.id);
+  // Fetch worksheet details from API
+  useEffect(() => {
+    async function fetchWorksheetDetails() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Call the API to get worksheet details
+        const worksheet = await api.therapists.worksheets.getById(params.id);
+
+        // Transform API data to match Task interface
+        const transformedTask: Task = {
+          id: worksheet.id,
+          title: worksheet.title,
+          patientName: worksheet.client?.user?.firstName && worksheet.client?.user?.lastName 
+            ? `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`
+            : "Unknown Patient",
+          date: worksheet.createdAt,
+          status: worksheet.status || "assigned",
+          isCompleted: worksheet.status === "completed",
+          instructions: worksheet.instructions || "",
+          materials: worksheet.materials || [],
+          myWork: worksheet.submissions || [],
+          submittedAt: worksheet.submittedAt,
+          feedback: worksheet.feedback || "",
+        };
+
+        setTask(transformedTask);
+      } catch (err) {
+        console.error("Error fetching worksheet details:", err);
+        setError("Failed to load worksheet details. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchWorksheetDetails();
+  }, [params.id, api.therapists.worksheets]);
 
   const handleBack = () => {
     router.push("/therapist/worksheets");
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-red-500">
+        <p>{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+        >
+          Retry
+        </button>
+        <button 
+          onClick={handleBack} 
+          className="mt-2 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   return <TherapistTaskDetailPage task={task} onBack={handleBack} />;
 }
