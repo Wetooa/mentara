@@ -150,7 +150,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
         const currentUserId = await getCurrentUserId();
         const conversations = await client.get('/messaging/conversations');
         
-        return conversations.data.map((conv: Record<string, unknown>) => {
+        return (conversations.data || []).map((conv: Record<string, unknown>) => {
           const { contact } = convertBackendConversationToFrontendFormat(conv, currentUserId);
           return contact;
         });
@@ -168,7 +168,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
         const currentUserId = await getCurrentUserId();
         const messages = await client.get(`/messaging/conversations/${conversationId}/messages`);
         
-        const convertedMessages = messages.data.map((msg: Record<string, unknown>) => 
+        const convertedMessages = (messages.data || []).map((msg: Record<string, unknown>) => 
           convertBackendMessageToFrontendFormat(msg, currentUserId)
         );
 
@@ -258,7 +258,7 @@ export const createMessagingApiService = (getToken: () => Promise<string | null>
 
         const messages = await client.get(`/messaging/search?${params.toString()}`);
         
-        return messages.data.map((msg: Record<string, unknown>) => convertBackendMessageToFrontendFormat(msg, currentUserId));
+        return (messages.data || []).map((msg: Record<string, unknown>) => convertBackendMessageToFrontendFormat(msg, currentUserId));
       } catch (error) {
         console.error("Error searching messages:", error);
         return [];

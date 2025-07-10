@@ -26,7 +26,7 @@ export function useMessagingContacts() {
       const currentUser = await api.messaging.getCurrentUser();
       const conversations = await api.messaging.getConversations();
       
-      return conversations.map((conv: any) => {
+      return (conversations || []).map((conv: any) => {
         // Find the other participant (not the current user)
         const otherParticipant = conv.participants.find(
           (p: any) => p.userId !== currentUser.id
@@ -67,7 +67,7 @@ export function useConversation(conversationId: string) {
       const currentUser = await api.messaging.getCurrentUser();
       const messages = await api.messaging.getConversationMessages(conversationId);
       
-      const convertedMessages: Message[] = messages.map((msg: any) => ({
+      const convertedMessages: Message[] = (messages || []).map((msg: any) => ({
         id: msg.id,
         sender: msg.senderId === currentUser.id ? 'me' : 'them',
         text: msg.content,
@@ -260,7 +260,7 @@ export function useSearchMessages(query: string, conversationId?: string) {
       const currentUser = await api.messaging.getCurrentUser();
       const messages = await api.messaging.searchMessages({ query, conversationId });
       
-      return messages.map((msg: any): Message => ({
+      return (messages || []).map((msg: any): Message => ({
         id: msg.id,
         sender: msg.senderId === currentUser.id ? 'me' : 'them',
         text: msg.content,
