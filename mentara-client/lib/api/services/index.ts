@@ -16,7 +16,7 @@ import { createCommentsService } from './comments';
 import { createWorksheetsService } from './worksheets';
 import { createPreAssessmentService } from './pre-assessment';
 import { createTherapistApplicationService } from './therapist-application';
-import { createSessionsService } from './sessions';
+import { createSessionService } from './sessions';
 import { createAnalyticsService } from './analytics';
 import { createAuditLogService } from './audit-logs';
 
@@ -39,7 +39,7 @@ export const createApiServices = (client: AxiosInstance) => ({
   worksheets: createWorksheetsService(client),
   preAssessment: createPreAssessmentService(client),
   therapistApplication: createTherapistApplicationService(client),
-  sessions: createSessionsService(client),
+  sessions: createSessionService(client),
   analytics: createAnalyticsService(client),
   auditLogs: createAuditLogService(client),
 });
@@ -64,7 +64,7 @@ export type { CommentsService } from './comments';
 export type { WorksheetsService } from './worksheets';
 export type { PreAssessmentService } from './pre-assessment';
 export type { TherapistApplicationService } from './therapist-application';
-export type { SessionService } from './sessions';
+// export type { SessionService } from './sessions'; // SessionService type not exported from sessions.ts
 export type { AnalyticsService } from './analytics';
 export type { AuditLogService } from './audit-logs';
 
