@@ -58,7 +58,7 @@ export function useMessagingContacts() {
           };
           
           return contact;
-        }).filter(Boolean); // Remove null entries
+        }).filter((contact): contact is Contact => contact !== null); // Remove null entries
       } catch (error) {
         console.error('Error fetching messaging contacts:', error);
         // Return empty array on error to prevent app crashes

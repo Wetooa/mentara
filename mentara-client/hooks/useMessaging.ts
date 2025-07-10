@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { Contact, Conversation, Message, MessagesState } from '@/components/messages/types';
+import { Contact, Conversation, Message } from '@/components/messages/types';
 import { messagingWebSocket } from '@/lib/messaging-websocket';
 import { 
   useMessagingContacts, 
@@ -10,8 +10,7 @@ import {
   useSendMessage, 
   useMarkMessageAsRead, 
   useAddMessageReaction, 
-  useRemoveMessageReaction, 
-  useSearchMessages 
+  useRemoveMessageReaction 
 } from './useMessagingQueries';
 
 export interface UseMessagingReturn {
@@ -73,7 +72,7 @@ export function useMessaging(): UseMessagingReturn {
   
   // Auto-select first contact if none selected
   useEffect(() => {
-    if (!selectedContactId && contacts.length > 0) {
+    if (!selectedContactId && contacts && contacts.length > 0) {
       setSelectedContactId(contacts[0].id);
     }
   }, [contacts, selectedContactId]);
@@ -243,7 +242,7 @@ export function useMessaging(): UseMessagingReturn {
   
   return {
     // State
-    contacts,
+    contacts: contacts || [],
     conversations,
     selectedContactId,
     isLoadingContacts,

@@ -50,10 +50,10 @@ const convertBackendMessageToFrontendFormat = (backendMessage: Record<string, un
     status: getMessageStatus(backendMessage, currentUserId),
     attachments: backendMessage.attachmentUrl ? [{
       id: `attachment-${backendMessage.id}`,
-      type: getAttachmentType(backendMessage.attachmentUrl),
-      url: backendMessage.attachmentUrl,
-      name: backendMessage.attachmentName || 'Attachment',
-      size: backendMessage.attachmentSize,
+      type: getAttachmentType(backendMessage.attachmentUrl as string),
+      url: backendMessage.attachmentUrl as string,
+      name: (backendMessage.attachmentName as string) || 'Attachment',
+      size: backendMessage.attachmentSize as number,
     }] : undefined,
     reactions: backendMessage.reactions?.map((reaction: Record<string, unknown>) => ({
       emoji: reaction.emoji,
