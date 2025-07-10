@@ -22,8 +22,17 @@ export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
       try {
         let token: string | null = null;
 
-        // Client-side fallback: try to get token from global Clerk instance
-        if (typeof window !== "undefined" && (window as any).Clerk?.session) {
+        // Priority 1: Use the provided getToken function if available
+        if (getToken) {
+          try {
+            token = await getToken();
+          } catch (error) {
+            console.warn("Failed to get token from provided getter:", error);
+          }
+        }
+
+        // Priority 2: Client-side fallback: try to get token from global Clerk instance
+        if (!token && typeof window !== "undefined" && (window as any).Clerk?.session) {
           try {
             token = await (window as any).Clerk.session.getToken();
           } catch (error) {
