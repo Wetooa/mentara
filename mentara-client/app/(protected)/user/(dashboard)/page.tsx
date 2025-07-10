@@ -152,6 +152,8 @@ export default function DashboardPage() {
         {/* Right Column */}
         <div className="space-y-6">
           <AssignedTherapist
+            assignedTherapists={dashboardApiData?.assignedTherapists || []}
+            isLoading={isDashboardLoading}
             onMessageTherapist={handleMessageTherapist}
             onScheduleSession={handleScheduleSession}
           />
