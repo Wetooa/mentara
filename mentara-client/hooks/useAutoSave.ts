@@ -1,18 +1,18 @@
 import { useEffect, useRef } from "react";
-import { useWatch } from "react-hook-form";
+import { useWatch, Control, FieldValues } from "react-hook-form";
 import useTherapistForm from "@/store/therapistform";
 
-interface UseAutoSaveProps {
-  control: any;
+interface UseAutoSaveProps<T extends FieldValues = FieldValues> {
+  control: Control<T>;
   interval?: number; // Auto-save interval in milliseconds (default: 30 seconds)
   debounceMs?: number; // Debounce time in milliseconds (default: 2 seconds)
 }
 
-export const useAutoSave = ({ 
+export const useAutoSave = <T extends FieldValues = FieldValues>({ 
   control, 
   interval = 30000, // 30 seconds
   debounceMs = 2000  // 2 seconds
-}: UseAutoSaveProps) => {
+}: UseAutoSaveProps<T>) => {
   const {
     updateField,
     saveFormData,

@@ -19,6 +19,7 @@ import {
   TeletherapyInfo,
   DocumentInfo,
   WorksheetAssignment,
+  TherapistCredentials,
 } from "@/types/api/therapists";
 
 // Therapist service factory
@@ -82,7 +83,7 @@ export const createTherapistService = (client: AxiosInstance) => ({
   updateApplicationStatus: (
     applicationId: string,
     data: { status: string; reviewedBy?: string; notes?: string }
-  ): Promise<{ success: boolean; message: string; credentials?: any }> =>
+  ): Promise<{ success: boolean; message: string; credentials?: TherapistCredentials }> =>
     client.put(`/therapist/application/${applicationId}/status`, data),
 
   // Application management

@@ -11,7 +11,7 @@ interface Document {
 }
 
 interface FormValues {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Section {

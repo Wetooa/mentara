@@ -4,6 +4,8 @@ import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { useAuth } from '@clerk/nextjs';
 import { toast } from "sonner";
+import { MentaraApiError } from "@/lib/api/errorHandler";
+import type { UserFavorite } from "@/types/api/users";
 
 /**
  * Hook for managing favorite therapists with backend sync
@@ -44,7 +46,7 @@ export function useFavorites() {
     onSuccess: (data) => {
       // Sync backend data to localStorage
       if (data && userId) {
-        const favoriteIds = data.map((fav: any) => fav.therapistId);
+        const favoriteIds = data.map((fav: UserFavorite) => fav.therapistId);
         setLocalFavorites(favoriteIds);
         localStorage.setItem(`therapist-favorites-${userId}`, JSON.stringify(favoriteIds));
       }
@@ -70,7 +72,7 @@ export function useFavorites() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(userId || '') });
     },
-    onError: (error: any, therapistId) => {
+    onError: (error: MentaraApiError, therapistId) => {
       // Rollback optimistic update
       setLocalFavorites(prev => prev.filter(id => id !== therapistId));
       toast.error("Failed to add favorite");
@@ -93,7 +95,7 @@ export function useFavorites() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(userId || '') });
     },
-    onError: (error: any, therapistId) => {
+    onError: (error: MentaraApiError, therapistId) => {
       // Rollback optimistic update
       setLocalFavorites(prev => {
         if (!prev.includes(therapistId)) {
@@ -106,7 +108,7 @@ export function useFavorites() {
   });
 
   // Use backend data if available, otherwise use local data
-  const favorites = backendFavorites?.map((fav: any) => fav.therapistId) || localFavorites;
+  const favorites = backendFavorites?.map((fav: UserFavorite) => fav.therapistId) || localFavorites;
   const isLoaded = isLocalLoaded && !isLoadingBackend;
 
   const isFavorite = (therapistId: string): boolean => {

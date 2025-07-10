@@ -11,6 +11,7 @@ import {
   ReviewHelpfulResponse
 } from '@/types/review';
 import { toast } from 'sonner';
+import { MentaraApiError } from '@/lib/api/errorHandler';
 
 // Hook for fetching reviews with filters
 export function useReviews(params: GetReviewsParams = {}) {
@@ -73,7 +74,7 @@ export function useCreateReview() {
       const previousReviews = queryClient.getQueryData(queryKeys.reviews.all);
       
       // Optimistically update to the new value
-      queryClient.setQueryData(queryKeys.reviews.list({}), (old: any) => {
+      queryClient.setQueryData(queryKeys.reviews.list({}), (old: ReviewsResponse | undefined) => {
         if (!old?.reviews) return old;
         
         const optimisticReview = {
@@ -142,7 +143,7 @@ export function useUpdateReview() {
       
       toast.success('Review updated successfully!');
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error('Failed to update review', {
         description: error.message || 'Please try again later.',
       });
@@ -167,7 +168,7 @@ export function useDeleteReview() {
       
       toast.success('Review deleted successfully!');
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error('Failed to delete review', {
         description: error.message || 'Please try again later.',
       });
@@ -186,7 +187,7 @@ export function useMarkReviewHelpful() {
     },
     onSuccess: (data, reviewId) => {
       // Update the specific review in the cache
-      queryClient.setQueryData(['reviews'], (oldData: any) => {
+      queryClient.setQueryData(['reviews'], (oldData: ReviewsResponse | undefined) => {
         if (!oldData?.reviews) return oldData;
         
         return {
@@ -204,7 +205,7 @@ export function useMarkReviewHelpful() {
       
       toast.success(data.helpful ? 'Marked as helpful!' : 'Removed helpful mark');
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error('Failed to update helpful status', {
         description: error.message || 'Please try again later.',
       });
@@ -237,7 +238,7 @@ export function useModerateReview() {
       
       toast.success('Review moderated successfully!');
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error('Failed to moderate review', {
         description: error.message || 'Please try again later.',
       });

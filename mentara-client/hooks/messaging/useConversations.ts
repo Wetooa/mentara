@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Conversation, Message } from '@/components/messages/types';
 import { createMessagingApiService } from '@/lib/messaging-api';
+import type { MessageAttachment } from '@/types/api/messaging';
 
 export function useConversations() {
   const { getToken } = useAuth();
@@ -44,7 +45,7 @@ export function useConversations() {
     }
   }, [messagingApi]);
 
-  const sendMessage = useCallback(async (text: string, attachments?: any[]) => {
+  const sendMessage = useCallback(async (text: string, attachments?: MessageAttachment[]) => {
     if (!selectedContactId || !messagingApi) return;
 
     try {

@@ -2,9 +2,10 @@
 
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
+import CommentSection from "@/components/community/CommentSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCommunityPage } from "@/hooks/useCommunityPage";
-import type { Post } from "@/lib/api/services/communities";
+import { useCommunityStats, useCommunityOverview } from "@/hooks/community";
+import type { Post } from "@/types/api/communities";
 
 export default function UserCommunity() {
   const {
@@ -40,7 +42,6 @@ export default function UserCommunity() {
     postsData,
     postsLoading,
     postsError,
-    communityStats,
     createPostMutation,
     heartPostMutation,
     handleCommunitySelect,
@@ -56,6 +57,16 @@ export default function UserCommunity() {
     isPostingAllowed,
     isPostHearted,
   } = useCommunityPage();
+
+  // Enhanced community data with new hooks
+  const { stats: communityStats } = useCommunityStats();
+  const {
+    isUserMember,
+    joinCommunity,
+    leaveCommunity,
+    isJoining,
+    isLeaving,
+  } = useCommunityOverview(selectedCommunityId);
 
   const breadcrumb = getRoomBreadcrumb();
 
@@ -210,7 +221,7 @@ export default function UserCommunity() {
                   <div className="space-y-6">
                     {[1, 2, 3].map(i => (
                       <Card key={i}>
-                        <CardHeader className="space-y-3">
+                        <CardHeader>
                           <div className="flex items-center gap-3">
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <div className="space-y-1">
@@ -218,7 +229,9 @@ export default function UserCommunity() {
                               <Skeleton className="h-3 w-16" />
                             </div>
                           </div>
-                          <Skeleton className="h-6 w-3/4" />
+                          <CardTitle>
+                            <Skeleton className="h-6 w-3/4" />
+                          </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <Skeleton className="h-20 w-full" />
@@ -228,10 +241,10 @@ export default function UserCommunity() {
                   </div>
                 ) : postsError ? (
                   // Error state
-                  <Card className="text-center py-12">
-                    <CardContent>
+                  <Card>
+                    <CardContent className="text-center py-8">
                       <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-neutral-800 mb-2">Failed to load posts</h3>
+                      <CardTitle className="text-lg mb-2">Failed to load posts</CardTitle>
                       <p className="text-neutral-600 mb-4">
                         There was an error loading posts from this room.
                       </p>
@@ -242,10 +255,10 @@ export default function UserCommunity() {
                   </Card>
                 ) : !postsData?.posts.length ? (
                   // Empty state
-                  <Card className="text-center py-12">
-                    <CardContent>
+                  <Card>
+                    <CardContent className="text-center py-8">
                       <MessageCircle className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-neutral-800 mb-2">No posts yet</h3>
+                      <CardTitle className="text-lg mb-2">No posts yet</CardTitle>
                       <p className="text-neutral-600 mb-4">
                         Be the first to start a conversation in this room!
                       </p>
@@ -268,29 +281,27 @@ export default function UserCommunity() {
                       (
                         <Card key={post.id} className="hover:shadow-md transition-shadow">
                           <CardHeader>
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10">
-                                  <AvatarImage src={post.user.avatarUrl} />
-                                  <AvatarFallback>
-                                    {getUserInitials(post.user.firstName, post.user.lastName)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <h3 className="font-medium text-neutral-800">
-                                    {post.user.firstName} {post.user.lastName}
-                                  </h3>
-                                  <p className="text-xs text-neutral-500 flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-                                  </p>
-                                </div>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={post.user.avatarUrl} />
+                                <AvatarFallback>
+                                  {getUserInitials(post.user.firstName, post.user.lastName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <h3 className="font-medium text-neutral-800">
+                                  {post.user.firstName} {post.user.lastName}
+                                </h3>
+                                <p className="text-xs text-neutral-500 flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                                </p>
                               </div>
                             </div>
                             
-                            <h2 className="text-lg font-semibold text-neutral-900 mt-3">
+                            <CardTitle className="mt-3">
                               {post.title}
-                            </h2>
+                            </CardTitle>
                           </CardHeader>
                           
                           <CardContent>
@@ -300,7 +311,7 @@ export default function UserCommunity() {
                             
                             <Separator className="my-4" />
                             
-                            <div className="flex items-center gap-6 text-sm">
+                            <div className="flex items-center gap-6 text-sm mb-4">
                               <button
                                 onClick={() => handleHeartPost(post)}
                                 className={cn(
@@ -318,6 +329,8 @@ export default function UserCommunity() {
                                 <span>{post._count.comments}</span>
                               </div>
                             </div>
+                            
+                            <CommentSection postId={post.id} />
                           </CardContent>
                         </Card>
                       )

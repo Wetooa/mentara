@@ -5,7 +5,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import type { Post } from "@/lib/api/services/communities";
+import { queryKeys } from "@/lib/queryKeys";
+import { MentaraApiError } from "@/lib/api/errorHandler";
+import type { Post } from "@/types/api/communities";
 
 export function useCommunityPage() {
   const api = useApi();
@@ -20,7 +22,7 @@ export function useCommunityPage() {
 
   // Get selected community and room info
   const { data: selectedCommunity } = useQuery({
-    queryKey: ["community-with-structure", selectedCommunityId],
+    queryKey: queryKeys.communities.withStructureById(selectedCommunityId!),
     queryFn: () => selectedCommunityId ? api.communities.getCommunityWithStructure(selectedCommunityId) : null,
     enabled: !!selectedCommunityId,
   });
@@ -35,7 +37,7 @@ export function useCommunityPage() {
     isLoading: postsLoading, 
     error: postsError 
   } = useQuery({
-    queryKey: ["room-posts", selectedRoomId],
+    queryKey: queryKeys.communities.roomPosts(selectedRoomId!),
     queryFn: () => selectedRoomId ? api.communities.getPostsByRoom(selectedRoomId) : null,
     enabled: !!selectedRoomId,
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -43,7 +45,7 @@ export function useCommunityPage() {
 
   // Get community stats
   const { data: communityStats } = useQuery({
-    queryKey: ["community-stats"],
+    queryKey: queryKeys.communities.stats(),
     queryFn: () => api.communities.getCommunityStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -53,17 +55,14 @@ export function useCommunityPage() {
     mutationFn: (data: { title: string; content: string; roomId: string }) =>
       api.communities.createPost(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["room-posts", selectedRoomId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
       setNewPostTitle("");
       setNewPostContent("");
       setIsCreatePostOpen(false);
       toast.success("Post created successfully!");
     },
-    onError: (error: unknown) => {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error.response as { data?: { message?: string } })?.data?.message 
-        : 'Failed to create post';
-      toast.error(errorMessage);
+    onError: (error: MentaraApiError) => {
+      toast.error("Failed to create post");
     },
   });
 
@@ -72,7 +71,7 @@ export function useCommunityPage() {
     mutationFn: ({ postId, isHearted }: { postId: string; isHearted: boolean }) =>
       isHearted ? api.communities.unheartPost(postId) : api.communities.heartPost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["room-posts", selectedRoomId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
     },
   });
 
@@ -124,7 +123,7 @@ export function useCommunityPage() {
   };
 
   const retryLoadPosts = () => {
-    queryClient.invalidateQueries({ queryKey: ["room-posts", selectedRoomId] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
   };
 
   const isPostingAllowed = () => {

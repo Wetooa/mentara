@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 interface Therapist {
   id: string;
@@ -41,7 +42,7 @@ export function useTherapist() {
     queryKey: queryKeys.client.assignedTherapist(),
     queryFn: () => api.client.getAssignedTherapist(),
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: MentaraApiError) => {
       // Don't retry on 404 (no therapist assigned)
       if (error?.response?.status === 404) return false;
       return failureCount < 3;
@@ -62,7 +63,7 @@ export function useTherapist() {
       // Note: In a real implementation, this would directly assign the therapist
       // For now, it creates a change request that admin needs to approve
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
       toast.error(message);
     },
@@ -78,7 +79,7 @@ export function useTherapist() {
       // Invalidate the assigned therapist query
       queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to submit therapist change request";
       toast.error(message);
     },
@@ -135,3 +136,28 @@ export function useAssignedTherapist() {
     refetch,
   };
 }
+
+/**
+ * Hook for getting multiple assigned therapists (for clients with multiple therapists)
+ */
+export function useAssignedTherapists() {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: queryKeys.client.assignedTherapists(),
+    queryFn: () => api.client.getAssignedTherapists(),
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: (failureCount, error: MentaraApiError) => {
+      // Don't retry on 404 (no therapists assigned)
+      if (error?.response?.status === 404) return false;
+      return failureCount < 3;
+    },
+  });
+}
+
+// Export namespace for better organization
+export const useTherapist = {
+  useAssignedTherapist,
+  useAssignedTherapists,
+  useTherapistAssignment,
+};

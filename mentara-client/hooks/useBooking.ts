@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 interface BookingSlot {
   id: string;
@@ -23,6 +24,9 @@ interface Meeting {
   notes?: string;
 }
 
+/**
+ * Hook for managing therapy session bookings
+ */
 /**
  * Hook for managing therapy session bookings
  */
@@ -50,60 +54,76 @@ export function useBooking() {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Book session mutation
-  const bookSessionMutation = useMutation({
+  // Create meeting mutation (for clients)
+  const createMeetingMutation = useMutation({
     mutationFn: ({ 
       therapistId, 
       startTime, 
       duration, 
-      notes 
+      title,
+      description,
+      meetingType = 'video',
     }: { 
       therapistId: string; 
       startTime: string; 
       duration: number; 
-      notes?: string; 
-    }) => api.booking.bookSession(therapistId, startTime, duration, notes),
+      title?: string;
+      description?: string;
+      meetingType?: 'video' | 'audio' | 'in_person' | 'chat';
+    }) => api.booking.createMeeting({
+      therapistId,
+      startTime,
+      duration,
+      title: title || 'Therapy Session',
+      description,
+      meetingType,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
       toast.success("Session booked successfully");
     },
-    onError: (error: any) => {
-      toast.error("Failed to book session");
+    onError: (error: MentaraApiError) => {
+      toast.error(error.message || "Failed to book session");
     },
   });
 
-  // Cancel booking mutation
-  const cancelBookingMutation = useMutation({
-    mutationFn: (meetingId: string) => api.booking.cancelBooking(meetingId),
+  // Cancel meeting mutation
+  const cancelMeetingMutation = useMutation({
+    mutationFn: (meetingId: string) => api.booking.cancelMeeting(meetingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
-      toast.success("Booking cancelled successfully");
+      toast.success("Meeting cancelled successfully");
     },
-    onError: (error: any) => {
-      toast.error("Failed to cancel booking");
+    onError: (error: MentaraApiError) => {
+      toast.error(error.message || "Failed to cancel meeting");
     },
   });
 
-  // Reschedule booking mutation
-  const rescheduleBookingMutation = useMutation({
+  // Update meeting mutation
+  const updateMeetingMutation = useMutation({
     mutationFn: ({ 
       meetingId, 
-      newStartTime, 
-      newDuration 
+      updates,
     }: { 
       meetingId: string; 
-      newStartTime: string; 
-      newDuration?: number; 
-    }) => api.booking.rescheduleBooking(meetingId, newStartTime, newDuration),
+      updates: {
+        title?: string;
+        description?: string;
+        startTime?: string;
+        duration?: number;
+        meetingType?: 'video' | 'audio' | 'in_person' | 'chat';
+        status?: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+      };
+    }) => api.booking.updateMeeting(meetingId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
-      toast.success("Booking rescheduled successfully");
+      toast.success("Meeting updated successfully");
     },
-    onError: (error: any) => {
-      toast.error("Failed to reschedule booking");
+    onError: (error: MentaraApiError) => {
+      toast.error(error.message || "Failed to update meeting");
     },
   });
 
@@ -111,14 +131,39 @@ export function useBooking() {
     durations: durations || [],
     isLoadingDurations,
     getAvailableSlots,
+    createMeeting: (data: {
+      therapistId: string;
+      startTime: string;
+      duration: number;
+      title?: string;
+      description?: string;
+      meetingType?: 'video' | 'audio' | 'in_person' | 'chat';
+    }) => createMeetingMutation.mutate(data),
+    cancelMeeting: (meetingId: string) => cancelMeetingMutation.mutate(meetingId),
+    updateMeeting: (meetingId: string, updates: any) => 
+      updateMeetingMutation.mutate({ meetingId, updates }),
+    isCreating: createMeetingMutation.isPending,
+    isCancelling: cancelMeetingMutation.isPending,
+    isUpdating: updateMeetingMutation.isPending,
+    
+    // Legacy aliases for backward compatibility
     bookSession: (therapistId: string, startTime: string, duration: number, notes?: string) =>
-      bookSessionMutation.mutate({ therapistId, startTime, duration, notes }),
-    cancelBooking: (meetingId: string) => cancelBookingMutation.mutate(meetingId),
+      createMeetingMutation.mutate({ 
+        therapistId, 
+        startTime, 
+        duration, 
+        description: notes,
+      }),
     rescheduleBooking: (meetingId: string, newStartTime: string, newDuration?: number) =>
-      rescheduleBookingMutation.mutate({ meetingId, newStartTime, newDuration }),
-    isBooking: bookSessionMutation.isPending,
-    isCancelling: cancelBookingMutation.isPending,
-    isRescheduling: rescheduleBookingMutation.isPending,
+      updateMeetingMutation.mutate({ 
+        meetingId, 
+        updates: { 
+          startTime: newStartTime, 
+          ...(newDuration && { duration: newDuration }),
+        },
+      }),
+    isBooking: createMeetingMutation.isPending,
+    isRescheduling: updateMeetingMutation.isPending,
   };
 }
 

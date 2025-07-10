@@ -246,7 +246,8 @@ export class CommunitiesController {
     @CurrentUserId() userId: string,
   ): Promise<{ assignedCommunities: string[] }> {
     try {
-      const assignedCommunities = await this.communityAssignmentService.assignCommunitiesToUser(userId);
+      const assignedCommunities =
+        await this.communityAssignmentService.assignCommunitiesToUser(userId);
       return { assignedCommunities };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -261,7 +262,8 @@ export class CommunitiesController {
     @Param('userId') userId: string,
   ): Promise<{ assignedCommunities: string[] }> {
     try {
-      const assignedCommunities = await this.communityAssignmentService.assignCommunitiesToUser(userId);
+      const assignedCommunities =
+        await this.communityAssignmentService.assignCommunitiesToUser(userId);
       return { assignedCommunities };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -275,7 +277,8 @@ export class CommunitiesController {
     @CurrentUserId() userId: string,
   ): Promise<{ recommendedCommunities: string[] }> {
     try {
-      const recommendedCommunities = await this.communityAssignmentService.getRecommendedCommunities(userId);
+      const recommendedCommunities =
+        await this.communityAssignmentService.getRecommendedCommunities(userId);
       return { recommendedCommunities };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -290,7 +293,10 @@ export class CommunitiesController {
     @Body() body: { userIds: string[] },
   ): Promise<{ results: { [userId: string]: string[] } }> {
     try {
-      const results = await this.communityAssignmentService.bulkAssignCommunities(body.userIds);
+      const results =
+        await this.communityAssignmentService.bulkAssignCommunities(
+          body.userIds,
+        );
       return { results };
     } catch (error) {
       throw new InternalServerErrorException(

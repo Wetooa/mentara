@@ -60,3 +60,10 @@ export interface UserListResponse {
   total: number;
   hasMore: boolean;
 }
+
+export interface UserFavorite {
+  id: string;
+  userId: string;
+  therapistId: string;
+  createdAt: string;
+}

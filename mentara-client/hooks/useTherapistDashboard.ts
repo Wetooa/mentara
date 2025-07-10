@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
-import type { TherapistDashboardData } from '@/lib/api/services/therapists';
+import { MentaraApiError } from '@/lib/api/errorHandler';
+import type { TherapistDashboardData, MeetingData } from '@/types/api/therapists';
 
 /**
  * Hook for fetching complete therapist dashboard data
@@ -14,7 +15,7 @@ export function useTherapistDashboard() {
     queryKey: queryKeys.therapists.all.concat(['dashboard']),
     queryFn: () => api.therapists.dashboard.getData(),
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (dashboard data changes frequently)
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized to access therapist data
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -106,7 +107,7 @@ export function useUpdateMeetingStatus() {
       // Optimistically update meeting status
       queryClient.setQueriesData(
         { queryKey: queryKeys.therapists.all.concat(['meetings']) },
-        (oldData: any) => {
+        (oldData: MeetingData[] | undefined) => {
           if (Array.isArray(oldData)) {
             return oldData.map(meeting => 
               meeting.id === meetingId ? { ...meeting, status } : meeting
@@ -119,10 +120,10 @@ export function useUpdateMeetingStatus() {
       // Also update specific meeting query
       queryClient.setQueryData(
         queryKeys.therapists.all.concat(['meetings', meetingId]),
-        (oldMeeting: any) => oldMeeting ? { ...oldMeeting, status } : oldMeeting
+        (oldMeeting: MeetingData | undefined) => oldMeeting ? { ...oldMeeting, status } : oldMeeting
       );
     },
-    onError: (error: any, { meetingId }) => {
+    onError: (error: MentaraApiError, { meetingId }) => {
       toast.error(error?.message || 'Failed to update meeting status');
       
       // Invalidate queries to revert optimistic update
@@ -165,7 +166,7 @@ export function useStartMeeting() {
       // Update meeting status to 'started'
       queryClient.setQueriesData(
         { queryKey: queryKeys.therapists.all.concat(['meetings']) },
-        (oldData: any) => {
+        (oldData: MeetingData[] | undefined) => {
           if (Array.isArray(oldData)) {
             return oldData.map(meeting => 
               meeting.id === meetingId ? { ...meeting, status: 'started' } : meeting
@@ -180,7 +181,7 @@ export function useStartMeeting() {
         queryKey: queryKeys.therapists.all.concat(['dashboard']) 
       });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to start meeting');
     },
   });

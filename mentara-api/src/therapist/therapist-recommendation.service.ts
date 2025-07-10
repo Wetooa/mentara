@@ -9,10 +9,21 @@ import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
 } from './dto/therapist-application.dto';
+import {
+  AdvancedMatchingService,
+  TherapistScore,
+} from './services/advanced-matching.service';
+import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
+import { MatchingAnalyticsService } from './services/matching-analytics.service';
 
 @Injectable()
 export class TherapistRecommendationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly advancedMatching: AdvancedMatchingService,
+    private readonly compatibilityAnalysis: CompatibilityAnalysisService,
+    private readonly matchingAnalytics: MatchingAnalyticsService,
+  ) {}
 
   private calculateYearsOfExperience(startDate: Date): number {
     const now = new Date();
@@ -31,11 +42,13 @@ export class TherapistRecommendationService {
     request: TherapistRecommendationRequest,
   ): Promise<TherapistRecommendationResponse> {
     try {
-      // Get user's pre-assessment results
+      // Get user's comprehensive data including preferences
       const user = await this.prisma.client.findUnique({
         where: { userId: request.userId },
         include: {
           preAssessment: true,
+          clientPreferences: true,
+          user: true,
         },
       });
       if (!user) throw new NotFoundException('User not found');
@@ -49,7 +62,7 @@ export class TherapistRecommendationService {
         string
       >;
 
-      // Fetch therapists
+      // Fetch therapists with comprehensive data
       const therapists = await this.prisma.therapist.findMany({
         where: {
           status: 'approved',
@@ -59,31 +72,95 @@ export class TherapistRecommendationService {
           }),
         },
         orderBy: { createdAt: 'desc' },
-        take: request.limit ?? 10,
+        take: Math.min(request.limit ?? 10, 50), // Increase limit for better filtering
         include: {
           user: true,
+          reviews: {
+            where: { status: 'APPROVED' },
+            select: {
+              rating: true,
+              status: true,
+            },
+          },
         },
       });
 
-      // Calculate match scores
-      const therapistsWithScores = therapists.map((therapist) => {
-        const matchScore = this.calculateMatchScore(therapist, userConditions);
-        return { ...therapist, matchScore };
-      });
+      // Use advanced matching algorithm
+      const therapistScores: TherapistScore[] = [];
 
-      // Sort by matchScore descending
-      const sortedTherapists = therapistsWithScores.toSorted(
-        (a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0),
+      for (const therapist of therapists) {
+        try {
+          const score = await this.advancedMatching.calculateAdvancedMatch(
+            user,
+            therapist,
+          );
+          therapistScores.push(score);
+        } catch (error) {
+          // Fallback to basic scoring if advanced matching fails
+          console.warn(
+            `Advanced matching failed for therapist ${therapist.userId}:`,
+            error,
+          );
+          const basicScore = this.calculateMatchScore(
+            therapist,
+            userConditions,
+          );
+          therapistScores.push({
+            therapist,
+            totalScore: basicScore,
+            breakdown: {
+              conditionScore: basicScore * 0.6,
+              approachScore: 0,
+              experienceScore: basicScore * 0.4,
+              reviewScore: 0,
+              logisticsScore: 0,
+            },
+            matchExplanation: {
+              primaryMatches: this.getPrimaryConditions(userConditions),
+              secondaryMatches: this.getSecondaryConditions(userConditions),
+              approachMatches: [],
+              experienceYears: this.calculateYearsOfExperience(
+                therapist.practiceStartDate,
+              ),
+              averageRating: 0,
+              totalReviews: 0,
+              successRates: {},
+            },
+          });
+        }
+      }
+
+      // Sort by total score descending
+      const sortedTherapistScores = therapistScores.sort(
+        (a, b) => b.totalScore - a.totalScore,
       );
+
+      // Take only the requested number of results
+      const finalResults = sortedTherapistScores.slice(0, request.limit ?? 10);
+
+      // Track recommendation analytics
+      await this.matchingAnalytics.trackRecommendation(
+        request.userId,
+        finalResults,
+        'advanced_v1.0',
+      );
+
+      // Transform to expected format
+      const therapistsWithScores = finalResults.map((score) => ({
+        ...score.therapist,
+        matchScore: score.totalScore,
+        scoreBreakdown: score.breakdown,
+        matchExplanation: score.matchExplanation,
+      }));
 
       // Determine primary and secondary conditions
       const primaryConditions = this.getPrimaryConditions(userConditions);
       const secondaryConditions = this.getSecondaryConditions(userConditions);
 
       return {
-        totalCount: sortedTherapists.length,
+        totalCount: therapistsWithScores.length,
         userConditions: Object.keys(userConditions),
-        therapists: sortedTherapists,
+        therapists: therapistsWithScores,
         matchCriteria: {
           primaryConditions,
           secondaryConditions,
@@ -99,6 +176,49 @@ export class TherapistRecommendationService {
           : 'Failed to get therapist recommendations',
       );
     }
+  }
+
+  /**
+   * Get detailed compatibility analysis between a client and therapist
+   */
+  async getCompatibilityAnalysis(clientId: string, therapistId: string) {
+    const client = await this.prisma.client.findUnique({
+      where: { userId: clientId },
+      include: {
+        preAssessment: true,
+        clientPreferences: true,
+        user: true,
+      },
+    });
+
+    const therapist = await this.prisma.therapist.findUnique({
+      where: { userId: therapistId },
+      include: {
+        user: true,
+        reviews: {
+          where: { status: 'APPROVED' },
+        },
+      },
+    });
+
+    if (!client || !therapist) {
+      throw new NotFoundException('Client or therapist not found');
+    }
+
+    const compatibility = await this.compatibilityAnalysis.analyzeCompatibility(
+      client,
+      therapist,
+    );
+
+    // Track compatibility analysis
+    await this.matchingAnalytics.trackCompatibilityAnalysis(
+      clientId,
+      therapistId,
+      compatibility,
+      '1.0',
+    );
+
+    return compatibility;
   }
 
   private extractUserConditions(

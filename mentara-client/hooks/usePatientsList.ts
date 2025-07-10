@@ -2,7 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
-import type { PatientData } from '@/lib/api/services/therapists';
+import { MentaraApiError } from '@/lib/api/errorHandler';
+import type { PatientData, WorksheetAssignment } from '@/types/api/therapists';
+import type { Session } from '@/types/api/sessions';
 
 /**
  * Hook for fetching assigned patients list (for therapists)
@@ -15,7 +17,7 @@ export function usePatientsList() {
     queryFn: () => api.therapists.patients.getList(),
     select: (response) => response.data || [],
     staleTime: 1000 * 60 * 5, // Patient list is relatively stable
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized to access patient data
       if (error?.status === 403 || error?.status === 401) {
         return false;
@@ -96,7 +98,7 @@ export function useUpdatePatientNotes() {
       // Optimistically update session notes
       queryClient.setQueryData(
         queryKeys.clients.sessions(patientId),
-        (oldSessions: any[]) => {
+        (oldSessions: Session[] | undefined) => {
           if (!oldSessions) return oldSessions;
           
           return oldSessions.map(session => 
@@ -107,7 +109,7 @@ export function useUpdatePatientNotes() {
       
       return { patientId, sessionId };
     },
-    onError: (error: any, variables, context) => {
+    onError: (error: MentaraApiError, variables, context) => {
       toast.error(error?.message || 'Failed to update session notes');
       
       // Revert optimistic update
@@ -141,7 +143,7 @@ export function useAssignWorksheet() {
       worksheetData 
     }: { 
       patientId: string; 
-      worksheetData: any; 
+      worksheetData: WorksheetAssignment; 
     }) => api.therapists.patients.assignWorksheet(patientId, worksheetData),
     onSuccess: (data, { patientId }) => {
       toast.success('Worksheet assigned successfully!');
@@ -156,7 +158,7 @@ export function useAssignWorksheet() {
         queryKey: queryKeys.clients.detail(patientId) 
       });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to assign worksheet');
     },
   });

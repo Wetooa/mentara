@@ -21,34 +21,34 @@ export class CommunityAssignmentService {
     // Depression-related assessments
     'phq-9': 'depression-support',
     'mood-disorder': 'depression-support',
-    
+
     // Anxiety-related assessments
     'gad-7-anxiety': 'anxiety-warriors',
     'social-phobia': 'social-anxiety-support',
     'panic-disorder': 'anxiety-warriors',
-    'phobia': 'phobia-support',
-    
+    phobia: 'phobia-support',
+
     // Stress-related assessments
     'perceived-stress-scale': 'stress-support',
-    'burnout': 'burnout-recovery',
-    
+    burnout: 'burnout-recovery',
+
     // Sleep-related assessments
-    'insomnia': 'insomnia-support',
-    
+    insomnia: 'insomnia-support',
+
     // Trauma-related assessments
-    'ptsd': 'ptsd-support',
-    
+    ptsd: 'ptsd-support',
+
     // OCD-related assessments
     'obsessional-compulsive': 'ocd-support',
-    
+
     // ADHD-related assessments
-    'adhd': 'adhd-support',
-    
+    adhd: 'adhd-support',
+
     // Eating disorder assessments
     'binge-eating': 'eating-disorder-recovery',
-    
+
     // Substance use assessments
-    'alcohol': 'substance-recovery-support',
+    alcohol: 'substance-recovery-support',
     'drug-abuse': 'substance-recovery-support',
   };
 
@@ -57,10 +57,10 @@ export class CommunityAssignmentService {
    * Only assign to communities if severity is moderate or higher
    */
   private readonly SEVERITY_THRESHOLD = {
-    'minimal': false,
-    'mild': false,
-    'moderate': true,
-    'severe': true,
+    minimal: false,
+    mild: false,
+    moderate: true,
+    severe: true,
     'very-severe': true,
   };
 
@@ -131,16 +131,23 @@ export class CommunityAssignmentService {
         });
 
         assignedCommunities.push(community.name);
-        console.log(`✅ Assigned user to community: ${community.name} (${severity} ${questionnaire})`);
+        console.log(
+          `✅ Assigned user to community: ${community.name} (${severity} ${questionnaire})`,
+        );
       } catch (error) {
-        console.error(`❌ Failed to assign community ${community.name}:`, error);
+        console.error(
+          `❌ Failed to assign community ${community.name}:`,
+          error,
+        );
       }
     }
 
     // Always assign to general support communities
     await this.assignGeneralSupportCommunities(userId);
 
-    console.log(`🎯 Auto-assignment complete. Assigned ${assignedCommunities.length} communities.`);
+    console.log(
+      `🎯 Auto-assignment complete. Assigned ${assignedCommunities.length} communities.`,
+    );
     return assignedCommunities;
   }
 
@@ -180,7 +187,10 @@ export class CommunityAssignmentService {
         });
         console.log(`✅ Assigned user to general community: ${community.name}`);
       } catch (error) {
-        console.error(`❌ Failed to assign general community ${community.name}:`, error);
+        console.error(
+          `❌ Failed to assign general community ${community.name}:`,
+          error,
+        );
       }
     }
   }
@@ -206,7 +216,9 @@ export class CommunityAssignmentService {
       const communitySlug = this.QUESTIONNAIRE_TO_COMMUNITY_MAP[questionnaire];
 
       if (communitySlug && this.SEVERITY_THRESHOLD[severity?.toLowerCase()]) {
-        const community = ILLNESS_COMMUNITIES.find(c => c.slug === communitySlug);
+        const community = ILLNESS_COMMUNITIES.find(
+          (c) => c.slug === communitySlug,
+        );
         if (community) {
           recommendedCommunities.push(community.name);
         }
@@ -219,7 +231,9 @@ export class CommunityAssignmentService {
   /**
    * Bulk assign communities to multiple users (useful for existing users)
    */
-  async bulkAssignCommunities(userIds: string[]): Promise<{ [userId: string]: string[] }> {
+  async bulkAssignCommunities(
+    userIds: string[],
+  ): Promise<{ [userId: string]: string[] }> {
     const results: { [userId: string]: string[] } = {};
 
     for (const userId of userIds) {

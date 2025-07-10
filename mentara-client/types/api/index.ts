@@ -50,6 +50,12 @@ export * from './sessions';
 export * from './analytics';
 export * from './audit-logs';
 
+// Filter types (eliminates Record<string, any> usage)
+export * from './filters';
+
+// Meeting types
+export * from './meetings';
+
 // Keep existing service types for backward compatibility
 export * from '../booking';
 export * from '../review';

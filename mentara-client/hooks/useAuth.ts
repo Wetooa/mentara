@@ -17,6 +17,7 @@ import type {
   RegisterUserRequest,
   PreAssessmentSubmission,
 } from "@/types/api/auth";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 /**
  * Simplified authentication hook following proper data flow:
@@ -63,7 +64,7 @@ export function useAuth() {
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
       toast.success("Registration successful!");
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       console.error("Registration failed:", error);
       toast.error("Registration failed. Please try again.");
     },
@@ -73,7 +74,7 @@ export function useAuth() {
   const submitPreAssessmentMutation = useMutation({
     mutationFn: (data: PreAssessmentSubmission) =>
       api.auth.submitPreAssessment(data),
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       console.error("Pre-assessment submission failed:", error);
       toast.error("Failed to submit assessment. Please try again.");
     },
@@ -82,7 +83,7 @@ export function useAuth() {
   // Community assignment mutation
   const assignCommunitiesMutation = useMutation({
     mutationFn: () => api.auth.assignCommunities(),
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       console.error("Community assignment failed:", error);
       toast.error("Failed to assign communities. Please try again.");
     },

@@ -247,3 +247,12 @@ export interface WorksheetAssignment {
   priority: "low" | "medium" | "high";
   instructions?: string;
 }
+
+export interface TherapistCredentials {
+  userId: string;
+  therapistId: string;
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt: string;
+  permissions: string[];
+}

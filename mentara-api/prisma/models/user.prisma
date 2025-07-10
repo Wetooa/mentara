@@ -103,6 +103,11 @@ model Client {
     assessments            Assessment[]
     mentalHealthIndicators MentalHealthIndicator[]
 
+    // Matching analytics relations
+    matchHistory            MatchHistory[]
+    clientCompatibility     ClientCompatibility[]
+    recommendationFeedback  RecommendationFeedback[]
+
     hasSeenTherapistRecommendations Boolean @default(false)
 
     createdAt DateTime @default(now())

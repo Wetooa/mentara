@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { api } from '@/lib/api';
+import { useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { api } from "@/lib/api";
 
 /**
  * Hook to set up API authentication with Clerk token
@@ -15,7 +15,7 @@ export function useApiAuth() {
       try {
         return await getToken();
       } catch (error) {
-        console.error('Failed to get auth token:', error);
+        console.error("Failed to get auth token:", error);
         return null;
       }
     });

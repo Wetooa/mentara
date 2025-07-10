@@ -63,6 +63,29 @@ export interface UpdateMessageDto {
   content?: string;
 }
 
+export interface TypingData {
+  conversationId: string;
+  userId: string;
+  isTyping: boolean;
+  timestamp: string;
+}
+
+export interface UserStatusData {
+  userId: string;
+  status: 'online' | 'offline' | 'away';
+  lastSeen?: string;
+}
+
+export interface MessageAttachment {
+  id?: string;
+  type: 'image' | 'file' | 'video' | 'audio';
+  url: string;
+  fileName: string;
+  fileSize?: number;
+  mimeType?: string;
+  thumbnailUrl?: string;
+}
+
 export interface AddReactionDto {
   emoji: string;
 }

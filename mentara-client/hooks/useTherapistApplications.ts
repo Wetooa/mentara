@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
+import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
   TherapistApplication,
   ApplicationListParams,
   UpdateApplicationRequest,
   CreateApplicationRequest
-} from '@/lib/api/services/therapists';
+} from '@/types/api/therapists';
 
 /**
  * Hook for fetching therapist applications list (admin functionality)
@@ -69,7 +70,7 @@ export function useMyTherapistApplication() {
     queryKey: queryKeys.therapists.applications.detail('me'),
     queryFn: () => api.therapists.application.getMy(),
     staleTime: 1000 * 60 * 10, // My application doesn't change often
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if application doesn't exist (404)
       if (error?.status === 404) {
         return false;
@@ -102,7 +103,7 @@ export function useSubmitTherapistApplication() {
         queryKey: queryKeys.therapists.applications.all() 
       });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Failed to submit application');
     },
   });
@@ -143,7 +144,7 @@ export function useUpdateTherapistApplicationStatus() {
       
       return { previousApplication, applicationId };
     },
-    onError: (error: any, { applicationId }, context) => {
+    onError: (error: MentaraApiError, { applicationId }, context) => {
       // Rollback to previous value on error
       if (context?.previousApplication) {
         queryClient.setQueryData(
@@ -216,7 +217,7 @@ export function useBulkUpdateApplications() {
         queryKey: queryKeys.therapists.applications.all() 
       });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error(error?.message || 'Bulk update failed');
     },
   });

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 interface Worksheet {
   id: string;
@@ -44,7 +45,7 @@ export function useWorksheets() {
       queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
       toast.success("Worksheet submitted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error("Failed to submit worksheet");
     },
   });
@@ -56,7 +57,7 @@ export function useWorksheets() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       console.error("Failed to save draft:", error);
     },
   });
@@ -102,7 +103,7 @@ export function useTherapistWorksheets() {
       queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
       toast.success("Worksheet assigned successfully");
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error("Failed to assign worksheet");
     },
   });
@@ -115,7 +116,7 @@ export function useTherapistWorksheets() {
       queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
       toast.success("Review submitted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error("Failed to submit review");
     },
   });

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { messagingWebSocket } from '@/lib/messaging-websocket';
+import type { Message, TypingData, UserStatusData } from '@/types/api/messaging';
 
 export function useWebSocket() {
   const { getToken } = useAuth();
@@ -58,15 +59,15 @@ export function useWebSocket() {
     }
   }, []);
 
-  const subscribeToMessages = useCallback((callback: (message: any) => void) => {
+  const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
     return messagingWebSocket.onMessage(callback);
   }, []);
 
-  const subscribeToTyping = useCallback((callback: (data: any) => void) => {
+  const subscribeToTyping = useCallback((callback: (data: TypingData) => void) => {
     return messagingWebSocket.onTyping(callback);
   }, []);
 
-  const subscribeToUserStatus = useCallback((callback: (data: any) => void) => {
+  const subscribeToUserStatus = useCallback((callback: (data: UserStatusData) => void) => {
     return messagingWebSocket.onUserStatus(callback);
   }, []);
 

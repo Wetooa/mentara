@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
@@ -31,7 +32,12 @@ export class BookingController {
   async createMeeting(
     @Body() createMeetingDto: MeetingCreateDto,
     @CurrentUserId() userId: string,
+    @CurrentUserRole() role: string,
   ) {
+    // Only clients can book meetings, but we'll validate the relationship in the service
+    if (role !== 'client') {
+      throw new ForbiddenException('Only clients can book meetings');
+    }
     return this.bookingService.createMeeting(createMeetingDto, userId);
   }
 
@@ -141,10 +147,10 @@ export class BookingController {
   }
 
   // Duration endpoints (public)
-  /* @Get('durations')
+  @Get('durations')
   getDurations() {
     return this.bookingService.getDurations();
-  } */
+  }
 
   // Available slots endpoint
   @Get('slots')

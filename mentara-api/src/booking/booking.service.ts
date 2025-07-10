@@ -13,6 +13,9 @@ import {
   TherapistAvailabilityUpdateDto,
 } from '../../schema/booking';
 import { EventBusService } from '../common/events/event-bus.service';
+import { SlotGeneratorService } from './services/slot-generator.service';
+import { ConflictDetectionService } from './services/conflict-detection.service';
+import { AvailabilityValidatorService } from './services/availability-validator.service';
 import {
   AppointmentBookedEvent,
   AppointmentCancelledEvent,
@@ -25,121 +28,32 @@ export class BookingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
+    private readonly slotGenerator: SlotGeneratorService,
+    private readonly conflictDetection: ConflictDetectionService,
+    private readonly availabilityValidator: AvailabilityValidatorService,
   ) {}
 
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     try {
       const { startTime, therapistId, duration } = createMeetingDto;
-
-      // Verify therapist exists and is active
-      const therapist = await this.prisma.therapist.findFirst({
-        where: {
-          userId: therapistId,
-        },
-      });
-
-      if (!therapist) {
-        throw new NotFoundException('Therapist not found or inactive');
-      }
-
-      // Verify client-therapist relationship exists
-      const relationship = await this.prisma.clientTherapist.findFirst({
-        where: {
-          clientId,
-          therapistId,
-        },
-      });
-
-      if (!relationship) {
-        throw new ForbiddenException(
-          'You can only book meetings with your assigned therapists',
-        );
-      }
-
-      // Check for scheduling conflicts
       const startTimeDate = new Date(startTime);
-      const endTimeDate = new Date(
-        startTimeDate.getTime() + duration * 60 * 1000,
-      ); // Convert duration (minutes) to milliseconds
 
-      const conflicts = await this.prisma.meeting.findMany({
-        where: {
-          OR: [
-            {
-              therapistId,
-              AND: [
-                {
-                  startTime: {
-                    lt: endTimeDate,
-                  },
-                },
-                {
-                  startTime: {
-                    gte: startTimeDate,
-                  },
-                },
-              ],
-              status: { in: ['SCHEDULED', 'CONFIRMED'] },
-            },
-            {
-              clientId,
-              AND: [
-                {
-                  startTime: {
-                    lt: endTimeDate,
-                  },
-                },
-                {
-                  startTime: {
-                    gte: startTimeDate,
-                  },
-                },
-              ],
-              status: { in: ['SCHEDULED', 'CONFIRMED'] },
-            },
-          ],
-        },
+      // Comprehensive validation using our new services
+      await this.availabilityValidator.validateMeetingCreation({
+        therapistId,
+        clientId,
+        startTime: startTimeDate,
+        duration,
       });
 
-      if (conflicts.length > 0) {
-        throw new BadRequestException(
-          'Time slot conflicts with existing meetings',
-        );
-      }
-
-      // Verify therapist availability for this time slot
-      const dayOfWeek = new Date(startTime).getDay();
-      const timeString = new Date(startTime).toTimeString();
-      const startTimeStr =
-        timeString.length >= 5 ? timeString.slice(0, 5) : timeString;
-
-      const endTime = new Date(startTime).getTime() + duration * 60 * 1000;
-      const endTimeString = new Date(endTime).toTimeString();
-      const endTimeStr =
-        endTimeString.length >= 5 ? endTimeString.slice(0, 5) : endTimeString;
-
-      const availability = await this.prisma.therapistAvailability.findFirst({
-        where: {
-          therapistId,
-          dayOfWeek,
-          startTime: { lte: startTimeStr },
-          endTime: { gte: endTimeStr },
-          isAvailable: true,
-        },
-      });
-
-      if (!availability) {
-        throw new BadRequestException(
-          'Therapist is not available at this time',
-        );
-      }
-
-      // Validate time format
-      const timeRegex = /^([0-1]?[\d]|2[0-3]):[0-5][\d]$/;
-      if (!timeRegex.test(startTimeStr)) {
-        throw new BadRequestException('Invalid time format. Use HH:MM format');
-      }
+      // Check for conflicts using our dedicated service
+      await this.conflictDetection.validateNoConflicts(
+        therapistId,
+        clientId,
+        startTimeDate,
+        duration,
+      );
 
       // Create the meeting
       const meeting = await this.prisma.meeting.create({
@@ -189,7 +103,7 @@ export class BookingService {
           duration: meeting.duration,
           title: meeting.title || 'Therapy Session',
           description: meeting.description || undefined,
-          isInitialConsultation: false, // Could be enhanced to track this
+          isInitialConsultation: false,
         }),
       );
 
@@ -306,6 +220,39 @@ export class BookingService {
           'Cannot update completed or cancelled meetings',
         );
       }
+
+      // If updating time, validate the new schedule
+      if (updateMeetingDto.startTime || updateMeetingDto.duration) {
+        const newStartTime = updateMeetingDto.startTime
+          ? new Date(updateMeetingDto.startTime)
+          : meeting.startTime;
+        const newDuration = updateMeetingDto.duration || meeting.duration;
+
+        // Check for conflicts with the update
+        const conflicts = await this.conflictDetection.checkUpdateConflicts(
+          id,
+          meeting.therapistId,
+          meeting.clientId,
+          newStartTime,
+          newDuration,
+        );
+
+        if (conflicts.hasConflict) {
+          throw new BadRequestException(
+            `Schedule update would cause conflicts: ${conflicts.conflictingMeetings.length} conflicting meetings found`,
+          );
+        }
+
+        // Validate therapist availability for new time
+        if (updateMeetingDto.startTime) {
+          await this.availabilityValidator.validateTherapistAvailability(
+            meeting.therapistId,
+            newStartTime,
+            newDuration,
+          );
+        }
+      }
+
       const updatedMeeting = await this.prisma.meeting.update({
         where: { id },
         data: {
@@ -345,7 +292,7 @@ export class BookingService {
         },
       });
 
-      // Publish appropriate events based on what was updated
+      // Publish appropriate events
       if (updateMeetingDto.status === 'COMPLETED') {
         await this.eventBus.emit(
           new AppointmentCompletedEvent({
@@ -355,7 +302,7 @@ export class BookingService {
             completedAt: new Date(),
             duration: updatedMeeting.duration,
             sessionNotes: updateMeetingDto.description || '',
-            attendanceStatus: 'ATTENDED', // Default, could be enhanced
+            attendanceStatus: 'ATTENDED',
           }),
         );
       } else if (
@@ -425,12 +372,12 @@ export class BookingService {
         },
       });
 
-      // Calculate cancellation notice in hours
+      // Calculate cancellation notice
       const cancellationNotice = Math.floor(
         (meeting.startTime.getTime() - Date.now()) / (1000 * 60 * 60),
       );
 
-      // Publish appointment cancelled event
+      // Publish cancellation event
       await this.eventBus.emit(
         new AppointmentCancelledEvent({
           appointmentId: cancelledMeeting.id,
@@ -463,36 +410,13 @@ export class BookingService {
     try {
       const { dayOfWeek, startTime, endTime, notes } = createAvailabilityDto;
 
-      // Validate time format
-      const timeRegex = /^([0-1]?[\d]|2[0-3]):[0-5][\d]$/;
-      if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-        throw new BadRequestException('Invalid time format. Use HH:MM format');
-      }
-
-      // Validate time range
-      if (startTime >= endTime) {
-        throw new BadRequestException('Start time must be before end time');
-      }
-
-      // Check for overlapping availability
-      const overlapping = await this.prisma.therapistAvailability.findFirst({
-        where: {
-          therapistId,
-          dayOfWeek,
-          OR: [
-            {
-              startTime: { lt: endTime },
-              endTime: { gt: startTime },
-            },
-          ],
-        },
+      // Validate using our new service
+      await this.availabilityValidator.validateAvailabilityCreation({
+        therapistId,
+        dayOfWeek,
+        startTime,
+        endTime,
       });
-
-      if (overlapping) {
-        throw new BadRequestException(
-          'Availability slot overlaps with existing slot',
-        );
-      }
 
       return this.prisma.therapistAvailability.create({
         data: {
@@ -568,8 +492,19 @@ export class BookingService {
     }
   }
 
-  // Duration Management
-  private getDurations() {
+  // Simplified slot generation using our new service
+  async getAvailableSlots(therapistId: string, date: string) {
+    try {
+      return await this.slotGenerator.generateAvailableSlots(therapistId, date);
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  // Duration management
+  getDurations() {
     return [
       { id: '30', name: '30 minutes', duration: 30 },
       { id: '60', name: '60 minutes', duration: 60 },
@@ -578,260 +513,29 @@ export class BookingService {
     ];
   }
 
-  // Get available time slots for a therapist on a specific date
-  async getAvailableSlots(therapistId: string, date: string) {
-    try {
-      const targetDate = new Date(date);
-      const dayOfWeek = targetDate.getDay();
-
-      // Get therapist's availability for this day
-      const availability = await this.prisma.therapistAvailability.findMany({
-        where: {
-          therapistId,
-          dayOfWeek,
-          isAvailable: true,
-        },
-        orderBy: { startTime: 'asc' },
-      });
-
-      if (availability.length === 0) {
-        return [];
-      }
-
-      // Get existing bookings for this date
-      const startOfDay = new Date(targetDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(targetDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const existingBookings = await this.prisma.meeting.findMany({
-        where: {
-          therapistId,
-          startTime: { gte: startOfDay, lte: endOfDay },
-          status: { in: ['SCHEDULED', 'CONFIRMED'] },
-        },
-        orderBy: { startTime: 'asc' },
-      });
-
-      // Get available durations
-      const durations = this.getDurations();
-
-      // Generate available slots
-      const availableSlots: {
-        startTime: string;
-        availableDurations: {
-          id: string;
-          name: string;
-          duration: number;
-        }[];
-      }[] = [];
-
-      const slotInterval = 30; // 30-minute intervals
-
-      for (const avail of availability) {
-        const startTime = new Date(targetDate);
-        const [startHour, startMinute] = avail.startTime.split(':').map(Number);
-        startTime.setHours(startHour, startMinute, 0, 0);
-
-        const endTime = new Date(targetDate);
-        const [endHour, endMinute] = avail.endTime.split(':').map(Number);
-        endTime.setHours(endHour, endMinute, 0, 0);
-
-        let currentTime = new Date(startTime);
-
-        while (currentTime < endTime) {
-          const slotEnd = new Date(
-            currentTime.getTime() + slotInterval * 60000,
-          );
-
-          if (slotEnd <= endTime) {
-            // Check if this slot conflicts with existing bookings
-            const conflicts = existingBookings.filter((booking) => {
-              const bookingEnd = new Date(
-                booking.startTime.getTime() + booking.duration * 60000,
-              );
-              return (
-                (currentTime >= booking.startTime &&
-                  currentTime < bookingEnd) ||
-                (slotEnd > booking.startTime && slotEnd <= bookingEnd) ||
-                (currentTime <= booking.startTime && slotEnd >= bookingEnd)
-              );
-            });
-
-            if (conflicts.length === 0) {
-              // Check which durations fit in this slot
-              const availableDurations = durations.filter((duration) => {
-                const durationEnd = new Date(
-                  currentTime.getTime() + duration.duration * 60000,
-                );
-                return (
-                  durationEnd <= endTime &&
-                  !existingBookings.some((booking) => {
-                    const bookingEnd = new Date(
-                      booking.startTime.getTime() + booking.duration * 60000,
-                    );
-                    return (
-                      (currentTime >= booking.startTime &&
-                        currentTime < bookingEnd) ||
-                      (durationEnd > booking.startTime &&
-                        durationEnd <= bookingEnd) ||
-                      (currentTime <= booking.startTime &&
-                        durationEnd >= bookingEnd)
-                    );
-                  })
-                );
-              });
-
-              if (availableDurations.length > 0) {
-                availableSlots.push({
-                  startTime: currentTime.toISOString(),
-                  availableDurations,
-                });
-              }
-            }
-          }
-
-          currentTime = new Date(currentTime.getTime() + slotInterval * 60000);
-        }
-      }
-
-      return availableSlots;
-    } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : String(error),
-      );
-    }
-  }
-
-  private validateTimeFormat(timeStr: string) {
-    const timeRegex = /^([0-1]?[\d]|2[0-3]):[0-5][\d]$/;
-    if (!timeRegex.test(timeStr)) {
-      throw new BadRequestException('Invalid time format. Use HH:MM format');
-    }
-  }
-
-  private getTimeInfo(startTime: string | Date, duration: number) {
-    const startDate = new Date(startTime);
-    const endDate = new Date(startDate.getTime() + duration * 60 * 1000);
-
-    const startTimeString = startDate.toTimeString();
-    const endTimeString = endDate.toTimeString();
-
-    return {
-      dayOfWeek: startDate.getDay(),
-      startTimeStr:
-        startTimeString.length >= 5
-          ? startTimeString.slice(0, 5)
-          : startTimeString,
-      endTimeStr:
-        endTimeString.length >= 5 ? endTimeString.slice(0, 5) : endTimeString,
-    };
-  }
-
-  private async checkTherapistAvailability(
-    therapistId: string,
-    timeInfo: { dayOfWeek: number; startTimeStr: string; endTimeStr: string },
-  ) {
-    const { dayOfWeek, startTimeStr, endTimeStr } = timeInfo;
-
-    const availability = await this.prisma.therapistAvailability.findFirst({
-      where: {
-        therapistId,
-        dayOfWeek,
-        startTime: { lte: startTimeStr },
-        endTime: { gte: endTimeStr },
-        isAvailable: true,
-      },
-    });
-
-    if (!availability) {
-      throw new BadRequestException('Therapist is not available at this time');
-    }
-  }
-
-  private validateDuration(duration: number) {
-    const validDurations = this.getDurations().map((d) => d.duration);
-    if (!validDurations.includes(duration)) {
-      throw new BadRequestException('Invalid meeting duration');
-    }
-  }
-
-  private async checkSchedulingConflicts(
-    therapistId: string,
-    clientId: string,
-    startTime: Date,
-    duration: number,
-  ) {
-    const endTimeDate = new Date(startTime.getTime() + duration * 60 * 1000);
-
-    const conflicts = await this.prisma.meeting.findMany({
-      where: {
-        OR: [
-          {
-            therapistId,
-            AND: [
-              {
-                startTime: {
-                  lt: endTimeDate,
-                },
-              },
-              {
-                startTime: {
-                  gte: startTime,
-                },
-              },
-            ],
-            status: { in: ['SCHEDULED', 'CONFIRMED'] },
-          },
-          {
-            clientId,
-            AND: [
-              {
-                startTime: {
-                  lt: endTimeDate,
-                },
-              },
-              {
-                startTime: {
-                  gte: startTime,
-                },
-              },
-            ],
-            status: { in: ['SCHEDULED', 'CONFIRMED'] },
-          },
-        ],
-      },
-    });
-
-    if (conflicts.length > 0) {
-      throw new BadRequestException(
-        'Time slot conflicts with existing meetings',
-      );
-    }
-  }
-
+  // Enhanced validation method using our services
   async validateMeetingTime(
     therapistId: string,
     clientId: string,
     startTime: string | Date,
     duration: number,
   ) {
-    // Validate duration
-    this.validateDuration(duration);
+    const startTimeDate = new Date(startTime);
 
-    // Get time information
-    const timeInfo = this.getTimeInfo(startTime, duration);
-    this.validateTimeFormat(timeInfo.startTimeStr);
-
-    // Check therapist availability
-    await this.checkTherapistAvailability(therapistId, timeInfo);
-
-    // Check for scheduling conflicts
-    await this.checkSchedulingConflicts(
+    await this.availabilityValidator.validateMeetingCreation({
       therapistId,
       clientId,
-      new Date(startTime),
+      startTime: startTimeDate,
+      duration,
+    });
+
+    await this.conflictDetection.validateNoConflicts(
+      therapistId,
+      clientId,
+      startTimeDate,
       duration,
     );
+
+    return true;
   }
 }

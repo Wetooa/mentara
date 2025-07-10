@@ -19,6 +19,7 @@ import { AdminModule } from './admin/admin.module';
 import { ModeratorModule } from './moderator/moderator.module';
 import { ClientModule } from './client/client.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { MeetingsModule } from './meetings/meetings.module';
 import { FilesModule } from './files/files.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -27,6 +28,7 @@ import { BillingModule } from './billing/billing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { SearchModule } from './search/search.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
 import { PrismaService } from './providers/prisma-client.provider';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -79,6 +81,7 @@ import { CommonModule } from './common/common.module';
     ModeratorModule,
     ClientModule,
     MessagingModule,
+    MeetingsModule,
     FilesModule,
     SessionsModule,
     NotificationsModule,
@@ -87,6 +90,7 @@ import { CommonModule } from './common/common.module';
     DashboardModule,
     SearchModule,
     AnalyticsModule,
+    OnboardingModule,
   ],
   controllers: [AppController],
   providers: [

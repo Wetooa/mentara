@@ -80,6 +80,11 @@ model Therapist {
   sessionLogs             SessionLog[]
   therapyProgress         TherapyProgress[]
 
+  // Matching analytics relations
+  matchHistory            MatchHistory[]
+  clientCompatibility     ClientCompatibility[]
+  recommendationFeedback  RecommendationFeedback[]
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

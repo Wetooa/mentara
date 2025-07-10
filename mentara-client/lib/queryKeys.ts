@@ -1,6 +1,35 @@
 // Centralized query key management for React Query
 // This ensures type safety and consistency across all queries
 
+import type {
+  UserListFilters,
+  TherapistListFilters,
+  TherapistRecommendationParams,
+  TherapistApplicationFilters,
+  CommunityListFilters,
+  PostListFilters,
+  CommentListFilters,
+  ReviewListFilters,
+  BookingListFilters,
+  FileListFilters,
+  NotificationListFilters,
+  AnalyticsQueryParams,
+  TherapistSearchFilters,
+  PostSearchFilters,
+  UserSearchFilters,
+  CommunitySearchFilters,
+  GlobalSearchFilters,
+  SessionListFilters,
+  ConversationListFilters,
+  MessageListFilters,
+  PreAssessmentFilters,
+  AuditLogFilters,
+  WorksheetListFilters,
+  InvoiceFilters,
+  BillingPlanFilters,
+  AdminUserFilters,
+} from "@/types/api/filters";
+
 export const queryKeys = {
   // Auth-related queries
   auth: {
@@ -14,7 +43,7 @@ export const queryKeys = {
   users: {
     all: ["users"] as const,
     lists: () => [...queryKeys.users.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: UserListFilters) =>
       [...queryKeys.users.lists(), { filters }] as const,
     details: () => [...queryKeys.users.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.users.details(), id] as const,
@@ -28,17 +57,17 @@ export const queryKeys = {
   therapists: {
     all: ["therapists"] as const,
     lists: () => [...queryKeys.therapists.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: TherapistListFilters) =>
       [...queryKeys.therapists.lists(), { filters }] as const,
     details: () => [...queryKeys.therapists.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.therapists.details(), id] as const,
-    recommendations: (params: Record<string, any>) =>
+    recommendations: (params: TherapistRecommendationParams) =>
       [...queryKeys.therapists.all, "recommendations", params] as const,
     applications: {
       all: () => [...queryKeys.therapists.all, "applications"] as const,
       lists: () =>
         [...queryKeys.therapists.applications.all(), "list"] as const,
-      list: (filters: Record<string, any>) =>
+      list: (filters: TherapistApplicationFilters) =>
         [...queryKeys.therapists.applications.lists(), { filters }] as const,
       details: () =>
         [...queryKeys.therapists.applications.all(), "detail"] as const,
@@ -51,19 +80,86 @@ export const queryKeys = {
   communities: {
     all: ["communities"] as const,
     lists: () => [...queryKeys.communities.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: CommunityListFilters) =>
       [...queryKeys.communities.lists(), { filters }] as const,
     details: () => [...queryKeys.communities.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.communities.details(), id] as const,
     byUser: (userId: string) =>
       [...queryKeys.communities.all, "user", userId] as const,
+    withStructure: () =>
+      [...queryKeys.communities.all, "withStructure"] as const,
+    withStructureById: (id: string) =>
+      [...queryKeys.communities.withStructure(), id] as const,
+
+    // Membership-related queries
+    memberships: {
+      all: () => [...queryKeys.communities.all, "memberships"] as const,
+      my: () => [...queryKeys.communities.memberships.all(), "my"] as const,
+      byUser: (userId: string) =>
+        [...queryKeys.communities.memberships.all(), "user", userId] as const,
+    },
+
+    // Members-related queries
+    members: {
+      all: () => [...queryKeys.communities.all, "members"] as const,
+      byCommunity: (communityId: string, limit?: number, offset?: number) =>
+        [
+          ...queryKeys.communities.members.all(),
+          "community",
+          communityId,
+          { limit, offset },
+        ] as const,
+    },
+
+    // Room groups and rooms
+    roomGroups: {
+      all: () => [...queryKeys.communities.all, "roomGroups"] as const,
+      byCommunity: (communityId: string) =>
+        [
+          ...queryKeys.communities.roomGroups.all(),
+          "community",
+          communityId,
+        ] as const,
+    },
+
+    rooms: {
+      all: () => [...queryKeys.communities.all, "rooms"] as const,
+      byGroup: (roomGroupId: string) =>
+        [...queryKeys.communities.rooms.all(), "group", roomGroupId] as const,
+      byRoom: (roomId: string) =>
+        [...queryKeys.communities.rooms.all(), "room", roomId] as const,
+    },
+
+    // Posts by room/community
+    roomPosts: (roomId: string, limit?: number, offset?: number) =>
+      [
+        ...queryKeys.communities.all,
+        "roomPosts",
+        roomId,
+        { limit, offset },
+      ] as const,
+
+    // Community stats
+    stats: () => [...queryKeys.communities.all, "stats"] as const,
+
+    // Assignment and recommendations
+    assignment: {
+      all: () => [...queryKeys.communities.all, "assignment"] as const,
+      my: () => [...queryKeys.communities.assignment.all(), "my"] as const,
+      recommendations: () =>
+        [...queryKeys.communities.assignment.all(), "recommendations"] as const,
+      bulk: () => [...queryKeys.communities.assignment.all(), "bulk"] as const,
+    },
+
+    // For backward compatibility - mapping old methods to new ones
+    userMemberships: () => queryKeys.communities.memberships.my(),
   },
 
   // Post-related queries
   posts: {
     all: ["posts"] as const,
     lists: () => [...queryKeys.posts.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: PostListFilters) =>
       [...queryKeys.posts.lists(), { filters }] as const,
     details: () => [...queryKeys.posts.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.posts.details(), id] as const,
@@ -77,7 +173,7 @@ export const queryKeys = {
   comments: {
     all: ["comments"] as const,
     lists: () => [...queryKeys.comments.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: CommentListFilters) =>
       [...queryKeys.comments.lists(), { filters }] as const,
     details: () => [...queryKeys.comments.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.comments.details(), id] as const,
@@ -89,11 +185,11 @@ export const queryKeys = {
   reviews: {
     all: ["reviews"] as const,
     lists: () => [...queryKeys.reviews.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: ReviewListFilters) =>
       [...queryKeys.reviews.lists(), { filters }] as const,
     details: () => [...queryKeys.reviews.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.reviews.details(), id] as const,
-    byTherapist: (therapistId: string, filters?: Record<string, any>) =>
+    byTherapist: (therapistId: string, filters?: ReviewListFilters) =>
       [
         ...queryKeys.reviews.all,
         "therapist",
@@ -102,7 +198,7 @@ export const queryKeys = {
       ] as const,
     therapistStats: (therapistId: string) =>
       [...queryKeys.reviews.all, "therapist", therapistId, "stats"] as const,
-    pending: (filters: Record<string, any>) =>
+    pending: (filters: ReviewListFilters) =>
       [...queryKeys.reviews.all, "pending", { filters }] as const,
   },
 
@@ -112,7 +208,7 @@ export const queryKeys = {
     meetings: {
       all: () => [...queryKeys.booking.all, "meetings"] as const,
       lists: () => [...queryKeys.booking.meetings.all(), "list"] as const,
-      list: (filters: Record<string, any>) =>
+      list: (filters: UserListFilters) =>
         [...queryKeys.booking.meetings.lists(), { filters }] as const,
       details: () => [...queryKeys.booking.meetings.all(), "detail"] as const,
       detail: (id: string) =>
@@ -126,11 +222,11 @@ export const queryKeys = {
   // Analytics-related queries
   analytics: {
     all: ["analytics"] as const,
-    platform: (params: Record<string, any>) =>
+    platform: (params: AnalyticsQueryParams) =>
       [...queryKeys.analytics.all, "platform", params] as const,
-    therapist: (params: Record<string, any>) =>
+    therapist: (params: AnalyticsQueryParams) =>
       [...queryKeys.analytics.all, "therapist", params] as const,
-    client: (params: Record<string, any>) =>
+    client: (params: AnalyticsQueryParams) =>
       [...queryKeys.analytics.all, "client", params] as const,
   },
 
@@ -144,7 +240,7 @@ export const queryKeys = {
     plans: {
       all: () => [...queryKeys.billing.all, "plans"] as const,
       lists: () => [...queryKeys.billing.plans.all(), "list"] as const,
-      list: (filters: Record<string, any>) =>
+      list: (filters: UserListFilters) =>
         [...queryKeys.billing.plans.lists(), { filters }] as const,
     },
     paymentMethods: {
@@ -154,7 +250,7 @@ export const queryKeys = {
     invoices: {
       all: () => [...queryKeys.billing.all, "invoices"] as const,
       lists: () => [...queryKeys.billing.invoices.all(), "list"] as const,
-      list: (filters: Record<string, any>) =>
+      list: (filters: UserListFilters) =>
         [...queryKeys.billing.invoices.lists(), { filters }] as const,
     },
   },
@@ -162,7 +258,7 @@ export const queryKeys = {
   // Search-related queries
   search: {
     all: ["search"] as const,
-    therapists: (query: string, filters: Record<string, any>) =>
+    therapists: (query: string, filters: TherapistSearchFilters) =>
       [...queryKeys.search.all, "therapists", query, { filters }] as const,
     posts: (query: string, communityId?: string) =>
       [...queryKeys.search.all, "posts", query, { communityId }] as const,
@@ -191,7 +287,10 @@ export const queryKeys = {
     all: ["client"] as const,
     profile: () => [...queryKeys.client.all, "profile"] as const,
     progress: () => [...queryKeys.client.all, "progress"] as const,
-    assignedTherapist: () => [...queryKeys.client.all, "assignedTherapist"] as const,
+    assignedTherapist: () =>
+      [...queryKeys.client.all, "assignedTherapist"] as const,
+    assignedTherapists: () =>
+      [...queryKeys.client.all, "assignedTherapists"] as const,
     onboarding: () => [...queryKeys.client.all, "onboarding"] as const,
     preferences: () => [...queryKeys.client.all, "preferences"] as const,
     goals: () => [...queryKeys.client.all, "goals"] as const,
@@ -201,11 +300,11 @@ export const queryKeys = {
   files: {
     all: ["files"] as const,
     lists: () => [...queryKeys.files.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: UserListFilters) =>
       [...queryKeys.files.lists(), { filters }] as const,
     details: () => [...queryKeys.files.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.files.details(), id] as const,
-    my: (filters: Record<string, any>) =>
+    my: (filters: FileListFilters) =>
       [...queryKeys.files.all, "my", { filters }] as const,
   },
 
@@ -213,9 +312,9 @@ export const queryKeys = {
   notifications: {
     all: ["notifications"] as const,
     lists: () => [...queryKeys.notifications.all, "list"] as const,
-    list: (filters: Record<string, any>) =>
+    list: (filters: UserListFilters) =>
       [...queryKeys.notifications.lists(), { filters }] as const,
-    my: (filters: Record<string, any>) =>
+    my: (filters: NotificationListFilters) =>
       [...queryKeys.notifications.all, "my", { filters }] as const,
     unreadCount: () => [...queryKeys.notifications.all, "unreadCount"] as const,
   },
@@ -225,7 +324,8 @@ export const queryKeys = {
     all: ["worksheets"] as const,
     my: () => [...queryKeys.worksheets.all, "my"] as const,
     assigned: () => [...queryKeys.worksheets.all, "assigned"] as const,
-    detail: (id: string) => [...queryKeys.worksheets.all, "detail", id] as const,
+    detail: (id: string) =>
+      [...queryKeys.worksheets.all, "detail", id] as const,
   },
 
   // Admin-related queries
@@ -236,10 +336,10 @@ export const queryKeys = {
 
   // Dashboard-related queries
   dashboard: {
-    all: ['dashboard'] as const,
-    user: () => [...queryKeys.dashboard.all, 'user'] as const,
-    therapist: () => [...queryKeys.dashboard.all, 'therapist'] as const,
-    admin: () => [...queryKeys.dashboard.all, 'admin'] as const,
+    all: ["dashboard"] as const,
+    user: () => [...queryKeys.dashboard.all, "user"] as const,
+    therapist: () => [...queryKeys.dashboard.all, "therapist"] as const,
+    admin: () => [...queryKeys.dashboard.all, "admin"] as const,
   },
 } as const;
 
@@ -274,6 +374,28 @@ export const getRelatedQueryKeys = (entity: string, id?: string) => {
     case "community":
       keys.push(queryKeys.communities.all);
       keys.push(queryKeys.posts.all);
+      break;
+
+    case "session":
+      keys.push(queryKeys.sessions.all);
+      break;
+
+    case "message":
+      keys.push(queryKeys.messaging.conversations.all());
+      keys.push(queryKeys.messaging.messages.all());
+      break;
+
+    case "conversation":
+      keys.push(queryKeys.messaging.conversations.all());
+      keys.push(queryKeys.messaging.messages.all());
+      break;
+
+    case "assessment":
+      keys.push(queryKeys.preAssessment.all);
+      break;
+
+    case "auditLog":
+      keys.push(queryKeys.auditLogs.all);
       break;
 
     default:

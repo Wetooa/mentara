@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 interface Notification {
   id: string;
@@ -45,7 +46,7 @@ export function useNotifications(params: { limit?: number; offset?: number; isRe
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error("Failed to mark notification as read");
     },
   });
@@ -57,7 +58,7 @@ export function useNotifications(params: { limit?: number; offset?: number; isRe
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       toast.success("All notifications marked as read");
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error("Failed to mark all notifications as read");
     },
   });
@@ -69,7 +70,7 @@ export function useNotifications(params: { limit?: number; offset?: number; isRe
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       toast.success("Notification deleted");
     },
-    onError: (error: any) => {
+    onError: (error: MentaraApiError) => {
       toast.error("Failed to delete notification");
     },
   });

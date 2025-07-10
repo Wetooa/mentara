@@ -143,3 +143,12 @@ export interface CreateReplyRequest {
   content: string;
   commentId: string;
 }
+
+export interface PostAttachment {
+  id?: string;
+  type: 'image' | 'file' | 'video';
+  url: string;
+  fileName: string;
+  fileSize?: number;
+  mimeType?: string;
+}

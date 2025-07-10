@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Query,
+  Param,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -52,6 +53,35 @@ export class TherapistRecommendationController {
       };
       return await this.therapistRecommendationService.getRecommendedTherapists(
         request,
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  @Get('compatibility/:therapistId')
+  @HttpCode(HttpStatus.OK)
+  async getCompatibilityAnalysis(
+    @CurrentUserId() clerkId: string,
+    @Param('therapistId') therapistId: string,
+  ) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: clerkId },
+      });
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${clerkId} not found`);
+      }
+
+      return await this.therapistRecommendationService.getCompatibilityAnalysis(
+        user.id,
+        therapistId,
       );
     } catch (error) {
       if (error instanceof NotFoundException) {
