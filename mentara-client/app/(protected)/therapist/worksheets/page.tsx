@@ -29,9 +29,12 @@ export default function TherapistWorksheetsPage() {
         }
 
         // Call the API to get therapist worksheets
-        const worksheets = await api.therapists.worksheets.getAll({
+        const response = await api.therapists.worksheets.getAll({
           status: statusFilter,
         });
+
+        // Handle different response formats - backend returns {data: Array}
+        const worksheets = Array.isArray(response) ? response : response?.data || response?.worksheets || [];
 
         // Transform API data to match Task interface
         const transformedTasks: Task[] = worksheets.map((worksheet: any) => ({
