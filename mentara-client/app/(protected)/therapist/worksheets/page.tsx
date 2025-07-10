@@ -59,7 +59,7 @@ export default function TherapistWorksheetsPage() {
     }
 
     fetchTherapistWorksheets();
-  }, [activeFilter, api.therapists.worksheets]);
+  }, [activeFilter]);
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {
