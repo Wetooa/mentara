@@ -40,7 +40,7 @@ export default function WorksheetsPage() {
           undefined,
           statusFilter
         );
-        setTasks(worksheets);
+        setTasks(Array.isArray(worksheets) ? worksheets : []);
       } catch (err) {
         console.error("Error fetching worksheets:", err);
         setError("Failed to load worksheets. Please try again.");
@@ -57,7 +57,9 @@ export default function WorksheetsPage() {
     // If still loading, return empty array
     if (isLoading) return [];
 
-    // Use tasks from API or fallback to mock data
+    // Ensure tasks is always an array
+    if (!Array.isArray(tasks)) return [];
+
     let filtered = [...tasks];
 
     // Apply therapist filter if selected
