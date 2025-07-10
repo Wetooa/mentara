@@ -1,14 +1,17 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Body,
   UseGuards,
   HttpCode,
   HttpStatus,
   Param,
+  Query,
 } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
+import { WorksheetsService } from '../worksheets/worksheets.service';
 import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import {
@@ -16,12 +19,17 @@ import {
   TherapistResponse,
   TherapistUpdateDto,
 } from 'schema/auth';
+import {
+  WorksheetCreateInputDto,
+  WorksheetUpdateInputDto,
+} from 'schema/worksheet';
 
 @Controller('therapist-management')
 @UseGuards(ClerkAuthGuard)
 export class TherapistManagementController {
   constructor(
     private readonly therapistManagementService: TherapistManagementService,
+    private readonly worksheetsService: WorksheetsService,
   ) {}
 
   @Get('profile')
@@ -79,6 +87,50 @@ export class TherapistManagementController {
     @Param('id') clientId: string,
   ): Promise<ClientResponse> {
     return this.therapistManagementService.getClientById(therapistId, clientId);
+  }
+
+  // Therapist Worksheet Management Endpoints
+
+  @Get('worksheets')
+  @HttpCode(HttpStatus.OK)
+  async getTherapistWorksheets(
+    @CurrentUserId() therapistId: string,
+    @Query('status') status?: string,
+    @Query('clientId') clientId?: string,
+  ) {
+    return this.worksheetsService.findAll(clientId, therapistId, status);
+  }
+
+  @Get('worksheets/:id')
+  @HttpCode(HttpStatus.OK)
+  async getTherapistWorksheetById(
+    @CurrentUserId() therapistId: string,
+    @Param('id') worksheetId: string,
+  ) {
+    return this.worksheetsService.findById(worksheetId);
+  }
+
+  @Post('worksheets')
+  @HttpCode(HttpStatus.CREATED)
+  async createTherapistWorksheet(
+    @CurrentUserId() therapistId: string,
+    @Body() createWorksheetDto: WorksheetCreateInputDto & { clientId: string },
+  ) {
+    return this.worksheetsService.create(
+      createWorksheetDto,
+      createWorksheetDto.clientId,
+      therapistId,
+    );
+  }
+
+  @Put('worksheets/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateTherapistWorksheet(
+    @CurrentUserId() therapistId: string,
+    @Param('id') worksheetId: string,
+    @Body() updateWorksheetDto: WorksheetUpdateInputDto,
+  ) {
+    return this.worksheetsService.update(worksheetId, updateWorksheetDto);
   }
 
   @Get('profile')

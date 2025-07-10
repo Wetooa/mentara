@@ -322,6 +322,38 @@ export const createTherapistService = (client: AxiosInstance) => ({
       client.post(`/therapist/patients/${patientId}/worksheets`, worksheetData),
   },
 
+  // Therapist worksheets management
+  worksheets: {
+    // Get all worksheets created by the therapist
+    getAll: (
+      params: { status?: string; clientId?: string; limit?: number; offset?: number } = {}
+    ): Promise<any[]> => {
+      const searchParams = new URLSearchParams();
+
+      if (params.status) searchParams.append("status", params.status);
+      if (params.clientId) searchParams.append("clientId", params.clientId);
+      if (params.limit) searchParams.append("limit", params.limit.toString());
+      if (params.offset) searchParams.append("offset", params.offset.toString());
+
+      const queryString = searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "";
+      return client.get(`/therapist-management/worksheets${queryString}`);
+    },
+
+    // Get worksheet by ID
+    getById: (worksheetId: string): Promise<any> =>
+      client.get(`/therapist-management/worksheets/${worksheetId}`),
+
+    // Create new worksheet
+    create: (worksheetData: any): Promise<any> =>
+      client.post(`/therapist-management/worksheets`, worksheetData),
+
+    // Update worksheet
+    update: (worksheetId: string, worksheetData: any): Promise<any> =>
+      client.put(`/therapist-management/worksheets/${worksheetId}`, worksheetData),
+  },
+
   // Meetings and sessions
   meetings: {
     // Get therapist meetings/sessions
