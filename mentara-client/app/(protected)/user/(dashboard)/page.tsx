@@ -39,7 +39,7 @@ export default function DashboardPage() {
   // Transform backend data to frontend format
   const dashboardData = useMemo(() => {
     if (!dashboardApiData) {
-      return createFallbackDashboardData();
+      return null;
     }
 
     return transformDashboardData(
@@ -98,8 +98,8 @@ export default function DashboardPage() {
     );
   }
 
-  // Show loading state for first load
-  if (isLoading && !dashboardApiData) {
+  // Show loading state for first load or when no data
+  if (isLoading || !dashboardData) {
     return (
       <div className="w-full h-full p-6 space-y-8">
         {/* Loading Header */}
@@ -129,6 +129,11 @@ export default function DashboardPage() {
         </div>
       </div>
     );
+  }
+
+  // Ensure we have dashboard data before rendering
+  if (!dashboardData) {
+    return null;
   }
 
   return (
