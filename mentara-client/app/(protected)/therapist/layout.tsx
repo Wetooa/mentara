@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search, User, LogOut, ChevronDown } from "lucide-react";
+import { Bell, User, LogOut, ChevronDown } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 

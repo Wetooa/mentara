@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import {
   SignedIn,
   SignedOut,
@@ -27,7 +27,7 @@ export default function MainLayout({
     // Navigate to user profile or handle user selection
     console.log('Selected user:', user);
     // For now, we'll just log the user. In a real app, you might navigate to their profile
-    // router.push(`/user/profile/${user.id}`);
+    router.push(`/user/profile/${user.id}`);
   };
 
   // Navigation menu items
