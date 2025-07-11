@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Search, User, LogOut, ChevronDown } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
+import { UserSearchBar, User as SearchUser } from "@/components/search";
 
 export default function TherapistLayout({
   children,
@@ -24,6 +25,15 @@ export default function TherapistLayout({
       router.push("/sign-in");
     } catch (error) {
       console.error("Error during logout:", error);
+    }
+  };
+
+  // Handle user selection from search
+  const handleUserSelect = (user: SearchUser) => {
+    console.log('Selected user:', user);
+    // Navigate to patient profile if it's a client, or handle other user types
+    if (user.role === 'client') {
+      router.push(`/therapist/patients/${user.id}`);
     }
   };
 
@@ -296,15 +306,13 @@ export default function TherapistLayout({
         <header className="flex items-center justify-between px-4 bg-primary text-white h-14">
           <div className="flex items-center">
             {/* Search Bar */}
-            <div className="relative ml-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-                <input
-                  type="text"
-                  placeholder="Search Mentara"
-                  className="w-72 rounded-full bg-white/20 py-1.5 pl-9 pr-4 text-white placeholder-white/70 focus:outline-none focus:ring-1 focus:ring-white/30"
-                />
-              </div>
+            <div className="relative ml-6 w-72">
+              <UserSearchBar
+                placeholder="Search users (clients, therapists, moderators)..."
+                onUserSelect={handleUserSelect}
+                showRoleFilter={false}
+                className="w-full"
+              />
             </div>
           </div>
 

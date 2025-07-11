@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, Search } from "lucide-react";
 import {
   SignedIn,
@@ -13,6 +13,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { UserSearchBar, User } from "@/components/search";
 
 export default function MainLayout({
   children,
@@ -20,6 +21,14 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleUserSelect = (user: User) => {
+    // Navigate to user profile or handle user selection
+    console.log('Selected user:', user);
+    // For now, we'll just log the user. In a real app, you might navigate to their profile
+    // router.push(`/user/profile/${user.id}`);
+  };
 
   // Navigation menu items
   const navItems = [
@@ -120,14 +129,12 @@ export default function MainLayout({
 
             {/* Search Bar */}
             <div className="relative mx-4 hidden flex-1 md:block">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search Mentara"
-                  className="w-full rounded-full border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-green-500 focus:outline-none"
-                />
-              </div>
+              <UserSearchBar
+                placeholder="Search users (clients, therapists, moderators)..."
+                onUserSelect={handleUserSelect}
+                showRoleFilter={false}
+                className="w-full"
+              />
             </div>
 
             {/* User Area */}
