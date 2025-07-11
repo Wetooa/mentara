@@ -77,9 +77,17 @@ export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
             dataType: typeof response.data,
           }
         );
+        
+
       }
 
-      // Return just the data for successful responses
+      // Handle wrapped API responses from NestJS ResponseInterceptor
+      // Backend wraps responses in: { success: true, data: actualData, timestamp, path, statusCode }
+      if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+        return response.data.data; // Return the actual data from the wrapper
+      }
+      
+      // Return just the data for successful responses (fallback for non-wrapped responses)
       return response.data;
     },
     (error) => {
