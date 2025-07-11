@@ -69,12 +69,12 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
   }
 
   return (
-    <div className={cn('bg-background border border-border rounded-md shadow-lg', className)}>
+    <div className={cn('bg-background border border-border rounded-md shadow-lg', className)} role="region" aria-labelledby="recent-searches-heading">
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-border">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Recent Searches</span>
+          <span id="recent-searches-heading" className="text-sm font-medium">Recent Searches</span>
           <Badge variant="secondary" className="text-xs">
             {recentSearches.length}
           </Badge>
@@ -86,6 +86,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
             size="sm"
             onClick={clearRecentSearches}
             className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+            aria-label="Clear all recent searches"
           >
             <Trash2 className="w-3 h-3 mr-1" />
             Clear
@@ -94,12 +95,21 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
       </div>
 
       {/* Recent Searches List */}
-      <div className="max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto" role="list" aria-label="Recent searches">
         {displayedSearches.map((search) => (
           <div
             key={search.id}
             className="flex items-center gap-3 p-3 hover:bg-accent cursor-pointer transition-colors border-b border-border/50 last:border-b-0"
             onClick={() => handleSearchClick(search)}
+            role="listitem"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSearchClick(search);
+              }
+            }}
+            aria-label={`Recent search: ${search.query}${search.user ? `, found ${search.user.firstName} ${search.user.lastName}` : ''}, ${formatTimeAgo(search.timestamp)}`}
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -131,6 +141,7 @@ export const RecentSearches: React.FC<RecentSearchesProps> = ({
               size="sm"
               onClick={(e) => handleRemoveSearch(e, search.id)}
               className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive flex-shrink-0"
+              aria-label={`Remove search: ${search.query}`}
             >
               <X className="w-3 h-3" />
             </Button>

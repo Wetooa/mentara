@@ -119,6 +119,9 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
         'flex items-center gap-3 p-3 cursor-pointer transition-colors',
         isHighlighted ? 'bg-accent' : 'hover:bg-accent/50'
       )}
+      role="option"
+      aria-selected={isHighlighted}
+      aria-label={`${suggestion.firstName} ${suggestion.lastName}, ${suggestion.role}, ${suggestion.email}`}
     >
       <Avatar className="w-8 h-8">
         <AvatarImage src={suggestion.avatarUrl} alt={`${suggestion.firstName} ${suggestion.lastName}`} />
@@ -152,9 +155,11 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
         'absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 max-h-96 overflow-y-auto',
         containerProps.className
       )}
+      role="listbox"
+      aria-label="Search suggestions"
     >
       {isLoading && (
-        <div className="flex items-center justify-center p-4">
+        <div className="flex items-center justify-center p-4" role="status" aria-live="polite">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             Searching...
@@ -163,7 +168,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       )}
       
       {!isLoading && query.length >= 2 && suggestions.length === 0 && (
-        <div className="p-4 text-center text-sm text-muted-foreground">
+        <div className="p-4 text-center text-sm text-muted-foreground" role="status" aria-live="polite">
           No users found for "{query}"
         </div>
       )}
@@ -202,6 +207,12 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
       'placeholder:text-muted-foreground'
     ),
+    'aria-label': 'Search for users',
+    'aria-describedby': 'search-instructions',
+    'aria-expanded': suggestions.length > 0 || showRecentSearches,
+    'aria-haspopup': 'listbox',
+    'aria-autocomplete': 'list' as const,
+    'role': 'combobox',
   };
 
   const handleSuggestionSelected = (
@@ -237,6 +248,15 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
 
   return (
     <div className={cn('relative', className)}>
+      {/* Screen reader instructions */}
+      <div 
+        id="search-instructions" 
+        className="sr-only"
+        aria-live="polite"
+      >
+        Search for users by name or email. Use arrow keys to navigate suggestions, Enter to select, Escape to clear.
+      </div>
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         
@@ -256,6 +276,8 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
           <button
             onClick={clearSearch}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear search"
+            title="Clear search"
           >
             <X className="w-4 h-4" />
           </button>
