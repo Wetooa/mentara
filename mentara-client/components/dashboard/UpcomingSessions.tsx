@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, isToday, addMinutes } from "date-fns";

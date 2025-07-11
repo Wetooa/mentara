@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import ProfileSettings from "./ProfileSettings";
 
 interface DashboardHeaderProps {

@@ -6,10 +6,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { createClerkClient } from '@clerk/backend';
 
 declare module 'express' {
   interface Request {
     userId: string;
+    userRole?: string;
   }
 }
 
@@ -30,9 +32,32 @@ export class ClerkAuthGuard implements CanActivate {
         secretKey: process.env.CLERK_SECRET_KEY ?? '',
       });
 
+      if (!session.sub) {
+        return false;
+      }
+
+      // Set userId from token
       request.userId = session.sub;
 
-      return true;
+      // Use Clerk server-side API to get user with metadata including role
+      const clerkClient = createClerkClient({
+        secretKey: process.env.CLERK_SECRET_KEY ?? '',
+      });
+
+      try {
+        const user = await clerkClient.users.getUser(session.sub);
+        const role = user.publicMetadata?.role as string | undefined;
+
+        request.userRole = role;
+        console.log('Fetched user role from Clerk:', role);
+
+        return true;
+      } catch (clerkError) {
+        console.error('Error fetching user from Clerk:', clerkError);
+        // Continue without role if Clerk API call fails
+        request.userRole = undefined;
+        return true;
+      }
     } catch (error) {
       this.logger.error(
         'Error verifying token',

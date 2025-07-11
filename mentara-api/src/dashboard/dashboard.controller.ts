@@ -19,7 +19,8 @@ export class DashboardController {
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
-    if (role !== 'user') {
+    console.log(role);
+    if (role !== 'client') {
       throw new UnauthorizedException('Access denied');
     }
     return this.dashboardService.getUserDashboardData(userId);

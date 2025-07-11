@@ -4,6 +4,7 @@ import { createTherapistService } from './therapists';
 import { createReviewsService } from './reviews';
 import { createBookingService } from './booking';
 import { createCommunitiesService } from './communities';
+import { createDashboardService } from './dashboard';
 
 // Additional services for completeness
 import { AxiosInstance as Client } from 'axios';
@@ -115,6 +116,63 @@ export const createNotificationsService = (client: Client) => ({
   getUnreadCount: (): Promise<{ count: number }> =>
     client.get('/notifications/unread-count'),
 });
+// Messaging service
+export const createMessagingService = (client: Client) => ({
+  getConversations: (params: { page?: number; limit?: number } = {}): Promise<any[]> => {
+    const searchParams = new URLSearchParams();
+    
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return client.get(`/messaging/conversations${queryString}`);
+  },
+
+  getConversationMessages: (
+    conversationId: string, 
+    params: { page?: number; limit?: number } = {}
+  ): Promise<any[]> => {
+    const searchParams = new URLSearchParams();
+    
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return client.get(`/messaging/conversations/${conversationId}/messages${queryString}`);
+  },
+
+  createConversation: (data: { participantIds: string[]; title?: string }): Promise<any> =>
+    client.post('/messaging/conversations', data),
+
+  sendMessage: (conversationId: string, data: { content: string; type?: string }): Promise<any> =>
+    client.post(`/messaging/conversations/${conversationId}/messages`, data),
+
+  markMessageAsRead: (messageId: string): Promise<void> =>
+    client.post(`/messaging/messages/${messageId}/read`),
+
+  updateMessage: (messageId: string, data: { content: string }): Promise<any> =>
+    client.put(`/messaging/messages/${messageId}`, data),
+
+  deleteMessage: (messageId: string): Promise<void> =>
+    client.delete(`/messaging/messages/${messageId}`),
+
+  searchMessages: (params: { 
+    query: string; 
+    conversationId?: string; 
+    page?: number; 
+    limit?: number 
+  }): Promise<any[]> => {
+    const searchParams = new URLSearchParams();
+    searchParams.append('query', params.query);
+    
+    if (params.conversationId) searchParams.append('conversationId', params.conversationId);
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return client.get(`/messaging/search${queryString}`);
+  },
+});
 
 // Client management service (for therapists)
 export const createClientService = (client: Client) => ({
@@ -144,7 +202,9 @@ export const createApiServices = (client: AxiosInstance) => ({
   search: createSearchService(client),
   files: createFilesService(client),
   notifications: createNotificationsService(client),
+  messaging: createMessagingService(client),
   clients: createClientService(client),
+  dashboard: createDashboardService(client),
 });
 
 export type ApiServices = ReturnType<typeof createApiServices>;
@@ -155,6 +215,7 @@ export type { TherapistService } from './therapists';
 export type { ReviewsService } from './reviews';
 export type { BookingService } from './booking';
 export type { CommunitiesService } from './communities';
+export type { DashboardService } from './dashboard';
 
 // Export all types
 export * from './users';
@@ -162,3 +223,4 @@ export * from './therapists';
 export * from './reviews';
 export * from './booking';
 export * from './communities';
+export * from './dashboard';
