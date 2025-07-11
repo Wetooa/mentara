@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/lib/api/api-client';
+import { useApi } from '@/lib/api';
 import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
 import { 
   Review, 

@@ -18,10 +18,25 @@ import {
   FeatureFlag,
   UpdateFeatureFlagRequest,
   User,
+  TherapistApplication,
 } from '@/types/api';
 
 export interface AdminService {
   checkAdmin(): Promise<{ isAdmin: boolean }>;
+  
+  // Dashboard
+  getDashboard(): Promise<{
+    overview: {
+      totalUsers: number;
+      totalClients: number;
+      totalTherapists: number;
+      pendingApplications: number;
+      totalCommunities: number;
+      totalPosts: number;
+      totalSessions: number;
+    };
+    recentActivity: User[];
+  }>;
   
   // User management
   users: {
@@ -31,8 +46,15 @@ export interface AdminService {
     update(userId: string, userData: AdminUserUpdateRequest): Promise<User>;
     delete(userId: string): Promise<void>;
     updateRole(userId: string, data: UserRoleUpdateRequest): Promise<User>;
-    suspend(userId: string, data: UserSuspendRequest): Promise<User>;
-    unsuspend(userId: string): Promise<User>;
+    suspend(userId: string, data: UserSuspendRequest): Promise<{ success: boolean; user: User }>;
+    unsuspend(userId: string): Promise<{ success: boolean; user: User }>;
+  };
+
+  // Therapist Applications Management
+  therapistApplications: {
+    getList(params?: { status?: string; limit?: number; offset?: number }): Promise<{ applications: TherapistApplication[]; total: number }>;
+    getById(applicationId: string): Promise<TherapistApplication>;
+    updateStatus(applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }>;
   };
 
   // Analytics and reports
@@ -40,13 +62,38 @@ export interface AdminService {
     getSystemStats(): Promise<SystemStats>;
     getUserGrowth(params?: UserGrowthParams): Promise<UserGrowthData[]>;
     getEngagement(params?: EngagementParams): Promise<EngagementData[]>;
+    getPlatformOverview(): Promise<{
+      overview: {
+        totalUsers: number;
+        totalClients: number;
+        totalTherapists: number;
+        pendingApplications: number;
+        totalCommunities: number;
+        totalPosts: number;
+        totalSessions: number;
+      };
+      recentActivity: User[];
+    }>;
+    getMatchingPerformance(startDate?: string, endDate?: string): Promise<{
+      period: { start: Date; end: Date };
+      metrics: {
+        totalRecommendations: number;
+        successfulMatches: number;
+        viewedRecommendations: number;
+        contactedTherapists: number;
+        averageMatchScore: number;
+        conversionRate: number;
+        clickThroughRate: number;
+      };
+    }>;
   };
 
   // Content moderation
   moderation: {
     getReports(params?: ModerationReportParams): Promise<{ reports: ModerationReport[]; total: number }>;
     updateReport(reportId: string, data: UpdateModerationReportRequest): Promise<ModerationReport>;
-    getFlaggedContent(params?: { type?: string; limit?: number; offset?: number }): Promise<{ content: FlaggedContent[]; total: number }>;
+    getFlaggedContent(params?: { type?: string; page?: number; limit?: number }): Promise<{ posts: any[]; comments: any[]; page: number; totalItems: number }>;
+    moderateContent(contentType: string, contentId: string, action: 'approve' | 'remove' | 'flag', reason?: string): Promise<{ success: boolean }>;
   };
 
   // System configuration
@@ -56,11 +103,32 @@ export interface AdminService {
     getFeatureFlags(): Promise<FeatureFlag[]>;
     updateFeatureFlag(flagName: string, data: UpdateFeatureFlagRequest): Promise<FeatureFlag>;
   };
+
+  // Profile Management
+  profile: {
+    get(): Promise<User>;
+    update(data: Partial<User>): Promise<User>;
+  };
 }
 
 export const createAdminService = (client: AxiosInstance): AdminService => ({
   checkAdmin: (): Promise<{ isAdmin: boolean }> =>
     client.post('/auth/admin'),
+
+  // Dashboard
+  getDashboard: (): Promise<{
+    overview: {
+      totalUsers: number;
+      totalClients: number;
+      totalTherapists: number;
+      pendingApplications: number;
+      totalCommunities: number;
+      totalPosts: number;
+      totalSessions: number;
+    };
+    recentActivity: User[];
+  }> =>
+    client.get('/admin/platform-overview'),
 
   // Admin user management
   users: {
@@ -93,11 +161,30 @@ export const createAdminService = (client: AxiosInstance): AdminService => ({
     updateRole: (userId: string, data: UserRoleUpdateRequest): Promise<User> =>
       client.patch(`/admin/users/${userId}/role`, data),
 
-    suspend: (userId: string, data: UserSuspendRequest): Promise<User> =>
+    suspend: (userId: string, data: UserSuspendRequest): Promise<{ success: boolean; user: User }> =>
       client.patch(`/admin/users/${userId}/suspend`, data),
 
-    unsuspend: (userId: string): Promise<User> =>
+    unsuspend: (userId: string): Promise<{ success: boolean; user: User }> =>
       client.patch(`/admin/users/${userId}/unsuspend`),
+  },
+
+  // Therapist Applications Management
+  therapistApplications: {
+    getList: (params: { status?: string; limit?: number; offset?: number } = {}): Promise<{ applications: TherapistApplication[]; total: number }> => {
+      const searchParams = new URLSearchParams();
+      if (params.status) searchParams.append('status', params.status);
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (params.offset) searchParams.append('offset', params.offset.toString());
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/therapist-applications${queryString}`);
+    },
+
+    getById: (applicationId: string): Promise<TherapistApplication> =>
+      client.get(`/admin/therapist-applications/${applicationId}`),
+
+    updateStatus: (applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }> =>
+      client.put(`/admin/therapist-applications/${applicationId}/status`, data),
   },
 
   // Analytics and reports
@@ -124,6 +211,40 @@ export const createAdminService = (client: AxiosInstance): AdminService => ({
       const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
       return client.get(`/admin/analytics/engagement${queryString}`);
     },
+
+    getPlatformOverview: (): Promise<{
+      overview: {
+        totalUsers: number;
+        totalClients: number;
+        totalTherapists: number;
+        pendingApplications: number;
+        totalCommunities: number;
+        totalPosts: number;
+        totalSessions: number;
+      };
+      recentActivity: User[];
+    }> =>
+      client.get('/admin/platform-overview'),
+
+    getMatchingPerformance: (startDate?: string, endDate?: string): Promise<{
+      period: { start: Date; end: Date };
+      metrics: {
+        totalRecommendations: number;
+        successfulMatches: number;
+        viewedRecommendations: number;
+        contactedTherapists: number;
+        averageMatchScore: number;
+        conversionRate: number;
+        clickThroughRate: number;
+      };
+    }> => {
+      const searchParams = new URLSearchParams();
+      if (startDate) searchParams.append('startDate', startDate);
+      if (endDate) searchParams.append('endDate', endDate);
+
+      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+      return client.get(`/admin/matching-performance${queryString}`);
+    },
   },
 
   // Content moderation
@@ -143,15 +264,23 @@ export const createAdminService = (client: AxiosInstance): AdminService => ({
     updateReport: (reportId: string, data: UpdateModerationReportRequest): Promise<ModerationReport> =>
       client.patch(`/admin/moderation/reports/${reportId}`, data),
 
-    getFlaggedContent: (params: { type?: string; limit?: number; offset?: number } = {}): Promise<{ content: FlaggedContent[]; total: number }> => {
+    getFlaggedContent: (params: { type?: string; page?: number; limit?: number } = {}): Promise<{ posts: any[]; comments: any[]; page: number; totalItems: number }> => {
       const searchParams = new URLSearchParams();
       if (params.type) searchParams.append('type', params.type);
+      if (params.page) searchParams.append('page', params.page.toString());
       if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
 
       const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      return client.get(`/admin/moderation/flagged-content${queryString}`);
+      return client.get(`/admin/flagged-content${queryString}`);
     },
+
+    moderateContent: (contentType: string, contentId: string, action: 'approve' | 'remove' | 'flag', reason?: string): Promise<{ success: boolean }> =>
+      client.post('/admin/moderate-content', {
+        contentType,
+        contentId,
+        action,
+        reason,
+      }),
   },
 
   // System configuration
@@ -168,4 +297,16 @@ export const createAdminService = (client: AxiosInstance): AdminService => ({
     updateFeatureFlag: (flagName: string, data: UpdateFeatureFlagRequest): Promise<FeatureFlag> =>
       client.patch(`/admin/config/feature-flags/${flagName}`, data),
   },
+
+  // Profile Management
+  profile: {
+    get: (): Promise<User> =>
+      client.get('/admin/profile'),
+
+    update: (data: Partial<User>): Promise<User> =>
+      client.patch('/admin/profile', data),
+  },
 });
+
+// For consistency with other services, also export the service type using ReturnType pattern
+export type AdminServiceType = ReturnType<typeof createAdminService>;

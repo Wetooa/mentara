@@ -6,6 +6,7 @@ export function useRole() {
 
   const isUser = user?.role === "client";
   const isTherapist = user?.role === "therapist";
+  const isModerator = user?.role === "moderator";
   const isAdmin = user?.role === "admin";
 
   const hasRole = (role: UserRole) => user?.role === role;
@@ -23,6 +24,7 @@ export function useRole() {
   return {
     isUser,
     isTherapist,
+    isModerator,
     isAdmin,
     hasRole,
     hasAnyRole,

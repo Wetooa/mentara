@@ -95,3 +95,6 @@ export const createFilesService = (client: AxiosInstance): FilesService => ({
       client.get('/admin/files/stats'),
   },
 });
+
+// For consistency with other services, also export the service type using ReturnType pattern
+export type FilesServiceType = ReturnType<typeof createFilesService>;

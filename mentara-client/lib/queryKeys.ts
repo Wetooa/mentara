@@ -332,6 +332,97 @@ export const queryKeys = {
   admin: {
     all: ["admin"] as const,
     checkAdmin: () => [...queryKeys.admin.all, "checkAdmin"] as const,
+    dashboard: () => [...queryKeys.admin.all, "dashboard"] as const,
+    users: {
+      all: () => [...queryKeys.admin.all, "users"] as const,
+      lists: () => [...queryKeys.admin.users.all(), "list"] as const,
+      list: (filters: AdminUserFilters) =>
+        [...queryKeys.admin.users.lists(), { filters }] as const,
+      details: () => [...queryKeys.admin.users.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.admin.users.details(), id] as const,
+    },
+    therapistApplications: {
+      all: () => [...queryKeys.admin.all, "therapistApplications"] as const,
+      lists: () => [...queryKeys.admin.therapistApplications.all(), "list"] as const,
+      list: (params?: { status?: string; limit?: number; offset?: number }) =>
+        [...queryKeys.admin.therapistApplications.lists(), { params }] as const,
+      details: () => [...queryKeys.admin.therapistApplications.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.admin.therapistApplications.details(), id] as const,
+    },
+    analytics: {
+      all: () => [...queryKeys.admin.all, "analytics"] as const,
+      systemStats: () => [...queryKeys.admin.analytics.all(), "systemStats"] as const,
+      userGrowth: (params?: { startDate?: string; endDate?: string; granularity?: string }) =>
+        [...queryKeys.admin.analytics.all(), "userGrowth", { params }] as const,
+      engagement: (params?: { startDate?: string; endDate?: string; granularity?: string }) =>
+        [...queryKeys.admin.analytics.all(), "engagement", { params }] as const,
+      platformOverview: () => [...queryKeys.admin.analytics.all(), "platformOverview"] as const,
+      matchingPerformance: (startDate?: string, endDate?: string) =>
+        [...queryKeys.admin.analytics.all(), "matchingPerformance", { startDate, endDate }] as const,
+    },
+    moderation: {
+      all: () => [...queryKeys.admin.all, "moderation"] as const,
+      reports: (params?: { type?: string; status?: string; assignedTo?: string; limit?: number; offset?: number }) =>
+        [...queryKeys.admin.moderation.all(), "reports", { params }] as const,
+      flaggedContent: (params?: { type?: string; page?: number; limit?: number }) =>
+        [...queryKeys.admin.moderation.all(), "flaggedContent", { params }] as const,
+    },
+    config: {
+      all: () => [...queryKeys.admin.all, "config"] as const,
+      system: () => [...queryKeys.admin.config.all(), "system"] as const,
+      featureFlags: () => [...queryKeys.admin.config.all(), "featureFlags"] as const,
+    },
+    profile: () => [...queryKeys.admin.all, "profile"] as const,
+  },
+
+  // Moderator-related queries
+  moderator: {
+    all: ["moderator"] as const,
+    dashboard: () => [...queryKeys.moderator.all, "dashboard"] as const,
+    content: {
+      all: () => [...queryKeys.moderator.all, "content"] as const,
+      queue: (params?: { type?: string; status?: string; priority?: string; limit?: number; offset?: number; sortBy?: string; sortOrder?: string }) =>
+        [...queryKeys.moderator.content.all(), "queue", { params }] as const,
+      reports: (params?: { type?: string; status?: string; limit?: number; offset?: number }) =>
+        [...queryKeys.moderator.content.all(), "reports", { params }] as const,
+    },
+    users: {
+      all: () => [...queryKeys.moderator.all, "users"] as const,
+      flagged: (params?: { status?: string; role?: string; limit?: number; offset?: number; search?: string }) =>
+        [...queryKeys.moderator.users.all(), "flagged", { params }] as const,
+      history: (userId: string) => [...queryKeys.moderator.users.all(), "history", userId] as const,
+    },
+    auditLogs: {
+      all: () => [...queryKeys.moderator.all, "auditLogs"] as const,
+      search: (params?: { userId?: string; action?: string; entityType?: string; startDate?: string; endDate?: string; limit?: number; offset?: number }) =>
+        [...queryKeys.moderator.auditLogs.all(), "search", { params }] as const,
+      stats: () => [...queryKeys.moderator.auditLogs.all(), "stats"] as const,
+    },
+    systemEvents: {
+      all: () => [...queryKeys.moderator.all, "systemEvents"] as const,
+      list: (params?: { eventType?: string; severity?: string; component?: string; isResolved?: boolean; limit?: number; offset?: number }) =>
+        [...queryKeys.moderator.systemEvents.all(), "list", { params }] as const,
+    },
+    profile: () => [...queryKeys.moderator.all, "profile"] as const,
+    activity: () => [...queryKeys.moderator.all, "activity"] as const,
+  },
+
+  // Content moderation-related queries
+  contentModeration: {
+    all: ["contentModeration"] as const,
+    flaggedContent: (filters?: { type?: string; status?: string; priority?: string; reportReason?: string; authorId?: string; communityId?: string; dateFrom?: string; dateTo?: string; limit?: number; offset?: number; sortBy?: string; sortOrder?: string }) =>
+      [...queryKeys.contentModeration.all, "flaggedContent", { filters }] as const,
+    reports: (filters?: { status?: string; type?: string; priority?: string; limit?: number; offset?: number }) =>
+      [...queryKeys.contentModeration.all, "reports", { filters }] as const,
+    userViolations: (userId: string) =>
+      [...queryKeys.contentModeration.all, "userViolations", userId] as const,
+    stats: (dateFrom?: string, dateTo?: string) =>
+      [...queryKeys.contentModeration.all, "stats", { dateFrom, dateTo }] as const,
+    history: (filters?: { moderatorId?: string; limit?: number; offset?: number }) =>
+      [...queryKeys.contentModeration.all, "history", { filters }] as const,
+    autoRules: () => [...queryKeys.contentModeration.all, "autoRules"] as const,
+    preview: (contentType: string, contentId: string) =>
+      [...queryKeys.contentModeration.all, "preview", contentType, contentId] as const,
   },
 
   // Dashboard-related queries
@@ -396,6 +487,34 @@ export const getRelatedQueryKeys = (entity: string, id?: string) => {
 
     case "auditLog":
       keys.push(queryKeys.auditLogs.all);
+      keys.push(queryKeys.moderator.auditLogs.all());
+      break;
+
+    case "admin":
+      keys.push(queryKeys.admin.all);
+      if (id) {
+        keys.push(queryKeys.admin.users.detail(id));
+      }
+      break;
+
+    case "moderator":
+      keys.push(queryKeys.moderator.all);
+      keys.push(queryKeys.contentModeration.all);
+      break;
+
+    case "moderation":
+      keys.push(queryKeys.admin.moderation.all());
+      keys.push(queryKeys.moderator.content.all());
+      keys.push(queryKeys.contentModeration.all);
+      break;
+
+    case "user":
+      keys.push(queryKeys.users.all);
+      if (id) {
+        keys.push(queryKeys.admin.users.detail(id));
+        keys.push(queryKeys.moderator.users.history(id));
+        keys.push(queryKeys.contentModeration.userViolations(id));
+      }
       break;
 
     default:

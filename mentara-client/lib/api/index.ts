@@ -2,6 +2,7 @@
 // Usage: import { api } from '@/lib/api'
 // Then: api.auth.getCurrentUser(), api.client.getProfile(), etc.
 
+import { useAuth } from '@clerk/nextjs';
 import { createAxiosClient, setTokenProvider } from "./client";
 import { createApiServices, type ApiServices } from "./services";
 
@@ -10,6 +11,18 @@ const axiosClient = createAxiosClient();
 
 // Create all API services using the axios client
 const apiServices = createApiServices(axiosClient);
+
+// React hook for API access with authentication
+export const useApi = () => {
+  const { getToken } = useAuth();
+  
+  // Set up token provider for this session
+  if (getToken) {
+    setTokenProvider(getToken);
+  }
+  
+  return api;
+};
 
 // Create the main API object with additional utilities
 export const api = {

@@ -87,7 +87,8 @@
       "mcp__serena__write_memory",
       "Bash(git push:*)",
       "mcp__serena__insert_after_symbol",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "mcp__serena__think_about_whether_you_are_done"
     ]
   },
   "enableAllProjectMcpServers": true,

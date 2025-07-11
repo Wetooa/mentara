@@ -76,3 +76,6 @@ export const createPreAssessmentService = (client: AxiosInstance): PreAssessment
       client.post('/admin/pre-assessment/reprocess-all', params),
   },
 });
+
+// For consistency with other services, also export the service type using ReturnType pattern
+export type PreAssessmentServiceType = ReturnType<typeof createPreAssessmentService>;

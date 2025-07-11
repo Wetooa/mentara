@@ -50,6 +50,14 @@ export * from './sessions';
 export * from './analytics';
 export * from './audit-logs';
 
+// Moderator types (from services)
+export {
+  ModeratorDashboardStats,
+  ContentModerationParams,
+  UserModerationParams,
+  AuditLogParams,
+} from '../../../lib/api/services/moderator';
+
 // Filter types (eliminates Record<string, any> usage)
 export * from './filters';
 

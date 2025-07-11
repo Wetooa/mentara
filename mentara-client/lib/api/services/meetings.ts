@@ -141,3 +141,5 @@ export const createMeetingsService = (api: AxiosInstance) => ({
     }).then(({ data }) => data);
   },
 });
+
+export type MeetingsService = ReturnType<typeof createMeetingsService>;

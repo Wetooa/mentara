@@ -142,3 +142,6 @@ export const createSessionService = (client: AxiosInstance): SessionService => (
 });
 
 export type { SessionCreateDto, SessionUpdateDto, Session, SessionListParams, SessionListResponse, SessionStats };
+
+// For consistency with other services, also export the service type using ReturnType pattern
+export type SessionServiceType = ReturnType<typeof createSessionService>;
