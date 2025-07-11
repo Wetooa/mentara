@@ -11,6 +11,12 @@ export const CurrentUserRole = createParamDecorator(
       return null;
     }
 
+    // First, check if role was extracted from Clerk token by ClerkAuthGuard
+    if (request.userRole) {
+      return request.userRole;
+    }
+
+    // Fallback to database lookup for backwards compatibility
     try {
       const prisma = new PrismaService();
       const user = await prisma.user.findUnique({
@@ -22,10 +28,10 @@ export const CurrentUserRole = createParamDecorator(
       return user?.role ?? null;
     } catch (error) {
       console.error(
-        'Error getting user role:',
+        'Error getting user role from database:',
         error instanceof Error ? error.message : error,
       );
       return null;
     }
   },
-);
+);;

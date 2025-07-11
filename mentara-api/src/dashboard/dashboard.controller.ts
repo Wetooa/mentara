@@ -19,6 +19,7 @@ export class DashboardController {
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
+    console.log(role);
     if (role !== 'client') {
       throw new UnauthorizedException('Access denied');
     }
