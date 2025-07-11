@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUserSearch } from './hooks/useUserSearch';
+import { useRecentSearches } from './hooks/useRecentSearches';
+import { RecentSearches } from './RecentSearches';
 
 export interface User {
   id: string;
@@ -61,9 +63,11 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentRoleFilter, setCurrentRoleFilter] = useState<string>(roleFilter);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
   
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const { searchUsers } = useUserSearch();
+  const { addRecentSearch } = useRecentSearches();
 
   const debouncedSearch = useCallback(
     async (searchQuery: string) => {
@@ -173,11 +177,24 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     value: query,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
       setQuery(e.target.value);
+      setShowRecentSearches(false);
+    },
+    onFocus: () => {
+      if (query.trim().length === 0) {
+        setShowRecentSearches(true);
+      }
+    },
+    onBlur: () => {
+      // Delay hiding recent searches to allow clicking on them
+      setTimeout(() => {
+        setShowRecentSearches(false);
+      }, 200);
     },
     onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Escape') {
         setQuery('');
         setSuggestions([]);
+        setShowRecentSearches(false);
       }
     },
     className: cn(
@@ -191,9 +208,26 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     event: React.FormEvent<any>,
     { suggestion }: { suggestion: User }
   ) => {
+    // Add to recent searches
+    addRecentSearch(query, suggestion);
+    
     onUserSelect(suggestion);
     setQuery('');
     setSuggestions([]);
+    setShowRecentSearches(false);
+  };
+
+  const handleRecentSearchSelect = (searchQuery: string) => {
+    setQuery(searchQuery);
+    setShowRecentSearches(false);
+    // Trigger search
+    debouncedSearch(searchQuery);
+  };
+
+  const handleRecentUserSelect = (user: User) => {
+    onUserSelect(user);
+    setQuery('');
+    setShowRecentSearches(false);
   };
 
   const clearSearch = () => {
@@ -227,6 +261,17 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
           </button>
         )}
       </div>
+
+      {/* Recent Searches */}
+      {showRecentSearches && !query && (
+        <div className="absolute top-full left-0 right-0 mt-1 z-50">
+          <RecentSearches
+            onSearchSelect={handleRecentSearchSelect}
+            onUserSelect={handleRecentUserSelect}
+            maxItems={5}
+          />
+        </div>
+      )}
     </div>
   );
 };
