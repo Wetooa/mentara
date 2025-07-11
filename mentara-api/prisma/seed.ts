@@ -592,6 +592,23 @@ async function seedCommunityContent(communities: any[], users: any[]) {
     
     if (memberships.length === 0) continue;
     
+    // Create room structure for the community
+    const roomGroup = await prisma.roomGroup.create({
+      data: {
+        name: `${community.name} General`,
+        order: 1,
+        communityId: community.id,
+      },
+    });
+    
+    const room = await prisma.room.create({
+      data: {
+        name: 'General Discussion',
+        order: 1,
+        roomGroupId: roomGroup.id,
+      },
+    });
+    
     // Create posts
     for (let i = 0; i < SEED_CONFIG.COMMUNITIES.POSTS_PER_COMMUNITY; i++) {
       const author = faker.helpers.arrayElement(memberships).user;
@@ -600,7 +617,7 @@ async function seedCommunityContent(communities: any[], users: any[]) {
           title: faker.lorem.sentence(),
           content: faker.lorem.paragraphs(faker.number.int({ min: 2, max: 5 })),
           userId: author?.id,
-          roomId: community.id,
+          roomId: room.id,
           createdAt: faker.date.past({ years: 0.5 }),
         },
       });
