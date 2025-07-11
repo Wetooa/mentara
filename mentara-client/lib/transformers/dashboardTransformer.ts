@@ -10,11 +10,17 @@ export function transformDashboardData(
 ): UserDashboardData {
   const { client, stats, upcomingMeetings, pendingWorksheets, assignedTherapists } = backendData;
 
+  // Handle cases where client.user might be null or undefined
+  if (!client?.user) {
+    console.warn('Client user data is missing, using fallback data');
+    return createFallbackDashboardData(client?.userId || 'unknown');
+  }
+
   return {
     user: {
       id: client.user.id,
       name: `${client.user.firstName || ''} ${client.user.lastName || ''}`.trim() || 'User',
-      avatar: client.user.imageUrl || '/default-avatar.jpg',
+      avatar: client.user.avatarUrl || client.user.imageUrl || '/default-avatar.jpg',
       email: client.user.email,
       joinDate: client.user.createdAt,
     },
@@ -43,8 +49,8 @@ export function transformDashboardData(
     upcomingSessions: upcomingMeetings.map(meeting => ({
       id: meeting.id,
       title: meeting.title || 'Therapy Session',
-      therapistId: meeting.therapist.userId,
-      therapistName: `${meeting.therapist.user.firstName || ''} ${meeting.therapist.user.lastName || ''}`.trim() || 'Therapist',
+      therapistId: meeting.therapist?.userId || '',
+      therapistName: `${meeting.therapist?.user?.firstName || ''} ${meeting.therapist?.user?.lastName || ''}`.trim() || 'Therapist',
       therapistAvatar: undefined, // Backend doesn't provide this yet
       dateTime: meeting.startTime,
       duration: meeting.duration,
@@ -58,7 +64,7 @@ export function transformDashboardData(
       dueDate: worksheet.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
       status: worksheet.isCompleted ? 'completed' : determineWorksheetStatus(worksheet.dueDate),
       progress: worksheet.progress || 0,
-      therapistName: `${worksheet.therapist.user.firstName || ''} ${worksheet.therapist.user.lastName || ''}`.trim() || 'Therapist',
+      therapistName: `${worksheet.therapist?.user?.firstName || ''} ${worksheet.therapist?.user?.lastName || ''}`.trim() || 'Therapist',
     })),
     notifications: notifications.map(notification => ({
       id: notification.id,
@@ -76,7 +82,7 @@ export function transformDashboardData(
       lastMessage: comm.lastMessage || comm.lastMessageContent || 'No messages yet',
       time: comm.time || comm.lastMessageTime || comm.updatedAt,
       unread: comm.unread || comm.unreadCount || 0,
-      avatar: comm.avatar || comm.user?.imageUrl || '/default-avatar.jpg',
+      avatar: comm.avatar || comm.user?.avatarUrl || comm.user?.imageUrl || '/default-avatar.jpg',
     })),
   };
 }

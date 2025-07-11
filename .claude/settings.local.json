@@ -51,7 +51,8 @@
       "mcp__serena__check_onboarding_performed",
       "mcp__serena__onboarding",
       "mcp__serena__list_dir",
-      "mcp__serena__insert_after_symbol"
+      "mcp__serena__insert_after_symbol",
+      "mcp__supabase__execute_sql"
     ]
   },
   "enableAllProjectMcpServers": true,

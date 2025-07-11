@@ -47,7 +47,12 @@ export class DashboardService {
       });
 
       if (!client) {
-        throw new NotFoundException('Client not found');
+        throw new NotFoundException(`Client not found for userId: ${userId}`);
+      }
+
+      // Validate that client has user relationship
+      if (!client.user) {
+        throw new InternalServerErrorException(`Client found but user relationship is missing for userId: ${userId}`);
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
