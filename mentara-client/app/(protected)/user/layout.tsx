@@ -25,7 +25,7 @@ export default function MainLayout({
 
   const handleUserSelect = (user: User) => {
     // Navigate to user profile or handle user selection
-    console.log('Selected user:', user);
+    console.log("Selected user:", user);
     // For now, we'll just log the user. In a real app, you might navigate to their profile
     router.push(`/user/profile/${user.id}`);
   };
