@@ -29,9 +29,9 @@ export default function TherapistLayout({
 
   // Handle user selection from search
   const handleUserSelect = (user: SearchUser) => {
-    console.log('Selected user:', user);
+    console.log("Selected user:", user);
     // Navigate to patient profile if it's a client, or handle other user types
-    if (user.role === 'client') {
+    if (user.role === "client") {
       router.push(`/therapist/patients/${user.id}`);
     }
   };
@@ -310,9 +310,12 @@ export default function TherapistLayout({
                         : "text-gray-600 hover:text-primary"
                     }`}
                   >
-                    {React.cloneElement(item.icon as React.ReactElement<{className?: string}>, {
-                      className: "h-5 w-5",
-                    })}
+                    {React.cloneElement(
+                      item.icon as React.ReactElement<{ className?: string }>,
+                      {
+                        className: "h-5 w-5",
+                      }
+                    )}
                   </div>
                   <span
                     className={`mt-1 text-center text-[10px] ${
