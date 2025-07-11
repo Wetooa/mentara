@@ -83,7 +83,7 @@ export class DashboardService {
         },
       });
 
-      return {
+      const responseData = {
         client,
         stats: {
           completedMeetings: completedMeetingsCount,
@@ -97,6 +97,8 @@ export class DashboardService {
         recentActivity: recentPosts,
         hasPreAssessment: !!client.preAssessment,
       };
+      
+      return responseData;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
