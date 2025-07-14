@@ -71,7 +71,7 @@ export default function ProfileSettings({
 
   const handleSave = () => {
     // TODO: Save profile settings to API
-    console.log("Saving profile settings:", { formData, notifications, privacy });
+    // API integration to be implemented
     onClose();
   };
 

@@ -1,7 +1,7 @@
 // NOTE: Comprehensive database seeding with realistic data
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { ILLNESS_COMMUNITIES } from '../src/communities/illness-communities.config';
+import { ILLNESS_COMMUNITIES } from '../src/config/community-configs';
 
 const prisma = new PrismaClient();
 

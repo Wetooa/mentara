@@ -1,0 +1,425 @@
+20d4573affa7119c32478725ddd50562
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TherapistUpdateDto = exports.TherapistCreateDto = exports.ClientUpdateDto = exports.ClientCreateDto = exports.UserCreateDto = exports.UserRole = void 0;
+const class_validator_1 = require("class-validator");
+var UserRole;
+(function (UserRole) {
+    UserRole["CLIENT"] = "client";
+    UserRole["THERAPIST"] = "therapist";
+    UserRole["MODERATOR"] = "moderator";
+    UserRole["ADMIN"] = "admin";
+})(UserRole || (exports.UserRole = UserRole = {}));
+class UserCreateDto {
+    email;
+    firstName;
+    middleName;
+    lastName;
+    birthDate;
+    address;
+    avatarUrl;
+    role;
+    bio;
+    coverImageUrl;
+    isActive;
+}
+exports.UserCreateDto = UserCreateDto;
+__decorate([
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "firstName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "middleName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "lastName", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "birthDate", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "address", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "avatarUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(UserRole),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "bio", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UserCreateDto.prototype, "coverImageUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UserCreateDto.prototype, "isActive", void 0);
+class ClientCreateDto {
+    user;
+}
+exports.ClientCreateDto = ClientCreateDto;
+class ClientUpdateDto extends UserCreateDto {
+}
+exports.ClientUpdateDto = ClientUpdateDto;
+class TherapistCreateDto extends UserCreateDto {
+    user;
+    mobile;
+    province;
+    providerType;
+    professionalLicenseType;
+    isPRCLicensed;
+    prcLicenseNumber;
+    expirationDateOfLicense;
+    practiceStartDate;
+    areasOfExpertise;
+    assessmentTools;
+    therapeuticApproachesUsedList;
+    languagesOffered;
+    providedOnlineTherapyBefore;
+    comfortableUsingVideoConferencing;
+    preferredSessionLength;
+    privateConfidentialSpace;
+    compliesWithDataPrivacyAct;
+    professionalLiabilityInsurance;
+    complaintsOrDisciplinaryActions;
+    willingToAbideByPlatformGuidelines;
+    expertise;
+    approaches;
+    languages;
+    illnessSpecializations;
+    acceptTypes;
+    treatmentSuccessRates;
+    sessionLength;
+    hourlyRate;
+}
+exports.TherapistCreateDto = TherapistCreateDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "mobile", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "province", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "providerType", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "professionalLicenseType", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "isPRCLicensed", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "prcLicenseNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsDate)(),
+    __metadata("design:type", Date)
+], TherapistCreateDto.prototype, "expirationDateOfLicense", void 0);
+__decorate([
+    (0, class_validator_1.IsDate)(),
+    __metadata("design:type", Date)
+], TherapistCreateDto.prototype, "practiceStartDate", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "areasOfExpertise", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "assessmentTools", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "therapeuticApproachesUsedList", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "languagesOffered", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], TherapistCreateDto.prototype, "providedOnlineTherapyBefore", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], TherapistCreateDto.prototype, "comfortableUsingVideoConferencing", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "preferredSessionLength", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "privateConfidentialSpace", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TherapistCreateDto.prototype, "compliesWithDataPrivacyAct", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "professionalLiabilityInsurance", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "complaintsOrDisciplinaryActions", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], TherapistCreateDto.prototype, "willingToAbideByPlatformGuidelines", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "expertise", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "approaches", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "languages", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "illnessSpecializations", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], TherapistCreateDto.prototype, "acceptTypes", void 0);
+__decorate([
+    (0, class_validator_1.IsJSON)(),
+    __metadata("design:type", Object)
+], TherapistCreateDto.prototype, "treatmentSuccessRates", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TherapistCreateDto.prototype, "sessionLength", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TherapistCreateDto.prototype, "hourlyRate", void 0);
+class TherapistUpdateDto {
+    mobile;
+    province;
+    providerType;
+    professionalLicenseType;
+    isPRCLicensed;
+    prcLicenseNumber;
+    expirationDateOfLicense;
+    practiceStartDate;
+    areasOfExpertise;
+    assessmentTools;
+    therapeuticApproachesUsedList;
+    languagesOffered;
+    providedOnlineTherapyBefore;
+    comfortableUsingVideoConferencing;
+    preferredSessionLength;
+    privateConfidentialSpace;
+    compliesWithDataPrivacyAct;
+    professionalLiabilityInsurance;
+    complaintsOrDisciplinaryActions;
+    willingToAbideByPlatformGuidelines;
+    expertise;
+    approaches;
+    languages;
+    illnessSpecializations;
+    acceptTypes;
+    treatmentSuccessRates;
+    sessionLength;
+    hourlyRate;
+}
+exports.TherapistUpdateDto = TherapistUpdateDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "mobile", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "province", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "providerType", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "professionalLicenseType", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "isPRCLicensed", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "prcLicenseNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsDate)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Date)
+], TherapistUpdateDto.prototype, "expirationDateOfLicense", void 0);
+__decorate([
+    (0, class_validator_1.IsDate)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Date)
+], TherapistUpdateDto.prototype, "practiceStartDate", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "areasOfExpertise", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "assessmentTools", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "therapeuticApproachesUsedList", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "languagesOffered", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TherapistUpdateDto.prototype, "providedOnlineTherapyBefore", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TherapistUpdateDto.prototype, "comfortableUsingVideoConferencing", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "preferredSessionLength", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "privateConfidentialSpace", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TherapistUpdateDto.prototype, "compliesWithDataPrivacyAct", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "professionalLiabilityInsurance", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "complaintsOrDisciplinaryActions", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TherapistUpdateDto.prototype, "willingToAbideByPlatformGuidelines", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "expertise", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "approaches", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "languages", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "illnessSpecializations", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], TherapistUpdateDto.prototype, "acceptTypes", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], TherapistUpdateDto.prototype, "treatmentSuccessRates", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], TherapistUpdateDto.prototype, "sessionLength", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], TherapistUpdateDto.prototype, "hourlyRate", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc2NoZW1hL2F1dGgudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBQUEscURBV3lCO0FBR3pCLElBQVksUUFLWDtBQUxELFdBQVksUUFBUTtJQUNsQiw2QkFBaUIsQ0FBQTtJQUNqQixtQ0FBdUIsQ0FBQTtJQUN2QixtQ0FBdUIsQ0FBQTtJQUN2QiwyQkFBZSxDQUFBO0FBQ2pCLENBQUMsRUFMVyxRQUFRLHdCQUFSLFFBQVEsUUFLbkI7QUFFRCxNQUFhLGFBQWE7SUFFeEIsS0FBSyxDQUFVO0lBR2YsU0FBUyxDQUFVO0lBR25CLFVBQVUsQ0FBVTtJQUdwQixRQUFRLENBQVU7SUFHbEIsU0FBUyxDQUFVO0lBR25CLE9BQU8sQ0FBVTtJQUdqQixTQUFTLENBQVU7SUFHbkIsSUFBSSxDQUFVO0lBR2QsR0FBRyxDQUFVO0lBR2IsYUFBYSxDQUFVO0lBR3ZCLFFBQVEsQ0FBVztDQUNwQjtBQWpDRCxzQ0FpQ0M7QUEvQkM7SUFEQyxJQUFBLHlCQUFPLEdBQUU7OzRDQUNLO0FBR2Y7SUFEQyxJQUFBLDBCQUFRLEdBQUU7O2dEQUNRO0FBR25CO0lBREMsSUFBQSwwQkFBUSxHQUFFOztpREFDUztBQUdwQjtJQURDLElBQUEsMEJBQVEsR0FBRTs7K0NBQ087QUFHbEI7SUFEQyxJQUFBLDBCQUFRLEdBQUU7O2dEQUNRO0FBR25CO0lBREMsSUFBQSwwQkFBUSxHQUFFOzs4Q0FDTTtBQUdqQjtJQURDLElBQUEsMEJBQVEsR0FBRTs7Z0RBQ1E7QUFHbkI7SUFEQyxJQUFBLHdCQUFNLEVBQUMsUUFBUSxDQUFDOzsyQ0FDSDtBQUdkO0lBREMsSUFBQSwwQkFBUSxHQUFFOzswQ0FDRTtBQUdiO0lBREMsSUFBQSwwQkFBUSxHQUFFOztvREFDWTtBQUd2QjtJQURDLElBQUEsNEJBQVUsR0FBRTs7K0NBQ007QUFHckIsTUFBYSxlQUFlO0lBQzFCLElBQUksQ0FBaUI7Q0FDdEI7QUFGRCwwQ0FFQztBQUVE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QUFBLDRCQUFVLEdBQUU7O2tFQUNxQjtBQUtsQztJQUhDLElBQUEseUJBQU8sR0FBRTtJQUNULElBQUEsMEJBQVEsRUFBQyxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsQ0FBQztJQUN4QixJQUFBLDRCQUFVLEdBQUU7O3VEQUNVO0FBR3ZCO0lBREMsSUFBQSw0QkFBVSxHQUFFOztpRUFDa0M7QUFJL0M7SUFGQyxJQUFBLDBCQUFRLEdBQUU7SUFDVixJQUFBLDRCQUFVLEdBQUU7O3lEQUNVO0FBSXZCO0lBRkMsSUFBQSwwQkFBUSxHQUFFO0lBQ1YsSUFBQSw0QkFBVSxHQUFFOztzREFDTyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zY2hlbWEvYXV0aC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge1xuICBJc1N0cmluZyxcbiAgSXNPcHRpb25hbCxcbiAgSXNFbWFpbCxcbiAgSXNFbnVtLFxuICBJc0RhdGUsXG4gIElzQm9vbGVhbixcbiAgSXNBcnJheSxcbiAgSXNKU09OLFxuICBJc051bWJlcixcbiAgVmFsaWRhdGVOZXN0ZWQsXG59IGZyb20gJ2NsYXNzLXZhbGlkYXRvcic7XG5pbXBvcnQgeyBKc29uVmFsdWUsIERlY2ltYWwgfSBmcm9tICdAcHJpc21hL2NsaWVudC9ydW50aW1lL2xpYnJhcnknO1xuXG5leHBvcnQgZW51bSBVc2VyUm9sZSB7XG4gIENMSUVOVCA9ICdjbGllbnQnLFxuICBUSEVSQVBJU1QgPSAndGhlcmFwaXN0JyxcbiAgTU9ERVJBVE9SID0gJ21vZGVyYXRvcicsXG4gIEFETUlOID0gJ2FkbWluJyxcbn1cblxuZXhwb3J0IGNsYXNzIFVzZXJDcmVhdGVEdG8ge1xuICBASXNFbWFpbCgpXG4gIGVtYWlsITogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIGZpcnN0TmFtZSE6IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBtaWRkbGVOYW1lITogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIGxhc3ROYW1lITogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIGJpcnRoRGF0ZSE6IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBhZGRyZXNzITogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIGF2YXRhclVybCE6IHN0cmluZztcblxuICBASXNFbnVtKFVzZXJSb2xlKVxuICByb2xlITogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIGJpbyE6IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBjb3ZlckltYWdlVXJsITogc3RyaW5nO1xuXG4gIEBJc09wdGlvbmFsKClcbiAgaXNBY3RpdmUhOiBib29sZWFuO1xufVxuXG5leHBvcnQgY2xhc3MgQ2xpZW50Q3JlYXRlRHRvIHtcbiAgdXNlciE6IFVzZXJDcmVhdGVEdG87XG59XG5cbmV4cG9ydCBjbGFzcyBDbGllbnRVcGRhdGVEdG8gZXh0ZW5kcyBVc2VyQ3JlYXRlRHRvIHt9XG5cbmV4cG9ydCBjbGFzcyBUaGVyYXBpc3RDcmVhdGVEdG8gZXh0ZW5kcyBVc2VyQ3JlYXRlRHRvIHtcbiAgdXNlciE6IFVzZXJDcmVhdGVEdG87XG5cbiAgQElzU3RyaW5nKClcbiAgbW9iaWxlITogc3RyaW5nO1xuICBASXNTdHJpbmcoKVxuICBwcm92aW5jZSE6IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBwcm92aWRlclR5cGUhOiBzdHJpbmc7XG4gIEBJc1N0cmluZygpXG4gIHByb2Zlc3Npb25hbExpY2Vuc2VUeXBlITogc3RyaW5nO1xuICBASXNTdHJpbmcoKVxuICBpc1BSQ0xpY2Vuc2VkITogc3RyaW5nO1xuICBASXNTdHJpbmcoKVxuICBwcmNMaWNlbnNlTnVtYmVyITogc3RyaW5nO1xuICBASXNEYXRlKClcbiAgZXhwaXJhdGlvbkRhdGVPZkxpY2Vuc2UhOiBEYXRlO1xuICBASXNEYXRlKClcbiAgcHJhY3RpY2VTdGFydERhdGUhOiBEYXRlO1xuXG4gIEBJc0FycmF5KClcbiAgQElzU3RyaW5nKHsgZWFjaDogdHJ1ZSB9KVxuICBhcmVhc09mRXhwZXJ0aXNlITogc3RyaW5nW107XG4gIEBJc0FycmF5KClcbiAgQElzU3RyaW5nKHsgZWFjaDogdHJ1ZSB9KVxuICBhc3Nlc3NtZW50VG9vbHMhOiBzdHJpbmdbXTtcbiAgQElzQXJyYXkoKVxuICBASXNTdHJpbmcoeyBlYWNoOiB0cnVlIH0pXG4gIHRoZXJhcGV1dGljQXBwcm9hY2hlc1VzZWRMaXN0ITogc3RyaW5nW107XG4gIEBJc0FycmF5KClcbiAgQElzU3RyaW5nKHsgZWFjaDogdHJ1ZSB9KVxuICBsYW5ndWFnZXNPZmZlcmVkITogc3RyaW5nW107XG5cbiAgQElzQm9vbGVhbigpXG4gIHByb3ZpZGVkT25saW5lVGhlcmFweUJlZm9yZSE6IGJvb2xlYW47XG4gIEBJc0Jvb2xlYW4oKVxuICBjb21mb3J0YWJsZVVzaW5nVmlkZW9Db25mZXJlbmNpbmchOiBib29sZWFuO1xuICBASXNBcnJheSgpXG4gIEBJc051bWJlcih7fSwgeyBlYWNoOiB0cnVlIH0pXG4gIHByZWZlcnJlZFNlc3Npb25MZW5ndGghOiBudW1iZXJbXTtcblxuICBASXNTdHJpbmcoKVxuICBASXNPcHRpb25hbCgpXG4gIHByaXZhdGVDb25maWRlbnRpYWxTcGFjZSE6IHN0cmluZztcbiAgQElzQm9vbGVhbigpXG4gIEBJc09wdGlvbmFsKClcbiAgY29tcGxpZXNXaXRoRGF0YVByaXZhY3lBY3QhOiBib29sZWFuO1xuICBASXNTdHJpbmcoKVxuICBASXNPcHRpb25hbCgpXG4gIHByb2Zlc3Npb25hbExpYWJpbGl0eUluc3VyYW5jZSE6IHN0cmluZztcbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICBjb21wbGFpbnRzT3JEaXNjaXBsaW5hcnlBY3Rpb25zITogc3RyaW5nO1xuICBASXNCb29sZWFuKClcbiAgd2lsbGluZ1RvQWJpZGVCeVBsYXRmb3JtR3VpZGVsaW5lcyE6IGJvb2xlYW47XG5cbiAgQElzQXJyYXkoKVxuICBASXNTdHJpbmcoeyBlYWNoOiB0cnVlIH0pXG4gIGV4cGVydGlzZSE6IHN0cmluZ1tdO1xuICBASXNBcnJheSgpXG4gIEBJc1N0cmluZyh7IGVhY2g6IHRydWUgfSlcbiAgYXBwcm9hY2hlcyE6IHN0cmluZ1tdO1xuICBASXNBcnJheSgpXG4gIEBJc1N0cmluZyh7IGVhY2g6IHRydWUgfSlcbiAgbGFuZ3VhZ2VzITogc3RyaW5nW107XG4gIEBJc0FycmF5KClcbiAgQElzU3RyaW5nKHsgZWFjaDogdHJ1ZSB9KVxuICBpbGxuZXNzU3BlY2lhbGl6YXRpb25zITogc3RyaW5nW107XG4gIEBJc0FycmF5KClcbiAgQElzU3RyaW5nKHsgZWFjaDogdHJ1ZSB9KVxuICBhY2NlcHRUeXBlcyE6IHN0cmluZ1tdO1xuICBASXNKU09OKClcbiAgdHJlYXRtZW50U3VjY2Vzc1JhdGVzITogUmVjb3JkPHN0cmluZywgbnVtYmVyPjtcblxuICBASXNTdHJpbmcoKVxuICBzZXNzaW9uTGVuZ3RoITogc3RyaW5nO1xuICBASXNOdW1iZXIoKVxuICBob3VybHlSYXRlITogbnVtYmVyO1xufVxuXG5leHBvcnQgY2xhc3MgVGhlcmFwaXN0VXBkYXRlRHRvIHtcbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICBtb2JpbGU/OiBzdHJpbmc7XG5cbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICBwcm92aW5jZT86IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBASXNPcHRpb25hbCgpXG4gIHByb3ZpZGVyVHlwZT86IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBASXNPcHRpb25hbCgpXG4gIHByb2Zlc3Npb25hbExpY2Vuc2VUeXBlPzogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIEBJc09wdGlvbmFsKClcbiAgaXNQUkNMaWNlbnNlZD86IHN0cmluZztcblxuICBASXNTdHJpbmcoKVxuICBASXNPcHRpb25hbCgpXG4gIHByY0xpY2Vuc2VOdW1iZXI/OiBzdHJpbmc7XG5cbiAgQElzRGF0ZSgpXG4gIEBJc09wdGlvbmFsKClcbiAgZXhwaXJhdGlvbkRhdGVPZkxpY2Vuc2U/OiBEYXRlO1xuXG4gIEBJc0RhdGUoKVxuICBASXNPcHRpb25hbCgpXG4gIHByYWN0aWNlU3RhcnREYXRlPzogRGF0ZTtcblxuICBASXNBcnJheSgpXG4gIEBJc1N0cmluZyh7IGVhY2g6IHRydWUgfSlcbiAgQElzT3B0aW9uYWwoKVxuICBhcmVhc09mRXhwZXJ0aXNlPzogc3RyaW5nW107XG5cbiAgQElzQXJyYXkoKVxuICBASXNTdHJpbmcoeyBlYWNoOiB0cnVlIH0pXG4gIEBJc09wdGlvbmFsKClcbiAgYXNzZXNzbWVudFRvb2xzPzogc3RyaW5nW107XG5cbiAgQElzQXJyYXkoKVxuICBASXNTdHJpbmcoeyBlYWNoOiB0cnVlIH0pXG4gIEBJc09wdGlvbmFsKClcbiAgdGhlcmFwZXV0aWNBcHByb2FjaGVzVXNlZExpc3Q/OiBzdHJpbmdbXTtcblxuICBASXNBcnJheSgpXG4gIEBJc1N0cmluZyh7IGVhY2g6IHRydWUgfSlcbiAgQElzT3B0aW9uYWwoKVxuICBsYW5ndWFnZXNPZmZlcmVkPzogc3RyaW5nW107XG5cbiAgQElzQm9vbGVhbigpXG4gIEBJc09wdGlvbmFsKClcbiAgcHJvdmlkZWRPbmxpbmVUaGVyYXB5QmVmb3JlPzogYm9vbGVhbjtcblxuICBASXNCb29sZWFuKClcbiAgQElzT3B0aW9uYWwoKVxuICBjb21mb3J0YWJsZVVzaW5nVmlkZW9Db25mZXJlbmNpbmc/OiBib29sZWFuO1xuXG4gIEBJc0FycmF5KClcbiAgQElzTnVtYmVyKHt9LCB7IGVhY2g6IHRydWUgfSlcbiAgQElzT3B0aW9uYWwoKVxuICBwcmVmZXJyZWRTZXNzaW9uTGVuZ3RoPzogbnVtYmVyW107XG5cbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICBwcml2YXRlQ29uZmlkZW50aWFsU3BhY2U/OiBzdHJpbmc7XG5cbiAgQElzQm9vbGVhbigpXG4gIEBJc09wdGlvbmFsKClcbiAgY29tcGxpZXNXaXRoRGF0YVByaXZhY3lBY3Q/OiBib29sZWFuO1xuXG4gIEBJc1N0cmluZygpXG4gIEBJc09wdGlvbmFsKClcbiAgcHJvZmVzc2lvbmFsTGlhYmlsaXR5SW5zdXJhbmNlPzogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIEBJc09wdGlvbmFsKClcbiAgY29tcGxhaW50c09yRGlzY2lwbGluYXJ5QWN0aW9ucz86IHN0cmluZztcblxuICBASXNCb29sZWFuKClcbiAgQElzT3B0aW9uYWwoKVxuICB3aWxsaW5nVG9BYmlkZUJ5UGxhdGZvcm1HdWlkZWxpbmVzPzogYm9vbGVhbjtcblxuICBASXNBcnJheSgpXG4gIEBJc1N0cmluZyh7IGVhY2g6IHRydWUgfSlcbiAgQElzT3B0aW9uYWwoKVxuICBleHBlcnRpc2U/OiBzdHJpbmdbXTtcblxuICBASXNBcnJheSgpXG4gIEBJc1N0cmluZyh7IGVhY2g6IHRydWUgfSlcbiAgQElzT3B0aW9uYWwoKVxuICBhcHByb2FjaGVzPzogc3RyaW5nW107XG5cbiAgQElzQXJyYXkoKVxuICBASXNTdHJpbmcoeyBlYWNoOiB0cnVlIH0pXG4gIEBJc09wdGlvbmFsKClcbiAgbGFuZ3VhZ2VzPzogc3RyaW5nW107XG5cbiAgQElzQXJyYXkoKVxuICBASXNTdHJpbmcoeyBlYWNoOiB0cnVlIH0pXG4gIEBJc09wdGlvbmFsKClcbiAgaWxsbmVzc1NwZWNpYWxpemF0aW9ucz86IHN0cmluZ1tdO1xuXG4gIEBJc0FycmF5KClcbiAgQElzU3RyaW5nKHsgZWFjaDogdHJ1ZSB9KVxuICBASXNPcHRpb25hbCgpXG4gIGFjY2VwdFR5cGVzPzogc3RyaW5nW107XG5cbiAgQElzT3B0aW9uYWwoKVxuICB0cmVhdG1lbnRTdWNjZXNzUmF0ZXM/OiBSZWNvcmQ8c3RyaW5nLCBudW1iZXI+O1xuXG4gIEBJc1N0cmluZygpXG4gIEBJc09wdGlvbmFsKClcbiAgc2Vzc2lvbkxlbmd0aD86IHN0cmluZztcblxuICBASXNOdW1iZXIoKVxuICBASXNPcHRpb25hbCgpXG4gIGhvdXJseVJhdGU/OiBudW1iZXI7XG59XG5cbmV4cG9ydCB0eXBlIFVzZXJSZXNwb25zZSA9IHtcbiAgaWQ6IHN0cmluZztcbiAgZW1haWw6IHN0cmluZztcbiAgZmlyc3ROYW1lOiBzdHJpbmc7XG4gIG1pZGRsZU5hbWU6IHN0cmluZyB8IG51bGw7XG4gIGxhc3ROYW1lOiBzdHJpbmc7XG4gIGJpcnRoRGF0ZTogRGF0ZSB8IG51bGw7XG4gIGFkZHJlc3M6IHN0cmluZyB8IG51bGw7XG4gIGF2YXRhclVybDogc3RyaW5nIHwgbnVsbDtcbiAgcm9sZTogc3RyaW5nO1xuICBiaW86IHN0cmluZyB8IG51bGw7XG4gIGNvdmVySW1hZ2VVcmw6IHN0cmluZyB8IG51bGw7XG4gIGlzQWN0aXZlOiBib29sZWFuO1xuICBjcmVhdGVkQXQ6IERhdGU7XG4gIHVwZGF0ZWRBdDogRGF0ZTtcbn07XG5cbmV4cG9ydCB0eXBlIENsaWVudFJlc3BvbnNlID0ge1xuICB1c2VySWQ6IHN0cmluZztcbiAgdXNlcjogVXNlclJlc3BvbnNlO1xuICBoYXNTZWVuVGhlcmFwaXN0UmVjb21tZW5kYXRpb25zOiBib29sZWFuO1xuICBjcmVhdGVkQXQ6IERhdGU7XG4gIHVwZGF0ZWRBdDogRGF0ZTtcbn07XG5cbmV4cG9ydCB0eXBlIFRoZXJhcGlzdFJlc3BvbnNlID0ge1xuICB1c2VySWQ6IHN0cmluZztcbiAgdXNlcjogVXNlclJlc3BvbnNlO1xuXG4gIHN0YXR1czogc3RyaW5nO1xuICBzdWJtaXNzaW9uRGF0ZTogRGF0ZTtcbiAgcHJvY2Vzc2luZ0RhdGU6IERhdGU7XG5cbiAgbW9iaWxlOiBzdHJpbmc7XG4gIHByb3ZpbmNlOiBzdHJpbmc7XG5cbiAgcHJvdmlkZXJUeXBlOiBzdHJpbmc7XG4gIHByb2Zlc3Npb25hbExpY2Vuc2VUeXBlOiBzdHJpbmc7XG4gIGlzUFJDTGljZW5zZWQ6IHN0cmluZztcbiAgcHJjTGljZW5zZU51bWJlcjogc3RyaW5nO1xuICBleHBpcmF0aW9uRGF0ZU9mTGljZW5zZTogRGF0ZTtcbiAgcHJhY3RpY2VTdGFydERhdGU6IERhdGU7XG5cbiAgYXJlYXNPZkV4cGVydGlzZTogc3RyaW5nW107XG4gIGFzc2Vzc21lbnRUb29sczogc3RyaW5nW107XG4gIHRoZXJhcGV1dGljQXBwcm9hY2hlc1VzZWRMaXN0OiBzdHJpbmdbXTtcbiAgbGFuZ3VhZ2VzT2ZmZXJlZDogc3RyaW5nW107XG5cbiAgcHJvdmlkZWRPbmxpbmVUaGVyYXB5QmVmb3JlOiBib29sZWFuO1xuICBjb21mb3J0YWJsZVVzaW5nVmlkZW9Db25mZXJlbmNpbmc6IGJvb2xlYW47XG4gIHByZWZlcnJlZFNlc3Npb25MZW5ndGg6IG51bWJlcltdO1xuXG4gIHByaXZhdGVDb25maWRlbnRpYWxTcGFjZTogc3RyaW5nIHwgbnVsbDtcbiAgY29tcGxpZXNXaXRoRGF0YVByaXZhY3lBY3Q6IGJvb2xlYW47XG4gIHByb2Zlc3Npb25hbExpYWJpbGl0eUluc3VyYW5jZTogc3RyaW5nIHwgbnVsbDtcbiAgY29tcGxhaW50c09yRGlzY2lwbGluYXJ5QWN0aW9uczogc3RyaW5nIHwgbnVsbDtcbiAgd2lsbGluZ1RvQWJpZGVCeVBsYXRmb3JtR3VpZGVsaW5lczogYm9vbGVhbjtcblxuICBleHBlcnRpc2U6IHN0cmluZ1tdO1xuICBhcHByb2FjaGVzOiBzdHJpbmdbXTtcbiAgbGFuZ3VhZ2VzOiBzdHJpbmdbXTtcbiAgaWxsbmVzc1NwZWNpYWxpemF0aW9uczogc3RyaW5nW107XG4gIGFjY2VwdFR5cGVzOiBzdHJpbmdbXTtcbiAgdHJlYXRtZW50U3VjY2Vzc1JhdGVzOiBKc29uVmFsdWU7XG5cbiAgc2Vzc2lvbkxlbmd0aDogc3RyaW5nO1xuICBob3VybHlSYXRlOiBEZWNpbWFsO1xuXG4gIGNyZWF0ZWRBdDogRGF0ZTtcbiAgdXBkYXRlZEF0OiBEYXRlO1xuXG4gIHByb2Nlc3NlZEJ5QWRtaW5JZDogc3RyaW5nIHwgbnVsbDtcbn07XG4iXSwidmVyc2lvbiI6M30=

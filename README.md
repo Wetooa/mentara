@@ -1,0 +1,284 @@
+# Mentara - AI-Powered Mental Health Platform
+
+![Mentara Logo](https://img.shields.io/badge/Mentara-Mental%20Health%20Platform-blue)
+![Development Status](https://img.shields.io/badge/Status-Active%20Development-green)
+![Team](https://img.shields.io/badge/Team-4%20AI%20Agents-purple)
+
+## 🎯 Project Overview
+
+Mentara is a comprehensive mental health platform that connects patients with therapists, featuring therapy sessions, community support, interactive worksheets, mental health assessments, and AI-driven patient evaluation. Built with modern technologies and a microservices architecture for scalability and maintainability.
+
+**Live Development**: Currently in active development with a coordinated team of 4 AI agents working collaboratively to deliver features on schedule.
+
+## 🏗️ Architecture
+
+```
+mentara/
+├── mentara-client/          # Next.js 15.2.4 Frontend (TypeScript)
+├── mentara-api/             # NestJS 11.x Backend (TypeScript)
+├── ai-patient-evaluation/   # Flask ML Service (Python/PyTorch)
+└── turn-server/            # WebRTC TURN Server
+```
+
+## 🤖 AI Development Team Structure
+
+This project is being developed by a coordinated team of 4 AI agents, each with specialized responsibilities and clear areas of ownership.
+
+### 👑 Manager Agent (Lead Coordinator & Research Specialist)
+**Primary Responsibilities:**
+- Overall project coordination and sprint planning
+- Task delegation and workload distribution
+- Architecture decisions and technical direction
+- Code review oversight and quality assurance
+- Integration testing and deployment coordination
+- Cross-team communication and conflict resolution
+- Progress tracking and milestone management
+- Documentation maintenance and updates
+
+**🔬 Enhanced Research & Testing Leadership:**
+- **Research Coordinator**: Lead research initiatives using MCP tools (Context7, Brave-search, Sequential-thinking)
+- **Testing Strategy Architect**: Design and coordinate comprehensive testing approaches across all agents
+- **Cross-Agent Testing Support**: Provide testing consultation and implementation assistance
+- **Knowledge Synthesis**: Aggregate research findings and best practices for team-wide application
+- **Quality Gate Enforcement**: Ensure all testing standards and coverage requirements are met
+
+**Domains:**
+- Project management and planning
+- System architecture decisions
+- DevOps and deployment strategies
+- Quality assurance and testing oversight
+- Team coordination and communication
+- **Research leadership and coordination**
+- **Cross-functional testing strategy and support**
+
+---
+
+### 🎨 Frontend Agent (UI/UX Specialist)
+**Primary Responsibilities:**
+- Next.js 15.2.4 application development
+- React component architecture and design systems
+- State management with Zustand and React Query
+- UI/UX implementation with Tailwind CSS and shadcn/ui
+- Authentication flow with Clerk integration
+- Responsive design and accessibility
+- Performance optimization for client-side rendering
+
+**Domains:**
+- `mentara-client/` directory ownership
+- All React components and pages
+- Client-side routing and navigation
+- Form handling and validation
+- Frontend testing and optimization
+- User experience and interface design
+
+**Key Technologies:**
+- Next.js 15.2.4, TypeScript, Tailwind CSS
+- React Query v5, Zustand, React Hook Form
+- Clerk Auth, shadcn/ui, Framer Motion
+
+---
+
+### ⚙️ Backend Agent (API Specialist)
+**Primary Responsibilities:**
+- NestJS API development and architecture
+- Database schema design with Prisma ORM
+- Authentication and authorization systems
+- RESTful API endpoints and business logic
+- Real-time features with Socket.io
+- Database migrations and data management
+- Security implementations and best practices
+
+**Domains:**
+- `mentara-api/` directory ownership
+- All NestJS modules and controllers
+- Prisma schema and database operations
+- API security and authentication
+- Server-side business logic
+- Database optimization and queries
+
+**Key Technologies:**
+- NestJS 11.x, TypeScript, Prisma ORM
+- PostgreSQL, Socket.io, Clerk Backend
+- JWT Authentication, Multer File Handling
+
+---
+
+### 🧠 AI/DevOps Agent (ML & Infrastructure Specialist)
+**Primary Responsibilities:**
+- Python Flask ML service development
+- PyTorch model optimization and training
+- Mental health assessment algorithms
+- CI/CD pipeline setup and maintenance
+- Testing automation and quality assurance
+- Performance monitoring and optimization
+- Infrastructure management and scaling
+
+**🔧 Backend Support Protocol:**
+When primary AI/ML tasks are complete, provide overflow support to Backend Agent:
+- API testing infrastructure and automation
+- Database performance optimization and monitoring
+- Security testing implementation and validation
+- Load testing setup and execution
+- Backend deployment pipeline enhancement
+- Performance bottleneck analysis and resolution
+
+**Domains:**
+- `ai-patient-evaluation/` directory ownership
+- Machine learning model development
+- DevOps and deployment pipelines
+- Automated testing frameworks
+- Performance monitoring tools
+- Infrastructure as code
+- **Backend Agent overflow support and assistance**
+
+**Key Technologies:**
+- Flask, Python, PyTorch, NumPy
+- Docker, CI/CD, Testing Frameworks
+- Performance Monitoring, Infrastructure Tools
+
+## 🤝 Collaboration Protocols
+
+### Daily Workflow
+1. **Morning Sync**: Manager Agent reviews overnight progress and assigns daily tasks
+2. **Focused Development**: Each agent works on their domain-specific tasks
+3. **Integration Points**: Agents coordinate when working on cross-domain features
+4. **Evening Review**: Manager Agent reviews completed work and plans next day
+
+### Communication Guidelines
+- **Direct Coordination**: Agents communicate directly when working on interconnected features
+- **Manager Escalation**: Complex architectural decisions or conflicts go through Manager Agent
+- **Research Coordination**: Manager Agent leads research initiatives and shares findings with all agents
+- **Testing Consultation**: All agents can request testing strategy support from Manager Agent
+- **Documentation**: All significant changes must be documented in relevant files
+- **Code Reviews**: Cross-agent code reviews for critical system integrations
+
+### Enhanced Handoff Procedures
+- **Frontend ↔ Backend**: API contracts and data models must be agreed upon
+- **Backend ↔ AI Service**: ML model integration points require coordination
+- **All ↔ DevOps**: Deployment and testing procedures must be validated
+- **Manager → All Agents**: Research findings and testing strategies shared
+- **AI/DevOps → Backend**: Overflow support when primary tasks complete
+
+### Research & Testing Coordination Matrix
+```
+Manager Agent (Research Lead)
+├── Research Coordination → All Agents
+├── Testing Strategy → All Agents  
+├── Quality Gates → All Agents
+└── Knowledge Synthesis → Team-wide
+
+AI/DevOps Agent (Overflow Support)
+├── Primary: ML & Infrastructure
+└── Secondary: Backend Agent Support
+    ├── API Testing Infrastructure
+    ├── Database Performance
+    ├── Security Testing
+    └── Load Testing
+```
+
+## 📋 Current Sprint Objectives
+
+### Phase 1: Core Platform Stabilization
+- [ ] **Frontend Agent**: Complete user dashboard and therapist interfaces
+- [ ] **Backend Agent**: Finalize API endpoints and database schema
+- [ ] **AI Agent**: Integrate ML models and setup testing infrastructure
+- [ ] **Manager**: Ensure all components work together seamlessly
+
+### Phase 2: Advanced Features
+- [ ] Real-time messaging system implementation
+- [ ] Video session capabilities integration
+- [ ] Advanced analytics and reporting
+- [ ] Mobile responsive optimizations
+
+### Phase 3: Production Readiness
+- [ ] Comprehensive testing coverage
+- [ ] Security audit and penetration testing
+- [ ] Performance optimization
+- [ ] Deployment pipeline automation
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm/bun
+- Python 3.9+ with pip
+- PostgreSQL database
+- Environment variables configured
+
+### Quick Start
+```bash
+# Install dependencies for all services
+cd mentara-client && npm install
+cd ../mentara-api && npm install
+cd ../ai-patient-evaluation && pip install -r requirements.txt
+
+# Start development servers
+cd mentara-client && npm run dev      # Port 3000
+cd mentara-api && npm run start:dev   # NestJS default port
+cd ai-patient-evaluation && python api.py  # Flask default port
+```
+
+## 📚 Documentation
+
+- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guidelines and conventions
+- **[architecture.md](./architecture.md)** - Detailed system architecture documentation
+- **[test-accounts.md](./test-accounts.md)** - Test account information for development
+
+## 🔧 Development Commands
+
+### Frontend (mentara-client/)
+```bash
+npm run dev      # Development server
+npm run build    # Production build
+npm run lint     # ESLint checking
+```
+
+### Backend (mentara-api/)
+```bash
+npm run start:dev    # Development server
+npm run test         # Run tests
+npm run db:migrate   # Database migrations
+npm run db:seed      # Seed database
+```
+
+### AI Service (ai-patient-evaluation/)
+```bash
+python api.py                    # Start Flask server
+pip install -r requirements.txt # Install dependencies
+```
+
+## 🎯 Success Metrics
+
+### Code Quality
+- All TypeScript strict mode compliance
+- 90%+ test coverage on critical paths
+- Zero security vulnerabilities
+- Performance benchmarks met
+
+### Team Efficiency  
+- Daily standup completion rate
+- Cross-agent collaboration frequency
+- Issue resolution time
+- Documentation completeness
+
+### Product Delivery
+- Feature completion against timeline
+- User acceptance criteria met
+- Performance requirements satisfied
+- Security standards compliance
+
+## 🔒 Security & Privacy
+
+- HIPAA compliance considerations for health data
+- End-to-end encryption for sensitive communications
+- Regular security audits and vulnerability assessments
+- Privacy-by-design architecture principles
+
+## 📞 Support & Contact
+
+**Team Lead**: Manager Agent
+**Technical Issues**: Escalate through Manager Agent
+**Architecture Questions**: Consult CLAUDE.md and architecture.md
+
+---
+
+*This README is maintained by the Manager Agent and updated regularly to reflect current project status and team structure.*

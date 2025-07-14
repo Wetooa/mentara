@@ -5,6 +5,9 @@ import { TherapistManagementController } from './therapist-management.controller
 import { TherapistManagementService } from './therapist-management.service';
 import { TherapistApplicationController } from './therapist-application.controller';
 import { TherapistApplicationService } from './therapist-application.service';
+import { TherapistProfileController } from './controllers/therapist-profile.controller';
+import { TherapistClientController } from './controllers/therapist-client.controller';
+import { TherapistWorksheetController } from './controllers/therapist-worksheet.controller';
 import { WorksheetsService } from '../worksheets/worksheets.service';
 import { AdvancedMatchingService } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
@@ -18,6 +21,9 @@ import { RoleUtils } from 'src/utils/role-utils';
     TherapistRecommendationController,
     TherapistManagementController,
     TherapistApplicationController,
+    TherapistProfileController,
+    TherapistClientController,
+    TherapistWorksheetController,
   ],
   providers: [
     TherapistRecommendationService,

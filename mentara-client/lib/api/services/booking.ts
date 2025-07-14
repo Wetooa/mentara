@@ -87,7 +87,7 @@ export const createBookingService = (client: AxiosInstance) => ({
     create: (data: CreateMeetingRequest): Promise<Meeting> =>
       client.post('/booking/meetings', data),
 
-    // Get meetings list
+    // Get meetings list with optional filters
     getList: (params: MeetingListParams = {}): Promise<MeetingListResponse> => {
       const searchParams = new URLSearchParams();
       
@@ -120,13 +120,9 @@ export const createBookingService = (client: AxiosInstance) => ({
     // Cancel meeting
     cancel: (id: string): Promise<void> =>
       client.delete(`/booking/meetings/${id}/cancel`),
-
-    // Complete meeting (add notes, mark as completed)
-    complete: (id: string, notes?: string): Promise<Meeting> =>
-      client.post(`/booking/meetings/${id}/complete`, { notes }),
   },
 
-  // Availability management
+  // Availability management (therapist only)
   availability: {
     // Get available slots for a therapist on a specific date
     getSlots: (therapistId: string, date: string): Promise<AvailableSlot[]> => {
@@ -137,15 +133,21 @@ export const createBookingService = (client: AxiosInstance) => ({
       return client.get(`/booking/slots?${searchParams.toString()}`);
     },
 
-    // Get available slots for multiple days
-    getSlotsRange: (therapistId: string, startDate: string, endDate: string): Promise<Record<string, AvailableSlot[]>> => {
-      const searchParams = new URLSearchParams();
-      searchParams.append('therapistId', therapistId);
-      searchParams.append('startDate', startDate);
-      searchParams.append('endDate', endDate);
-      
-      return client.get(`/booking/slots/range?${searchParams.toString()}`);
-    },
+    // Create availability slot (therapist only)
+    create: (data: any): Promise<any> =>
+      client.post('/booking/availability', data),
+
+    // Get therapist's availability
+    get: (): Promise<any[]> =>
+      client.get('/booking/availability'),
+
+    // Update availability slot
+    update: (id: string, data: any): Promise<any> =>
+      client.put(`/booking/availability/${id}`, data),
+
+    // Delete availability slot
+    delete: (id: string): Promise<void> =>
+      client.delete(`/booking/availability/${id}`),
   },
 
   // Duration options
@@ -153,11 +155,7 @@ export const createBookingService = (client: AxiosInstance) => ({
     // Get all available session durations
     getAll: (): Promise<Duration[]> =>
       client.get('/booking/durations'),
-
-    // Get active durations only
-    getActive: (): Promise<Duration[]> =>
-      client.get('/booking/durations?active=true'),
   },
-});
+});;
 
 export type BookingService = ReturnType<typeof createBookingService>;

@@ -1,8 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
+import {
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { TEST_USER_IDS } from '../test-utils';
+import { EventBusService } from '../common/events/event-bus.service';
+import { UserRegisteredEvent } from '../common/events/user-events';
+import {
+  createMockPrismaService,
+  createMockEventBus,
+  TEST_USER_IDS,
+} from '../test-utils';
+import {
+  TestDataGenerator,
+  TestAssertions,
+} from '../test-utils/enhanced-test-helpers';
 import { ClientCreateDto } from 'schema/auth';
 
 // Mock Clerk client
@@ -12,37 +25,30 @@ const mockClerkClient = {
     getUserList: jest.fn(),
     getUser: jest.fn(),
   },
+  sessions: {
+    getSessionList: jest.fn(),
+    revokeSession: jest.fn(),
+  },
 };
 
 jest.mock('@clerk/backend', () => ({
   createClerkClient: jest.fn(() => mockClerkClient),
 }));
 
-// Mock Prisma
-const mockPrismaService = {
-  user: {
-    findUnique: jest.fn(),
-    create: jest.fn(),
-  },
-  client: {
-    create: jest.fn(),
-  },
-  therapist: {
-    create: jest.fn(),
-  },
-};
-
 describe('AuthService', () => {
   let service: AuthService;
+  let mockPrisma: any;
+  let mockEventBus: any;
 
   beforeEach(async () => {
+    mockPrisma = createMockPrismaService();
+    mockEventBus = createMockEventBus();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        {
-          provide: PrismaService,
-          useValue: mockPrismaService,
-        },
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: EventBusService, useValue: mockEventBus },
       ],
     }).compile();
 
@@ -56,101 +62,291 @@ describe('AuthService', () => {
     jest.clearAllMocks();
   });
 
-  describe('checkAdmin', () => {
-    it('should return true for valid admin user', async () => {
-      const adminUser = {
-        id: TEST_USER_IDS.ADMIN,
-        role: 'admin',
-        email: 'admin@example.com',
+  describe('registerClient', () => {
+    const mockClientDto = {
+      user: {
+        id: TEST_USER_IDS.CLIENT,
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        middleName: null,
+        birthDate: new Date('1990-01-01'),
+        address: null,
+        avatarUrl: null,
+        role: 'client',
+        isActive: true,
+        isVerified: false,
+      },
+      dateOfBirth: new Date('1990-01-01'),
+      emergencyContact: {
+        name: 'Emergency Contact',
+        phone: '+1234567890',
+        relationship: 'Parent',
+      },
+      hasSeenTherapistRecommendations: false,
+    } as ClientCreateDto;
+
+    it('should successfully register a new client', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
+
+      // Mock database responses
+      mockPrisma.user.findUnique.mockResolvedValue(null); // User doesn't exist
+      mockPrisma.user.create.mockResolvedValue(mockClientDto.user);
+
+      const mockClient = {
+        ...mockClientDto,
+        user: mockClientDto.user,
+        id: 'client-123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
-      mockPrismaService.user.findUnique.mockResolvedValue(adminUser);
+      mockPrisma.client.create.mockResolvedValue(mockClient);
 
-      const result = await service.checkAdmin(TEST_USER_IDS.ADMIN);
+      mockClerkClient.users.updateUserMetadata.mockResolvedValue({});
 
-      expect(result).toBe(true);
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { role: 'admin', id: TEST_USER_IDS.ADMIN },
+      const result = await service.registerClient(userId, mockClientDto);
+
+      // Verify Clerk metadata update
+      expect(mockClerkClient.users.updateUserMetadata).toHaveBeenCalledWith(
+        userId,
+        {
+          publicMetadata: {
+            role: 'client',
+          },
+        },
+      );
+
+      // Verify database operations
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: mockClientDto.user,
       });
+
+      expect(mockPrisma.client.create).toHaveBeenCalledWith({
+        data: {
+          ...mockClientDto,
+          user: { connect: { id: userId } },
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      // Verify event publication
+      expect(mockEventBus.emit).toHaveBeenCalledWith(
+        expect.any(UserRegisteredEvent),
+      );
+
+      expect(result).toEqual(mockClient);
     });
 
-    it('should return false for non-admin user', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+    it('should throw ConflictException if user already exists', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
+      const existingUser = TestDataGenerator.createUser();
 
-      const result = await service.checkAdmin(TEST_USER_IDS.CLIENT);
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
 
-      expect(result).toBe(false);
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { role: 'admin', id: TEST_USER_IDS.CLIENT },
-      });
+      await TestAssertions.expectToThrowNestException(
+        () => service.registerClient(userId, mockClientDto),
+        ConflictException,
+        'User already exists',
+      );
+
+      expect(mockPrisma.client.create).not.toHaveBeenCalled();
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
 
-    it('should return false when user does not exist', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+    it('should handle database errors gracefully', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
 
-      const result = await service.checkAdmin('non-existent-id');
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockRejectedValue(new Error('Database error'));
 
-      expect(result).toBe(false);
+      await TestAssertions.expectToThrowNestException(
+        () => service.registerClient(userId, mockClientDto),
+        InternalServerErrorException,
+        'User registration failed',
+      );
     });
   });
 
-  describe('registerClient', () => {
-    it('should throw ConflictException when user already exists', async () => {
-      const existingUser = {
-        id: TEST_USER_IDS.CLIENT,
-        email: 'client@example.com',
+  describe('registerTherapist', () => {
+    const mockTherapistDto = {
+      user: {
+        id: TEST_USER_IDS.THERAPIST,
+        email: 'therapist@example.com',
+        firstName: 'Dr. Test',
+        lastName: 'Therapist',
+        middleName: null,
+        birthDate: new Date('1980-01-01'),
+        address: null,
+        avatarUrl: null,
+        role: 'therapist',
+        isActive: true,
+        isVerified: false,
+      },
+      // Minimal required fields for TherapistCreateDto
+      mobile: '+1234567890',
+      province: 'Test Province',
+    } as any; // Use any to avoid complex DTO construction
+
+    it('should successfully register a new therapist', async () => {
+      const userId = TEST_USER_IDS.THERAPIST;
+
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue(mockTherapistDto.user);
+
+      const mockTherapist = {
+        ...mockTherapistDto,
+        user: mockTherapistDto.user,
+        id: 'therapist-123',
+        status: 'pending',
+        treatmentSuccessRates: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
-      mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
+      mockPrisma.therapist.create.mockResolvedValue(mockTherapist);
 
-      const mockClientCreateDto = {
-        user: {},
-        hasSeenTherapistRecommendations: false,
-      } as ClientCreateDto;
+      mockClerkClient.users.updateUserMetadata.mockResolvedValue({});
 
-      await expect(
-        service.registerClient(TEST_USER_IDS.CLIENT, mockClientCreateDto),
-      ).rejects.toThrow(ConflictException);
+      const result = await service.registerTherapist(userId, mockTherapistDto);
 
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { id: TEST_USER_IDS.CLIENT },
+      // Verify Clerk metadata update
+      expect(mockClerkClient.users.updateUserMetadata).toHaveBeenCalledWith(
+        userId,
+        {
+          publicMetadata: {
+            role: 'therapist',
+          },
+        },
+      );
+
+      // Verify database operations
+      expect(mockPrisma.therapist.create).toHaveBeenCalledWith({
+        data: {
+          ...mockTherapistDto,
+          user: { connect: { id: userId } },
+          status: 'pending',
+        },
+        include: {
+          user: true,
+        },
       });
+
+      // Verify event publication
+      expect(mockEventBus.emit).toHaveBeenCalledWith(
+        expect.any(UserRegisteredEvent),
+      );
+
+      expect(result).toEqual({
+        ...mockTherapist,
+        treatmentSuccessRates: {},
+      });
+    });
+
+    it('should throw ConflictException if therapist user already exists', async () => {
+      const userId = TEST_USER_IDS.THERAPIST;
+      const existingUser = TestDataGenerator.createUser();
+
+      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
+
+      await TestAssertions.expectToThrowNestException(
+        () => service.registerTherapist(userId, mockTherapistDto),
+        ConflictException,
+        'User already exists',
+      );
     });
   });
 
   describe('getUsers', () => {
     it('should return list of users from Clerk', async () => {
       const mockUsers = [
-        {
-          id: 'user1',
-          emailAddresses: [{ emailAddress: 'user1@example.com' }],
-        },
-        {
-          id: 'user2',
-          emailAddresses: [{ emailAddress: 'user2@example.com' }],
-        },
+        { id: 'user1', emailAddresses: [{ emailAddress: 'user1@test.com' }] },
+        { id: 'user2', emailAddresses: [{ emailAddress: 'user2@test.com' }] },
       ];
+
       mockClerkClient.users.getUserList.mockResolvedValue(mockUsers);
 
       const result = await service.getUsers();
 
+      expect(mockClerkClient.users.getUserList).toHaveBeenCalled();
       expect(result).toEqual(mockUsers);
-      expect(mockClerkClient.users.getUserList).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('getUser', () => {
-    it('should return specific user from Clerk', async () => {
+    it('should return a specific user from Clerk', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
       const mockUser = {
-        id: TEST_USER_IDS.CLIENT,
-        emailAddresses: [{ emailAddress: 'client@example.com' }],
+        id: userId,
+        emailAddresses: [{ emailAddress: 'test@example.com' }],
       };
+
       mockClerkClient.users.getUser.mockResolvedValue(mockUser);
 
-      const result = await service.getUser(TEST_USER_IDS.CLIENT);
+      const result = await service.getUser(userId);
 
+      expect(mockClerkClient.users.getUser).toHaveBeenCalledWith(userId);
       expect(result).toEqual(mockUser);
-      expect(mockClerkClient.users.getUser).toHaveBeenCalledWith(
-        TEST_USER_IDS.CLIENT,
+    });
+  });
+
+  describe('forceLogout', () => {
+    it('should revoke all user sessions successfully', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
+      const mockSessions = {
+        data: [{ id: 'session1' }, { id: 'session2' }],
+      };
+
+      mockClerkClient.sessions.getSessionList.mockResolvedValue(mockSessions);
+      mockClerkClient.sessions.revokeSession.mockResolvedValue({});
+
+      const result = await service.forceLogout(userId);
+
+      expect(mockClerkClient.sessions.getSessionList).toHaveBeenCalledWith({
+        userId,
+      });
+
+      expect(mockClerkClient.sessions.revokeSession).toHaveBeenCalledTimes(2);
+      expect(mockClerkClient.sessions.revokeSession).toHaveBeenCalledWith(
+        'session1',
       );
+      expect(mockClerkClient.sessions.revokeSession).toHaveBeenCalledWith(
+        'session2',
+      );
+
+      expect(result).toEqual({
+        success: true,
+        message: 'User sessions revoked successfully',
+      });
+    });
+
+    it('should handle force logout errors', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
+
+      mockClerkClient.sessions.getSessionList.mockRejectedValue(
+        new Error('Clerk API error'),
+      );
+
+      await TestAssertions.expectToThrowNestException(
+        () => service.forceLogout(userId),
+        InternalServerErrorException,
+        'Force logout failed',
+      );
+    });
+
+    it('should handle empty sessions list', async () => {
+      const userId = TEST_USER_IDS.CLIENT;
+      const mockSessions = { data: [] };
+
+      mockClerkClient.sessions.getSessionList.mockResolvedValue(mockSessions);
+
+      const result = await service.forceLogout(userId);
+
+      expect(mockClerkClient.sessions.revokeSession).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        success: true,
+        message: 'User sessions revoked successfully',
+      });
     });
   });
 });

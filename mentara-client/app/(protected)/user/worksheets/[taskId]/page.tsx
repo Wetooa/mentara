@@ -13,7 +13,6 @@ import {
   Upload as UploadIcon,
 } from "lucide-react";
 import { Task, TaskFile } from "@/components/worksheets/types";
-import { createWorksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 import { useToast } from "@/contexts/ToastContext";

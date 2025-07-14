@@ -1,4 +1,138 @@
-import '@testing-library/jest-dom'
+require('@testing-library/jest-dom')
+
+// React Query testing utilities
+const { QueryClient } = require('@tanstack/react-query')
+
+// Create a mock QueryClient for tests
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        staleTime: 0,
+        gcTime: 0,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  })
+
+// Make test QueryClient available globally
+global.createTestQueryClient = createTestQueryClient
+
+// Mock axios
+jest.mock('axios', () => ({
+  create: jest.fn(() => ({
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    patch: jest.fn(),
+    interceptors: {
+      request: { use: jest.fn(), eject: jest.fn() },
+      response: { use: jest.fn(), eject: jest.fn() },
+    },
+  })),
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+  patch: jest.fn(),
+}))
+
+// Mock Clerk
+jest.mock('@clerk/nextjs', () => ({
+  useAuth: () => ({
+    isLoaded: true,
+    isSignedIn: true,
+    userId: 'test-user-id',
+    sessionId: 'test-session-id',
+    getToken: jest.fn().mockResolvedValue('test-token'),
+  }),
+  useUser: () => ({
+    isLoaded: true,
+    isSignedIn: true,
+    user: {
+      id: 'test-user-id',
+      firstName: 'Test',
+      lastName: 'User',
+      emailAddresses: [{ emailAddress: 'test@example.com' }],
+    },
+  }),
+  SignIn: ({ children }) => children,
+  SignUp: ({ children }) => children,
+  UserButton: () => <div data-testid="user-button">User Button</div>,
+  ClerkProvider: ({ children }) => children,
+  auth: () => ({
+    userId: 'test-user-id',
+    sessionId: 'test-session-id',
+    getToken: jest.fn().mockResolvedValue('test-token'),
+  }),
+}))
+
+// Mock our API client
+jest.mock('@/lib/api', () => ({
+  useApi: jest.fn(() => ({
+    auth: {
+      registerClient: jest.fn(),
+      registerTherapist: jest.fn(),
+      getCurrentUser: jest.fn(),
+      getAllUsers: jest.fn(),
+      forceLogout: jest.fn(),
+    },
+    users: {
+      getAll: jest.fn(),
+      getOne: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+    dashboard: {
+      getUserDashboard: jest.fn(),
+      getTherapistDashboard: jest.fn(),
+      getAdminDashboard: jest.fn(),
+    },
+    booking: {
+      meetings: {
+        create: jest.fn(),
+        getList: jest.fn(),
+        getMy: jest.fn(),
+        getById: jest.fn(),
+        update: jest.fn(),
+        cancel: jest.fn(),
+      },
+      availability: {
+        getSlots: jest.fn(),
+        create: jest.fn(),
+        get: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
+      durations: {
+        getAll: jest.fn(),
+      },
+    },
+  })),
+  api: {
+    auth: {
+      registerClient: jest.fn(),
+      registerTherapist: jest.fn(),
+      getCurrentUser: jest.fn(),
+    },
+    users: {
+      getAll: jest.fn(),
+      getOne: jest.fn(),
+    },
+    dashboard: {
+      getUserDashboard: jest.fn(),
+    },
+  },
+}))
+
+// Setup test environment variables
+process.env.NODE_ENV = 'test'
+process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'test-clerk-key'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

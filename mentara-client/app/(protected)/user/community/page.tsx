@@ -5,7 +5,7 @@ import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCommunityPage } from "@/hooks/useCommunityPage";
-import { useCommunityStats, useCommunityOverview } from "@/hooks/community";
+import { useCommunityStats } from "@/hooks/community";
 import type { Post } from "@/types/api/communities";
 
 export default function UserCommunity() {
@@ -60,13 +60,6 @@ export default function UserCommunity() {
 
   // Enhanced community data with new hooks
   const { stats: communityStats } = useCommunityStats();
-  const {
-    isUserMember,
-    joinCommunity,
-    leaveCommunity,
-    isJoining,
-    isLeaving,
-  } = useCommunityOverview(selectedCommunityId);
 
   const breadcrumb = getRoomBreadcrumb();
 

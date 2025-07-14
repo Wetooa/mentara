@@ -9,9 +9,37 @@ import { format } from "date-fns";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+// Backend message interface
+interface BackendMessage {
+  id: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  isRead: boolean;
+  reactions?: Array<{
+    emoji: string;
+    userId: string;
+    count: number;
+  }>;
+  attachment?: {
+    url: string;
+    name: string;
+    size: number;
+  };
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
+  replyToId?: string;
+  isDeleted?: boolean;
+  readReceipts?: Array<{
+    userId: string;
+    readAt: string;
+  }>;
+}
+
 // Helper function to convert backend message to frontend format
 const convertBackendMessageToFrontend = (
-  backendMessage: any,
+  backendMessage: BackendMessage,
   currentUserId: string
 ): Message => {
   return {
@@ -31,10 +59,10 @@ const convertBackendMessageToFrontend = (
           },
         ]
       : undefined,
-    reactions: backendMessage.reactions?.map((reaction: any) => ({
+    reactions: backendMessage.reactions?.map((reaction) => ({
       emoji: reaction.emoji,
-      count: 1,
-      users: [reaction.user.id],
+      count: reaction.count,
+      users: [reaction.userId],
     })),
     replyTo: backendMessage.replyToId,
     isDeleted: backendMessage.isDeleted,
@@ -43,7 +71,7 @@ const convertBackendMessageToFrontend = (
 
 // Helper function to determine message status
 const getMessageStatus = (
-  backendMessage: any,
+  backendMessage: BackendMessage,
   currentUserId: string
 ): MessageStatus => {
   if (backendMessage.senderId !== currentUserId) {
@@ -77,14 +105,31 @@ const getAttachmentType = (
   return "document";
 };
 
+// Backend conversation interface
+interface BackendConversation {
+  id: string;
+  participants: Array<{
+    userId: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl?: string;
+    };
+  }>;
+  lastMessage?: BackendMessage;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Helper function to convert backend conversation to frontend format
 const convertBackendConversationToFrontend = (
-  backendConversation: any,
+  backendConversation: BackendConversation,
   currentUserId: string
 ): { contact: Contact; conversation: Conversation } => {
   // Find the other participant (not the current user)
   const otherParticipant = backendConversation.participants.find(
-    (p: any) => p.userId !== currentUserId
+    (p) => p.userId !== currentUserId
   );
 
   if (!otherParticipant) {
@@ -128,7 +173,6 @@ export const createMessagingApiService = (
 
     // Check if this request is already pending
     if (pendingRequests.has(requestKey)) {
-      console.log(`Deduplicating request to ${url}`);
       return pendingRequests.get(requestKey);
     }
 
@@ -143,9 +187,7 @@ export const createMessagingApiService = (
           ...options.headers,
         };
 
-        console.log(`Making messaging API request to ${url}`, {
-          hasToken: !!token,
-        });
+        // Making messaging API request with authentication
 
         const response = await fetch(url, {
           ...options,
@@ -217,7 +259,7 @@ export const createMessagingApiService = (
         const currentUserId = await getCurrentUserId();
         const conversations = await makeRequest("/messaging/conversations");
 
-        return conversations.map((conv: any) => {
+        return conversations.map((conv: BackendConversation) => {
           const { contact } = convertBackendConversationToFrontend(
             conv,
             currentUserId
@@ -240,7 +282,7 @@ export const createMessagingApiService = (
           `/messaging/conversations/${conversationId}/messages`
         );
 
-        const convertedMessages = messages.map((msg: any) =>
+        const convertedMessages = messages.map((msg: BackendMessage) =>
           convertBackendMessageToFrontend(msg, currentUserId)
         );
 
@@ -349,7 +391,7 @@ export const createMessagingApiService = (
           `/messaging/search?${params.toString()}`
         );
 
-        return messages.map((msg: any) =>
+        return messages.map((msg: BackendMessage) =>
           convertBackendMessageToFrontend(msg, currentUserId)
         );
       } catch (error) {

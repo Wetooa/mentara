@@ -75,7 +75,7 @@ export default function GoalsPage() {
       
       // Navigate to next step
       router.push("/user/onboarding/therapist-preferences");
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to save goals. Please try again.",
@@ -159,7 +159,7 @@ export default function GoalsPage() {
                   <FormItem>
                     <FormLabel>Specific Concerns (Optional)</FormLabel>
                     <FormDescription>
-                      Is there anything specific you'd like to share about your current situation?
+                      Is there anything specific you&apos;d like to share about your current situation?
                     </FormDescription>
                     <FormControl>
                       <Textarea
@@ -208,7 +208,7 @@ export default function GoalsPage() {
                         <FormItem>
                           <FormLabel>Previous Treatment Details</FormLabel>
                           <FormDescription>
-                            Please share what types of treatment you've tried and what worked or didn't work
+                            Please share what types of treatment you&apos;ve tried and what worked or didn&apos;t work
                           </FormDescription>
                           <FormControl>
                             <Textarea
@@ -249,7 +249,7 @@ export default function GoalsPage() {
                       >
                         <div className="font-medium">Low Priority</div>
                         <div className="text-sm text-gray-600">
-                          I'm doing okay, just want to work on some things
+                          I&apos;m doing okay, just want to work on some things
                         </div>
                       </div>
                       <div
@@ -262,7 +262,7 @@ export default function GoalsPage() {
                       >
                         <div className="font-medium">Moderate Priority</div>
                         <div className="text-sm text-gray-600">
-                          I'm struggling but managing day-to-day life
+                          I&apos;m struggling but managing day-to-day life
                         </div>
                       </div>
                       <div
@@ -275,7 +275,7 @@ export default function GoalsPage() {
                       >
                         <div className="font-medium">High Priority</div>
                         <div className="text-sm text-gray-600">
-                          I'm having significant difficulties
+                          I&apos;m having significant difficulties
                         </div>
                       </div>
                       <div
@@ -305,7 +305,7 @@ export default function GoalsPage() {
                   <FormItem>
                     <FormLabel>What would success look like for you?</FormLabel>
                     <FormDescription>
-                      Describe how you'd like to feel or what you'd like to be different after treatment
+                      Describe how you&apos;d like to feel or what you&apos;d like to be different after treatment
                     </FormDescription>
                     <FormControl>
                       <Textarea
@@ -328,7 +328,7 @@ export default function GoalsPage() {
                   <FormItem>
                     <FormLabel>Additional Notes (Optional)</FormLabel>
                     <FormDescription>
-                      Anything else you'd like your therapist to know?
+                      Anything else you&apos;d like your therapist to know?
                     </FormDescription>
                     <FormControl>
                       <Textarea

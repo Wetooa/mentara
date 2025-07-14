@@ -3,6 +3,8 @@ import type { ApiDashboardResponse } from "../types/dashboard";
 
 export interface DashboardService {
   getUserDashboard: () => Promise<ApiDashboardResponse>;
+  getTherapistDashboard: () => Promise<ApiDashboardResponse>;
+  getAdminDashboard: () => Promise<ApiDashboardResponse>;
 }
 
 export const createDashboardService = (

@@ -4,6 +4,7 @@ import React from "react";
 import MessageSidebar from "@/components/messages/MessageSidebar";
 import MessageChatArea from "@/components/messages/MessageChatArea";
 import { useMessaging } from "@/hooks/useMessaging";
+import { Message, MessageAttachment } from "@/types/api/messaging";
 
 export default function MessagesLayout() {
   const {
@@ -19,7 +20,6 @@ export default function MessagesLayout() {
     addReaction,
     removeReaction,
     sendTyping,
-    searchMessages,
     isConnected,
   } = useMessaging();
 
@@ -81,8 +81,8 @@ export default function MessagesLayout() {
 // Wrapper component to integrate messaging actions with MessageChatArea
 interface MessageChatAreaWrapperProps {
   contactId: string;
-  conversation?: { id: string; contactId: string; messages: any[]; lastReadMessageId?: string };
-  onSendMessage: (text: string, attachments?: any[]) => Promise<void>;
+  conversation?: { id: string; contactId: string; messages: Message[]; lastReadMessageId?: string };
+  onSendMessage: (text: string, attachments?: MessageAttachment[]) => Promise<void>;
   onMarkAsRead: (messageId: string) => void;
   onAddReaction: (messageId: string, emoji: string) => void;
   onRemoveReaction: (messageId: string, emoji: string) => void;

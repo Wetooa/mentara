@@ -93,13 +93,3 @@ model Therapist {
   @@index([status])
 }
 
-// model TherapistFiles {
-//     id          String    @id @unique
-//     therapistId String
-//     therapist   Therapist @relation(fields: [therapistId], references: [userId])
-//     fileUrl     String
-//     createdAt   DateTime  @default(now())
-//     updatedAt   DateTime  @updatedAt
-//
-//     @@index([therapistId])
-// }

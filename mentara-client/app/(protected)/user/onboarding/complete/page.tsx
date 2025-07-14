@@ -18,10 +18,51 @@ import {
   Heart
 } from "lucide-react";
 
+interface ProfileData {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelationship: string;
+  medicalHistory?: string;
+  currentMedications?: string;
+  allergies?: string;
+}
+
+interface GoalsData {
+  treatmentGoals: string[];
+  specificConcerns?: string;
+  previousTreatment: boolean;
+  previousTreatmentDetails?: string;
+  urgencyLevel: string;
+  preferredOutcome: string;
+  additionalNotes?: string;
+}
+
+interface PreferencesData {
+  genderPreference: string;
+  agePreference: string;
+  languagePreferences?: string[];
+  treatmentApproaches: string[];
+  sessionFormat: string;
+  sessionFrequency: string;
+  budgetRange: string;
+  locationPreference?: string;
+  availabilityPreference?: string[];
+  specialConsiderations?: string;
+}
+
 interface OnboardingData {
-  profile: any;
-  goals: any;
-  preferences: any;
+  profile: ProfileData;
+  goals: GoalsData;
+  preferences: PreferencesData;
 }
 
 export default function OnboardingCompletePage() {
@@ -140,7 +181,7 @@ export default function OnboardingCompletePage() {
           Welcome to Mentara! 🎉
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Your profile is complete! We're ready to help you find the perfect therapist 
+          Your profile is complete! We&apos;re ready to help you find the perfect therapist 
           and begin your mental health journey.
         </p>
       </div>
@@ -244,10 +285,10 @@ export default function OnboardingCompletePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
-            What's Next?
+            What&apos;s Next?
           </CardTitle>
           <CardDescription>
-            Here's what happens after you complete your onboarding
+            Here&apos;s what happens after you complete your onboarding
           </CardDescription>
         </CardHeader>
         <CardContent>

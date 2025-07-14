@@ -1,0 +1,123 @@
+import {
+  Controller,
+  Get,
+  Put,
+  UseGuards,
+  HttpException,
+  HttpStatus,
+  Logger,
+  Query,
+  Param,
+  Body,
+} from '@nestjs/common';
+import { AdminService } from '../admin.service';
+import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { AdminAuthGuard } from '../../guards/admin-auth.guard';
+import { AdminOnly } from '../../decorators/admin-only.decorator';
+import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+
+@Controller('admin/users')
+@UseGuards(ClerkAuthGuard, AdminAuthGuard)
+export class AdminUserController {
+  private readonly logger = new Logger(AdminUserController.name);
+
+  constructor(private readonly adminService: AdminService) {}
+
+  @Get()
+  @AdminOnly()
+  async getAllUsers(
+    @CurrentUserId() currentUserId: string,
+    @Query('role') role?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    try {
+      this.logger.log(`Admin ${currentUserId} retrieving users`);
+      const pageNum = page ? parseInt(page) : 1;
+      const limitNum = limit ? parseInt(limit) : 10;
+
+      return await this.adminService.getAllUsers({
+        role,
+        page: pageNum,
+        limit: limitNum,
+        search,
+      });
+    } catch (error) {
+      this.logger.error('Failed to retrieve users:', error);
+      throw new HttpException(
+        'Failed to retrieve users',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get(':id')
+  @AdminOnly()
+  async getUser(
+    @CurrentUserId() currentUserId: string,
+    @Param('id') userId: string,
+  ) {
+    try {
+      this.logger.log(`Admin ${currentUserId} retrieving user ${userId}`);
+      const user = await this.adminService.getUser(userId);
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      this.logger.error('Failed to retrieve user:', error);
+      throw new HttpException(
+        'Failed to retrieve user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put(':id/suspend')
+  @AdminOnly()
+  async suspendUser(
+    @CurrentUserId() currentUserId: string,
+    @Param('id') userId: string,
+    @Body() suspensionData: { reason: string; duration?: number },
+  ) {
+    try {
+      this.logger.log(`Admin ${currentUserId} suspending user ${userId}`);
+      return await this.adminService.suspendUser(
+        userId,
+        currentUserId,
+        suspensionData.reason,
+        suspensionData.duration,
+      );
+    } catch (error) {
+      this.logger.error('Failed to suspend user:', error);
+      throw new HttpException(
+        'Failed to suspend user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put(':id/unsuspend')
+  @AdminOnly()
+  async unsuspendUser(
+    @CurrentUserId() currentUserId: string,
+    @Param('id') userId: string,
+  ) {
+    try {
+      this.logger.log(`Admin ${currentUserId} unsuspending user ${userId}`);
+      return await this.adminService.unsuspendUser(userId, currentUserId);
+    } catch (error) {
+      this.logger.error('Failed to unsuspend user:', error);
+      throw new HttpException(
+        'Failed to unsuspend user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+}

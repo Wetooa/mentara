@@ -13,22 +13,20 @@ import {
   Phone,
   MessageSquare,
   User,
-  Plus,
   AlertCircle,
-  CheckCircle,
 } from "lucide-react";
 import BookingCalendar from "@/components/booking/BookingCalendar";
 import BookingModal from "@/components/booking/BookingModal";
 import { useBooking, useMeetings } from "@/hooks/useBooking";
 import { useTherapist } from "@/hooks/useTherapist";
-import { Meeting, MeetingStatus, MeetingType } from "@/types/booking";
+import { MeetingStatus, MeetingType } from "@/types/booking";
 import { TimeSlot } from "@/hooks/useAvailableSlots";
 import { toast } from "sonner";
 
 export default function BookingPage() {
   const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Get user's assigned therapists
@@ -49,7 +47,7 @@ export default function BookingPage() {
     setShowBookingModal(true);
   };
 
-  const handleBookingSuccess = (meeting: Meeting) => {
+  const handleBookingSuccess = () => {
     toast.success("Session booked successfully!");
     setShowBookingModal(false);
     setSelectedTimeSlot(null);

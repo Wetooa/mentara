@@ -1,0 +1,263 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TherapistCredentialsSchema = exports.WorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = void 0;
+const zod_1 = require("zod");
+// Basic Therapist Information Schema
+exports.TherapistRecommendationSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1, 'Therapist ID is required'),
+    firstName: zod_1.z.string().min(1, 'First name is required'),
+    lastName: zod_1.z.string().min(1, 'Last name is required'),
+    title: zod_1.z.string().min(1, 'Title is required'),
+    specialties: zod_1.z.array(zod_1.z.string()).min(1, 'At least one specialty is required'),
+    hourlyRate: zod_1.z.number().min(0, 'Hourly rate must be positive'),
+    experience: zod_1.z.number().min(0, 'Experience must be positive'),
+    province: zod_1.z.string().min(1, 'Province is required'),
+    isActive: zod_1.z.boolean(),
+    rating: zod_1.z.number().min(0).max(5).optional(),
+    totalReviews: zod_1.z.number().min(0).optional(),
+    bio: zod_1.z.string().optional(),
+    profileImage: zod_1.z.string().url().optional(),
+    availability: zod_1.z.object({
+        timezone: zod_1.z.string().min(1, 'Timezone is required'),
+        weeklySchedule: zod_1.z.record(zod_1.z.string(), zod_1.z.array(zod_1.z.object({
+            start: zod_1.z.string().min(1, 'Start time is required'),
+            end: zod_1.z.string().min(1, 'End time is required')
+        }))),
+        exceptions: zod_1.z.array(zod_1.z.object({
+            date: zod_1.z.string().datetime(),
+            isAvailable: zod_1.z.boolean(),
+            timeSlots: zod_1.z.array(zod_1.z.object({
+                start: zod_1.z.string().min(1, 'Start time is required'),
+                end: zod_1.z.string().min(1, 'End time is required')
+            })).optional()
+        })).optional()
+    }).optional(),
+    matchScore: zod_1.z.number().min(0).max(100).optional()
+});
+// Match Criteria Schema
+exports.MatchCriteriaSchema = zod_1.z.object({
+    primaryConditions: zod_1.z.array(zod_1.z.string()),
+    secondaryConditions: zod_1.z.array(zod_1.z.string()),
+    severityLevels: zod_1.z.record(zod_1.z.string(), zod_1.z.string())
+});
+// Therapist Search Parameters Schema
+exports.TherapistSearchParamsSchema = zod_1.z.object({
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    includeInactive: zod_1.z.boolean().optional(),
+    province: zod_1.z.string().optional(),
+    maxHourlyRate: zod_1.z.number().min(0).optional(),
+    specialties: zod_1.z.array(zod_1.z.string()).optional(),
+    minRating: zod_1.z.number().min(0).max(5).optional(),
+    offset: zod_1.z.number().min(0).optional()
+});
+// Therapist Recommendation Response Schema
+exports.TherapistRecommendationResponseSchema = zod_1.z.object({
+    therapists: zod_1.z.array(exports.TherapistRecommendationSchema),
+    totalCount: zod_1.z.number().min(0),
+    userConditions: zod_1.z.array(zod_1.z.string()),
+    matchCriteria: exports.MatchCriteriaSchema,
+    page: zod_1.z.number().min(1),
+    pageSize: zod_1.z.number().min(1)
+});
+// Therapist Dashboard Data Schema
+exports.TherapistDashboardDataSchema = zod_1.z.object({
+    therapist: zod_1.z.object({
+        id: zod_1.z.string().min(1),
+        name: zod_1.z.string().min(1),
+        avatar: zod_1.z.string().url()
+    }),
+    stats: zod_1.z.object({
+        activePatients: zod_1.z.number().min(0),
+        rescheduled: zod_1.z.number().min(0),
+        cancelled: zod_1.z.number().min(0),
+        income: zod_1.z.number().min(0),
+        patientStats: zod_1.z.object({
+            total: zod_1.z.number().min(0),
+            percentage: zod_1.z.number().min(0).max(100),
+            months: zod_1.z.number().min(0),
+            chartData: zod_1.z.array(zod_1.z.object({
+                month: zod_1.z.string().min(1),
+                value: zod_1.z.number().min(0)
+            }))
+        })
+    }),
+    upcomingAppointments: zod_1.z.array(zod_1.z.object({
+        id: zod_1.z.string().min(1),
+        patientId: zod_1.z.string().min(1),
+        patientName: zod_1.z.string().min(1),
+        time: zod_1.z.string().min(1),
+        date: zod_1.z.string().datetime(),
+        type: zod_1.z.string().min(1),
+        status: zod_1.z.enum(['scheduled', 'confirmed', 'cancelled', 'completed'])
+    }))
+});
+// Patient Data Schema
+exports.PatientDataSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1, 'Patient ID is required'),
+    name: zod_1.z.string().min(1, 'Name is required'),
+    fullName: zod_1.z.string().min(1, 'Full name is required'),
+    avatar: zod_1.z.string().url(),
+    email: zod_1.z.string().email('Invalid email format'),
+    phone: zod_1.z.string().min(1, 'Phone is required'),
+    age: zod_1.z.number().min(0).max(150),
+    diagnosis: zod_1.z.string().min(1, 'Diagnosis is required'),
+    treatmentPlan: zod_1.z.string().min(1, 'Treatment plan is required'),
+    currentSession: zod_1.z.number().min(0),
+    totalSessions: zod_1.z.number().min(0),
+    sessions: zod_1.z.array(zod_1.z.object({
+        id: zod_1.z.string().min(1),
+        date: zod_1.z.string().datetime(),
+        duration: zod_1.z.number().min(0),
+        notes: zod_1.z.string(),
+        type: zod_1.z.enum(['initial', 'follow-up', 'crisis', 'final']),
+        status: zod_1.z.enum(['scheduled', 'completed', 'cancelled', 'no-show'])
+    }))
+});
+// Therapist Application Schemas
+exports.PersonalInfoSchema = zod_1.z.object({
+    firstName: zod_1.z.string().min(1, 'First name is required'),
+    lastName: zod_1.z.string().min(1, 'Last name is required'),
+    middleName: zod_1.z.string().optional(),
+    email: zod_1.z.string().email('Invalid email format'),
+    phone: zod_1.z.string().min(1, 'Phone is required'),
+    birthDate: zod_1.z.string().datetime(),
+    address: zod_1.z.string().min(1, 'Address is required'),
+    city: zod_1.z.string().min(1, 'City is required'),
+    state: zod_1.z.string().min(1, 'State is required'),
+    zipCode: zod_1.z.string().min(1, 'Zip code is required'),
+    country: zod_1.z.string().min(1, 'Country is required')
+});
+exports.EducationSchema = zod_1.z.object({
+    degree: zod_1.z.string().min(1, 'Degree is required'),
+    institution: zod_1.z.string().min(1, 'Institution is required'),
+    graduationYear: zod_1.z.number().min(1900).max(new Date().getFullYear())
+});
+exports.CertificationSchema = zod_1.z.object({
+    name: zod_1.z.string().min(1, 'Certification name is required'),
+    issuingOrganization: zod_1.z.string().min(1, 'Issuing organization is required'),
+    issueDate: zod_1.z.string().datetime(),
+    expirationDate: zod_1.z.string().datetime().optional()
+});
+exports.ProfessionalInfoSchema = zod_1.z.object({
+    licenseNumber: zod_1.z.string().min(1, 'License number is required'),
+    licenseState: zod_1.z.string().min(1, 'License state is required'),
+    licenseExpiration: zod_1.z.string().datetime(),
+    specialties: zod_1.z.array(zod_1.z.string()).min(1, 'At least one specialty is required'),
+    yearsOfExperience: zod_1.z.number().min(0, 'Years of experience must be positive'),
+    education: zod_1.z.array(exports.EducationSchema).min(1, 'At least one education record is required'),
+    certifications: zod_1.z.array(exports.CertificationSchema),
+    languages: zod_1.z.array(zod_1.z.string()).min(1, 'At least one language is required'),
+    bio: zod_1.z.string().min(10, 'Bio must be at least 10 characters'),
+    approach: zod_1.z.string().min(10, 'Approach must be at least 10 characters')
+});
+exports.SessionFormatSchema = zod_1.z.enum(['in-person', 'video', 'phone']);
+exports.PracticeInfoSchema = zod_1.z.object({
+    sessionFormats: zod_1.z.array(exports.SessionFormatSchema).min(1, 'At least one session format is required'),
+    availability: zod_1.z.object({
+        timezone: zod_1.z.string().min(1, 'Timezone is required'),
+        schedule: zod_1.z.record(zod_1.z.string(), zod_1.z.object({
+            isAvailable: zod_1.z.boolean(),
+            startTime: zod_1.z.string().optional(),
+            endTime: zod_1.z.string().optional()
+        }))
+    }),
+    pricing: zod_1.z.object({
+        sessionFee: zod_1.z.number().min(0, 'Session fee must be positive'),
+        currency: zod_1.z.string().min(1, 'Currency is required'),
+        acceptsInsurance: zod_1.z.boolean(),
+        insuranceProviders: zod_1.z.array(zod_1.z.string()).optional()
+    })
+});
+exports.TherapistApplicationDtoSchema = zod_1.z.object({
+    personalInfo: exports.PersonalInfoSchema,
+    professionalInfo: exports.ProfessionalInfoSchema,
+    practiceInfo: exports.PracticeInfoSchema
+});
+// Application Status Schema
+exports.ApplicationStatusSchema = zod_1.z.enum([
+    'pending',
+    'under_review',
+    'approved',
+    'rejected',
+    'additional_info_required'
+]);
+// Document Schema
+exports.ApplicationDocumentSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1),
+    filename: zod_1.z.string().min(1),
+    originalName: zod_1.z.string().min(1),
+    url: zod_1.z.string().url(),
+    fileType: zod_1.z.enum(['resume', 'license', 'certification', 'transcript', 'other']),
+    uploadedAt: zod_1.z.string().datetime()
+});
+// Full Therapist Application Schema
+exports.TherapistApplicationSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1),
+    applicantId: zod_1.z.string().min(1),
+    applicant: zod_1.z.object({
+        id: zod_1.z.string().min(1),
+        firstName: zod_1.z.string().min(1),
+        lastName: zod_1.z.string().min(1),
+        email: zod_1.z.string().email()
+    }),
+    personalInfo: exports.PersonalInfoSchema,
+    professionalInfo: exports.ProfessionalInfoSchema,
+    practiceInfo: exports.PracticeInfoSchema,
+    status: exports.ApplicationStatusSchema,
+    submittedAt: zod_1.z.string().datetime(),
+    reviewedAt: zod_1.z.string().datetime().optional(),
+    reviewedBy: zod_1.z.object({
+        id: zod_1.z.string().min(1),
+        firstName: zod_1.z.string().min(1),
+        lastName: zod_1.z.string().min(1)
+    }).optional(),
+    adminNotes: zod_1.z.string().optional(),
+    rejectionReason: zod_1.z.string().optional(),
+    documents: zod_1.z.array(exports.ApplicationDocumentSchema),
+    createdAt: zod_1.z.string().datetime(),
+    updatedAt: zod_1.z.string().datetime()
+});
+// Application Status Update Schema
+exports.ApplicationStatusUpdateDtoSchema = zod_1.z.object({
+    status: exports.ApplicationStatusSchema,
+    adminNotes: zod_1.z.string().optional(),
+    rejectionReason: zod_1.z.string().optional()
+});
+// Create and Update Application Request Schemas
+exports.CreateApplicationRequestSchema = exports.TherapistApplicationDtoSchema;
+exports.UpdateApplicationRequestSchema = exports.TherapistApplicationDtoSchema.partial();
+// Application List Parameters Schema
+exports.ApplicationListParamsSchema = zod_1.z.object({
+    status: exports.ApplicationStatusSchema.optional(),
+    page: zod_1.z.number().min(1).optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    sortBy: zod_1.z.enum(['submittedAt', 'status', 'lastName']).optional(),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
+});
+// Worksheet Assignment Schema
+exports.WorksheetAssignmentSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1),
+    worksheetId: zod_1.z.string().min(1),
+    patientId: zod_1.z.string().min(1),
+    therapistId: zod_1.z.string().min(1),
+    assignedAt: zod_1.z.string().datetime(),
+    dueDate: zod_1.z.string().datetime().optional(),
+    status: zod_1.z.enum(['assigned', 'in_progress', 'completed', 'overdue']),
+    instructions: zod_1.z.string().optional(),
+    feedback: zod_1.z.string().optional()
+});
+// Therapist Credentials Schema
+exports.TherapistCredentialsSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1),
+    therapistId: zod_1.z.string().min(1),
+    licenseNumber: zod_1.z.string().min(1),
+    licenseType: zod_1.z.string().min(1),
+    issuingState: zod_1.z.string().min(1),
+    issueDate: zod_1.z.string().datetime(),
+    expirationDate: zod_1.z.string().datetime(),
+    isActive: zod_1.z.boolean(),
+    isVerified: zod_1.z.boolean(),
+    verifiedAt: zod_1.z.string().datetime().optional(),
+    verifiedBy: zod_1.z.string().optional()
+});
+//# sourceMappingURL=therapist.js.map

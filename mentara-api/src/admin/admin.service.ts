@@ -279,9 +279,9 @@ export class AdminService {
           data: {
             userId: adminId,
             action: 'APPROVE_THERAPIST_APPLICATION',
-            entityType: 'therapist',
+            entity: 'therapist',
             entityId: applicationId,
-            details: {
+            metadata: {
               applicationId,
               notes,
               timestamp: new Date().toISOString(),
@@ -320,9 +320,9 @@ export class AdminService {
           data: {
             userId: adminId,
             action: 'REJECT_THERAPIST_APPLICATION',
-            entityType: 'therapist',
+            entity: 'therapist',
             entityId: applicationId,
-            details: {
+            metadata: {
               applicationId,
               reason,
               notes,
@@ -442,9 +442,9 @@ export class AdminService {
           data: {
             userId: adminId,
             action: 'SUSPEND_USER',
-            entityType: 'user',
+            entity: 'user',
             entityId: userId,
-            details: {
+            metadata: {
               userId,
               reason,
               duration,
@@ -480,9 +480,9 @@ export class AdminService {
           data: {
             userId: adminId,
             action: 'UNSUSPEND_USER',
-            entityType: 'user',
+            entity: 'user',
             entityId: userId,
-            details: {
+            metadata: {
               userId,
               timestamp: new Date().toISOString(),
             },
@@ -639,9 +639,18 @@ export class AdminService {
               lastName: true,
             },
           },
-          community: {
+          room: {
             select: {
               name: true,
+              roomGroup: {
+                select: {
+                  community: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -722,9 +731,9 @@ export class AdminService {
             userId: adminId,
             action:
               contentType === 'post' ? 'MODERATE_POST' : 'MODERATE_COMMENT',
-            entityType: contentType,
+            entity: contentType,
             entityId: contentId,
-            details: {
+            metadata: {
               contentId,
               contentType,
               moderationAction: action,

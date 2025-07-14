@@ -415,12 +415,100 @@ export class MessagingGateway
     }
   }
 
-  private sendPushNotifications(conversationId: string, message: any) {
-    // TODO: Implement push notifications for offline users
-    // This could integrate with FCM, APNS, or other push notification services
-    this.logger.log(
-      `Push notification would be sent for message ${message.id} in conversation ${conversationId}`,
-    );
+  private async sendPushNotifications(conversationId: string, message: any) {
+    try {
+      // Get all participants in the conversation except the sender
+      const conversation = await this.prisma.conversation.findUnique({
+        where: { id: conversationId },
+        include: {
+          participants: {
+            include: {
+              user: {
+                include: {
+                  notificationSettings: true,
+                  pushSubscriptions: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!conversation) {
+        this.logger.warn(`Conversation ${conversationId} not found for push notifications`);
+        return;
+      }
+
+      // Filter participants who should receive push notifications
+      const eligibleParticipants = conversation.participants.filter(participant => {
+        // Don't send to message sender
+        if (participant.userId === message.senderId) {
+          return false;
+        }
+
+        // Check if user has push notifications enabled for messages
+        const settings = participant.user.notificationSettings;
+        if (!settings?.pushNewMessages) {
+          return false;
+        }
+
+        // Check if user has active push subscriptions
+        return participant.user.pushSubscriptions && participant.user.pushSubscriptions.length > 0;
+      });
+
+      if (eligibleParticipants.length === 0) {
+        this.logger.log(`No eligible participants for push notifications in conversation ${conversationId}`);
+        return;
+      }
+
+      // Prepare notification payload
+      const notificationPayload = {
+        title: 'New Message',
+        body: message.content.length > 50 
+          ? `${message.content.substring(0, 50)}...` 
+          : message.content,
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        data: {
+          conversationId: conversationId,
+          messageId: message.id,
+          senderId: message.senderId,
+          url: `/user/messages?conversation=${conversationId}`
+        }
+      };
+
+      // Send push notifications to all eligible participants
+      const pushPromises = eligibleParticipants.flatMap(participant => 
+        participant.user.pushSubscriptions.map(async (subscription: any) => {
+          try {
+            await this.pushNotificationService.sendPushNotification(
+              subscription.endpoint,
+              subscription.p256dhKey,
+              subscription.authKey,
+              notificationPayload
+            );
+
+            this.logger.log(`Push notification sent to user ${participant.userId} for message ${message.id}`);
+          } catch (error) {
+            this.logger.error(`Failed to send push notification to user ${participant.userId}:`, error);
+            
+            // If subscription is invalid, remove it
+            if (error.message?.includes('invalid') || error.message?.includes('expired')) {
+              await this.prisma.pushSubscription.delete({
+                where: { id: subscription.id }
+              });
+              this.logger.log(`Removed invalid push subscription for user ${participant.userId}`);
+            }
+          }
+        })
+      );
+
+      await Promise.allSettled(pushPromises);
+
+      this.logger.log(`Push notification processing completed for conversation ${conversationId}`);
+    } catch (error) {
+      this.logger.error(`Failed to send push notifications for conversation ${conversationId}:`, error);
+    }
   }
 
   // Clean up old typing indicators (call this periodically)

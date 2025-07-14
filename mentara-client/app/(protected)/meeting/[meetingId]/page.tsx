@@ -61,7 +61,7 @@ export default function MeetingPage() {
       await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       setHasPermission(true);
       toast.success("Media permissions granted");
-    } catch (error) {
+    } catch {
       toast.error("Failed to grant media permissions");
     }
   };
@@ -90,7 +90,7 @@ export default function MeetingPage() {
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
             <h2 className="text-xl font-semibold mb-2">Meeting Not Found</h2>
             <p className="text-muted-foreground mb-4">
-              This meeting doesn't exist or you don't have permission to join it.
+              This meeting doesn&apos;t exist or you don&apos;t have permission to join it.
             </p>
             <Button onClick={() => router.push("/user")}>
               Return to Dashboard
@@ -134,7 +134,7 @@ export default function MeetingPage() {
             <Alert className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Click "Allow" when your browser asks for permission, or grant permissions manually in your browser settings.
+                Click &quot;Allow&quot; when your browser asks for permission, or grant permissions manually in your browser settings.
               </AlertDescription>
             </Alert>
             <div className="space-y-2">

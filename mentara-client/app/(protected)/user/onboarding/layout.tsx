@@ -43,7 +43,7 @@ export default function OnboardingLayout({
               Welcome to Mentara
             </h1>
             <p className="text-sm text-gray-600">
-              Let's get you set up for your mental health journey
+              Let&apos;s get you set up for your mental health journey
             </p>
           </div>
           

@@ -91,7 +91,7 @@ export class TherapistRecommendationService {
       for (const therapist of therapists) {
         try {
           const score = await this.advancedMatching.calculateAdvancedMatch(
-            user,
+            user as any, // Safe because we verified preAssessment exists above
             therapist,
           );
           therapistScores.push(score);
@@ -205,8 +205,12 @@ export class TherapistRecommendationService {
       throw new NotFoundException('Client or therapist not found');
     }
 
+    if (!client.preAssessment) {
+      throw new NotFoundException('No pre-assessment found for client');
+    }
+
     const compatibility = await this.compatibilityAnalysis.analyzeCompatibility(
-      client,
+      client as any, // Safe because we verified preAssessment exists above
       therapist,
     );
 

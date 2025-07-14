@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
@@ -10,8 +9,14 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { ValidatedBody } from 'src/common/decorators/validate-body.decorator';
+import { 
+  RegisterClientDtoSchema, 
+  RegisterTherapistDtoSchema,
+  type RegisterClientDto,
+  type RegisterTherapistDto 
+} from 'mentara-commons';
 import { AuthService } from './auth.service';
-import { ClientCreateDto, TherapistCreateDto } from '../../schema/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +28,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async registerClient(
     @CurrentUserId() id: string,
-    @Body() registerUserDto: ClientCreateDto,
+    @ValidatedBody(RegisterClientDtoSchema) registerUserDto: RegisterClientDto,
   ) {
     return await this.authService.registerClient(id, registerUserDto);
   }
@@ -34,7 +39,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async registerTherapist(
     @CurrentUserId() id: string,
-    @Body() registerTherapistDto: TherapistCreateDto,
+    @ValidatedBody(RegisterTherapistDtoSchema) registerTherapistDto: RegisterTherapistDto,
   ) {
     return await this.authService.registerTherapist(id, registerTherapistDto);
   }

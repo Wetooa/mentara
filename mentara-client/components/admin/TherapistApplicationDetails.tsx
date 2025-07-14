@@ -10,16 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
-  useTherapistApplication,
   useUpdateTherapistApplicationStatus,
 } from "@/hooks/useTherapistApplications";
 import type { TherapistApplication } from "@/lib/api/services/therapists";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,

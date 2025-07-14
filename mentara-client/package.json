@@ -16,6 +16,7 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
+    "mentara-commons": "file:../mentara-commons",
     "@aws-sdk/client-s3": "^3.802.0",
     "@clerk/backend": "^2.2.0",
     "@clerk/nextjs": "^6.12.12",
@@ -94,10 +95,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/simple-peer": "^9.11.8",
+    "babel-jest": "^30.0.4",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "jest": "^30.0.3",
     "jest-environment-jsdom": "^30.0.2",
+    "jest-watch-typeahead": "^3.0.1",
     "prisma": "^6.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"

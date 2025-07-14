@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
 import { Task } from "@/components/worksheets/types";
-import { createWorksheetsApi } from "@/lib/api/worksheets";
 import { useAuth } from "@clerk/nextjs";
 
 

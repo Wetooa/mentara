@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import { ILLNESS_COMMUNITIES } from './illness-communities.config';
+import { ILLNESS_COMMUNITIES } from '../config/community-configs';
 
 interface PreAssessmentScores {
   [key: string]: number;
@@ -85,7 +85,7 @@ export class CommunityAssignmentService {
     const assignedCommunities: string[] = [];
 
     // Iterate through questionnaire results and assign communities
-    for (const [questionnaire, score] of Object.entries(scores)) {
+    for (const [questionnaire] of Object.entries(scores)) {
       const severity = severityLevels[questionnaire];
       const communitySlug = this.QUESTIONNAIRE_TO_COMMUNITY_MAP[questionnaire];
 
@@ -211,7 +211,7 @@ export class CommunityAssignmentService {
     const severityLevels = userAssessment.severityLevels as SeverityLevels;
     const recommendedCommunities: string[] = [];
 
-    for (const [questionnaire, score] of Object.entries(scores)) {
+    for (const [questionnaire] of Object.entries(scores)) {
       const severity = severityLevels[questionnaire];
       const communitySlug = this.QUESTIONNAIRE_TO_COMMUNITY_MAP[questionnaire];
 

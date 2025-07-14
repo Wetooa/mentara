@@ -10,10 +10,16 @@ import {
 // Auth service factory
 export const createAuthService = (client: AxiosInstance) => ({
   /**
-   * Register a new user with the backend
+   * Register a new client user with the backend
    */
-  register: (userData: RegisterUserRequest): Promise<AuthUser> =>
-    client.post("/auth/register", userData),
+  registerClient: (userData: RegisterUserRequest): Promise<AuthUser> =>
+    client.post("/auth/register/client", userData),
+
+  /**
+   * Register a new therapist user with the backend
+   */
+  registerTherapist: (userData: RegisterUserRequest): Promise<AuthUser> =>
+    client.post("/auth/register/therapist", userData),
 
   /**
    * Get current authenticated user data
@@ -21,10 +27,15 @@ export const createAuthService = (client: AxiosInstance) => ({
   getCurrentUser: (): Promise<AuthUser> => client.get("/auth/me"),
 
   /**
-   * Check if current user is signing in for the first time
+   * Get all users (admin only)
    */
-  checkFirstSignIn: (): Promise<FirstSignInResponse> =>
-    client.get("/auth/is-first-signin"),
+  getAllUsers: (): Promise<AuthUser[]> => client.get("/auth/users"),
+
+  /**
+   * Force logout current user
+   */
+  forceLogout: (): Promise<{ success: boolean }> => 
+    client.post("/auth/force-logout"),
 
   /**
    * Submit pre-assessment data
@@ -39,11 +50,6 @@ export const createAuthService = (client: AxiosInstance) => ({
    */
   assignCommunities: (): Promise<CommunityAssignmentResponse> =>
     client.post("/communities/assign-user"),
-
-  /**
-   * Check if user has admin privileges
-   */
-  checkAdmin: (): Promise<{ isAdmin: boolean }> => client.post("/auth/admin"),
-});
+});;
 
 export type AuthService = ReturnType<typeof createAuthService>;

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { ContentSearch } from "@/components/admin/ContentSearch";
 import {
   Card,
   CardContent,
@@ -36,6 +35,7 @@ import {
   MessageSquare,
   User,
 } from "lucide-react";
+import { Post, Comment, Community } from "@/types/api/communities";
 
 // Mock data for search results
 const mockPosts = [
@@ -171,7 +171,7 @@ export default function ContentSearchPage() {
   };
 
   // Filter content based on search and filters
-  const filterContent = (items: any[], type: string) => {
+  const filterContent = (items: Array<Post | Comment | Community>, type: string) => {
     return items.filter((item) => {
       // Search term filter
       const searchLower = searchTerm.toLowerCase();

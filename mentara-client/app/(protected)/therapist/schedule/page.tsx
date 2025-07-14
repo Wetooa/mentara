@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+// Alert components not used in this page
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Calendar,
@@ -14,8 +14,7 @@ import {
   Phone,
   MessageSquare,
   User,
-  Plus,
-  AlertCircle,
+
   Settings,
   Eye,
   Edit,
@@ -24,7 +23,7 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useBooking, useMeetings } from "@/hooks/useBooking";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { Meeting, MeetingStatus, MeetingType } from "@/types/booking";
+import { MeetingStatus, MeetingType } from "@/types/booking";
 import { toast } from "sonner";
 
 export default function TherapistSchedulePage() {
@@ -42,10 +41,7 @@ export default function TherapistSchedulePage() {
 
   // Get available slots for the selected date (to show availability)
   const {
-    slots,
     timeSlots,
-    isLoading: slotsLoading,
-    hasSlots,
   } = useAvailableSlots("current-therapist", dateString); // In real app, get current therapist ID
 
   // Get all upcoming meetings
@@ -60,7 +56,7 @@ export default function TherapistSchedulePage() {
     try {
       await updateMeeting(meetingId, { status });
       toast.success("Meeting status updated");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update meeting status");
     }
   };
@@ -70,7 +66,7 @@ export default function TherapistSchedulePage() {
       try {
         await cancelMeeting(meetingId);
         toast.success("Meeting cancelled");
-      } catch (error) {
+      } catch {
         toast.error("Failed to cancel meeting");
       }
     }
@@ -135,12 +131,12 @@ export default function TherapistSchedulePage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="schedule">Today's Schedule</TabsTrigger>
+          <TabsTrigger value="schedule">Today&apos;s Schedule</TabsTrigger>
           <TabsTrigger value="calendar">Calendar View</TabsTrigger>
           <TabsTrigger value="upcoming">All Upcoming</TabsTrigger>
         </TabsList>
 
-        {/* Today's Schedule Tab */}
+        {/* Today&apos;s Schedule Tab */}
         <TabsContent value="schedule" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Date Selector */}
@@ -166,7 +162,7 @@ export default function TherapistSchedulePage() {
               {/* Quick Stats */}
               <Card className="mt-4">
                 <CardHeader>
-                  <CardTitle>Today's Overview</CardTitle>
+                  <CardTitle>Today&apos;s Overview</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between">

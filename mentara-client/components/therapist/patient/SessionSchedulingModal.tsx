@@ -33,7 +33,7 @@ import {
   User
 } from "lucide-react";
 import { Patient } from "@/types/patient";
-import { patientsApi } from "@/lib/api/patients";
+import { useApi } from "@/lib/api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SessionSchedulingModalProps {

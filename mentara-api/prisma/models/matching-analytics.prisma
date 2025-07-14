@@ -172,6 +172,3 @@ model AlgorithmPerformance {
     @@index([createdAt])
 }
 
-// Note: New relations for Client and Therapist models need to be added to their respective files:
-// - Add to user.prisma (Client model): matchHistory, clientCompatibility, recommendationFeedback
-// - Add to therapist.prisma (Therapist model): matchHistory, clientCompatibility, recommendationFeedback

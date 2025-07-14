@@ -29,7 +29,7 @@ export const getNamespacedSocket = (namespace: string): Socket => {
 };
 
 // Named export for convenience
-export const socket = getNamespacedSocket;
+export const createSocket = getNamespacedSocket;
 
 export const connectSocket = (): Promise<Socket> => {
   return new Promise((resolve, reject) => {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import TherapistCard from "./TherapistCard";
 import TherapistProfileModal from "../TherapistProfileModal";
 import BookingModal from "../../booking/BookingModal";
@@ -47,6 +48,7 @@ export default function TherapistListing({
   filter,
   advancedFilters,
 }: TherapistListingProps) {
+  const router = useRouter();
   const [selectedTherapist, setSelectedTherapist] = useState<TherapistCardData | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -104,9 +106,8 @@ export default function TherapistListing({
   };
 
   const handleMessage = (therapistId: string) => {
-    // TODO: Implement messaging functionality
-    console.log("Messaging therapist:", therapistId);
-    toast.info("Messaging feature coming soon!");
+    router.push(`/user/messages?contact=${therapistId}`);
+    toast.success("Opening messages...");
   };
 
   // Loading state

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger, Injectable } from '@nestjs/common';
-import { WebsocketAuthService } from '../messaging/services/websocket-auth.service';
+import { WebSocketAuthService } from '../messaging/services/websocket-auth.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
 
@@ -72,7 +72,7 @@ export class MeetingsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(MeetingsGateway.name);
   private meetings = new Map<string, MeetingRoom>();
@@ -80,7 +80,7 @@ export class MeetingsGateway
   private socketToUser = new Map<string, string>();
 
   constructor(
-    private readonly websocketAuth: WebsocketAuthService,
+    private readonly websocketAuth: WebSocketAuthService,
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
   ) {}
@@ -91,19 +91,19 @@ export class MeetingsGateway
 
   async handleConnection(client: Socket) {
     try {
-      const user = await this.websocketAuth.validateConnection(client);
+      const user = await this.websocketAuth.authenticateSocket(client);
       if (!user) {
         client.disconnect();
         return;
       }
 
-      this.userToSocket.set(user.id, client.id);
-      this.socketToUser.set(client.id, user.id);
+      this.userToSocket.set(user.userId, client.id);
+      this.socketToUser.set(client.id, user.userId);
 
-      this.logger.log(`User ${user.id} connected to meetings gateway`);
+      this.logger.log(`User ${user.userId} connected to meetings gateway`);
 
       // Send user their active meetings
-      await this.sendActiveMeetings(client, user.id);
+      await this.sendActiveMeetings(client, user.userId);
     } catch (error) {
       this.logger.error('Connection failed:', error);
       client.disconnect();
@@ -345,6 +345,7 @@ export class MeetingsGateway
     if (!meetingRoom || !meetingRoom.participants.has(userId)) return;
 
     const participant = meetingRoom.participants.get(userId);
+    if (!participant) return;
 
     // Broadcast message to all participants
     this.server.to(data.meetingId).emit('chat-message', {

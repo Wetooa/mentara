@@ -4,7 +4,6 @@ import {
   Post,
   Put,
   Delete,
-  Body,
   Param,
   Query,
   UseGuards,
@@ -14,14 +13,21 @@ import {
 import { MessagingService } from './messaging.service';
 import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
+import { ValidatedBody, ValidatedQuery } from '../common/decorators/validate-body.decorator';
 import {
-  CreateConversationDto,
-  SendMessageDto,
-  UpdateMessageDto,
-  AddReactionDto,
-  BlockUserDto,
-  SearchMessagesDto,
-} from './dto/messaging.dto';
+  CreateConversationDtoSchema,
+  SendMessageDtoSchema,
+  UpdateMessageDtoSchema,
+  AddReactionDtoSchema,
+  BlockUserDtoSchema,
+  SearchMessagesDtoSchema,
+  type CreateConversationDto,
+  type SendMessageDto,
+  type UpdateMessageDto,
+  type AddReactionDto,
+  type BlockUserDto,
+  type SearchMessagesDto,
+} from 'mentara-commons';
 
 @Controller('messaging')
 @UseGuards(ClerkAuthGuard)
@@ -33,7 +39,7 @@ export class MessagingController {
   @HttpCode(HttpStatus.CREATED)
   async createConversation(
     @CurrentUserId() userId: string,
-    @Body() createConversationDto: CreateConversationDto,
+    @ValidatedBody(CreateConversationDtoSchema) createConversationDto: CreateConversationDto,
   ) {
     return this.messagingService.createConversation(
       userId,

@@ -29,7 +29,7 @@ model Meeting {
     @@index([therapistId])
     @@index([startTime])
     @@index([status])
-    @@index([therapistId, startTime]) // For availability queries
+    @@index([therapistId, startTime, status]) // For availability queries
 }
 
 model MeetingNotes {

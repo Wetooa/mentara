@@ -33,7 +33,6 @@ import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useSectionCompletion } from "@/hooks/useSectionCompletion";
-import { submitApplicationWithDocuments } from "@/lib/api/therapist-application";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
 const unifiedTherapistSchema = z

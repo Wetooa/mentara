@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         });
 
         console.log("Admin user synced to database:", adminUser.id);
-      } catch (error) {
+      } catch {
         console.error("Error syncing admin user to database:", error);
       }
     }
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       });
 
       console.log("Admin user removed from database:", deletedAdmin.id);
-    } catch (error) {
+    } catch {
       // User might not be an admin, so deletion may fail - this is fine
       console.log("No admin user found to delete for Clerk user ID:", id);
     }

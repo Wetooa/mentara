@@ -24,12 +24,10 @@ export default function TherapistPage() {
   
   const {
     filters,
-    updateFilter,
     updateFilters,
     resetFilters,
     hasActiveFilters,
-    activeFilterCount,
-    toQueryParams
+    activeFilterCount
   } = useFilters();
 
   return (

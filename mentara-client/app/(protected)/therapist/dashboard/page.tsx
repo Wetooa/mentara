@@ -34,13 +34,13 @@ export default function TherapistDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <div className="lg:col-span-2">
           <div className="mb-6">
-            <h2 className="text-lg font-medium mb-4">Today's agenda</h2>
+            <h2 className="text-lg font-medium mb-4">Today&apos;s agenda</h2>
             <DashboardStats stats={stats} />
           </div>
 
           <div>
             <h2 className="text-lg font-medium mb-4">
-              Today's upcoming patients ({upcomingAppointments.length})
+              Today&apos;s upcoming patients ({upcomingAppointments.length})
             </h2>
             <DashboardPatientList appointments={upcomingAppointments} />
           </div>

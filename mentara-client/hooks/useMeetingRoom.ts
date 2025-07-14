@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useApi } from '@/lib/api';
-import { socket } from '@/lib/socket';
+import { createSocket } from '@/lib/socket';
 import { toast } from 'sonner';
 
 interface ParticipantInfo {
@@ -54,7 +54,7 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
   useEffect(() => {
     if (!meetingId) return;
 
-    const meetingSocket = socket('/meetings');
+    const meetingSocket = createSocket('/meetings');
     meetingSocketRef.current = meetingSocket;
 
     meetingSocket.on('connect', () => {

@@ -268,7 +268,7 @@ export class AvailabilityValidatorService {
       // Check if timezone is valid
       Intl.DateTimeFormat(undefined, { timeZone: timezone });
       return true;
-    } catch (error) {
+    } catch {
       throw new BadRequestException(`Invalid timezone: ${timezone}`);
     }
   }

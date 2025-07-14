@@ -15,7 +15,6 @@ import { TherapistApplicationsTable } from "@/components/admin/TherapistApplicat
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
 import { useTherapistApplications } from "@/hooks/useTherapistApplications";
-import type { TherapistApplication } from "@/lib/api/services/therapists";
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -55,10 +54,7 @@ export default function TherapistApplicationsPage() {
   }, [applications, searchQuery]);
 
   // Handle status change - React Query will automatically update the cache
-  const handleStatusChange = async (
-    id: string,
-    status: "approved" | "rejected" | "pending"
-  ) => {
+  const handleStatusChange = async () => {
     // React Query mutation in TherapistApplicationsTable will handle the update
     // No manual state management needed - React Query cache will be invalidated
   };

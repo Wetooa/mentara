@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ModerationQueue } from "@/components/moderator";
-import { useModeratorContentQueue, useModerateContent } from "@/hooks/useModeratorContentQueue";
+import { useModeratorContentQueue } from "@/hooks/useModeratorContentQueue";
 import { useModeratorContentStore, useModeratorUIStore } from "@/store/moderator";
 import type { Post, Comment } from "@/types/api";
 
@@ -10,21 +10,15 @@ export default function ModeratorContentPage() {
   const { 
     filters, 
     setFilters, 
-    selectedContentIds,
     clearSelection 
   } = useModeratorContentStore();
   
   const {
-    currentAction,
     setCurrentAction,
-    actionFormData,
-    setActionFormData,
-    resetActionFormData,
     setActionDialogOpen
   } = useModeratorUIStore();
   
   const { data: queueData, isLoading, refetch } = useModeratorContentQueue(filters);
-  const moderateContent = useModerateContent();
 
   const content = queueData?.content || [];
   const total = queueData?.total || 0;

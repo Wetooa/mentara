@@ -6,6 +6,13 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
+import {
+  MeetingConfirmedEvent,
+  MeetingStartedEvent,
+  MeetingCompletedEvent,
+  MeetingCancelledEvent,
+  MeetingEmergencyTerminatedEvent,
+} from '../common/events/booking-events';
 
 export interface MeetingSessionData {
   meetingId: string;
@@ -49,7 +56,7 @@ export class MeetingsService {
                 firstName: true,
                 lastName: true,
                 email: true,
-                profileImageUrl: true,
+                avatarUrl: true,
               },
             },
           },
@@ -61,12 +68,11 @@ export class MeetingsService {
                 firstName: true,
                 lastName: true,
                 email: true,
-                profileImageUrl: true,
+                avatarUrl: true,
               },
             },
           },
         },
-        durationConfig: true,
       },
     });
 
@@ -102,8 +108,6 @@ export class MeetingsService {
       where: { id: meetingId },
       data: {
         status,
-        ...(status === 'IN_PROGRESS' && { actualStartTime: new Date() }),
-        ...(status === 'COMPLETED' && { actualEndTime: new Date() }),
       },
       include: {
         client: {
@@ -118,29 +122,52 @@ export class MeetingsService {
     // Emit events for status changes
     switch (status) {
       case 'CONFIRMED':
-        void this.eventBus.emit('meeting.confirmed', {
-          meetingId,
-          meeting: updatedMeeting,
-        });
+        void this.eventBus.emit(
+          new MeetingConfirmedEvent({
+            meetingId,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            confirmedAt: new Date(),
+            startTime: updatedMeeting.startTime,
+            duration: updatedMeeting.duration,
+          }),
+        );
         break;
       case 'IN_PROGRESS':
-        void this.eventBus.emit('meeting.started', {
-          meetingId,
-          meeting: updatedMeeting,
-        });
+        void this.eventBus.emit(
+          new MeetingStartedEvent({
+            meetingId,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            startedAt: new Date(),
+            actualStartTime: new Date(),
+            scheduledStartTime: updatedMeeting.startTime,
+          }),
+        );
         break;
       case 'COMPLETED':
-        void this.eventBus.emit('meeting.completed', {
-          meetingId,
-          meeting: updatedMeeting,
-        });
+        void this.eventBus.emit(
+          new MeetingCompletedEvent({
+            meetingId,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            completedAt: new Date(),
+            actualDuration: updatedMeeting.duration,
+            scheduledDuration: updatedMeeting.duration,
+          }),
+        );
         break;
       case 'CANCELLED':
-        void this.eventBus.emit('meeting.cancelled', {
-          meetingId,
-          meeting: updatedMeeting,
-          cancelledBy: userId,
-        });
+        void this.eventBus.emit(
+          new MeetingCancelledEvent({
+            meetingId,
+            clientId: updatedMeeting.clientId,
+            therapistId: updatedMeeting.therapistId,
+            cancelledBy: userId,
+            cancelledAt: new Date(),
+            originalStartTime: updatedMeeting.startTime,
+          }),
+        );
         break;
     }
 
@@ -155,23 +182,33 @@ export class MeetingsService {
    */
   async saveMeetingSession(sessionData: MeetingSessionData) {
     try {
-      // This could be stored in a separate session tracking table
-      // For now, we'll update the meeting record with session info
+      // Get meeting data to extract clientId
+      const meeting = await this.prisma.meeting.findUnique({
+        where: { id: sessionData.meetingId },
+        select: { clientId: true, therapistId: true },
+      });
 
-      const session = await this.prisma.session.create({
+      if (!meeting) {
+        throw new NotFoundException('Meeting not found');
+      }
+
+      const session = await this.prisma.sessionLog.create({
         data: {
           meetingId: sessionData.meetingId,
+          clientId: meeting.clientId,
+          therapistId: meeting.therapistId,
+          sessionType: 'REGULAR_THERAPY',
           startTime: sessionData.startTime,
           endTime: sessionData.endTime,
-          actualDuration: sessionData.duration,
-          participantCount: sessionData.participantCount,
+          duration: sessionData.duration,
+          status: 'COMPLETED',
+          platform: 'video',
           recordingUrl: sessionData.recordingUrl,
-          sessionNotes: JSON.stringify({
+          notes: JSON.stringify({
             chatMessages: sessionData.chatMessages,
             techIssues: sessionData.techIssues,
             quality: sessionData.quality,
           }),
-          sessionType: 'video_call',
         },
       });
 
@@ -202,7 +239,7 @@ export class MeetingsService {
               select: {
                 firstName: true,
                 lastName: true,
-                profileImageUrl: true,
+                avatarUrl: true,
               },
             },
           },
@@ -213,12 +250,11 @@ export class MeetingsService {
               select: {
                 firstName: true,
                 lastName: true,
-                profileImageUrl: true,
+                avatarUrl: true,
               },
             },
           },
         },
-        durationConfig: true,
       },
       orderBy: { startTime: 'asc' },
       take: limit,
@@ -301,7 +337,7 @@ export class MeetingsService {
     const meetings = await this.prisma.meeting.findMany({
       where: whereClause,
       include: {
-        session: true,
+        sessionLogs: true,
       },
     });
 
@@ -353,16 +389,28 @@ export class MeetingsService {
       where: { id: meetingId },
       data: {
         status: 'CANCELLED',
+      },
+    });
+
+    // Add emergency termination note
+    await this.prisma.meetingNotes.create({
+      data: {
+        id: `note_${Date.now()}`,
+        meetingId,
         notes: `Emergency termination: ${reason}. Terminated by: ${terminatedBy}`,
       },
     });
 
-    void this.eventBus.emit('meeting.emergency_terminated', {
-      meetingId,
-      reason,
-      terminatedBy,
-      meeting,
-    });
+    void this.eventBus.emit(
+      new MeetingEmergencyTerminatedEvent({
+        meetingId,
+        clientId: meeting.clientId,
+        therapistId: meeting.therapistId,
+        terminatedBy,
+        terminatedAt: new Date(),
+        reason,
+      }),
+    );
 
     this.logger.warn(
       `Emergency termination of meeting ${meetingId}: ${reason}`,

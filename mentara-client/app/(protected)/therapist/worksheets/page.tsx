@@ -5,6 +5,7 @@ import WorksheetsSidebar from "@/components/worksheets/TherapistWorksheetsSideba
 import TherapistWorksheetsList from "@/components/worksheets/TherapistWorksheetsList";
 import { Task } from "@/components/worksheets/types";
 import { useApi } from "@/lib/api";
+import { Worksheet } from "@/types/api/worksheets";
 
 export default function TherapistWorksheetsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
@@ -37,7 +38,7 @@ export default function TherapistWorksheetsPage() {
         const worksheets = Array.isArray(response) ? response : response?.data || response?.worksheets || [];
 
         // Transform API data to match Task interface
-        const transformedTasks: Task[] = worksheets.map((worksheet: any) => ({
+        const transformedTasks: Task[] = worksheets.map((worksheet: Worksheet) => ({
           id: worksheet.id,
           title: worksheet.title,
           patientName: worksheet.client?.user?.firstName && worksheet.client?.user?.lastName 
@@ -62,7 +63,7 @@ export default function TherapistWorksheetsPage() {
     }
 
     fetchTherapistWorksheets();
-  }, [activeFilter]);
+  }, [activeFilter, api.therapists.worksheets]);
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {

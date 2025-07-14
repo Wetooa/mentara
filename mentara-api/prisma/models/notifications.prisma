@@ -33,6 +33,7 @@ model Notification {
   @@index([priority])
   @@index([scheduledFor])
   @@index([createdAt])
+  @@index([userId, isRead, createdAt(sort: Desc)]) // For efficient unread notification queries
 }
 
 model NotificationSettings {

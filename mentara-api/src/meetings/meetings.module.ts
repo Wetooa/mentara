@@ -4,7 +4,7 @@ import { MeetingsService } from './meetings.service';
 import { MeetingsController } from './meetings.controller';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
-import { WebsocketAuthService } from '../messaging/services/websocket-auth.service';
+import { WebSocketAuthService } from '../messaging/services/websocket-auth.service';
 
 @Module({
   controllers: [MeetingsController],
@@ -13,7 +13,7 @@ import { WebsocketAuthService } from '../messaging/services/websocket-auth.servi
     MeetingsService,
     PrismaService,
     EventBusService,
-    WebsocketAuthService,
+    WebSocketAuthService,
   ],
   exports: [MeetingsGateway, MeetingsService],
 })

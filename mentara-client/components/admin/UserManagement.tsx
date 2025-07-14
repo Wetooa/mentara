@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -349,10 +350,12 @@ export function UserManagement() {
                 <TableRow key={user.id}>
                   <TableCell className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                      <img
+                      <Image
                         src={user.avatar}
                         alt={user.name}
                         className="w-full h-full object-cover"
+                        width={32}
+                        height={32}
                       />
                     </div>
                     <span>{user.name}</span>
@@ -400,10 +403,12 @@ export function UserManagement() {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                  <img
+                  <Image
                     src={selectedUser.avatar}
                     alt={selectedUser.name}
                     className="w-full h-full object-cover"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div>

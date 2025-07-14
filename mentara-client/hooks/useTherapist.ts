@@ -156,7 +156,7 @@ export function useAssignedTherapists() {
 }
 
 // Export namespace for better organization
-export const useTherapist = {
+export const TherapistHooks = {
   useAssignedTherapist,
   useAssignedTherapists,
   useTherapistAssignment,

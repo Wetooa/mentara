@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Users, Calendar, DollarSign, MapPin, Languages, Heart } from "lucide-react";
+import { Loader2, Users, Calendar, DollarSign, Languages, Heart } from "lucide-react";
 
 const preferencesSchema = z.object({
   genderPreference: z.enum(["no-preference", "male", "female", "non-binary"]),
@@ -96,7 +96,7 @@ export default function TherapistPreferencesPage() {
       
       // Navigate to completion page
       router.push("/user/onboarding/complete");
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to save preferences. Please try again.",
@@ -154,7 +154,7 @@ export default function TherapistPreferencesPage() {
                   <FormItem>
                     <FormLabel>Therapist Gender Preference</FormLabel>
                     <FormDescription>
-                      Do you have a preference for your therapist's gender?
+                      Do you have a preference for your therapist&apos;s gender?
                     </FormDescription>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
                       {[
@@ -227,7 +227,7 @@ export default function TherapistPreferencesPage() {
                       Language Preferences
                     </FormLabel>
                     <FormDescription>
-                      Select all languages you're comfortable speaking in therapy
+                      Select all languages you&apos;re comfortable speaking in therapy
                     </FormDescription>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
                       {languages.map((lang) => (
@@ -264,7 +264,7 @@ export default function TherapistPreferencesPage() {
                       Treatment Approaches
                     </FormLabel>
                     <FormDescription>
-                      Select the therapeutic approaches you're interested in
+                      Select the therapeutic approaches you&apos;re interested in
                     </FormDescription>
                     <div className="space-y-3 mt-4">
                       {treatmentApproaches.map((approach) => (
@@ -380,7 +380,7 @@ export default function TherapistPreferencesPage() {
                       Budget Range
                     </FormLabel>
                     <FormDescription>
-                      What's your budget range per session?
+                      What&apos;s your budget range per session?
                     </FormDescription>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                       {[

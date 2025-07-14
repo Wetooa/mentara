@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export default function SSOCallbackPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { registerUser, submitPreAssessment, isRegistering, isSubmittingAssessment } = useAuth();
+  const { registerUser, submitPreAssessment } = useAuth();
 
   useEffect(() => {
     const handleSSOCallback = async () => {

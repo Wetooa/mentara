@@ -59,7 +59,7 @@ export default function WorksheetDetailPage({
     }
 
     fetchWorksheetDetails();
-  }, [params.id]);
+  }, [params.id, api.therapists.worksheets]);
 
   const handleBack = () => {
     router.push("/therapist/worksheets");

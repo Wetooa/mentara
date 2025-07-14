@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -26,7 +27,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -41,7 +41,6 @@ import {
 import {
   Search,
   MessageSquare,
-  FileText,
   Eye,
   Flag,
   Trash2,
@@ -210,10 +209,24 @@ const mockComments = [
   },
 ];
 
+interface ContentItem {
+  id: string;
+  type: string;
+  title: string;
+  content: string;
+  authorName: string;
+  authorAvatar: string;
+  authorRole: string;
+  createdAt: string;
+  reportCount: number;
+  status: string;
+  community?: string;
+}
+
 export function ContentSearch() {
   const [searchTerm, setSearchTerm] = useState("");
   const [contentType, setContentType] = useState("posts");
-  const [selectedContent, setSelectedContent] = useState<any | null>(null);
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
@@ -381,7 +394,7 @@ export function ContentSearch() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredContent.map((post: any) => (
+                  {filteredContent.map((post: ContentItem) => (
                     <TableRow key={post.id}>
                       <TableCell className="font-medium">
                         {post.title}
@@ -389,10 +402,12 @@ export function ContentSearch() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-100">
-                            <img
+                            <Image
                               src={post.authorAvatar}
                               alt={post.authorName}
                               className="w-full h-full object-cover"
+                              width={24}
+                              height={24}
                             />
                           </div>
                           <span>{post.authorName}</span>
@@ -465,7 +480,7 @@ export function ContentSearch() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredContent.map((comment: any) => (
+                  {filteredContent.map((comment: ContentItem) => (
                     <TableRow key={comment.id}>
                       <TableCell className="max-w-sm truncate">
                         {comment.content}
@@ -473,10 +488,12 @@ export function ContentSearch() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-100">
-                            <img
+                            <Image
                               src={comment.authorAvatar}
                               alt={comment.authorName}
                               className="w-full h-full object-cover"
+                              width={24}
+                              height={24}
                             />
                           </div>
                           <span>{comment.authorName}</span>
@@ -586,10 +603,12 @@ export function ContentSearch() {
               <div className="pt-2 border-t">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                    <img
+                    <Image
                       src={selectedContent.authorAvatar}
                       alt={selectedContent.authorName}
                       className="w-full h-full object-cover"
+                      width={32}
+                      height={32}
                     />
                   </div>
                   <div>

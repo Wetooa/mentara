@@ -168,7 +168,7 @@ export default function ApplicationErrorPage() {
             {/* Contact Information */}
             <div className="text-center pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-500 mb-2">
-                Still having trouble? We're here to help.
+                Still having trouble? We&apos;re here to help.
               </p>
               <p className="text-sm text-gray-500">
                 Contact us at{" "}

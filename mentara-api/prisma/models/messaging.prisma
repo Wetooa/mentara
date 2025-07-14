@@ -65,7 +65,7 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([conversationId, createdAt])
+  @@index([conversationId, createdAt, isDeleted]) // For efficient pagination with deletion filtering
   @@index([senderId])
   @@index([messageType])
   @@index([isDeleted])

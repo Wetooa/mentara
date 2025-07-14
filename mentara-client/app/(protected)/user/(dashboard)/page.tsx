@@ -57,27 +57,28 @@ export default function DashboardPage() {
 
   const handleMessageTherapist = () => {
     // TODO: Navigate to messages page
-    console.log("Navigate to messages");
+    // Navigation functionality to be implemented
   };
 
   const handleScheduleSession = () => {
     // TODO: Navigate to scheduling page
-    console.log("Navigate to scheduling");
+    // Navigation functionality to be implemented
   };
 
   const handleViewAllMessages = () => {
     // TODO: Navigate to messages page
-    console.log("Navigate to messages page");
+    // Navigation functionality to be implemented
   };
 
   const handleContactSelect = (contactId: string) => {
     // TODO: Navigate to specific conversation
-    console.log("Navigate to conversation with contact:", contactId);
+    // Navigation functionality to be implemented
+    void contactId; // Acknowledge parameter
   };
 
   const handleBookSession = () => {
     // TODO: Navigate to booking page
-    console.log("Navigate to booking page");
+    // Navigation functionality to be implemented
   };
 
   const handleRetry = () => {

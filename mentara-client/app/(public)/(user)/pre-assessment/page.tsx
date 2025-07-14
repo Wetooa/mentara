@@ -19,7 +19,7 @@ export interface PreAssessmentPageFormProps {
 export default function PreAssessmentPage() {
   const animationControls = useAnimationControls();
 
-  const { step, nextStep, prevStep, questionnaires, answers } =
+  const { step, nextStep, prevStep, questionnaires } =
     usePreAssessmentChecklistStore();
 
   function handlePrevButtonOnClick() {

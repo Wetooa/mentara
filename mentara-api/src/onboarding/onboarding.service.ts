@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 
 export interface OnboardingStep {
@@ -112,20 +107,22 @@ export class OnboardingService {
     stepName: string,
   ): Promise<{ completed: boolean; completedAt?: Date }> {
     switch (stepName) {
-      case 'profile_setup':
+      case 'profile_setup': {
         const hasBasicInfo = user.firstName && user.lastName && user.email;
         return {
           completed: hasBasicInfo,
           completedAt: hasBasicInfo ? user.updatedAt : undefined,
         };
+      }
 
-      case 'email_verification':
+      case 'email_verification': {
         return {
           completed: user.isVerified,
           completedAt: user.isVerified ? user.updatedAt : undefined,
         };
+      }
 
-      case 'pre_assessment':
+      case 'pre_assessment': {
         const hasPreAssessment = user.client?.preAssessment;
         return {
           completed: !!hasPreAssessment,
@@ -133,8 +130,9 @@ export class OnboardingService {
             ? user.client.preAssessment.createdAt
             : undefined,
         };
+      }
 
-      case 'community_assignment':
+      case 'community_assignment': {
         const hasCommunityMemberships = user.memberships?.length > 0;
         return {
           completed: hasCommunityMemberships,
@@ -142,8 +140,9 @@ export class OnboardingService {
             ? user.memberships[0].joinedAt
             : undefined,
         };
+      }
 
-      case 'license_verification':
+      case 'license_verification': {
         const hasVerifiedLicense = user.therapist?.licenseVerified;
         return {
           completed: !!hasVerifiedLicense,
@@ -151,8 +150,9 @@ export class OnboardingService {
             ? user.therapist.licenseVerifiedAt
             : undefined,
         };
+      }
 
-      case 'profile_completion':
+      case 'profile_completion': {
         const hasCompleteProfile =
           user.therapist &&
           user.therapist.areasOfExpertise?.length > 0 &&
@@ -163,8 +163,9 @@ export class OnboardingService {
             ? user.therapist.updatedAt
             : undefined,
         };
+      }
 
-      case 'availability_setup':
+      case 'availability_setup': {
         const hasAvailability =
           await this.prisma.therapistAvailability.findFirst({
             where: { therapistId: user.id },
@@ -173,20 +174,23 @@ export class OnboardingService {
           completed: !!hasAvailability,
           completedAt: hasAvailability ? hasAvailability.createdAt : undefined,
         };
+      }
 
-      case 'admin_training':
+      case 'admin_training': {
         // For now, assume admin training is complete if they have admin permissions
         return {
           completed: !!user.admin,
           completedAt: user.admin ? user.admin.createdAt : undefined,
         };
+      }
 
-      case 'moderation_training':
+      case 'moderation_training': {
         // For now, assume moderation training is complete if they have moderator permissions
         return {
           completed: !!user.moderator,
           completedAt: user.moderator ? user.moderator.createdAt : undefined,
         };
+      }
 
       default:
         return { completed: false };
@@ -210,9 +214,9 @@ export class OnboardingService {
         data: {
           userId,
           action: 'COMPLETE_ONBOARDING_STEP',
-          entityType: 'onboarding',
+          entity: 'onboarding',
           entityId: userId,
-          details: {
+          metadata: {
             step: stepName,
             timestamp: new Date().toISOString(),
           },
