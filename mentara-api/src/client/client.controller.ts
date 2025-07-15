@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ClientService } from './client.service';
 import {
   ClientResponse,
@@ -19,7 +19,7 @@ import {
 } from 'schema/auth';
 
 @Controller('client')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 

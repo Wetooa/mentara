@@ -26,7 +26,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  // DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -40,12 +40,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Search,
-  User,
+  // User,
   Eye,
   Ban,
   ShieldAlert,
   UserCheck,
-  UserX,
+  // UserX,
   Filter,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -134,7 +134,7 @@ const mockUsers = [
 export function UserManagement() {
   const [users, setUsers] = useState(mockUsers);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [selectedUser, setSelectedUser] = useState<Record<string, unknown> | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<

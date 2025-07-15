@@ -11,6 +11,11 @@ model Post {
     room      Room?       @relation(fields: [roomId], references: [id])
     roomId    String?
 
+    // Reddit-like features
+    votes         PostVote[]        @relation("PostVotes")
+    awards        PostAward[]       @relation("PostAwards")
+    commentThreads CommentThread[]  @relation("PostCommentThreads")
+
     @@index([userId])
     @@index([roomId])
 }
@@ -19,22 +24,37 @@ model Post {
 // This model is kept for backward compatibility but should be migrated
 
 model Comment {
-    id      String @id @default(uuid())
-    postId  String
-    userId  String
-    content String @db.Text
+    id        String  @id @default(uuid())
+    postId    String
+    userId    String
+    content   String  @db.Text
+    parentId  String? // For nested comments
+    threadId  String? // Reference to comment thread
+    depth     Int     @default(0) // Nesting depth (0 = top-level)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    post Post @relation(fields: [postId], references: [id])
-    user User @relation(fields: [userId], references: [id])
+    post   Post @relation(fields: [postId], references: [id])
+    user   User @relation(fields: [userId], references: [id])
+    parent Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+    thread CommentThread? @relation("ThreadComments", fields: [threadId], references: [id])
 
+    // Existing relations
     hearts  CommentHeart[]
     replies Reply[]
 
+    // Reddit-like features
+    votes       CommentVote[]   @relation("CommentVotes")
+    awards      CommentAward[]  @relation("CommentAwards")
+    children    Comment[]       @relation("CommentReplies")
+    rootThread  CommentThread[] @relation("CommentThreads") // If this is a root comment
+
     @@index([postId])
     @@index([userId])
+    @@index([parentId])
+    @@index([threadId])
+    @@index([postId, depth])
 }
 
 // Note: CommentFile is now replaced by FileAttachment with entityType = COMMENT

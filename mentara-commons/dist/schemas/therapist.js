@@ -1,7 +1,119 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TherapistCredentialsSchema = exports.WorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = void 0;
+exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
 const zod_1 = require("zod");
+// Enhanced Therapist Registration Schema (from class-validator DTO)
+exports.RegisterTherapistDtoSchema = zod_1.z.object({
+    email: zod_1.z.string().email('Invalid email format'),
+    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
+    firstName: zod_1.z.string().min(1, 'First name is required'),
+    lastName: zod_1.z.string().min(1, 'Last name is required'),
+    mobile: zod_1.z.string().min(1, 'Mobile is required'),
+    province: zod_1.z.string().min(1, 'Province is required'),
+    providerType: zod_1.z.string().min(1, 'Provider type is required'),
+    professionalLicenseType: zod_1.z.string().min(1, 'Professional license type is required'),
+    isPRCLicensed: zod_1.z.boolean(),
+    prcLicenseNumber: zod_1.z.string().min(1, 'PRC license number is required'),
+    expirationDateOfLicense: zod_1.z.string().datetime().optional(),
+    isLicenseActive: zod_1.z.boolean(),
+    practiceStartDate: zod_1.z.string().datetime(),
+    yearsOfExperience: zod_1.z.string().optional(),
+    areasOfExpertise: zod_1.z.array(zod_1.z.string()).min(1, 'At least one area of expertise is required'),
+    assessmentTools: zod_1.z.array(zod_1.z.string()).min(1, 'At least one assessment tool is required'),
+    therapeuticApproachesUsedList: zod_1.z.array(zod_1.z.string()).min(1, 'At least one therapeutic approach is required'),
+    languagesOffered: zod_1.z.array(zod_1.z.string()).min(1, 'At least one language is required'),
+    providedOnlineTherapyBefore: zod_1.z.boolean(),
+    comfortableUsingVideoConferencing: zod_1.z.boolean(),
+    weeklyAvailability: zod_1.z.string().min(1, 'Weekly availability is required'),
+    preferredSessionLength: zod_1.z.string().min(1, 'Preferred session length is required'),
+    accepts: zod_1.z.array(zod_1.z.string()).min(1, 'Must accept at least one payment method'),
+    privateConfidentialSpace: zod_1.z.boolean().optional(),
+    compliesWithDataPrivacyAct: zod_1.z.boolean().optional(),
+    professionalLiabilityInsurance: zod_1.z.boolean().optional(),
+    complaintsOrDisciplinaryActions: zod_1.z.boolean().optional(),
+    willingToAbideByPlatformGuidelines: zod_1.z.boolean().optional(),
+    sessionLength: zod_1.z.string().optional(),
+    hourlyRate: zod_1.z.number().min(0, 'Hourly rate must be positive').optional(),
+    bio: zod_1.z.string().optional(),
+    profileImageUrl: zod_1.z.string().url().optional(),
+    applicationData: zod_1.z.record(zod_1.z.any()).optional()
+});
+// Update Therapist Schema (from class-validator DTO)
+exports.UpdateTherapistDtoSchema = zod_1.z.object({
+    firstName: zod_1.z.string().min(1, 'First name is required').optional(),
+    lastName: zod_1.z.string().min(1, 'Last name is required').optional(),
+    mobile: zod_1.z.string().optional(),
+    province: zod_1.z.string().optional(),
+    bio: zod_1.z.string().optional(),
+    profileImageUrl: zod_1.z.string().url().optional(),
+    hourlyRate: zod_1.z.number().min(0, 'Hourly rate must be positive').optional(),
+    isActive: zod_1.z.boolean().optional(),
+    expertise: zod_1.z.array(zod_1.z.string()).optional(),
+    approaches: zod_1.z.array(zod_1.z.string()).optional(),
+    languages: zod_1.z.array(zod_1.z.string()).optional(),
+    illnessSpecializations: zod_1.z.array(zod_1.z.string()).optional()
+});
+// Therapist Recommendation Request Schema
+exports.TherapistRecommendationRequestSchema = zod_1.z.object({
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    includeInactive: zod_1.z.boolean().optional(),
+    province: zod_1.z.string().optional(),
+    maxHourlyRate: zod_1.z.number().min(0).optional()
+});
+// Therapist Recommendation Response Schema  
+exports.TherapistRecommendationResponseDtoSchema = zod_1.z.object({
+    totalCount: zod_1.z.number().min(0),
+    userConditions: zod_1.z.array(zod_1.z.string()),
+    therapists: zod_1.z.array(zod_1.z.any()), // TherapistWithUser with matchScore
+    matchCriteria: zod_1.z.object({
+        primaryConditions: zod_1.z.array(zod_1.z.string()),
+        secondaryConditions: zod_1.z.array(zod_1.z.string()),
+        severityLevels: zod_1.z.record(zod_1.z.string())
+    }),
+    page: zod_1.z.number().min(1).optional(),
+    pageSize: zod_1.z.number().min(1).optional()
+});
+// Comprehensive Therapist Application Schema (from class-validator DTO)
+exports.TherapistApplicationCreateDtoSchema = zod_1.z.object({
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    firstName: zod_1.z.string().min(1, 'First name is required'),
+    lastName: zod_1.z.string().min(1, 'Last name is required'),
+    email: zod_1.z.string().email('Invalid email format'),
+    mobile: zod_1.z.string().min(1, 'Mobile is required'),
+    province: zod_1.z.string().min(1, 'Province is required'),
+    providerType: zod_1.z.string().min(1, 'Provider type is required'),
+    professionalLicenseType: zod_1.z.string().min(1, 'Professional license type is required'),
+    isPRCLicensed: zod_1.z.string().min(1, 'PRC license status is required'),
+    prcLicenseNumber: zod_1.z.string().optional(),
+    isLicenseActive: zod_1.z.string().optional(),
+    expirationDateOfLicense: zod_1.z.string().optional(),
+    practiceStartDate: zod_1.z.string().min(1, 'Practice start date is required'),
+    areasOfExpertise: zod_1.z.array(zod_1.z.string()).min(1, 'At least one area of expertise is required'),
+    assessmentTools: zod_1.z.array(zod_1.z.string()).min(1, 'At least one assessment tool is required'),
+    therapeuticApproachesUsedList: zod_1.z.array(zod_1.z.string()).min(1, 'At least one therapeutic approach is required'),
+    languagesOffered: zod_1.z.array(zod_1.z.string()).min(1, 'At least one language is required'),
+    providedOnlineTherapyBefore: zod_1.z.boolean(),
+    comfortableUsingVideoConferencing: zod_1.z.boolean(),
+    privateConfidentialSpace: zod_1.z.boolean(),
+    compliesWithDataPrivacyAct: zod_1.z.boolean(),
+    weeklyAvailability: zod_1.z.string().min(1, 'Weekly availability is required'),
+    preferredSessionLength: zod_1.z.string().min(1, 'Preferred session length is required'),
+    accepts: zod_1.z.array(zod_1.z.string()).min(1, 'Must accept at least one payment method'),
+    bio: zod_1.z.string().optional(),
+    hourlyRate: zod_1.z.number().min(0, 'Hourly rate must be positive').optional(),
+    professionalLiabilityInsurance: zod_1.z.string().min(1, 'Professional liability insurance status is required'),
+    complaintsOrDisciplinaryActions: zod_1.z.string().min(1, 'Complaints or disciplinary actions status is required'),
+    complaintsOrDisciplinaryActions_specify: zod_1.z.string().optional(),
+    willingToAbideByPlatformGuidelines: zod_1.z.boolean()
+});
+// Parameter Schemas
+exports.TherapistIdParamSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid('Invalid therapist ID format')
+});
+exports.TherapistApplicationIdParamSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid('Invalid application ID format')
+});
 // Basic Therapist Information Schema
 exports.TherapistRecommendationSchema = zod_1.z.object({
     id: zod_1.z.string().min(1, 'Therapist ID is required'),
@@ -234,8 +346,8 @@ exports.ApplicationListParamsSchema = zod_1.z.object({
     sortBy: zod_1.z.enum(['submittedAt', 'status', 'lastName']).optional(),
     sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
 });
-// Worksheet Assignment Schema
-exports.WorksheetAssignmentSchema = zod_1.z.object({
+// Therapist-specific Worksheet Assignment Schema
+exports.TherapistWorksheetAssignmentSchema = zod_1.z.object({
     id: zod_1.z.string().min(1),
     worksheetId: zod_1.z.string().min(1),
     patientId: zod_1.z.string().min(1),

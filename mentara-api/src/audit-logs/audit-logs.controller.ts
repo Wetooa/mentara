@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuditLogsService } from './audit-logs.service';
 import { AuditLoggingService } from '../common/services/audit-logging.service';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@prisma/client';
 
 @Controller('audit-logs')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AuditLogsController {
   constructor(
     private readonly auditLogsService: AuditLogsService,

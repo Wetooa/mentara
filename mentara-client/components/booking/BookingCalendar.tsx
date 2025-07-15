@@ -38,12 +38,10 @@ export function BookingCalendar({
   const dateString = calendarDate.toISOString().split('T')[0];
   
   const {
-    slots,
     timeSlots,
     isLoading,
     error,
     hasSlots,
-    isTimeAvailable,
     getAvailableDurationsForSlot,
   } = useAvailableSlots(therapistId, dateString);
 

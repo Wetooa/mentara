@@ -9,8 +9,7 @@ export type {
   RolePermissions,
   RegisterClientDto,
   UpdateClientDto,
-  RegisterTherapistDto,
-  UpdateTherapistDto,
+  // Note: RegisterTherapistDto and UpdateTherapistDto are now in therapist.ts
   DeactivateUserDto,
   UserDeactivationResponseDto
 } from '../schemas/user';
@@ -34,7 +33,9 @@ export type {
   CreateApplicationRequest,
   UpdateApplicationRequest,
   ApplicationListParams,
-  WorksheetAssignment,
+  TherapistWorksheetAssignment,
+  RegisterTherapistDto,
+  UpdateTherapistDto,
   TherapistCredentials,
   SessionFormat,
   Education,

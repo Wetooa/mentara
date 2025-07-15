@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { verifyToken } from '@clerk/backend';
+import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Socket } from 'socket.io';
+import { WsException } from '@nestjs/websockets';
 
 export interface AuthenticatedUser {
   userId: string;
@@ -10,6 +12,11 @@ export interface AuthenticatedUser {
 @Injectable()
 export class WebSocketAuthService {
   private readonly logger = new Logger(WebSocketAuthService.name);
+
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async authenticateSocket(socket: Socket): Promise<AuthenticatedUser | null> {
     try {
@@ -21,23 +28,39 @@ export class WebSocketAuthService {
         return null;
       }
 
-      // Verify token with Clerk
-      const verifiedToken = await verifyToken(token, {
-        secretKey: process.env.CLERK_SECRET_KEY ?? '',
-      });
-
-      if (!verifiedToken.sub) {
+      // Verify JWT token
+      const payload = this.jwtService.verify(token);
+      
+      if (!payload.sub) {
         this.logger.warn(`Socket ${socket.id} has invalid token payload`);
         return null;
       }
 
+      // Validate user exists in database and is not deactivated
+      const user = await this.prisma.user.findUnique({
+        where: { 
+          id: payload.sub,
+          deactivatedAt: null,
+        },
+        select: {
+          id: true,
+          role: true,
+          emailVerified: true,
+        },
+      });
+
+      if (!user) {
+        this.logger.warn(`Socket ${socket.id} user not found or deactivated`);
+        return null;
+      }
+
       this.logger.log(
-        `Socket ${socket.id} authenticated as user ${verifiedToken.sub}`,
+        `Socket ${socket.id} authenticated as user ${user.id} with role ${user.role}`,
       );
 
       return {
-        userId: verifiedToken.sub,
-        role: verifiedToken.role as string | undefined,
+        userId: user.id,
+        role: user.role,
       };
     } catch (error) {
       this.logger.error(
@@ -101,18 +124,24 @@ export class WebSocketAuthService {
     }
   }
 
-  async refreshTokenIfNeeded(token: string): Promise<string | null> {
+  async validateToken(token: string): Promise<boolean> {
     try {
-      // Check if token is close to expiry and refresh if needed
-      await verifyToken(token, {
-        secretKey: process.env.CLERK_SECRET_KEY ?? '',
+      // Simply verify if the JWT token is valid
+      const payload = this.jwtService.verify(token);
+      
+      // Additional validation: check if user still exists and is active
+      const user = await this.prisma.user.findUnique({
+        where: { 
+          id: payload.sub,
+          deactivatedAt: null,
+        },
+        select: { id: true },
       });
 
-      // If token is valid, return as is
-      return token;
+      return !!user;
     } catch (error) {
-      this.logger.warn('Token refresh failed:', error);
-      return null;
+      this.logger.warn('Token validation failed:', error);
+      return false;
     }
   }
 }

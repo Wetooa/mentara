@@ -8,6 +8,8 @@ module.exports = {
     '<rootDir>/node_modules/',
     '<rootDir>/dist/',
     '<rootDir>/coverage/',
+    '<rootDir>/../mentara-client/',
+    '<rootDir>/../ai-patient-evaluation/'
   ],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
@@ -96,6 +98,7 @@ module.exports = {
   },
   testTimeout: 10000,
   maxWorkers: process.env.CI ? 2 : '50%',
+  workerIdleMemoryLimit: '512MB',
   // Enhanced reporting for better debugging
   verbose: true,
   detectOpenHandles: true,

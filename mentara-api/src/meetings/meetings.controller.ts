@@ -9,11 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 
 @Controller('meetings')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
 

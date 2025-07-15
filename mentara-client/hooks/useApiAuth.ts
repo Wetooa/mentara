@@ -1,25 +1,24 @@
 import { useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 
 /**
- * Hook to set up API authentication with Clerk token
+ * Hook to set up API authentication with JWT token
  * This should be called once at the app level to configure the API client
  */
 export function useApiAuth() {
-  const { getToken } = useAuth();
+  const { accessToken } = useAuth();
 
   useEffect(() => {
     // Set up the token provider for the API client
     api.setAuthToken(async () => {
       try {
-        return await getToken();
+        return accessToken;
       } catch (error) {
-        console.error("Failed to get auth token:", error);
         return null;
       }
     });
-  }, [getToken]);
+  }, [accessToken]);
 }
 
 export default useApiAuth;

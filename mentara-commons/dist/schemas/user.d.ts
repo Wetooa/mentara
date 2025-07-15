@@ -84,8 +84,8 @@ export declare const RolePermissionsSchema: z.ZodObject<{
     canAssignWorksheets: boolean;
 }>;
 export declare const RegisterClientDtoSchema: z.ZodObject<{
-    userId: z.ZodString;
     email: z.ZodString;
+    password: z.ZodString;
     firstName: z.ZodString;
     middleName: z.ZodOptional<z.ZodString>;
     lastName: z.ZodString;
@@ -97,7 +97,7 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     email: string;
     firstName: string;
     lastName: string;
-    userId: string;
+    password: string;
     middleName?: string | undefined;
     birthDate?: string | undefined;
     address?: string | undefined;
@@ -107,7 +107,7 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     email: string;
     firstName: string;
     lastName: string;
-    userId: string;
+    password: string;
     middleName?: string | undefined;
     birthDate?: string | undefined;
     address?: string | undefined;
@@ -115,8 +115,8 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     hasSeenTherapistRecommendations?: boolean | undefined;
 }>;
 export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
-    userId: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodString>;
+    password: z.ZodOptional<z.ZodString>;
     firstName: z.ZodOptional<z.ZodString>;
     middleName: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     lastName: z.ZodOptional<z.ZodString>;
@@ -124,7 +124,7 @@ export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
     address: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     avatarUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     hasSeenTherapistRecommendations: z.ZodOptional<z.ZodOptional<z.ZodBoolean>>;
-}, "userId">, "strip", z.ZodTypeAny, {
+}, "password">, "strip", z.ZodTypeAny, {
     email?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
@@ -142,128 +142,29 @@ export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
     address?: string | undefined;
     avatarUrl?: string | undefined;
     hasSeenTherapistRecommendations?: boolean | undefined;
-}>;
-export declare const RegisterTherapistDtoSchema: z.ZodObject<{
-    userId: z.ZodString;
-    email: z.ZodString;
-    firstName: z.ZodString;
-    middleName: z.ZodOptional<z.ZodString>;
-    lastName: z.ZodString;
-    title: z.ZodString;
-    hourlyRate: z.ZodOptional<z.ZodNumber>;
-    experienceYears: z.ZodOptional<z.ZodNumber>;
-    province: z.ZodOptional<z.ZodString>;
-    specialties: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-    bio: z.ZodOptional<z.ZodString>;
-    profileImage: z.ZodOptional<z.ZodString>;
-    licenseNumber: z.ZodOptional<z.ZodString>;
-    licenseType: z.ZodOptional<z.ZodString>;
-    isVerified: z.ZodDefault<z.ZodBoolean>;
-}, "strip", z.ZodTypeAny, {
-    email: string;
-    firstName: string;
-    lastName: string;
-    userId: string;
-    title: string;
-    isVerified: boolean;
-    middleName?: string | undefined;
-    hourlyRate?: number | undefined;
-    experienceYears?: number | undefined;
-    province?: string | undefined;
-    specialties?: string[] | undefined;
-    bio?: string | undefined;
-    profileImage?: string | undefined;
-    licenseNumber?: string | undefined;
-    licenseType?: string | undefined;
-}, {
-    email: string;
-    firstName: string;
-    lastName: string;
-    userId: string;
-    title: string;
-    middleName?: string | undefined;
-    hourlyRate?: number | undefined;
-    experienceYears?: number | undefined;
-    province?: string | undefined;
-    specialties?: string[] | undefined;
-    bio?: string | undefined;
-    profileImage?: string | undefined;
-    licenseNumber?: string | undefined;
-    licenseType?: string | undefined;
-    isVerified?: boolean | undefined;
-}>;
-export declare const UpdateTherapistDtoSchema: z.ZodObject<Omit<{
-    userId: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodString>;
-    firstName: z.ZodOptional<z.ZodString>;
-    middleName: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    lastName: z.ZodOptional<z.ZodString>;
-    title: z.ZodOptional<z.ZodString>;
-    hourlyRate: z.ZodOptional<z.ZodOptional<z.ZodNumber>>;
-    experienceYears: z.ZodOptional<z.ZodOptional<z.ZodNumber>>;
-    province: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    specialties: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
-    bio: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    profileImage: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    licenseNumber: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    licenseType: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    isVerified: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-}, "userId">, "strip", z.ZodTypeAny, {
-    email?: string | undefined;
-    firstName?: string | undefined;
-    lastName?: string | undefined;
-    middleName?: string | undefined;
-    title?: string | undefined;
-    hourlyRate?: number | undefined;
-    experienceYears?: number | undefined;
-    province?: string | undefined;
-    specialties?: string[] | undefined;
-    bio?: string | undefined;
-    profileImage?: string | undefined;
-    licenseNumber?: string | undefined;
-    licenseType?: string | undefined;
-    isVerified?: boolean | undefined;
-}, {
-    email?: string | undefined;
-    firstName?: string | undefined;
-    lastName?: string | undefined;
-    middleName?: string | undefined;
-    title?: string | undefined;
-    hourlyRate?: number | undefined;
-    experienceYears?: number | undefined;
-    province?: string | undefined;
-    specialties?: string[] | undefined;
-    bio?: string | undefined;
-    profileImage?: string | undefined;
-    licenseNumber?: string | undefined;
-    licenseType?: string | undefined;
-    isVerified?: boolean | undefined;
 }>;
 export declare const DeactivateUserDtoSchema: z.ZodObject<{
-    reason: z.ZodString;
-    notifyUser: z.ZodDefault<z.ZodBoolean>;
+    reason: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    reason: string;
-    notifyUser: boolean;
+    reason?: string | undefined;
 }, {
-    reason: string;
-    notifyUser?: boolean | undefined;
+    reason?: string | undefined;
 }>;
 export declare const UserDeactivationResponseDtoSchema: z.ZodObject<{
-    id: z.ZodString;
-    isActive: z.ZodBoolean;
-    deactivatedAt: z.ZodNullable<z.ZodString>;
-    deactivationReason: z.ZodNullable<z.ZodString>;
+    message: z.ZodString;
+    deactivatedAt: z.ZodString;
+    reason: z.ZodOptional<z.ZodString>;
+    deactivatedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    isActive: boolean;
-    deactivatedAt: string | null;
-    deactivationReason: string | null;
+    message: string;
+    deactivatedAt: string;
+    reason?: string | undefined;
+    deactivatedBy?: string | undefined;
 }, {
-    id: string;
-    isActive: boolean;
-    deactivatedAt: string | null;
-    deactivationReason: string | null;
+    message: string;
+    deactivatedAt: string;
+    reason?: string | undefined;
+    deactivatedBy?: string | undefined;
 }>;
 export type UserRole = z.infer<typeof UserRoleSchema>;
 export type User = z.infer<typeof UserSchema>;
@@ -273,10 +174,46 @@ export type FirstSignInResponse = z.infer<typeof FirstSignInResponseSchema>;
 export type RolePermissions = z.infer<typeof RolePermissionsSchema>;
 export type RegisterClientDto = z.infer<typeof RegisterClientDtoSchema>;
 export type UpdateClientDto = z.infer<typeof UpdateClientDtoSchema>;
-export type RegisterTherapistDto = z.infer<typeof RegisterTherapistDtoSchema>;
-export type UpdateTherapistDto = z.infer<typeof UpdateTherapistDtoSchema>;
 export type DeactivateUserDto = z.infer<typeof DeactivateUserDtoSchema>;
 export type UserDeactivationResponseDto = z.infer<typeof UserDeactivationResponseDtoSchema>;
+export declare const LoginDtoSchema: z.ZodObject<{
+    email: z.ZodString;
+    password: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    password: string;
+}, {
+    email: string;
+    password: string;
+}>;
+export declare const RefreshTokenDtoSchema: z.ZodObject<{
+    refreshToken: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+}, {
+    refreshToken: string;
+}>;
+export declare const ChangePasswordDtoSchema: z.ZodObject<{
+    currentPassword: z.ZodString;
+    newPassword: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    currentPassword: string;
+    newPassword: string;
+}, {
+    currentPassword: string;
+    newPassword: string;
+}>;
+export declare const UserIdParamSchema: z.ZodObject<{
+    id: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+}, {
+    id: string;
+}>;
 export declare const UserIdSchema: z.ZodString;
 export declare const EmailSchema: z.ZodString;
+export type LoginDto = z.infer<typeof LoginDtoSchema>;
+export type RefreshTokenDto = z.infer<typeof RefreshTokenDtoSchema>;
+export type ChangePasswordDto = z.infer<typeof ChangePasswordDtoSchema>;
+export type UserIdParam = z.infer<typeof UserIdParamSchema>;
 //# sourceMappingURL=user.d.ts.map

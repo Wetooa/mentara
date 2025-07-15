@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import { z } from 'mentara-commons';
 
 export interface ApiError {
   message: string;
@@ -6,6 +7,7 @@ export interface ApiError {
   code?: string;
   details?: any;
   timestamp: Date;
+  zodIssues?: Array<{ path: (string | number)[]; message: string; code: string; }>;
 }
 
 export class MentaraApiError extends Error {
@@ -13,6 +15,7 @@ export class MentaraApiError extends Error {
   public readonly code?: string;
   public readonly details?: any;
   public readonly timestamp: Date;
+  public readonly zodIssues?: Array<{ path: (string | number)[]; message: string; code: string; }>;
 
   constructor(apiError: ApiError) {
     super(apiError.message);
@@ -21,11 +24,32 @@ export class MentaraApiError extends Error {
     this.code = apiError.code;
     this.details = apiError.details;
     this.timestamp = apiError.timestamp;
+    this.zodIssues = apiError.zodIssues;
 
     // Maintain proper stack trace (only available on V8)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, MentaraApiError);
     }
+  }
+
+  /**
+   * Extract field-specific error messages from Zod validation issues
+   */
+  getFieldErrors(): Record<string, string> {
+    if (!this.zodIssues) return {};
+    
+    return this.zodIssues.reduce((acc, issue) => {
+      const field = issue.path.length > 0 ? issue.path.join('.') : 'root';
+      acc[field] = issue.message;
+      return acc;
+    }, {} as Record<string, string>);
+  }
+
+  /**
+   * Check if this is a validation error with field-specific issues
+   */
+  isValidationError(): boolean {
+    return this.status === 400 && Boolean(this.zodIssues?.length);
   }
 }
 
@@ -37,6 +61,30 @@ export const handleApiError = (error: AxiosError): ApiError => {
     details: error.response?.data,
     timestamp: new Date(),
   };
+
+  // Handle Zod validation errors from backend
+  if (error.response?.data && typeof error.response.data === 'object') {
+    const responseData = error.response.data as any;
+    
+    // Check for Zod validation error format
+    if (responseData.errors && Array.isArray(responseData.errors) && error.response.status === 400) {
+      apiError.zodIssues = responseData.errors.map((err: string) => {
+        // Parse error format: "field: message"
+        const parts = err.split(': ');
+        const field = parts[0] || 'root';
+        const message = parts.slice(1).join(': ') || err;
+        
+        return {
+          path: field === 'root' ? [] : field.split('.'),
+          message,
+          code: 'custom' // Default code for parsed errors
+        };
+      });
+      
+      apiError.message = responseData.message || "Validation failed";
+      return apiError; // Return early for Zod validation errors
+    }
+  }
 
   // Handle specific error cases
   switch (error.response?.status) {

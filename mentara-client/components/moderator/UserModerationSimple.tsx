@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -157,7 +158,7 @@ export function UserModeration({
             
             <Select 
               value={filters.status || 'all'} 
-              onValueChange={(value) => onFiltersChange?.({ status: value === 'all' ? undefined : value as any })}
+              onValueChange={(value: string) => onFiltersChange?.({ status: value === 'all' ? undefined : value as 'active' | 'suspended' | 'flagged' })}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Status" />
@@ -172,7 +173,7 @@ export function UserModeration({
 
             <Select 
               value={filters.role || 'all'} 
-              onValueChange={(value) => onFiltersChange?.({ role: value === 'all' ? undefined : value as any })}
+              onValueChange={(value: string) => onFiltersChange?.({ role: value === 'all' ? undefined : value as 'client' | 'therapist' | 'moderator' | 'admin' })}
             >
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Role" />
@@ -213,9 +214,11 @@ export function UserModeration({
                   <TableRow key={user.id}>
                     <TableCell className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                        <img
+                        <Image
                           src={user.avatarUrl || `/icons/user-avatar.png`}
                           alt={user.firstName || 'User'}
+                          width={32}
+                          height={32}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -223,10 +226,10 @@ export function UserModeration({
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell>{getStatusBadge((user as any).status || 'active')}</TableCell>
+                    <TableCell>{getStatusBadge((user as { status?: string }).status || 'active')}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-red-50 text-red-700">
-                        {(user as any).reportCount || 0}
+                        {(user as { reportCount?: number }).reportCount || 0}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatDate(user.createdAt || '')}</TableCell>
@@ -239,7 +242,7 @@ export function UserModeration({
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {(user as any).status !== 'suspended' && (
+                        {(user as { status?: string }).status !== 'suspended' && (
                           <>
                             <Button
                               variant="outline"
@@ -259,7 +262,7 @@ export function UserModeration({
                             </Button>
                           </>
                         )}
-                        {(user as any).status === 'flagged' && (
+                        {(user as { status?: string }).status === 'flagged' && (
                           <Button
                             variant="outline"
                             size="sm"

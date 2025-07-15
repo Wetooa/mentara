@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -25,7 +26,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  // DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -47,7 +48,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Search,
-  User,
+  // User,
   Eye,
   Ban,
   ShieldAlert,
@@ -217,7 +218,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
             
             <Select 
               value={filters.status} 
-              onValueChange={(value) => setFilters({...filters, status: value as any})}
+              onValueChange={(value: string) => setFilters({...filters, status: value as 'all' | 'active' | 'suspended' | 'flagged'})}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Status" />
@@ -232,7 +233,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
 
             <Select 
               value={filters.role} 
-              onValueChange={(value) => setFilters({...filters, role: value as any})}
+              onValueChange={(value: string) => setFilters({...filters, role: value as 'all' | 'client' | 'therapist' | 'moderator' | 'admin'})}
             >
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Role" />
@@ -273,9 +274,11 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                   <TableRow key={user.id}>
                     <TableCell className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                        <img
+                        <Image
                           src={user.avatarUrl || `/icons/user-avatar.png`}
                           alt={user.firstName || 'User'}
+                          width={32}
+                          height={32}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -283,10 +286,10 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell>{getStatusBadge((user as any).status || 'active')}</TableCell>
+                    <TableCell>{getStatusBadge((user as { status?: string }).status || 'active')}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-red-50 text-red-700">
-                        {(user as any).reportCount || 0}
+                        {(user as { reportCount?: number }).reportCount || 0}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatDate(user.createdAt || '')}</TableCell>
@@ -302,7 +305,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {(user as any).status !== 'suspended' && (
+                        {(user as { status?: string }).status !== 'suspended' && (
                           <>
                             <Button
                               variant="outline"
@@ -322,7 +325,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                             </Button>
                           </>
                         )}
-                        {(user as any).status === 'flagged' && (
+                        {(user as { status?: string }).status === 'flagged' && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -356,9 +359,11 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                  <img
+                  <Image
                     src={selectedUser.avatarUrl || `/icons/user-avatar.png`}
                     alt={selectedUser.firstName || 'User'}
+                    width={48}
+                    height={48}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -367,7 +372,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                   <p className="text-sm text-gray-500">{selectedUser.email}</p>
                 </div>
                 <div className="ml-auto flex items-center gap-2">
-                  {getStatusBadge((selectedUser as any).status || 'active')}
+                  {getStatusBadge((selectedUser as { status?: string }).status || 'active')}
                   {getRoleBadge(selectedUser.role)}
                 </div>
               </div>
@@ -383,7 +388,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                   <CardContent className="p-3">
                     <h3 className="text-sm font-medium text-gray-500">Reports Against</h3>
                     <p className="text-xl font-bold mt-1 text-red-600">
-                      {(selectedUser as any).reportCount || 0}
+                      {(selectedUser as { reportCount?: number }).reportCount || 0}
                     </p>
                   </CardContent>
                 </Card>
@@ -408,7 +413,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                   </div>
                 ) : userHistory?.actions && userHistory.actions.length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {userHistory.actions.map((action: any, index: number) => (
+                    {userHistory.actions.map((action: { type: string; timestamp: string; moderator: string; reason?: string }, index: number) => (
                       <div key={index} className="border rounded-lg p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -437,7 +442,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
 
               <div className="border-t pt-4 flex justify-between">
                 <div className="flex items-center gap-2">
-                  {(selectedUser as any).status !== 'suspended' && (
+                  {(selectedUser as { status?: string }).status !== 'suspended' && (
                     <>
                       <Button
                         variant="outline"
@@ -465,7 +470,7 @@ export function UserModerationTable({ className }: UserModerationTableProps) {
                       </Button>
                     </>
                   )}
-                  {(selectedUser as any).status === 'flagged' && (
+                  {(selectedUser as { status?: string }).status === 'flagged' && (
                     <Button
                       variant="outline"
                       size="sm"

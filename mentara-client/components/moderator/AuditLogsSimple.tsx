@@ -148,7 +148,7 @@ export function AuditLogs({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Today's Logs</p>
+                <p className="text-sm font-medium text-green-600">Today&apos;s Logs</p>
                 <h3 className="text-2xl font-bold mt-1">{stats.todayLogs.toLocaleString()}</h3>
               </div>
               <Calendar className="h-8 w-8 text-green-600 opacity-75" />
@@ -317,7 +317,7 @@ export function AuditLogs({
                       </p>
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {(log as any).ipAddress || '-'}
+                      {(log as { ipAddress?: string }).ipAddress || '-'}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button

@@ -6,13 +6,13 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CurrentUserId } from '../../decorators/current-user-id.decorator';
 import { TherapistManagementService } from '../therapist-management.service';
 import { ClientResponse } from 'schema/auth';
 
 @Controller('therapist/clients')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TherapistClientController {
   constructor(
     private readonly therapistManagementService: TherapistManagementService,

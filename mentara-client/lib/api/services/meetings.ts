@@ -83,7 +83,7 @@ export const createMeetingsService = (api: AxiosInstance) => ({
     startDate?: string,
     endDate?: string
   ): Promise<MeetingAnalytics> => {
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
     
@@ -118,27 +118,31 @@ export const createMeetingsService = (api: AxiosInstance) => ({
    * Helper methods for meeting status management
    */
   confirmMeeting: async (meetingId: string): Promise<Meeting> => {
-    return await api.put(`/meetings/${meetingId}/status`, { 
+    const { data } = await api.put(`/meetings/${meetingId}/status`, { 
       status: 'CONFIRMED' 
-    }).then(({ data }) => data);
+    });
+    return data;
   },
 
   startMeeting: async (meetingId: string): Promise<Meeting> => {
-    return await api.put(`/meetings/${meetingId}/status`, { 
+    const { data } = await api.put(`/meetings/${meetingId}/status`, { 
       status: 'IN_PROGRESS' 
-    }).then(({ data }) => data);
+    });
+    return data;
   },
 
   completeMeeting: async (meetingId: string): Promise<Meeting> => {
-    return await api.put(`/meetings/${meetingId}/status`, { 
+    const { data } = await api.put(`/meetings/${meetingId}/status`, { 
       status: 'COMPLETED' 
-    }).then(({ data }) => data);
+    });
+    return data;
   },
 
   cancelMeeting: async (meetingId: string): Promise<Meeting> => {
-    return await api.put(`/meetings/${meetingId}/status`, { 
+    const { data } = await api.put(`/meetings/${meetingId}/status`, { 
       status: 'CANCELLED' 
-    }).then(({ data }) => data);
+    });
+    return data;
   },
 });
 

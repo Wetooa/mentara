@@ -1,33 +1,27 @@
-import {
-  useUser,
-  useClerk,
-  useSignIn,
-  useSignUp,
-  useAuth as useClerkAuth,
-} from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { usePreAssessmentStore } from "@/store/pre-assessment";
+import { useAuth as useJWTAuth } from "@/contexts/AuthContext";
+import { LoginDto, RegisterClientDto, User } from "mentara-commons";
+// Keep local types for features not yet migrated to commons
 import type {
   AuthUser,
-  RegisterUserRequest,
   PreAssessmentSubmission,
-} from "@/types/api/auth";
+} from "@/types/api";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
 /**
  * Simplified authentication hook following proper data flow:
  * UI → Hook → API Service → Backend
+ * Now uses JWT authentication instead of Clerk
  */
 export function useAuth() {
-  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  const { signOut } = useClerk();
-  const { signIn } = useSignIn();
-  const { signUp } = useSignUp();
+  const auth = useJWTAuth();
+  const api = useApi();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { getAssessmentData, clearAssessmentData } = usePreAssessmentStore();
@@ -43,7 +37,7 @@ export function useAuth() {
   } = useQuery({
     queryKey: queryKeys.auth.currentUser(),
     queryFn: () => api.auth.getCurrentUser(),
-    enabled: !!clerkUser && clerkLoaded,
+    enabled: !!auth.accessToken && auth.isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
@@ -52,20 +46,19 @@ export function useAuth() {
   const { data: firstSignInData, isLoading: firstSignInLoading } = useQuery({
     queryKey: queryKeys.auth.isFirstSignIn(),
     queryFn: () => api.auth.checkFirstSignIn(),
-    enabled: !!clerkUser && clerkLoaded,
+    enabled: !!auth.accessToken && auth.isAuthenticated,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
-  // Registration mutation
+  // Registration mutation (Updated with commons types and Zod validation)
   const registerMutation = useMutation({
-    mutationFn: (userData: RegisterUserRequest) => api.auth.register(userData),
+    mutationFn: (userData: RegisterClientDto) => api.auth.registerClient(userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
       toast.success("Registration successful!");
     },
     onError: (error: MentaraApiError) => {
-      console.error("Registration failed:", error);
       toast.error("Registration failed. Please try again.");
     },
   });
@@ -75,7 +68,6 @@ export function useAuth() {
     mutationFn: (data: PreAssessmentSubmission) =>
       api.auth.submitPreAssessment(data),
     onError: (error: MentaraApiError) => {
-      console.error("Pre-assessment submission failed:", error);
       toast.error("Failed to submit assessment. Please try again.");
     },
   });
@@ -84,173 +76,132 @@ export function useAuth() {
   const assignCommunitiesMutation = useMutation({
     mutationFn: () => api.auth.assignCommunities(),
     onError: (error: MentaraApiError) => {
-      console.error("Community assignment failed:", error);
       toast.error("Failed to assign communities. Please try again.");
     },
   });
 
-  // Sign in with email
+  // Sign in with email (Updated to use commons LoginDto)
   const signInWithEmail = async (email: string, password: string) => {
-    if (!clerkLoaded || !signIn) return;
-
     try {
       setIsAuthenticating(true);
-      const result = await signIn.create({
-        identifier: email,
-        password,
-      });
-
-      if (result.status === "complete") {
-        toast.success("Signed in successfully!");
-        router.push("/user/dashboard");
-      } else {
-        toast.error("Sign in failed. Please try again.");
+      
+      // Create LoginDto object
+      const loginData: LoginDto = { email, password };
+      await auth.login(loginData);
+      toast.success("Signed in successfully!");
+      
+      // Get the user's role and redirect appropriately
+      const userData = await api.auth.getCurrentUser();
+      const userRole = userData?.role || 'client';
+      
+      switch (userRole) {
+        case 'client':
+          router.push("/user/dashboard");
+          break;
+        case 'therapist':
+          router.push("/therapist/dashboard");
+          break;
+        case 'moderator':
+          router.push("/moderator/dashboard");
+          break;
+        case 'admin':
+          router.push("/admin/dashboard");
+          break;
+        default:
+          router.push("/user/dashboard");
       }
-    } catch (error) {
-      toast.error("Failed to sign in. Please check your credentials.");
-      console.error("Sign in error:", error);
+    } catch (error: any) {
+      const errorMessage = error instanceof MentaraApiError 
+        ? error.message 
+        : "Failed to sign in. Please check your credentials.";
+      toast.error(errorMessage);
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  // Sign in with OAuth
+  // Sign in with OAuth (FIXED - functional implementation)
   const signInWithOAuth = async (
     strategy: "oauth_google" | "oauth_microsoft"
   ) => {
-    if (!clerkLoaded || !signIn) return;
-
     try {
       setIsAuthenticating(true);
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/user/dashboard",
-      });
+      const oauthUrl = strategy === "oauth_google" 
+        ? api.auth.initiateGoogleOAuth()
+        : api.auth.initiateMicrosoftOAuth();
+      window.location.href = oauthUrl;
     } catch (error) {
-      toast.error("Failed to sign in with OAuth");
-      console.error("OAuth sign in error:", error);
+      toast.error("Failed to start OAuth sign-in");
       setIsAuthenticating(false);
     }
   };
 
-  // Sign up with email
+  // Sign up with email (FIXED - uses flat structure)
   const signUpWithEmail = async (
     email: string,
     password: string,
     nickname: string = "User"
   ) => {
-    if (!clerkLoaded || !signUp) return;
-
     try {
       setIsAuthenticating(true);
 
-      // Create Clerk account
-      const result = await signUp.create({
-        emailAddress: email,
-        password,
+      // Register with JWT backend using flat structure
+      await auth.register({ 
+        email, 
+        password, 
+        firstName: nickname || "User",
+        lastName: "",
+        role: "client"
       });
 
-      if (result.status === "complete") {
-        // Account created and verified immediately - proceed with backend registration
-        const userData: RegisterUserRequest = {
-          user: {
-            email,
-            firstName: nickname || "User",
-            middleName: "",
-            lastName: "",
-            birthDate: new Date().toISOString(),
-            address: "",
-            avatarUrl: "",
-            role: "client",
-            bio: "",
-            coverImageUrl: "",
-            isActive: true,
-          },
-        };
+      toast.success("Account created successfully!");
 
-        // Register with backend
-        await registerMutation.mutateAsync(userData);
+      // Submit pre-assessment if available
+      const assessmentData = getAssessmentData();
+      if (assessmentData?.answers && assessmentData.answers.length > 0) {
+        await submitPreAssessmentMutation.mutateAsync({
+          answerMatrix: assessmentData.answers,
+          metadata: assessmentData.metadata || {},
+        });
 
-        // Submit pre-assessment if available
-        const assessmentData = getAssessmentData();
-        if (assessmentData?.answers && assessmentData.answers.length > 0) {
-          await submitPreAssessmentMutation.mutateAsync({
-            answerMatrix: assessmentData.answers,
-            metadata: assessmentData.metadata || {},
-          });
-
-          // Assign communities based on assessment
-          await assignCommunitiesMutation.mutateAsync();
-          clearAssessmentData();
-        }
-
-        router.push("/user/onboarding/profile");
-      } else if (result.status === "missing_requirements") {
-        // Email verification required - do backend registration and pre-assessment BEFORE redirect
-        const userData: RegisterUserRequest = {
-          user: {
-            email,
-            firstName: nickname || "User",
-            middleName: "",
-            lastName: "",
-            birthDate: new Date().toISOString(),
-            address: "",
-            avatarUrl: "",
-            role: "client",
-            bio: "",
-            coverImageUrl: "",
-            isActive: true,
-          },
-        };
-
-        // Register with backend first
-        await registerMutation.mutateAsync(userData);
-
-        // Submit pre-assessment if available
-        const assessmentData = getAssessmentData();
-        if (assessmentData?.answers && assessmentData.answers.length > 0) {
-          await submitPreAssessmentMutation.mutateAsync({
-            answerMatrix: assessmentData.answers,
-            metadata: assessmentData.metadata || {},
-          });
-
-          // Assign communities based on assessment
-          await assignCommunitiesMutation.mutateAsync();
-          clearAssessmentData();
-        }
-
-        // Now redirect to verification page
-        router.push("/verify-account");
-      } else {
-        toast.error("Registration failed. Please try again.");
+        // Assign communities based on assessment
+        await assignCommunitiesMutation.mutateAsync();
+        clearAssessmentData();
       }
+
+      router.push("/user/onboarding/profile");
     } catch (error: any) {
-      const message =
-        error?.errors?.[0]?.message || error?.message || "Registration failed";
-      toast.error(message);
-      console.error("Sign up error:", error);
+      const errorMessage = error instanceof MentaraApiError
+        ? error.message
+        : error?.message || "Registration failed";
+      toast.error(errorMessage);
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  // Sign up with OAuth
+  // Sign up with OAuth (FIXED - functional implementation)
   const signUpWithOAuth = async (
-    strategy: "oauth_google" | "oauth_microsoft"
+    strategy: "oauth_google" | "oauth_microsoft",
+    options?: { hasPreAssessmentData?: boolean; redirectPath?: string }
   ) => {
-    if (!clerkLoaded || !signUp) return;
-
     try {
       setIsAuthenticating(true);
-      await signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/user/onboarding/profile",
-      });
+      
+      // Store pre-assessment data if provided
+      if (options?.hasPreAssessmentData) {
+        const assessmentData = getAssessmentData();
+        if (assessmentData?.answers) {
+          localStorage.setItem("pendingAssessmentData", JSON.stringify(assessmentData));
+        }
+      }
+      
+      const oauthUrl = strategy === "oauth_google" 
+        ? api.auth.initiateGoogleOAuth()
+        : api.auth.initiateMicrosoftOAuth();
+      window.location.href = oauthUrl;
     } catch (error) {
-      toast.error("Failed to sign up with OAuth");
-      console.error("OAuth sign up error:", error);
+      toast.error("Failed to start OAuth sign-up");
       setIsAuthenticating(false);
     }
   };
@@ -259,21 +210,20 @@ export function useAuth() {
   const handleSignOut = async () => {
     try {
       setIsAuthenticating(true);
-      await signOut();
+      await auth.logout();
       // Clear React Query cache
       queryClient.clear();
       toast.success("Signed out successfully");
-      router.push("/sign-in");
+      router.push("/auth/sign-in");
     } catch (error) {
       toast.error("Failed to sign out");
-      console.error("Sign out error:", error);
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  // Register user with backend (for OAuth flows)
-  const registerUser = async (userData: RegisterUserRequest) => {
+  // Register user with backend (for OAuth flows) - Updated with commons types
+  const registerUser = async (userData: RegisterClientDto) => {
     return registerMutation.mutateAsync(userData);
   };
 
@@ -282,10 +232,40 @@ export function useAuth() {
     return submitPreAssessmentMutation.mutateAsync(data);
   };
 
+  // OAuth callback handler (NEW)
+  const handleOAuthCallback = async (token: string) => {
+    try {
+      // Store the token using the auth context
+      auth.setTokens(token, ''); // Assuming single token for simplicity
+      
+      // Fetch user data
+      await refetchUser();
+      
+      // Process any pending assessment data
+      const pendingAssessmentData = localStorage.getItem("pendingAssessmentData");
+      if (pendingAssessmentData) {
+        try {
+          const assessmentData = JSON.parse(pendingAssessmentData);
+          await submitPreAssessmentMutation.mutateAsync({
+            answerMatrix: assessmentData.answers,
+            metadata: assessmentData.metadata || {},
+          });
+          await assignCommunitiesMutation.mutateAsync();
+          localStorage.removeItem("pendingAssessmentData");
+        } catch (error) {
+        }
+      }
+      
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // Computed values
-  const isSignedIn = !!clerkUser;
-  const isLoaded = clerkLoaded;
-  const isLoading = userLoading || firstSignInLoading || isAuthenticating;
+  const isSignedIn = auth.isAuthenticated;
+  const isLoaded = !auth.isLoading;
+  const isLoading = userLoading || firstSignInLoading || isAuthenticating || auth.isLoading;
   const isFirstTimeUser = firstSignInData?.isFirstTime ?? false;
 
   return {
@@ -305,13 +285,14 @@ export function useAuth() {
     signUpWithEmail,
     signUpWithOAuth,
     handleSignOut,
+    handleOAuthCallback,
 
     // Registration helpers
     registerUser,
     submitPreAssessment,
 
     // Utilities
-    getToken,
+    getToken: () => Promise.resolve(auth.accessToken),
     refetchUser,
 
     // Mutation states

@@ -57,6 +57,56 @@ export interface AdminService {
     updateStatus(applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }>;
   };
 
+  // Enhanced Therapist Management for Module 2
+  getTherapistApplications(filters?: {
+    status?: 'pending' | 'approved' | 'rejected' | 'suspended';
+    province?: string;
+    submittedAfter?: string;
+    processedBy?: string;
+    providerType?: string;
+    limit?: number;
+  }): Promise<{ therapists: any[]; total: number; }>;
+
+  getTherapistStatistics(): Promise<{
+    overview: {
+      totalApplications: number;
+      pendingReview: number;
+      approvedToday: number;
+      rejectedToday: number;
+      averageProcessingTime: number;
+      approvalRate: number;
+    };
+    trends: {
+      weeklyApplications: number;
+      weeklyApprovals: number;
+      weeklyRejections: number;
+      weeklyChange: number;
+    };
+    demographics: {
+      provinces: Array<{ name: string; count: number }>;
+      providerTypes: Array<{ name: string; count: number }>;
+      experienceLevels: Array<{ range: string; count: number }>;
+    };
+    performance: {
+      averageRating: number;
+      ratedTherapists: number;
+      totalTherapists: number;
+      activeTherapists: number;
+    };
+  }>;
+
+  approveTherapist(therapistId: string, data: {
+    approvalMessage?: string;
+    notifyTherapist?: boolean;
+  }): Promise<{ success: boolean; message: string; }>;
+
+  rejectTherapist(therapistId: string, data: {
+    rejectionReason: string;
+    customMessage?: string;
+    notifyTherapist?: boolean;
+    allowReapplication?: boolean;
+  }): Promise<{ success: boolean; message: string; }>;
+
   // Analytics and reports
   analytics: {
     getSystemStats(): Promise<SystemStats>;
@@ -186,6 +236,69 @@ export const createAdminService = (client: AxiosInstance): AdminService => ({
     updateStatus: (applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }> =>
       client.put(`/admin/therapist-applications/${applicationId}/status`, data),
   },
+
+  // Enhanced Therapist Management for Module 2
+  getTherapistApplications: (filters: {
+    status?: 'pending' | 'approved' | 'rejected' | 'suspended';
+    province?: string;
+    submittedAfter?: string;
+    processedBy?: string;
+    providerType?: string;
+    limit?: number;
+  } = {}): Promise<{ therapists: any[]; total: number; }> => {
+    const searchParams = new URLSearchParams();
+    if (filters.status) searchParams.append('status', filters.status);
+    if (filters.province) searchParams.append('province', filters.province);
+    if (filters.submittedAfter) searchParams.append('submittedAfter', filters.submittedAfter);
+    if (filters.processedBy) searchParams.append('processedBy', filters.processedBy);
+    if (filters.providerType) searchParams.append('providerType', filters.providerType);
+    if (filters.limit) searchParams.append('limit', filters.limit.toString());
+
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return client.get(`/admin/therapists/applications${queryString}`);
+  },
+
+  getTherapistStatistics: (): Promise<{
+    overview: {
+      totalApplications: number;
+      pendingReview: number;
+      approvedToday: number;
+      rejectedToday: number;
+      averageProcessingTime: number;
+      approvalRate: number;
+    };
+    trends: {
+      weeklyApplications: number;
+      weeklyApprovals: number;
+      weeklyRejections: number;
+      weeklyChange: number;
+    };
+    demographics: {
+      provinces: Array<{ name: string; count: number }>;
+      providerTypes: Array<{ name: string; count: number }>;
+      experienceLevels: Array<{ range: string; count: number }>;
+    };
+    performance: {
+      averageRating: number;
+      ratedTherapists: number;
+      totalTherapists: number;
+      activeTherapists: number;
+    };
+  }> => client.get('/admin/therapists/statistics'),
+
+  approveTherapist: (therapistId: string, data: {
+    approvalMessage?: string;
+    notifyTherapist?: boolean;
+  }): Promise<{ success: boolean; message: string; }> =>
+    client.post(`/admin/therapists/${therapistId}/approve`, data),
+
+  rejectTherapist: (therapistId: string, data: {
+    rejectionReason: string;
+    customMessage?: string;
+    notifyTherapist?: boolean;
+    allowReapplication?: boolean;
+  }): Promise<{ success: boolean; message: string; }> =>
+    client.post(`/admin/therapists/${therapistId}/reject`, data),
 
   // Analytics and reports
   analytics: {

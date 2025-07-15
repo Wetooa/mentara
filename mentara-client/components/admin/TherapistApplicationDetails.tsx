@@ -62,10 +62,10 @@ export function TherapistApplicationDetails({
   application,
   onStatusChange,
 }: TherapistApplicationDetailsProps) {
-  const [selectedFile, setSelectedFile] = useState<{
-    name: string;
-    url: string;
-  } | null>(null);
+  // const [selectedFile, setSelectedFile] = useState<{
+  //   name: string;
+  //   url: string;
+  // } | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(
     null

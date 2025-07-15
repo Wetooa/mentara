@@ -1,6 +1,6 @@
 "use client";
-import React, { useCallback, useMemo } from "react";
-import { useForm, FormProvider, Controller, useWatch } from "react-hook-form";
+import React, { useCallback } from "react";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle, Shield, FileText, Users, Clock, AlertCircle, Check, Save, Loader2 } from "lucide-react";
+import { CheckCircle, Circle, Shield, FileText, Users, Clock, Save, Loader2 } from "lucide-react";
 import { OnboardingStepper } from "@/components/ui/onboardingstepper";
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 import Image from "next/image";
@@ -207,27 +207,27 @@ export default function MentaraApplication() {
   const [professionalLicenseType, isPRCLicensed, complaintsOrDisciplinaryActions] = watchedValues;
 
   // Helper function to check if a field is valid and has a value
-  const isFieldComplete = useCallback((fieldName: string) => {
-    const fieldState = form.getFieldState(fieldName);
-    const fieldValue = form.getValues(fieldName as any);
-    return !fieldState.error && fieldValue && fieldValue !== "" && (!Array.isArray(fieldValue) || fieldValue.length > 0);
-  }, [form]);
+  // const isFieldComplete = useCallback((fieldName: string) => {
+  //   const fieldState = form.getFieldState(fieldName);
+  //   const fieldValue = form.getValues(fieldName as keyof TherapistApplicationForm);
+  //   return !fieldState.error && fieldValue && fieldValue !== "" && (!Array.isArray(fieldValue) || fieldValue.length > 0);
+  // }, [form]);
 
   // Helper function to get validation icon
-  const getValidationIcon = useCallback((fieldName: string, size = "w-4 h-4") => {
-    const fieldState = form.getFieldState(fieldName);
-    const fieldValue = form.getValues(fieldName as any);
-    
-    if (fieldState.error) {
-      return <AlertCircle className={`${size} text-red-500`} />;
-    }
-    
-    if (fieldValue && fieldValue !== "" && (!Array.isArray(fieldValue) || fieldValue.length > 0)) {
-      return <Check className={`${size} text-green-500`} />;
-    }
-    
-    return <Circle className={`${size} text-gray-300`} />;
-  }, [form]);
+  // const getValidationIcon = useCallback((fieldName: string, size = "w-4 h-4") => {
+  //   const fieldState = form.getFieldState(fieldName);
+  //   const fieldValue = form.getValues(fieldName as keyof TherapistApplicationForm);
+  //   
+  //   if (fieldState.error) {
+  //     return <AlertCircle className={`${size} text-red-500`} />;
+  //   }
+  //   
+  //   if (fieldValue && fieldValue !== "" && (!Array.isArray(fieldValue) || fieldValue.length > 0)) {
+  //     return <Check className={`${size} text-green-500`} />;
+  //   }
+  //   
+  //   return <Circle className={`${size} text-gray-300`} />;
+  // }, [form]);
 
   // Auto-save functionality
   const autoSave = useCallback((values: TherapistApplicationForm) => {
@@ -260,8 +260,7 @@ export default function MentaraApplication() {
       
       setLastSavedAt(new Date());
       showToast("Draft saved automatically", "info", 2000);
-    } catch (error) {
-      console.error("Error auto-saving application data:", error);
+    } catch {
       showToast("Failed to save draft", "error");
     }
   }, [updateField, updateNestedField, showToast]);
@@ -286,7 +285,6 @@ export default function MentaraApplication() {
         router.push("/therapist-application/2");
       }, 1500);
     } catch (error) {
-      console.error("Error saving application data:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to save application. Please try again.";
       showToast(errorMessage, "error");
     } finally {
@@ -326,7 +324,7 @@ export default function MentaraApplication() {
           />
         </div>
         <div className="mt-4 mb-8">
-          <p className="text-sm text-gray-600 mb-1">You're working on</p>
+          <p className="text-sm text-gray-600 mb-1">You&apos;re working on</p>
           <h1 className="text-2xl font-bold text-green-900">Application</h1>
         </div>
         <OnboardingStepper steps={steps} currentStep={0} />
@@ -383,7 +381,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="professionalLicenseType"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             What is your professional license type? <span className="text-red-500">*</span>
@@ -458,7 +456,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="isPRCLicensed"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Are you PRC-licensed? <span className="text-red-500">*</span>
@@ -541,7 +539,7 @@ export default function MentaraApplication() {
                         <FormField
                           control={form.control}
                           name="isLicenseActive"
-                          render={({ field }) => (
+                          render={() => (
                             <FormItem>
                               <FormLabel className="font-semibold text-gray-900">
                                 Is your license currently active and in good standing? <span className="text-red-500">*</span>
@@ -588,7 +586,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="teletherapyReadiness.providedOnlineTherapyBefore"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Have you provided online therapy before? <span className="text-red-500">*</span>
@@ -622,7 +620,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="teletherapyReadiness.comfortableUsingVideoConferencing"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Are you comfortable using secure video conferencing tools (e.g., Zoom, Google Meet)? <span className="text-red-500">*</span>
@@ -656,7 +654,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="teletherapyReadiness.privateConfidentialSpace"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Do you have a private and confidential space for conducting virtual sessions? <span className="text-red-500">*</span>
@@ -690,7 +688,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="teletherapyReadiness.compliesWithDataPrivacyAct"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Do you comply with the Philippine Data Privacy Act (RA 10173)? <span className="text-red-500">*</span>
@@ -805,7 +803,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="compliance.professionalLiabilityInsurance"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Do you have professional liability insurance for online practice? <span className="text-red-500">*</span>
@@ -852,7 +850,7 @@ export default function MentaraApplication() {
                     <FormField
                       control={form.control}
                       name="compliance.complaintsOrDisciplinaryActions"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel className="text-base font-semibold text-gray-900">
                             Have you ever had complaints or disciplinary actions against your PRC license? <span className="text-red-500">*</span>
@@ -918,10 +916,10 @@ export default function MentaraApplication() {
                       <FormField
                         control={form.control}
                         name="compliance.willingToAbideByPlatformGuidelines"
-                        render={({ field }) => (
+                        render={() => (
                           <FormItem>
                             <FormLabel className="text-base font-semibold text-gray-900">
-                              Are you willing to abide by our platform's ethical guidelines, privacy policies, and patient safety standards? <span className="text-red-500">*</span>
+                              Are you willing to abide by our platform&apos;s ethical guidelines, privacy policies, and patient safety standards? <span className="text-red-500">*</span>
                             </FormLabel>
                             <Controller
                               control={form.control}

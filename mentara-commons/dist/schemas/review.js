@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateReviewResponseSchema = exports.ReviewResponseSchema = exports.ReviewAnalyticsSchema = exports.ReviewReportSchema = exports.ReviewHelpfulActionSchema = exports.ModerateReviewRequestSchema = exports.TherapistReviewParamsSchema = exports.ReviewStatsSchema = exports.ReviewListResponseSchema = exports.ReviewListParamsSchema = exports.UpdateReviewRequestSchema = exports.CreateReviewRequestSchema = exports.ReviewSchema = exports.ReviewTherapistSchema = exports.ReviewClientSchema = exports.RatingSchema = exports.ReviewStatusSchema = void 0;
+exports.ReviewIdParamSchema = exports.ReviewStatsDtoSchema = exports.GetReviewsDtoSchema = exports.ModerateReviewDtoSchema = exports.UpdateReviewDtoSchema = exports.CreateReviewDtoSchema = exports.CreateReviewResponseSchema = exports.ReviewResponseSchema = exports.ReviewAnalyticsSchema = exports.ReviewReportSchema = exports.ReviewHelpfulActionSchema = exports.ModerateReviewRequestSchema = exports.TherapistReviewParamsSchema = exports.ReviewStatsSchema = exports.ReviewListResponseSchema = exports.ReviewListParamsSchema = exports.UpdateReviewRequestSchema = exports.CreateReviewRequestSchema = exports.ReviewSchema = exports.ReviewTherapistSchema = exports.ReviewClientSchema = exports.RatingSchema = exports.ReviewStatusSchema = void 0;
 const zod_1 = require("zod");
-// Review Status Schema
+// Review Status Schema (updated from class-validator DTO)
 exports.ReviewStatusSchema = zod_1.z.enum([
-    'pending',
-    'approved',
-    'rejected'
+    'PENDING',
+    'APPROVED',
+    'REJECTED',
+    'FLAGGED'
 ]);
 // Rating Schema (1-5 stars)
 exports.RatingSchema = zod_1.z.number()
@@ -34,7 +35,7 @@ exports.ReviewSchema = zod_1.z.object({
     clientId: zod_1.z.string().min(1, 'Client ID is required'),
     meetingId: zod_1.z.string().optional(),
     isAnonymous: zod_1.z.boolean().default(false),
-    status: exports.ReviewStatusSchema.default('pending'),
+    status: exports.ReviewStatusSchema.default('PENDING'),
     helpfulCount: zod_1.z.number().min(0).default(0),
     createdAt: zod_1.z.string().datetime(),
     updatedAt: zod_1.z.string().datetime(),
@@ -180,5 +181,41 @@ exports.ReviewResponseSchema = zod_1.z.object({
 exports.CreateReviewResponseSchema = zod_1.z.object({
     content: zod_1.z.string().min(10, 'Response must be at least 10 characters').max(1000, 'Response cannot exceed 1000 characters'),
     isPublic: zod_1.z.boolean().default(true)
+});
+// DTOs from class-validator conversion
+exports.CreateReviewDtoSchema = zod_1.z.object({
+    rating: zod_1.z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating cannot exceed 5'),
+    title: zod_1.z.string().optional(),
+    content: zod_1.z.string().optional(),
+    therapistId: zod_1.z.string().uuid('Invalid therapist ID format'),
+    meetingId: zod_1.z.string().uuid('Invalid meeting ID format').optional(),
+    isAnonymous: zod_1.z.boolean().default(false)
+});
+exports.UpdateReviewDtoSchema = zod_1.z.object({
+    rating: zod_1.z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating cannot exceed 5').optional(),
+    title: zod_1.z.string().optional(),
+    content: zod_1.z.string().optional(),
+    isAnonymous: zod_1.z.boolean().optional()
+});
+exports.ModerateReviewDtoSchema = zod_1.z.object({
+    status: exports.ReviewStatusSchema,
+    moderationNote: zod_1.z.string().optional()
+});
+exports.GetReviewsDtoSchema = zod_1.z.object({
+    therapistId: zod_1.z.string().uuid('Invalid therapist ID format').optional(),
+    clientId: zod_1.z.string().uuid('Invalid client ID format').optional(),
+    status: exports.ReviewStatusSchema.optional(),
+    page: zod_1.z.number().int().min(1).default(1),
+    limit: zod_1.z.number().int().min(1).max(50).default(10),
+    sortBy: zod_1.z.string().default('createdAt'),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).default('desc'),
+    rating: zod_1.z.number().int().min(1).max(5).optional()
+});
+exports.ReviewStatsDtoSchema = zod_1.z.object({
+    therapistId: zod_1.z.string().uuid('Invalid therapist ID format')
+});
+// Parameter Schemas
+exports.ReviewIdParamSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid('Invalid review ID format')
 });
 //# sourceMappingURL=review.js.map

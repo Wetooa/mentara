@@ -10,12 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { NotificationType, NotificationPriority } from '@prisma/client';
 
 @Controller('notifications')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 

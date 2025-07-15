@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { RegisterClientDtoSchema, z } from "mentara-commons";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -27,24 +27,15 @@ import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
 import { useAuth } from "@/hooks/useAuth";
 
-const formSchema = z
-  .object({
-    nickname: z.string().min(2, {
-      message: "Name must be at least 2 characters.",
-    }),
-    email: z.string().email({
-      message: "Please enter a valid email address.",
-    }),
-    confirmEmail: z.string().email({
-      message: "Please enter a valid email address.",
-    }),
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
-    confirmPassword: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
-  })
+// Frontend-specific form schema that extends commons schema with confirmation fields
+const formSchema = RegisterClientDtoSchema.extend({
+  confirmEmail: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  confirmPassword: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+})
   .refine((data) => data.email === data.confirmEmail, {
     message: "Emails do not match",
     path: ["confirmEmail"],
@@ -54,6 +45,8 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
+type SignUpFormData = z.infer<typeof formSchema>;
+
 function PreAssessmentSignUp({
   handleNextButtonOnClick,
 }: PreAssessmentPageFormProps) {
@@ -61,10 +54,11 @@ function PreAssessmentSignUp({
   const { setDetails } = useSignUpStore();
   const { signUpWithEmail, signUpWithOAuth, isLoading } = useAuth();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<SignUpFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nickname: "",
+      firstName: "", // Using firstName instead of nickname to match commons schema
+      lastName: "",
       email: "",
       confirmEmail: "",
       password: "",
@@ -78,10 +72,10 @@ function PreAssessmentSignUp({
     localStorage.setItem("assessmentAnswers", JSON.stringify(answersList));
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: SignUpFormData) {
     storeAssessmentAnswersInLocalStorage();
     setDetails({
-      nickName: values.nickname,
+      nickName: values.firstName + (values.lastName ? ` ${values.lastName}` : ''),
       email: values.email,
     });
 
@@ -89,9 +83,18 @@ function PreAssessmentSignUp({
       // Prepare pre-assessment data
       const answersList = answersToAnswerMatrix(questionnaires, answers);
 
+      // Transform form data to match commons RegisterClientDto
+      // const registrationData: RegisterClientDto = {
+      //   email: values.email,
+      //   password: values.password,
+      //   firstName: values.firstName,
+      //   lastName: values.lastName,
+      //   // Add any other fields from commons schema as needed
+      // };
+
       // Use centralized authentication with pre-assessment support
       const result = await signUpWithEmail(values.email, values.password, {
-        nickname: values.nickname,
+        nickname: values.firstName,
         preAssessmentAnswers: answersList,
         source: "preAssessment",
         sendEmailVerification: true,
@@ -106,8 +109,8 @@ function PreAssessmentSignUp({
           // Redirect will be handled by the useAuth hook
         }
       }
-    } catch (error: any) {
-      toast.error(`Failed to create account. ${error?.message || error}`);
+    } catch (error: unknown) {
+      toast.error(`Failed to create account. ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -130,7 +133,7 @@ function PreAssessmentSignUp({
             <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="nickname"
+                name="firstName"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -140,6 +143,19 @@ function PreAssessmentSignUp({
                       For added privacy you can provide nickname instead of your
                       first name
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Last name (optional)" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -213,8 +229,8 @@ function PreAssessmentSignUp({
               <Separator className="flex-1" />
             </div>
 
-            <div className="space-y-3 ">
-              <Button
+            <div className="space-y-3">
+              <div
                 onClick={() => {
                   storeAssessmentAnswersInLocalStorage();
                   signUpWithOAuth("oauth_google", {
@@ -222,14 +238,11 @@ function PreAssessmentSignUp({
                     redirectPath: "/user/welcome",
                   });
                 }}
-                type="button"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 p-2 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <ContinueWithGoogle />
-              </Button>
+              </div>
 
-              <Button
+              <div
                 onClick={() => {
                   storeAssessmentAnswersInLocalStorage();
                   signUpWithOAuth("oauth_microsoft", {
@@ -237,12 +250,9 @@ function PreAssessmentSignUp({
                     redirectPath: "/user/welcome",
                   });
                 }}
-                type="button"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 p-2 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <ContinueWithMicrosoft />
-              </Button>
+              </div>
 
               {/* FIX: Implement this */}
               {/* <GoogleOneTap /> */}

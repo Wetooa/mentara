@@ -1,5 +1,5 @@
 model User {
-    id         String    @id @unique @default(uuid()) // Clerk user ID for authentication
+    id         String    @id @unique @default(uuid()) // Local user ID for authentication
     email      String    @unique // User's email address
     firstName  String
     middleName String?
@@ -10,6 +10,24 @@ model User {
     role       String    @default("client") // client, therapist, moderator, admin
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
+
+    // Authentication fields for local auth
+    password              String? // Hashed password (nullable for migration compatibility)
+    emailVerified         Boolean   @default(false) // Email verification status
+    emailVerifyToken      String?   @unique // Token for email verification
+    emailVerifyTokenExp   DateTime? // Email verification token expiry
+    resetToken            String?   @unique // Password reset token
+    resetTokenExpiry      DateTime? // Password reset token expiry
+    lastLoginAt           DateTime? // Last successful login
+    failedLoginCount      Int       @default(0) // Failed login attempts
+    lockoutUntil          DateTime? // Account lockout until timestamp
+    twoFactorEnabled      Boolean   @default(false) // Two-factor authentication
+    twoFactorSecret       String? // 2FA secret key
+
+    // Account status and deactivation
+    deactivatedAt         DateTime? // When account was deactivated
+    deactivatedBy         String? // Who deactivated the account
+    deactivationReason    String? // Reason for deactivation
 
     // Profile and verification
     bio           String?
@@ -31,7 +49,6 @@ model User {
     allowMessagesFrom String @default("therapists") // all, therapists, none
 
     // Account status
-    lastLoginAt      DateTime?
     lastActiveAt     DateTime?
     suspendedAt      DateTime?
     suspendedBy      String?
@@ -43,6 +60,11 @@ model User {
     comments      Comment[]
     postHearts    PostHeart[]
     commentHearts CommentHeart[]
+    
+    // Community recommendation system relations
+    communityRecommendations CommunityRecommendation[] @relation("UserCommunityRecommendations")
+    joinRequests            CommunityJoinRequest[]     @relation("UserJoinRequests")
+    moderatedJoinRequests   CommunityJoinRequest[]     @relation("ModeratedJoinRequests")
 
     // Role-specific relations
     client    Client?    @relation("UserClient")
@@ -80,9 +102,30 @@ model User {
     subscription        Subscription?        @relation("UserSubscription")
     paymentMethods      PaymentMethod[]      @relation("UserPaymentMethods")
     discountRedemptions DiscountRedemption[] @relation("UserDiscountRedemptions")
+    stripeCustomerId    String?              @unique // Stripe customer ID
+
+    // Authentication relations
+    refreshTokens RefreshToken[] @relation("UserRefreshTokens")
+
+    // Push notification relations
+    deviceTokens             DeviceToken[]             @relation("UserDeviceTokens")
+    scheduledNotifications   ScheduledNotification[]   @relation("UserScheduledNotifications")
+
+    // Reddit-like features relations
+    postVotes                PostVote[]                @relation("UserPostVotes")
+    commentVotes             CommentVote[]             @relation("UserCommentVotes")
+    givenAwards              PostAward[]               @relation("UserGivenAwards")
+    givenCommentAwards       CommentAward[]            @relation("UserGivenCommentAwards")
+    reports                  ContentReport[]           @relation("UserReports")
+    moderatedReports         ContentReport[]           @relation("UserModeratedReports")
+    savedContent             SavedContent[]            @relation("UserSavedContent")
+    karma                    UserKarma?                @relation("UserKarma")
 
     @@index([email])
     @@index([role])
+    @@index([emailVerifyToken])
+    @@index([resetToken])
+    @@index([deactivatedAt])
 }
 
 model Client {
@@ -96,6 +139,7 @@ model Client {
     clientMedicalHistory   ClientMedicalHistory[]
     clientPreferences      ClientPreference[]
     assignedTherapists     ClientTherapist[]
+    sentRequests           ClientTherapistRequest[] // Therapist requests sent by this client
     meetings               Meeting[]               @relation("ClientMeetings")
     reviews                Review[] // Reviews written by this client
     sessionLogs            SessionLog[]

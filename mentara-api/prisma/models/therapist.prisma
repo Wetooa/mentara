@@ -76,6 +76,7 @@ model Therapist {
   therapistAvailabilities TherapistAvailability[]
   worksheets              Worksheet[]
   assignedClients         ClientTherapist[]
+  receivedRequests        ClientTherapistRequest[] // Client requests received by this therapist
   reviews                 Review[]
   sessionLogs             SessionLog[]
   therapyProgress         TherapyProgress[]

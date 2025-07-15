@@ -46,7 +46,7 @@ interface BookingModalProps {
   therapist: TherapistCardData | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (meeting: any) => void;
+  onSuccess?: (meeting: CreateMeetingRequest) => void;
 }
 
 export default function BookingModal({
@@ -81,11 +81,11 @@ export default function BookingModal({
   }, [isOpen, therapist]);
 
   // Get available durations
-  const { data: durations = [] } = useQuery({
-    queryKey: ["meeting-durations"],
-    queryFn: () => api.booking.getDurations(),
-    enabled: isOpen,
-  });
+  // const { data: durations = [] } = useQuery({
+  //   queryKey: ["meeting-durations"],
+  //   queryFn: () => api.booking.getDurations(),
+  //   enabled: isOpen,
+  // });
 
   // Get available slots for selected date
   const {

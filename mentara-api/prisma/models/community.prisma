@@ -9,6 +9,10 @@ model Community {
     memberships          Membership[]
     moderatorCommunities ModeratorCommunity[]
     roomGroups           RoomGroup[]
+    
+    // Community recommendation system relations
+    recommendations      CommunityRecommendation[] @relation("CommunityRecommendations")
+    joinRequests         CommunityJoinRequest[]    @relation("CommunityJoinRequests")
 
     @@index([name])
     @@index([slug])

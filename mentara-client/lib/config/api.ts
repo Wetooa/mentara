@@ -13,7 +13,7 @@ export const queryConfig = {
   gcTime: 10 * 60 * 1000, // 10 minutes (v5 renamed cacheTime)
   refetchOnWindowFocus: false, // Reduce unnecessary refetches
   refetchOnReconnect: "always" as const,
-  retry: (failureCount: number, error: any) => {
+  retry: (failureCount: number, error: { response?: { status?: number } }) => {
     // Don't retry on 4xx errors except 408, 429
     if (error?.response?.status >= 400 && error?.response?.status < 500) {
       return [408, 429].includes(error.response.status) && failureCount < 3;

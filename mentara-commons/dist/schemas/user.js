@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EmailSchema = exports.UserIdSchema = exports.UserDeactivationResponseDtoSchema = exports.DeactivateUserDtoSchema = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema = exports.RolePermissionsSchema = exports.FirstSignInResponseSchema = exports.UpdateUserRequestSchema = exports.CreateUserRequestSchema = exports.UserSchema = exports.UserRoleSchema = void 0;
+exports.EmailSchema = exports.UserIdSchema = exports.UserIdParamSchema = exports.ChangePasswordDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = exports.UserDeactivationResponseDtoSchema = exports.DeactivateUserDtoSchema = exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema = exports.RolePermissionsSchema = exports.FirstSignInResponseSchema = exports.UpdateUserRequestSchema = exports.CreateUserRequestSchema = exports.UserSchema = exports.UserRoleSchema = void 0;
 const zod_1 = require("zod");
 // User Role Enum Schema
 exports.UserRoleSchema = zod_1.z.enum([
@@ -46,10 +46,10 @@ exports.RolePermissionsSchema = zod_1.z.object({
     canCreateWorksheets: zod_1.z.boolean(),
     canAssignWorksheets: zod_1.z.boolean()
 });
-// User Registration DTOs (Backend specific)
+// User Registration DTOs (JWT Authentication)
 exports.RegisterClientDtoSchema = zod_1.z.object({
-    userId: zod_1.z.string().min(1, 'User ID is required'), // Clerk user ID
     email: zod_1.z.string().email('Invalid email format'),
+    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
     firstName: zod_1.z.string().min(1, 'First name is required'),
     middleName: zod_1.z.string().optional(),
     lastName: zod_1.z.string().min(1, 'Last name is required'),
@@ -59,39 +59,34 @@ exports.RegisterClientDtoSchema = zod_1.z.object({
     hasSeenTherapistRecommendations: zod_1.z.boolean().optional()
 });
 exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema.partial().omit({
-    userId: true
+    password: true
 });
-// Therapist Registration Schema
-exports.RegisterTherapistDtoSchema = zod_1.z.object({
-    userId: zod_1.z.string().min(1, 'User ID is required'), // Clerk user ID
-    email: zod_1.z.string().email('Invalid email format'),
-    firstName: zod_1.z.string().min(1, 'First name is required'),
-    middleName: zod_1.z.string().optional(),
-    lastName: zod_1.z.string().min(1, 'Last name is required'),
-    title: zod_1.z.string().min(1, 'Professional title is required'),
-    hourlyRate: zod_1.z.number().min(0, 'Hourly rate must be positive').optional(),
-    experienceYears: zod_1.z.number().min(0, 'Experience years must be positive').optional(),
-    province: zod_1.z.string().min(1, 'Province is required').optional(),
-    specialties: zod_1.z.array(zod_1.z.string()).optional(),
-    bio: zod_1.z.string().optional(),
-    profileImage: zod_1.z.string().url().optional(),
-    licenseNumber: zod_1.z.string().optional(),
-    licenseType: zod_1.z.string().optional(),
-    isVerified: zod_1.z.boolean().default(false)
-});
-exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema.partial().omit({
-    userId: true
-});
-// User Deactivation Schemas
+// Note: Therapist registration schemas are now in therapist.ts to avoid conflicts
+// User Deactivation Schemas (updated from class-validator DTO)
 exports.DeactivateUserDtoSchema = zod_1.z.object({
-    reason: zod_1.z.string().min(1, 'Deactivation reason is required'),
-    notifyUser: zod_1.z.boolean().default(true)
+    reason: zod_1.z.string().max(500, 'Reason must not exceed 500 characters').optional()
 });
 exports.UserDeactivationResponseDtoSchema = zod_1.z.object({
-    id: zod_1.z.string(),
-    isActive: zod_1.z.boolean(),
-    deactivatedAt: zod_1.z.string().datetime().nullable(),
-    deactivationReason: zod_1.z.string().nullable()
+    message: zod_1.z.string(),
+    deactivatedAt: zod_1.z.string().datetime(),
+    reason: zod_1.z.string().optional(),
+    deactivatedBy: zod_1.z.string().optional()
+});
+// Authentication Schemas for Phase 3A
+exports.LoginDtoSchema = zod_1.z.object({
+    email: zod_1.z.string().email('Invalid email format'),
+    password: zod_1.z.string().min(1, 'Password is required')
+});
+exports.RefreshTokenDtoSchema = zod_1.z.object({
+    refreshToken: zod_1.z.string().min(1, 'Refresh token is required')
+});
+exports.ChangePasswordDtoSchema = zod_1.z.object({
+    currentPassword: zod_1.z.string().min(1, 'Current password is required'),
+    newPassword: zod_1.z.string().min(8, 'New password must be at least 8 characters long')
+});
+// User ID Parameter Schema
+exports.UserIdParamSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid('Invalid user ID format')
 });
 // Utility schemas for specific use cases
 exports.UserIdSchema = zod_1.z.string().min(1, 'User ID is required');

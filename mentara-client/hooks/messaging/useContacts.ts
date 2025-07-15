@@ -1,20 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
 import { Contact } from '@/components/messages/types';
 import { createMessagingApiService } from '@/lib/messaging-api';
 
 export function useContacts() {
-  const { getToken, isLoaded } = useAuth();
+  const { accessToken, isAuthenticated } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const messagingApi = getToken ? createMessagingApiService(getToken) : null;
+  const messagingApi = accessToken ? createMessagingApiService(() => Promise.resolve(accessToken)) : null;
 
   const loadContacts = useCallback(async () => {
-    if (!messagingApi || !isLoaded) return;
+    if (!messagingApi || !isAuthenticated) return;
 
     try {
       setIsLoading(true);
@@ -27,7 +27,7 @@ export function useContacts() {
     } finally {
       setIsLoading(false);
     }
-  }, [messagingApi, isLoaded]);
+  }, [messagingApi, isAuthenticated]);
 
   const searchContacts = useCallback(async (query: string): Promise<Contact[]> => {
     if (!messagingApi) return [];

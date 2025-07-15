@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useCallback, useRef } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
 import { Conversation, Message } from '@/components/messages/types';
 import { createMessagingApiService } from '@/lib/messaging-api';
 import type { MessageAttachment } from '@/types/api/messaging';
 
 export function useConversations() {
-  const { getToken } = useAuth();
+  const { accessToken } = useAuth();
   const [conversations, setConversations] = useState<Map<string, Conversation>>(new Map());
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -16,7 +16,7 @@ export function useConversations() {
   const conversationsRef = useRef(conversations);
   conversationsRef.current = conversations;
 
-  const messagingApi = getToken ? createMessagingApiService(getToken) : null;
+  const messagingApi = accessToken ? createMessagingApiService(() => Promise.resolve(accessToken)) : null;
 
   const selectContact = useCallback(async (contactId: string) => {
     setSelectedContactId(contactId);

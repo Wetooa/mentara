@@ -379,8 +379,8 @@ export declare const BookingFormDataSchema: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    title: string;
     date: string;
+    title: string;
     duration: {
         id: string;
         isActive: boolean;
@@ -401,8 +401,8 @@ export declare const BookingFormDataSchema: z.ZodObject<{
         }[];
     };
 }, {
-    title: string;
     date: string;
+    title: string;
     duration: {
         id: string;
         isActive: boolean;
@@ -911,4 +911,129 @@ export type SlotGenerationConfig = z.infer<typeof SlotGenerationConfigSchema>;
 export type TimeSlot = z.infer<typeof TimeSlotSchema>;
 export type ValidationConfig = z.infer<typeof ValidationConfigSchema>;
 export type BookingStats = z.infer<typeof BookingStatsSchema>;
+export declare const MeetingCreateDtoSchema: z.ZodObject<{
+    therapistId: z.ZodString;
+    startTime: z.ZodString;
+    duration: z.ZodNumber;
+    title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    meetingType: z.ZodDefault<z.ZodOptional<z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>>>;
+}, "strip", z.ZodTypeAny, {
+    duration: number;
+    startTime: string;
+    therapistId: string;
+    meetingType: "phone" | "in-person" | "video" | "audio" | "chat";
+    title?: string | undefined;
+    description?: string | undefined;
+}, {
+    duration: number;
+    startTime: string;
+    therapistId: string;
+    title?: string | undefined;
+    description?: string | undefined;
+    meetingType?: "phone" | "in-person" | "video" | "audio" | "chat" | undefined;
+}>;
+export declare const MeetingUpdateDtoSchema: z.ZodObject<{
+    status: z.ZodOptional<z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>>;
+    notes: z.ZodOptional<z.ZodString>;
+    meetingUrl: z.ZodOptional<z.ZodString>;
+    startTime: z.ZodOptional<z.ZodString>;
+    duration: z.ZodOptional<z.ZodNumber>;
+    title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    meetingType: z.ZodOptional<z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>>;
+}, "strip", z.ZodTypeAny, {
+    status?: "cancelled" | "scheduled" | "confirmed" | "completed" | "in_progress" | "no_show" | undefined;
+    title?: string | undefined;
+    duration?: number | undefined;
+    notes?: string | undefined;
+    startTime?: string | undefined;
+    description?: string | undefined;
+    meetingType?: "phone" | "in-person" | "video" | "audio" | "chat" | undefined;
+    meetingUrl?: string | undefined;
+}, {
+    status?: "cancelled" | "scheduled" | "confirmed" | "completed" | "in_progress" | "no_show" | undefined;
+    title?: string | undefined;
+    duration?: number | undefined;
+    notes?: string | undefined;
+    startTime?: string | undefined;
+    description?: string | undefined;
+    meetingType?: "phone" | "in-person" | "video" | "audio" | "chat" | undefined;
+    meetingUrl?: string | undefined;
+}>;
+export declare const BookingMeetingParamsDtoSchema: z.ZodObject<{
+    id: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+}, {
+    id: string;
+}>;
+export declare const TherapistAvailabilityCreateDtoSchema: z.ZodObject<{
+    therapistId: z.ZodString;
+    dayOfWeek: z.ZodNumber;
+    startTime: z.ZodString;
+    endTime: z.ZodString;
+    isAvailable: z.ZodDefault<z.ZodBoolean>;
+    timezone: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    isAvailable: boolean;
+    startTime: string;
+    endTime: string;
+    therapistId: string;
+    dayOfWeek: number;
+    timezone?: string | undefined;
+}, {
+    startTime: string;
+    endTime: string;
+    therapistId: string;
+    dayOfWeek: number;
+    timezone?: string | undefined;
+    isAvailable?: boolean | undefined;
+}>;
+export declare const TherapistAvailabilityUpdateDtoSchema: z.ZodObject<{
+    dayOfWeek: z.ZodOptional<z.ZodNumber>;
+    startTime: z.ZodOptional<z.ZodString>;
+    endTime: z.ZodOptional<z.ZodString>;
+    isAvailable: z.ZodOptional<z.ZodBoolean>;
+    timezone: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    timezone?: string | undefined;
+    isAvailable?: boolean | undefined;
+    startTime?: string | undefined;
+    endTime?: string | undefined;
+    dayOfWeek?: number | undefined;
+}, {
+    timezone?: string | undefined;
+    isAvailable?: boolean | undefined;
+    startTime?: string | undefined;
+    endTime?: string | undefined;
+    dayOfWeek?: number | undefined;
+}>;
+export declare const AvailabilityParamsDtoSchema: z.ZodObject<{
+    id: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+}, {
+    id: string;
+}>;
+export declare const GetAvailableSlotsQueryDtoSchema: z.ZodObject<{
+    therapistId: z.ZodString;
+    date: z.ZodString;
+    duration: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    date: string;
+    therapistId: string;
+    duration?: number | undefined;
+}, {
+    date: string;
+    therapistId: string;
+    duration?: number | undefined;
+}>;
+export type MeetingCreateDto = z.infer<typeof MeetingCreateDtoSchema>;
+export type MeetingUpdateDto = z.infer<typeof MeetingUpdateDtoSchema>;
+export type BookingMeetingParamsDto = z.infer<typeof BookingMeetingParamsDtoSchema>;
+export type TherapistAvailabilityCreateDto = z.infer<typeof TherapistAvailabilityCreateDtoSchema>;
+export type TherapistAvailabilityUpdateDto = z.infer<typeof TherapistAvailabilityUpdateDtoSchema>;
+export type AvailabilityParamsDto = z.infer<typeof AvailabilityParamsDtoSchema>;
+export type GetAvailableSlotsQueryDto = z.infer<typeof GetAvailableSlotsQueryDtoSchema>;
 //# sourceMappingURL=booking.d.ts.map

@@ -42,7 +42,6 @@ import {
   Calendar,
   User,
   Shield,
-  Database,
   Download,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -168,7 +167,7 @@ export function AuditLogsTable({ className }: AuditLogsTableProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Today's Logs</p>
+                <p className="text-sm font-medium text-green-600">Today&apos;s Logs</p>
                 <h3 className="text-2xl font-bold mt-1">{stats.todayLogs.toLocaleString()}</h3>
               </div>
               <Calendar className="h-8 w-8 text-green-600 opacity-75" />
@@ -316,7 +315,7 @@ export function AuditLogsTable({ className }: AuditLogsTableProps) {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {getActionBadge(log.action)}
-                        {getSeverityBadge((log as any).severity)}
+                        {getSeverityBadge((log as { severity?: string }).severity)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -339,7 +338,7 @@ export function AuditLogsTable({ className }: AuditLogsTableProps) {
                       </p>
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {(log as any).ipAddress || '-'}
+                      {(log as { ipAddress?: string }).ipAddress || '-'}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -382,7 +381,7 @@ export function AuditLogsTable({ className }: AuditLogsTableProps) {
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Action</h3>
                   <div className="flex items-center gap-2">
                     {getActionBadge(selectedLog.action)}
-                    {getSeverityBadge((selectedLog as any).severity)}
+                    {getSeverityBadge((selectedLog as { severity?: string }).severity)}
                   </div>
                 </div>
                 <div>
@@ -399,7 +398,7 @@ export function AuditLogsTable({ className }: AuditLogsTableProps) {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">IP Address</h3>
-                  <p className="font-mono text-sm">{(selectedLog as any).ipAddress || '-'}</p>
+                  <p className="font-mono text-sm">{(selectedLog as { ipAddress?: string }).ipAddress || '-'}</p>
                 </div>
               </div>
 
@@ -412,12 +411,12 @@ export function AuditLogsTable({ className }: AuditLogsTableProps) {
                 </div>
               </div>
 
-              {(selectedLog as any).metadata && (
+              {(selectedLog as { metadata?: unknown }).metadata && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Metadata</h3>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <pre className="text-sm whitespace-pre-wrap">
-                      {JSON.stringify((selectedLog as any).metadata, null, 2)}
+                      {JSON.stringify((selectedLog as { metadata?: unknown }).metadata, null, 2)}
                     </pre>
                   </div>
                 </div>

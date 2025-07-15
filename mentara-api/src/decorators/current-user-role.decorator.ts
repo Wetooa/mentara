@@ -11,7 +11,7 @@ export const CurrentUserRole = createParamDecorator(
       return null;
     }
 
-    // First, check if role was extracted from Clerk token by ClerkAuthGuard
+    // First, check if role was extracted from JWT token by JwtAuthGuard
     if (request.userRole) {
       return request.userRole;
     }

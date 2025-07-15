@@ -1,0 +1,17 @@
+model RefreshToken {
+    id        String   @id @default(uuid())
+    token     String   @unique // Hashed refresh token
+    userId    String   // Foreign key to User
+    user      User     @relation("UserRefreshTokens", fields: [userId], references: [id], onDelete: Cascade)
+    expiresAt DateTime // When the refresh token expires
+    createdAt DateTime @default(now())
+    revokedAt DateTime? // When the token was revoked (for logout)
+    
+    // Additional security fields
+    ipAddress String? // IP address where token was issued
+    userAgent String? // User agent where token was issued
+    
+    @@index([userId])
+    @@index([token])
+    @@index([expiresAt])
+}

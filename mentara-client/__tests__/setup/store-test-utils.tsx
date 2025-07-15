@@ -263,8 +263,8 @@ export const simulateLocalStorageQuotaExceeded = () => {
  */
 
 // Measure store update performance
-export const measureStorePerformance = async <T>(
-  operation: () => T,
+export const measureStorePerformance = async <T extends any>(
+  operation: () => T | Promise<T>,
   label: string = 'Store Operation'
 ): Promise<{ result: T; duration: number }> => {
   const start = performance.now()

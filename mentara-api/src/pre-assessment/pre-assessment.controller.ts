@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { AdminOnly } from '../decorators/admin-only.decorator';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
@@ -21,7 +21,7 @@ import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { PreAssessment } from '@prisma/client';
 
 @Controller('pre-assessment')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class PreAssessmentController {
   private readonly logger = new Logger(PreAssessmentController.name);
 

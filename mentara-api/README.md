@@ -117,11 +117,19 @@ npm run db:reset      # Reset database and reseed
 
 ## 🔐 Authentication
 
-Uses Clerk for authentication with role-based access control:
+Uses JWT-based local authentication with role-based access control:
 - **Client** - Patients seeking therapy
 - **Therapist** - Licensed mental health professionals
 - **Moderator** - Community moderators
 - **Admin** - System administrators
+
+### Authentication Features
+- **JWT Tokens**: Secure token-based authentication with refresh token rotation
+- **Password Security**: bcrypt hashing with configurable rounds
+- **Email Verification**: Account activation via email verification
+- **Password Reset**: Secure password reset with time-limited tokens
+- **Session Management**: Multiple device support with individual session control
+- **Security Monitoring**: Failed login attempt tracking and account lockout protection
 
 ## 📡 API Documentation
 
@@ -146,6 +154,7 @@ Uses Clerk for authentication with role-based access control:
 | **Notifications** | User notifications | [📖 docs/api/notifications/](docs/api/notifications/) |
 | **Analytics** | Usage analytics | [📖 docs/api/analytics/](docs/api/analytics/) |
 | **Audit Logs** | System audit trails | [📖 docs/api/audit-logs/](docs/api/audit-logs/) |
+| **Moderation** | AI-powered content moderation | [📖 docs/api/moderation/](docs/api/moderation/) |
 
 ### Quick Start Guides
 - [🚀 Frontend Integration](docs/guides/frontend-integration.md)

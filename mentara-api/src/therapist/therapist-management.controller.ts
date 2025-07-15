@@ -1,10 +1,10 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
 import { WorksheetsService } from '../worksheets/worksheets.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @Controller('therapist-management')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TherapistManagementController {
   constructor(
     private readonly therapistManagementService: TherapistManagementService,

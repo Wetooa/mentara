@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useForm, FieldValues, ControllerRenderProps } from "react-hook-form";
+import { useForm, ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Star, User, EyeOff } from "lucide-react";
+import { Star, EyeOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -143,7 +143,7 @@ export default function ReviewForm({
             <FormField
               control={form.control}
               name="rating"
-              render={({ field }: { field: ControllerRenderProps<ReviewFormData, "rating"> }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold">How would you rate your experience?</FormLabel>
                   <FormControl>

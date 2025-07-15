@@ -17,6 +17,7 @@ mentara/
 ├── mentara-client/          # Next.js 15.2.4 Frontend (TypeScript)
 ├── mentara-api/             # NestJS 11.x Backend (TypeScript)
 ├── ai-patient-evaluation/   # Flask ML Service (Python/PyTorch)
+├── ai-content-moderation/   # Flask AI Moderation Service (Ollama/mxbai-embed-large)
 └── turn-server/            # WebRTC TURN Server
 ```
 
@@ -178,23 +179,24 @@ AI/DevOps Agent (Overflow Support)
 
 ## 📋 Current Sprint Objectives
 
-### Phase 1: Core Platform Stabilization
-- [ ] **Frontend Agent**: Complete user dashboard and therapist interfaces
-- [ ] **Backend Agent**: Finalize API endpoints and database schema
-- [ ] **AI Agent**: Integrate ML models and setup testing infrastructure
-- [ ] **Manager**: Ensure all components work together seamlessly
+### 🔐 **CRITICAL: Clerk to Local Auth Migration**
+- [ ] **Backend Agent**: Implement JWT authentication system, migrate 30+ controllers, update WebSocket auth
+- [ ] **Frontend Agent**: Replace ClerkProvider with JWT auth, update all auth hooks, migrate middleware
+- [ ] **AI/DevOps Agent**: Create comprehensive testing infrastructure, security validation, rollback procedures
+- [ ] **Manager**: Coordinate WebSocket integration, ensure security standards, update documentation
 
-### Phase 2: Advanced Features
-- [ ] Real-time messaging system implementation
-- [ ] Video session capabilities integration
-- [ ] Advanced analytics and reporting
-- [ ] Mobile responsive optimizations
+### 🛡️ **NEW: AI-Powered Content Moderation System**
+- [ ] **AI/DevOps Agent**: Build ai-content-moderation service, integrate Ollama mxbai-embed-large, fine-tune on toxic datasets
+- [ ] **Backend Agent**: Integrate moderation API with posts/comments, create moderator review queue
+- [ ] **Frontend Agent**: Build moderator dashboard, user appeals system, content status indicators
+- [ ] **Manager**: Define moderation policies, coordinate testing, ensure mental health platform safety
 
-### Phase 3: Production Readiness
-- [ ] Comprehensive testing coverage
-- [ ] Security audit and penetration testing
-- [ ] Performance optimization
-- [ ] Deployment pipeline automation
+### 🎯 **Ongoing Platform Features**
+- [x] Real-time messaging system (WebSocket implementation complete)
+- [x] Video session capabilities (WebRTC integration operational)
+- [ ] Enhanced community safety with AI moderation
+- [ ] Secure local authentication system
+- [ ] Comprehensive testing and monitoring
 
 ## 🚀 Getting Started
 
@@ -219,9 +221,19 @@ cd ai-patient-evaluation && python api.py  # Flask default port
 
 ## 📚 Documentation
 
+- **[PROJECT_DOCS_INDEX.md](./PROJECT_DOCS_INDEX.md)** - 📚 Complete navigation guide to all organized documentation
+- **[TEAM_MANAGEMENT_ROLES.md](./TEAM_MANAGEMENT_ROLES.md)** - 4-agent team structure, roles, and coordination framework
 - **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guidelines and conventions
-- **[architecture.md](./architecture.md)** - Detailed system architecture documentation
-- **[test-accounts.md](./test-accounts.md)** - Test account information for development
+
+### 📁 Organized Documentation
+All project documentation has been organized into [`project-docs/`](./project-docs/) with logical categorization:
+- **Team Coordination** - Active management and progress tracking
+- **Agent Directives** - Specific tasks and instructions for each agent
+- **Technical Docs** - Architecture, deployment, and integration guides  
+- **Reports & Analysis** - Audits, assessments, and technical analysis
+- **Policies** - Security, moderation, and operational guidelines
+- **Development** - Progress tracking and testing resources
+- **Archive** - Historical documents and completed phases
 
 ## 🔧 Development Commands
 
@@ -244,6 +256,14 @@ npm run db:seed      # Seed database
 ```bash
 python api.py                    # Start Flask server
 pip install -r requirements.txt # Install dependencies
+```
+
+### AI Content Moderation (ai-content-moderation/)
+```bash
+python api.py                    # Start moderation API server
+pip install -r requirements.txt # Install dependencies (includes Ollama)
+ollama serve                     # Start Ollama server
+ollama pull mxbai-embed-large    # Download embedding model
 ```
 
 ## 🎯 Success Metrics

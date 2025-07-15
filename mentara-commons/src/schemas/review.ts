@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
-// Review Status Schema
+// Review Status Schema (updated from class-validator DTO)
 export const ReviewStatusSchema = z.enum([
-  'pending',
-  'approved', 
-  'rejected'
+  'PENDING',
+  'APPROVED', 
+  'REJECTED',
+  'FLAGGED'
 ]);
 
 // Rating Schema (1-5 stars)
@@ -36,7 +37,7 @@ export const ReviewSchema = z.object({
   clientId: z.string().min(1, 'Client ID is required'),
   meetingId: z.string().optional(),
   isAnonymous: z.boolean().default(false),
-  status: ReviewStatusSchema.default('pending'),
+  status: ReviewStatusSchema.default('PENDING'),
   helpfulCount: z.number().min(0).default(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -205,6 +206,48 @@ export const CreateReviewResponseSchema = z.object({
   isPublic: z.boolean().default(true)
 });
 
+// DTOs from class-validator conversion
+export const CreateReviewDtoSchema = z.object({
+  rating: z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating cannot exceed 5'),
+  title: z.string().optional(),
+  content: z.string().optional(),
+  therapistId: z.string().uuid('Invalid therapist ID format'),
+  meetingId: z.string().uuid('Invalid meeting ID format').optional(),
+  isAnonymous: z.boolean().default(false)
+});
+
+export const UpdateReviewDtoSchema = z.object({
+  rating: z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating cannot exceed 5').optional(),
+  title: z.string().optional(),
+  content: z.string().optional(),
+  isAnonymous: z.boolean().optional()
+});
+
+export const ModerateReviewDtoSchema = z.object({
+  status: ReviewStatusSchema,
+  moderationNote: z.string().optional()
+});
+
+export const GetReviewsDtoSchema = z.object({
+  therapistId: z.string().uuid('Invalid therapist ID format').optional(),
+  clientId: z.string().uuid('Invalid client ID format').optional(),
+  status: ReviewStatusSchema.optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(50).default(10),
+  sortBy: z.string().default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  rating: z.number().int().min(1).max(5).optional()
+});
+
+export const ReviewStatsDtoSchema = z.object({
+  therapistId: z.string().uuid('Invalid therapist ID format')
+});
+
+// Parameter Schemas
+export const ReviewIdParamSchema = z.object({
+  id: z.string().uuid('Invalid review ID format')
+});
+
 // Type inference exports
 export type ReviewStatus = z.infer<typeof ReviewStatusSchema>;
 export type Rating = z.infer<typeof RatingSchema>;
@@ -223,3 +266,11 @@ export type ReviewReport = z.infer<typeof ReviewReportSchema>;
 export type ReviewAnalytics = z.infer<typeof ReviewAnalyticsSchema>;
 export type ReviewResponse = z.infer<typeof ReviewResponseSchema>;
 export type CreateReviewResponse = z.infer<typeof CreateReviewResponseSchema>;
+
+// New type exports from converted DTOs
+export type CreateReviewDto = z.infer<typeof CreateReviewDtoSchema>;
+export type UpdateReviewDto = z.infer<typeof UpdateReviewDtoSchema>;
+export type ModerateReviewDto = z.infer<typeof ModerateReviewDtoSchema>;
+export type GetReviewsDto = z.infer<typeof GetReviewsDtoSchema>;
+export type ReviewStatsDto = z.infer<typeof ReviewStatsDtoSchema>;
+export type ReviewIdParam = z.infer<typeof ReviewIdParamSchema>;

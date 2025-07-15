@@ -1,0 +1,761 @@
+{
+  "info": {
+    "name": "Mentara - Therapist Management",
+    "description": "Therapist application, recommendations, and profile management endpoints. Handles therapist onboarding, client matching, and professional verification.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-therapist"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error(`❌ Validation Error: ${issue.message} (${issue.path.join('.')})`);",
+          "            });",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Therapist Applications",
+      "item": [
+        {
+          "name": "Submit Application with Documents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application submitted successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has application ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('applicationId', responseJson.id);",
+                  "});",
+                  "",
+                  "pm.test('Application has required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('status');",
+                  "    pm.expect(responseJson).to.have.property('specializations');",
+                  "    pm.expect(responseJson).to.have.property('qualifications');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "applicationDataJson",
+                  "value": "{\n  \"firstName\": \"Dr. Sarah\",\n  \"lastName\": \"Johnson\",\n  \"email\": \"sarah.johnson@example.com\",\n  \"phoneNumber\": \"+1234567890\",\n  \"licenseNumber\": \"PSY123456\",\n  \"yearsOfExperience\": 8,\n  \"specializations\": [\"Anxiety Disorders\", \"Depression\", \"PTSD\"],\n  \"qualifications\": [\"PhD in Clinical Psychology\", \"Licensed Clinical Psychologist\"],\n  \"workSettings\": [\"Individual Therapy\", \"Group Therapy\"],\n  \"preferredClientTypes\": [\"Adults\", \"Young Adults\"],\n  \"hourlyRate\": 180.00,\n  \"availability\": {\n    \"monday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"tuesday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"wednesday\": { \"start\": \"10:00\", \"end\": \"18:00\" },\n    \"thursday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"friday\": { \"start\": \"09:00\", \"end\": \"15:00\" }\n  },\n  \"languages\": [\"English\", \"Spanish\"],\n  \"bio\": \"Experienced clinical psychologist specializing in anxiety and mood disorders with 8 years of practice.\",\n  \"education\": [\n    {\n      \"degree\": \"PhD in Clinical Psychology\",\n      \"institution\": \"University of Toronto\",\n      \"year\": 2015\n    },\n    {\n      \"degree\": \"Master of Arts in Psychology\",\n      \"institution\": \"University of British Columbia\",\n      \"year\": 2012\n    }\n  ],\n  \"province\": \"Ontario\"\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "fileTypes",
+                  "value": "{\n  \"0\": \"license\",\n  \"1\": \"diploma\",\n  \"2\": \"cv\",\n  \"3\": \"reference_letter\"\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/apply-with-documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "apply-with-documents"]
+            },
+            "description": "Submit therapist application with required documents (public endpoint)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Applications (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Applications retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is paginated', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('applications');",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "    pm.expect(responseJson.applications).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/application?page=1&limit=10&status=pending&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "application"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get all therapist applications with filtering (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application by ID (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Application has complete details', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('applicantInfo');",
+                  "    pm.expect(responseJson).to.have.property('documents');",
+                  "    pm.expect(responseJson).to.have.property('reviewNotes');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/application/{{applicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "application", "{{applicationId}}"]
+            },
+            "description": "Get specific therapist application details (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Application Status (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Status change reflected', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.status).to.equal('under_review');",
+                  "    pm.expect(responseJson).to.have.property('reviewedAt');",
+                  "    pm.expect(responseJson).to.have.property('reviewedBy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"under_review\",\n  \"reviewNotes\": \"Application looks promising. All required documents submitted. Scheduling verification call.\",\n  \"nextSteps\": \"Contact applicant for phone verification\",\n  \"estimatedCompletionDate\": \"2024-02-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/application/{{applicationId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "application", "{{applicationId}}", "status"]
+            },
+            "description": "Update application status and add review notes (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application Files (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/application/{{applicationId}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "application", "{{applicationId}}", "files"]
+            },
+            "description": "Get all files associated with an application (admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Therapist Recommendations",
+      "item": [
+        {
+          "name": "Get Recommended Therapists",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Recommendations retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has therapist recommendations', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('recommendations');",
+                  "    pm.expect(responseJson.recommendations).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Recommendations have match scores', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.recommendations.length > 0) {",
+                  "        pm.expect(responseJson.recommendations[0]).to.have.property('matchScore');",
+                  "        pm.expect(responseJson.recommendations[0]).to.have.property('therapist');",
+                  "        pm.expect(responseJson.recommendations[0]).to.have.property('reasons');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations?limit=5&includeInactive=false&province=Ontario&maxHourlyRate=200",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "includeInactive",
+                  "value": "false"
+                },
+                {
+                  "key": "province",
+                  "value": "Ontario"
+                },
+                {
+                  "key": "maxHourlyRate",
+                  "value": "200"
+                }
+              ]
+            },
+            "description": "Get personalized therapist recommendations for current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Compatibility Analysis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Compatibility analysis retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Analysis has detailed breakdown', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('overallScore');",
+                  "    pm.expect(responseJson).to.have.property('categoryScores');",
+                  "    pm.expect(responseJson).to.have.property('strengths');",
+                  "    pm.expect(responseJson).to.have.property('considerations');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations/compatibility/{{therapistId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations", "compatibility", "{{therapistId}}"]
+            },
+            "description": "Get detailed compatibility analysis with specific therapist"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations by Specialization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations?specialization=anxiety&specialization=depression&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations"],
+              "query": [
+                {
+                  "key": "specialization",
+                  "value": "anxiety"
+                },
+                {
+                  "key": "specialization",
+                  "value": "depression"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get therapists by specific specializations"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations by Language",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations?language=spanish&province=Ontario&limit=8",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations"],
+              "query": [
+                {
+                  "key": "language",
+                  "value": "spanish"
+                },
+                {
+                  "key": "province",
+                  "value": "Ontario"
+                },
+                {
+                  "key": "limit",
+                  "value": "8"
+                }
+              ]
+            },
+            "description": "Get therapists who speak specific languages"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Therapist Management",
+      "item": [
+        {
+          "name": "Approve Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application approved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Approval details recorded', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.status).to.equal('approved');",
+                  "    pm.expect(responseJson).to.have.property('approvedAt');",
+                  "    pm.expect(responseJson).to.have.property('approvedBy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvalNotes\": \"All credentials verified. License confirmed with regulatory body. Phone interview completed successfully.\",\n  \"welcomeMessage\": \"Welcome to Mentara! Your application has been approved. You can now start accepting clients.\",\n  \"startDate\": \"2024-01-15\",\n  \"initialClientLimit\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/therapists/applications/{{applicationId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "therapists", "applications", "{{applicationId}}", "approve"]
+            },
+            "description": "Approve therapist application (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application rejected successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Rejection details recorded', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.status).to.equal('rejected');",
+                  "    pm.expect(responseJson).to.have.property('rejectedAt');",
+                  "    pm.expect(responseJson).to.have.property('rejectionReason');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rejectionReason\": \"Insufficient experience for specialized practice areas\",\n  \"feedback\": \"Thank you for your interest in Mentara. While your qualifications are impressive, we require a minimum of 5 years of specialized experience for the practice areas you selected. Please consider reapplying after gaining additional experience.\",\n  \"canReapply\": true,\n  \"reapplyAfterDate\": \"2025-01-15\",\n  \"suggestedImprovements\": [\n    \"Gain additional supervised experience in anxiety disorders\",\n    \"Complete specialized training in trauma-informed care\",\n    \"Obtain additional certifications in chosen specialization areas\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/therapists/applications/{{applicationId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "therapists", "applications", "{{applicationId}}", "reject"]
+            },
+            "description": "Reject therapist application with feedback (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Therapist Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/therapists/applications?status=pending&sortBy=submittedAt&sortOrder=asc&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "therapists", "applications"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "submittedAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get all therapist applications for admin review"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/therapists/applications/statistics?period=monthly&year=2024",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "therapists", "applications", "statistics"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "monthly"
+                },
+                {
+                  "key": "year",
+                  "value": "2024"
+                }
+              ]
+            },
+            "description": "Get application statistics and metrics (admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Therapist Profile Management",
+      "item": [
+        {
+          "name": "Update Therapist Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated bio: Experienced clinical psychologist with 10+ years specializing in anxiety, depression, and trauma recovery. I use evidence-based approaches including CBT and EMDR.\",\n  \"specializations\": [\"Anxiety Disorders\", \"Depression\", \"PTSD\", \"Trauma Recovery\"],\n  \"hourlyRate\": 200.00,\n  \"availability\": {\n    \"monday\": { \"start\": \"08:00\", \"end\": \"18:00\" },\n    \"tuesday\": { \"start\": \"08:00\", \"end\": \"18:00\" },\n    \"wednesday\": { \"start\": \"10:00\", \"end\": \"19:00\" },\n    \"thursday\": { \"start\": \"08:00\", \"end\": \"18:00\" },\n    \"friday\": { \"start\": \"08:00\", \"end\": \"16:00\" }\n  },\n  \"acceptingNewClients\": true,\n  \"preferredClientTypes\": [\"Adults\", \"Young Adults\", \"Seniors\"],\n  \"maxClientsPerWeek\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Update therapist profile information (therapist only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Availability",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"availability\": {\n    \"monday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"breaks\": [{\"start\": \"12:00\", \"end\": \"13:00\"}] },\n    \"tuesday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"breaks\": [{\"start\": \"12:00\", \"end\": \"13:00\"}] },\n    \"wednesday\": { \"start\": \"10:00\", \"end\": \"18:00\", \"breaks\": [{\"start\": \"13:00\", \"end\": \"14:00\"}] },\n    \"thursday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"breaks\": [{\"start\": \"12:00\", \"end\": \"13:00\"}] },\n    \"friday\": { \"start\": \"09:00\", \"end\": \"15:00\" }\n  },\n  \"timeZone\": \"America/Toronto\",\n  \"bufferTimeBetweenSessions\": 15,\n  \"maxConsecutiveSessions\": 6,\n  \"blackoutDates\": [\n    { \"start\": \"2024-12-23\", \"end\": \"2024-12-30\", \"reason\": \"Holiday break\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "availability"]
+            },
+            "description": "Update therapist availability schedule"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Therapist Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/dashboard?period=week&startDate=2024-01-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "dashboard"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "week"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-15"
+                }
+              ]
+            },
+            "description": "Get therapist dashboard with appointments and metrics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Submit Incomplete Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for incomplete application', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message lists missing fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('errors');",
+                  "    pm.expect(responseJson.errors).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "applicationDataJson",
+                  "value": "{\n  \"firstName\": \"Dr. John\",\n  \"email\": \"incomplete@example.com\"\n}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/apply-with-documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "apply-with-documents"]
+            },
+            "description": "Test validation with incomplete application data"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Application Without Permission",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for unauthorized access', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions authorization', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('authorized');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/application/{{applicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "application", "{{applicationId}}"]
+            },
+            "description": "Test access control for application details"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

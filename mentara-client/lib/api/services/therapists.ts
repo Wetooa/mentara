@@ -48,9 +48,31 @@ export const createTherapistService = (client: AxiosInstance) => ({
     return client.get(`/therapist-recommendations${queryString}`);
   },
 
-  // Get therapist profile
-  getProfile: (id: string): Promise<TherapistRecommendation> =>
-    client.get(`/therapists/${id}`),
+  // Enhanced recommendation endpoints for Module 2
+  getPersonalizedRecommendations: (): Promise<{
+    recommendations: any[];
+    averageMatchScore: number;
+    totalRecommendations: number;
+    matchCriteria: {
+      primaryConditions: string[];
+      secondaryConditions: string[];
+      preferences: Record<string, any>;
+    };
+  }> => client.get('/therapists/recommendations/personalized'),
+
+  sendTherapistRequests: (data: {
+    therapistIds: string[];
+    message?: string;
+  }): Promise<{
+    success: boolean;
+    requestsSent: number;
+    failedRequests: string[];
+    message: string;
+  }> => client.post('/therapists/requests/send', data),
+
+  // Get therapist profile (BACKEND ENDPOINT MISSING - needs implementation)
+  // getProfile: (id: string): Promise<TherapistRecommendation> =>
+  //   client.get(`/therapists/${id}`),
 
   // Admin methods for application management
   getApplications: (
@@ -122,58 +144,36 @@ export const createTherapistService = (client: AxiosInstance) => ({
     ): Promise<TherapistApplication> =>
       client.put(`/therapist/application/${id}/status`, data),
 
-    // Get my application (for therapists)
-    getMy: (): Promise<TherapistApplication> =>
-      client.get("/therapist/application/me"),
+    // Get my application (BACKEND ENDPOINT MISSING - needs implementation)
+    // getMy: (): Promise<TherapistApplication> =>
+    //   client.get("/therapist/application/me"),
   },
 
   // Dashboard and patient management
   dashboard: {
-    // Get therapist dashboard data
+    // Get therapist dashboard data (corrected path)
     getData: (): Promise<TherapistDashboardData> =>
-      client.get("/therapist/dashboard"),
+      client.get("/dashboard/therapist"),
 
-    // Get dashboard stats
-    getStats: (): Promise<TherapistDashboardData["stats"]> =>
-      client.get("/therapist/dashboard/stats"),
-
-    // Get upcoming appointments
-    getUpcomingAppointments: (): Promise<
-      TherapistDashboardData["upcomingAppointments"]
-    > => client.get("/therapist/dashboard/appointments"),
+    // Dashboard stats and appointments are included in main dashboard data
+    // Separate endpoints not available in backend
   },
 
   // Patient management
   patients: {
-    // Get assigned patients list
-    getList: (): Promise<PatientData[]> => client.get("/therapist/patients"),
+    // Get assigned clients list (corrected path)
+    getList: (): Promise<PatientData[]> => client.get("/therapist/clients/assigned"),
 
-    // Get specific patient details
+    // Get specific client details (corrected path)
     getById: (patientId: string): Promise<PatientData> =>
-      client.get(`/therapist/patients/${patientId}`),
+      client.get(`/therapist/clients/${patientId}`),
 
-    // Update patient notes
-    updateNotes: (
-      patientId: string,
-      sessionId: string,
-      notes: string
-    ): Promise<void> =>
-      client.patch(
-        `/therapist/patients/${patientId}/sessions/${sessionId}/notes`,
-        { notes }
-      ),
-
-    // Get patient sessions
-    getSessions: (patientId: string): Promise<PatientData["sessions"]> =>
-      client.get(`/therapist/patients/${patientId}/sessions`),
-
-    // Get patient worksheets
-    getWorksheets: (patientId: string): Promise<PatientData["worksheets"]> =>
-      client.get(`/therapist/patients/${patientId}/worksheets`),
-
-    // Assign worksheet to patient
-    assignWorksheet: (patientId: string, worksheetData: WorksheetAssignment): Promise<void> =>
-      client.post(`/therapist/patients/${patientId}/worksheets`, worksheetData),
+    // BACKEND ENDPOINTS MISSING - These need to be implemented:
+    // updateNotes: Update session notes
+    // getSessions: Get client sessions
+    // getWorksheets: Get client worksheets
+    // assignWorksheet: Assign worksheet to client
+    // Commenting out until backend implementation is ready
   },
 
   // Therapist worksheets management
@@ -192,20 +192,20 @@ export const createTherapistService = (client: AxiosInstance) => ({
       const queryString = searchParams.toString()
         ? `?${searchParams.toString()}`
         : "";
-      return client.get(`/therapist-management/worksheets${queryString}`);
+      return client.get(`/therapist/worksheets${queryString}`);
     },
 
-    // Get worksheet by ID
+    // Get worksheet by ID (corrected path)
     getById: (worksheetId: string): Promise<any> =>
-      client.get(`/therapist-management/worksheets/${worksheetId}`),
+      client.get(`/therapist/worksheets/${worksheetId}`),
 
-    // Create new worksheet
+    // Create new worksheet (corrected path)
     create: (worksheetData: any): Promise<any> =>
-      client.post(`/therapist-management/worksheets`, worksheetData),
+      client.post(`/therapist/worksheets`, worksheetData),
 
-    // Update worksheet
+    // Update worksheet (corrected path)
     update: (worksheetId: string, worksheetData: any): Promise<any> =>
-      client.put(`/therapist-management/worksheets/${worksheetId}`, worksheetData),
+      client.put(`/therapist/worksheets/${worksheetId}`, worksheetData),
   },
 
   // Meetings and sessions
@@ -231,17 +231,91 @@ export const createTherapistService = (client: AxiosInstance) => ({
     getById: (meetingId: string): Promise<MeetingData> =>
       client.get(`/booking/meetings/${meetingId}`),
 
-    // Update meeting status
+    // Update meeting (corrected method and path)
     updateStatus: (
       meetingId: string,
       status: MeetingData["status"]
     ): Promise<MeetingData> =>
-      client.patch(`/booking/meetings/${meetingId}/status`, { status }),
+      client.put(`/booking/meetings/${meetingId}`, { status }),
 
-    // Start a meeting
-    start: (meetingId: string): Promise<{ meetingUrl: string }> =>
-      client.post(`/booking/meetings/${meetingId}/start`),
+    // Start a meeting (BACKEND ENDPOINT MISSING - needs implementation)
+    // start: (meetingId: string): Promise<{ meetingUrl: string }> =>
+    //   client.post(`/booking/meetings/${meetingId}/start`),
   },
+
+  // Enhanced request management endpoints for Module 2
+  getClientRequests: (params: {
+    status?: 'pending' | 'accepted' | 'declined' | 'expired';
+    priority?: 'high' | 'medium' | 'low';
+    dateRange?: 'today' | 'week' | 'month' | 'all';
+    sortBy?: 'newest' | 'oldest' | 'priority' | 'match_score';
+    search?: string;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<{
+    requests: any[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> => {
+    const searchParams = new URLSearchParams();
+    
+    if (params.status) searchParams.append('status', params.status);
+    if (params.priority) searchParams.append('priority', params.priority);
+    if (params.dateRange) searchParams.append('dateRange', params.dateRange);
+    if (params.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params.search) searchParams.append('search', params.search);
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+    if (params.offset) searchParams.append('offset', params.offset.toString());
+
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return client.get(`/therapist/requests${queryString}`);
+  },
+
+  getRequestStatistics: (): Promise<{
+    overview: {
+      totalRequests: number;
+      pendingRequests: number;
+      acceptedToday: number;
+      declinedToday: number;
+      averageResponseTime: number;
+      responseRate: number;
+    };
+    trends: {
+      weeklyRequests: number;
+      weeklyAccepted: number;
+      weeklyDeclined: number;
+      weeklyChange: number;
+    };
+    performance: {
+      averageMatchScore: number;
+      clientSatisfaction: number;
+      conversionRate: number;
+      averageSessionsPerClient: number;
+    };
+    timeDistribution: {
+      morning: number;
+      afternoon: number;
+      evening: number;
+    };
+  }> => client.get('/therapist/requests/statistics'),
+
+  respondToClientRequest: (requestId: string, response: {
+    action: 'accept' | 'decline' | 'request_info';
+    message?: string;
+    availableSlots?: Array<{
+      date: string;
+      time: string;
+      duration: number;
+    }>;
+    questions?: string[];
+    includeIntroCall?: boolean;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    requestId: string;
+    status: string;
+  }> => client.post(`/therapist/requests/${requestId}/respond`, response),
 });
 
 export type TherapistService = ReturnType<typeof createTherapistService>;

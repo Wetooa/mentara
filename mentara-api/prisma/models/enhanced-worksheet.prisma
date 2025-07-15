@@ -1,0 +1,212 @@
+// Enhanced Worksheet Models for Real-time Collaboration
+// This file extends the existing worksheet models with collaboration features
+
+// Worksheet version control and collaboration
+model WorksheetVersion {
+  id          String   @id @default(uuid())
+  worksheetId String
+  version     Int      // Version number (1, 2, 3, etc.)
+  content     Json     // Complete worksheet content snapshot
+  changeLog   Json?    // Description of changes made
+  createdBy   String   // User ID who created this version
+  createdAt   DateTime @default(now())
+
+  // Relations
+  worksheet     Worksheet           @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  creator       User                @relation(fields: [createdBy], references: [id])
+  collaborators WorksheetCollab[]
+
+  @@unique([worksheetId, version])
+  @@index([worksheetId, version])
+  @@index([createdBy])
+}
+
+// Active collaboration sessions
+model WorksheetCollab {
+  id             String   @id @default(uuid())
+  worksheetId    String
+  versionId      String?  // Current version being edited
+  userId         String
+  sessionId      String   @unique // WebSocket session ID
+  isActive       Boolean  @default(true)
+  cursorPosition Json?    // Current cursor/selection position
+  lastActivity   DateTime @default(now())
+  joinedAt       DateTime @default(now())
+  leftAt         DateTime?
+
+  // Relations
+  worksheet Worksheet        @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  version   WorksheetVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([worksheetId, userId])
+  @@index([worksheetId, isActive])
+  @@index([userId])
+  @@index([sessionId])
+}
+
+// Real-time operations for operational transformation
+model WorksheetOperation {
+  id           String   @id @default(uuid())
+  worksheetId  String
+  versionId    String
+  operationId  String   @unique // Client-generated operation ID
+  type         OperationType
+  position     Int      // Position in document
+  content      String?  // Content being inserted/replaced
+  length       Int?     // Length of content being deleted/replaced
+  userId       String
+  timestamp    DateTime @default(now())
+  applied      Boolean  @default(false)
+  
+  // Operational transformation data
+  transformedFrom String? // Original operation ID that this was transformed from
+  metadata        Json?   // Additional operation metadata
+
+  // Relations
+  worksheet Worksheet        @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  version   WorksheetVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@index([worksheetId, timestamp])
+  @@index([versionId, timestamp])
+  @@index([userId])
+  @@index([operationId])
+}
+
+// Auto-save drafts
+model WorksheetDraft {
+  id          String   @id @default(uuid())
+  worksheetId String
+  userId      String
+  content     Json     // Current draft content
+  lastSaved   DateTime @default(now())
+  autoSaved   Boolean  @default(true) // true for auto-save, false for manual save
+
+  // Relations
+  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([worksheetId, userId])
+  @@index([worksheetId])
+  @@index([userId])
+  @@index([lastSaved])
+}
+
+// Comments and annotations on worksheets
+model WorksheetComment {
+  id          String   @id @default(uuid())
+  worksheetId String
+  userId      String
+  content     String   @db.Text
+  position    Json?    // Position/selection in the worksheet where comment was made
+  parentId    String?  // For threaded comments
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  worksheet Worksheet           @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id])
+  parent    WorksheetComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   WorksheetComment[] @relation("CommentReplies")
+
+  @@index([worksheetId, createdAt])
+  @@index([userId])
+  @@index([parentId])
+  @@index([resolved])
+}
+
+// Real-time change notifications
+model WorksheetChangeNotification {
+  id          String                @id @default(uuid())
+  worksheetId String
+  userId      String    // User who should receive the notification
+  changeType  ChangeNotificationType
+  changeData  Json      // Data about the change
+  read        Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+
+  // Relations
+  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([worksheetId, userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// Worksheet templates for reusability
+model WorksheetTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  content     Json     // Template structure
+  category    String   // Template category
+  tags        String[] // Search tags
+  isPublic    Boolean  @default(false)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Usage tracking
+  usageCount  Int      @default(0)
+  lastUsed    DateTime?
+
+  // Relations
+  creator User @relation(fields: [createdBy], references: [id])
+
+  @@index([category])
+  @@index([isPublic])
+  @@index([createdBy])
+  @@index([usageCount])
+}
+
+// Enums
+enum OperationType {
+  INSERT
+  DELETE
+  REPLACE
+  FORMAT
+  MOVE
+}
+
+enum ChangeNotificationType {
+  USER_JOINED
+  USER_LEFT
+  CONTENT_CHANGED
+  COMMENT_ADDED
+  VERSION_CREATED
+  WORKSHEET_COMPLETED
+  FEEDBACK_ADDED
+}
+
+// Update the main Worksheet model to include new relations
+// Note: This would be added to the existing worksheet.prisma file
+/*
+model Worksheet {
+  // ... existing fields ...
+  
+  // New collaboration relations
+  versions         WorksheetVersion[]
+  collaborators    WorksheetCollab[]
+  operations       WorksheetOperation[]
+  drafts           WorksheetDraft[]
+  comments         WorksheetComment[]
+  notifications    WorksheetChangeNotification[]
+}
+
+// Add these relations to the User model
+model User {
+  // ... existing fields ...
+  
+  // Worksheet collaboration relations
+  worksheetVersions     WorksheetVersion[]
+  worksheetCollabs      WorksheetCollab[]
+  worksheetOperations   WorksheetOperation[]
+  worksheetDrafts       WorksheetDraft[]
+  worksheetComments     WorksheetComment[]
+  worksheetNotifications WorksheetChangeNotification[]
+  worksheetTemplates    WorksheetTemplate[]
+}
+*/

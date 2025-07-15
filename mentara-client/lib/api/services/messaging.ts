@@ -20,15 +20,15 @@ export interface MessagingService {
   conversations: {
     create(data: CreateConversationDto): Promise<Conversation>;
     getList(params?: ConversationListParams): Promise<{ conversations: Conversation[]; total: number }>;
-    getById(conversationId: string): Promise<Conversation>;
-    delete(conversationId: string): Promise<void>;
+    // getById(conversationId: string): Promise<Conversation>; // BACKEND MISSING
+    // delete(conversationId: string): Promise<void>; // BACKEND MISSING
   };
 
   // Messages
   messages: {
     send(conversationId: string, data: SendMessageDto): Promise<Message>;
     getList(conversationId: string, params?: MessagesListParams): Promise<{ messages: Message[]; total: number; hasMore: boolean }>;
-    getById(messageId: string): Promise<Message>;
+    // getById(messageId: string): Promise<Message>; // BACKEND MISSING
     update(messageId: string, data: UpdateMessageDto): Promise<Message>;
     delete(messageId: string): Promise<void>;
     markAsRead(messageId: string): Promise<void>;
@@ -44,7 +44,7 @@ export interface MessagingService {
   blocking: {
     blockUser(data: BlockUserDto): Promise<BlockedUser>;
     unblockUser(blockedUserId: string): Promise<void>;
-    getBlockedUsers(): Promise<{ blockedUsers: BlockedUser[]; total: number }>;
+    // getBlockedUsers(): Promise<{ blockedUsers: BlockedUser[]; total: number }>; // BACKEND MISSING
   };
 
   // Search
@@ -60,18 +60,24 @@ export const createMessagingService = (client: AxiosInstance): MessagingService 
     getList: (params: ConversationListParams = {}): Promise<{ conversations: Conversation[]; total: number }> => {
       const searchParams = new URLSearchParams();
       if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
+      // Convert offset to page for backend compatibility
+      if (params.offset && params.limit) {
+        const page = Math.floor(params.offset / params.limit) + 1;
+        searchParams.append('page', page.toString());
+      }
       if (params.type) searchParams.append('type', params.type);
 
       const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
       return client.get(`/messaging/conversations${queryString}`);
     },
 
-    getById: (conversationId: string): Promise<Conversation> =>
-      client.get(`/messaging/conversations/${conversationId}`),
+    // BACKEND ENDPOINT MISSING - needs implementation
+    // getById: (conversationId: string): Promise<Conversation> =>
+    //   client.get(`/messaging/conversations/${conversationId}`),
 
-    delete: (conversationId: string): Promise<void> =>
-      client.delete(`/messaging/conversations/${conversationId}`),
+    // BACKEND ENDPOINT MISSING - needs implementation
+    // delete: (conversationId: string): Promise<void> =>
+    //   client.delete(`/messaging/conversations/${conversationId}`),
   },
 
   // Messages
@@ -82,15 +88,20 @@ export const createMessagingService = (client: AxiosInstance): MessagingService 
     getList: (conversationId: string, params: MessagesListParams = {}): Promise<{ messages: Message[]; total: number; hasMore: boolean }> => {
       const searchParams = new URLSearchParams();
       if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
+      // Convert offset to page for backend compatibility
+      if (params.offset && params.limit) {
+        const page = Math.floor(params.offset / params.limit) + 1;
+        searchParams.append('page', page.toString());
+      }
       if (params.before) searchParams.append('before', params.before);
 
       const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
       return client.get(`/messaging/conversations/${conversationId}/messages${queryString}`);
     },
 
-    getById: (messageId: string): Promise<Message> =>
-      client.get(`/messaging/messages/${messageId}`),
+    // BACKEND ENDPOINT MISSING - needs implementation
+    // getById: (messageId: string): Promise<Message> =>
+    //   client.get(`/messaging/messages/${messageId}`),
 
     update: (messageId: string, data: UpdateMessageDto): Promise<Message> =>
       client.put(`/messaging/messages/${messageId}`, data),
@@ -119,8 +130,9 @@ export const createMessagingService = (client: AxiosInstance): MessagingService 
     unblockUser: (blockedUserId: string): Promise<void> =>
       client.delete(`/messaging/block/${blockedUserId}`),
 
-    getBlockedUsers: (): Promise<{ blockedUsers: BlockedUser[]; total: number }> =>
-      client.get('/messaging/blocked'),
+    // BACKEND ENDPOINT MISSING - needs implementation
+    // getBlockedUsers: (): Promise<{ blockedUsers: BlockedUser[]; total: number }> =>
+    //   client.get('/messaging/blocked'),
   },
 
   // Search
@@ -130,7 +142,11 @@ export const createMessagingService = (client: AxiosInstance): MessagingService 
     if (data.conversationId) searchParams.append('conversationId', data.conversationId);
     if (data.type) searchParams.append('type', data.type);
     if (data.limit) searchParams.append('limit', data.limit.toString());
-    if (data.offset) searchParams.append('offset', data.offset.toString());
+    // Convert offset to page for backend compatibility
+    if (data.offset && data.limit) {
+      const page = Math.floor(data.offset / data.limit) + 1;
+      searchParams.append('page', page.toString());
+    }
 
     return client.get(`/messaging/search?${searchParams.toString()}`);
   },

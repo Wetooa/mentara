@@ -1,9 +1,8 @@
 // Re-export all API types for easy importing
 // NOTE: To avoid naming conflicts, we use qualified re-exports where needed
 
-// Core auth and user types
-export * from './auth';
-export * from './users';
+// Frontend-specific auth extensions (core auth types now in commons)
+export * from './auth-extensions';
 
 // Client-specific types  
 export * from './client';

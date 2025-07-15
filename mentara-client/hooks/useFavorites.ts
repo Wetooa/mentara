@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { UserFavorite } from "@/types/api/users";
@@ -11,7 +11,7 @@ import type { UserFavorite } from "@/types/api/users";
  * Hook for managing favorite therapists with backend sync
  */
 export function useFavorites() {
-  const { userId } = useAuth();
+  const { user } = useAuth();
   const api = useApi();
   const queryClient = useQueryClient();
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
@@ -19,8 +19,8 @@ export function useFavorites() {
 
   // Load favorites from localStorage initially
   useEffect(() => {
-    if (userId) {
-      const storedFavorites = localStorage.getItem(`therapist-favorites-${userId}`);
+    if (user?.id) {
+      const storedFavorites = localStorage.getItem(`therapist-favorites-${user.id}`);
       if (storedFavorites) {
         try {
           setLocalFavorites(JSON.parse(storedFavorites));
@@ -31,7 +31,7 @@ export function useFavorites() {
       }
       setIsLocalLoaded(true);
     }
-  }, [userId]);
+  }, [user?.id]);
 
   // Get favorites from backend
   const {
@@ -39,16 +39,16 @@ export function useFavorites() {
     isLoading: isLoadingBackend,
     error: backendError,
   } = useQuery({
-    queryKey: queryKeys.users.favorites(userId || ''),
+    queryKey: queryKeys.users.favorites(user?.id || ''),
     queryFn: () => api.users.getFavorites(),
-    enabled: !!userId,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     onSuccess: (data) => {
       // Sync backend data to localStorage
-      if (data && userId) {
+      if (data && user?.id) {
         const favoriteIds = data.map((fav: UserFavorite) => fav.therapistId);
         setLocalFavorites(favoriteIds);
-        localStorage.setItem(`therapist-favorites-${userId}`, JSON.stringify(favoriteIds));
+        localStorage.setItem(`therapist-favorites-${user.id}`, JSON.stringify(favoriteIds));
       }
     },
   });
@@ -61,8 +61,8 @@ export function useFavorites() {
       setLocalFavorites(prev => {
         if (!prev.includes(therapistId)) {
           const newFavorites = [...prev, therapistId];
-          if (userId) {
-            localStorage.setItem(`therapist-favorites-${userId}`, JSON.stringify(newFavorites));
+          if (user?.id) {
+            localStorage.setItem(`therapist-favorites-${user.id}`, JSON.stringify(newFavorites));
           }
           return newFavorites;
         }
@@ -70,7 +70,7 @@ export function useFavorites() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(userId || '') });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(user?.id || '') });
     },
     onError: (error: MentaraApiError, therapistId) => {
       // Rollback optimistic update
@@ -86,14 +86,14 @@ export function useFavorites() {
       // Optimistic update
       setLocalFavorites(prev => {
         const newFavorites = prev.filter(id => id !== therapistId);
-        if (userId) {
-          localStorage.setItem(`therapist-favorites-${userId}`, JSON.stringify(newFavorites));
+        if (user?.id) {
+          localStorage.setItem(`therapist-favorites-${user.id}`, JSON.stringify(newFavorites));
         }
         return newFavorites;
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(userId || '') });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.favorites(user?.id || '') });
     },
     onError: (error: MentaraApiError, therapistId) => {
       // Rollback optimistic update

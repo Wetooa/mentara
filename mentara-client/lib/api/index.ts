@@ -2,7 +2,7 @@
 // Usage: import { api } from '@/lib/api'
 // Then: api.auth.getCurrentUser(), api.client.getProfile(), etc.
 
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
 import { createAxiosClient, setTokenProvider } from "./client";
 import { createApiServices, type ApiServices } from "./services";
 
@@ -14,12 +14,31 @@ const apiServices = createApiServices(axiosClient);
 
 // React hook for API access with authentication
 export const useApi = () => {
-  const { getToken } = useAuth();
+  const { accessToken, refreshAccessToken } = useAuth();
   
-  // Set up token provider for this session
-  if (getToken) {
-    setTokenProvider(getToken);
-  }
+  // Set up JWT token provider for this session
+  const getToken = async (): Promise<string | null> => {
+    if (!accessToken) return null;
+    
+    // Check if token is still valid (simple check)
+    try {
+      const payload = JSON.parse(atob(accessToken.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      
+      // If token expires in less than 5 minutes, try to refresh
+      if (payload.exp && payload.exp - currentTime < 300) {
+        const refreshed = await refreshAccessToken();
+        if (!refreshed) return null;
+      }
+      
+      return accessToken;
+    } catch (error) {
+      console.error('Error checking token validity:', error);
+      return accessToken; // Return current token if check fails
+    }
+  };
+  
+  setTokenProvider(getToken);
   
   return api;
 };

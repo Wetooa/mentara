@@ -11,14 +11,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AiServiceClient } from '../pre-assessment/services/ai-service.client';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { FilesService } from '../files/files.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 
 describe('External Services Integration', () => {
   let configService: ConfigService;
   let aiServiceClient: AiServiceClient;
-  let clerkAuthGuard: ClerkAuthGuard;
+  let jwtAuthGuard: JwtAuthGuard;
   let filesService: FilesService;
   let moduleRef: TestingModule;
 
@@ -33,7 +33,7 @@ describe('External Services Integration', () => {
       providers: [
         ConfigService,
         AiServiceClient,
-        ClerkAuthGuard,
+        JwtAuthGuard,
         FilesService,
         {
           provide: PrismaService,
@@ -54,7 +54,7 @@ describe('External Services Integration', () => {
 
     configService = moduleRef.get<ConfigService>(ConfigService);
     aiServiceClient = moduleRef.get<AiServiceClient>(AiServiceClient);
-    clerkAuthGuard = moduleRef.get<ClerkAuthGuard>(ClerkAuthGuard);
+    jwtAuthGuard = moduleRef.get<JwtAuthGuard>(JwtAuthGuard);
     filesService = moduleRef.get<FilesService>(FilesService);
   });
 

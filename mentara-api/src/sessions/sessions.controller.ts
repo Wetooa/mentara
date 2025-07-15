@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
 import {
@@ -20,7 +20,7 @@ import {
 } from '@prisma/client';
 
 @Controller('sessions')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 

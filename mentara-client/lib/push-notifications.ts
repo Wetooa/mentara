@@ -276,7 +276,7 @@ class PushNotificationService {
   /**
    * Show a local notification (for testing)
    */
-  async showLocalNotification(title: string, body: string, data?: any): Promise<void> {
+  async showLocalNotification(title: string, body: string, data?: unknown): Promise<void> {
     try {
       if (!this.serviceWorkerRegistration) {
         throw new Error('Service worker not registered');

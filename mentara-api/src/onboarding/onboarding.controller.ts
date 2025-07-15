@@ -9,13 +9,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { OnboardingService, OnboardingStatus } from './onboarding.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { AdminOnly } from '../decorators/admin-only.decorator';
 
 @Controller('onboarding')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class OnboardingController {
   private readonly logger = new Logger(OnboardingController.name);
 

@@ -95,6 +95,10 @@ enum NotificationType {
 
   COMMUNITY_POST // New post in followed community
   COMMUNITY_REPLY // Reply to your post/comment
+  COMMUNITY_RECOMMENDATION // New community recommendations available
+  COMMUNITY_JOINED // Successfully joined a community
+  COMMUNITY_WELCOME // Welcome message after joining
+  RECOMMENDATIONS_UPDATED // Community recommendations refreshed
 
   SYSTEM_MAINTENANCE // System maintenance notice
   SYSTEM_UPDATE // Platform update

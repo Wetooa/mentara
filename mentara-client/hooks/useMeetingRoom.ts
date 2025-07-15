@@ -59,12 +59,10 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
 
     meetingSocket.on('connect', () => {
       setIsConnected(true);
-      console.log('Connected to meeting room');
     });
 
     meetingSocket.on('disconnect', () => {
       setIsConnected(false);
-      console.log('Disconnected from meeting room');
     });
 
     meetingSocket.on('meeting-joined', (data: {
@@ -137,7 +135,10 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
     });
 
     return () => {
-      meetingSocket.disconnect();
+      if (meetingSocket && meetingSocket.connected) {
+        meetingSocket.disconnect();
+      }
+      meetingSocketRef.current = null;
     };
   }, [meetingId, onMeetingEnd, onError]);
 
@@ -241,7 +242,7 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
     type: 'offer' | 'answer' | 'ice-candidate';
   }) => {
     // This would be handled by WebRTC implementation
-    console.log('Received WebRTC signal:', data);
+    // WebRTC signal processing logic would go here
   }, []);
 
   // Get meeting room URL
@@ -250,7 +251,7 @@ export function useMeetingRoom({ meetingId, onMeetingEnd, onError }: UseMeetingR
       const response = await api.meetings.generateMeetingRoom(meetingId);
       return response.roomUrl;
     } catch (error) {
-      console.error('Failed to get meeting room URL:', error);
+      toast.error('Failed to get meeting room URL');
       throw error;
     }
   }, [meetingId, api]);

@@ -16,24 +16,15 @@ import { fadeDown } from "@/lib/animations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { LoginDto, LoginDtoSchema } from "mentara-commons";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }),
-});
-
 export default function SignIn() {
-  const { signInWithEmail, signInWithOAuth, isLoading } = useAuth();
+  const { signInWithEmail, isLoading } = useAuth();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<LoginDto>({
+    resolver: zodResolver(LoginDtoSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -41,7 +32,7 @@ export default function SignIn() {
     mode: "onChange",
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: LoginDto) {
     await signInWithEmail(values.email, values.password);
   }
 
@@ -102,23 +93,8 @@ export default function SignIn() {
             </div>
 
             <div className="space-y-3">
-              <Button
-                onClick={() => signInWithOAuth("oauth_google")}
-                type="button"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 p-2 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                <ContinueWithGoogle />
-              </Button>
-
-              <Button
-                onClick={() => signInWithOAuth("oauth_microsoft")}
-                type="button"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 p-2 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                <ContinueWithMicrosoft />
-              </Button>
+              <ContinueWithGoogle />
+              <ContinueWithMicrosoft />
 
               {/* CAPTCHA Widget */}
               <div id="clerk-captcha"></div>
@@ -137,7 +113,7 @@ export default function SignIn() {
             
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link 
                   href="/pre-assessment" 
                   className="text-blue-600 hover:text-blue-800 font-medium"

@@ -164,7 +164,7 @@ export const createMessagingApiService = (
   getToken: () => Promise<string | null>
 ) => {
   // Request deduplication to prevent multiple simultaneous calls
-  const pendingRequests = new Map<string, Promise<any>>();
+  const pendingRequests = new Map<string, Promise<unknown>>();
 
   // Helper function to make authenticated requests with deduplication
   const makeRequest = async (endpoint: string, options: RequestInit = {}) => {

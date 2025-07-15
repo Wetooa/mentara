@@ -925,8 +925,8 @@ export declare const ConversationParticipantSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     role: "ADMIN" | "MODERATOR" | "MEMBER";
-    userId: string;
     isActive: boolean;
+    userId: string;
     conversationId: string;
     joinedAt: string;
     leftAt: string | null;
@@ -956,8 +956,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
-        userId: string;
         isActive: boolean;
+        userId: string;
         conversationId: string;
         joinedAt: string;
         leftAt: string | null;
@@ -1109,8 +1109,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
     participants: {
         id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
-        userId: string;
         isActive: boolean;
+        userId: string;
         conversationId: string;
         joinedAt: string;
         leftAt: string | null;
@@ -1158,8 +1158,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
         isActive?: boolean | undefined;
     }[];
-    title?: string | undefined;
     isActive?: boolean | undefined;
+    title?: string | undefined;
     lastMessageAt?: string | undefined;
 }>;
 export declare const MessageSearchResultSchema: z.ZodObject<{

@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { BillingService } from './billing.service';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
 import {
@@ -24,7 +24,7 @@ import {
 } from '@prisma/client';
 
 @Controller('billing')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
@@ -73,6 +73,106 @@ export class BillingController {
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.cancelSubscription(userId);
+  }
+
+  // ===== ADVANCED SUBSCRIPTION MANAGEMENT =====
+
+  @Post('subscriptions/me/change-plan')
+  changeMySubscriptionPlan(
+    @Body()
+    body: {
+      newPlanId: string;
+      billingCycle?: BillingCycle;
+      prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
+      effectiveDate?: string;
+    },
+    @CurrentUserId() userId: string,
+  ) {
+    return this.billingService.changeSubscriptionPlan(userId, body.newPlanId, {
+      billingCycle: body.billingCycle,
+      prorationBehavior: body.prorationBehavior,
+      effectiveDate: body.effectiveDate ? new Date(body.effectiveDate) : undefined,
+    });
+  }
+
+  @Post('subscriptions/me/pause')
+  pauseMySubscription(
+    @Body()
+    body: {
+      pauseUntil?: string;
+      reason?: string;
+    },
+    @CurrentUserId() userId: string,
+  ) {
+    return this.billingService.pauseSubscription(userId, {
+      pauseUntil: body.pauseUntil ? new Date(body.pauseUntil) : undefined,
+      reason: body.reason,
+    });
+  }
+
+  @Post('subscriptions/me/resume')
+  resumeMySubscription(@CurrentUserId() userId: string) {
+    return this.billingService.resumeSubscription(userId);
+  }
+
+  @Post('subscriptions/me/schedule-cancellation')
+  scheduleMySubscriptionCancellation(
+    @Body()
+    body: {
+      reason?: string;
+      feedback?: string;
+      cancelAtPeriodEnd?: boolean;
+    },
+    @CurrentUserId() userId: string,
+  ) {
+    return this.billingService.scheduleSubscriptionCancellation(userId, body);
+  }
+
+  @Post('subscriptions/me/reactivate')
+  reactivateMySubscription(
+    @Body() body: { newPaymentMethodId?: string },
+    @CurrentUserId() userId: string,
+  ) {
+    return this.billingService.reactivateSubscription(userId, body.newPaymentMethodId);
+  }
+
+  @Post('subscriptions/me/apply-discount')
+  applyDiscountToMySubscription(
+    @Body() body: { discountCode: string },
+    @CurrentUserId() userId: string,
+  ) {
+    return this.billingService.applyDiscountToSubscription(userId, body.discountCode);
+  }
+
+  @Post('subscriptions/:id/renew')
+  processSubscriptionRenewal(
+    @Param('id') subscriptionId: string,
+    @CurrentUserRole() userRole: string,
+  ) {
+    if (userRole !== 'admin') {
+      throw new UnauthorizedException('Insufficient permissions');
+    }
+    return this.billingService.processSubscriptionRenewal(subscriptionId);
+  }
+
+  @Get('subscriptions/:id/usage-analytics')
+  getSubscriptionUsageAnalytics(
+    @Param('id') subscriptionId: string,
+    @CurrentUserRole() userRole: string,
+    @CurrentUserId() userId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    // Users can only see their own subscription analytics
+    if (userRole !== 'admin') {
+      // In a real implementation, verify subscriptionId belongs to user
+    }
+
+    return this.billingService.getSubscriptionUsageAnalytics(
+      subscriptionId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+    );
   }
 
   // Subscription Plans

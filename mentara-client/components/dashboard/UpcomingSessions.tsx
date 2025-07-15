@@ -11,23 +11,23 @@ interface UpcomingSessionsProps {
 
 export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
   // Function to format the session time
-  const formatSessionTime = (dateTimeStr: string, durationMinutes: number) => {
-    const dateTime = parseISO(dateTimeStr);
-    const endTime = addMinutes(dateTime, durationMinutes);
+  // const formatSessionTime = (dateTimeStr: string, durationMinutes: number) => {
+  //   const dateTime = parseISO(dateTimeStr);
+  //   const endTime = addMinutes(dateTime, durationMinutes);
 
-    return `${format(dateTime, "h:mm a")} - ${format(endTime, "h:mm a")}`;
-  };
+  //   return `${format(dateTime, "h:mm a")} - ${format(endTime, "h:mm a")}`;
+  // };
 
   // Function to format the date with special handling for today
-  const formatSessionDate = (dateTimeStr: string) => {
-    const dateTime = parseISO(dateTimeStr);
+  // const formatSessionDate = (dateTimeStr: string) => {
+  //   const dateTime = parseISO(dateTimeStr);
 
-    if (isToday(dateTime)) {
-      return "Today";
-    }
+  //   if (isToday(dateTime)) {
+  //     return "Today";
+  //   }
 
-    return format(dateTime, "EEEE, MMMM d");
-  };
+  //   return format(dateTime, "EEEE, MMMM d");
+  // };
 
   // Check if there are any sessions scheduled for today
   const todaySessions = sessions.filter((session) =>

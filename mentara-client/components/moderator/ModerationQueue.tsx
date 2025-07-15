@@ -24,7 +24,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  // DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -46,14 +46,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Shield,
-  AlertTriangle,
   CheckCircle,
   XCircle,
   Eye,
-  Flag,
   Trash2,
   Filter,
   RefreshCw,
+  // AlertTriangle,
+  // Flag,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useContentModerationQueue, useModerateContent } from "@/hooks/useModerator";
@@ -181,7 +181,7 @@ export function ModerationQueue({ className }: ModerationQueueProps) {
                 <Filter className="h-4 w-4 text-gray-500" />
                 <Select 
                   value={filters.type} 
-                  onValueChange={(value) => setFilters({...filters, type: value as any})}
+                  onValueChange={(value: string) => setFilters({...filters, type: value as 'all' | 'post' | 'comment'})}
                 >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Type" />
@@ -195,7 +195,7 @@ export function ModerationQueue({ className }: ModerationQueueProps) {
 
                 <Select 
                   value={filters.priority} 
-                  onValueChange={(value) => setFilters({...filters, priority: value as any})}
+                  onValueChange={(value: string) => setFilters({...filters, priority: value as 'all' | 'urgent' | 'high' | 'medium' | 'low'})}
                 >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Priority" />
@@ -258,11 +258,11 @@ export function ModerationQueue({ className }: ModerationQueueProps) {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-red-50 text-red-700">
-                        {(item as any).reportCount || 0}
+                        {(item as Post | Comment & { reportCount?: number }).reportCount || 0}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {getPriorityBadge((item as any).priority || 'medium')}
+                      {getPriorityBadge((item as Post | Comment & { priority?: string }).priority || 'medium')}
                     </TableCell>
                     <TableCell>{formatDate(item.createdAt)}</TableCell>
                     <TableCell className="text-right">
@@ -326,10 +326,10 @@ export function ModerationQueue({ className }: ModerationQueueProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {getContentTypeBadge(selectedContent)}
-                  {getPriorityBadge((selectedContent as any).priority || 'medium')}
+                  {getPriorityBadge((selectedContent as Post | Comment & { priority?: string }).priority || 'medium')}
                 </div>
                 <Badge variant="outline" className="bg-red-50 text-red-700">
-                  {(selectedContent as any).reportCount || 0} Reports
+                  {(selectedContent as Post | Comment & { reportCount?: number }).reportCount || 0} Reports
                 </Badge>
               </div>
 
@@ -355,7 +355,7 @@ export function ModerationQueue({ className }: ModerationQueueProps) {
                 {'communityId' in selectedContent && (
                   <div>
                     <span className="font-medium">Community:</span>{" "}
-                    {(selectedContent as any).community?.name || 'Unknown'}
+                    {(selectedContent as Post | Comment & { community?: { name?: string } }).community?.name || 'Unknown'}
                   </div>
                 )}
               </div>

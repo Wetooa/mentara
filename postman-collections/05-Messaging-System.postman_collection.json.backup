@@ -1,0 +1,930 @@
+{
+  "info": {
+    "name": "Mentara - Messaging System",
+    "description": "Real-time messaging system for secure communication between clients and therapists. Includes conversation management, message reactions, and blocking functionality.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-messaging"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Conversation Management",
+      "item": [
+        {
+          "name": "Create Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conversation created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has conversation ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('conversationId', responseJson.id);",
+                  "});",
+                  "",
+                  "pm.test('Conversation has participants', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('participants');",
+                  "    pm.expect(responseJson.participants).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"participantIds\": [\"{{therapistId}}\"],\n  \"type\": \"direct\",\n  \"title\": \"Therapy Session Discussion\",\n  \"isEncrypted\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations"]
+            },
+            "description": "Create a new conversation between client and therapist"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conversations retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Conversations have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.length > 0) {",
+                  "        pm.expect(responseJson[0]).to.have.property('id');",
+                  "        pm.expect(responseJson[0]).to.have.property('participants');",
+                  "        pm.expect(responseJson[0]).to.have.property('lastMessage');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations?page=1&limit=20&includeArchived=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "includeArchived",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get user's conversations with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/{{conversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "{{conversationId}}"]
+            },
+            "description": "Get specific conversation details"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Message Operations",
+      "item": [
+        {
+          "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Message sent successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has message ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('messageId', responseJson.id);",
+                  "});",
+                  "",
+                  "pm.test('Message has content and timestamp', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('content');",
+                  "    pm.expect(responseJson).to.have.property('createdAt');",
+                  "    pm.expect(responseJson).to.have.property('senderId');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello, I wanted to follow up on our last session and discuss the coping strategies we talked about.\",\n  \"type\": \"text\",\n  \"isEncrypted\": true,\n  \"metadata\": {\n    \"priority\": \"normal\",\n    \"tags\": [\"follow-up\", \"coping-strategies\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/{{conversationId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "{{conversationId}}", "messages"]
+            },
+            "description": "Send a text message in a conversation"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Message with Attachment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Here's the worksheet we discussed. Please complete it before our next session.\",\n  \"type\": \"attachment\",\n  \"attachments\": [\n    {\n      \"fileId\": \"{{fileId}}\",\n      \"fileName\": \"mindfulness-worksheet.pdf\",\n      \"fileType\": \"application/pdf\",\n      \"fileSize\": 524288\n    }\n  ],\n  \"isEncrypted\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/{{conversationId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "{{conversationId}}", "messages"]
+            },
+            "description": "Send a message with file attachment"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Messages retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has messages array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('messages');",
+                  "    pm.expect(responseJson.messages).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Pagination info included', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "    pm.expect(responseJson.pagination).to.have.property('page');",
+                  "    pm.expect(responseJson.pagination).to.have.property('totalPages');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/{{conversationId}}/messages?page=1&limit=50&before={{messageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "{{conversationId}}", "messages"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "before",
+                  "value": "{{messageId}}"
+                }
+              ]
+            },
+            "description": "Get messages from a conversation with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Message updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Updated content reflected', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.content).to.include('updated');",
+                  "    pm.expect(responseJson).to.have.property('editedAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello, I wanted to follow up on our last session and discuss the updated coping strategies we talked about. [Message updated]\",\n  \"editReason\": \"Added clarification\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages/{{messageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "messages", "{{messageId}}"]
+            },
+            "description": "Update/edit a message (only by sender)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Message deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Deletion confirmed', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Sent by mistake\",\n  \"deleteForEveryone\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages/{{messageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "messages", "{{messageId}}"]
+            },
+            "description": "Delete a message (soft delete with reason)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Message Status & Reactions",
+      "item": [
+        {
+          "name": "Mark Message as Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Message marked as read', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Read receipt created', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('readAt');",
+                  "    pm.expect(responseJson).to.have.property('readBy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"readAt\": \"{{$isoTimestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages/{{messageId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "messages", "{{messageId}}", "read"]
+            },
+            "description": "Mark a message as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Reaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reaction added successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Reaction details returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('emoji');",
+                  "    pm.expect(responseJson).to.have.property('userId');",
+                  "    pm.expect(responseJson).to.have.property('createdAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emoji\": \"👍\",\n  \"reactionType\": \"like\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages/{{messageId}}/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "messages", "{{messageId}}", "reactions"]
+            },
+            "description": "Add an emoji reaction to a message"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Reaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reaction removed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Removal confirmed', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('removed');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages/{{messageId}}/reactions/👍",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "messages", "{{messageId}}", "reactions", "👍"]
+            },
+            "description": "Remove a specific emoji reaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Message Read Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages/{{messageId}}/read-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "messages", "{{messageId}}", "read-status"]
+            },
+            "description": "Get read receipts for a message"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Blocking & Privacy",
+      "item": [
+        {
+          "name": "Block User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User blocked successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Block details returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('blockedUserId');",
+                  "    pm.expect(responseJson).to.have.property('blockedAt');",
+                  "    pm.expect(responseJson).to.have.property('reason');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blockedUserId\": \"{{targetUserId}}\",\n  \"reason\": \"Inappropriate behavior\",\n  \"reportToModerators\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/block",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "block"]
+            },
+            "description": "Block a user from messaging"
+          },
+          "response": []
+        },
+        {
+          "name": "Unblock User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User unblocked successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Unblock confirmed', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('unblocked');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/block/{{targetUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "block", "{{targetUserId}}"]
+            },
+            "description": "Unblock a previously blocked user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Blocked Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/blocked-users?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "blocked-users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get list of blocked users"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Message Search",
+      "item": [
+        {
+          "name": "Search Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Search results structure valid', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('results');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/search?query=coping strategies&conversationId={{conversationId}}&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "coping strategies"
+                },
+                {
+                  "key": "conversationId",
+                  "value": "{{conversationId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search messages by content within a conversation"
+          },
+          "response": []
+        },
+        {
+          "name": "Global Message Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/search?query=homework&dateFrom=2024-01-01&dateTo=2024-12-31&messageType=text",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "homework"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "messageType",
+                  "value": "text"
+                }
+              ]
+            },
+            "description": "Search messages across all conversations with date range"
+          },
+          "response": []
+        },
+        {
+          "name": "Search by Attachment Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/search?messageType=attachment&attachmentType=pdf&conversationId={{conversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "search"],
+              "query": [
+                {
+                  "key": "messageType",
+                  "value": "attachment"
+                },
+                {
+                  "key": "attachmentType",
+                  "value": "pdf"
+                },
+                {
+                  "key": "conversationId",
+                  "value": "{{conversationId}}"
+                }
+              ]
+            },
+            "description": "Search for messages with specific attachment types"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Real-time Features",
+      "item": [
+        {
+          "name": "Send Typing Indicator",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": \"{{conversationId}}\",\n  \"isTyping\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/typing",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "typing"]
+            },
+            "description": "Send typing indicator to conversation participants"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Online Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"online\",\n  \"customMessage\": \"Available for sessions\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/presence",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "presence"]
+            },
+            "description": "Update user's online presence status"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Online Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/online-users?conversationId={{conversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "online-users"],
+              "query": [
+                {
+                  "key": "conversationId",
+                  "value": "{{conversationId}}"
+                }
+              ]
+            },
+            "description": "Get online status of conversation participants"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Send Message - Blocked User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for blocked user', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions blocking', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('blocked');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This message should be blocked\",\n  \"type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/{{blockedConversationId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "{{blockedConversationId}}", "messages"]
+            },
+            "description": "Test messaging to blocked user"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Empty Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for empty message', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions content', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('content');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"\",\n  \"type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/{{conversationId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "{{conversationId}}", "messages"]
+            },
+            "description": "Test validation for empty message content"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Invalid Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 404 for invalid conversation', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions conversation', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('conversation');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/conversations/invalid-conversation-id/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["messaging", "conversations", "invalid-conversation-id", "messages"]
+            },
+            "description": "Test access to non-existent conversation"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

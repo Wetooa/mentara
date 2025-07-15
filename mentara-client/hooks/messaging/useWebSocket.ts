@@ -1,25 +1,24 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
 import { messagingWebSocket } from '@/lib/messaging-websocket';
 import type { Message, TypingData, UserStatusData } from '@/types/api/messaging';
 
 export function useWebSocket() {
-  const { getToken } = useAuth();
+  const { accessToken } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const connectionRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(async () => {
-    if (!getToken || connectionRef.current?.readyState === WebSocket.OPEN) return;
+    if (!accessToken || connectionRef.current?.readyState === WebSocket.OPEN) return;
 
     try {
       setError(null);
-      const token = await getToken();
-      if (!token) throw new Error('No authentication token available');
+      if (!accessToken) throw new Error('No authentication token available');
 
-      const ws = messagingWebSocket.connect(token);
+      const ws = messagingWebSocket.connect(accessToken);
       connectionRef.current = ws;
 
       ws.onopen = () => {
@@ -32,18 +31,16 @@ export function useWebSocket() {
         connectionRef.current = null;
       };
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+      ws.onerror = () => {
         setError('Connection error');
         setIsConnected(false);
       };
 
     } catch (err) {
-      console.error('Failed to connect WebSocket:', err);
       setError('Failed to connect');
       setIsConnected(false);
     }
-  }, [getToken]);
+  }, [accessToken]);
 
   const disconnect = useCallback(() => {
     if (connectionRef.current) {

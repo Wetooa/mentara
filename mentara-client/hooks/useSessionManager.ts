@@ -54,7 +54,6 @@ export function useSessionManager(options: SessionManagerOptions = {}) {
           router.push(newPath);
         }
       } catch (error) {
-        console.error("Failed to handle role change:", error);
         toast.error("Session update failed. Please sign in again.");
         router.push("/sign-in");
       }
@@ -77,7 +76,6 @@ export function useSessionManager(options: SessionManagerOptions = {}) {
         await refreshSession();
       }
     } catch (error) {
-      console.error("Failed to refresh session:", error);
       // Don't show error toast for automatic refresh failures
     }
   }, [isLoaded, user, sessionData, refreshSession]);
@@ -100,7 +98,6 @@ export function useSessionManager(options: SessionManagerOptions = {}) {
         await validateSession();
         return true;
       } catch (error) {
-        console.error("Session validation failed:", error);
         toast.error("Session expired. Please sign in again.");
         router.push("/sign-in");
         return false;
@@ -199,8 +196,7 @@ export function useSessionManager(options: SessionManagerOptions = {}) {
   // Initial session validation on mount
   useEffect(() => {
     if (isLoaded && user && !sessionData) {
-      validateSession().catch((error) => {
-        console.error('Initial session validation failed:', error);
+      validateSession().catch(() => {
         // Silent fail for initial validation - user can still sign in
       });
     }
@@ -251,7 +247,6 @@ export function useRoleProtectedOperation() {
         await operation();
         return true;
       } catch (error) {
-        console.error("Operation failed:", error);
         return false;
       }
     },

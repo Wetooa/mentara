@@ -15,10 +15,6 @@ export default function VerifyAccount() {
   const { isLoaded, signUp } = useSignUp();
   const { details } = useSignUpStore();
 
-  if (!signUp) {
-    return;
-  }
-
   useEffect(() => {
     const sendVerificationEmail = async () => {
       if (isLoaded && signUp) {
@@ -40,6 +36,10 @@ export default function VerifyAccount() {
     sendVerificationEmail();
   }, [isLoaded, signUp]);
 
+  if (!signUp) {
+    return null;
+  }
+
   async function handleResendEmail() {
     if (isLoaded) {
       try {
@@ -56,7 +56,7 @@ export default function VerifyAccount() {
         
         toast.success("Verification email sent! Please check your inbox.");
       } catch (error: unknown) {
-        toast.error(`Failed to resend verification email. ${error.message}`);
+        toast.error(`Failed to resend verification email. ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }

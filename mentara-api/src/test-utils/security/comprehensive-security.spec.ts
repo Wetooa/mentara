@@ -8,7 +8,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../guards/admin-auth.guard';
 import { RoleUtils, UserRole } from '../../utils/role-utils';
 import { PrismaService } from '../../providers/prisma-client.provider';
@@ -19,7 +19,7 @@ import { Reflector } from '@nestjs/core';
 describe('Comprehensive Security Testing', () => {
   let app: INestApplication;
   let authController: AuthController;
-  let clerkAuthGuard: ClerkAuthGuard;
+  let jwtAuthGuard: JwtAuthGuard;
   let adminAuthGuard: AdminAuthGuard;
   let roleUtils: RoleUtils;
   let prismaService: PrismaService;
@@ -29,7 +29,7 @@ describe('Comprehensive Security Testing', () => {
       controllers: [AuthController],
       providers: [
         AuthService,
-        ClerkAuthGuard,
+        JwtAuthGuard,
         AdminAuthGuard,
         RoleUtils,
         Reflector,
@@ -57,7 +57,7 @@ describe('Comprehensive Security Testing', () => {
     await app.init();
 
     authController = moduleRef.get<AuthController>(AuthController);
-    clerkAuthGuard = moduleRef.get<ClerkAuthGuard>(ClerkAuthGuard);
+    jwtAuthGuard = moduleRef.get<JwtAuthGuard>(JwtAuthGuard);
     adminAuthGuard = moduleRef.get<AdminAuthGuard>(AdminAuthGuard);
     roleUtils = moduleRef.get<RoleUtils>(RoleUtils);
     prismaService = moduleRef.get<PrismaService>(PrismaService);
@@ -77,7 +77,7 @@ describe('Comprehensive Security Testing', () => {
         }),
       } as any;
 
-      const result = await clerkAuthGuard.canActivate(mockContext);
+      const result = await jwtAuthGuard.canActivate(mockContext);
       expect(result).toBe(false);
     });
 
@@ -101,7 +101,7 @@ describe('Comprehensive Security Testing', () => {
           }),
         } as any;
 
-        const result = await clerkAuthGuard.canActivate(mockContext);
+        const result = await jwtAuthGuard.canActivate(mockContext);
         expect(result).toBe(false);
       }
     });
@@ -125,7 +125,7 @@ describe('Comprehensive Security Testing', () => {
           }),
         } as any;
 
-        const result = await clerkAuthGuard.canActivate(mockContext);
+        const result = await jwtAuthGuard.canActivate(mockContext);
         expect(result).toBe(false);
       }
     });

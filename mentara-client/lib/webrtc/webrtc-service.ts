@@ -364,7 +364,7 @@ export class WebRTCService {
   /**
    * Get connection statistics
    */
-  async getConnectionStats(userId: string): Promise<any> {
+  async getConnectionStats(userId: string): Promise<unknown> {
     const peerConnection = this.peers.get(userId);
     if (peerConnection) {
       // SimplePeer doesn't expose getStats easily, but you could access the internal RTCPeerConnection

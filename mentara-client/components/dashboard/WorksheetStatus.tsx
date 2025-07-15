@@ -8,7 +8,7 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
-import { format, parseISO, isPast, isToday } from "date-fns";
+import { format, parseISO, isToday } from "date-fns";
 
 interface WorksheetStatusProps {
   worksheets: UserDashboardData["worksheets"];
@@ -18,9 +18,9 @@ export default function WorksheetStatus({ worksheets }: WorksheetStatusProps) {
   // Group worksheets by status
   const pendingWorksheets = worksheets.filter((ws) => ws.status === "pending");
   const overdueWorksheets = worksheets.filter((ws) => ws.status === "overdue");
-  const completedWorksheets = worksheets.filter(
-    (ws) => ws.status === "completed"
-  );
+  // const completedWorksheets = worksheets.filter(
+  //   (ws) => ws.status === "completed"
+  // );
 
   // Check if there are worksheets due today
   const dueTodayWorksheets = worksheets.filter(

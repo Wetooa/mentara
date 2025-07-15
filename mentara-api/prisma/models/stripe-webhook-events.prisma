@@ -1,0 +1,25 @@
+// Stripe Webhook Event Tracking
+// This model tracks Stripe webhook events for idempotency and debugging
+
+model StripeWebhookEvent {
+  id          String   @id @default(uuid())
+  eventId     String   @unique // Stripe event ID
+  eventType   String   // Event type (e.g., "payment_intent.succeeded")
+  eventData   Json     // Full event data from Stripe
+  livemode    Boolean  // Whether this was a live or test event
+  apiVersion  String?  // Stripe API version
+  created     DateTime // When the event was created by Stripe
+  received    DateTime @default(now()) // When we received the event
+  processed   Boolean  @default(false) // Whether we've processed this event
+  processedAt DateTime? // When we finished processing
+  success     Boolean? // Whether processing was successful
+  errorMessage String? @db.Text // Error message if processing failed
+  retryCount  Int      @default(0) // Number of times we've retried this event
+  
+  // Indexes for performance
+  @@index([eventId])
+  @@index([eventType])
+  @@index([processed, success])
+  @@index([created])
+  @@index([livemode])
+}

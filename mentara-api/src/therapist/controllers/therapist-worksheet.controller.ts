@@ -10,7 +10,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CurrentUserId } from '../../decorators/current-user-id.decorator';
 import { WorksheetsService } from '../../worksheets/worksheets.service';
 import {
@@ -19,7 +19,7 @@ import {
 } from 'schema/worksheet';
 
 @Controller('therapist/worksheets')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TherapistWorksheetController {
   constructor(private readonly worksheetsService: WorksheetsService) {}
 

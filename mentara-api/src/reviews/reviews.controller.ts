@@ -10,12 +10,12 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { ReviewCreateDto, ReviewUpdateDto } from 'schema/review';
 
 @Controller('reviews')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 

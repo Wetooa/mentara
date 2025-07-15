@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MoreVertical } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Contact } from "@/components/messages/types";
 
 interface RecentCommunicationsProps {

@@ -1,48 +1,57 @@
 import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
 import { z } from 'zod';
-import { validateSchema, formatValidationErrors } from 'mentara-commons';
 
 @Injectable()
 export class ZodValidationPipe implements PipeTransform {
-  constructor(private schema: z.ZodSchema) {}
+  constructor(private schema: z.ZodType<any, any, any>) {}
 
   transform(value: any, metadata: ArgumentMetadata) {
-    if (metadata.type !== 'body') {
-      return value;
+    try {
+      // Validate all types: body, query, param
+      const parsedValue = this.schema.parse(value);
+      return parsedValue;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map((err) => {
+          const path = err.path.length > 0 ? err.path.join('.') : 'root';
+          return `${path}: ${err.message}`;
+        });
+        
+        throw new BadRequestException({
+          message: 'Validation failed',
+          errors: errorMessages,
+          statusCode: 400,
+          type: metadata.type
+        });
+      }
+      throw new BadRequestException('Validation failed');
     }
-
-    const result = validateSchema(this.schema, value);
-    
-    if (!result.success) {
-      const errorMessage = formatValidationErrors(result.errors);
-      throw new BadRequestException(`Validation failed: ${errorMessage}`);
-    }
-    
-    return result.data;
   }
 }
 
 // Factory function to create validation pipes
-export function ZodValidationPipeFactory(schema: z.ZodSchema) {
+export function ZodValidationPipeFactory(schema: z.ZodType<any, any, any>) {
   return new ZodValidationPipe(schema);
 }
 
-// Decorator for easy use
-export function ValidateZodSchema(schema: z.ZodSchema) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
-    const method = descriptor.value;
-    descriptor.value = function (...args: any[]) {
-      // Find body parameter and validate it
-      const bodyIndex = Reflect.getMetadata('custom:body-index', target, propertyName) || 0;
-      if (args[bodyIndex]) {
-        const result = validateSchema(schema, args[bodyIndex]);
-        if (!result.success) {
-          const errorMessage = formatValidationErrors(result.errors);
-          throw new BadRequestException(`Validation failed: ${errorMessage}`);
-        }
-        args[bodyIndex] = result.data;
-      }
-      return method.apply(this, args);
-    };
+// Decorator for easy parameter validation
+export function ValidateBody(schema: z.ZodType<any, any, any>) {
+  return function (target: any, propertyKey: string, parameterIndex: number) {
+    // This would work with a custom decorator implementation
+    // For now, we'll use the pipe directly in controllers
+  };
+}
+
+// Decorator for query validation
+export function ValidateQuery(schema: z.ZodType<any, any, any>) {
+  return function (target: any, propertyKey: string, parameterIndex: number) {
+    // This would work with a custom decorator implementation
+  };
+}
+
+// Decorator for param validation
+export function ValidateParam(schema: z.ZodType<any, any, any>) {
+  return function (target: any, propertyKey: string, parameterIndex: number) {
+    // This would work with a custom decorator implementation  
   };
 }

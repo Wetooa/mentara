@@ -123,7 +123,7 @@ export function ModerationQueue({
                 <Filter className="h-4 w-4 text-gray-500" />
                 <Select 
                   value={filters.type || 'all'} 
-                  onValueChange={(value) => onFiltersChange?.({ type: value === 'all' ? undefined : value as any })}
+                  onValueChange={(value: string) => onFiltersChange?.({ type: value === 'all' ? undefined : value as 'post' | 'comment' })}
                 >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Type" />
@@ -137,7 +137,7 @@ export function ModerationQueue({
 
                 <Select 
                   value={filters.priority || 'all'} 
-                  onValueChange={(value) => onFiltersChange?.({ priority: value === 'all' ? undefined : value as any })}
+                  onValueChange={(value: string) => onFiltersChange?.({ priority: value === 'all' ? undefined : value as 'urgent' | 'high' | 'medium' | 'low' })}
                 >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Priority" />
@@ -200,11 +200,11 @@ export function ModerationQueue({
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-red-50 text-red-700">
-                        {(item as any).reportCount || 0}
+                        {(item as { reportCount?: number }).reportCount || 0}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {getPriorityBadge((item as any).priority || 'medium')}
+                      {getPriorityBadge((item as { priority?: string }).priority || 'medium')}
                     </TableCell>
                     <TableCell>{formatDate(item.createdAt)}</TableCell>
                     <TableCell className="text-right">

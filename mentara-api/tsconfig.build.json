@@ -1,4 +1,23 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "scripts/**/*"]
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "**/*test.ts",
+    "scripts/**/*",
+    "../mentara-client/**/*",
+    "../ai-patient-evaluation/**/*",
+    "../node_modules/**/*",
+    "../.*",
+    "coverage/**/*",
+    ".nyc_output/**/*",
+    "prisma/seed*.ts"
+  ],
+  "compilerOptions": {
+    "sourceMap": false,
+    "declaration": false,
+    "removeComments": true
+  }
 }

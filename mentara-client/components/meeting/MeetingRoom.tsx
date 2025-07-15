@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Video,
   VideoOff,
@@ -18,14 +18,11 @@ import {
   Phone,
   MessageSquare,
   Users,
-  Settings,
-  AlertCircle,
   Send,
   Clock,
   Play,
   Square,
   PhoneOff,
-  Smartphone,
   MoreVertical,
 } from "lucide-react";
 import { useMeetingRoom } from "@/hooks/useMeetingRoom";
@@ -53,7 +50,7 @@ export function MeetingRoom({ meetingId, onLeave }: MeetingRoomProps) {
   
   // Media queries for responsive design
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const isTablet = useMediaQuery('(max-width: 1024px)');
+  // const isTablet = useMediaQuery('(max-width: 1024px)');
   const isTouchDevice = useMediaQuery('(pointer: coarse)');
 
   const {
@@ -70,7 +67,7 @@ export function MeetingRoom({ meetingId, onLeave }: MeetingRoomProps) {
     sendChatMessage,
     startMeeting,
     endMeeting,
-    startRecording,
+    // startRecording,
     participantCount,
     isActive,
     isWaiting,

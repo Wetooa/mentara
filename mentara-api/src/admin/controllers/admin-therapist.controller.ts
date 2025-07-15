@@ -1,135 +1,114 @@
 import {
   Controller,
   Get,
-  Body,
+  Post,
+  Put,
   Param,
+  Body,
+  Query,
   UseGuards,
-  HttpException,
+  HttpCode,
   HttpStatus,
   Logger,
-  Query,
-  Put,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
-import { AdminService } from '../admin.service';
-import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../guards/admin-auth.guard';
 import { AdminOnly } from '../../decorators/admin-only.decorator';
 import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import {
+  ApproveTherapistDtoSchema,
+  RejectTherapistDtoSchema,
+  UpdateTherapistStatusDtoSchema,
+  PendingTherapistFiltersDtoSchema,
+  type ApproveTherapistDto,
+  type RejectTherapistDto,
+  type UpdateTherapistStatusDto,
+  type PendingTherapistFiltersDto,
+} from 'mentara-commons';
+import { AdminTherapistService } from '../services/admin-therapist.service';
 
 @Controller('admin/therapists')
-@UseGuards(ClerkAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard, AdminAuthGuard)
+@AdminOnly()
 export class AdminTherapistController {
   private readonly logger = new Logger(AdminTherapistController.name);
 
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminTherapistService: AdminTherapistService) {}
+
+  @Get('pending')
+  @HttpCode(HttpStatus.OK)
+  async getPendingApplications(
+    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema)) filters: PendingTherapistFiltersDto,
+    @CurrentUserId() adminId: string,
+  ) {
+    this.logger.log(`Admin ${adminId} fetching pending therapist applications`);
+    return this.adminTherapistService.getPendingApplications(filters);
+  }
 
   @Get('applications')
-  @AdminOnly()
-  async getAllTherapistApplications(
-    @CurrentUserId() currentUserId: string,
-    @Query('status') status?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+  @HttpCode(HttpStatus.OK)
+  async getAllApplications(
+    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema)) filters: PendingTherapistFiltersDto,
+    @CurrentUserId() adminId: string,
   ) {
-    try {
-      this.logger.log(
-        `Admin ${currentUserId} retrieving therapist applications`,
-      );
-      const pageNum = page ? parseInt(page) : 1;
-      const limitNum = limit ? parseInt(limit) : 10;
-
-      return await this.adminService.getAllTherapistApplications({
-        status,
-        page: pageNum,
-        limit: limitNum,
-      });
-    } catch (error) {
-      this.logger.error('Failed to retrieve therapist applications:', error);
-      throw new HttpException(
-        'Failed to retrieve therapist applications',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    this.logger.log(`Admin ${adminId} fetching all therapist applications`);
+    return this.adminTherapistService.getPendingApplications(filters);
   }
 
-  @Get('applications/:id')
-  @AdminOnly()
-  async getTherapistApplication(
-    @CurrentUserId() currentUserId: string,
-    @Param('id') applicationId: string,
+  @Get(':id/details')
+  @HttpCode(HttpStatus.OK)
+  async getApplicationDetails(
+    @Param('id') therapistId: string,
+    @CurrentUserId() adminId: string,
   ) {
-    try {
-      this.logger.log(
-        `Admin ${currentUserId} retrieving therapist application ${applicationId}`,
-      );
-      const application =
-        await this.adminService.getTherapistApplication(applicationId);
-
-      if (!application) {
-        throw new HttpException('Application not found', HttpStatus.NOT_FOUND);
-      }
-
-      return application;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      this.logger.error('Failed to retrieve therapist application:', error);
-      throw new HttpException(
-        'Failed to retrieve therapist application',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    this.logger.log(`Admin ${adminId} viewing therapist application ${therapistId}`);
+    return this.adminTherapistService.getApplicationDetails(therapistId);
   }
 
-  @Put('applications/:id/approve')
-  @AdminOnly()
-  async approveTherapistApplication(
-    @CurrentUserId() currentUserId: string,
-    @Param('id') applicationId: string,
-    @Body() approvalData: { notes?: string },
+  @Post(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  async approveTherapist(
+    @Param('id') therapistId: string,
+    @Body(new ZodValidationPipe(ApproveTherapistDtoSchema)) approvalDto: ApproveTherapistDto,
+    @CurrentUserId() adminId: string,
   ) {
-    try {
-      this.logger.log(
-        `Admin ${currentUserId} approving therapist application ${applicationId}`,
-      );
-      return await this.adminService.approveTherapistApplication(
-        applicationId,
-        currentUserId,
-        approvalData.notes,
-      );
-    } catch (error) {
-      this.logger.error('Failed to approve therapist application:', error);
-      throw new HttpException(
-        'Failed to approve therapist application',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    this.logger.log(`Admin ${adminId} approving therapist ${therapistId}`);
+    return this.adminTherapistService.approveTherapist(therapistId, adminId, approvalDto);
   }
 
-  @Put('applications/:id/reject')
-  @AdminOnly()
-  async rejectTherapistApplication(
-    @CurrentUserId() currentUserId: string,
-    @Param('id') applicationId: string,
-    @Body() rejectionData: { reason: string; notes?: string },
+  @Post(':id/reject')
+  @HttpCode(HttpStatus.OK)
+  async rejectTherapist(
+    @Param('id') therapistId: string,
+    @Body(new ZodValidationPipe(RejectTherapistDtoSchema)) rejectionDto: RejectTherapistDto,
+    @CurrentUserId() adminId: string,
   ) {
-    try {
-      this.logger.log(
-        `Admin ${currentUserId} rejecting therapist application ${applicationId}`,
-      );
-      return await this.adminService.rejectTherapistApplication(
-        applicationId,
-        currentUserId,
-        rejectionData.reason,
-        rejectionData.notes,
-      );
-    } catch (error) {
-      this.logger.error('Failed to reject therapist application:', error);
-      throw new HttpException(
-        'Failed to reject therapist application',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    this.logger.log(`Admin ${adminId} rejecting therapist ${therapistId}`);
+    return this.adminTherapistService.rejectTherapist(therapistId, adminId, rejectionDto);
+  }
+
+  @Put(':id/status')
+  @HttpCode(HttpStatus.OK)
+  async updateTherapistStatus(
+    @Param('id') therapistId: string,
+    @Body(new ZodValidationPipe(UpdateTherapistStatusDtoSchema)) statusDto: UpdateTherapistStatusDto,
+    @CurrentUserId() adminId: string,
+  ) {
+    this.logger.log(`Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`);
+    return this.adminTherapistService.updateTherapistStatus(therapistId, adminId, statusDto);
+  }
+
+  @Get('metrics')
+  @HttpCode(HttpStatus.OK)
+  async getTherapistApplicationMetrics(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @CurrentUserId() adminId?: string,
+  ) {
+    this.logger.log(`Admin ${adminId} fetching therapist application metrics`);
+    return this.adminTherapistService.getTherapistApplicationMetrics(startDate, endDate);
   }
 }

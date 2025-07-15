@@ -18,22 +18,7 @@ import {
 } from '../test-utils/enhanced-test-helpers';
 import { ClientCreateDto } from 'schema/auth';
 
-// Mock Clerk client
-const mockClerkClient = {
-  users: {
-    updateUserMetadata: jest.fn(),
-    getUserList: jest.fn(),
-    getUser: jest.fn(),
-  },
-  sessions: {
-    getSessionList: jest.fn(),
-    revokeSession: jest.fn(),
-  },
-};
-
-jest.mock('@clerk/backend', () => ({
-  createClerkClient: jest.fn(() => mockClerkClient),
-}));
+// @clerk/backend has been removed from the project - JWT auth is now used instead
 
 describe('AuthService', () => {
   let service: AuthService;

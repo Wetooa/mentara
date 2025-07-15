@@ -13,15 +13,24 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { AdminAuthGuard } from 'src/guards/admin-auth.guard';
 import { AdminOnly } from 'src/decorators/admin-only.decorator';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import { 
+  UserIdParamSchema,
+  UpdateUserRequestSchema,
+  DeactivateUserDtoSchema,
+  type UserIdParam,
+  type UpdateUserRequest,
+  type DeactivateUserDto
+} from 'mentara-commons';
 import { UsersService } from './users.service';
 import { RoleUtils } from 'src/utils/role-utils';
 
 @Controller('users')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
 
@@ -68,20 +77,20 @@ export class UsersController {
 
   @Get(':id')
   async findOne(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
   ): Promise<User> {
     try {
       // Users can only view their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
 
-      if (!isAdmin && id !== currentUserId) {
+      if (!isAdmin && params.id !== currentUserId) {
         throw new ForbiddenException('You can only access your own profile');
       }
 
       const user = isAdmin
-        ? await this.usersService.findOneIncludeInactive(id)
-        : await this.usersService.findOne(id);
+        ? await this.usersService.findOneIncludeInactive(params.id)
+        : await this.usersService.findOne(params.id);
 
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);

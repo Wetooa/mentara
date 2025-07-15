@@ -8,7 +8,7 @@ import {
   Bell,
   ArrowRight,
 } from "lucide-react";
-import { format, parseISO, formatDistanceToNow } from "date-fns";
+import { parseISO, formatDistanceToNow } from "date-fns";
 
 interface NotificationsCenterProps {
   notifications: UserDashboardData["notifications"];

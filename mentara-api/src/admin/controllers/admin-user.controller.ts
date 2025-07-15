@@ -11,13 +11,13 @@ import {
   Body,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
-import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../guards/admin-auth.guard';
 import { AdminOnly } from '../../decorators/admin-only.decorator';
 import { CurrentUserId } from '../../decorators/current-user-id.decorator';
 
 @Controller('admin/users')
-@UseGuards(ClerkAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminUserController {
   private readonly logger = new Logger(AdminUserController.name);
 

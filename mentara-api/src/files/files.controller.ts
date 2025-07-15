@@ -21,7 +21,7 @@ import { Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import {
   FileStatus,
@@ -31,7 +31,7 @@ import {
 import { FileShareCreateDto } from '../../schema/files';
 
 @Controller('files')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 

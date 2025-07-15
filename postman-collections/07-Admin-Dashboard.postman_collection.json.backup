@@ -1,0 +1,900 @@
+{
+  "info": {
+    "name": "Mentara - Admin Dashboard",
+    "description": "Administrative endpoints for platform management, user oversight, analytics, and system configuration. Requires admin role access.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-admin"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure admin token is set",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}",
+          "",
+          "// Check if user role is admin",
+          "if (pm.environment.get('userRole') !== 'admin') {",
+          "    console.warn('⚠️ Admin role required for these endpoints');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Platform Analytics",
+      "item": [
+        {
+          "name": "Get Dashboard Overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dashboard data retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Overview has key metrics', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('userStats');",
+                  "    pm.expect(responseJson).to.have.property('sessionStats');",
+                  "    pm.expect(responseJson).to.have.property('revenueStats');",
+                  "    pm.expect(responseJson).to.have.property('systemHealth');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/dashboard/overview?period=month&includeComparisons=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "dashboard", "overview"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "includeComparisons",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get comprehensive admin dashboard overview"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/users?startDate=2024-01-01&endDate=2024-12-31&groupBy=month&includeChurn=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "users"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "month"
+                },
+                {
+                  "key": "includeChurn",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get user registration and activity analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/sessions?period=quarter&breakdownBy=therapist&includeRatings=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "sessions"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "quarter"
+                },
+                {
+                  "key": "breakdownBy",
+                  "value": "therapist"
+                },
+                {
+                  "key": "includeRatings",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get therapy session analytics and performance metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Financial Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/financial?period=year&currency=CAD&includeProjections=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "financial"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "year"
+                },
+                {
+                  "key": "currency",
+                  "value": "CAD"
+                },
+                {
+                  "key": "includeProjections",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get financial performance and revenue analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Platform Usage Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/platform-usage?metrics=daily_active_users,session_duration,feature_usage&period=week",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "platform-usage"],
+              "query": [
+                {
+                  "key": "metrics",
+                  "value": "daily_active_users,session_duration,feature_usage"
+                },
+                {
+                  "key": "period",
+                  "value": "week"
+                }
+              ]
+            },
+            "description": "Get detailed platform usage and engagement metrics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get All Users with Filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Users retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('users');",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "    pm.expect(responseJson.users).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?role=client&isActive=true&sortBy=createdAt&sortOrder=desc&page=1&limit=20&search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "client"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get all users with advanced filtering and search"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}?includeActivity=true&includeSessions=true&includeFinancials=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}"],
+              "query": [
+                {
+                  "key": "includeActivity",
+                  "value": "true"
+                },
+                {
+                  "key": "includeSessions",
+                  "value": "true"
+                },
+                {
+                  "key": "includeFinancials",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get comprehensive user details for admin review"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User status updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Status change recorded', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('status');",
+                  "    pm.expect(responseJson).to.have.property('updatedAt');",
+                  "    pm.expect(responseJson).to.have.property('updatedBy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"Violation of community guidelines\",\n  \"notes\": \"User reported for inappropriate behavior in community posts. Temporary suspension pending review.\",\n  \"suspensionDuration\": \"7d\",\n  \"notifyUser\": true,\n  \"restrictActions\": [\"post_creation\", \"messaging\", \"booking\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}", "status"]
+            },
+            "description": "Update user account status with admin notes"
+          },
+          "response": []
+        },
+        {
+          "name": "Send User Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"admin_notice\",\n  \"title\": \"Important Platform Update\",\n  \"message\": \"We have updated our terms of service and privacy policy. Please review the changes in your account settings.\",\n  \"priority\": \"high\",\n  \"actionRequired\": true,\n  \"actionUrl\": \"/settings/terms\",\n  \"actionText\": \"Review Changes\",\n  \"expiresAt\": \"2024-02-15T23:59:59.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/notify",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}", "notify"]
+            },
+            "description": "Send administrative notification to specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Export User Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/export?format=csv&fields=id,email,role,createdAt,isActive&filters=role:client,isActive:true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "export"],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,email,role,createdAt,isActive"
+                },
+                {
+                  "key": "filters",
+                  "value": "role:client,isActive:true"
+                }
+              ]
+            },
+            "description": "Export user data for administrative reporting"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Content Moderation",
+      "item": [
+        {
+          "name": "Get Flagged Content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Flagged content retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Content has moderation details', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.length > 0) {",
+                  "        pm.expect(responseJson[0]).to.have.property('contentType');",
+                  "        pm.expect(responseJson[0]).to.have.property('flagReason');",
+                  "        pm.expect(responseJson[0]).to.have.property('reportedBy');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/moderation/flagged-content?status=pending&contentType=post&priority=high&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "moderation", "flagged-content"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "contentType",
+                  "value": "post"
+                },
+                {
+                  "key": "priority",
+                  "value": "high"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get content flagged for moderation review"
+          },
+          "response": []
+        },
+        {
+          "name": "Review Flagged Content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Content review submitted', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Review decision recorded', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('decision');",
+                  "    pm.expect(responseJson).to.have.property('reviewedAt');",
+                  "    pm.expect(responseJson).to.have.property('reviewedBy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"remove\",\n  \"reason\": \"Content violates community guidelines - inappropriate language\",\n  \"action\": \"content_removal\",\n  \"userAction\": \"warning\",\n  \"notifyUser\": true,\n  \"notificationMessage\": \"Your post has been removed for violating our community guidelines. Please review our posting rules.\",\n  \"escalateToSupervisor\": false,\n  \"reviewNotes\": \"Clear violation of language policy. User has previous warning for similar content.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/moderation/content/{{contentId}}/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "moderation", "content", "{{contentId}}", "review"]
+            },
+            "description": "Submit moderation decision for flagged content"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Moderation Queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/moderation/queue?assignedTo={{moderatorId}}&sortBy=priority&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "moderation", "queue"],
+              "query": [
+                {
+                  "key": "assignedTo",
+                  "value": "{{moderatorId}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "priority"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get assigned moderation queue for moderator"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Moderation Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/moderation/statistics?period=month&includeContentTypes=true&includeModerators=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "moderation", "statistics"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "includeContentTypes",
+                  "value": "true"
+                },
+                {
+                  "key": "includeModerators",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get moderation performance statistics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System Management",
+      "item": [
+        {
+          "name": "Get System Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('System health retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Health metrics present', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('overallStatus');",
+                  "    pm.expect(responseJson).to.have.property('services');",
+                  "    pm.expect(responseJson).to.have.property('database');",
+                  "    pm.expect(responseJson).to.have.property('externalServices');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/health?includeDetails=true&checkExternalServices=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "health"],
+              "query": [
+                {
+                  "key": "includeDetails",
+                  "value": "true"
+                },
+                {
+                  "key": "checkExternalServices",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get comprehensive system health status"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Error Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/logs?level=error&startDate=2024-01-01&endDate=2024-01-31&service=api&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "logs"],
+              "query": [
+                {
+                  "key": "level",
+                  "value": "error"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "service",
+                  "value": "api"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get system error logs for troubleshooting"
+          },
+          "response": []
+        },
+        {
+          "name": "Update System Configuration",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maintenance\": {\n    \"enabled\": false,\n    \"message\": \"System maintenance completed\",\n    \"allowedRoles\": [\"admin\"]\n  },\n  \"features\": {\n    \"newUserRegistration\": true,\n    \"therapistApplications\": true,\n    \"messagingSystem\": true,\n    \"bookingSystem\": true,\n    \"communityFeatures\": true\n  },\n  \"limits\": {\n    \"maxSessionsPerDay\": 100,\n    \"maxMessagesPerHour\": 1000,\n    \"maxFileUploadSize\": \"10MB\"\n  },\n  \"security\": {\n    \"requireTwoFactor\": false,\n    \"sessionTimeoutMinutes\": 30,\n    \"maxLoginAttempts\": 5\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/configuration",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "configuration"]
+            },
+            "description": "Update system-wide configuration settings"
+          },
+          "response": []
+        },
+        {
+          "name": "Send System Announcement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Platform Maintenance Scheduled\",\n  \"message\": \"We will be performing scheduled maintenance on January 15th from 2:00 AM to 4:00 AM EST. During this time, the platform may be temporarily unavailable.\",\n  \"type\": \"maintenance\",\n  \"priority\": \"high\",\n  \"targetRoles\": [\"client\", \"therapist\"],\n  \"startDate\": \"2024-01-14T00:00:00.000Z\",\n  \"endDate\": \"2024-01-16T00:00:00.000Z\",\n  \"actionRequired\": false,\n  \"showInDashboard\": true,\n  \"sendEmail\": true,\n  \"sendPushNotification\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "announcements"]
+            },
+            "description": "Send system-wide announcement to users"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audit & Compliance",
+      "item": [
+        {
+          "name": "Get Audit Logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Audit logs retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Logs have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.logs && responseJson.logs.length > 0) {",
+                  "        pm.expect(responseJson.logs[0]).to.have.property('timestamp');",
+                  "        pm.expect(responseJson.logs[0]).to.have.property('userId');",
+                  "        pm.expect(responseJson.logs[0]).to.have.property('action');",
+                  "        pm.expect(responseJson.logs[0]).to.have.property('ipAddress');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit-logs?startDate=2024-01-01&endDate=2024-01-31&action=user_login&userId={{userId}}&page=1&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "audit-logs"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "action",
+                  "value": "user_login"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get detailed audit logs for compliance tracking"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Compliance Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportType\": \"hipaa_compliance\",\n  \"period\": {\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-12-31\"\n  },\n  \"includeMetrics\": [\n    \"data_access_logs\",\n    \"encryption_status\",\n    \"user_permissions\",\n    \"security_incidents\",\n    \"backup_status\"\n  ],\n  \"format\": \"pdf\",\n  \"includeCharts\": true,\n  \"deliveryMethod\": \"download\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/compliance/generate-report",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "compliance", "generate-report"]
+            },
+            "description": "Generate comprehensive compliance report"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Data Retention Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/compliance/data-retention?includePendingDeletions=true&includeRetentionPolicies=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "compliance", "data-retention"],
+              "query": [
+                {
+                  "key": "includePendingDeletions",
+                  "value": "true"
+                },
+                {
+                  "key": "includeRetentionPolicies",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get data retention status and pending deletions"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Access Admin Endpoint Without Permission",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for non-admin user', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions admin access', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('admin');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{clientAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/dashboard/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "dashboard", "overview"]
+            },
+            "description": "Test admin access control with non-admin token"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Date Range in Analytics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for invalid date range', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions date range', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('date');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/users?startDate=2024-12-31&endDate=2024-01-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "users"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-01"
+                }
+              ]
+            },
+            "description": "Test validation with invalid date range"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

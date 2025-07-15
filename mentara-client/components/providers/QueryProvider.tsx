@@ -16,7 +16,7 @@ const createQueryClient = () => {
         gcTime: queryConfig.gcTime, // v5 renamed cacheTime to gcTime
         refetchOnWindowFocus: queryConfig.refetchOnWindowFocus,
         refetchOnReconnect: queryConfig.refetchOnReconnect,
-        retry: (failureCount: number, error: any) => {
+        retry: (failureCount: number, error: unknown) => {
           // Don't retry on authentication errors
           if (error instanceof MentaraApiError && error.status === 401) {
             return false;
@@ -34,7 +34,7 @@ const createQueryClient = () => {
       },
       mutations: {
         // Generally don't retry mutations as they might have side effects
-        retry: (failureCount: number, error: any) => {
+        retry: (failureCount: number, error: unknown) => {
           // Only retry mutations on network errors or 5xx errors
           if (error instanceof MentaraApiError) {
             // Don't retry client errors (4xx)

@@ -46,9 +46,13 @@ export const createAxiosClient = (): AxiosInstance => {
           (window as any).Clerk?.session
         ) {
           try {
-            token = await (window as any).Clerk.session.getToken();
+            // Use our secure storage fallback method
+            const { SecureTokenStorage } = await import(
+              "@/contexts/AuthContext"
+            );
+            token = SecureTokenStorage.getAccessTokenFallback();
           } catch (error) {
-            console.warn("Failed to get client-side token:", error);
+            console.warn("Failed to get token from secure storage:", error);
           }
         }
 

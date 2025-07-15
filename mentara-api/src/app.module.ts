@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -34,6 +34,11 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { EventBusService } from './common/events/event-bus.service';
 import { CommonModule } from './common/common.module';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { SecurityGuard } from './common/guards/security.guard';
+import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -97,6 +102,7 @@ import { CommonModule } from './common/common.module';
     AppService,
     PrismaService,
     EventBusService,
+    JwtService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
@@ -109,6 +115,24 @@ import { CommonModule } from './common/common.module';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SecurityGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SecurityHeadersMiddleware)
+      .forRoutes('*');
+    
+    consumer
+      .apply(RateLimitMiddleware)
+      .forRoutes('*');
+  }
+}

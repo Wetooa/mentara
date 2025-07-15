@@ -1,5 +1,5 @@
 import { z } from 'zod';
-export declare const ReviewStatusSchema: z.ZodEnum<["pending", "approved", "rejected"]>;
+export declare const ReviewStatusSchema: z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>;
 export declare const RatingSchema: z.ZodNumber;
 export declare const ReviewClientSchema: z.ZodObject<{
     id: z.ZodString;
@@ -36,7 +36,7 @@ export declare const ReviewSchema: z.ZodObject<{
     clientId: z.ZodString;
     meetingId: z.ZodOptional<z.ZodString>;
     isAnonymous: z.ZodDefault<z.ZodBoolean>;
-    status: z.ZodDefault<z.ZodEnum<["pending", "approved", "rejected"]>>;
+    status: z.ZodDefault<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>>;
     helpfulCount: z.ZodDefault<z.ZodNumber>;
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
@@ -71,7 +71,7 @@ export declare const ReviewSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "pending" | "approved" | "rejected";
+    status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
     rating: number;
     therapistId: string;
     clientId: string;
@@ -108,7 +108,7 @@ export declare const ReviewSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
     } | undefined;
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     title?: string | undefined;
     content?: string | undefined;
     meetingId?: string | undefined;
@@ -171,7 +171,7 @@ export declare const UpdateReviewRequestSchema: z.ZodObject<{
 export declare const ReviewListParamsSchema: z.ZodEffects<z.ZodObject<{
     therapistId: z.ZodOptional<z.ZodString>;
     clientId: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<["pending", "approved", "rejected"]>>;
+    status: z.ZodOptional<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>>;
     page: z.ZodDefault<z.ZodNumber>;
     limit: z.ZodDefault<z.ZodNumber>;
     sortBy: z.ZodDefault<z.ZodEnum<["createdAt", "rating", "helpfulCount"]>>;
@@ -183,16 +183,16 @@ export declare const ReviewListParamsSchema: z.ZodEffects<z.ZodObject<{
     page: number;
     sortBy: "createdAt" | "rating" | "helpfulCount";
     sortOrder: "asc" | "desc";
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     minRating?: number | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
     maxRating?: number | undefined;
 }, {
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     limit?: number | undefined;
-    minRating?: number | undefined;
     page?: number | undefined;
+    minRating?: number | undefined;
     sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
@@ -203,16 +203,16 @@ export declare const ReviewListParamsSchema: z.ZodEffects<z.ZodObject<{
     page: number;
     sortBy: "createdAt" | "rating" | "helpfulCount";
     sortOrder: "asc" | "desc";
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     minRating?: number | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
     maxRating?: number | undefined;
 }, {
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     limit?: number | undefined;
-    minRating?: number | undefined;
     page?: number | undefined;
+    minRating?: number | undefined;
     sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
@@ -229,7 +229,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         clientId: z.ZodString;
         meetingId: z.ZodOptional<z.ZodString>;
         isAnonymous: z.ZodDefault<z.ZodBoolean>;
-        status: z.ZodDefault<z.ZodEnum<["pending", "approved", "rejected"]>>;
+        status: z.ZodDefault<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>>;
         helpfulCount: z.ZodDefault<z.ZodNumber>;
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
@@ -264,7 +264,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "approved" | "rejected";
+        status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
         rating: number;
         therapistId: string;
         clientId: string;
@@ -301,7 +301,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
             firstName: string;
             lastName: string;
         } | undefined;
-        status?: "pending" | "approved" | "rejected" | undefined;
+        status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
         title?: string | undefined;
         content?: string | undefined;
         meetingId?: string | undefined;
@@ -342,7 +342,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "approved" | "rejected";
+        status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
         rating: number;
         therapistId: string;
         clientId: string;
@@ -393,7 +393,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
             firstName: string;
             lastName: string;
         } | undefined;
-        status?: "pending" | "approved" | "rejected" | undefined;
+        status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
         title?: string | undefined;
         content?: string | undefined;
         meetingId?: string | undefined;
@@ -454,7 +454,7 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         clientId: z.ZodString;
         meetingId: z.ZodOptional<z.ZodString>;
         isAnonymous: z.ZodDefault<z.ZodBoolean>;
-        status: z.ZodDefault<z.ZodEnum<["pending", "approved", "rejected"]>>;
+        status: z.ZodDefault<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>>;
         helpfulCount: z.ZodDefault<z.ZodNumber>;
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
@@ -489,7 +489,7 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "approved" | "rejected";
+        status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
         rating: number;
         therapistId: string;
         clientId: string;
@@ -526,7 +526,7 @@ export declare const ReviewStatsSchema: z.ZodObject<{
             firstName: string;
             lastName: string;
         } | undefined;
-        status?: "pending" | "approved" | "rejected" | undefined;
+        status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
         title?: string | undefined;
         content?: string | undefined;
         meetingId?: string | undefined;
@@ -553,7 +553,7 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "approved" | "rejected";
+        status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
         rating: number;
         therapistId: string;
         clientId: string;
@@ -606,7 +606,7 @@ export declare const ReviewStatsSchema: z.ZodObject<{
             firstName: string;
             lastName: string;
         } | undefined;
-        status?: "pending" | "approved" | "rejected" | undefined;
+        status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
         title?: string | undefined;
         content?: string | undefined;
         meetingId?: string | undefined;
@@ -617,17 +617,17 @@ export declare const ReviewStatsSchema: z.ZodObject<{
 }>;
 export declare const TherapistReviewParamsSchema: z.ZodObject<{
     therapistId: z.ZodString;
-    status: z.ZodOptional<z.ZodEnum<["pending", "approved", "rejected"]>>;
+    status: z.ZodOptional<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>>;
     page: z.ZodDefault<z.ZodNumber>;
     limit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
     page: number;
     therapistId: string;
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
 }, {
     therapistId: string;
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     limit?: number | undefined;
     page?: number | undefined;
 }>;
@@ -805,6 +805,96 @@ export declare const CreateReviewResponseSchema: z.ZodObject<{
     content: string;
     isPublic?: boolean | undefined;
 }>;
+export declare const CreateReviewDtoSchema: z.ZodObject<{
+    rating: z.ZodNumber;
+    title: z.ZodOptional<z.ZodString>;
+    content: z.ZodOptional<z.ZodString>;
+    therapistId: z.ZodString;
+    meetingId: z.ZodOptional<z.ZodString>;
+    isAnonymous: z.ZodDefault<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    rating: number;
+    therapistId: string;
+    isAnonymous: boolean;
+    title?: string | undefined;
+    content?: string | undefined;
+    meetingId?: string | undefined;
+}, {
+    rating: number;
+    therapistId: string;
+    title?: string | undefined;
+    content?: string | undefined;
+    meetingId?: string | undefined;
+    isAnonymous?: boolean | undefined;
+}>;
+export declare const UpdateReviewDtoSchema: z.ZodObject<{
+    rating: z.ZodOptional<z.ZodNumber>;
+    title: z.ZodOptional<z.ZodString>;
+    content: z.ZodOptional<z.ZodString>;
+    isAnonymous: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    title?: string | undefined;
+    rating?: number | undefined;
+    content?: string | undefined;
+    isAnonymous?: boolean | undefined;
+}, {
+    title?: string | undefined;
+    rating?: number | undefined;
+    content?: string | undefined;
+    isAnonymous?: boolean | undefined;
+}>;
+export declare const ModerateReviewDtoSchema: z.ZodObject<{
+    status: z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>;
+    moderationNote: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
+    moderationNote?: string | undefined;
+}, {
+    status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
+    moderationNote?: string | undefined;
+}>;
+export declare const GetReviewsDtoSchema: z.ZodObject<{
+    therapistId: z.ZodOptional<z.ZodString>;
+    clientId: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "FLAGGED"]>>;
+    page: z.ZodDefault<z.ZodNumber>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    sortBy: z.ZodDefault<z.ZodString>;
+    sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
+    rating: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    page: number;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
+    rating?: number | undefined;
+    therapistId?: string | undefined;
+    clientId?: string | undefined;
+}, {
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
+    limit?: number | undefined;
+    page?: number | undefined;
+    rating?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    therapistId?: string | undefined;
+    clientId?: string | undefined;
+}>;
+export declare const ReviewStatsDtoSchema: z.ZodObject<{
+    therapistId: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    therapistId: string;
+}, {
+    therapistId: string;
+}>;
+export declare const ReviewIdParamSchema: z.ZodObject<{
+    id: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+}, {
+    id: string;
+}>;
 export type ReviewStatus = z.infer<typeof ReviewStatusSchema>;
 export type Rating = z.infer<typeof RatingSchema>;
 export type Review = z.infer<typeof ReviewSchema>;
@@ -822,4 +912,10 @@ export type ReviewReport = z.infer<typeof ReviewReportSchema>;
 export type ReviewAnalytics = z.infer<typeof ReviewAnalyticsSchema>;
 export type ReviewResponse = z.infer<typeof ReviewResponseSchema>;
 export type CreateReviewResponse = z.infer<typeof CreateReviewResponseSchema>;
+export type CreateReviewDto = z.infer<typeof CreateReviewDtoSchema>;
+export type UpdateReviewDto = z.infer<typeof UpdateReviewDtoSchema>;
+export type ModerateReviewDto = z.infer<typeof ModerateReviewDtoSchema>;
+export type GetReviewsDto = z.infer<typeof GetReviewsDtoSchema>;
+export type ReviewStatsDto = z.infer<typeof ReviewStatsDtoSchema>;
+export type ReviewIdParam = z.infer<typeof ReviewIdParamSchema>;
 //# sourceMappingURL=review.d.ts.map

@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { WorksheetsService } from './worksheets.service';
 import { PaginationQuery, FilterQuery } from 'src/types';
@@ -20,7 +20,7 @@ import {
 } from 'schema/worksheet';
 
 @Controller('worksheets')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class WorksheetsController {
   constructor(private readonly worksheetsService: WorksheetsService) {}
 

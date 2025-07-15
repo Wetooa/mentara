@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { Message, Contact } from "@/components/messages/types";
+import { Message } from "@/components/messages/types";
 
 const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5000";
 
@@ -21,7 +21,7 @@ export interface MessagingWebSocketEvents {
     userId: string;
     readAt: string;
   }) => void;
-  message_reaction: (data: { messageId: string; reaction: any }) => void;
+  message_reaction: (data: { messageId: string; reaction: unknown }) => void;
 
   // Typing events
   typing_indicator: (data: {
@@ -56,7 +56,7 @@ export class MessagingWebSocketService {
   private authToken: string | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private listeners = new Map<keyof MessagingWebSocketEvents, Set<Function>>();
+  private listeners = new Map<keyof MessagingWebSocketEvents, Set<(...args: unknown[]) => void>>();
   private getToken: (() => Promise<string | null>) | null = null;
 
   constructor() {
@@ -70,7 +70,7 @@ export class MessagingWebSocketService {
   }
 
   // Connect to WebSocket server (simplified without authentication)
-  async connect(token?: string): Promise<void> {
+  async connect(): Promise<void> {
     if (this.socket?.connected) {
       console.log("WebSocket already connected");
       return;
@@ -269,7 +269,7 @@ export class MessagingWebSocketService {
     if (eventListeners) {
       eventListeners.forEach((listener) => {
         try {
-          (listener as Function)(...args);
+          (listener as (...args: unknown[]) => void)(...args);
         } catch (error) {
           console.error(
             `Error in WebSocket event listener for ${event}:`,
@@ -286,7 +286,7 @@ export class MessagingWebSocketService {
   }
 
   // Simplified token methods for demo (authentication disabled)
-  async setAuthToken(token: string): Promise<void> {
+  async setAuthToken(): Promise<void> {
     // Token functionality disabled for demo
     console.log("Token functionality disabled for demo mode");
   }

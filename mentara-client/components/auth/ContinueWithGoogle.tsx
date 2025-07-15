@@ -1,12 +1,35 @@
+'use client';
+// import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+
 export default function ContinueWithGoogle() {
+  // const router = useRouter();
+  const { signInWithOAuth, isLoading } = useAuth();
+
+  const handleGoogleOAuth = async () => {
+    try {
+      await signInWithOAuth("oauth_google");
+    } catch {
+      // Google OAuth initiation failed - error handling in hook
+    }
+  };
+
   return (
-    <>
+    <Button
+      variant="outline"
+      className="w-full"
+      onClick={handleGoogleOAuth}
+      type="button"
+      disabled={isLoading}
+    >
       <svg
         width="20"
         height="20"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        className="mr-2"
       >
         <path
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -26,6 +49,6 @@ export default function ContinueWithGoogle() {
         />
       </svg>
       Continue with Google
-    </>
+    </Button>
   );
 }

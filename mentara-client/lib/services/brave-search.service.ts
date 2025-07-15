@@ -260,7 +260,7 @@ export class BraveSearchService {
   /**
    * Calculate relevance score for search results
    */
-  private calculateRelevanceScore(result: BraveSearchResult, options: BraveSearchOptions): number {
+  private calculateRelevanceScore(result: BraveSearchResult): number {
     let score = 0.5; // Base score
     
     const content = `${result.title} ${result.description || ''} ${result.snippet || ''}`.toLowerCase();
@@ -296,7 +296,7 @@ export class BraveSearchService {
   /**
    * Generate unique ID for search result
    */
-  private generateResultId(result: BraveSearchResult): string {
+  private generateResultId(): string {
     return `brave_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 

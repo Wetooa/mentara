@@ -14,7 +14,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
@@ -29,7 +29,7 @@ import {
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 
 @Controller('communities')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class CommunitiesController {
   constructor(
     private readonly communitiesService: CommunitiesService,

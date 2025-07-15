@@ -6,14 +6,16 @@ import {
   IsBoolean,
   IsJSON,
   IsDecimal,
+  MinLength,
 } from 'class-validator';
 
 export class RegisterTherapistDto {
-  @IsString()
-  userId!: string; // Clerk user ID
-
   @IsEmail()
   email!: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  password!: string;
 
   @IsString()
   firstName!: string;
@@ -33,8 +35,8 @@ export class RegisterTherapistDto {
   @IsString()
   professionalLicenseType!: string;
 
-  @IsString()
-  isPRCLicensed!: string;
+  @IsBoolean()
+  isPRCLicensed!: boolean;
 
   @IsString()
   prcLicenseNumber!: string;
@@ -43,8 +45,8 @@ export class RegisterTherapistDto {
   @IsDateString()
   expirationDateOfLicense?: string;
 
-  @IsString()
-  isLicenseActive!: string;
+  @IsBoolean()
+  isLicenseActive!: boolean;
 
   @IsDateString()
   practiceStartDate!: string;
@@ -65,11 +67,11 @@ export class RegisterTherapistDto {
   @IsJSON()
   languagesOffered!: any;
 
-  @IsString()
-  providedOnlineTherapyBefore!: string;
+  @IsBoolean()
+  providedOnlineTherapyBefore!: boolean;
 
-  @IsString()
-  comfortableUsingVideoConferencing!: string;
+  @IsBoolean()
+  comfortableUsingVideoConferencing!: boolean;
 
   @IsString()
   weeklyAvailability!: string;
@@ -81,24 +83,24 @@ export class RegisterTherapistDto {
   accepts!: any;
 
   @IsOptional()
-  @IsString()
-  privateConfidentialSpace?: string;
+  @IsBoolean()
+  privateConfidentialSpace?: boolean;
 
   @IsOptional()
-  @IsString()
-  compliesWithDataPrivacyAct?: string;
+  @IsBoolean()
+  compliesWithDataPrivacyAct?: boolean;
 
   @IsOptional()
-  @IsString()
-  professionalLiabilityInsurance?: string;
+  @IsBoolean()
+  professionalLiabilityInsurance?: boolean;
 
   @IsOptional()
-  @IsString()
-  complaintsOrDisciplinaryActions?: string;
+  @IsBoolean()
+  complaintsOrDisciplinaryActions?: boolean;
 
   @IsOptional()
-  @IsString()
-  willingToAbideByPlatformGuidelines?: string;
+  @IsBoolean()
+  willingToAbideByPlatformGuidelines?: boolean;
 
   @IsOptional()
   @IsString()

@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { MessagingService } from './messaging.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { ValidatedBody, ValidatedQuery } from '../common/decorators/validate-body.decorator';
 import {
@@ -30,7 +30,7 @@ import {
 } from 'mentara-commons';
 
 @Controller('messaging')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class MessagingController {
   constructor(private readonly messagingService: MessagingService) {}
 

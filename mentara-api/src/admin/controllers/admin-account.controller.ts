@@ -17,13 +17,13 @@ import {
   UpdateAdminDto,
   AdminResponseDto,
 } from '../dto/admin.dto';
-import { ClerkAuthGuard } from '../../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../guards/admin-auth.guard';
 import { AdminOnly } from '../../decorators/admin-only.decorator';
 import { CurrentUserId } from '../../decorators/current-user-id.decorator';
 
 @Controller('admin/accounts')
-@UseGuards(ClerkAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminAccountController {
   private readonly logger = new Logger(AdminAccountController.name);
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -19,13 +19,12 @@ import {
   ChevronUp,
   Stethoscope,
   Edit3,
-  Trash2,
-  MoreHorizontal
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCommunityComments } from "@/hooks/community";
 import { useAuth } from "@/hooks/useAuth";
-import type { Comment, CreateCommentRequest, CreateReplyRequest } from "@/types/api/communities";
+import type { Comment } from "@/types/api/communities";
 
 interface CommentSectionProps {
   postId: string;

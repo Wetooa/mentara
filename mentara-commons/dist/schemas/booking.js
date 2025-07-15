@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BookingStatsSchema = exports.ValidationConfigSchema = exports.TimeSlotSchema = exports.SlotGenerationConfigSchema = exports.ConflictResultSchema = exports.TimeRangeSchema = exports.DurationSchema = exports.MeetingListResponseSchema = exports.MeetingListParamsSchema = exports.BookingFormDataSchema = exports.UpdateMeetingRequestSchema = exports.CreateMeetingRequestSchema = exports.MeetingSchema = exports.MeetingTherapistSchema = exports.MeetingClientSchema = exports.AvailableSlotSchema = exports.MeetingDurationSchema = exports.MeetingTypeSchema = exports.MeetingStatusSchema = void 0;
+exports.GetAvailableSlotsQueryDtoSchema = exports.AvailabilityParamsDtoSchema = exports.TherapistAvailabilityUpdateDtoSchema = exports.TherapistAvailabilityCreateDtoSchema = exports.BookingMeetingParamsDtoSchema = exports.MeetingUpdateDtoSchema = exports.MeetingCreateDtoSchema = exports.BookingStatsSchema = exports.ValidationConfigSchema = exports.TimeSlotSchema = exports.SlotGenerationConfigSchema = exports.ConflictResultSchema = exports.TimeRangeSchema = exports.DurationSchema = exports.MeetingListResponseSchema = exports.MeetingListParamsSchema = exports.BookingFormDataSchema = exports.UpdateMeetingRequestSchema = exports.CreateMeetingRequestSchema = exports.MeetingSchema = exports.MeetingTherapistSchema = exports.MeetingClientSchema = exports.AvailableSlotSchema = exports.MeetingDurationSchema = exports.MeetingTypeSchema = exports.MeetingStatusSchema = void 0;
 const zod_1 = require("zod");
 // Meeting Status Schema
 exports.MeetingStatusSchema = zod_1.z.enum([
@@ -179,5 +179,34 @@ exports.BookingStatsSchema = zod_1.z.object({
         date: zod_1.z.string().date(),
         count: zod_1.z.number().min(0)
     }))
+});
+// Additional DTOs for BookingController endpoints
+exports.MeetingCreateDtoSchema = exports.CreateMeetingRequestSchema;
+exports.MeetingUpdateDtoSchema = exports.UpdateMeetingRequestSchema;
+exports.BookingMeetingParamsDtoSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid('Invalid meeting ID format')
+});
+exports.TherapistAvailabilityCreateDtoSchema = zod_1.z.object({
+    therapistId: zod_1.z.string().uuid('Invalid therapist ID format'),
+    dayOfWeek: zod_1.z.number().min(0).max(6), // 0 = Sunday, 6 = Saturday
+    startTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+    endTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+    isAvailable: zod_1.z.boolean().default(true),
+    timezone: zod_1.z.string().optional()
+});
+exports.TherapistAvailabilityUpdateDtoSchema = zod_1.z.object({
+    dayOfWeek: zod_1.z.number().min(0).max(6).optional(),
+    startTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
+    endTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
+    isAvailable: zod_1.z.boolean().optional(),
+    timezone: zod_1.z.string().optional()
+});
+exports.AvailabilityParamsDtoSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid('Invalid availability ID format')
+});
+exports.GetAvailableSlotsQueryDtoSchema = zod_1.z.object({
+    therapistId: zod_1.z.string().uuid('Invalid therapist ID format'),
+    date: zod_1.z.string().date('Invalid date format (YYYY-MM-DD)'),
+    duration: zod_1.z.number().min(15).max(240).optional()
 });
 //# sourceMappingURL=booking.js.map

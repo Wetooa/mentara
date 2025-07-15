@@ -10,14 +10,14 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { CommentsService } from './comments.service';
 import { Comment } from '@prisma/client';
 import { CommentCreateInputDto, CommentUpdateInputDto } from 'schema/comment';
 
 @Controller('comments')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 

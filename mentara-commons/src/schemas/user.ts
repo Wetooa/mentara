@@ -50,10 +50,10 @@ export const RolePermissionsSchema = z.object({
   canAssignWorksheets: z.boolean()
 });
 
-// User Registration DTOs (Backend specific)
+// User Registration DTOs (JWT Authentication)
 export const RegisterClientDtoSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'), // Clerk user ID
   email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters long'),
   firstName: z.string().min(1, 'First name is required'),
   middleName: z.string().optional(),
   lastName: z.string().min(1, 'Last name is required'),
@@ -64,43 +64,21 @@ export const RegisterClientDtoSchema = z.object({
 });
 
 export const UpdateClientDtoSchema = RegisterClientDtoSchema.partial().omit({
-  userId: true
+  password: true
 });
 
-// Therapist Registration Schema
-export const RegisterTherapistDtoSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'), // Clerk user ID
-  email: z.string().email('Invalid email format'),
-  firstName: z.string().min(1, 'First name is required'),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, 'Last name is required'),
-  title: z.string().min(1, 'Professional title is required'),
-  hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
-  experienceYears: z.number().min(0, 'Experience years must be positive').optional(),
-  province: z.string().min(1, 'Province is required').optional(),
-  specialties: z.array(z.string()).optional(),
-  bio: z.string().optional(),
-  profileImage: z.string().url().optional(),
-  licenseNumber: z.string().optional(),
-  licenseType: z.string().optional(),
-  isVerified: z.boolean().default(false)
-});
+// Note: Therapist registration schemas are now in therapist.ts to avoid conflicts
 
-export const UpdateTherapistDtoSchema = RegisterTherapistDtoSchema.partial().omit({
-  userId: true
-});
-
-// User Deactivation Schemas
+// User Deactivation Schemas (updated from class-validator DTO)
 export const DeactivateUserDtoSchema = z.object({
-  reason: z.string().min(1, 'Deactivation reason is required'),
-  notifyUser: z.boolean().default(true)
+  reason: z.string().max(500, 'Reason must not exceed 500 characters').optional()
 });
 
 export const UserDeactivationResponseDtoSchema = z.object({
-  id: z.string(),
-  isActive: z.boolean(),
-  deactivatedAt: z.string().datetime().nullable(),
-  deactivationReason: z.string().nullable()
+  message: z.string(),
+  deactivatedAt: z.string().datetime(),
+  reason: z.string().optional(),
+  deactivatedBy: z.string().optional()
 });
 
 // Export type inference helpers
@@ -112,11 +90,36 @@ export type FirstSignInResponse = z.infer<typeof FirstSignInResponseSchema>;
 export type RolePermissions = z.infer<typeof RolePermissionsSchema>;
 export type RegisterClientDto = z.infer<typeof RegisterClientDtoSchema>;
 export type UpdateClientDto = z.infer<typeof UpdateClientDtoSchema>;
-export type RegisterTherapistDto = z.infer<typeof RegisterTherapistDtoSchema>;
-export type UpdateTherapistDto = z.infer<typeof UpdateTherapistDtoSchema>;
+// Note: RegisterTherapistDto and UpdateTherapistDto types are exported from therapist.ts
 export type DeactivateUserDto = z.infer<typeof DeactivateUserDtoSchema>;
 export type UserDeactivationResponseDto = z.infer<typeof UserDeactivationResponseDtoSchema>;
+
+// Authentication Schemas for Phase 3A
+export const LoginDtoSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(1, 'Password is required')
+});
+
+export const RefreshTokenDtoSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh token is required')
+});
+
+export const ChangePasswordDtoSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters long')
+});
+
+// User ID Parameter Schema
+export const UserIdParamSchema = z.object({
+  id: z.string().uuid('Invalid user ID format')
+});
 
 // Utility schemas for specific use cases
 export const UserIdSchema = z.string().min(1, 'User ID is required');
 export const EmailSchema = z.string().email('Invalid email format');
+
+// New authentication type exports
+export type LoginDto = z.infer<typeof LoginDtoSchema>;
+export type RefreshTokenDto = z.infer<typeof RefreshTokenDtoSchema>;
+export type ChangePasswordDto = z.infer<typeof ChangePasswordDtoSchema>;
+export type UserIdParam = z.infer<typeof UserIdParamSchema>;

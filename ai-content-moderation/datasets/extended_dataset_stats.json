@@ -1,0 +1,13 @@
+{
+  "total_samples": 110,
+  "crisis_samples": 20,
+  "depression_samples": 15,
+  "anxiety_samples": 15,
+  "therapeutic_samples": 15,
+  "recovery_samples": 15,
+  "general_samples": 20,
+  "toxic_samples": 10,
+  "mental_health_samples": 80,
+  "toxic_content_samples": 30,
+  "requires_human_review": 60
+}

@@ -1,10 +1,10 @@
 import { Controller, UseGuards, Logger } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
 
 @Controller('admin')
-@UseGuards(ClerkAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminController {
   private readonly logger = new Logger(AdminController.name);
 

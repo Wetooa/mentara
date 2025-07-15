@@ -20,16 +20,7 @@ beforeAll(async () => {
 
 // Mock external dependencies
 jest.mock('axios');
-jest.mock('@clerk/backend', () => ({
-  clerkClient: {
-    users: {
-      getUser: jest.fn(),
-      updateUser: jest.fn(),
-      deleteUser: jest.fn(),
-    },
-  },
-  createClerkClient: jest.fn(),
-}));
+// @clerk/backend has been removed from the project - JWT auth is now used instead
 
 // Note: File upload and AI service mocks will be added per-test as needed
 // This prevents global module resolution issues when dependencies aren't installed

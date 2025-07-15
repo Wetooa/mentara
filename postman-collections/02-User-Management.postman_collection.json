@@ -1,0 +1,565 @@
+{
+  "info": {
+    "name": "Mentara - User Management",
+    "description": "User management endpoints for Mentara platform. Includes profile management, user administration, and account operations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-users"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure Bearer token is set",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}",
+          "",
+          "// Ensure test environment has valid UUIDs for user IDs",
+          "if (!pm.environment.get('userId') || !pm.environment.get('userId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('userId', '123e4567-e89b-12d3-a456-426614174000');",
+          "    console.log('⚠️ Set default UUID for userId');",
+          "}",
+          "",
+          "if (!pm.environment.get('targetUserId') || !pm.environment.get('targetUserId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('targetUserId', '987fcdeb-51a2-43d1-9c4f-123456789012');",
+          "    console.log('⚠️ Set default UUID for targetUserId');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error(`❌ Validation Error: ${issue.message} (${issue.path.join('.')})`);",
+          "            });",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "targetUserId",
+      "value": "987fcdeb-51a2-43d1-9c4f-123456789012",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User Profile Operations",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Test for Zod validation errors (400 responses)",
+                  "pm.test('Zod validation error format (if 400)', function () {",
+                  "    if (pm.response.code === 400) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('issues');",
+                  "        pm.expect(responseJson.issues).to.be.an('array');",
+                  "        if (responseJson.issues.length > 0) {",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Get all active users (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users Including Inactive (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/all-including-inactive",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "all-including-inactive"]
+            },
+            "description": "Get all users including inactive accounts (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('email');",
+                  "    pm.expect(responseJson).to.have.property('role');",
+                  "});",
+                  "",
+                  "// Test for Zod validation errors (400 responses)",
+                  "pm.test('Zod validation error format (if 400)', function () {",
+                  "    if (pm.response.code === 400) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('issues');",
+                  "        pm.expect(responseJson.issues).to.be.an('array');",
+                  "        if (responseJson.issues.length > 0) {",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Get specific user by ID (self or admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID - Invalid UUID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 for invalid UUID', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Zod validation error for invalid UUID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('issues');",
+                  "    pm.expect(responseJson.issues).to.be.an('array');",
+                  "    const idError = responseJson.issues.find(issue => ",
+                  "        issue.path && issue.path.includes('id'));",
+                  "    pm.expect(idError).to.not.be.undefined;",
+                  "    pm.expect(idError.message).to.equal('Invalid user ID format');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/invalid-user-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "invalid-user-id"]
+            },
+            "description": "Test user ID parameter validation with non-UUID (should fail with Zod error)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has updated user data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test for Zod validation errors (400 responses)",
+                  "pm.test('Zod validation error format (if 400)', function () {",
+                  "    if (pm.response.code === 400) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('issues');",
+                  "        pm.expect(responseJson.issues).to.be.an('array');",
+                  "        if (responseJson.issues.length > 0) {",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Name\",\n  \"email\": \"updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Update user profile information"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Account Management",
+      "item": [
+        {
+          "name": "Deactivate Own Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Account deactivated successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "});",
+                  "",
+                  "// Test for Zod validation errors (400 responses)",
+                  "pm.test('Zod validation error format (if 400)', function () {",
+                  "    if (pm.response.code === 400) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('issues');",
+                  "        pm.expect(responseJson.issues).to.be.an('array');",
+                  "        if (responseJson.issues.length > 0) {",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Deactivate user's own account"
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Deactivate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Policy violation\",\n  \"notes\": \"Administrative deactivation for terms of service violation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{targetUserId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{targetUserId}}", "deactivate"]
+            },
+            "description": "Admin deactivate a user account with reason"
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Reactivate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Account reactivated after review\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{targetUserId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{targetUserId}}", "reactivate"]
+            },
+            "description": "Admin reactivate a deactivated user account"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Search & Filtering",
+      "item": [
+        {
+          "name": "Search Users by Role",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?role={{userRole}}&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "{{userRole}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search users by role with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Users by Province",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?province=Ontario&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "province",
+                  "value": "Ontario"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search users by province"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Users by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?isActive=true&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search users by active status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile Validation",
+      "item": [
+        {
+          "name": "Update Profile - Invalid Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message for invalid email', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invalid-email\",\n  \"firstName\": \"Test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Test validation with invalid email format"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile - Missing Required Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message for missing fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Test validation with missing required fields"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

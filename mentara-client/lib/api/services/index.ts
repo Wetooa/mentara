@@ -259,6 +259,7 @@ export const createApiServices = (client: AxiosInstance) => ({
   messaging: createMessagingService(client),
   clients: createClientService(client),
   dashboard: createDashboardService(client),
+  billing: createBillingService(client),
 });
 
 export type ApiServices = ReturnType<typeof createApiServices>;

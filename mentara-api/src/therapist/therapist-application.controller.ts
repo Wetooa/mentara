@@ -15,7 +15,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { TherapistApplicationService } from './therapist-application.service';
 import { TherapistApplicationDto } from './dto/therapist-application.dto';
@@ -240,7 +240,7 @@ export class TherapistApplicationController {
   // Deprecated: Use apply-with-documents endpoint instead for atomic submission
 
   @Get('application')
-  @UseGuards(ClerkAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getAllApplications(
     @CurrentUserRole() role: string,
     @Query('status') status?: string,
@@ -273,7 +273,7 @@ export class TherapistApplicationController {
   }
 
   @Get('application/:id')
-  @UseGuards(ClerkAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getApplicationById(
     @CurrentUserRole() role: string,
     @Param('id') id: string,
@@ -300,7 +300,7 @@ export class TherapistApplicationController {
   }
 
   @Put('application/:id/status')
-  @UseGuards(ClerkAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateApplicationStatus(
     @CurrentUserRole() role: string,
     @Param('id') id: string,
@@ -337,7 +337,7 @@ export class TherapistApplicationController {
   // Deprecated: Use apply-with-documents endpoint instead for atomic submission with documents
 
   @Get('application/:id/files')
-  @UseGuards(ClerkAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getApplicationFiles(
     @CurrentUserRole() role: string,
     @Param('id') applicationId: string,

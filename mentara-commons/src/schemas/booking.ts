@@ -217,3 +217,47 @@ export type SlotGenerationConfig = z.infer<typeof SlotGenerationConfigSchema>;
 export type TimeSlot = z.infer<typeof TimeSlotSchema>;
 export type ValidationConfig = z.infer<typeof ValidationConfigSchema>;
 export type BookingStats = z.infer<typeof BookingStatsSchema>;
+
+// Additional DTOs for BookingController endpoints
+export const MeetingCreateDtoSchema = CreateMeetingRequestSchema;
+export const MeetingUpdateDtoSchema = UpdateMeetingRequestSchema;
+
+export const BookingMeetingParamsDtoSchema = z.object({
+  id: z.string().uuid('Invalid meeting ID format')
+});
+
+export const TherapistAvailabilityCreateDtoSchema = z.object({
+  therapistId: z.string().uuid('Invalid therapist ID format'),
+  dayOfWeek: z.number().min(0).max(6), // 0 = Sunday, 6 = Saturday
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+  isAvailable: z.boolean().default(true),
+  timezone: z.string().optional()
+});
+
+export const TherapistAvailabilityUpdateDtoSchema = z.object({
+  dayOfWeek: z.number().min(0).max(6).optional(),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
+  isAvailable: z.boolean().optional(),
+  timezone: z.string().optional()
+});
+
+export const AvailabilityParamsDtoSchema = z.object({
+  id: z.string().uuid('Invalid availability ID format')
+});
+
+export const GetAvailableSlotsQueryDtoSchema = z.object({
+  therapistId: z.string().uuid('Invalid therapist ID format'),
+  date: z.string().date('Invalid date format (YYYY-MM-DD)'),
+  duration: z.number().min(15).max(240).optional()
+});
+
+// Type exports for new DTOs
+export type MeetingCreateDto = z.infer<typeof MeetingCreateDtoSchema>;
+export type MeetingUpdateDto = z.infer<typeof MeetingUpdateDtoSchema>;
+export type BookingMeetingParamsDto = z.infer<typeof BookingMeetingParamsDtoSchema>;
+export type TherapistAvailabilityCreateDto = z.infer<typeof TherapistAvailabilityCreateDtoSchema>;
+export type TherapistAvailabilityUpdateDto = z.infer<typeof TherapistAvailabilityUpdateDtoSchema>;
+export type AvailabilityParamsDto = z.infer<typeof AvailabilityParamsDtoSchema>;
+export type GetAvailableSlotsQueryDto = z.infer<typeof GetAvailableSlotsQueryDtoSchema>;

@@ -1,0 +1,232 @@
+# Mentara Platform - Development Docker Compose
+# Optimized for development with hot reloading and debugging
+version: '3.8'
+
+services:
+  # Database Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: mentara-postgres-dev
+    environment:
+      POSTGRES_DB: mentara_dev
+      POSTGRES_USER: ${POSTGRES_USER:-mentara}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password}
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: mentara-redis-dev
+    command: redis-server --requirepass ${REDIS_PASSWORD:-dev_redis_password}
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+
+  # Ollama Service for AI Content Moderation
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mentara-ollama-dev
+    volumes:
+      - ollama_dev_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+    environment:
+      - OLLAMA_ORIGINS=*
+
+  # Backend API Service (Development Mode)
+  mentara-api:
+    build:
+      context: ./mentara-api
+      dockerfile: Dockerfile
+      target: runner
+    container_name: mentara-api-dev
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mentara}:${POSTGRES_PASSWORD:-dev_password}@postgres:5432/mentara_dev
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_for_development_only}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-dev_redis_password}@redis:6379
+      AI_PATIENT_EVAL_URL: http://ai-patient-evaluation:5000
+      AI_CONTENT_MOD_URL: http://ai-content-moderation:5001
+      PORT: 3000
+      LOG_LEVEL: DEBUG
+    ports:
+      - "3001:3000"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./mentara-api:/app
+      - api_dev_uploads:/app/uploads
+      - api_dev_logs:/app/logs
+      - /app/node_modules  # Anonymous volume for node_modules
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+    command: npm run start:dev
+
+  # Frontend Client Service (Development Mode)
+  mentara-client:
+    build:
+      context: ./mentara-client
+      dockerfile: Dockerfile
+      target: runner
+    container_name: mentara-client-dev
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev_nextauth_secret}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mentara-api
+    volumes:
+      - ./mentara-client:/app
+      - /app/node_modules  # Anonymous volume for node_modules
+      - /app/.next  # Anonymous volume for .next
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+    command: npm run dev
+
+  # AI Patient Evaluation Service (Development Mode)
+  ai-patient-evaluation:
+    build:
+      context: ./ai-patient-evaluation
+      dockerfile: Dockerfile
+    container_name: mentara-ai-patient-eval-dev
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      MODEL_PATH: /app/mental_model_config2.pt
+      LOG_LEVEL: DEBUG
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ai-patient-evaluation:/app
+      - ai_dev_models:/app/models
+      - ai_dev_logs:/app/logs
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+    command: python api.py
+
+  # AI Content Moderation Service (Development Mode)
+  ai-content-moderation:
+    build:
+      context: ./ai-content-moderation
+      dockerfile: Dockerfile
+    container_name: mentara-ai-content-mod-dev
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      OLLAMA_HOST: http://ollama:11434
+      EMBEDDING_MODEL: mxbai-embed-large
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-dev_redis_password}
+      TOXICITY_THRESHOLD: 0.7
+      CONFIDENCE_THRESHOLD: 0.8
+      MENTAL_HEALTH_THRESHOLD: 0.6
+      LOG_LEVEL: DEBUG
+    ports:
+      - "5001:5001"
+    depends_on:
+      - ollama
+      - redis
+    volumes:
+      - ./ai-content-moderation:/app
+      - moderation_dev_models:/app/models
+      - moderation_dev_logs:/app/logs
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+    command: python api.py
+
+  # Development Tools
+  adminer:
+    image: adminer:latest
+    container_name: mentara-adminer-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: mentara-redis-commander-dev
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:${REDIS_PASSWORD:-dev_redis_password}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+
+  # Monitoring (Lightweight for development)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mentara-prometheus-dev
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.dev.yml:/etc/prometheus/prometheus.yml
+      - prometheus_dev_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - mentara-dev-network
+    restart: unless-stopped
+
+# Named Volumes for Development
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+  ollama_dev_data:
+    driver: local
+  api_dev_uploads:
+    driver: local
+  api_dev_logs:
+    driver: local
+  ai_dev_models:
+    driver: local
+  ai_dev_logs:
+    driver: local
+  moderation_dev_models:
+    driver: local
+  moderation_dev_logs:
+    driver: local
+  prometheus_dev_data:
+    driver: local
+
+# Networks
+networks:
+  mentara-dev-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

@@ -1,5 +1,124 @@
 import { z } from 'zod';
 
+// Enhanced Therapist Registration Schema (from class-validator DTO)
+export const RegisterTherapistDtoSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters long'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  mobile: z.string().min(1, 'Mobile is required'),
+  province: z.string().min(1, 'Province is required'),
+  providerType: z.string().min(1, 'Provider type is required'),
+  professionalLicenseType: z.string().min(1, 'Professional license type is required'),
+  isPRCLicensed: z.boolean(),
+  prcLicenseNumber: z.string().min(1, 'PRC license number is required'),
+  expirationDateOfLicense: z.string().datetime().optional(),
+  isLicenseActive: z.boolean(),
+  practiceStartDate: z.string().datetime(),
+  yearsOfExperience: z.string().optional(),
+  areasOfExpertise: z.array(z.string()).min(1, 'At least one area of expertise is required'),
+  assessmentTools: z.array(z.string()).min(1, 'At least one assessment tool is required'),
+  therapeuticApproachesUsedList: z.array(z.string()).min(1, 'At least one therapeutic approach is required'),
+  languagesOffered: z.array(z.string()).min(1, 'At least one language is required'),
+  providedOnlineTherapyBefore: z.boolean(),
+  comfortableUsingVideoConferencing: z.boolean(),
+  weeklyAvailability: z.string().min(1, 'Weekly availability is required'),
+  preferredSessionLength: z.string().min(1, 'Preferred session length is required'),
+  accepts: z.array(z.string()).min(1, 'Must accept at least one payment method'),
+  privateConfidentialSpace: z.boolean().optional(),
+  compliesWithDataPrivacyAct: z.boolean().optional(),
+  professionalLiabilityInsurance: z.boolean().optional(),
+  complaintsOrDisciplinaryActions: z.boolean().optional(),
+  willingToAbideByPlatformGuidelines: z.boolean().optional(),
+  sessionLength: z.string().optional(),
+  hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
+  bio: z.string().optional(),
+  profileImageUrl: z.string().url().optional(),
+  applicationData: z.record(z.any()).optional()
+});
+
+// Update Therapist Schema (from class-validator DTO)
+export const UpdateTherapistDtoSchema = z.object({
+  firstName: z.string().min(1, 'First name is required').optional(),
+  lastName: z.string().min(1, 'Last name is required').optional(),
+  mobile: z.string().optional(),
+  province: z.string().optional(),
+  bio: z.string().optional(),
+  profileImageUrl: z.string().url().optional(),
+  hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
+  isActive: z.boolean().optional(),
+  expertise: z.array(z.string()).optional(),
+  approaches: z.array(z.string()).optional(),
+  languages: z.array(z.string()).optional(),
+  illnessSpecializations: z.array(z.string()).optional()
+});
+
+// Therapist Recommendation Request Schema
+export const TherapistRecommendationRequestSchema = z.object({
+  userId: z.string().uuid('Invalid user ID format'),
+  limit: z.number().min(1).max(100).optional(),
+  includeInactive: z.boolean().optional(),
+  province: z.string().optional(),
+  maxHourlyRate: z.number().min(0).optional()
+});
+
+// Therapist Recommendation Response Schema  
+export const TherapistRecommendationResponseDtoSchema = z.object({
+  totalCount: z.number().min(0),
+  userConditions: z.array(z.string()),
+  therapists: z.array(z.any()), // TherapistWithUser with matchScore
+  matchCriteria: z.object({
+    primaryConditions: z.array(z.string()),
+    secondaryConditions: z.array(z.string()),
+    severityLevels: z.record(z.string())
+  }),
+  page: z.number().min(1).optional(),
+  pageSize: z.number().min(1).optional()
+});
+
+// Comprehensive Therapist Application Schema (from class-validator DTO)
+export const TherapistApplicationCreateDtoSchema = z.object({
+  userId: z.string().uuid('Invalid user ID format'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email format'),
+  mobile: z.string().min(1, 'Mobile is required'),
+  province: z.string().min(1, 'Province is required'),
+  providerType: z.string().min(1, 'Provider type is required'),
+  professionalLicenseType: z.string().min(1, 'Professional license type is required'),
+  isPRCLicensed: z.string().min(1, 'PRC license status is required'),
+  prcLicenseNumber: z.string().optional(),
+  isLicenseActive: z.string().optional(),
+  expirationDateOfLicense: z.string().optional(),
+  practiceStartDate: z.string().min(1, 'Practice start date is required'),
+  areasOfExpertise: z.array(z.string()).min(1, 'At least one area of expertise is required'),
+  assessmentTools: z.array(z.string()).min(1, 'At least one assessment tool is required'),
+  therapeuticApproachesUsedList: z.array(z.string()).min(1, 'At least one therapeutic approach is required'),
+  languagesOffered: z.array(z.string()).min(1, 'At least one language is required'),
+  providedOnlineTherapyBefore: z.boolean(),
+  comfortableUsingVideoConferencing: z.boolean(),
+  privateConfidentialSpace: z.boolean(),
+  compliesWithDataPrivacyAct: z.boolean(),
+  weeklyAvailability: z.string().min(1, 'Weekly availability is required'),
+  preferredSessionLength: z.string().min(1, 'Preferred session length is required'),
+  accepts: z.array(z.string()).min(1, 'Must accept at least one payment method'),
+  bio: z.string().optional(),
+  hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
+  professionalLiabilityInsurance: z.string().min(1, 'Professional liability insurance status is required'),
+  complaintsOrDisciplinaryActions: z.string().min(1, 'Complaints or disciplinary actions status is required'),
+  complaintsOrDisciplinaryActions_specify: z.string().optional(),
+  willingToAbideByPlatformGuidelines: z.boolean()
+});
+
+// Parameter Schemas
+export const TherapistIdParamSchema = z.object({
+  id: z.string().uuid('Invalid therapist ID format')
+});
+
+export const TherapistApplicationIdParamSchema = z.object({
+  id: z.string().uuid('Invalid application ID format')
+});
+
 // Basic Therapist Information Schema
 export const TherapistRecommendationSchema = z.object({
   id: z.string().min(1, 'Therapist ID is required'),
@@ -257,8 +376,8 @@ export const ApplicationListParamsSchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional()
 });
 
-// Worksheet Assignment Schema
-export const WorksheetAssignmentSchema = z.object({
+// Therapist-specific Worksheet Assignment Schema
+export const TherapistWorksheetAssignmentSchema = z.object({
   id: z.string().min(1),
   worksheetId: z.string().min(1),
   patientId: z.string().min(1),
@@ -303,8 +422,17 @@ export type ApplicationStatusUpdateDto = z.infer<typeof ApplicationStatusUpdateD
 export type CreateApplicationRequest = z.infer<typeof CreateApplicationRequestSchema>;
 export type UpdateApplicationRequest = z.infer<typeof UpdateApplicationRequestSchema>;
 export type ApplicationListParams = z.infer<typeof ApplicationListParamsSchema>;
-export type WorksheetAssignment = z.infer<typeof WorksheetAssignmentSchema>;
+export type TherapistWorksheetAssignment = z.infer<typeof TherapistWorksheetAssignmentSchema>;
 export type TherapistCredentials = z.infer<typeof TherapistCredentialsSchema>;
 export type SessionFormat = z.infer<typeof SessionFormatSchema>;
 export type Education = z.infer<typeof EducationSchema>;
 export type Certification = z.infer<typeof CertificationSchema>;
+
+// New type exports from converted DTOs
+export type RegisterTherapistDto = z.infer<typeof RegisterTherapistDtoSchema>;
+export type UpdateTherapistDto = z.infer<typeof UpdateTherapistDtoSchema>;
+export type TherapistRecommendationRequest = z.infer<typeof TherapistRecommendationRequestSchema>;
+export type TherapistRecommendationResponseDto = z.infer<typeof TherapistRecommendationResponseDtoSchema>;
+export type TherapistApplicationCreateDto = z.infer<typeof TherapistApplicationCreateDtoSchema>;
+export type TherapistIdParam = z.infer<typeof TherapistIdParamSchema>;
+export type TherapistApplicationIdParam = z.infer<typeof TherapistApplicationIdParamSchema>;

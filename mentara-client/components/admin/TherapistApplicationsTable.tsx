@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+// Removed unused import: toast
 import { useUpdateTherapistApplicationStatus } from "@/hooks/useTherapistApplications";
 import type { TherapistApplication } from "@/lib/api/services/therapists";
 

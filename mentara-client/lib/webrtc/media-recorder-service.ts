@@ -126,10 +126,10 @@ export class MediaRecorderService {
 
     // Create video elements for each stream
     const videos: HTMLVideoElement[] = [];
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
     const audioDestination = audioContext.createMediaStreamDestination();
 
-    streams.forEach((stream, index) => {
+    streams.forEach((stream) => {
       // Handle video
       if (stream.getVideoTracks().length > 0) {
         const video = document.createElement('video');

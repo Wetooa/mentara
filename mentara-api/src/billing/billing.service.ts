@@ -2,8 +2,10 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   SubscriptionStatus,
   SubscriptionTier,
@@ -16,7 +18,12 @@ import {
 
 @Injectable()
 export class BillingService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(BillingService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2
+  ) {}
 
   // Subscription Management
   async createSubscription(data: {
@@ -574,5 +581,547 @@ export class BillingService {
       canceledSubscriptions,
       subscriptionsByTier,
     };
+  }
+
+  // ===== ADVANCED SUBSCRIPTION MANAGEMENT =====
+
+  /**
+   * Upgrade or downgrade subscription with prorated billing
+   */
+  async changeSubscriptionPlan(
+    userId: string,
+    newPlanId: string,
+    options: {
+      billingCycle?: BillingCycle;
+      prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
+      effectiveDate?: Date;
+    } = {}
+  ) {
+    const subscription = await this.findUserSubscription(userId);
+    if (!subscription) {
+      throw new NotFoundException(`Subscription for user ${userId} not found`);
+    }
+
+    const newPlan = await this.prisma.subscriptionPlan.findUnique({
+      where: { id: newPlanId },
+    });
+
+    if (!newPlan) {
+      throw new NotFoundException(`Plan ${newPlanId} not found`);
+    }
+
+    const effectiveDate = options.effectiveDate || new Date();
+    const newBillingCycle = options.billingCycle || subscription.billingCycle;
+    const newAmount = newBillingCycle === BillingCycle.YEARLY 
+      ? newPlan.yearlyPrice || newPlan.monthlyPrice 
+      : newPlan.monthlyPrice;
+
+    // Calculate proration if needed
+    let prorationAmount = 0;
+    if (options.prorationBehavior !== 'none') {
+      prorationAmount = await this.calculateProration(
+        subscription,
+        Number(newAmount),
+        effectiveDate
+      );
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      // Update subscription
+      const updatedSubscription = await tx.subscription.update({
+        where: { userId },
+        data: {
+          planId: newPlanId,
+          tier: newPlan.tier,
+          billingCycle: newBillingCycle,
+          amount: newAmount,
+          metadata: {
+            ...subscription.metadata,
+            lastPlanChange: effectiveDate.toISOString(),
+            previousPlanId: subscription.planId,
+          },
+        },
+        include: {
+          plan: true,
+          defaultPaymentMethod: true,
+        },
+      });
+
+      // Create proration invoice if needed
+      if (prorationAmount !== 0 && options.prorationBehavior !== 'none') {
+        await this.createProrationInvoice(tx, subscription.id, prorationAmount, effectiveDate);
+      }
+
+      // Emit event
+      this.eventEmitter.emit('subscription.plan.changed', {
+        userId,
+        subscriptionId: subscription.id,
+        previousPlanId: subscription.planId,
+        newPlanId,
+        prorationAmount,
+        effectiveDate,
+      });
+
+      this.logger.log(`User ${userId} changed subscription plan from ${subscription.planId} to ${newPlanId}`);
+
+      return updatedSubscription;
+    });
+  }
+
+  /**
+   * Pause subscription (keep it active but stop billing)
+   */
+  async pauseSubscription(
+    userId: string,
+    options: {
+      pauseUntil?: Date;
+      reason?: string;
+    } = {}
+  ) {
+    const subscription = await this.findUserSubscription(userId);
+    if (!subscription) {
+      throw new NotFoundException(`Subscription for user ${userId} not found`);
+    }
+
+    if (subscription.status !== SubscriptionStatus.ACTIVE) {
+      throw new BadRequestException('Can only pause active subscriptions');
+    }
+
+    const updatedSubscription = await this.prisma.subscription.update({
+      where: { userId },
+      data: {
+        status: SubscriptionStatus.PAUSED,
+        metadata: {
+          ...subscription.metadata,
+          pausedAt: new Date().toISOString(),
+          pauseUntil: options.pauseUntil?.toISOString(),
+          pauseReason: options.reason,
+          previousStatus: subscription.status,
+        },
+      },
+      include: {
+        plan: true,
+        defaultPaymentMethod: true,
+      },
+    });
+
+    this.eventEmitter.emit('subscription.paused', {
+      userId,
+      subscriptionId: subscription.id,
+      pauseUntil: options.pauseUntil,
+      reason: options.reason,
+    });
+
+    this.logger.log(`Subscription ${subscription.id} paused for user ${userId}`);
+
+    return updatedSubscription;
+  }
+
+  /**
+   * Resume paused subscription
+   */
+  async resumeSubscription(userId: string) {
+    const subscription = await this.findUserSubscription(userId);
+    if (!subscription) {
+      throw new NotFoundException(`Subscription for user ${userId} not found`);
+    }
+
+    if (subscription.status !== SubscriptionStatus.PAUSED) {
+      throw new BadRequestException('Can only resume paused subscriptions');
+    }
+
+    const metadata = subscription.metadata as any;
+    const previousStatus = metadata?.previousStatus || SubscriptionStatus.ACTIVE;
+
+    const updatedSubscription = await this.prisma.subscription.update({
+      where: { userId },
+      data: {
+        status: previousStatus,
+        metadata: {
+          ...metadata,
+          resumedAt: new Date().toISOString(),
+          pausedAt: undefined,
+          pauseUntil: undefined,
+          pauseReason: undefined,
+          previousStatus: undefined,
+        },
+      },
+      include: {
+        plan: true,
+        defaultPaymentMethod: true,
+      },
+    });
+
+    this.eventEmitter.emit('subscription.resumed', {
+      userId,
+      subscriptionId: subscription.id,
+    });
+
+    this.logger.log(`Subscription ${subscription.id} resumed for user ${userId}`);
+
+    return updatedSubscription;
+  }
+
+  /**
+   * Schedule subscription cancellation at period end
+   */
+  async scheduleSubscriptionCancellation(
+    userId: string,
+    options: {
+      reason?: string;
+      feedback?: string;
+      cancelAtPeriodEnd?: boolean;
+    } = {}
+  ) {
+    const subscription = await this.findUserSubscription(userId);
+    if (!subscription) {
+      throw new NotFoundException(`Subscription for user ${userId} not found`);
+    }
+
+    const cancelAtPeriodEnd = options.cancelAtPeriodEnd ?? true;
+    const cancelDate = cancelAtPeriodEnd ? subscription.currentPeriodEnd : new Date();
+
+    const updatedSubscription = await this.prisma.subscription.update({
+      where: { userId },
+      data: {
+        status: cancelAtPeriodEnd ? subscription.status : SubscriptionStatus.CANCELED,
+        canceledAt: cancelAtPeriodEnd ? null : new Date(),
+        endedAt: cancelAtPeriodEnd ? subscription.currentPeriodEnd : new Date(),
+        cancelReason: options.reason,
+        canceledBy: userId,
+        metadata: {
+          ...subscription.metadata,
+          scheduledCancellation: cancelAtPeriodEnd,
+          cancellationFeedback: options.feedback,
+          cancellationScheduledAt: new Date().toISOString(),
+        },
+      },
+      include: {
+        plan: true,
+        defaultPaymentMethod: true,
+      },
+    });
+
+    this.eventEmitter.emit('subscription.cancellation.scheduled', {
+      userId,
+      subscriptionId: subscription.id,
+      cancelDate,
+      reason: options.reason,
+      feedback: options.feedback,
+      cancelAtPeriodEnd,
+    });
+
+    this.logger.log(`Subscription cancellation scheduled for user ${userId}, effective ${cancelDate}`);
+
+    return updatedSubscription;
+  }
+
+  /**
+   * Reactivate a canceled subscription
+   */
+  async reactivateSubscription(userId: string, newPaymentMethodId?: string) {
+    const subscription = await this.findUserSubscription(userId);
+    if (!subscription) {
+      throw new NotFoundException(`Subscription for user ${userId} not found`);
+    }
+
+    if (subscription.status !== SubscriptionStatus.CANCELED) {
+      throw new BadRequestException('Can only reactivate canceled subscriptions');
+    }
+
+    // Reset period dates
+    const currentPeriodStart = new Date();
+    const currentPeriodEnd = new Date();
+    
+    if (subscription.billingCycle === BillingCycle.YEARLY) {
+      currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
+    } else {
+      currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
+    }
+
+    const updatedSubscription = await this.prisma.subscription.update({
+      where: { userId },
+      data: {
+        status: SubscriptionStatus.ACTIVE,
+        currentPeriodStart,
+        currentPeriodEnd,
+        canceledAt: null,
+        endedAt: null,
+        cancelReason: null,
+        defaultPaymentMethodId: newPaymentMethodId || subscription.defaultPaymentMethodId,
+        metadata: {
+          ...subscription.metadata,
+          reactivatedAt: new Date().toISOString(),
+          scheduledCancellation: false,
+        },
+      },
+      include: {
+        plan: true,
+        defaultPaymentMethod: true,
+      },
+    });
+
+    this.eventEmitter.emit('subscription.reactivated', {
+      userId,
+      subscriptionId: subscription.id,
+    });
+
+    this.logger.log(`Subscription ${subscription.id} reactivated for user ${userId}`);
+
+    return updatedSubscription;
+  }
+
+  /**
+   * Apply discount to subscription
+   */
+  async applyDiscountToSubscription(
+    userId: string,
+    discountCode: string
+  ) {
+    const subscription = await this.findUserSubscription(userId);
+    if (!subscription) {
+      throw new NotFoundException(`Subscription for user ${userId} not found`);
+    }
+
+    const discount = await this.validateDiscount(discountCode, userId, Number(subscription.amount));
+    
+    // Calculate discount amount
+    let discountAmount = 0;
+    if (discount.type === DiscountType.PERCENTAGE && discount.percentOff) {
+      discountAmount = Number(subscription.amount) * (Number(discount.percentOff) / 100);
+    } else if (discount.type === DiscountType.FIXED_AMOUNT && discount.amountOff) {
+      discountAmount = Number(discount.amountOff);
+    }
+
+    const newAmount = Math.max(0, Number(subscription.amount) - discountAmount);
+
+    return await this.prisma.$transaction(async (tx) => {
+      // Update subscription amount
+      const updatedSubscription = await tx.subscription.update({
+        where: { userId },
+        data: {
+          amount: newAmount,
+          metadata: {
+            ...subscription.metadata,
+            appliedDiscounts: [
+              ...(subscription.metadata?.appliedDiscounts || []),
+              {
+                discountId: discount.id,
+                code: discountCode,
+                appliedAt: new Date().toISOString(),
+                originalAmount: subscription.amount,
+                discountAmount,
+                newAmount,
+              },
+            ],
+          },
+        },
+        include: {
+          plan: true,
+          defaultPaymentMethod: true,
+        },
+      });
+
+      // Record discount redemption
+      await this.redeemDiscount(discount.id, userId, discountAmount);
+
+      this.eventEmitter.emit('subscription.discount.applied', {
+        userId,
+        subscriptionId: subscription.id,
+        discountCode,
+        discountAmount,
+        newAmount,
+      });
+
+      return updatedSubscription;
+    });
+  }
+
+  /**
+   * Process subscription renewal
+   */
+  async processSubscriptionRenewal(subscriptionId: string) {
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id: subscriptionId },
+      include: {
+        plan: true,
+        defaultPaymentMethod: true,
+        user: true,
+      },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException(`Subscription ${subscriptionId} not found`);
+    }
+
+    // Check if renewal is due
+    const now = new Date();
+    if (subscription.currentPeriodEnd > now) {
+      throw new BadRequestException('Subscription renewal not yet due');
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      // Create invoice for next period
+      const nextPeriodStart = subscription.currentPeriodEnd;
+      const nextPeriodEnd = new Date(nextPeriodStart);
+
+      if (subscription.billingCycle === BillingCycle.YEARLY) {
+        nextPeriodEnd.setFullYear(nextPeriodEnd.getFullYear() + 1);
+      } else {
+        nextPeriodEnd.setMonth(nextPeriodEnd.getMonth() + 1);
+      }
+
+      const invoice = await this.createInvoice({
+        subscriptionId,
+        subtotal: Number(subscription.amount),
+        dueDate: nextPeriodStart,
+      });
+
+      // Update subscription period
+      const updatedSubscription = await tx.subscription.update({
+        where: { id: subscriptionId },
+        data: {
+          currentPeriodStart: nextPeriodStart,
+          currentPeriodEnd: nextPeriodEnd,
+          metadata: {
+            ...subscription.metadata,
+            lastRenewal: now.toISOString(),
+          },
+        },
+        include: {
+          plan: true,
+          defaultPaymentMethod: true,
+        },
+      });
+
+      this.eventEmitter.emit('subscription.renewed', {
+        userId: subscription.userId,
+        subscriptionId,
+        invoiceId: invoice.id,
+        nextPeriodStart,
+        nextPeriodEnd,
+      });
+
+      return { subscription: updatedSubscription, invoice };
+    });
+  }
+
+  /**
+   * Get subscription usage analytics
+   */
+  async getSubscriptionUsageAnalytics(
+    subscriptionId: string,
+    startDate?: Date,
+    endDate?: Date
+  ) {
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id: subscriptionId },
+      include: { plan: true },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException(`Subscription ${subscriptionId} not found`);
+    }
+
+    const where: any = { subscriptionId };
+    if (startDate) where.usageDate = { ...where.usageDate, gte: startDate };
+    if (endDate) where.usageDate = { ...where.usageDate, lte: endDate };
+
+    const [usageRecords, usageByFeature, totalUsage] = await Promise.all([
+      this.prisma.usageRecord.findMany({
+        where,
+        orderBy: { usageDate: 'desc' },
+        take: 100,
+      }),
+      this.prisma.usageRecord.groupBy({
+        by: ['feature'],
+        where,
+        _sum: { quantity: true },
+        _count: { quantity: true },
+      }),
+      this.prisma.usageRecord.aggregate({
+        where,
+        _sum: { quantity: true },
+        _count: { quantity: true },
+      }),
+    ]);
+
+    const planLimits = subscription.plan.limits as any;
+
+    return {
+      subscription,
+      usageRecords,
+      usageByFeature: usageByFeature.map(usage => ({
+        feature: usage.feature,
+        totalQuantity: usage._sum.quantity || 0,
+        recordCount: usage._count.quantity,
+        limit: planLimits?.[usage.feature] || null,
+        utilizationPercentage: planLimits?.[usage.feature] 
+          ? ((usage._sum.quantity || 0) / planLimits[usage.feature]) * 100 
+          : null,
+      })),
+      totalUsage: {
+        totalQuantity: totalUsage._sum.quantity || 0,
+        totalRecords: totalUsage._count.quantity,
+      },
+    };
+  }
+
+  // ===== PRIVATE HELPER METHODS =====
+
+  private async calculateProration(
+    subscription: any,
+    newAmount: number,
+    effectiveDate: Date
+  ): Promise<number> {
+    const currentAmount = Number(subscription.amount);
+    const periodStart = subscription.currentPeriodStart;
+    const periodEnd = subscription.currentPeriodEnd;
+    
+    const totalPeriodDays = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
+    const remainingDays = Math.ceil((periodEnd.getTime() - effectiveDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (remainingDays <= 0) return 0;
+
+    const dailyCurrentRate = currentAmount / totalPeriodDays;
+    const dailyNewRate = newAmount / totalPeriodDays;
+    
+    const prorationAmount = (dailyNewRate - dailyCurrentRate) * remainingDays;
+    
+    return Math.round(prorationAmount * 100) / 100; // Round to 2 decimal places
+  }
+
+  private async createProrationInvoice(
+    tx: any,
+    subscriptionId: string,
+    prorationAmount: number,
+    effectiveDate: Date
+  ) {
+    if (prorationAmount === 0) return;
+
+    const invoiceNumber = await this.generateInvoiceNumber();
+    const description = prorationAmount > 0 
+      ? 'Proration charge for plan upgrade'
+      : 'Proration credit for plan downgrade';
+
+    return await tx.invoice.create({
+      data: {
+        subscriptionId,
+        number: invoiceNumber,
+        status: InvoiceStatus.OPEN,
+        subtotal: Math.abs(prorationAmount),
+        total: Math.abs(prorationAmount),
+        amountDue: prorationAmount > 0 ? prorationAmount : 0,
+        dueDate: effectiveDate,
+        lineItems: {
+          create: {
+            description,
+            quantity: 1,
+            unitPrice: prorationAmount,
+            amount: prorationAmount,
+          },
+        },
+      },
+    });
   }
 }

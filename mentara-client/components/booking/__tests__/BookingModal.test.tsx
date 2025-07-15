@@ -37,9 +37,9 @@ jest.mock('@/lib/api', () => ({
 // Mock framer-motion to avoid animation issues in tests
 jest.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>,
   },
-  AnimatePresence: ({ children }: any) => children,
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 const mockTherapist: TherapistCardData = {
@@ -239,10 +239,11 @@ describe('BookingModal Component', () => {
   });
 
   it('handles booking errors gracefully', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup();
     
     // Mock API to return error
-    jest.mocked(require('@/lib/api').useApi).mockReturnValue({
+    const { useApi } = await import('@/lib/api');
+    jest.mocked(useApi).mockReturnValue({
       booking: {
         getAvailableSlots: jest.fn(() => Promise.reject(new Error('Failed to fetch slots'))),
         createMeeting: jest.fn(() => Promise.reject(new Error('Booking failed')))
