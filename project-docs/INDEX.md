@@ -1,123 +1,158 @@
-# 📁 PROJECT DOCUMENTATION DIRECTORY
+# 📚 PROJECT DOCUMENTATION INDEX
 
-**Welcome to the organized Mentara project documentation!**  
-**Last Updated**: 2025-01-14  
-**Total Files**: 26 organized documents
-
----
-
-## 📂 **Directory Structure**
-
-```
-project-docs/
-├── team-coordination/        # 4 files - Active team management
-├── agent-directives/         # 6 files - Agent-specific tasks and instructions  
-├── technical-docs/          # 5 files - Architecture, deployment, integration
-├── reports/                 # 5 files - Audits, analysis, inventories
-├── policies/                # 1 file  - Security, moderation policies
-├── development/             # 2 files - Development tracking, test resources
-├── archive/                 # 4 files - Historical/completed documents
-└── INDEX.md                # This navigation file
-```
+**Navigation Guide to Organized Mentara Documentation**  
+**Last Updated**: 2025-01-15  
+**Total Documents**: 39 organized + 2 core files in root
 
 ---
 
-## 🤝 **Team Coordination** (4 files)
-*Current team management and active coordination*
+## 🏠 **Root Directory (Essential Files)**
 
-- `AGENT_ASSIGNMENTS.md` - Task assignments for all 4 agents
-- `TEAM_PROGRESS_REPORT.md` - Sprint progress and milestones
-- `TEAM_COORDINATION_STATUS.md` - Real-time coordination status
-- `MANAGER_QUALITY_CHECKPOINTS.md` - Quality assurance gates
-
----
-
-## 🎯 **Agent Directives** (6 files)
-*Specific instructions and immediate tasks for each agent*
-
-- `BACKEND_AGENT_DIRECTIVES.md` - Backend Agent priorities and instructions
-- `AI_DEVOPS_AGENT_DIRECTIVES.md` - AI/DevOps Agent assignments
-- `FRONTEND_AGENT_IMMEDIATE_TASKS.md` - Frontend Agent immediate actions
-- `FRONTEND_AGENT_COMPREHENSIVE_ERROR_AUDIT.md` - Frontend error audit guide
-- `BACKEND_AGENT_IMMEDIATE_TASKS.md` - Backend Agent immediate actions
-- `BACKEND_AGENT_CRITICAL_ENDPOINT_VERIFICATION.md` - Critical endpoint verification
+| File | Description |
+|------|-------------|
+| **[README.md](./README.md)** | Main project overview and getting started guide |
+| **[CLAUDE.md](./CLAUDE.md)** | Development guidelines and coding conventions |
 
 ---
 
-## 🏗️ **Technical Documentation** (5 files)
-*System architecture and deployment guides*
+## 📁 **Organized Documentation Structure**
 
-- `ARCHITECTURE.md` - Complete system architecture overview
-- `BRANCHING_STRATEGY.md` - Git workflow and branching conventions
-- `INTEGRATION_TESTING_STRATEGY.md` - Cross-service testing methodology
-- `DEPLOYMENT_GUIDE.md` - Production deployment procedures
-- `DOCKER_DEPLOYMENT_SUMMARY.md` - Docker infrastructure details
+### 🤝 **Team Coordination** → [`project-docs/team-coordination/`](./project-docs/team-coordination/)
+*Active team management and coordination documents*
 
----
+- **[AGENT_ASSIGNMENTS.md](./project-docs/team-coordination/AGENT_ASSIGNMENTS.md)** - Current task assignments for all 4 agents
+- **[TEAM_COORDINATION_STATUS.md](./project-docs/team-coordination/TEAM_COORDINATION_STATUS.md)** - Real-time coordination status
+- **[TEAM_MANAGEMENT_ROLES.md](./project-docs/team-coordination/TEAM_MANAGEMENT_ROLES.md)** - 4-agent team structure and coordination framework
+- **[TEAM_PROGRESS_REPORT.md](./project-docs/team-coordination/TEAM_PROGRESS_REPORT.md)** - Sprint progress and milestone tracking
+- **[MANAGER_QUALITY_CHECKPOINTS.md](./project-docs/team-coordination/MANAGER_QUALITY_CHECKPOINTS.md)** - Quality assurance milestones
 
-## 📊 **Reports & Analysis** (5 files)
-*Comprehensive audits and technical assessments*
+### 🎯 **Agent Directives** → [`project-docs/agent-directives/`](./project-docs/agent-directives/)
+*Specific instructions and tasks for each agent*
 
-- `BACKEND_API_INVENTORY.md` - Complete API endpoint documentation
-- `DATABASE_SCHEMA_ANALYSIS.md` - Database structure and optimization
-- `DTO_VALIDATION_REPORT.md` - Data transfer object validation analysis
-- `COMPREHENSIVE_BACKEND_TESTING_REPORT.md` - Backend testing coverage report
-- `SECURITY_AUDIT_REPORT.md` - Security assessment and recommendations
+- **[BACKEND_AGENT_DIRECTIVES.md](./project-docs/agent-directives/BACKEND_AGENT_DIRECTIVES.md)** - Backend Agent instructions and priorities
+- **[BACKEND_AGENT_DTO_CONSOLIDATION_DIRECTIVE.md](./project-docs/agent-directives/BACKEND_AGENT_DTO_CONSOLIDATION_DIRECTIVE.md)** - ~~**COMPLETED & ARCHIVED**~~ ✅
+- **[BACKEND_AGENT_NESTJS_MEMORY_OPTIMIZATION_DIRECTIVE.md](./project-docs/agent-directives/BACKEND_AGENT_NESTJS_MEMORY_OPTIMIZATION_DIRECTIVE.md)** - **URGENT**: Fix NestJS memory overload during dev/build
+- **[AI_DEVOPS_AGENT_DIRECTIVES.md](./project-docs/agent-directives/AI_DEVOPS_AGENT_DIRECTIVES.md)** - AI/DevOps Agent instructions
+- **[AI_DEVOPS_AGENT_DTO_INTEGRATION_DIRECTIVE.md](./project-docs/agent-directives/AI_DEVOPS_AGENT_DTO_INTEGRATION_DIRECTIVE.md)** - ~~**COMPLETED & ARCHIVED**~~ ✅
+- **[FRONTEND_AGENT_COMPREHENSIVE_ERROR_AUDIT.md](./project-docs/agent-directives/FRONTEND_AGENT_COMPREHENSIVE_ERROR_AUDIT.md)** - Frontend error audit instructions
+- **[FRONTEND_AGENT_TYPE_CONSOLIDATION_DIRECTIVE.md](./project-docs/agent-directives/FRONTEND_AGENT_TYPE_CONSOLIDATION_DIRECTIVE.md)** - **READY TO EXECUTE**: Complete type consolidation (backend dependency ✅)
+- **[FRONTEND_AGENT_MODULE2_THERAPIST_MATCHING_DIRECTIVE.md](./project-docs/agent-directives/FRONTEND_AGENT_MODULE2_THERAPIST_MATCHING_DIRECTIVE.md)** - **MODULE 2**: Complete therapist matching frontend implementation
+- **[BACKEND_AGENT_MODULE2_THERAPIST_MATCHING_DIRECTIVE.md](./project-docs/agent-directives/BACKEND_AGENT_MODULE2_THERAPIST_MATCHING_DIRECTIVE.md)** - **MODULE 2**: Complete therapist matching backend implementation
+- **[BACKEND_AGENT_CRITICAL_ENDPOINT_VERIFICATION.md](./project-docs/agent-directives/BACKEND_AGENT_CRITICAL_ENDPOINT_VERIFICATION.md)** - Critical endpoint verification
 
----
+### 🏗️ **Technical Documentation** → [`project-docs/technical-docs/`](./project-docs/technical-docs/)
+*Architecture, deployment, and integration guides*
 
-## 🛡️ **Policies** (1 file)
-*Platform policies and operational guidelines*
+#### **Architecture & Strategy**
+- **[ARCHITECTURE.md](./project-docs/technical-docs/ARCHITECTURE.md)** - System architecture overview
+- **[TYPE_SAFETY_CONSOLIDATION_STRATEGY.md](./project-docs/technical-docs/TYPE_SAFETY_CONSOLIDATION_STRATEGY.md)** - Comprehensive type safety initiative strategy
 
-- `CONTENT_MODERATION_POLICY.md` - AI-powered content moderation framework
+#### **Development Guides**
+- **[BRANCHING_STRATEGY.md](./project-docs/technical-docs/BRANCHING_STRATEGY.md)** - Git workflow and branching conventions
+- **[INTEGRATION_TESTING_STRATEGY.md](./project-docs/technical-docs/INTEGRATION_TESTING_STRATEGY.md)** - Cross-service testing approach
 
----
+#### **Deployment & Infrastructure**
+- **[DEPLOYMENT_GUIDE.md](./project-docs/technical-docs/DEPLOYMENT_GUIDE.md)** - Production deployment procedures
+- **[DOCKER_DEPLOYMENT_SUMMARY.md](./project-docs/technical-docs/DOCKER_DEPLOYMENT_SUMMARY.md)** - Docker infrastructure details
 
-## 🔧 **Development** (2 files)
+#### **Commons Package Guides**
+- **[COMMONS_USAGE_GUIDE.md](./project-docs/technical-docs/COMMONS_USAGE_GUIDE.md)** - mentara-commons package usage guide
+- **[COMMONS_MIGRATION_GUIDE.md](./project-docs/technical-docs/COMMONS_MIGRATION_GUIDE.md)** - Commons package migration instructions
+
+### 📊 **Reports & Analysis** → [`project-docs/reports/`](./project-docs/reports/)
+*Audits, assessments, and technical analysis*
+
+#### **Current Reports**
+- **[BACKEND_ENDPOINT_VERIFICATION_REPORT.md](./project-docs/reports/BACKEND_ENDPOINT_VERIFICATION_REPORT.md)** - Critical endpoint verification results
+- **[BACKEND_MIGRATION_COMPLETION_REPORT.md](./project-docs/reports/BACKEND_MIGRATION_COMPLETION_REPORT.md)** - Backend migration completion status
+- **[BACKEND_ANALYSIS_REPORT.md](./project-docs/reports/BACKEND_ANALYSIS_REPORT.md)** - Backend system analysis
+
+#### **Completion Reports**
+- **[DTO_CONSOLIDATION_COMPLETION_REPORT.md](./project-docs/reports/DTO_CONSOLIDATION_COMPLETION_REPORT.md)** - DTO consolidation completion status
+- **[MEMORY_OPTIMIZATION_SUCCESS_REPORT.md](./project-docs/reports/MEMORY_OPTIMIZATION_SUCCESS_REPORT.md)** - Memory optimization results
+- **[FRONTEND_TYPE_CONSOLIDATION_COMPLETION_REPORT.md](./project-docs/reports/FRONTEND_TYPE_CONSOLIDATION_COMPLETION_REPORT.md)** - Frontend type consolidation results
+- **[FRONTEND_ERROR_AUDIT_REPORT.md](./project-docs/reports/FRONTEND_ERROR_AUDIT_REPORT.md)** - Frontend error audit findings
+- **[FRONTEND_HOOKS_OPTIMIZATION_REPORT.md](./project-docs/reports/FRONTEND_HOOKS_OPTIMIZATION_REPORT.md)** - Frontend hooks optimization results
+- **[COMMONS_IMPLEMENTATION_REPORT.md](./project-docs/reports/COMMONS_IMPLEMENTATION_REPORT.md)** - Commons package implementation summary
+
+#### **Integration & API Reports**
+- **[FRONTEND_API_INTEGRATION_GAPS.md](./project-docs/reports/FRONTEND_API_INTEGRATION_GAPS.md)** - API integration gap analysis
+- **[BACKEND_API_INVENTORY.md](./project-docs/reports/BACKEND_API_INVENTORY.md)** - Complete API endpoint documentation
+
+#### **System Analysis**
+- **[DATABASE_SCHEMA_ANALYSIS.md](./project-docs/reports/DATABASE_SCHEMA_ANALYSIS.md)** - Database structure analysis
+- **[DTO_VALIDATION_REPORT.md](./project-docs/reports/DTO_VALIDATION_REPORT.md)** - Data validation analysis
+- **[COMPREHENSIVE_BACKEND_TESTING_REPORT.md](./project-docs/reports/COMPREHENSIVE_BACKEND_TESTING_REPORT.md)** - Backend testing coverage
+- **[SECURITY_AUDIT_REPORT.md](./project-docs/reports/SECURITY_AUDIT_REPORT.md)** - Security assessment results
+
+### 🛡️ **Policies** → [`project-docs/policies/`](./project-docs/policies/)
+*Security, moderation, and operational policies*
+
+- **[CONTENT_MODERATION_POLICY.md](./project-docs/policies/CONTENT_MODERATION_POLICY.md)** - Content moderation guidelines and procedures
+
+### 🔧 **Development** → [`project-docs/development/`](./project-docs/development/)
 *Development tracking and testing resources*
 
-- `MEMORY.md` - Historical development progress and milestones
-- `TEST_ACCOUNTS.md` - Test account credentials for development
+- **[MEMORY.md](./project-docs/development/MEMORY.md)** - Development progress and milestone history
+- **[TEST_ACCOUNTS.md](./project-docs/development/TEST_ACCOUNTS.md)** - Test account credentials for development
+- **[BACKEND_TODO.md](./project-docs/development/BACKEND_TODO.md)** - Backend development todos and tasks
+- **[FRONTEND_INTEGRATION_NOTES.md](./project-docs/development/FRONTEND_INTEGRATION_NOTES.md)** - Frontend integration development notes
+
+### 📦 **Archive** → [`project-docs/archive/`](./project-docs/archive/)
+*Historical documents and completed phases*
+
+#### **Recently Archived (2025-01-15)**
+- **[BACKEND_AGENT_DTO_CONSOLIDATION_DIRECTIVE_COMPLETED.md](./project-docs/archive/BACKEND_AGENT_DTO_CONSOLIDATION_DIRECTIVE_COMPLETED.md)** - ✅ **COMPLETED**: Complete DTO consolidation to Zod schemas
+- **[AI_DEVOPS_AGENT_DTO_INTEGRATION_DIRECTIVE_COMPLETED.md](./project-docs/archive/AI_DEVOPS_AGENT_DTO_INTEGRATION_DIRECTIVE_COMPLETED.md)** - ✅ **COMPLETED**: Infrastructure updates for DTO consolidation
+- **[DIRECTIVE_CLEANUP_ANALYSIS_REPORT.md](./project-docs/reports/DIRECTIVE_CLEANUP_ANALYSIS_REPORT.md)** - Documentation cleanup analysis
+
+#### **Historical Archives**
+- **[URGENT_BACKEND_ESCALATION.md](./project-docs/archive/URGENT_BACKEND_ESCALATION.md)** - Historical escalation document
+- **[AI_DEVOPS_URGENT_UPDATE.md](./project-docs/archive/AI_DEVOPS_URGENT_UPDATE.md)** - Historical urgent update
+- **[TEAM_CRISIS_COORDINATION.md](./project-docs/archive/TEAM_CRISIS_COORDINATION.md)** - Historical crisis coordination
+- **[AI_TEAM_BATTLE_PLANS.md](./project-docs/archive/AI_TEAM_BATTLE_PLANS.md)** - Historical battle plans document
+- **[BACKEND_AGENT_MODULE1_AUTH_DIRECTIVE_COMPLETED.md](./project-docs/archive/BACKEND_AGENT_MODULE1_AUTH_DIRECTIVE_COMPLETED.md)** - Module 1 auth implementation
+- **[FRONTEND_AGENT_MODULE1_AUTH_DIRECTIVE_COMPLETED.md](./project-docs/archive/FRONTEND_AGENT_MODULE1_AUTH_DIRECTIVE_COMPLETED.md)** - Module 1 frontend auth
 
 ---
 
-## 📦 **Archive** (4 files)
-*Historical documents and completed project phases*
+## 📋 **Documentation Guidelines for AI Agents**
 
-- `URGENT_BACKEND_ESCALATION.md` - Historical escalation documentation
-- `AI_DEVOPS_URGENT_UPDATE.md` - Historical urgent updates
-- `TEAM_CRISIS_COORDINATION.md` - Historical crisis coordination
-- `AI_TEAM_BATTLE_PLANS.md` - Historical strategic planning document
+### 🎯 **Where to Place New Documentation**
 
----
+| Document Type | Location | Examples |
+|---------------|----------|----------|
+| **Team Coordination** | `project-docs/team-coordination/` | Progress reports, assignments, status updates |
+| **Agent Instructions** | `project-docs/agent-directives/` | Task lists, directives, immediate actions |
+| **Technical Docs** | `project-docs/technical-docs/` | Architecture, deployment, integration guides |
+| **Reports & Analysis** | `project-docs/reports/` | Audits, assessments, inventories |
+| **Policies** | `project-docs/policies/` | Security, moderation, operational policies |
+| **Development** | `project-docs/development/` | Progress tracking, test resources |
+| **Completed Work** | `project-docs/archive/` | Historical documents, completed phases |
 
-## 📋 **Documentation Guidelines**
+### 📝 **Naming Convention Rules**
 
-### 🎯 **For AI Agents Creating New Documentation:**
+- **ALL** markdown files MUST use `UPPERCASE_WITH_UNDERSCORES.md` format
+- No hyphens allowed - use underscores instead
+- Be descriptive but concise
+- Include document type prefix when helpful (e.g., `BACKEND_AGENT_`, `SECURITY_`)
 
-1. **Follow Naming Convention**: Use `UPPERCASE_WITH_UNDERSCORES.md` format
-2. **Choose Correct Folder**: 
-   - Team coordination → `team-coordination/`
-   - Agent tasks → `agent-directives/`
-   - Technical guides → `technical-docs/`
-   - Analysis/audits → `reports/`
-   - Policies → `policies/`
-   - Dev tracking → `development/`
-   - Completed work → `archive/`
+### 🔄 **Maintenance Responsibilities**
 
-3. **Update This Index**: When adding new categories or major documents
-
-### 🔄 **Maintenance Notes**
-
-- Files organized by relevance and current usage
-- Archive contains historical/superseded documents
-- All files now follow consistent naming conventions
-- Project Manager maintains organization standards
+- **Project Manager**: Maintains this index and oversees organization
+- **All Agents**: Follow placement guidelines for new documentation
+- **Updates**: This index should be updated when new categories are added
 
 ---
 
-**🏠 [Back to Main Documentation Index](../PROJECT_DOCS_INDEX.md)**
+## 🎯 **Quick Navigation**
+
+**Need team coordination info?** → [`project-docs/team-coordination/`](./project-docs/team-coordination/)  
+**Looking for your agent tasks?** → [`project-docs/agent-directives/`](./project-docs/agent-directives/)  
+**Need technical architecture info?** → [`project-docs/technical-docs/`](./project-docs/technical-docs/)  
+**Want to see reports/analysis?** → [`project-docs/reports/`](./project-docs/reports/)  
+**Need development resources?** → [`project-docs/development/`](./project-docs/development/)
 
 ---
 
-*This directory is maintained by the Project Manager Agent as part of the team coordination framework.*
+*This index is maintained by the Project Manager Agent and updated with each documentation reorganization.*
