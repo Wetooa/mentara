@@ -197,7 +197,7 @@ export const EngagementDataSchema = z.object({
   bounceRate: z.number().min(0).max(100)
 });
 
-export const ModerationReportSchema = z.object({
+export const AdminModerationReportSchema = z.object({
   id: z.string().uuid(),
   type: z.string().min(1),
   status: z.enum(['pending', 'resolved', 'dismissed']),
@@ -280,7 +280,7 @@ export const UserSuspendRequestSchema = z.object({
 export type SystemStats = z.infer<typeof SystemStatsSchema>;
 export type UserGrowthData = z.infer<typeof UserGrowthDataSchema>;
 export type EngagementData = z.infer<typeof EngagementDataSchema>;
-export type ModerationReport = z.infer<typeof ModerationReportSchema>;
+export type AdminModerationReport = z.infer<typeof AdminModerationReportSchema>;
 export type UpdateModerationReportRequest = z.infer<typeof UpdateModerationReportRequestSchema>;
 export type SystemConfig = z.infer<typeof SystemConfigSchema>;
 export type FeatureFlag = z.infer<typeof FeatureFlagSchema>;

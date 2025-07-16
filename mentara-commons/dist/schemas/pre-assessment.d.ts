@@ -9,20 +9,20 @@ export declare const AssessmentScaleSchema: z.ZodObject<{
     categories: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    name: string;
     description: string;
-    categories: string[];
+    name: string;
     questionCount: number;
     minScore: number;
     maxScore: number;
+    categories: string[];
 }, {
     id: string;
-    name: string;
     description: string;
-    categories: string[];
+    name: string;
     questionCount: number;
     minScore: number;
     maxScore: number;
+    categories: string[];
 }>;
 export declare const AssessmentQuestionSchema: z.ZodObject<{
     id: z.ZodString;
@@ -129,19 +129,19 @@ export declare const CreatePreAssessmentDtoSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
     userId: string;
-    severityLevels: Record<string, string>;
     scores: Record<string, number>;
     questionnaires: string[];
     answers: number[][];
     answerMatrix: number[];
+    severityLevels: Record<string, string>;
     metadata?: Record<string, any> | undefined;
 }, {
     userId: string;
-    severityLevels: Record<string, string>;
     scores: Record<string, number>;
     questionnaires: string[];
     answers: number[][];
     answerMatrix: number[];
+    severityLevels: Record<string, string>;
     metadata?: Record<string, any> | undefined;
 }>;
 export declare const UpdatePreAssessmentDtoSchema: z.ZodObject<{
@@ -152,19 +152,19 @@ export declare const UpdatePreAssessmentDtoSchema: z.ZodObject<{
     severityLevels: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    severityLevels?: Record<string, string> | undefined;
     metadata?: Record<string, any> | undefined;
     scores?: Record<string, number> | undefined;
     questionnaires?: string[] | undefined;
     answers?: number[][] | undefined;
     answerMatrix?: number[] | undefined;
+    severityLevels?: Record<string, string> | undefined;
 }, {
-    severityLevels?: Record<string, string> | undefined;
     metadata?: Record<string, any> | undefined;
     scores?: Record<string, number> | undefined;
     questionnaires?: string[] | undefined;
     answers?: number[][] | undefined;
     answerMatrix?: number[] | undefined;
+    severityLevels?: Record<string, string> | undefined;
 }>;
 export declare const AssessmentResultSchema: z.ZodObject<{
     scales: z.ZodRecord<z.ZodString, z.ZodObject<{
@@ -288,8 +288,8 @@ export declare const AssessmentQuerySchema: z.ZodObject<{
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     userId?: string | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "completedAt" | "overallScore" | "riskLevel" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
@@ -298,8 +298,8 @@ export declare const AssessmentQuerySchema: z.ZodObject<{
     isProcessed?: boolean | undefined;
 }, {
     userId?: string | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "completedAt" | "overallScore" | "riskLevel" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
@@ -324,7 +324,7 @@ export declare const ExportAssessmentDtoSchema: z.ZodObject<{
     format: z.ZodDefault<z.ZodEnum<["json", "csv", "pdf"]>>;
     includePersonalInfo: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    format: "json" | "csv" | "pdf";
+    format: "csv" | "json" | "pdf";
     includePersonalInfo: boolean;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
@@ -332,8 +332,8 @@ export declare const ExportAssessmentDtoSchema: z.ZodObject<{
 }, {
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
+    format?: "csv" | "json" | "pdf" | undefined;
     assessmentIds?: string[] | undefined;
-    format?: "json" | "csv" | "pdf" | undefined;
     includePersonalInfo?: boolean | undefined;
 }>;
 export declare const CrisisAssessmentDtoSchema: z.ZodObject<{
@@ -384,9 +384,9 @@ export declare const PreAssessmentListParamsSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    offset: number;
     sortBy: "completedAt" | "overallScore" | "riskLevel" | "processedAt";
     sortOrder: "asc" | "desc";
+    offset: number;
     userId?: string | undefined;
     isProcessed?: boolean | undefined;
     overallRisk?: "low" | "high" | "moderate" | "critical" | undefined;
@@ -395,9 +395,9 @@ export declare const PreAssessmentListParamsSchema: z.ZodObject<{
 }, {
     userId?: string | undefined;
     limit?: number | undefined;
-    offset?: number | undefined;
     sortBy?: "completedAt" | "overallScore" | "riskLevel" | "processedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
     isProcessed?: boolean | undefined;
     overallRisk?: "low" | "high" | "moderate" | "critical" | undefined;
     processedAfter?: string | undefined;
@@ -463,10 +463,10 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
     limit: z.ZodNumber;
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    total: number;
+    limit: number;
     hasMore: boolean;
+    total: number;
     assessments: {
         id: string;
         userId: string;
@@ -484,10 +484,10 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
         processedAt?: string | undefined;
     }[];
 }, {
-    limit: number;
     page: number;
-    total: number;
+    limit: number;
     hasMore: boolean;
+    total: number;
     assessments: {
         id: string;
         userId: string;

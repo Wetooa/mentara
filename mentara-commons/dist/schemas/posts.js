@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReportContentDtoSchema = exports.CreateNestedCommentDtoSchema = exports.GiveAwardDtoSchema = exports.VoteContentDtoSchema = exports.PostRoomParamsDtoSchema = exports.PostUpdateInputDtoSchema = exports.PostCreateInputDtoSchema = exports.PostParamsDtoSchema = exports.PostReactionParamSchema = exports.PostIdParamSchema = exports.ModeratePostDtoSchema = exports.PostQuerySchema = exports.PollVoteDtoSchema = exports.ReportPostDtoSchema = exports.CreatePostReactionDtoSchema = exports.PostReactionSchema = exports.UpdatePostDtoSchema = exports.CreatePostDtoSchema = exports.PostSchema = void 0;
+exports.CheckHeartedResponseSchema = exports.HeartPostResponseSchema = exports.PostListResponseSchema = exports.PostWithDetailsSchema = exports.PostCommentSchema = exports.CommentHeartSchema = exports.PostHeartSchema = exports.PostByRoomParamsDtoSchema = exports.PostByUserParamsDtoSchema = exports.PostListParamsDtoSchema = exports.ReportContentDtoSchema = exports.CreateNestedCommentDtoSchema = exports.GiveAwardDtoSchema = exports.VoteContentDtoSchema = exports.PostRoomParamsDtoSchema = exports.PostUpdateInputDtoSchema = exports.PostCreateInputDtoSchema = exports.PostParamsDtoSchema = exports.PostReactionParamSchema = exports.PostIdParamSchema = exports.ModeratePostDtoSchema = exports.PostQuerySchema = exports.PollVoteDtoSchema = exports.ReportPostDtoSchema = exports.CreatePostReactionDtoSchema = exports.PostReactionSchema = exports.UpdatePostDtoSchema = exports.CreatePostDtoSchema = exports.PostSchema = void 0;
 const zod_1 = require("zod");
 // Post Schema
 exports.PostSchema = zod_1.z.object({
@@ -149,5 +149,107 @@ exports.ReportContentDtoSchema = zod_1.z.object({
     contentType: zod_1.z.enum(['POST', 'COMMENT']),
     reason: zod_1.z.enum(['SPAM', 'HARASSMENT', 'HATE_SPEECH', 'VIOLENCE', 'SEXUAL_CONTENT', 'MISINFORMATION', 'COPYRIGHT', 'SELF_HARM', 'OTHER']),
     description: zod_1.z.string().max(1000, 'Description too long').optional()
+});
+// Additional DTOs for posts service query operations
+exports.PostListParamsDtoSchema = zod_1.z.object({
+    roomId: zod_1.z.string().uuid().optional(),
+    authorId: zod_1.z.string().uuid().optional(),
+    tags: zod_1.z.array(zod_1.z.string()).optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0),
+    sortBy: zod_1.z.enum(['newest', 'oldest', 'popular']).default('newest'),
+    isAnonymous: zod_1.z.boolean().optional()
+});
+exports.PostByUserParamsDtoSchema = zod_1.z.object({
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    roomId: zod_1.z.string().uuid().optional(),
+    tags: zod_1.z.array(zod_1.z.string()).optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0),
+    sortBy: zod_1.z.enum(['newest', 'oldest', 'popular']).default('newest'),
+    isAnonymous: zod_1.z.boolean().optional()
+});
+exports.PostByRoomParamsDtoSchema = zod_1.z.object({
+    roomId: zod_1.z.string().uuid('Invalid room ID format'),
+    authorId: zod_1.z.string().uuid().optional(),
+    tags: zod_1.z.array(zod_1.z.string()).optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0),
+    sortBy: zod_1.z.enum(['newest', 'oldest', 'popular']).default('newest'),
+    isAnonymous: zod_1.z.boolean().optional()
+});
+// UI-specific data structures moved from frontend services
+exports.PostHeartSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    postId: zod_1.z.string().uuid(),
+    userId: zod_1.z.string().uuid(),
+    user: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        firstName: zod_1.z.string().min(1),
+        lastName: zod_1.z.string().min(1),
+        avatarUrl: zod_1.z.string().url()
+    }),
+    createdAt: zod_1.z.string().datetime()
+});
+exports.CommentHeartSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    commentId: zod_1.z.string().uuid(),
+    userId: zod_1.z.string().uuid(),
+    user: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        firstName: zod_1.z.string().min(1),
+        lastName: zod_1.z.string().min(1),
+        avatarUrl: zod_1.z.string().url()
+    }),
+    createdAt: zod_1.z.string().datetime()
+});
+exports.PostCommentSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    content: zod_1.z.string().min(1),
+    postId: zod_1.z.string().uuid(),
+    authorId: zod_1.z.string().uuid(),
+    author: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        firstName: zod_1.z.string().min(1),
+        lastName: zod_1.z.string().min(1),
+        avatarUrl: zod_1.z.string().url()
+    }),
+    parentId: zod_1.z.string().uuid().optional(),
+    replies: zod_1.z.array(zod_1.z.lazy(() => exports.PostCommentSchema)).optional(),
+    hearts: zod_1.z.array(exports.CommentHeartSchema),
+    heartCount: zod_1.z.number().min(0),
+    isHearted: zod_1.z.boolean().optional(),
+    createdAt: zod_1.z.string().datetime(),
+    updatedAt: zod_1.z.string().datetime()
+});
+exports.PostWithDetailsSchema = exports.PostSchema.extend({
+    author: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        firstName: zod_1.z.string().min(1),
+        lastName: zod_1.z.string().min(1),
+        avatarUrl: zod_1.z.string().url()
+    }),
+    room: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        name: zod_1.z.string().min(1),
+        slug: zod_1.z.string().min(1)
+    }),
+    hearts: zod_1.z.array(exports.PostHeartSchema),
+    heartCount: zod_1.z.number().min(0),
+    isHearted: zod_1.z.boolean().optional(),
+    comments: zod_1.z.array(exports.PostCommentSchema),
+    commentCount: zod_1.z.number().min(0)
+});
+exports.PostListResponseSchema = zod_1.z.object({
+    posts: zod_1.z.array(exports.PostWithDetailsSchema),
+    total: zod_1.z.number().min(0),
+    hasMore: zod_1.z.boolean()
+});
+exports.HeartPostResponseSchema = zod_1.z.object({
+    isHearted: zod_1.z.boolean(),
+    heartCount: zod_1.z.number().min(0)
+});
+exports.CheckHeartedResponseSchema = zod_1.z.object({
+    isHearted: zod_1.z.boolean()
 });
 //# sourceMappingURL=posts.js.map

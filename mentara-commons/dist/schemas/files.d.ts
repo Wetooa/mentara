@@ -16,11 +16,11 @@ export declare const FileSchema: z.ZodObject<{
     createdAt: string;
     updatedAt: string;
     path: string;
+    isPublic: boolean;
     url: string;
+    size: number;
     filename: string;
     originalName: string;
-    isPublic: boolean;
-    size: number;
     mimeType: string;
     uploadedBy: string;
 }, {
@@ -28,11 +28,11 @@ export declare const FileSchema: z.ZodObject<{
     createdAt: string;
     updatedAt: string;
     path: string;
+    isPublic: boolean;
     url: string;
+    size: number;
     filename: string;
     originalName: string;
-    isPublic: boolean;
-    size: number;
     mimeType: string;
     uploadedBy: string;
 }>;
@@ -43,14 +43,14 @@ export declare const FileUploadDtoSchema: z.ZodObject<{
     isPublic: z.ZodDefault<z.ZodBoolean>;
     folder: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    filename: string;
     isPublic: boolean;
     size: number;
+    filename: string;
     mimeType: string;
     folder?: string | undefined;
 }, {
-    filename: string;
     size: number;
+    filename: string;
     mimeType: string;
     isPublic?: boolean | undefined;
     folder?: string | undefined;
@@ -59,11 +59,11 @@ export declare const UpdateFileDtoSchema: z.ZodObject<{
     filename: z.ZodOptional<z.ZodString>;
     isPublic: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    filename?: string | undefined;
     isPublic?: boolean | undefined;
+    filename?: string | undefined;
 }, {
-    filename?: string | undefined;
     isPublic?: boolean | undefined;
+    filename?: string | undefined;
 }>;
 export declare const FileQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -76,9 +76,9 @@ export declare const FileQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["filename", "size", "createdAt"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit?: number | undefined;
     page?: number | undefined;
-    sortBy?: "createdAt" | "filename" | "size" | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "size" | "filename" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
     search?: string | undefined;
@@ -86,9 +86,9 @@ export declare const FileQuerySchema: z.ZodObject<{
     uploadedBy?: string | undefined;
     folder?: string | undefined;
 }, {
-    limit?: number | undefined;
     page?: number | undefined;
-    sortBy?: "createdAt" | "filename" | "size" | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "size" | "filename" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
     search?: string | undefined;
@@ -104,19 +104,19 @@ export declare const FileUploadProgressSchema: z.ZodObject<{
     percentage: z.ZodNumber;
     status: z.ZodEnum<["uploading", "completed", "failed", "cancelled"]>;
 }, "strip", z.ZodTypeAny, {
-    status: "cancelled" | "completed" | "failed" | "uploading";
-    percentage: number;
+    status: "completed" | "cancelled" | "failed" | "uploading";
     filename: string;
     uploadId: string;
     bytesUploaded: number;
     totalBytes: number;
+    percentage: number;
 }, {
-    status: "cancelled" | "completed" | "failed" | "uploading";
-    percentage: number;
+    status: "completed" | "cancelled" | "failed" | "uploading";
     filename: string;
     uploadId: string;
     bytesUploaded: number;
     totalBytes: number;
+    percentage: number;
 }>;
 export declare const MultipleFileUploadDtoSchema: z.ZodObject<{
     files: z.ZodArray<z.ZodObject<{
@@ -126,14 +126,14 @@ export declare const MultipleFileUploadDtoSchema: z.ZodObject<{
         isPublic: z.ZodDefault<z.ZodBoolean>;
         folder: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        filename: string;
         isPublic: boolean;
         size: number;
+        filename: string;
         mimeType: string;
         folder?: string | undefined;
     }, {
-        filename: string;
         size: number;
+        filename: string;
         mimeType: string;
         isPublic?: boolean | undefined;
         folder?: string | undefined;
@@ -141,17 +141,17 @@ export declare const MultipleFileUploadDtoSchema: z.ZodObject<{
     folder: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     files: {
-        filename: string;
         isPublic: boolean;
         size: number;
+        filename: string;
         mimeType: string;
         folder?: string | undefined;
     }[];
     folder?: string | undefined;
 }, {
     files: {
-        filename: string;
         size: number;
+        filename: string;
         mimeType: string;
         isPublic?: boolean | undefined;
         folder?: string | undefined;
@@ -201,17 +201,17 @@ export declare const EnhancedFileUploadDtoSchema: z.ZodObject<{
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     expiresAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    filename: string;
     isPublic: boolean;
     size: number;
+    filename: string;
     mimeType: string;
     description?: string | undefined;
     expiresAt?: string | undefined;
     tags?: string[] | undefined;
     folder?: string | undefined;
 }, {
-    filename: string;
     size: number;
+    filename: string;
     mimeType: string;
     description?: string | undefined;
     isPublic?: boolean | undefined;
@@ -235,30 +235,30 @@ export declare const FindFilesQueryDtoSchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["filename", "size", "createdAt", "downloads"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit?: number | undefined;
     page?: number | undefined;
-    sortBy?: "createdAt" | "filename" | "size" | "downloads" | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "size" | "filename" | "downloads" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
-    search?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     tags?: string[] | undefined;
+    search?: string | undefined;
     mimeType?: string | undefined;
     uploadedBy?: string | undefined;
     folder?: string | undefined;
     sizeMin?: number | undefined;
     sizeMax?: number | undefined;
 }, {
-    limit?: number | undefined;
     page?: number | undefined;
-    sortBy?: "createdAt" | "filename" | "size" | "downloads" | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "size" | "filename" | "downloads" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
-    search?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     tags?: string[] | undefined;
+    search?: string | undefined;
     mimeType?: string | undefined;
     uploadedBy?: string | undefined;
     folder?: string | undefined;
@@ -318,14 +318,14 @@ export declare const CreateFileVersionDtoSchema: z.ZodObject<{
     versionNote: z.ZodOptional<z.ZodString>;
     isMinorUpdate: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    filename: string;
     size: number;
+    filename: string;
     mimeType: string;
     isMinorUpdate: boolean;
     versionNote?: string | undefined;
 }, {
-    filename: string;
     size: number;
+    filename: string;
     mimeType: string;
     versionNote?: string | undefined;
     isMinorUpdate?: boolean | undefined;

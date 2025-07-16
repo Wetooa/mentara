@@ -12,20 +12,20 @@ export declare const CommunitySchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    name: string;
     description: string;
-    isPrivate: boolean;
+    name: string;
     memberCount: number;
     createdBy: string;
+    isPrivate: boolean;
 }, {
     id: string;
     createdAt: string;
     updatedAt: string;
-    name: string;
     description: string;
-    isPrivate: boolean;
+    name: string;
     memberCount: number;
     createdBy: string;
+    isPrivate: boolean;
 }>;
 export declare const CreateCommunityDtoSchema: z.ZodObject<{
     name: z.ZodString;
@@ -33,13 +33,13 @@ export declare const CreateCommunityDtoSchema: z.ZodObject<{
     isPrivate: z.ZodDefault<z.ZodBoolean>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     description: string;
+    name: string;
     isPrivate: boolean;
     tags?: string[] | undefined;
 }, {
-    name: string;
     description: string;
+    name: string;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
 }>;
@@ -49,13 +49,13 @@ export declare const UpdateCommunityDtoSchema: z.ZodObject<{
     isPrivate: z.ZodOptional<z.ZodBoolean>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    name?: string | undefined;
     description?: string | undefined;
+    name?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
 }, {
-    name?: string | undefined;
     description?: string | undefined;
+    name?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
 }>;
@@ -98,21 +98,21 @@ export declare const CommunityQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["name", "memberCount", "createdAt"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "name" | "memberCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    search?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
+    search?: string | undefined;
 }, {
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "name" | "memberCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    search?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
+    search?: string | undefined;
 }>;
 export declare const MemberQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -121,13 +121,13 @@ export declare const MemberQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["joinedAt", "role"]>>;
 }, "strip", z.ZodTypeAny, {
     role?: "moderator" | "admin" | "member" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "role" | "joinedAt" | undefined;
 }, {
     role?: "moderator" | "admin" | "member" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "role" | "joinedAt" | undefined;
 }>;
 export declare const CommunityIdParamSchema: z.ZodObject<{
@@ -180,15 +180,15 @@ export declare const GetCommunityMembersQueryDtoSchema: z.ZodObject<{
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     role?: "moderator" | "admin" | "member" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "role" | "name" | "joinedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     search?: string | undefined;
 }, {
     role?: "moderator" | "admin" | "member" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "role" | "name" | "joinedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     search?: string | undefined;
@@ -204,22 +204,22 @@ export declare const CommunityCreateInputDtoSchema: z.ZodObject<{
     maxMembers: z.ZodOptional<z.ZodNumber>;
     requireApproval: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     description: string;
+    name: string;
     isPrivate: boolean;
     slug: string;
     requireApproval: boolean;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
 }, {
-    name: string;
     description: string;
+    name: string;
     slug: string;
+    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
@@ -235,22 +235,22 @@ export declare const CommunityUpdateInputDtoSchema: z.ZodObject<{
     requireApproval: z.ZodOptional<z.ZodBoolean>;
     isActive: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    isActive?: boolean | undefined;
-    name?: string | undefined;
     description?: string | undefined;
+    name?: string | undefined;
+    isActive?: boolean | undefined;
+    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
 }, {
-    isActive?: boolean | undefined;
-    name?: string | undefined;
     description?: string | undefined;
+    name?: string | undefined;
+    isActive?: boolean | undefined;
+    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
@@ -360,16 +360,16 @@ export declare const JoinRequestFiltersDtoSchema: z.ZodObject<{
     limit: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
 }, "strip", z.ZodTypeAny, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     communityId?: string | undefined;
     moderatorId?: string | undefined;
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     communityId?: string | undefined;
@@ -411,14 +411,14 @@ export declare const JoinRequestFiltersPartialDtoSchema: z.ZodObject<Pick<{
     dateTo: z.ZodOptional<z.ZodString>;
     page: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
     limit: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
-}, "status" | "limit" | "page">, "strip", z.ZodTypeAny, {
+}, "status" | "page" | "limit">, "strip", z.ZodTypeAny, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
 }>;
 export declare const GenerateRecommendationsDtoSchema: z.ZodObject<{
     force: z.ZodOptional<z.ZodBoolean>;
@@ -439,11 +439,11 @@ export declare const RecommendationQueryDtoSchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["compatibility", "created", "updated"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "pending" | "rejected" | "accepted" | undefined;
+    status?: "rejected" | "pending" | "accepted" | undefined;
     sortBy?: "compatibility" | "created" | "updated" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }, {
-    status?: "pending" | "rejected" | "accepted" | undefined;
+    status?: "rejected" | "pending" | "accepted" | undefined;
     sortBy?: "compatibility" | "created" | "updated" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }>;

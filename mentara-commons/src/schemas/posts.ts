@@ -258,7 +258,7 @@ export const CommentHeartSchema = z.object({
   createdAt: z.string().datetime()
 });
 
-export const CommentSchema = z.object({
+export const PostCommentSchema: z.ZodType<any> = z.object({
   id: z.string().uuid(),
   content: z.string().min(1),
   postId: z.string().uuid(),
@@ -270,7 +270,7 @@ export const CommentSchema = z.object({
     avatarUrl: z.string().url()
   }),
   parentId: z.string().uuid().optional(),
-  replies: z.array(z.lazy(() => CommentSchema)).optional(),
+  replies: z.array(z.lazy((): z.ZodType<any> => PostCommentSchema)).optional(),
   hearts: z.array(CommentHeartSchema),
   heartCount: z.number().min(0),
   isHearted: z.boolean().optional(),
@@ -293,7 +293,7 @@ export const PostWithDetailsSchema = PostSchema.extend({
   hearts: z.array(PostHeartSchema),
   heartCount: z.number().min(0),
   isHearted: z.boolean().optional(),
-  comments: z.array(CommentSchema),
+  comments: z.array(PostCommentSchema),
   commentCount: z.number().min(0)
 });
 
@@ -315,7 +315,7 @@ export const CheckHeartedResponseSchema = z.object({
 // Export type inference helpers for new schemas
 export type PostHeart = z.infer<typeof PostHeartSchema>;
 export type CommentHeart = z.infer<typeof CommentHeartSchema>;
-export type Comment = z.infer<typeof CommentSchema>;
+export type PostComment = z.infer<typeof PostCommentSchema>;
 export type PostWithDetails = z.infer<typeof PostWithDetailsSchema>;
 export type PostListResponse = z.infer<typeof PostListResponseSchema>;
 export type HeartPostResponse = z.infer<typeof HeartPostResponseSchema>;

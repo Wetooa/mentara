@@ -212,7 +212,7 @@ export type SearchUsersQueryDto = z.infer<typeof SearchUsersQueryDtoSchema>;
 export type GlobalSearchQueryDto = z.infer<typeof GlobalSearchQueryDtoSchema>;
 
 // Legacy interfaces for backward compatibility moved from frontend services
-export const TherapistSearchParamsSchema = z.object({
+export const SearchTherapistParamsSchema = z.object({
   q: z.string().min(1),
   specialties: z.array(z.string()).optional(),
   languages: z.array(z.string()).optional(),
@@ -335,7 +335,7 @@ export const GlobalSearchResultSchema = z.object({
 });
 
 // Export type inference helpers for new schemas
-export type TherapistSearchParams = z.infer<typeof TherapistSearchParamsSchema>;
+export type SearchTherapistParams = z.infer<typeof SearchTherapistParamsSchema>;
 export type PostSearchParams = z.infer<typeof PostSearchParamsSchema>;
 export type UserSearchParams = z.infer<typeof UserSearchParamsSchema>;
 export type CommunitySearchParams = z.infer<typeof CommunitySearchParamsSchema>;

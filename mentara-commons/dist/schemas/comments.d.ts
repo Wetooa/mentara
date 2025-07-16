@@ -80,10 +80,10 @@ export declare const ReportCommentDtoSchema: z.ZodObject<{
     reason: z.ZodEnum<["spam", "harassment", "inappropriate", "misinformation", "other"]>;
     description: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    reason: "other" | "spam" | "harassment" | "inappropriate" | "misinformation";
+    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation";
     description?: string | undefined;
 }, {
-    reason: "other" | "spam" | "harassment" | "inappropriate" | "misinformation";
+    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation";
     description?: string | undefined;
 }>;
 export declare const CommentQuerySchema: z.ZodObject<{
@@ -96,8 +96,8 @@ export declare const CommentQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "updatedAt", "likes"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "likes" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     authorId?: string | undefined;
@@ -105,8 +105,8 @@ export declare const CommentQuerySchema: z.ZodObject<{
     parentCommentId?: string | undefined;
     includeDeleted?: boolean | undefined;
 }, {
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "likes" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     authorId?: string | undefined;

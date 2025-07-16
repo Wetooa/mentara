@@ -168,8 +168,8 @@ export declare const NotificationQuerySchema: z.ZodObject<{
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     type?: "SYSTEM_MAINTENANCE" | "APPOINTMENT_REMINDER" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_CANCELLED" | "APPOINTMENT_RESCHEDULED" | "MESSAGE_RECEIVED" | "MESSAGE_REACTION" | "WORKSHEET_ASSIGNED" | "WORKSHEET_DUE" | "WORKSHEET_FEEDBACK" | "REVIEW_REQUEST" | "REVIEW_RECEIVED" | "THERAPIST_APPLICATION" | "THERAPIST_APPROVED" | "THERAPIST_REJECTED" | "THERAPIST_STATUS_UPDATED" | "THERAPIST_REQUEST_ACCEPTED" | "THERAPIST_REQUEST_DECLINED" | "ALTERNATIVE_RECOMMENDATIONS" | "CLIENT_REQUEST_RECEIVED" | "CLIENT_REQUEST_CANCELLED" | "PROFILE_COMPLETION" | "COMMUNITY_POST" | "COMMUNITY_REPLY" | "COMMUNITY_RECOMMENDATION" | "COMMUNITY_JOINED" | "COMMUNITY_WELCOME" | "RECOMMENDATIONS_UPDATED" | "NEW_RECOMMENDATIONS" | "RELATIONSHIP_ESTABLISHED" | "REQUEST_REMINDER" | "SYSTEM_UPDATE" | "SECURITY_ALERT" | "SCHEDULING_INFO" | "PAYMENT_SUCCESS" | "PAYMENT_FAILED" | "SUBSCRIPTION_EXPIRING" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "type" | "readAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isRead?: boolean | undefined;
@@ -179,8 +179,8 @@ export declare const NotificationQuerySchema: z.ZodObject<{
     isArchived?: boolean | undefined;
 }, {
     type?: "SYSTEM_MAINTENANCE" | "APPOINTMENT_REMINDER" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_CANCELLED" | "APPOINTMENT_RESCHEDULED" | "MESSAGE_RECEIVED" | "MESSAGE_REACTION" | "WORKSHEET_ASSIGNED" | "WORKSHEET_DUE" | "WORKSHEET_FEEDBACK" | "REVIEW_REQUEST" | "REVIEW_RECEIVED" | "THERAPIST_APPLICATION" | "THERAPIST_APPROVED" | "THERAPIST_REJECTED" | "THERAPIST_STATUS_UPDATED" | "THERAPIST_REQUEST_ACCEPTED" | "THERAPIST_REQUEST_DECLINED" | "ALTERNATIVE_RECOMMENDATIONS" | "CLIENT_REQUEST_RECEIVED" | "CLIENT_REQUEST_CANCELLED" | "PROFILE_COMPLETION" | "COMMUNITY_POST" | "COMMUNITY_REPLY" | "COMMUNITY_RECOMMENDATION" | "COMMUNITY_JOINED" | "COMMUNITY_WELCOME" | "RECOMMENDATIONS_UPDATED" | "NEW_RECOMMENDATIONS" | "RELATIONSHIP_ESTABLISHED" | "REQUEST_REMINDER" | "SYSTEM_UPDATE" | "SECURITY_ALERT" | "SCHEDULING_INFO" | "PAYMENT_SUCCESS" | "PAYMENT_FAILED" | "SUBSCRIPTION_EXPIRING" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "type" | "readAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isRead?: boolean | undefined;
@@ -221,23 +221,23 @@ export declare const NotificationListParamsSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    offset: number;
     sortBy: "createdAt" | "type" | "readAt";
     sortOrder: "asc" | "desc";
+    offset: number;
     type?: "SYSTEM_MAINTENANCE" | "APPOINTMENT_REMINDER" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_CANCELLED" | "APPOINTMENT_RESCHEDULED" | "MESSAGE_RECEIVED" | "MESSAGE_REACTION" | "WORKSHEET_ASSIGNED" | "WORKSHEET_DUE" | "WORKSHEET_FEEDBACK" | "REVIEW_REQUEST" | "REVIEW_RECEIVED" | "THERAPIST_APPLICATION" | "THERAPIST_APPROVED" | "THERAPIST_REJECTED" | "THERAPIST_STATUS_UPDATED" | "THERAPIST_REQUEST_ACCEPTED" | "THERAPIST_REQUEST_DECLINED" | "ALTERNATIVE_RECOMMENDATIONS" | "CLIENT_REQUEST_RECEIVED" | "CLIENT_REQUEST_CANCELLED" | "PROFILE_COMPLETION" | "COMMUNITY_POST" | "COMMUNITY_REPLY" | "COMMUNITY_RECOMMENDATION" | "COMMUNITY_JOINED" | "COMMUNITY_WELCOME" | "RECOMMENDATIONS_UPDATED" | "NEW_RECOMMENDATIONS" | "RELATIONSHIP_ESTABLISHED" | "REQUEST_REMINDER" | "SYSTEM_UPDATE" | "SECURITY_ALERT" | "SCHEDULING_INFO" | "PAYMENT_SUCCESS" | "PAYMENT_FAILED" | "SUBSCRIPTION_EXPIRING" | undefined;
+    isRead?: boolean | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
-    isRead?: boolean | undefined;
     priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
 }, {
     type?: "SYSTEM_MAINTENANCE" | "APPOINTMENT_REMINDER" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_CANCELLED" | "APPOINTMENT_RESCHEDULED" | "MESSAGE_RECEIVED" | "MESSAGE_REACTION" | "WORKSHEET_ASSIGNED" | "WORKSHEET_DUE" | "WORKSHEET_FEEDBACK" | "REVIEW_REQUEST" | "REVIEW_RECEIVED" | "THERAPIST_APPLICATION" | "THERAPIST_APPROVED" | "THERAPIST_REJECTED" | "THERAPIST_STATUS_UPDATED" | "THERAPIST_REQUEST_ACCEPTED" | "THERAPIST_REQUEST_DECLINED" | "ALTERNATIVE_RECOMMENDATIONS" | "CLIENT_REQUEST_RECEIVED" | "CLIENT_REQUEST_CANCELLED" | "PROFILE_COMPLETION" | "COMMUNITY_POST" | "COMMUNITY_REPLY" | "COMMUNITY_RECOMMENDATION" | "COMMUNITY_JOINED" | "COMMUNITY_WELCOME" | "RECOMMENDATIONS_UPDATED" | "NEW_RECOMMENDATIONS" | "RELATIONSHIP_ESTABLISHED" | "REQUEST_REMINDER" | "SYSTEM_UPDATE" | "SECURITY_ALERT" | "SCHEDULING_INFO" | "PAYMENT_SUCCESS" | "PAYMENT_FAILED" | "SUBSCRIPTION_EXPIRING" | undefined;
     limit?: number | undefined;
-    offset?: number | undefined;
     sortBy?: "createdAt" | "type" | "readAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    isRead?: boolean | undefined;
+    offset?: number | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
-    isRead?: boolean | undefined;
     priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
 }>;
 export declare const NotificationListResponseSchema: z.ZodObject<{
@@ -289,10 +289,10 @@ export declare const NotificationListResponseSchema: z.ZodObject<{
     limit: z.ZodNumber;
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    total: number;
+    limit: number;
     hasMore: boolean;
+    total: number;
     notifications: {
         id: string;
         createdAt: string;
@@ -309,10 +309,10 @@ export declare const NotificationListResponseSchema: z.ZodObject<{
         actionUrl?: string | undefined;
     }[];
 }, {
-    limit: number;
     page: number;
-    total: number;
+    limit: number;
     hasMore: boolean;
+    total: number;
     notifications: {
         id: string;
         createdAt: string;

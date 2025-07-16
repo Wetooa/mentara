@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CleanupAuditLogsDtoSchema = exports.LogSystemErrorDtoSchema = exports.LogProfileUpdateDtoSchema = exports.LogUserLogoutDtoSchema = exports.LogUserLoginDtoSchema = exports.CreateDataChangeLogDtoSchema = exports.ResolveSystemEventDtoSchema = exports.CreateSystemEventDtoSchema = exports.CreateAuditLogDtoSchema = exports.SearchAuditLogsQueryDtoSchema = exports.GetAuditStatisticsQueryDtoSchema = exports.FindDataChangeLogsQueryDtoSchema = exports.FindSystemEventsQueryDtoSchema = exports.FindAuditLogsQueryDtoSchema = void 0;
+exports.AuditLogQuerySchema = exports.AuditLogCreateDtoSchema = exports.ComplianceReportSchema = exports.SecurityEventQuerySchema = exports.SecurityEventSchema = exports.AuditLogStatsSchema = exports.AuditLogListResponseSchema = exports.AuditLogSchema = exports.CleanupAuditLogsDtoSchema = exports.LogSystemErrorDtoSchema = exports.LogProfileUpdateDtoSchema = exports.LogUserLogoutDtoSchema = exports.LogUserLoginDtoSchema = exports.CreateDataChangeLogDtoSchema = exports.ResolveSystemEventDtoSchema = exports.CreateSystemEventDtoSchema = exports.CreateAuditLogDtoSchema = exports.SearchAuditLogsQueryDtoSchema = exports.GetAuditStatisticsQueryDtoSchema = exports.FindDataChangeLogsQueryDtoSchema = exports.FindSystemEventsQueryDtoSchema = exports.FindAuditLogsQueryDtoSchema = void 0;
 const zod_1 = require("zod");
 // Define enums from Prisma client
 const AuditActionSchema = zod_1.z.enum([
@@ -199,5 +199,122 @@ exports.LogSystemErrorDtoSchema = zod_1.z.object({
 });
 exports.CleanupAuditLogsDtoSchema = zod_1.z.object({
     retentionDays: zod_1.z.number().min(1).max(3650).default(365),
+});
+// Additional DTOs for complex audit log data structures moved from frontend services
+exports.AuditLogSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    userId: zod_1.z.string().uuid(),
+    userEmail: zod_1.z.string().email(),
+    action: zod_1.z.string().min(1),
+    resource: zod_1.z.string().min(1),
+    resourceId: zod_1.z.string().min(1),
+    category: zod_1.z.string().min(1),
+    severity: zod_1.z.string().min(1),
+    success: zod_1.z.boolean(),
+    ipAddress: zod_1.z.string().ip(),
+    userAgent: zod_1.z.string().min(1),
+    metadata: zod_1.z.record(zod_1.z.any()),
+    timestamp: zod_1.z.string().datetime(),
+    details: zod_1.z.string().min(1)
+});
+exports.AuditLogListResponseSchema = zod_1.z.object({
+    logs: zod_1.z.array(exports.AuditLogSchema),
+    total: zod_1.z.number().min(0),
+    page: zod_1.z.number().min(1),
+    totalPages: zod_1.z.number().min(1),
+    hasMore: zod_1.z.boolean()
+});
+exports.AuditLogStatsSchema = zod_1.z.object({
+    totalLogs: zod_1.z.number().min(0),
+    totalUsers: zod_1.z.number().min(0),
+    totalActions: zod_1.z.number().min(0),
+    recentActivity: zod_1.z.number().min(0),
+    byAction: zod_1.z.record(zod_1.z.string(), zod_1.z.number().min(0)),
+    byCategory: zod_1.z.record(zod_1.z.string(), zod_1.z.number().min(0)),
+    bySeverity: zod_1.z.record(zod_1.z.string(), zod_1.z.number().min(0)),
+    byUser: zod_1.z.array(zod_1.z.object({
+        userId: zod_1.z.string().uuid(),
+        userEmail: zod_1.z.string().email(),
+        count: zod_1.z.number().min(0)
+    })),
+    trends: zod_1.z.array(zod_1.z.object({
+        date: zod_1.z.string().datetime(),
+        count: zod_1.z.number().min(0),
+        errors: zod_1.z.number().min(0)
+    }))
+});
+exports.SecurityEventSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    type: zod_1.z.string().min(1),
+    severity: zod_1.z.string().min(1),
+    userId: zod_1.z.string().uuid().optional(),
+    ipAddress: zod_1.z.string().ip(),
+    userAgent: zod_1.z.string().min(1),
+    description: zod_1.z.string().min(1),
+    resolved: zod_1.z.boolean(),
+    resolvedBy: zod_1.z.string().uuid().optional(),
+    resolvedAt: zod_1.z.string().datetime().optional(),
+    notes: zod_1.z.string().optional(),
+    metadata: zod_1.z.record(zod_1.z.any()),
+    timestamp: zod_1.z.string().datetime()
+});
+exports.SecurityEventQuerySchema = zod_1.z.object({
+    type: zod_1.z.string().optional(),
+    severity: zod_1.z.string().optional(),
+    resolved: zod_1.z.boolean().optional(),
+    userId: zod_1.z.string().uuid().optional(),
+    ipAddress: zod_1.z.string().ip().optional(),
+    startDate: zod_1.z.string().datetime().optional(),
+    endDate: zod_1.z.string().datetime().optional(),
+    limit: zod_1.z.number().min(1).max(1000).optional(),
+    offset: zod_1.z.number().min(0).optional(),
+    sortBy: zod_1.z.string().optional(),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
+});
+exports.ComplianceReportSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    type: zod_1.z.string().min(1),
+    title: zod_1.z.string().min(1),
+    description: zod_1.z.string().min(1),
+    period: zod_1.z.object({
+        startDate: zod_1.z.string().datetime(),
+        endDate: zod_1.z.string().datetime()
+    }),
+    status: zod_1.z.enum(['pending', 'processing', 'completed', 'failed']),
+    createdBy: zod_1.z.string().uuid(),
+    createdAt: zod_1.z.string().datetime(),
+    completedAt: zod_1.z.string().datetime().optional(),
+    reportData: zod_1.z.record(zod_1.z.any()).optional(),
+    fileUrl: zod_1.z.string().url().optional(),
+    error: zod_1.z.string().optional()
+});
+exports.AuditLogCreateDtoSchema = zod_1.z.object({
+    userId: zod_1.z.string().uuid(),
+    action: zod_1.z.string().min(1),
+    resource: zod_1.z.string().min(1),
+    resourceId: zod_1.z.string().min(1),
+    category: zod_1.z.string().optional(),
+    severity: zod_1.z.string().optional(),
+    success: zod_1.z.boolean().optional(),
+    ipAddress: zod_1.z.string().ip().optional(),
+    userAgent: zod_1.z.string().optional(),
+    metadata: zod_1.z.record(zod_1.z.any()).optional(),
+    details: zod_1.z.string().optional()
+});
+exports.AuditLogQuerySchema = zod_1.z.object({
+    userId: zod_1.z.string().uuid().optional(),
+    action: zod_1.z.string().optional(),
+    resource: zod_1.z.string().optional(),
+    resourceId: zod_1.z.string().optional(),
+    category: zod_1.z.string().optional(),
+    severity: zod_1.z.string().optional(),
+    success: zod_1.z.boolean().optional(),
+    startDate: zod_1.z.string().datetime().optional(),
+    endDate: zod_1.z.string().datetime().optional(),
+    ipAddress: zod_1.z.string().ip().optional(),
+    limit: zod_1.z.number().min(1).max(1000).optional(),
+    offset: zod_1.z.number().min(0).optional(),
+    sortBy: zod_1.z.string().optional(),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
 });
 //# sourceMappingURL=audit-logs.js.map

@@ -18,7 +18,7 @@ export declare const PostSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "video" | "image" | "text" | "link" | "poll";
+    type: "image" | "video" | "text" | "link" | "poll";
     title: string;
     content: string;
     isDeleted: boolean;
@@ -33,7 +33,7 @@ export declare const PostSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "video" | "image" | "text" | "link" | "poll";
+    type: "image" | "video" | "text" | "link" | "poll";
     title: string;
     content: string;
     isDeleted: boolean;
@@ -55,7 +55,7 @@ export declare const CreatePostDtoSchema: z.ZodObject<{
     pollOptions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     linkUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "video" | "image" | "text" | "link" | "poll";
+    type: "image" | "video" | "text" | "link" | "poll";
     title: string;
     content: string;
     communityId: string;
@@ -67,7 +67,7 @@ export declare const CreatePostDtoSchema: z.ZodObject<{
     title: string;
     content: string;
     communityId: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     attachments?: string[] | undefined;
     tags?: string[] | undefined;
     pollOptions?: string[] | undefined;
@@ -119,10 +119,10 @@ export declare const ReportPostDtoSchema: z.ZodObject<{
     reason: z.ZodEnum<["spam", "harassment", "inappropriate", "misinformation", "copyright", "other"]>;
     description: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    reason: "other" | "spam" | "harassment" | "inappropriate" | "misinformation" | "copyright";
+    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation" | "copyright";
     description?: string | undefined;
 }, {
-    reason: "other" | "spam" | "harassment" | "inappropriate" | "misinformation" | "copyright";
+    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation" | "copyright";
     description?: string | undefined;
 }>;
 export declare const PollVoteDtoSchema: z.ZodObject<{
@@ -145,26 +145,26 @@ export declare const PostQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "updatedAt", "likeCount", "commentCount", "viewCount"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
-    limit?: number | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    search?: string | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
+    search?: string | undefined;
     authorId?: string | undefined;
     includeDeleted?: boolean | undefined;
     isPinned?: boolean | undefined;
 }, {
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
-    limit?: number | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    search?: string | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
+    search?: string | undefined;
     authorId?: string | undefined;
     includeDeleted?: boolean | undefined;
     isPinned?: boolean | undefined;
@@ -231,57 +231,57 @@ export declare const PostCreateInputDtoSchema: z.ZodEffects<z.ZodObject<{
     pollOptions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     linkUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "video" | "image" | "text" | "link" | "poll" | "announcement";
+    type: "image" | "video" | "text" | "link" | "poll" | "announcement";
     title: string;
     content: string;
     isAnonymous: boolean;
     allowComments: boolean;
     attachments?: string[] | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
     roomId?: string | undefined;
+    scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
-    scheduledAt?: string | undefined;
 }, {
     title: string;
     content: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | "announcement" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | "announcement" | undefined;
     isAnonymous?: boolean | undefined;
     attachments?: string[] | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
     roomId?: string | undefined;
+    scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
     allowComments?: boolean | undefined;
-    scheduledAt?: string | undefined;
 }>, {
-    type: "video" | "image" | "text" | "link" | "poll" | "announcement";
+    type: "image" | "video" | "text" | "link" | "poll" | "announcement";
     title: string;
     content: string;
     isAnonymous: boolean;
     allowComments: boolean;
     attachments?: string[] | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
     roomId?: string | undefined;
+    scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
-    scheduledAt?: string | undefined;
 }, {
     title: string;
     content: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | "announcement" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | "announcement" | undefined;
     isAnonymous?: boolean | undefined;
     attachments?: string[] | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
     roomId?: string | undefined;
+    scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
     allowComments?: boolean | undefined;
-    scheduledAt?: string | undefined;
 }>;
 export declare const PostUpdateInputDtoSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -294,16 +294,16 @@ export declare const PostUpdateInputDtoSchema: z.ZodObject<{
     title?: string | undefined;
     content?: string | undefined;
     tags?: string[] | undefined;
+    scheduledAt?: string | undefined;
     isPinned?: boolean | undefined;
     allowComments?: boolean | undefined;
-    scheduledAt?: string | undefined;
 }, {
     title?: string | undefined;
     content?: string | undefined;
     tags?: string[] | undefined;
+    scheduledAt?: string | undefined;
     isPinned?: boolean | undefined;
     allowComments?: boolean | undefined;
-    scheduledAt?: string | undefined;
 }>;
 export declare const PostRoomParamsDtoSchema: z.ZodObject<{
     roomId: z.ZodString;
@@ -381,4 +381,639 @@ export type VoteContentDto = z.infer<typeof VoteContentDtoSchema>;
 export type GiveAwardDto = z.infer<typeof GiveAwardDtoSchema>;
 export type CreateNestedCommentDto = z.infer<typeof CreateNestedCommentDtoSchema>;
 export type ReportContentDto = z.infer<typeof ReportContentDtoSchema>;
+export declare const PostListParamsDtoSchema: z.ZodObject<{
+    roomId: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    offset: z.ZodDefault<z.ZodNumber>;
+    sortBy: z.ZodDefault<z.ZodEnum<["newest", "oldest", "popular"]>>;
+    isAnonymous: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    sortBy: "newest" | "oldest" | "popular";
+    offset: number;
+    isAnonymous?: boolean | undefined;
+    tags?: string[] | undefined;
+    roomId?: string | undefined;
+    authorId?: string | undefined;
+}, {
+    isAnonymous?: boolean | undefined;
+    limit?: number | undefined;
+    sortBy?: "newest" | "oldest" | "popular" | undefined;
+    offset?: number | undefined;
+    tags?: string[] | undefined;
+    roomId?: string | undefined;
+    authorId?: string | undefined;
+}>;
+export declare const PostByUserParamsDtoSchema: z.ZodObject<{
+    userId: z.ZodString;
+    roomId: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    offset: z.ZodDefault<z.ZodNumber>;
+    sortBy: z.ZodDefault<z.ZodEnum<["newest", "oldest", "popular"]>>;
+    isAnonymous: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    userId: string;
+    limit: number;
+    sortBy: "newest" | "oldest" | "popular";
+    offset: number;
+    isAnonymous?: boolean | undefined;
+    tags?: string[] | undefined;
+    roomId?: string | undefined;
+}, {
+    userId: string;
+    isAnonymous?: boolean | undefined;
+    limit?: number | undefined;
+    sortBy?: "newest" | "oldest" | "popular" | undefined;
+    offset?: number | undefined;
+    tags?: string[] | undefined;
+    roomId?: string | undefined;
+}>;
+export declare const PostByRoomParamsDtoSchema: z.ZodObject<{
+    roomId: z.ZodString;
+    authorId: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    offset: z.ZodDefault<z.ZodNumber>;
+    sortBy: z.ZodDefault<z.ZodEnum<["newest", "oldest", "popular"]>>;
+    isAnonymous: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    sortBy: "newest" | "oldest" | "popular";
+    offset: number;
+    roomId: string;
+    isAnonymous?: boolean | undefined;
+    tags?: string[] | undefined;
+    authorId?: string | undefined;
+}, {
+    roomId: string;
+    isAnonymous?: boolean | undefined;
+    limit?: number | undefined;
+    sortBy?: "newest" | "oldest" | "popular" | undefined;
+    offset?: number | undefined;
+    tags?: string[] | undefined;
+    authorId?: string | undefined;
+}>;
+export type PostListParamsDto = z.infer<typeof PostListParamsDtoSchema>;
+export type PostByUserParamsDto = z.infer<typeof PostByUserParamsDtoSchema>;
+export type PostByRoomParamsDto = z.infer<typeof PostByRoomParamsDtoSchema>;
+export declare const PostHeartSchema: z.ZodObject<{
+    id: z.ZodString;
+    postId: z.ZodString;
+    userId: z.ZodString;
+    user: z.ZodObject<{
+        id: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        avatarUrl: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    }, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    }>;
+    createdAt: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    user: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    };
+    id: string;
+    createdAt: string;
+    userId: string;
+    postId: string;
+}, {
+    user: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    };
+    id: string;
+    createdAt: string;
+    userId: string;
+    postId: string;
+}>;
+export declare const CommentHeartSchema: z.ZodObject<{
+    id: z.ZodString;
+    commentId: z.ZodString;
+    userId: z.ZodString;
+    user: z.ZodObject<{
+        id: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        avatarUrl: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    }, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    }>;
+    createdAt: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    user: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    };
+    id: string;
+    createdAt: string;
+    userId: string;
+    commentId: string;
+}, {
+    user: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    };
+    id: string;
+    createdAt: string;
+    userId: string;
+    commentId: string;
+}>;
+export declare const PostCommentSchema: z.ZodType<any>;
+export declare const PostWithDetailsSchema: z.ZodObject<{
+    id: z.ZodString;
+    title: z.ZodString;
+    content: z.ZodString;
+    authorId: z.ZodString;
+    communityId: z.ZodString;
+    type: z.ZodEnum<["text", "image", "video", "link", "poll"]>;
+    isEdited: z.ZodBoolean;
+    isDeleted: z.ZodBoolean;
+    isPinned: z.ZodBoolean;
+    viewCount: z.ZodNumber;
+    likeCount: z.ZodNumber;
+    createdAt: z.ZodString;
+    updatedAt: z.ZodString;
+} & {
+    author: z.ZodObject<{
+        id: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        avatarUrl: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    }, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    }>;
+    room: z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        slug: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        name: string;
+        slug: string;
+    }, {
+        id: string;
+        name: string;
+        slug: string;
+    }>;
+    hearts: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        postId: z.ZodString;
+        userId: z.ZodString;
+        user: z.ZodObject<{
+            id: z.ZodString;
+            firstName: z.ZodString;
+            lastName: z.ZodString;
+            avatarUrl: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        }, {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        }>;
+        createdAt: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        user: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        id: string;
+        createdAt: string;
+        userId: string;
+        postId: string;
+    }, {
+        user: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        id: string;
+        createdAt: string;
+        userId: string;
+        postId: string;
+    }>, "many">;
+    heartCount: z.ZodNumber;
+    isHearted: z.ZodOptional<z.ZodBoolean>;
+    comments: z.ZodArray<z.ZodType<any, z.ZodTypeDef, any>, "many">;
+    commentCount: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    type: "image" | "video" | "text" | "link" | "poll";
+    title: string;
+    content: string;
+    isDeleted: boolean;
+    communityId: string;
+    comments: any[];
+    authorId: string;
+    isEdited: boolean;
+    isPinned: boolean;
+    viewCount: number;
+    likeCount: number;
+    commentCount: number;
+    author: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    };
+    hearts: {
+        user: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        id: string;
+        createdAt: string;
+        userId: string;
+        postId: string;
+    }[];
+    heartCount: number;
+    room: {
+        id: string;
+        name: string;
+        slug: string;
+    };
+    isHearted?: boolean | undefined;
+}, {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    type: "image" | "video" | "text" | "link" | "poll";
+    title: string;
+    content: string;
+    isDeleted: boolean;
+    communityId: string;
+    comments: any[];
+    authorId: string;
+    isEdited: boolean;
+    isPinned: boolean;
+    viewCount: number;
+    likeCount: number;
+    commentCount: number;
+    author: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+    };
+    hearts: {
+        user: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        id: string;
+        createdAt: string;
+        userId: string;
+        postId: string;
+    }[];
+    heartCount: number;
+    room: {
+        id: string;
+        name: string;
+        slug: string;
+    };
+    isHearted?: boolean | undefined;
+}>;
+export declare const PostListResponseSchema: z.ZodObject<{
+    posts: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        title: z.ZodString;
+        content: z.ZodString;
+        authorId: z.ZodString;
+        communityId: z.ZodString;
+        type: z.ZodEnum<["text", "image", "video", "link", "poll"]>;
+        isEdited: z.ZodBoolean;
+        isDeleted: z.ZodBoolean;
+        isPinned: z.ZodBoolean;
+        viewCount: z.ZodNumber;
+        likeCount: z.ZodNumber;
+        createdAt: z.ZodString;
+        updatedAt: z.ZodString;
+    } & {
+        author: z.ZodObject<{
+            id: z.ZodString;
+            firstName: z.ZodString;
+            lastName: z.ZodString;
+            avatarUrl: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        }, {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        }>;
+        room: z.ZodObject<{
+            id: z.ZodString;
+            name: z.ZodString;
+            slug: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            id: string;
+            name: string;
+            slug: string;
+        }, {
+            id: string;
+            name: string;
+            slug: string;
+        }>;
+        hearts: z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            postId: z.ZodString;
+            userId: z.ZodString;
+            user: z.ZodObject<{
+                id: z.ZodString;
+                firstName: z.ZodString;
+                lastName: z.ZodString;
+                avatarUrl: z.ZodString;
+            }, "strip", z.ZodTypeAny, {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            }, {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            }>;
+            createdAt: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            };
+            id: string;
+            createdAt: string;
+            userId: string;
+            postId: string;
+        }, {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            };
+            id: string;
+            createdAt: string;
+            userId: string;
+            postId: string;
+        }>, "many">;
+        heartCount: z.ZodNumber;
+        isHearted: z.ZodOptional<z.ZodBoolean>;
+        comments: z.ZodArray<z.ZodType<any, z.ZodTypeDef, any>, "many">;
+        commentCount: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        type: "image" | "video" | "text" | "link" | "poll";
+        title: string;
+        content: string;
+        isDeleted: boolean;
+        communityId: string;
+        comments: any[];
+        authorId: string;
+        isEdited: boolean;
+        isPinned: boolean;
+        viewCount: number;
+        likeCount: number;
+        commentCount: number;
+        author: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        hearts: {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            };
+            id: string;
+            createdAt: string;
+            userId: string;
+            postId: string;
+        }[];
+        heartCount: number;
+        room: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        isHearted?: boolean | undefined;
+    }, {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        type: "image" | "video" | "text" | "link" | "poll";
+        title: string;
+        content: string;
+        isDeleted: boolean;
+        communityId: string;
+        comments: any[];
+        authorId: string;
+        isEdited: boolean;
+        isPinned: boolean;
+        viewCount: number;
+        likeCount: number;
+        commentCount: number;
+        author: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        hearts: {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            };
+            id: string;
+            createdAt: string;
+            userId: string;
+            postId: string;
+        }[];
+        heartCount: number;
+        room: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        isHearted?: boolean | undefined;
+    }>, "many">;
+    total: z.ZodNumber;
+    hasMore: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    hasMore: boolean;
+    posts: {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        type: "image" | "video" | "text" | "link" | "poll";
+        title: string;
+        content: string;
+        isDeleted: boolean;
+        communityId: string;
+        comments: any[];
+        authorId: string;
+        isEdited: boolean;
+        isPinned: boolean;
+        viewCount: number;
+        likeCount: number;
+        commentCount: number;
+        author: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        hearts: {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            };
+            id: string;
+            createdAt: string;
+            userId: string;
+            postId: string;
+        }[];
+        heartCount: number;
+        room: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        isHearted?: boolean | undefined;
+    }[];
+    total: number;
+}, {
+    hasMore: boolean;
+    posts: {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        type: "image" | "video" | "text" | "link" | "poll";
+        title: string;
+        content: string;
+        isDeleted: boolean;
+        communityId: string;
+        comments: any[];
+        authorId: string;
+        isEdited: boolean;
+        isPinned: boolean;
+        viewCount: number;
+        likeCount: number;
+        commentCount: number;
+        author: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            avatarUrl: string;
+        };
+        hearts: {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+                avatarUrl: string;
+            };
+            id: string;
+            createdAt: string;
+            userId: string;
+            postId: string;
+        }[];
+        heartCount: number;
+        room: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        isHearted?: boolean | undefined;
+    }[];
+    total: number;
+}>;
+export declare const HeartPostResponseSchema: z.ZodObject<{
+    isHearted: z.ZodBoolean;
+    heartCount: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    heartCount: number;
+    isHearted: boolean;
+}, {
+    heartCount: number;
+    isHearted: boolean;
+}>;
+export declare const CheckHeartedResponseSchema: z.ZodObject<{
+    isHearted: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    isHearted: boolean;
+}, {
+    isHearted: boolean;
+}>;
+export type PostHeart = z.infer<typeof PostHeartSchema>;
+export type CommentHeart = z.infer<typeof CommentHeartSchema>;
+export type PostComment = z.infer<typeof PostCommentSchema>;
+export type PostWithDetails = z.infer<typeof PostWithDetailsSchema>;
+export type PostListResponse = z.infer<typeof PostListResponseSchema>;
+export type HeartPostResponse = z.infer<typeof HeartPostResponseSchema>;
+export type CheckHeartedResponse = z.infer<typeof CheckHeartedResponseSchema>;
 //# sourceMappingURL=posts.d.ts.map

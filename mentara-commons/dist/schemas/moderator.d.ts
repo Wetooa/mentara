@@ -59,19 +59,19 @@ export declare const ContentModerationParamsSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    offset: number;
     sortBy: "createdAt" | "priority" | "reportCount";
     sortOrder: "asc" | "desc";
+    offset: number;
     type?: "post" | "comment" | undefined;
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "approved" | "rejected" | "pending" | undefined;
     priority?: "low" | "medium" | "high" | "urgent" | undefined;
 }, {
     type?: "post" | "comment" | undefined;
-    status?: "pending" | "approved" | "rejected" | undefined;
+    status?: "approved" | "rejected" | "pending" | undefined;
     limit?: number | undefined;
-    offset?: number | undefined;
     sortBy?: "createdAt" | "priority" | "reportCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
     priority?: "low" | "medium" | "high" | "urgent" | undefined;
 }>;
 export declare const UserModerationParamsSchema: z.ZodObject<{
@@ -193,8 +193,8 @@ export declare const SystemEventSchema: z.ZodObject<{
     isResolved: boolean;
     metadata?: any;
     resolution?: string | undefined;
-    resolvedAt?: string | undefined;
     resolvedBy?: string | undefined;
+    resolvedAt?: string | undefined;
 }, {
     id: string;
     createdAt: string;
@@ -206,8 +206,8 @@ export declare const SystemEventSchema: z.ZodObject<{
     isResolved?: boolean | undefined;
     metadata?: any;
     resolution?: string | undefined;
-    resolvedAt?: string | undefined;
     resolvedBy?: string | undefined;
+    resolvedAt?: string | undefined;
 }>;
 export declare const ModerationReportSchema: z.ZodObject<{
     id: z.ZodString;
@@ -227,7 +227,7 @@ export declare const ModerationReportSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "pending" | "under_review" | "dismissed" | "resolved";
+    status: "pending" | "dismissed" | "resolved" | "under_review";
     reason: string;
     reporterId: string;
     priority: "low" | "medium" | "high" | "urgent";
@@ -241,7 +241,7 @@ export declare const ModerationReportSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "pending" | "under_review" | "dismissed" | "resolved";
+    status: "pending" | "dismissed" | "resolved" | "under_review";
     reason: string;
     reporterId: string;
     priority: "low" | "medium" | "high" | "urgent";
@@ -316,7 +316,7 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "under_review" | "dismissed" | "resolved";
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "low" | "medium" | "high" | "urgent";
@@ -330,7 +330,7 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "under_review" | "dismissed" | "resolved";
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "low" | "medium" | "high" | "urgent";
@@ -362,7 +362,7 @@ export declare const FlaggedContentSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     type: "post" | "comment";
-    status: "pending" | "approved" | "rejected" | "removed";
+    status: "approved" | "rejected" | "pending" | "removed";
     content: string;
     priority: "low" | "medium" | "high" | "urgent";
     author: {
@@ -375,7 +375,7 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "under_review" | "dismissed" | "resolved";
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "low" | "medium" | "high" | "urgent";
@@ -388,17 +388,17 @@ export declare const FlaggedContentSchema: z.ZodObject<{
     }[];
     lastReportedAt: string;
     title?: string | undefined;
-    postId?: string | undefined;
     community?: {
         id: string;
         name: string;
     } | undefined;
+    postId?: string | undefined;
     postTitle?: string | undefined;
 }, {
     id: string;
     createdAt: string;
     type: "post" | "comment";
-    status: "pending" | "approved" | "rejected" | "removed";
+    status: "approved" | "rejected" | "pending" | "removed";
     content: string;
     priority: "low" | "medium" | "high" | "urgent";
     author: {
@@ -411,7 +411,7 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "under_review" | "dismissed" | "resolved";
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "low" | "medium" | "high" | "urgent";
@@ -424,11 +424,11 @@ export declare const FlaggedContentSchema: z.ZodObject<{
     }[];
     lastReportedAt: string;
     title?: string | undefined;
-    postId?: string | undefined;
     community?: {
         id: string;
         name: string;
     } | undefined;
+    postId?: string | undefined;
     postTitle?: string | undefined;
 }>;
 export declare const ModerationActionSchema: z.ZodObject<{
@@ -517,28 +517,28 @@ export declare const ContentModerationFiltersSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    offset: number;
     sortBy: "createdAt" | "priority" | "reportCount" | "lastReportedAt";
     sortOrder: "asc" | "desc";
+    offset: number;
     type?: "post" | "comment" | undefined;
-    status?: "pending" | "approved" | "rejected" | "removed" | undefined;
+    status?: "approved" | "rejected" | "pending" | "removed" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    priority?: "low" | "medium" | "high" | "urgent" | undefined;
     communityId?: string | undefined;
+    priority?: "low" | "medium" | "high" | "urgent" | undefined;
     authorId?: string | undefined;
     reportReason?: string | undefined;
 }, {
     type?: "post" | "comment" | undefined;
-    status?: "pending" | "approved" | "rejected" | "removed" | undefined;
+    status?: "approved" | "rejected" | "pending" | "removed" | undefined;
     limit?: number | undefined;
-    offset?: number | undefined;
     sortBy?: "createdAt" | "priority" | "reportCount" | "lastReportedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    priority?: "low" | "medium" | "high" | "urgent" | undefined;
     communityId?: string | undefined;
+    priority?: "low" | "medium" | "high" | "urgent" | undefined;
     authorId?: string | undefined;
     reportReason?: string | undefined;
 }>;

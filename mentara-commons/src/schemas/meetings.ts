@@ -69,7 +69,7 @@ export type GetMeetingAnalyticsQueryDto = z.infer<typeof GetMeetingAnalyticsQuer
 export type EmergencyTerminateMeetingDto = z.infer<typeof EmergencyTerminateMeetingDtoSchema>;
 
 // Complex meeting data structures moved from frontend services
-export const MeetingSchema = z.object({
+export const SessionMeetingSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(1),
   description: z.string().optional(),
@@ -222,7 +222,7 @@ export const VideoCallStatusSchema = z.object({
 });
 
 // Export type inference helpers for new schemas
-export type Meeting = z.infer<typeof MeetingSchema>;
+export type SessionMeeting = z.infer<typeof SessionMeetingSchema>;
 export type MeetingSessionData = z.infer<typeof MeetingSessionDataSchema>;
 export type MeetingAnalytics = z.infer<typeof MeetingAnalyticsSchema>;
 export type MeetingRoomResponse = z.infer<typeof MeetingRoomResponseSchema>;

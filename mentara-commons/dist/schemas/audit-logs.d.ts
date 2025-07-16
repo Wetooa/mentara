@@ -299,4 +299,441 @@ export type LogUserLogoutDto = z.infer<typeof LogUserLogoutDtoSchema>;
 export type LogProfileUpdateDto = z.infer<typeof LogProfileUpdateDtoSchema>;
 export type LogSystemErrorDto = z.infer<typeof LogSystemErrorDtoSchema>;
 export type CleanupAuditLogsDto = z.infer<typeof CleanupAuditLogsDtoSchema>;
+export declare const AuditLogSchema: z.ZodObject<{
+    id: z.ZodString;
+    userId: z.ZodString;
+    userEmail: z.ZodString;
+    action: z.ZodString;
+    resource: z.ZodString;
+    resourceId: z.ZodString;
+    category: z.ZodString;
+    severity: z.ZodString;
+    success: z.ZodBoolean;
+    ipAddress: z.ZodString;
+    userAgent: z.ZodString;
+    metadata: z.ZodRecord<z.ZodString, z.ZodAny>;
+    timestamp: z.ZodString;
+    details: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    userId: string;
+    action: string;
+    severity: string;
+    metadata: Record<string, any>;
+    ipAddress: string;
+    userAgent: string;
+    userEmail: string;
+    resource: string;
+    resourceId: string;
+    category: string;
+    success: boolean;
+    timestamp: string;
+    details: string;
+}, {
+    id: string;
+    userId: string;
+    action: string;
+    severity: string;
+    metadata: Record<string, any>;
+    ipAddress: string;
+    userAgent: string;
+    userEmail: string;
+    resource: string;
+    resourceId: string;
+    category: string;
+    success: boolean;
+    timestamp: string;
+    details: string;
+}>;
+export declare const AuditLogListResponseSchema: z.ZodObject<{
+    logs: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        userId: z.ZodString;
+        userEmail: z.ZodString;
+        action: z.ZodString;
+        resource: z.ZodString;
+        resourceId: z.ZodString;
+        category: z.ZodString;
+        severity: z.ZodString;
+        success: z.ZodBoolean;
+        ipAddress: z.ZodString;
+        userAgent: z.ZodString;
+        metadata: z.ZodRecord<z.ZodString, z.ZodAny>;
+        timestamp: z.ZodString;
+        details: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        userId: string;
+        action: string;
+        severity: string;
+        metadata: Record<string, any>;
+        ipAddress: string;
+        userAgent: string;
+        userEmail: string;
+        resource: string;
+        resourceId: string;
+        category: string;
+        success: boolean;
+        timestamp: string;
+        details: string;
+    }, {
+        id: string;
+        userId: string;
+        action: string;
+        severity: string;
+        metadata: Record<string, any>;
+        ipAddress: string;
+        userAgent: string;
+        userEmail: string;
+        resource: string;
+        resourceId: string;
+        category: string;
+        success: boolean;
+        timestamp: string;
+        details: string;
+    }>, "many">;
+    total: z.ZodNumber;
+    page: z.ZodNumber;
+    totalPages: z.ZodNumber;
+    hasMore: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+    logs: {
+        id: string;
+        userId: string;
+        action: string;
+        severity: string;
+        metadata: Record<string, any>;
+        ipAddress: string;
+        userAgent: string;
+        userEmail: string;
+        resource: string;
+        resourceId: string;
+        category: string;
+        success: boolean;
+        timestamp: string;
+        details: string;
+    }[];
+    total: number;
+}, {
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+    logs: {
+        id: string;
+        userId: string;
+        action: string;
+        severity: string;
+        metadata: Record<string, any>;
+        ipAddress: string;
+        userAgent: string;
+        userEmail: string;
+        resource: string;
+        resourceId: string;
+        category: string;
+        success: boolean;
+        timestamp: string;
+        details: string;
+    }[];
+    total: number;
+}>;
+export declare const AuditLogStatsSchema: z.ZodObject<{
+    totalLogs: z.ZodNumber;
+    totalUsers: z.ZodNumber;
+    totalActions: z.ZodNumber;
+    recentActivity: z.ZodNumber;
+    byAction: z.ZodRecord<z.ZodString, z.ZodNumber>;
+    byCategory: z.ZodRecord<z.ZodString, z.ZodNumber>;
+    bySeverity: z.ZodRecord<z.ZodString, z.ZodNumber>;
+    byUser: z.ZodArray<z.ZodObject<{
+        userId: z.ZodString;
+        userEmail: z.ZodString;
+        count: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        userId: string;
+        count: number;
+        userEmail: string;
+    }, {
+        userId: string;
+        count: number;
+        userEmail: string;
+    }>, "many">;
+    trends: z.ZodArray<z.ZodObject<{
+        date: z.ZodString;
+        count: z.ZodNumber;
+        errors: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        date: string;
+        count: number;
+        errors: number;
+    }, {
+        date: string;
+        count: number;
+        errors: number;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    totalUsers: number;
+    totalLogs: number;
+    totalActions: number;
+    recentActivity: number;
+    byAction: Record<string, number>;
+    byCategory: Record<string, number>;
+    bySeverity: Record<string, number>;
+    byUser: {
+        userId: string;
+        count: number;
+        userEmail: string;
+    }[];
+    trends: {
+        date: string;
+        count: number;
+        errors: number;
+    }[];
+}, {
+    totalUsers: number;
+    totalLogs: number;
+    totalActions: number;
+    recentActivity: number;
+    byAction: Record<string, number>;
+    byCategory: Record<string, number>;
+    bySeverity: Record<string, number>;
+    byUser: {
+        userId: string;
+        count: number;
+        userEmail: string;
+    }[];
+    trends: {
+        date: string;
+        count: number;
+        errors: number;
+    }[];
+}>;
+export declare const SecurityEventSchema: z.ZodObject<{
+    id: z.ZodString;
+    type: z.ZodString;
+    severity: z.ZodString;
+    userId: z.ZodOptional<z.ZodString>;
+    ipAddress: z.ZodString;
+    userAgent: z.ZodString;
+    description: z.ZodString;
+    resolved: z.ZodBoolean;
+    resolvedBy: z.ZodOptional<z.ZodString>;
+    resolvedAt: z.ZodOptional<z.ZodString>;
+    notes: z.ZodOptional<z.ZodString>;
+    metadata: z.ZodRecord<z.ZodString, z.ZodAny>;
+    timestamp: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    type: string;
+    description: string;
+    severity: string;
+    metadata: Record<string, any>;
+    ipAddress: string;
+    userAgent: string;
+    timestamp: string;
+    resolved: boolean;
+    userId?: string | undefined;
+    resolvedBy?: string | undefined;
+    resolvedAt?: string | undefined;
+    notes?: string | undefined;
+}, {
+    id: string;
+    type: string;
+    description: string;
+    severity: string;
+    metadata: Record<string, any>;
+    ipAddress: string;
+    userAgent: string;
+    timestamp: string;
+    resolved: boolean;
+    userId?: string | undefined;
+    resolvedBy?: string | undefined;
+    resolvedAt?: string | undefined;
+    notes?: string | undefined;
+}>;
+export declare const SecurityEventQuerySchema: z.ZodObject<{
+    type: z.ZodOptional<z.ZodString>;
+    severity: z.ZodOptional<z.ZodString>;
+    resolved: z.ZodOptional<z.ZodBoolean>;
+    userId: z.ZodOptional<z.ZodString>;
+    ipAddress: z.ZodOptional<z.ZodString>;
+    startDate: z.ZodOptional<z.ZodString>;
+    endDate: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+    sortBy: z.ZodOptional<z.ZodString>;
+    sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
+}, "strip", z.ZodTypeAny, {
+    type?: string | undefined;
+    userId?: string | undefined;
+    limit?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    severity?: string | undefined;
+    ipAddress?: string | undefined;
+    resolved?: boolean | undefined;
+}, {
+    type?: string | undefined;
+    userId?: string | undefined;
+    limit?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    severity?: string | undefined;
+    ipAddress?: string | undefined;
+    resolved?: boolean | undefined;
+}>;
+export declare const ComplianceReportSchema: z.ZodObject<{
+    id: z.ZodString;
+    type: z.ZodString;
+    title: z.ZodString;
+    description: z.ZodString;
+    period: z.ZodObject<{
+        startDate: z.ZodString;
+        endDate: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        startDate: string;
+        endDate: string;
+    }, {
+        startDate: string;
+        endDate: string;
+    }>;
+    status: z.ZodEnum<["pending", "processing", "completed", "failed"]>;
+    createdBy: z.ZodString;
+    createdAt: z.ZodString;
+    completedAt: z.ZodOptional<z.ZodString>;
+    reportData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+    fileUrl: z.ZodOptional<z.ZodString>;
+    error: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    createdAt: string;
+    type: string;
+    status: "pending" | "completed" | "processing" | "failed";
+    title: string;
+    description: string;
+    period: {
+        startDate: string;
+        endDate: string;
+    };
+    createdBy: string;
+    error?: string | undefined;
+    completedAt?: string | undefined;
+    reportData?: Record<string, any> | undefined;
+    fileUrl?: string | undefined;
+}, {
+    id: string;
+    createdAt: string;
+    type: string;
+    status: "pending" | "completed" | "processing" | "failed";
+    title: string;
+    description: string;
+    period: {
+        startDate: string;
+        endDate: string;
+    };
+    createdBy: string;
+    error?: string | undefined;
+    completedAt?: string | undefined;
+    reportData?: Record<string, any> | undefined;
+    fileUrl?: string | undefined;
+}>;
+export declare const AuditLogCreateDtoSchema: z.ZodObject<{
+    userId: z.ZodString;
+    action: z.ZodString;
+    resource: z.ZodString;
+    resourceId: z.ZodString;
+    category: z.ZodOptional<z.ZodString>;
+    severity: z.ZodOptional<z.ZodString>;
+    success: z.ZodOptional<z.ZodBoolean>;
+    ipAddress: z.ZodOptional<z.ZodString>;
+    userAgent: z.ZodOptional<z.ZodString>;
+    metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+    details: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    userId: string;
+    action: string;
+    resource: string;
+    resourceId: string;
+    severity?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    ipAddress?: string | undefined;
+    userAgent?: string | undefined;
+    category?: string | undefined;
+    success?: boolean | undefined;
+    details?: string | undefined;
+}, {
+    userId: string;
+    action: string;
+    resource: string;
+    resourceId: string;
+    severity?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    ipAddress?: string | undefined;
+    userAgent?: string | undefined;
+    category?: string | undefined;
+    success?: boolean | undefined;
+    details?: string | undefined;
+}>;
+export declare const AuditLogQuerySchema: z.ZodObject<{
+    userId: z.ZodOptional<z.ZodString>;
+    action: z.ZodOptional<z.ZodString>;
+    resource: z.ZodOptional<z.ZodString>;
+    resourceId: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodString>;
+    severity: z.ZodOptional<z.ZodString>;
+    success: z.ZodOptional<z.ZodBoolean>;
+    startDate: z.ZodOptional<z.ZodString>;
+    endDate: z.ZodOptional<z.ZodString>;
+    ipAddress: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+    sortBy: z.ZodOptional<z.ZodString>;
+    sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
+}, "strip", z.ZodTypeAny, {
+    userId?: string | undefined;
+    limit?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    action?: string | undefined;
+    severity?: string | undefined;
+    ipAddress?: string | undefined;
+    resource?: string | undefined;
+    resourceId?: string | undefined;
+    category?: string | undefined;
+    success?: boolean | undefined;
+}, {
+    userId?: string | undefined;
+    limit?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    action?: string | undefined;
+    severity?: string | undefined;
+    ipAddress?: string | undefined;
+    resource?: string | undefined;
+    resourceId?: string | undefined;
+    category?: string | undefined;
+    success?: boolean | undefined;
+}>;
+export type AuditLog = z.infer<typeof AuditLogSchema>;
+export type AuditLogListResponse = z.infer<typeof AuditLogListResponseSchema>;
+export type AuditLogStats = z.infer<typeof AuditLogStatsSchema>;
+export type SecurityEvent = z.infer<typeof SecurityEventSchema>;
+export type SecurityEventQuery = z.infer<typeof SecurityEventQuerySchema>;
+export type ComplianceReport = z.infer<typeof ComplianceReportSchema>;
+export type AuditLogCreateDto = z.infer<typeof AuditLogCreateDtoSchema>;
+export type AuditLogQuery = z.infer<typeof AuditLogQuerySchema>;
 //# sourceMappingURL=audit-logs.d.ts.map

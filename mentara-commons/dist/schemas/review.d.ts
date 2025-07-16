@@ -158,13 +158,13 @@ export declare const UpdateReviewRequestSchema: z.ZodObject<{
     content: z.ZodOptional<z.ZodString>;
     isAnonymous: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    title?: string | undefined;
     rating?: number | undefined;
+    title?: string | undefined;
     content?: string | undefined;
     isAnonymous?: boolean | undefined;
 }, {
-    title?: string | undefined;
     rating?: number | undefined;
+    title?: string | undefined;
     content?: string | undefined;
     isAnonymous?: boolean | undefined;
 }>;
@@ -179,44 +179,44 @@ export declare const ReviewListParamsSchema: z.ZodEffects<z.ZodObject<{
     minRating: z.ZodOptional<z.ZodNumber>;
     maxRating: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: "createdAt" | "rating" | "helpfulCount";
     sortOrder: "asc" | "desc";
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
-    minRating?: number | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    minRating?: number | undefined;
     maxRating?: number | undefined;
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    minRating?: number | undefined;
-    sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    minRating?: number | undefined;
     maxRating?: number | undefined;
 }>, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: "createdAt" | "rating" | "helpfulCount";
     sortOrder: "asc" | "desc";
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
-    minRating?: number | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    minRating?: number | undefined;
     maxRating?: number | undefined;
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    minRating?: number | undefined;
-    sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    minRating?: number | undefined;
     maxRating?: number | undefined;
 }>;
 export declare const ReviewListResponseSchema: z.ZodObject<{
@@ -334,10 +334,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         '5': number;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    totalCount: number;
     page: number;
-    pageSize: number;
-    totalPages: number;
     reviews: {
         id: string;
         createdAt: string;
@@ -363,6 +360,9 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         meetingId?: string | undefined;
         moderationNote?: string | undefined;
     }[];
+    totalCount: number;
+    pageSize: number;
+    totalPages: number;
     averageRating?: number | undefined;
     ratingDistribution?: {
         '1': number;
@@ -372,10 +372,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         '5': number;
     } | undefined;
 }, {
-    totalCount: number;
     page: number;
-    pageSize: number;
-    totalPages: number;
     reviews: {
         id: string;
         createdAt: string;
@@ -401,6 +398,9 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
         helpfulCount?: number | undefined;
         moderationNote?: string | undefined;
     }[];
+    totalCount: number;
+    pageSize: number;
+    totalPages: number;
     averageRating?: number | undefined;
     ratingDistribution?: {
         '1': number;
@@ -437,13 +437,13 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         count: z.ZodNumber;
         averageRating: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
+        averageRating: number;
         month: string;
         count: number;
-        averageRating: number;
     }, {
+        averageRating: number;
         month: string;
         count: number;
-        averageRating: number;
     }>, "many">;
     recentReviews: z.ZodArray<z.ZodObject<{
         id: z.ZodString;
@@ -535,7 +535,6 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         moderationNote?: string | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    totalReviews: number;
     averageRating: number;
     ratingDistribution: {
         '1': number;
@@ -544,10 +543,11 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         '4': number;
         '5': number;
     };
+    totalReviews: number;
     monthlyReviews: {
+        averageRating: number;
         month: string;
         count: number;
-        averageRating: number;
     }[];
     recentReviews: {
         id: string;
@@ -575,7 +575,6 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         moderationNote?: string | undefined;
     }[];
 }, {
-    totalReviews: number;
     averageRating: number;
     ratingDistribution: {
         '1': number;
@@ -584,10 +583,11 @@ export declare const ReviewStatsSchema: z.ZodObject<{
         '4': number;
         '5': number;
     };
+    totalReviews: number;
     monthlyReviews: {
+        averageRating: number;
         month: string;
         count: number;
-        averageRating: number;
     }[];
     recentReviews: {
         id: string;
@@ -621,15 +621,15 @@ export declare const TherapistReviewParamsSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodNumber>;
     limit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
-    page: number;
     therapistId: string;
+    page: number;
+    limit: number;
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
 }, {
     therapistId: string;
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
 }>;
 export declare const ModerateReviewRequestSchema: z.ZodEffects<z.ZodObject<{
     status: z.ZodEnum<["approved", "rejected"]>;
@@ -671,22 +671,22 @@ export declare const ReviewReportSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     status: "pending" | "reviewed" | "dismissed";
-    reason: "other" | "inappropriate_content" | "spam" | "fake_review" | "harassment";
+    reason: "inappropriate_content" | "spam" | "fake_review" | "harassment" | "other";
     reviewId: string;
     reporterId: string;
+    description?: string | undefined;
     reviewedAt?: string | undefined;
     reviewedBy?: string | undefined;
-    description?: string | undefined;
 }, {
     id: string;
     createdAt: string;
-    reason: "other" | "inappropriate_content" | "spam" | "fake_review" | "harassment";
+    reason: "inappropriate_content" | "spam" | "fake_review" | "harassment" | "other";
     reviewId: string;
     reporterId: string;
     status?: "pending" | "reviewed" | "dismissed" | undefined;
+    description?: string | undefined;
     reviewedAt?: string | undefined;
     reviewedBy?: string | undefined;
-    description?: string | undefined;
 }>;
 export declare const ReviewAnalyticsSchema: z.ZodObject<{
     therapistId: z.ZodString;
@@ -698,14 +698,14 @@ export declare const ReviewAnalyticsSchema: z.ZodObject<{
         responseRate: z.ZodNumber;
         improvementAreas: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
-        totalReviews: number;
         averageRating: number;
+        totalReviews: number;
         ratingTrend: number;
         responseRate: number;
         improvementAreas: string[];
     }, {
-        totalReviews: number;
         averageRating: number;
+        totalReviews: number;
         ratingTrend: number;
         responseRate: number;
         improvementAreas: string[];
@@ -715,23 +715,23 @@ export declare const ReviewAnalyticsSchema: z.ZodObject<{
             averageRating: z.ZodNumber;
             totalReviews: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            totalReviews: number;
             averageRating: number;
+            totalReviews: number;
         }, {
-            totalReviews: number;
             averageRating: number;
+            totalReviews: number;
         }>;
         platformAverage: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         previousPeriod: {
-            totalReviews: number;
             averageRating: number;
+            totalReviews: number;
         };
         platformAverage: number;
     }, {
         previousPeriod: {
-            totalReviews: number;
             averageRating: number;
+            totalReviews: number;
         };
         platformAverage: number;
     }>;
@@ -739,16 +739,16 @@ export declare const ReviewAnalyticsSchema: z.ZodObject<{
     therapistId: string;
     timeframe: "month" | "week" | "quarter" | "year";
     metrics: {
-        totalReviews: number;
         averageRating: number;
+        totalReviews: number;
         ratingTrend: number;
         responseRate: number;
         improvementAreas: string[];
     };
     comparisons: {
         previousPeriod: {
-            totalReviews: number;
             averageRating: number;
+            totalReviews: number;
         };
         platformAverage: number;
     };
@@ -756,16 +756,16 @@ export declare const ReviewAnalyticsSchema: z.ZodObject<{
     therapistId: string;
     timeframe: "month" | "week" | "quarter" | "year";
     metrics: {
-        totalReviews: number;
         averageRating: number;
+        totalReviews: number;
         ratingTrend: number;
         responseRate: number;
         improvementAreas: string[];
     };
     comparisons: {
         previousPeriod: {
-            totalReviews: number;
             averageRating: number;
+            totalReviews: number;
         };
         platformAverage: number;
     };
@@ -782,16 +782,16 @@ export declare const ReviewResponseSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    therapistId: string;
     content: string;
+    therapistId: string;
     reviewId: string;
     isPublic: boolean;
 }, {
     id: string;
     createdAt: string;
     updatedAt: string;
-    therapistId: string;
     content: string;
+    therapistId: string;
     reviewId: string;
     isPublic?: boolean | undefined;
 }>;
@@ -833,13 +833,13 @@ export declare const UpdateReviewDtoSchema: z.ZodObject<{
     content: z.ZodOptional<z.ZodString>;
     isAnonymous: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    title?: string | undefined;
     rating?: number | undefined;
+    title?: string | undefined;
     content?: string | undefined;
     isAnonymous?: boolean | undefined;
 }, {
-    title?: string | undefined;
     rating?: number | undefined;
+    title?: string | undefined;
     content?: string | undefined;
     isAnonymous?: boolean | undefined;
 }>;
@@ -863,8 +863,8 @@ export declare const GetReviewsDtoSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
     rating: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: string;
     sortOrder: "asc" | "desc";
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
@@ -873,13 +873,13 @@ export declare const GetReviewsDtoSchema: z.ZodObject<{
     clientId?: string | undefined;
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
     rating?: number | undefined;
-    sortBy?: string | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: string | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
 }>;
 export declare const ReviewStatsDtoSchema: z.ZodObject<{
     therapistId: z.ZodString;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GlobalSearchQueryDtoSchema = exports.SearchUsersQueryDtoSchema = exports.SearchCommunitiesQueryDtoSchema = exports.SearchPostsQueryDtoSchema = exports.SearchTherapistsQueryDtoSchema = exports.SearchAnalyticsDtoSchema = exports.SearchAutocompleteDtoSchema = exports.TherapistSearchDtoSchema = exports.AdvancedSearchDtoSchema = exports.SearchResponseDtoSchema = exports.SearchResultItemSchema = exports.SearchRequestDtoSchema = void 0;
+exports.GlobalSearchResultSchema = exports.CommunitySearchResultSchema = exports.UserSearchResultSchema = exports.PostSearchResultSchema = exports.TherapistSearchResultSchema = exports.SearchResultSchema = exports.GlobalSearchParamsSchema = exports.CommunitySearchParamsSchema = exports.UserSearchParamsSchema = exports.PostSearchParamsSchema = exports.SearchTherapistParamsSchema = exports.GlobalSearchQueryDtoSchema = exports.SearchUsersQueryDtoSchema = exports.SearchCommunitiesQueryDtoSchema = exports.SearchPostsQueryDtoSchema = exports.SearchTherapistsQueryDtoSchema = exports.SearchAnalyticsDtoSchema = exports.SearchAutocompleteDtoSchema = exports.TherapistSearchDtoSchema = exports.AdvancedSearchDtoSchema = exports.SearchResponseDtoSchema = exports.SearchResultItemSchema = exports.SearchRequestDtoSchema = void 0;
 const zod_1 = require("zod");
 // Search Request Schema
 exports.SearchRequestDtoSchema = zod_1.z.object({
@@ -184,5 +184,117 @@ exports.GlobalSearchQueryDtoSchema = zod_1.z.object({
     sortBy: zod_1.z.enum(['relevance', 'date', 'popularity']).default('relevance'),
     includeHighlights: zod_1.z.boolean().default(true),
     faceted: zod_1.z.boolean().default(false) // Include faceted search results
+});
+// Legacy interfaces for backward compatibility moved from frontend services
+exports.SearchTherapistParamsSchema = zod_1.z.object({
+    q: zod_1.z.string().min(1),
+    specialties: zod_1.z.array(zod_1.z.string()).optional(),
+    languages: zod_1.z.array(zod_1.z.string()).optional(),
+    minExperience: zod_1.z.number().min(0).optional(),
+    maxExperience: zod_1.z.number().min(0).optional(),
+    minPrice: zod_1.z.number().min(0).optional(),
+    maxPrice: zod_1.z.number().min(0).optional(),
+    location: zod_1.z.string().optional(),
+    insurance: zod_1.z.array(zod_1.z.string()).optional(),
+    availableFrom: zod_1.z.string().datetime().optional(),
+    availableTo: zod_1.z.string().datetime().optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    offset: zod_1.z.number().min(0).optional()
+});
+exports.PostSearchParamsSchema = zod_1.z.object({
+    q: zod_1.z.string().min(1),
+    communityId: zod_1.z.string().uuid().optional(),
+    roomId: zod_1.z.string().uuid().optional(),
+    authorId: zod_1.z.string().uuid().optional(),
+    tags: zod_1.z.array(zod_1.z.string()).optional(),
+    dateFrom: zod_1.z.string().datetime().optional(),
+    dateTo: zod_1.z.string().datetime().optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    offset: zod_1.z.number().min(0).optional()
+});
+exports.UserSearchParamsSchema = zod_1.z.object({
+    q: zod_1.z.string().min(1),
+    role: zod_1.z.string().optional(),
+    isActive: zod_1.z.boolean().optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    offset: zod_1.z.number().min(0).optional()
+});
+exports.CommunitySearchParamsSchema = zod_1.z.object({
+    q: zod_1.z.string().min(1),
+    category: zod_1.z.string().optional(),
+    isPublic: zod_1.z.boolean().optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    offset: zod_1.z.number().min(0).optional()
+});
+exports.GlobalSearchParamsSchema = zod_1.z.object({
+    q: zod_1.z.string().min(1),
+    type: zod_1.z.string().optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    offset: zod_1.z.number().min(0).optional()
+});
+exports.SearchResultSchema = zod_1.z.object({
+    results: zod_1.z.array(zod_1.z.any()),
+    total: zod_1.z.number().min(0),
+    page: zod_1.z.number().min(1),
+    totalPages: zod_1.z.number().min(1),
+    hasMore: zod_1.z.boolean()
+});
+exports.TherapistSearchResultSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    firstName: zod_1.z.string().min(1),
+    lastName: zod_1.z.string().min(1),
+    specialties: zod_1.z.array(zod_1.z.string()),
+    experience: zod_1.z.number().min(0),
+    rating: zod_1.z.number().min(0).max(5),
+    priceRange: zod_1.z.object({
+        min: zod_1.z.number().min(0),
+        max: zod_1.z.number().min(0)
+    }),
+    location: zod_1.z.string().min(1),
+    languages: zod_1.z.array(zod_1.z.string()),
+    profileImage: zod_1.z.string().url().optional(),
+    bio: zod_1.z.string().optional()
+});
+exports.PostSearchResultSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    title: zod_1.z.string().min(1),
+    content: zod_1.z.string().min(1),
+    authorId: zod_1.z.string().uuid(),
+    authorName: zod_1.z.string().min(1),
+    communityId: zod_1.z.string().uuid(),
+    communityName: zod_1.z.string().min(1),
+    tags: zod_1.z.array(zod_1.z.string()),
+    createdAt: zod_1.z.string().datetime(),
+    likeCount: zod_1.z.number().min(0),
+    commentCount: zod_1.z.number().min(0)
+});
+exports.UserSearchResultSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    firstName: zod_1.z.string().min(1),
+    lastName: zod_1.z.string().min(1),
+    email: zod_1.z.string().email().optional(),
+    role: zod_1.z.string().min(1),
+    profileImage: zod_1.z.string().url().optional(),
+    isActive: zod_1.z.boolean(),
+    joinedAt: zod_1.z.string().datetime()
+});
+exports.CommunitySearchResultSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    name: zod_1.z.string().min(1),
+    description: zod_1.z.string().min(1),
+    memberCount: zod_1.z.number().min(0),
+    category: zod_1.z.string().min(1),
+    isPublic: zod_1.z.boolean(),
+    tags: zod_1.z.array(zod_1.z.string()),
+    createdAt: zod_1.z.string().datetime()
+});
+exports.GlobalSearchResultSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    type: zod_1.z.string().min(1),
+    title: zod_1.z.string().min(1),
+    description: zod_1.z.string().min(1),
+    url: zod_1.z.string().url(),
+    metadata: zod_1.z.record(zod_1.z.any()),
+    score: zod_1.z.number().min(0)
 });
 //# sourceMappingURL=search.js.map

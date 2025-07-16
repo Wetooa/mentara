@@ -12,14 +12,14 @@ export declare const AttachmentSchema: z.ZodObject<{
     previewUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    type: "video" | "audio" | "image" | "document";
+    type: "image" | "document" | "audio" | "video";
     url: string;
     name: string;
     size?: number | undefined;
     previewUrl?: string | undefined;
 }, {
     id: string;
-    type: "video" | "audio" | "image" | "document";
+    type: "image" | "document" | "audio" | "video";
     url: string;
     name: string;
     size?: number | undefined;
@@ -30,12 +30,12 @@ export declare const ReactionSchema: z.ZodObject<{
     count: z.ZodNumber;
     users: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
-    emoji: string;
     count: number;
+    emoji: string;
     users: string[];
 }, {
-    emoji: string;
     count: number;
+    emoji: string;
     users: string[];
 }>;
 export declare const ReadReceiptSchema: z.ZodObject<{
@@ -63,14 +63,14 @@ export declare const MessageSchema: z.ZodObject<{
         previewUrl: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        type: "video" | "audio" | "image" | "document";
+        type: "image" | "document" | "audio" | "video";
         url: string;
         name: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }, {
         id: string;
-        type: "video" | "audio" | "image" | "document";
+        type: "image" | "document" | "audio" | "video";
         url: string;
         name: string;
         size?: number | undefined;
@@ -82,45 +82,45 @@ export declare const MessageSchema: z.ZodObject<{
         count: z.ZodNumber;
         users: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
-        emoji: string;
         count: number;
+        emoji: string;
         users: string[];
     }, {
-        emoji: string;
         count: number;
+        emoji: string;
         users: string[];
     }>, "many">>;
     replyTo: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    time: string;
     sender: "me" | "them";
     text: string;
+    time: string;
     isDeleted: boolean;
     status?: "sent" | "delivered" | "read" | undefined;
     attachments?: {
         id: string;
-        type: "video" | "audio" | "image" | "document";
+        type: "image" | "document" | "audio" | "video";
         url: string;
         name: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }[] | undefined;
     reactions?: {
-        emoji: string;
         count: number;
+        emoji: string;
         users: string[];
     }[] | undefined;
     replyTo?: string | undefined;
 }, {
     id: string;
-    time: string;
     sender: "me" | "them";
     text: string;
+    time: string;
     status?: "sent" | "delivered" | "read" | undefined;
     attachments?: {
         id: string;
-        type: "video" | "audio" | "image" | "document";
+        type: "image" | "document" | "audio" | "video";
         url: string;
         name: string;
         size?: number | undefined;
@@ -128,8 +128,8 @@ export declare const MessageSchema: z.ZodObject<{
     }[] | undefined;
     isDeleted?: boolean | undefined;
     reactions?: {
-        emoji: string;
         count: number;
+        emoji: string;
         users: string[];
     }[] | undefined;
     replyTo?: string | undefined;
@@ -147,12 +147,12 @@ export declare const BackendMessageSchema: z.ZodObject<{
         count: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         userId: string;
-        emoji: string;
         count: number;
+        emoji: string;
     }, {
         userId: string;
-        emoji: string;
         count: number;
+        emoji: string;
     }>, "many">>;
     attachment: z.ZodOptional<z.ZodObject<{
         url: z.ZodString;
@@ -192,8 +192,8 @@ export declare const BackendMessageSchema: z.ZodObject<{
     messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
     reactions?: {
         userId: string;
-        emoji: string;
         count: number;
+        emoji: string;
     }[] | undefined;
     attachment?: {
         url: string;
@@ -216,8 +216,8 @@ export declare const BackendMessageSchema: z.ZodObject<{
     isDeleted?: boolean | undefined;
     reactions?: {
         userId: string;
-        emoji: string;
         count: number;
+        emoji: string;
     }[] | undefined;
     isRead?: boolean | undefined;
     messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -247,8 +247,8 @@ export declare const ContactSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     status: "online" | "offline" | "away";
-    time: string;
     name: string;
+    time: string;
     lastMessage: string;
     unread: number;
     isTyping: boolean;
@@ -256,11 +256,11 @@ export declare const ContactSchema: z.ZodObject<{
 }, {
     id: string;
     status: "online" | "offline" | "away";
-    time: string;
     name: string;
-    avatar?: string | undefined;
+    time: string;
     lastMessage?: string | undefined;
     unread?: number | undefined;
+    avatar?: string | undefined;
     isTyping?: boolean | undefined;
 }>;
 export declare const ConversationSchema: z.ZodObject<{
@@ -281,14 +281,14 @@ export declare const ConversationSchema: z.ZodObject<{
             previewUrl: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }, {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
@@ -300,45 +300,45 @@ export declare const ConversationSchema: z.ZodObject<{
             count: z.ZodNumber;
             users: z.ZodArray<z.ZodString, "many">;
         }, "strip", z.ZodTypeAny, {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }, {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }>, "many">>;
         replyTo: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
     }, {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
@@ -346,8 +346,8 @@ export declare const ConversationSchema: z.ZodObject<{
         }[] | undefined;
         isDeleted?: boolean | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
@@ -358,22 +358,22 @@ export declare const ConversationSchema: z.ZodObject<{
     contactId: string;
     messages: {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
@@ -384,13 +384,13 @@ export declare const ConversationSchema: z.ZodObject<{
     contactId: string;
     messages: {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
@@ -398,8 +398,8 @@ export declare const ConversationSchema: z.ZodObject<{
         }[] | undefined;
         isDeleted?: boolean | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
@@ -423,14 +423,14 @@ export declare const MessageGroupSchema: z.ZodObject<{
             previewUrl: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }, {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
@@ -442,45 +442,45 @@ export declare const MessageGroupSchema: z.ZodObject<{
             count: z.ZodNumber;
             users: z.ZodArray<z.ZodString, "many">;
         }, "strip", z.ZodTypeAny, {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }, {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }>, "many">>;
         replyTo: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
     }, {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
@@ -488,8 +488,8 @@ export declare const MessageGroupSchema: z.ZodObject<{
         }[] | undefined;
         isDeleted?: boolean | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
@@ -498,22 +498,22 @@ export declare const MessageGroupSchema: z.ZodObject<{
     date: string;
     messages: {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
@@ -522,13 +522,13 @@ export declare const MessageGroupSchema: z.ZodObject<{
     date: string;
     messages: {
         id: string;
-        time: string;
         sender: "me" | "them";
         text: string;
+        time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "video" | "audio" | "image" | "document";
+            type: "image" | "document" | "audio" | "video";
             url: string;
             name: string;
             size?: number | undefined;
@@ -536,8 +536,8 @@ export declare const MessageGroupSchema: z.ZodObject<{
         }[] | undefined;
         isDeleted?: boolean | undefined;
         reactions?: {
-            emoji: string;
             count: number;
+            emoji: string;
             users: string[];
         }[] | undefined;
         replyTo?: string | undefined;
@@ -556,8 +556,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         id: string;
         status: "online" | "offline" | "away";
-        time: string;
         name: string;
+        time: string;
         lastMessage: string;
         unread: number;
         isTyping: boolean;
@@ -565,11 +565,11 @@ export declare const MessagesStateSchema: z.ZodObject<{
     }, {
         id: string;
         status: "online" | "offline" | "away";
-        time: string;
         name: string;
-        avatar?: string | undefined;
+        time: string;
         lastMessage?: string | undefined;
         unread?: number | undefined;
+        avatar?: string | undefined;
         isTyping?: boolean | undefined;
     }>, "many">;
     conversations: z.ZodArray<z.ZodObject<{
@@ -590,14 +590,14 @@ export declare const MessagesStateSchema: z.ZodObject<{
                 previewUrl: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }, {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
@@ -609,45 +609,45 @@ export declare const MessagesStateSchema: z.ZodObject<{
                 count: z.ZodNumber;
                 users: z.ZodArray<z.ZodString, "many">;
             }, "strip", z.ZodTypeAny, {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }, {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }>, "many">>;
             replyTo: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             id: string;
-            time: string;
             sender: "me" | "them";
             text: string;
+            time: string;
             isDeleted: boolean;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
             reactions?: {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }[] | undefined;
             replyTo?: string | undefined;
         }, {
             id: string;
-            time: string;
             sender: "me" | "them";
             text: string;
+            time: string;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
@@ -655,8 +655,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             }[] | undefined;
             isDeleted?: boolean | undefined;
             reactions?: {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }[] | undefined;
             replyTo?: string | undefined;
@@ -667,22 +667,22 @@ export declare const MessagesStateSchema: z.ZodObject<{
         contactId: string;
         messages: {
             id: string;
-            time: string;
             sender: "me" | "them";
             text: string;
+            time: string;
             isDeleted: boolean;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
             reactions?: {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }[] | undefined;
             replyTo?: string | undefined;
@@ -693,13 +693,13 @@ export declare const MessagesStateSchema: z.ZodObject<{
         contactId: string;
         messages: {
             id: string;
-            time: string;
             sender: "me" | "them";
             text: string;
+            time: string;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
@@ -707,8 +707,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             }[] | undefined;
             isDeleted?: boolean | undefined;
             reactions?: {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }[] | undefined;
             replyTo?: string | undefined;
@@ -722,8 +722,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
     contacts: {
         id: string;
         status: "online" | "offline" | "away";
-        time: string;
         name: string;
+        time: string;
         lastMessage: string;
         unread: number;
         isTyping: boolean;
@@ -734,22 +734,22 @@ export declare const MessagesStateSchema: z.ZodObject<{
         contactId: string;
         messages: {
             id: string;
-            time: string;
             sender: "me" | "them";
             text: string;
+            time: string;
             isDeleted: boolean;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
             reactions?: {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }[] | undefined;
             replyTo?: string | undefined;
@@ -763,11 +763,11 @@ export declare const MessagesStateSchema: z.ZodObject<{
     contacts: {
         id: string;
         status: "online" | "offline" | "away";
-        time: string;
         name: string;
-        avatar?: string | undefined;
+        time: string;
         lastMessage?: string | undefined;
         unread?: number | undefined;
+        avatar?: string | undefined;
         isTyping?: boolean | undefined;
     }[];
     conversations: {
@@ -775,13 +775,13 @@ export declare const MessagesStateSchema: z.ZodObject<{
         contactId: string;
         messages: {
             id: string;
-            time: string;
             sender: "me" | "them";
             text: string;
+            time: string;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "video" | "audio" | "image" | "document";
+                type: "image" | "document" | "audio" | "video";
                 url: string;
                 name: string;
                 size?: number | undefined;
@@ -789,8 +789,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             }[] | undefined;
             isDeleted?: boolean | undefined;
             reactions?: {
-                emoji: string;
                 count: number;
+                emoji: string;
                 users: string[];
             }[] | undefined;
             replyTo?: string | undefined;
@@ -881,13 +881,13 @@ export declare const SearchMessagesDtoSchema: z.ZodObject<{
     limit: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     query: string;
-    limit?: string | undefined;
     page?: string | undefined;
+    limit?: string | undefined;
     conversationId?: string | undefined;
 }, {
     query: string;
-    limit?: string | undefined;
     page?: string | undefined;
+    limit?: string | undefined;
     conversationId?: string | undefined;
 }>;
 export declare const JoinConversationDtoSchema: z.ZodObject<{
@@ -926,10 +926,10 @@ export declare const ConversationParticipantSchema: z.ZodObject<{
     id: string;
     role: "ADMIN" | "MODERATOR" | "MEMBER";
     userId: string;
-    isActive: boolean;
     conversationId: string;
     joinedAt: string;
     leftAt: string | null;
+    isActive: boolean;
 }, {
     id: string;
     userId: string;
@@ -957,10 +957,10 @@ export declare const BackendConversationSchema: z.ZodObject<{
         id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
         userId: string;
-        isActive: boolean;
         conversationId: string;
         joinedAt: string;
         leftAt: string | null;
+        isActive: boolean;
     }, {
         id: string;
         userId: string;
@@ -983,12 +983,12 @@ export declare const BackendConversationSchema: z.ZodObject<{
             count: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }, {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }>, "many">>;
         attachment: z.ZodOptional<z.ZodObject<{
             url: z.ZodString;
@@ -1028,8 +1028,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         attachment?: {
             url: string;
@@ -1052,8 +1052,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         isDeleted?: boolean | undefined;
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1078,7 +1078,6 @@ export declare const BackendConversationSchema: z.ZodObject<{
     createdAt: string;
     updatedAt: string;
     type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
-    isActive: boolean;
     messages: {
         id: string;
         createdAt: string;
@@ -1089,8 +1088,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         attachment?: {
             url: string;
@@ -1106,14 +1105,15 @@ export declare const BackendConversationSchema: z.ZodObject<{
             readAt: string;
         }[] | undefined;
     }[];
+    isActive: boolean;
     participants: {
         id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
         userId: string;
-        isActive: boolean;
         conversationId: string;
         joinedAt: string;
         leftAt: string | null;
+        isActive: boolean;
     }[];
     title?: string | undefined;
     lastMessageAt?: string | undefined;
@@ -1130,8 +1130,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         isDeleted?: boolean | undefined;
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1158,8 +1158,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
         isActive?: boolean | undefined;
     }[];
-    isActive?: boolean | undefined;
     title?: string | undefined;
+    isActive?: boolean | undefined;
     lastMessageAt?: string | undefined;
 }>;
 export declare const MessageSearchResultSchema: z.ZodObject<{
@@ -1176,12 +1176,12 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
             count: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }, {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }>, "many">>;
         attachment: z.ZodOptional<z.ZodObject<{
             url: z.ZodString;
@@ -1221,8 +1221,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         attachment?: {
             url: string;
@@ -1245,8 +1245,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         isDeleted?: boolean | undefined;
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1269,8 +1269,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
     pageSize: z.ZodNumber;
     totalPages: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    totalCount: number;
     page: number;
+    totalCount: number;
     pageSize: number;
     totalPages: number;
     messages: {
@@ -1283,8 +1283,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         attachment?: {
             url: string;
@@ -1301,8 +1301,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         }[] | undefined;
     }[];
 }, {
-    totalCount: number;
     page: number;
+    totalCount: number;
     pageSize: number;
     totalPages: number;
     messages: {
@@ -1313,8 +1313,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         isDeleted?: boolean | undefined;
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1341,19 +1341,19 @@ export declare const ConversationListParamsSchema: z.ZodObject<{
     sortBy: z.ZodDefault<z.ZodEnum<["lastMessageAt", "createdAt"]>>;
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: "createdAt" | "lastMessageAt";
     sortOrder: "asc" | "desc";
     type?: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT" | undefined;
     isActive?: boolean | undefined;
 }, {
     type?: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT" | undefined;
-    isActive?: boolean | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "lastMessageAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    isActive?: boolean | undefined;
 }>;
 export declare const MessageAnalyticsSchema: z.ZodObject<{
     conversationId: z.ZodString;
@@ -1366,11 +1366,11 @@ export declare const MessageAnalyticsSchema: z.ZodObject<{
             hour: z.ZodNumber;
             count: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            hour: number;
             count: number;
+            hour: number;
         }, {
-            hour: number;
             count: number;
+            hour: number;
         }>, "many">;
         attachmentTypes: z.ZodRecord<z.ZodString, z.ZodNumber>;
         engagementScore: z.ZodNumber;
@@ -1378,8 +1378,8 @@ export declare const MessageAnalyticsSchema: z.ZodObject<{
         totalMessages: number;
         averageResponseTime: number;
         messageFrequency: {
-            hour: number;
             count: number;
+            hour: number;
         }[];
         attachmentTypes: Record<string, number>;
         engagementScore: number;
@@ -1387,8 +1387,8 @@ export declare const MessageAnalyticsSchema: z.ZodObject<{
         totalMessages: number;
         averageResponseTime: number;
         messageFrequency: {
-            hour: number;
             count: number;
+            hour: number;
         }[];
         attachmentTypes: Record<string, number>;
         engagementScore: number;
@@ -1399,8 +1399,8 @@ export declare const MessageAnalyticsSchema: z.ZodObject<{
         totalMessages: number;
         averageResponseTime: number;
         messageFrequency: {
-            hour: number;
             count: number;
+            hour: number;
         }[];
         attachmentTypes: Record<string, number>;
         engagementScore: number;
@@ -1413,8 +1413,8 @@ export declare const MessageAnalyticsSchema: z.ZodObject<{
         totalMessages: number;
         averageResponseTime: number;
         messageFrequency: {
-            hour: number;
             count: number;
+            hour: number;
         }[];
         attachmentTypes: Record<string, number>;
         engagementScore: number;
@@ -1432,9 +1432,9 @@ export declare const MessageNotificationPreferencesSchema: z.ZodObject<{
         startTime: z.ZodString;
         endTime: z.ZodString;
     }, "strip", z.ZodTypeAny, {
+        enabled: boolean;
         startTime: string;
         endTime: string;
-        enabled: boolean;
     }, {
         startTime: string;
         endTime: string;
@@ -1446,9 +1446,9 @@ export declare const MessageNotificationPreferencesSchema: z.ZodObject<{
     pushNotifications: boolean;
     soundEnabled: boolean;
     quietHours?: {
+        enabled: boolean;
         startTime: string;
         endTime: string;
-        enabled: boolean;
     } | undefined;
 }, {
     userId: string;
@@ -1469,14 +1469,14 @@ export declare const MessagesListParamsSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    offset: number;
     sortOrder: "asc" | "desc";
+    offset: number;
     before?: string | undefined;
     after?: string | undefined;
 }, {
     limit?: number | undefined;
-    offset?: number | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    offset?: number | undefined;
     before?: string | undefined;
     after?: string | undefined;
 }>;
@@ -1541,12 +1541,12 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             count: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }, {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }>, "many">>;
         attachment: z.ZodOptional<z.ZodObject<{
             url: z.ZodString;
@@ -1586,8 +1586,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         attachment?: {
             url: string;
@@ -1610,8 +1610,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         isDeleted?: boolean | undefined;
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1647,10 +1647,10 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             userId: string;
-            isActive: boolean;
             conversationId: string;
             joinedAt: string;
             leftAt: string | null;
+            isActive: boolean;
         }, {
             id: string;
             userId: string;
@@ -1673,12 +1673,12 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 count: z.ZodNumber;
             }, "strip", z.ZodTypeAny, {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }, {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }>, "many">>;
             attachment: z.ZodOptional<z.ZodObject<{
                 url: z.ZodString;
@@ -1718,8 +1718,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
             reactions?: {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }[] | undefined;
             attachment?: {
                 url: string;
@@ -1742,8 +1742,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             isDeleted?: boolean | undefined;
             reactions?: {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }[] | undefined;
             isRead?: boolean | undefined;
             messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1768,7 +1768,6 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         createdAt: string;
         updatedAt: string;
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
-        isActive: boolean;
         messages: {
             id: string;
             createdAt: string;
@@ -1779,8 +1778,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
             reactions?: {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }[] | undefined;
             attachment?: {
                 url: string;
@@ -1796,14 +1795,15 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 readAt: string;
             }[] | undefined;
         }[];
+        isActive: boolean;
         participants: {
             id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             userId: string;
-            isActive: boolean;
             conversationId: string;
             joinedAt: string;
             leftAt: string | null;
+            isActive: boolean;
         }[];
         title?: string | undefined;
         lastMessageAt?: string | undefined;
@@ -1820,8 +1820,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             isDeleted?: boolean | undefined;
             reactions?: {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }[] | undefined;
             isRead?: boolean | undefined;
             messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1848,8 +1848,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
             isActive?: boolean | undefined;
         }[];
-        isActive?: boolean | undefined;
         title?: string | undefined;
+        isActive?: boolean | undefined;
         lastMessageAt?: string | undefined;
     }>, "many">;
     totalResults: z.ZodNumber;
@@ -1858,9 +1858,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
     totalPages: z.ZodNumber;
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    hasMore: boolean;
+    limit: number;
     totalPages: number;
     messages: {
         id: string;
@@ -1872,8 +1871,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         attachment?: {
             url: string;
@@ -1894,7 +1893,6 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         createdAt: string;
         updatedAt: string;
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
-        isActive: boolean;
         messages: {
             id: string;
             createdAt: string;
@@ -1905,8 +1903,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
             reactions?: {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }[] | undefined;
             attachment?: {
                 url: string;
@@ -1922,23 +1920,24 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 readAt: string;
             }[] | undefined;
         }[];
+        isActive: boolean;
         participants: {
             id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             userId: string;
-            isActive: boolean;
             conversationId: string;
             joinedAt: string;
             leftAt: string | null;
+            isActive: boolean;
         }[];
         title?: string | undefined;
         lastMessageAt?: string | undefined;
     }[];
     totalResults: number;
-}, {
-    limit: number;
-    page: number;
     hasMore: boolean;
+}, {
+    page: number;
+    limit: number;
     totalPages: number;
     messages: {
         id: string;
@@ -1948,8 +1947,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         isDeleted?: boolean | undefined;
         reactions?: {
             userId: string;
-            emoji: string;
             count: number;
+            emoji: string;
         }[] | undefined;
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -1980,8 +1979,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             isDeleted?: boolean | undefined;
             reactions?: {
                 userId: string;
-                emoji: string;
                 count: number;
+                emoji: string;
             }[] | undefined;
             isRead?: boolean | undefined;
             messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
@@ -2008,11 +2007,12 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
             isActive?: boolean | undefined;
         }[];
-        isActive?: boolean | undefined;
         title?: string | undefined;
+        isActive?: boolean | undefined;
         lastMessageAt?: string | undefined;
     }[];
     totalResults: number;
+    hasMore: boolean;
 }>;
 export declare const MessageReactionSchema: z.ZodObject<{
     id: z.ZodString;

@@ -146,18 +146,18 @@ export declare const UpdatePlanDtoSchema: z.ZodObject<{
     trialDays: z.ZodOptional<z.ZodNumber>;
     isActive: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    isActive?: boolean | undefined;
-    name?: string | undefined;
     description?: string | undefined;
+    name?: string | undefined;
+    isActive?: boolean | undefined;
     monthlyPrice?: number | undefined;
     yearlyPrice?: number | undefined;
     features?: any;
     limits?: any;
     trialDays?: number | undefined;
 }, {
-    isActive?: boolean | undefined;
-    name?: string | undefined;
     description?: string | undefined;
+    name?: string | undefined;
+    isActive?: boolean | undefined;
     monthlyPrice?: number | undefined;
     yearlyPrice?: number | undefined;
     features?: any;
@@ -209,19 +209,19 @@ export declare const CreatePaymentDtoSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     providerPaymentId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    currency: string;
     amount: number;
-    description?: string | undefined;
+    currency: string;
     meetingId?: string | undefined;
+    description?: string | undefined;
     paymentMethodId?: string | undefined;
     subscriptionId?: string | undefined;
     invoiceId?: string | undefined;
     providerPaymentId?: string | undefined;
 }, {
     amount: number;
-    currency?: string | undefined;
-    description?: string | undefined;
     meetingId?: string | undefined;
+    description?: string | undefined;
+    currency?: string | undefined;
     paymentMethodId?: string | undefined;
     subscriptionId?: string | undefined;
     invoiceId?: string | undefined;
@@ -261,16 +261,16 @@ export declare const CreateInvoiceDtoSchema: z.ZodObject<{
     dueDate: z.ZodString;
     billingAddress: z.ZodOptional<z.ZodAny>;
 }, "strip", z.ZodTypeAny, {
-    dueDate: string;
     subscriptionId: string;
     subtotal: number;
+    dueDate: string;
     taxAmount?: number | undefined;
     discountAmount?: number | undefined;
     billingAddress?: any;
 }, {
-    dueDate: string;
     subscriptionId: string;
     subtotal: number;
+    dueDate: string;
     taxAmount?: number | undefined;
     discountAmount?: number | undefined;
     billingAddress?: any;
@@ -432,21 +432,21 @@ export declare const InvoiceSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     createdAt: string;
-    status: "cancelled" | "pending" | "paid" | "failed";
+    status: "pending" | "cancelled" | "failed" | "paid";
     userId: string;
-    currency: string;
     description: string;
     amount: number;
+    currency: string;
     sessionId?: string | undefined;
     paidAt?: string | undefined;
 }, {
     id: string;
     createdAt: string;
-    status: "cancelled" | "pending" | "paid" | "failed";
+    status: "pending" | "cancelled" | "failed" | "paid";
     userId: string;
-    currency: string;
     description: string;
     amount: number;
+    currency: string;
     sessionId?: string | undefined;
     paidAt?: string | undefined;
 }>;
@@ -456,13 +456,13 @@ export declare const CreatePaymentIntentDtoSchema: z.ZodObject<{
     paymentMethodId: z.ZodOptional<z.ZodString>;
     sessionId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    currency: string;
     amount: number;
+    currency: string;
     paymentMethodId?: string | undefined;
     sessionId?: string | undefined;
 }, {
-    currency: string;
     amount: number;
+    currency: string;
     paymentMethodId?: string | undefined;
     sessionId?: string | undefined;
 }>;
@@ -474,16 +474,16 @@ export declare const BillingQuerySchema: z.ZodObject<{
     dateTo: z.ZodOptional<z.ZodString>;
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "amount", "status"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "cancelled" | "pending" | "paid" | "failed" | undefined;
-    limit?: number | undefined;
+    status?: "pending" | "cancelled" | "failed" | "paid" | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "status" | "amount" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
-    status?: "cancelled" | "pending" | "paid" | "failed" | undefined;
-    limit?: number | undefined;
+    status?: "pending" | "cancelled" | "failed" | "paid" | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "status" | "amount" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
@@ -534,4 +534,673 @@ export type CreatePaymentIntentDto = z.infer<typeof CreatePaymentIntentDtoSchema
 export type BillingQuery = z.infer<typeof BillingQuerySchema>;
 export type InvoiceIdParam = z.infer<typeof InvoiceIdParamSchema>;
 export type PaymentMethodIdParam = z.infer<typeof PaymentMethodIdParamSchema>;
+export declare const SubscriptionPlanSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    description: z.ZodString;
+    price: z.ZodNumber;
+    currency: z.ZodString;
+    interval: z.ZodEnum<["month", "year"]>;
+    interval_count: z.ZodNumber;
+    features: z.ZodArray<z.ZodString, "many">;
+    is_popular: z.ZodBoolean;
+    trial_period_days: z.ZodOptional<z.ZodNumber>;
+    metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    description: string;
+    name: string;
+    features: string[];
+    currency: string;
+    price: number;
+    interval: "month" | "year";
+    interval_count: number;
+    is_popular: boolean;
+    metadata?: Record<string, any> | undefined;
+    trial_period_days?: number | undefined;
+}, {
+    id: string;
+    description: string;
+    name: string;
+    features: string[];
+    currency: string;
+    price: number;
+    interval: "month" | "year";
+    interval_count: number;
+    is_popular: boolean;
+    metadata?: Record<string, any> | undefined;
+    trial_period_days?: number | undefined;
+}>;
+export declare const SubscriptionSchema: z.ZodObject<{
+    id: z.ZodString;
+    plan: z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        description: z.ZodString;
+        price: z.ZodNumber;
+        currency: z.ZodString;
+        interval: z.ZodEnum<["month", "year"]>;
+        interval_count: z.ZodNumber;
+        features: z.ZodArray<z.ZodString, "many">;
+        is_popular: z.ZodBoolean;
+        trial_period_days: z.ZodOptional<z.ZodNumber>;
+        metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        description: string;
+        name: string;
+        features: string[];
+        currency: string;
+        price: number;
+        interval: "month" | "year";
+        interval_count: number;
+        is_popular: boolean;
+        metadata?: Record<string, any> | undefined;
+        trial_period_days?: number | undefined;
+    }, {
+        id: string;
+        description: string;
+        name: string;
+        features: string[];
+        currency: string;
+        price: number;
+        interval: "month" | "year";
+        interval_count: number;
+        is_popular: boolean;
+        metadata?: Record<string, any> | undefined;
+        trial_period_days?: number | undefined;
+    }>;
+    status: z.ZodEnum<["active", "canceled", "incomplete", "incomplete_expired", "past_due", "trialing", "unpaid"]>;
+    current_period_start: z.ZodString;
+    current_period_end: z.ZodString;
+    trial_start: z.ZodOptional<z.ZodString>;
+    trial_end: z.ZodOptional<z.ZodString>;
+    cancel_at_period_end: z.ZodBoolean;
+    canceled_at: z.ZodOptional<z.ZodString>;
+    payment_method: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        type: z.ZodEnum<["card", "bank_account", "paypal"]>;
+        last4: z.ZodOptional<z.ZodString>;
+        brand: z.ZodOptional<z.ZodString>;
+        expiryMonth: z.ZodOptional<z.ZodNumber>;
+        expiryYear: z.ZodOptional<z.ZodNumber>;
+        isDefault: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    }, {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    }>>;
+    latest_invoice: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        userId: z.ZodString;
+        amount: z.ZodNumber;
+        currency: z.ZodString;
+        status: z.ZodEnum<["pending", "paid", "failed", "cancelled"]>;
+        description: z.ZodString;
+        sessionId: z.ZodOptional<z.ZodString>;
+        createdAt: z.ZodString;
+        paidAt: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        createdAt: string;
+        status: "pending" | "cancelled" | "failed" | "paid";
+        userId: string;
+        description: string;
+        amount: number;
+        currency: string;
+        sessionId?: string | undefined;
+        paidAt?: string | undefined;
+    }, {
+        id: string;
+        createdAt: string;
+        status: "pending" | "cancelled" | "failed" | "paid";
+        userId: string;
+        description: string;
+        amount: number;
+        currency: string;
+        sessionId?: string | undefined;
+        paidAt?: string | undefined;
+    }>>;
+    created_at: z.ZodString;
+    updated_at: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid";
+    plan: {
+        id: string;
+        description: string;
+        name: string;
+        features: string[];
+        currency: string;
+        price: number;
+        interval: "month" | "year";
+        interval_count: number;
+        is_popular: boolean;
+        metadata?: Record<string, any> | undefined;
+        trial_period_days?: number | undefined;
+    };
+    current_period_start: string;
+    current_period_end: string;
+    cancel_at_period_end: boolean;
+    created_at: string;
+    updated_at: string;
+    trial_start?: string | undefined;
+    trial_end?: string | undefined;
+    canceled_at?: string | undefined;
+    payment_method?: {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    } | undefined;
+    latest_invoice?: {
+        id: string;
+        createdAt: string;
+        status: "pending" | "cancelled" | "failed" | "paid";
+        userId: string;
+        description: string;
+        amount: number;
+        currency: string;
+        sessionId?: string | undefined;
+        paidAt?: string | undefined;
+    } | undefined;
+}, {
+    id: string;
+    status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid";
+    plan: {
+        id: string;
+        description: string;
+        name: string;
+        features: string[];
+        currency: string;
+        price: number;
+        interval: "month" | "year";
+        interval_count: number;
+        is_popular: boolean;
+        metadata?: Record<string, any> | undefined;
+        trial_period_days?: number | undefined;
+    };
+    current_period_start: string;
+    current_period_end: string;
+    cancel_at_period_end: boolean;
+    created_at: string;
+    updated_at: string;
+    trial_start?: string | undefined;
+    trial_end?: string | undefined;
+    canceled_at?: string | undefined;
+    payment_method?: {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    } | undefined;
+    latest_invoice?: {
+        id: string;
+        createdAt: string;
+        status: "pending" | "cancelled" | "failed" | "paid";
+        userId: string;
+        description: string;
+        amount: number;
+        currency: string;
+        sessionId?: string | undefined;
+        paidAt?: string | undefined;
+    } | undefined;
+}>;
+export declare const InvoiceLineItemSchema: z.ZodObject<{
+    id: z.ZodString;
+    description: z.ZodString;
+    quantity: z.ZodNumber;
+    unit_amount: z.ZodNumber;
+    amount: z.ZodNumber;
+    currency: z.ZodString;
+    period: z.ZodOptional<z.ZodObject<{
+        start: z.ZodString;
+        end: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        start: string;
+        end: string;
+    }, {
+        start: string;
+        end: string;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    description: string;
+    amount: number;
+    currency: string;
+    quantity: number;
+    unit_amount: number;
+    period?: {
+        start: string;
+        end: string;
+    } | undefined;
+}, {
+    id: string;
+    description: string;
+    amount: number;
+    currency: string;
+    quantity: number;
+    unit_amount: number;
+    period?: {
+        start: string;
+        end: string;
+    } | undefined;
+}>;
+export declare const PaymentIntentSchema: z.ZodObject<{
+    id: z.ZodString;
+    amount: z.ZodNumber;
+    currency: z.ZodString;
+    status: z.ZodEnum<["requires_payment_method", "requires_confirmation", "requires_action", "processing", "requires_capture", "canceled", "succeeded"]>;
+    client_secret: z.ZodString;
+    payment_method: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        type: z.ZodEnum<["card", "bank_account", "paypal"]>;
+        last4: z.ZodOptional<z.ZodString>;
+        brand: z.ZodOptional<z.ZodString>;
+        expiryMonth: z.ZodOptional<z.ZodNumber>;
+        expiryYear: z.ZodOptional<z.ZodNumber>;
+        isDefault: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    }, {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    }>>;
+    description: z.ZodOptional<z.ZodString>;
+    metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+    created_at: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    status: "processing" | "canceled" | "requires_payment_method" | "requires_confirmation" | "requires_action" | "requires_capture" | "succeeded";
+    amount: number;
+    currency: string;
+    created_at: string;
+    client_secret: string;
+    description?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    payment_method?: {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    } | undefined;
+}, {
+    id: string;
+    status: "processing" | "canceled" | "requires_payment_method" | "requires_confirmation" | "requires_action" | "requires_capture" | "succeeded";
+    amount: number;
+    currency: string;
+    created_at: string;
+    client_secret: string;
+    description?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    payment_method?: {
+        id: string;
+        type: "card" | "bank_account" | "paypal";
+        isDefault: boolean;
+        last4?: string | undefined;
+        brand?: string | undefined;
+        expiryMonth?: number | undefined;
+        expiryYear?: number | undefined;
+    } | undefined;
+}>;
+export declare const BillingPortalSessionSchema: z.ZodObject<{
+    url: z.ZodString;
+    return_url: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    url: string;
+    return_url: string;
+}, {
+    url: string;
+    return_url: string;
+}>;
+export declare const UsageRecordSchema: z.ZodObject<{
+    id: z.ZodString;
+    subscription_item_id: z.ZodString;
+    quantity: z.ZodNumber;
+    timestamp: z.ZodString;
+    action: z.ZodEnum<["increment", "set"]>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    action: "set" | "increment";
+    timestamp: string;
+    quantity: number;
+    subscription_item_id: string;
+}, {
+    id: string;
+    action: "set" | "increment";
+    timestamp: string;
+    quantity: number;
+    subscription_item_id: string;
+}>;
+export declare const BillingStatsSchema: z.ZodObject<{
+    total_revenue: z.ZodNumber;
+    monthly_revenue: z.ZodNumber;
+    active_subscriptions: z.ZodNumber;
+    canceled_subscriptions: z.ZodNumber;
+    trial_subscriptions: z.ZodNumber;
+    revenue_growth_rate: z.ZodNumber;
+    churn_rate: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    total_revenue: number;
+    monthly_revenue: number;
+    active_subscriptions: number;
+    canceled_subscriptions: number;
+    trial_subscriptions: number;
+    revenue_growth_rate: number;
+    churn_rate: number;
+}, {
+    total_revenue: number;
+    monthly_revenue: number;
+    active_subscriptions: number;
+    canceled_subscriptions: number;
+    trial_subscriptions: number;
+    revenue_growth_rate: number;
+    churn_rate: number;
+}>;
+export declare const CreatePaymentMethodRequestSchema: z.ZodObject<{
+    type: z.ZodEnum<["card", "bank_account"]>;
+    card: z.ZodOptional<z.ZodObject<{
+        number: z.ZodString;
+        exp_month: z.ZodNumber;
+        exp_year: z.ZodNumber;
+        cvc: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        number: string;
+        exp_month: number;
+        exp_year: number;
+        cvc: string;
+    }, {
+        number: string;
+        exp_month: number;
+        exp_year: number;
+        cvc: string;
+    }>>;
+    bank_account: z.ZodOptional<z.ZodObject<{
+        account_number: z.ZodString;
+        routing_number: z.ZodString;
+        account_type: z.ZodEnum<["checking", "savings"]>;
+    }, "strip", z.ZodTypeAny, {
+        account_number: string;
+        routing_number: string;
+        account_type: "checking" | "savings";
+    }, {
+        account_number: string;
+        routing_number: string;
+        account_type: "checking" | "savings";
+    }>>;
+    billing_details: z.ZodOptional<z.ZodObject<{
+        name: z.ZodOptional<z.ZodString>;
+        email: z.ZodOptional<z.ZodString>;
+        phone: z.ZodOptional<z.ZodString>;
+        address: z.ZodOptional<z.ZodObject<{
+            line1: z.ZodOptional<z.ZodString>;
+            line2: z.ZodOptional<z.ZodString>;
+            city: z.ZodOptional<z.ZodString>;
+            state: z.ZodOptional<z.ZodString>;
+            postal_code: z.ZodOptional<z.ZodString>;
+            country: z.ZodOptional<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            line1?: string | undefined;
+            line2?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
+            postal_code?: string | undefined;
+            country?: string | undefined;
+        }, {
+            line1?: string | undefined;
+            line2?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
+            postal_code?: string | undefined;
+            country?: string | undefined;
+        }>>;
+    }, "strip", z.ZodTypeAny, {
+        email?: string | undefined;
+        address?: {
+            line1?: string | undefined;
+            line2?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
+            postal_code?: string | undefined;
+            country?: string | undefined;
+        } | undefined;
+        name?: string | undefined;
+        phone?: string | undefined;
+    }, {
+        email?: string | undefined;
+        address?: {
+            line1?: string | undefined;
+            line2?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
+            postal_code?: string | undefined;
+            country?: string | undefined;
+        } | undefined;
+        name?: string | undefined;
+        phone?: string | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    type: "card" | "bank_account";
+    card?: {
+        number: string;
+        exp_month: number;
+        exp_year: number;
+        cvc: string;
+    } | undefined;
+    bank_account?: {
+        account_number: string;
+        routing_number: string;
+        account_type: "checking" | "savings";
+    } | undefined;
+    billing_details?: {
+        email?: string | undefined;
+        address?: {
+            line1?: string | undefined;
+            line2?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
+            postal_code?: string | undefined;
+            country?: string | undefined;
+        } | undefined;
+        name?: string | undefined;
+        phone?: string | undefined;
+    } | undefined;
+}, {
+    type: "card" | "bank_account";
+    card?: {
+        number: string;
+        exp_month: number;
+        exp_year: number;
+        cvc: string;
+    } | undefined;
+    bank_account?: {
+        account_number: string;
+        routing_number: string;
+        account_type: "checking" | "savings";
+    } | undefined;
+    billing_details?: {
+        email?: string | undefined;
+        address?: {
+            line1?: string | undefined;
+            line2?: string | undefined;
+            city?: string | undefined;
+            state?: string | undefined;
+            postal_code?: string | undefined;
+            country?: string | undefined;
+        } | undefined;
+        name?: string | undefined;
+        phone?: string | undefined;
+    } | undefined;
+}>;
+export declare const CreateSubscriptionRequestSchema: z.ZodObject<{
+    plan_id: z.ZodString;
+    payment_method_id: z.ZodOptional<z.ZodString>;
+    trial_period_days: z.ZodOptional<z.ZodNumber>;
+    coupon: z.ZodOptional<z.ZodString>;
+    metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+}, "strip", z.ZodTypeAny, {
+    plan_id: string;
+    metadata?: Record<string, any> | undefined;
+    trial_period_days?: number | undefined;
+    payment_method_id?: string | undefined;
+    coupon?: string | undefined;
+}, {
+    plan_id: string;
+    metadata?: Record<string, any> | undefined;
+    trial_period_days?: number | undefined;
+    payment_method_id?: string | undefined;
+    coupon?: string | undefined;
+}>;
+export declare const UpdateSubscriptionRequestSchema: z.ZodObject<{
+    plan_id: z.ZodOptional<z.ZodString>;
+    payment_method_id: z.ZodOptional<z.ZodString>;
+    cancel_at_period_end: z.ZodOptional<z.ZodBoolean>;
+    proration_behavior: z.ZodOptional<z.ZodEnum<["create_prorations", "none", "always_invoice"]>>;
+    metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+}, "strip", z.ZodTypeAny, {
+    metadata?: Record<string, any> | undefined;
+    cancel_at_period_end?: boolean | undefined;
+    plan_id?: string | undefined;
+    payment_method_id?: string | undefined;
+    proration_behavior?: "create_prorations" | "none" | "always_invoice" | undefined;
+}, {
+    metadata?: Record<string, any> | undefined;
+    cancel_at_period_end?: boolean | undefined;
+    plan_id?: string | undefined;
+    payment_method_id?: string | undefined;
+    proration_behavior?: "create_prorations" | "none" | "always_invoice" | undefined;
+}>;
+export declare const CreatePaymentIntentRequestSchema: z.ZodObject<{
+    amount: z.ZodNumber;
+    currency: z.ZodDefault<z.ZodString>;
+    payment_method_id: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+    automatic_payment_methods: z.ZodOptional<z.ZodObject<{
+        enabled: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        enabled: boolean;
+    }, {
+        enabled: boolean;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    amount: number;
+    currency: string;
+    description?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    payment_method_id?: string | undefined;
+    automatic_payment_methods?: {
+        enabled: boolean;
+    } | undefined;
+}, {
+    amount: number;
+    description?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    currency?: string | undefined;
+    payment_method_id?: string | undefined;
+    automatic_payment_methods?: {
+        enabled: boolean;
+    } | undefined;
+}>;
+export declare const BillingApiResponseSchema: z.ZodObject<{
+    data: z.ZodAny;
+    meta: z.ZodOptional<z.ZodObject<{
+        total_count: z.ZodOptional<z.ZodNumber>;
+        page: z.ZodOptional<z.ZodNumber>;
+        per_page: z.ZodOptional<z.ZodNumber>;
+        has_more: z.ZodOptional<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        page?: number | undefined;
+        total_count?: number | undefined;
+        per_page?: number | undefined;
+        has_more?: boolean | undefined;
+    }, {
+        page?: number | undefined;
+        total_count?: number | undefined;
+        per_page?: number | undefined;
+        has_more?: boolean | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    data?: any;
+    meta?: {
+        page?: number | undefined;
+        total_count?: number | undefined;
+        per_page?: number | undefined;
+        has_more?: boolean | undefined;
+    } | undefined;
+}, {
+    data?: any;
+    meta?: {
+        page?: number | undefined;
+        total_count?: number | undefined;
+        per_page?: number | undefined;
+        has_more?: boolean | undefined;
+    } | undefined;
+}>;
+export declare const BillingListOptionsSchema: z.ZodObject<{
+    page: z.ZodOptional<z.ZodNumber>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    status: z.ZodOptional<z.ZodString>;
+    starting_after: z.ZodOptional<z.ZodString>;
+    ending_before: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    status?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    starting_after?: string | undefined;
+    ending_before?: string | undefined;
+}, {
+    status?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    starting_after?: string | undefined;
+    ending_before?: string | undefined;
+}>;
+export type SubscriptionPlan = z.infer<typeof SubscriptionPlanSchema>;
+export type Subscription = z.infer<typeof SubscriptionSchema>;
+export type InvoiceLineItem = z.infer<typeof InvoiceLineItemSchema>;
+export type PaymentIntent = z.infer<typeof PaymentIntentSchema>;
+export type BillingPortalSession = z.infer<typeof BillingPortalSessionSchema>;
+export type UsageRecord = z.infer<typeof UsageRecordSchema>;
+export type BillingStats = z.infer<typeof BillingStatsSchema>;
+export type CreatePaymentMethodRequest = z.infer<typeof CreatePaymentMethodRequestSchema>;
+export type CreateSubscriptionRequest = z.infer<typeof CreateSubscriptionRequestSchema>;
+export type UpdateSubscriptionRequest = z.infer<typeof UpdateSubscriptionRequestSchema>;
+export type CreatePaymentIntentRequest = z.infer<typeof CreatePaymentIntentRequestSchema>;
+export type BillingApiResponse<T = any> = z.infer<typeof BillingApiResponseSchema> & {
+    data: T;
+};
+export type BillingListOptions = z.infer<typeof BillingListOptionsSchema>;
 //# sourceMappingURL=billing.d.ts.map

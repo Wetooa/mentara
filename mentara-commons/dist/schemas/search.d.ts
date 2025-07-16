@@ -20,22 +20,22 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
         availability: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         rating: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        specialties?: string[] | undefined;
         rating?: number | undefined;
-        availability?: string[] | undefined;
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
+        specialties?: string[] | undefined;
+        availability?: string[] | undefined;
         location?: string | undefined;
         priceRange?: {
             min?: number | undefined;
             max?: number | undefined;
         } | undefined;
     }, {
-        specialties?: string[] | undefined;
         rating?: number | undefined;
-        availability?: string[] | undefined;
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
+        specialties?: string[] | undefined;
+        availability?: string[] | undefined;
         location?: string | undefined;
         priceRange?: {
             min?: number | undefined;
@@ -46,25 +46,25 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
         page: z.ZodDefault<z.ZodNumber>;
         limit: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         page: number;
+        limit: number;
     }, {
-        limit?: number | undefined;
         page?: number | undefined;
+        limit?: number | undefined;
     }>>;
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "date", "rating", "price", "name"]>>;
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    type: "therapists" | "sessions" | "users" | "all" | "posts" | "communities" | "worksheets";
-    sortBy: "date" | "rating" | "name" | "relevance" | "price";
+    type: "users" | "sessions" | "posts" | "therapists" | "communities" | "all" | "worksheets";
+    sortBy: "rating" | "date" | "name" | "price" | "relevance";
     sortOrder: "asc" | "desc";
     query: string;
     filters?: {
-        specialties?: string[] | undefined;
         rating?: number | undefined;
-        availability?: string[] | undefined;
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
+        specialties?: string[] | undefined;
+        availability?: string[] | undefined;
         location?: string | undefined;
         priceRange?: {
             min?: number | undefined;
@@ -72,20 +72,20 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
     pagination?: {
-        limit: number;
         page: number;
+        limit: number;
     } | undefined;
 }, {
     query: string;
-    type?: "therapists" | "sessions" | "users" | "all" | "posts" | "communities" | "worksheets" | undefined;
-    sortBy?: "date" | "rating" | "name" | "relevance" | "price" | undefined;
+    type?: "users" | "sessions" | "posts" | "therapists" | "communities" | "all" | "worksheets" | undefined;
+    sortBy?: "rating" | "date" | "name" | "price" | "relevance" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     filters?: {
-        specialties?: string[] | undefined;
         rating?: number | undefined;
-        availability?: string[] | undefined;
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
+        specialties?: string[] | undefined;
+        availability?: string[] | undefined;
         location?: string | undefined;
         priceRange?: {
             min?: number | undefined;
@@ -93,8 +93,8 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
     pagination?: {
-        limit?: number | undefined;
         page?: number | undefined;
+        limit?: number | undefined;
     } | undefined;
 }>;
 export declare const SearchResultItemSchema: z.ZodObject<{
@@ -108,7 +108,7 @@ export declare const SearchResultItemSchema: z.ZodObject<{
     highlightedFields: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    type: "user" | "therapist" | "post" | "community" | "session" | "worksheet";
+    type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
     title: string;
     score: number;
     description?: string | undefined;
@@ -117,7 +117,7 @@ export declare const SearchResultItemSchema: z.ZodObject<{
     highlightedFields?: string[] | undefined;
 }, {
     id: string;
-    type: "user" | "therapist" | "post" | "community" | "session" | "worksheet";
+    type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
     title: string;
     score: number;
     description?: string | undefined;
@@ -141,7 +141,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
         highlightedFields: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        type: "user" | "therapist" | "post" | "community" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         title: string;
         score: number;
         description?: string | undefined;
@@ -150,7 +150,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
         highlightedFields?: string[] | undefined;
     }, {
         id: string;
-        type: "user" | "therapist" | "post" | "community" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         title: string;
         score: number;
         description?: string | undefined;
@@ -177,7 +177,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
     currentPage: number;
     results: {
         id: string;
-        type: "user" | "therapist" | "post" | "community" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         title: string;
         score: number;
         description?: string | undefined;
@@ -198,7 +198,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
     currentPage: number;
     results: {
         id: string;
-        type: "user" | "therapist" | "post" | "community" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         title: string;
         score: number;
         description?: string | undefined;
@@ -235,11 +235,11 @@ export declare const AdvancedSearchDtoSchema: z.ZodObject<{
         page: z.ZodDefault<z.ZodNumber>;
         limit: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        limit: number;
         page: number;
+        limit: number;
     }, {
-        limit?: number | undefined;
         page?: number | undefined;
+        limit?: number | undefined;
     }>>;
     includeHighlights: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
@@ -252,8 +252,8 @@ export declare const AdvancedSearchDtoSchema: z.ZodObject<{
     logicalOperator: "AND" | "OR";
     includeHighlights: boolean;
     pagination?: {
-        limit: number;
         page: number;
+        limit: number;
     } | undefined;
 }, {
     criteria: {
@@ -263,8 +263,8 @@ export declare const AdvancedSearchDtoSchema: z.ZodObject<{
         weight?: number | undefined;
     }[];
     pagination?: {
-        limit?: number | undefined;
         page?: number | undefined;
+        limit?: number | undefined;
     } | undefined;
     logicalOperator?: "AND" | "OR" | undefined;
     includeHighlights?: boolean | undefined;
@@ -318,12 +318,12 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
     limit: z.ZodDefault<z.ZodNumber>;
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "rating", "price", "experience", "distance"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    sortBy: "experience" | "rating" | "relevance" | "price" | "distance";
-    languages?: string[] | undefined;
-    specialties?: string[] | undefined;
+    limit: number;
+    sortBy: "rating" | "price" | "experience" | "relevance" | "distance";
     rating?: number | undefined;
+    query?: string | undefined;
+    specialties?: string[] | undefined;
     availability?: {
         dayOfWeek?: ("monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday")[] | undefined;
         timeRange?: {
@@ -331,8 +331,8 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
             end?: string | undefined;
         } | undefined;
     } | undefined;
-    query?: string | undefined;
     experienceYears?: number | undefined;
+    languages?: string[] | undefined;
     location?: string | undefined;
     priceRange?: {
         min?: number | undefined;
@@ -342,11 +342,12 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
     gender?: "male" | "female" | "any" | undefined;
     verifiedOnly?: boolean | undefined;
 }, {
-    languages?: string[] | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    specialties?: string[] | undefined;
     rating?: number | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "rating" | "price" | "experience" | "relevance" | "distance" | undefined;
+    query?: string | undefined;
+    specialties?: string[] | undefined;
     availability?: {
         dayOfWeek?: ("monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday")[] | undefined;
         timeRange?: {
@@ -354,9 +355,8 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
             end?: string | undefined;
         } | undefined;
     } | undefined;
-    sortBy?: "experience" | "rating" | "relevance" | "price" | "distance" | undefined;
-    query?: string | undefined;
     experienceYears?: number | undefined;
+    languages?: string[] | undefined;
     location?: string | undefined;
     priceRange?: {
         min?: number | undefined;
@@ -388,15 +388,15 @@ export declare const SearchAnalyticsDtoSchema: z.ZodObject<{
     timestamp: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     query: string;
-    resultCount: number;
     timestamp: string;
+    resultCount: number;
     sessionId?: string | undefined;
     clickedResult?: string | undefined;
     clickPosition?: number | undefined;
 }, {
     query: string;
-    resultCount: number;
     timestamp: string;
+    resultCount: number;
     sessionId?: string | undefined;
     clickedResult?: string | undefined;
     clickPosition?: number | undefined;
@@ -458,13 +458,13 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "rating", "price", "experience", "distance"]>>;
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    sortBy: "experience" | "rating" | "relevance" | "price" | "distance";
+    limit: number;
+    sortBy: "rating" | "price" | "experience" | "relevance" | "distance";
     sortOrder: "asc" | "desc";
-    languages?: string[] | undefined;
-    specialties?: string[] | undefined;
     rating?: number | undefined;
+    query?: string | undefined;
+    specialties?: string[] | undefined;
     availability?: {
         dayOfWeek?: ("monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday")[] | undefined;
         timeRange?: {
@@ -472,8 +472,8 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
             end?: string | undefined;
         } | undefined;
     } | undefined;
-    query?: string | undefined;
     experienceYears?: number | undefined;
+    languages?: string[] | undefined;
     location?: string | undefined;
     priceRange?: {
         min?: number | undefined;
@@ -483,11 +483,13 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
     gender?: "male" | "female" | "any" | undefined;
     verifiedOnly?: boolean | undefined;
 }, {
-    languages?: string[] | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    specialties?: string[] | undefined;
     rating?: number | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "rating" | "price" | "experience" | "relevance" | "distance" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    query?: string | undefined;
+    specialties?: string[] | undefined;
     availability?: {
         dayOfWeek?: ("monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday")[] | undefined;
         timeRange?: {
@@ -495,10 +497,8 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
             end?: string | undefined;
         } | undefined;
     } | undefined;
-    sortBy?: "experience" | "rating" | "relevance" | "price" | "distance" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
-    query?: string | undefined;
     experienceYears?: number | undefined;
+    languages?: string[] | undefined;
     location?: string | undefined;
     priceRange?: {
         min?: number | undefined;
@@ -521,27 +521,27 @@ export declare const SearchPostsQueryDtoSchema: z.ZodObject<{
     limit: z.ZodDefault<z.ZodNumber>;
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "date", "popularity", "comments"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    sortBy: "date" | "relevance" | "popularity" | "comments";
+    limit: number;
+    sortBy: "date" | "comments" | "relevance" | "popularity";
     query: string;
     includeComments: boolean;
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
     authorId?: string | undefined;
 }, {
     query: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
-    limit?: number | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
-    sortBy?: "date" | "relevance" | "popularity" | "comments" | undefined;
+    limit?: number | undefined;
+    sortBy?: "date" | "comments" | "relevance" | "popularity" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    tags?: string[] | undefined;
     communityId?: string | undefined;
+    tags?: string[] | undefined;
     authorId?: string | undefined;
     includeComments?: boolean | undefined;
 }>;
@@ -557,24 +557,24 @@ export declare const SearchCommunitiesQueryDtoSchema: z.ZodObject<{
     limit: z.ZodDefault<z.ZodNumber>;
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "members", "activity", "created"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    sortBy: "created" | "relevance" | "members" | "activity";
+    limit: number;
+    sortBy: "members" | "activity" | "created" | "relevance";
     query: string;
     activeOnly: boolean;
+    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     maxMembers?: number | undefined;
     minMembers?: number | undefined;
 }, {
     query: string;
-    limit?: number | undefined;
     page?: number | undefined;
-    sortBy?: "created" | "relevance" | "members" | "activity" | undefined;
+    limit?: number | undefined;
+    sortBy?: "members" | "activity" | "created" | "relevance" | undefined;
+    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     maxMembers?: number | undefined;
     minMembers?: number | undefined;
     activeOnly?: boolean | undefined;
@@ -590,11 +590,11 @@ export declare const SearchUsersQueryDtoSchema: z.ZodObject<{
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "name", "joined", "activity"]>>;
     includeProfile: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    isActive: boolean;
-    limit: number;
     page: number;
-    sortBy: "name" | "relevance" | "activity" | "joined";
+    limit: number;
+    sortBy: "name" | "activity" | "relevance" | "joined";
     query: string;
+    isActive: boolean;
     includeProfile: boolean;
     role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     location?: string | undefined;
@@ -602,10 +602,10 @@ export declare const SearchUsersQueryDtoSchema: z.ZodObject<{
 }, {
     query: string;
     role?: "client" | "therapist" | "moderator" | "admin" | undefined;
-    isActive?: boolean | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
-    sortBy?: "name" | "relevance" | "activity" | "joined" | undefined;
+    limit?: number | undefined;
+    sortBy?: "name" | "activity" | "relevance" | "joined" | undefined;
+    isActive?: boolean | undefined;
     location?: string | undefined;
     verifiedOnly?: boolean | undefined;
     includeProfile?: boolean | undefined;
@@ -623,14 +623,14 @@ export declare const GlobalSearchQueryDtoSchema: z.ZodObject<{
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         tags?: string[] | undefined;
-        location?: string | undefined;
         categories?: string[] | undefined;
+        location?: string | undefined;
     }, {
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         tags?: string[] | undefined;
-        location?: string | undefined;
         categories?: string[] | undefined;
+        location?: string | undefined;
     }>>;
     page: z.ZodDefault<z.ZodNumber>;
     limit: z.ZodDefault<z.ZodNumber>;
@@ -638,8 +638,8 @@ export declare const GlobalSearchQueryDtoSchema: z.ZodObject<{
     includeHighlights: z.ZodDefault<z.ZodBoolean>;
     faceted: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: "date" | "relevance" | "popularity";
     query: string;
     includeHighlights: boolean;
@@ -648,24 +648,24 @@ export declare const GlobalSearchQueryDtoSchema: z.ZodObject<{
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         tags?: string[] | undefined;
-        location?: string | undefined;
         categories?: string[] | undefined;
+        location?: string | undefined;
     } | undefined;
-    types?: ("therapists" | "users" | "posts" | "communities" | "worksheets")[] | undefined;
+    types?: ("users" | "posts" | "therapists" | "communities" | "worksheets")[] | undefined;
 }, {
     query: string;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "date" | "relevance" | "popularity" | undefined;
     filters?: {
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         tags?: string[] | undefined;
-        location?: string | undefined;
         categories?: string[] | undefined;
+        location?: string | undefined;
     } | undefined;
     includeHighlights?: boolean | undefined;
-    types?: ("therapists" | "users" | "posts" | "communities" | "worksheets")[] | undefined;
+    types?: ("users" | "posts" | "therapists" | "communities" | "worksheets")[] | undefined;
     faceted?: boolean | undefined;
 }>;
 export type SearchTherapistsQueryDto = z.infer<typeof SearchTherapistsQueryDtoSchema>;
@@ -673,4 +673,334 @@ export type SearchPostsQueryDto = z.infer<typeof SearchPostsQueryDtoSchema>;
 export type SearchCommunitiesQueryDto = z.infer<typeof SearchCommunitiesQueryDtoSchema>;
 export type SearchUsersQueryDto = z.infer<typeof SearchUsersQueryDtoSchema>;
 export type GlobalSearchQueryDto = z.infer<typeof GlobalSearchQueryDtoSchema>;
+export declare const SearchTherapistParamsSchema: z.ZodObject<{
+    q: z.ZodString;
+    specialties: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    languages: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    minExperience: z.ZodOptional<z.ZodNumber>;
+    maxExperience: z.ZodOptional<z.ZodNumber>;
+    minPrice: z.ZodOptional<z.ZodNumber>;
+    maxPrice: z.ZodOptional<z.ZodNumber>;
+    location: z.ZodOptional<z.ZodString>;
+    insurance: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    availableFrom: z.ZodOptional<z.ZodString>;
+    availableTo: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    q: string;
+    limit?: number | undefined;
+    offset?: number | undefined;
+    specialties?: string[] | undefined;
+    languages?: string[] | undefined;
+    location?: string | undefined;
+    minExperience?: number | undefined;
+    maxExperience?: number | undefined;
+    minPrice?: number | undefined;
+    maxPrice?: number | undefined;
+    insurance?: string[] | undefined;
+    availableFrom?: string | undefined;
+    availableTo?: string | undefined;
+}, {
+    q: string;
+    limit?: number | undefined;
+    offset?: number | undefined;
+    specialties?: string[] | undefined;
+    languages?: string[] | undefined;
+    location?: string | undefined;
+    minExperience?: number | undefined;
+    maxExperience?: number | undefined;
+    minPrice?: number | undefined;
+    maxPrice?: number | undefined;
+    insurance?: string[] | undefined;
+    availableFrom?: string | undefined;
+    availableTo?: string | undefined;
+}>;
+export declare const PostSearchParamsSchema: z.ZodObject<{
+    q: z.ZodString;
+    communityId: z.ZodOptional<z.ZodString>;
+    roomId: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    q: string;
+    limit?: number | undefined;
+    offset?: number | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    communityId?: string | undefined;
+    tags?: string[] | undefined;
+    roomId?: string | undefined;
+    authorId?: string | undefined;
+}, {
+    q: string;
+    limit?: number | undefined;
+    offset?: number | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    communityId?: string | undefined;
+    tags?: string[] | undefined;
+    roomId?: string | undefined;
+    authorId?: string | undefined;
+}>;
+export declare const UserSearchParamsSchema: z.ZodObject<{
+    q: z.ZodString;
+    role: z.ZodOptional<z.ZodString>;
+    isActive: z.ZodOptional<z.ZodBoolean>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    q: string;
+    role?: string | undefined;
+    limit?: number | undefined;
+    isActive?: boolean | undefined;
+    offset?: number | undefined;
+}, {
+    q: string;
+    role?: string | undefined;
+    limit?: number | undefined;
+    isActive?: boolean | undefined;
+    offset?: number | undefined;
+}>;
+export declare const CommunitySearchParamsSchema: z.ZodObject<{
+    q: z.ZodString;
+    category: z.ZodOptional<z.ZodString>;
+    isPublic: z.ZodOptional<z.ZodBoolean>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    q: string;
+    limit?: number | undefined;
+    isPublic?: boolean | undefined;
+    offset?: number | undefined;
+    category?: string | undefined;
+}, {
+    q: string;
+    limit?: number | undefined;
+    isPublic?: boolean | undefined;
+    offset?: number | undefined;
+    category?: string | undefined;
+}>;
+export declare const GlobalSearchParamsSchema: z.ZodObject<{
+    q: z.ZodString;
+    type: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodNumber>;
+    offset: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    q: string;
+    type?: string | undefined;
+    limit?: number | undefined;
+    offset?: number | undefined;
+}, {
+    q: string;
+    type?: string | undefined;
+    limit?: number | undefined;
+    offset?: number | undefined;
+}>;
+export declare const SearchResultSchema: z.ZodObject<{
+    results: z.ZodArray<z.ZodAny, "many">;
+    total: z.ZodNumber;
+    page: z.ZodNumber;
+    totalPages: z.ZodNumber;
+    hasMore: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+    total: number;
+    results: any[];
+}, {
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+    total: number;
+    results: any[];
+}>;
+export declare const TherapistSearchResultSchema: z.ZodObject<{
+    id: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+    specialties: z.ZodArray<z.ZodString, "many">;
+    experience: z.ZodNumber;
+    rating: z.ZodNumber;
+    priceRange: z.ZodObject<{
+        min: z.ZodNumber;
+        max: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        min: number;
+        max: number;
+    }, {
+        min: number;
+        max: number;
+    }>;
+    location: z.ZodString;
+    languages: z.ZodArray<z.ZodString, "many">;
+    profileImage: z.ZodOptional<z.ZodString>;
+    bio: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    firstName: string;
+    lastName: string;
+    rating: number;
+    specialties: string[];
+    experience: number;
+    languages: string[];
+    location: string;
+    priceRange: {
+        min: number;
+        max: number;
+    };
+    bio?: string | undefined;
+    profileImage?: string | undefined;
+}, {
+    id: string;
+    firstName: string;
+    lastName: string;
+    rating: number;
+    specialties: string[];
+    experience: number;
+    languages: string[];
+    location: string;
+    priceRange: {
+        min: number;
+        max: number;
+    };
+    bio?: string | undefined;
+    profileImage?: string | undefined;
+}>;
+export declare const PostSearchResultSchema: z.ZodObject<{
+    id: z.ZodString;
+    title: z.ZodString;
+    content: z.ZodString;
+    authorId: z.ZodString;
+    authorName: z.ZodString;
+    communityId: z.ZodString;
+    communityName: z.ZodString;
+    tags: z.ZodArray<z.ZodString, "many">;
+    createdAt: z.ZodString;
+    likeCount: z.ZodNumber;
+    commentCount: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    createdAt: string;
+    title: string;
+    content: string;
+    communityId: string;
+    tags: string[];
+    authorId: string;
+    likeCount: number;
+    commentCount: number;
+    authorName: string;
+    communityName: string;
+}, {
+    id: string;
+    createdAt: string;
+    title: string;
+    content: string;
+    communityId: string;
+    tags: string[];
+    authorId: string;
+    likeCount: number;
+    commentCount: number;
+    authorName: string;
+    communityName: string;
+}>;
+export declare const UserSearchResultSchema: z.ZodObject<{
+    id: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+    email: z.ZodOptional<z.ZodString>;
+    role: z.ZodString;
+    profileImage: z.ZodOptional<z.ZodString>;
+    isActive: z.ZodBoolean;
+    joinedAt: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    joinedAt: string;
+    isActive: boolean;
+    email?: string | undefined;
+    profileImage?: string | undefined;
+}, {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    joinedAt: string;
+    isActive: boolean;
+    email?: string | undefined;
+    profileImage?: string | undefined;
+}>;
+export declare const CommunitySearchResultSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    description: z.ZodString;
+    memberCount: z.ZodNumber;
+    category: z.ZodString;
+    isPublic: z.ZodBoolean;
+    tags: z.ZodArray<z.ZodString, "many">;
+    createdAt: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    createdAt: string;
+    description: string;
+    isPublic: boolean;
+    name: string;
+    memberCount: number;
+    category: string;
+    tags: string[];
+}, {
+    id: string;
+    createdAt: string;
+    description: string;
+    isPublic: boolean;
+    name: string;
+    memberCount: number;
+    category: string;
+    tags: string[];
+}>;
+export declare const GlobalSearchResultSchema: z.ZodObject<{
+    id: z.ZodString;
+    type: z.ZodString;
+    title: z.ZodString;
+    description: z.ZodString;
+    url: z.ZodString;
+    metadata: z.ZodRecord<z.ZodString, z.ZodAny>;
+    score: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    type: string;
+    title: string;
+    description: string;
+    url: string;
+    metadata: Record<string, any>;
+    score: number;
+}, {
+    id: string;
+    type: string;
+    title: string;
+    description: string;
+    url: string;
+    metadata: Record<string, any>;
+    score: number;
+}>;
+export type SearchTherapistParams = z.infer<typeof SearchTherapistParamsSchema>;
+export type PostSearchParams = z.infer<typeof PostSearchParamsSchema>;
+export type UserSearchParams = z.infer<typeof UserSearchParamsSchema>;
+export type CommunitySearchParams = z.infer<typeof CommunitySearchParamsSchema>;
+export type GlobalSearchParams = z.infer<typeof GlobalSearchParamsSchema>;
+export type SearchResult<T = any> = z.infer<typeof SearchResultSchema> & {
+    results: T[];
+};
+export type TherapistSearchResult = z.infer<typeof TherapistSearchResultSchema>;
+export type PostSearchResult = z.infer<typeof PostSearchResultSchema>;
+export type UserSearchResult = z.infer<typeof UserSearchResultSchema>;
+export type CommunitySearchResult = z.infer<typeof CommunitySearchResultSchema>;
+export type GlobalSearchResult = z.infer<typeof GlobalSearchResultSchema>;
 //# sourceMappingURL=search.d.ts.map

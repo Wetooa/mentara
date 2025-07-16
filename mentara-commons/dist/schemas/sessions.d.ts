@@ -19,33 +19,33 @@ export declare const SessionSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "phone" | "video" | "audio" | "in_person";
-    status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
-    duration: number;
+    type: "audio" | "video" | "phone" | "in_person";
+    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
     therapistId: string;
     clientId: string;
+    duration: number;
     scheduledAt: string;
     notes?: string | undefined;
-    meetingUrl?: string | undefined;
     startedAt?: string | undefined;
     sessionNotes?: string | undefined;
     recordingUrl?: string | undefined;
+    meetingUrl?: string | undefined;
     endedAt?: string | undefined;
 }, {
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "phone" | "video" | "audio" | "in_person";
-    status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
-    duration: number;
+    type: "audio" | "video" | "phone" | "in_person";
+    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
     therapistId: string;
     clientId: string;
+    duration: number;
     scheduledAt: string;
     notes?: string | undefined;
-    meetingUrl?: string | undefined;
     startedAt?: string | undefined;
     sessionNotes?: string | undefined;
     recordingUrl?: string | undefined;
+    meetingUrl?: string | undefined;
     endedAt?: string | undefined;
 }>;
 export declare const CreateSessionDtoSchema: z.ZodObject<{
@@ -56,18 +56,18 @@ export declare const CreateSessionDtoSchema: z.ZodObject<{
     type: z.ZodDefault<z.ZodEnum<["video", "audio", "phone", "in_person"]>>;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "phone" | "video" | "audio" | "in_person";
-    duration: number;
+    type: "audio" | "video" | "phone" | "in_person";
     therapistId: string;
     clientId: string;
+    duration: number;
     scheduledAt: string;
     notes?: string | undefined;
 }, {
-    duration: number;
     therapistId: string;
     clientId: string;
+    duration: number;
     scheduledAt: string;
-    type?: "phone" | "video" | "audio" | "in_person" | undefined;
+    type?: "audio" | "video" | "phone" | "in_person" | undefined;
     notes?: string | undefined;
 }>;
 export declare const UpdateSessionDtoSchema: z.ZodObject<{
@@ -77,13 +77,13 @@ export declare const UpdateSessionDtoSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;
     sessionNotes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type?: "phone" | "video" | "audio" | "in_person" | undefined;
+    type?: "audio" | "video" | "phone" | "in_person" | undefined;
     duration?: number | undefined;
     notes?: string | undefined;
     scheduledAt?: string | undefined;
     sessionNotes?: string | undefined;
 }, {
-    type?: "phone" | "video" | "audio" | "in_person" | undefined;
+    type?: "audio" | "video" | "phone" | "in_person" | undefined;
     duration?: number | undefined;
     notes?: string | undefined;
     scheduledAt?: string | undefined;
@@ -94,11 +94,11 @@ export declare const UpdateSessionStatusDtoSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;
     notifyParticipants: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
+    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
     notifyParticipants: boolean;
     reason?: string | undefined;
 }, {
-    status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
+    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
     reason?: string | undefined;
     notifyParticipants?: boolean | undefined;
 }>;
@@ -124,8 +124,8 @@ export declare const SessionRecordingSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     createdAt: string;
-    duration: number;
     size: number;
+    duration: number;
     sessionId: string;
     recordingUrl: string;
     isEncrypted: boolean;
@@ -133,8 +133,8 @@ export declare const SessionRecordingSchema: z.ZodObject<{
 }, {
     id: string;
     createdAt: string;
-    duration: number;
     size: number;
+    duration: number;
     sessionId: string;
     recordingUrl: string;
     isEncrypted: boolean;
@@ -171,25 +171,25 @@ export declare const SessionQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["scheduledAt", "createdAt", "duration", "status"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    type?: "phone" | "video" | "audio" | "in_person" | undefined;
-    status?: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    sortBy?: "createdAt" | "status" | "duration" | "scheduledAt" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
+    type?: "audio" | "video" | "phone" | "in_person" | undefined;
+    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "status" | "duration" | "scheduledAt" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
-    type?: "phone" | "video" | "audio" | "in_person" | undefined;
-    status?: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    sortBy?: "createdAt" | "status" | "duration" | "scheduledAt" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
+    type?: "audio" | "video" | "phone" | "in_person" | undefined;
+    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "status" | "duration" | "scheduledAt" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }>;
@@ -214,29 +214,29 @@ export declare const SessionAvailabilitySchema: z.ZodObject<{
         endTime: z.ZodString;
         duration: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        duration: number;
         startTime: string;
         endTime: string;
+        duration: number;
     }, {
-        duration: number;
         startTime: string;
         endTime: string;
+        duration: number;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    date: string;
     therapistId: string;
+    date: string;
     availableSlots: {
-        duration: number;
         startTime: string;
         endTime: string;
+        duration: number;
     }[];
 }, {
-    date: string;
     therapistId: string;
+    date: string;
     availableSlots: {
-        duration: number;
         startTime: string;
         endTime: string;
+        duration: number;
     }[];
 }>;
 export declare const SessionIdParamSchema: z.ZodObject<{
@@ -284,8 +284,8 @@ export declare const CreateSessionLogDtoSchema: z.ZodObject<{
     clientId: string;
     therapistId?: string | undefined;
     meetingId?: string | undefined;
-    platform?: string | undefined;
     sessionType?: "INITIAL_CONSULTATION" | "REGULAR_THERAPY" | "CRISIS_INTERVENTION" | "GROUP_THERAPY" | "FAMILY_THERAPY" | "FOLLOW_UP" | "ASSESSMENT" | "SELF_GUIDED" | undefined;
+    platform?: string | undefined;
 }>;
 export declare const FindSessionsQueryDtoSchema: z.ZodObject<{
     clientId: z.ZodOptional<z.ZodString>;
@@ -346,13 +346,13 @@ export declare const AddSessionActivityDtoSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodAny>;
 }, "strip", z.ZodTypeAny, {
     activityType: "SESSION_START" | "SESSION_END" | "SCREEN_SHARE" | "FILE_SHARE" | "WHITEBOARD_USE" | "CHAT_MESSAGE" | "GOAL_SETTING" | "PROGRESS_REVIEW" | "HOMEWORK_ASSIGNMENT" | "ASSESSMENT_COMPLETION" | "MOOD_CHECK_IN" | "CONNECTION_ISSUE" | "AUDIO_PROBLEM" | "VIDEO_PROBLEM" | "RECONNECTION" | "RECORDING_START" | "RECORDING_STOP";
-    duration?: number | undefined;
     description?: string | undefined;
+    duration?: number | undefined;
     metadata?: any;
 }, {
     activityType: "SESSION_START" | "SESSION_END" | "SCREEN_SHARE" | "FILE_SHARE" | "WHITEBOARD_USE" | "CHAT_MESSAGE" | "GOAL_SETTING" | "PROGRESS_REVIEW" | "HOMEWORK_ASSIGNMENT" | "ASSESSMENT_COMPLETION" | "MOOD_CHECK_IN" | "CONNECTION_ISSUE" | "AUDIO_PROBLEM" | "VIDEO_PROBLEM" | "RECONNECTION" | "RECORDING_START" | "RECORDING_STOP";
-    duration?: number | undefined;
     description?: string | undefined;
+    duration?: number | undefined;
     metadata?: any;
 }>;
 export declare const LogUserActivityDtoSchema: z.ZodObject<{
@@ -473,19 +473,19 @@ export declare const SessionCreateDtoSchema: z.ZodObject<{
     sessionType: z.ZodDefault<z.ZodEnum<["video", "audio", "phone", "in_person"]>>;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    duration: number;
     therapistId: string;
     clientId: string;
-    sessionType: "phone" | "video" | "audio" | "in_person";
+    duration: number;
+    sessionType: "audio" | "video" | "phone" | "in_person";
     scheduledAt: string;
     notes?: string | undefined;
 }, {
-    duration: number;
     therapistId: string;
     clientId: string;
+    duration: number;
     scheduledAt: string;
+    sessionType?: "audio" | "video" | "phone" | "in_person" | undefined;
     notes?: string | undefined;
-    sessionType?: "phone" | "video" | "audio" | "in_person" | undefined;
 }>;
 export declare const SessionUpdateDtoSchema: z.ZodObject<{
     scheduledAt: z.ZodOptional<z.ZodString>;
@@ -495,14 +495,14 @@ export declare const SessionUpdateDtoSchema: z.ZodObject<{
     sessionNotes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     duration?: number | undefined;
+    sessionType?: "audio" | "video" | "phone" | "in_person" | undefined;
     notes?: string | undefined;
-    sessionType?: "phone" | "video" | "audio" | "in_person" | undefined;
     scheduledAt?: string | undefined;
     sessionNotes?: string | undefined;
 }, {
     duration?: number | undefined;
+    sessionType?: "audio" | "video" | "phone" | "in_person" | undefined;
     notes?: string | undefined;
-    sessionType?: "phone" | "video" | "audio" | "in_person" | undefined;
     scheduledAt?: string | undefined;
     sessionNotes?: string | undefined;
 }>;
@@ -519,26 +519,26 @@ export declare const SessionListParamsSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    offset: number;
     sortBy: "createdAt" | "status" | "duration" | "scheduledAt";
     sortOrder: "asc" | "desc";
-    status?: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show" | undefined;
+    offset: number;
+    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    sessionType?: "audio" | "video" | "phone" | "in_person" | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
-    sessionType?: "phone" | "video" | "audio" | "in_person" | undefined;
 }, {
-    status?: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show" | undefined;
+    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | undefined;
+    therapistId?: string | undefined;
+    clientId?: string | undefined;
     limit?: number | undefined;
-    offset?: number | undefined;
     sortBy?: "createdAt" | "status" | "duration" | "scheduledAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    therapistId?: string | undefined;
-    clientId?: string | undefined;
+    offset?: number | undefined;
+    sessionType?: "audio" | "video" | "phone" | "in_person" | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
-    sessionType?: "phone" | "video" | "audio" | "in_person" | undefined;
 }>;
 export declare const SessionListResponseSchema: z.ZodObject<{
     sessions: z.ZodArray<z.ZodObject<{
@@ -561,33 +561,33 @@ export declare const SessionListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "phone" | "video" | "audio" | "in_person";
-        status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
-        duration: number;
+        type: "audio" | "video" | "phone" | "in_person";
+        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
         therapistId: string;
         clientId: string;
+        duration: number;
         scheduledAt: string;
         notes?: string | undefined;
-        meetingUrl?: string | undefined;
         startedAt?: string | undefined;
         sessionNotes?: string | undefined;
         recordingUrl?: string | undefined;
+        meetingUrl?: string | undefined;
         endedAt?: string | undefined;
     }, {
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "phone" | "video" | "audio" | "in_person";
-        status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
-        duration: number;
+        type: "audio" | "video" | "phone" | "in_person";
+        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
         therapistId: string;
         clientId: string;
+        duration: number;
         scheduledAt: string;
         notes?: string | undefined;
-        meetingUrl?: string | undefined;
         startedAt?: string | undefined;
         sessionNotes?: string | undefined;
         recordingUrl?: string | undefined;
+        meetingUrl?: string | undefined;
         endedAt?: string | undefined;
     }>, "many">;
     total: z.ZodNumber;
@@ -595,49 +595,49 @@ export declare const SessionListResponseSchema: z.ZodObject<{
     limit: z.ZodNumber;
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
-    total: number;
+    limit: number;
+    hasMore: boolean;
     sessions: {
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "phone" | "video" | "audio" | "in_person";
-        status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
-        duration: number;
+        type: "audio" | "video" | "phone" | "in_person";
+        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
         therapistId: string;
         clientId: string;
+        duration: number;
         scheduledAt: string;
         notes?: string | undefined;
-        meetingUrl?: string | undefined;
         startedAt?: string | undefined;
         sessionNotes?: string | undefined;
         recordingUrl?: string | undefined;
+        meetingUrl?: string | undefined;
         endedAt?: string | undefined;
     }[];
-    hasMore: boolean;
+    total: number;
 }, {
-    limit: number;
     page: number;
-    total: number;
+    limit: number;
+    hasMore: boolean;
     sessions: {
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "phone" | "video" | "audio" | "in_person";
-        status: "cancelled" | "scheduled" | "completed" | "in_progress" | "no_show";
-        duration: number;
+        type: "audio" | "video" | "phone" | "in_person";
+        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show";
         therapistId: string;
         clientId: string;
+        duration: number;
         scheduledAt: string;
         notes?: string | undefined;
-        meetingUrl?: string | undefined;
         startedAt?: string | undefined;
         sessionNotes?: string | undefined;
         recordingUrl?: string | undefined;
+        meetingUrl?: string | undefined;
         endedAt?: string | undefined;
     }[];
-    hasMore: boolean;
+    total: number;
 }>;
 export declare const SessionStatsSchema: z.ZodObject<{
     totalSessions: z.ZodNumber;
@@ -659,49 +659,49 @@ export declare const SessionStatsSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         month: string;
         totalSessions: number;
-        averageDuration: number;
         completedSessions: number;
+        averageDuration: number;
     }, {
         month: string;
         totalSessions: number;
-        averageDuration: number;
         completedSessions: number;
+        averageDuration: number;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     totalSessions: number;
-    averageDuration: number;
+    completionRate: number;
     completedSessions: number;
     cancelledSessions: number;
-    noShowSessions: number;
-    totalDuration: number;
-    completionRate: number;
-    noShowRate: number;
-    cancellationRate: number;
+    averageDuration: number;
     sessionsByType: Record<string, number>;
     sessionsByStatus: Record<string, number>;
+    noShowSessions: number;
+    totalDuration: number;
+    noShowRate: number;
+    cancellationRate: number;
     monthlyStats: {
         month: string;
         totalSessions: number;
-        averageDuration: number;
         completedSessions: number;
+        averageDuration: number;
     }[];
 }, {
     totalSessions: number;
-    averageDuration: number;
+    completionRate: number;
     completedSessions: number;
     cancelledSessions: number;
-    noShowSessions: number;
-    totalDuration: number;
-    completionRate: number;
-    noShowRate: number;
-    cancellationRate: number;
+    averageDuration: number;
     sessionsByType: Record<string, number>;
     sessionsByStatus: Record<string, number>;
+    noShowSessions: number;
+    totalDuration: number;
+    noShowRate: number;
+    cancellationRate: number;
     monthlyStats: {
         month: string;
         totalSessions: number;
-        averageDuration: number;
         completedSessions: number;
+        averageDuration: number;
     }[];
 }>;
 export type CreateSessionLogDto = z.infer<typeof CreateSessionLogDtoSchema>;

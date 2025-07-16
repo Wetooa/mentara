@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApplicationStatusUpdateResponseSchema = exports.SubmitApplicationResponseSchema = exports.SubmitApplicationWithDocumentsRequestSchema = exports.ApplicationListResponseSchema = exports.TherapistRecommendationQuerySchema = exports.WelcomeRecommendationQuerySchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchemaLegacy = exports.TherapistRecommendationRequestSchemaLegacy = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
+exports.TherapistApplicationListDtoSchema = exports.TherapistClientRequestQueryDtoSchema = exports.TherapistMeetingQueryDtoSchema = exports.TherapistWorksheetQueryDtoSchema = exports.ApplicationStatusUpdateResponseSchema = exports.SubmitApplicationResponseSchema = exports.SubmitApplicationWithDocumentsRequestSchema = exports.ApplicationListResponseSchema = exports.TherapistRecommendationQuerySchema = exports.WelcomeRecommendationQuerySchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchemaLegacy = exports.TherapistRecommendationRequestSchemaLegacy = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
 const zod_1 = require("zod");
 // Enhanced Therapist Registration Schema (from class-validator DTO)
 exports.RegisterTherapistDtoSchema = zod_1.z.object({
@@ -432,5 +432,33 @@ exports.ApplicationStatusUpdateResponseSchema = zod_1.z.object({
     updatedBy: zod_1.z.string().uuid(),
     adminNotes: zod_1.z.string().optional(),
     notificationSent: zod_1.z.boolean().default(false)
+});
+// Additional DTOs for service operations
+exports.TherapistWorksheetQueryDtoSchema = zod_1.z.object({
+    status: zod_1.z.enum(['assigned', 'in_progress', 'completed', 'overdue']).optional(),
+    clientId: zod_1.z.string().uuid().optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0)
+});
+exports.TherapistMeetingQueryDtoSchema = zod_1.z.object({
+    status: zod_1.z.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'no_show']).optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0)
+});
+exports.TherapistClientRequestQueryDtoSchema = zod_1.z.object({
+    status: zod_1.z.enum(['pending', 'accepted', 'declined', 'expired']).optional(),
+    priority: zod_1.z.enum(['high', 'medium', 'low']).optional(),
+    dateRange: zod_1.z.enum(['today', 'week', 'month', 'all']).optional(),
+    sortBy: zod_1.z.enum(['newest', 'oldest', 'priority', 'match_score']).optional(),
+    search: zod_1.z.string().optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0)
+});
+exports.TherapistApplicationListDtoSchema = zod_1.z.object({
+    status: zod_1.z.enum(['pending', 'under_review', 'approved', 'rejected', 'additional_info_required']).optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0),
+    sortBy: zod_1.z.enum(['submittedAt', 'status', 'lastName']).optional(),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
 });
 //# sourceMappingURL=therapist.js.map

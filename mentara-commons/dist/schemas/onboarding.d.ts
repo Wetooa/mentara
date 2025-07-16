@@ -114,15 +114,15 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
         specialties: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         availability: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
+        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
-        therapistGender?: "male" | "female" | "no_preference" | undefined;
-        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
     }, {
+        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
-        therapistGender?: "male" | "female" | "no_preference" | undefined;
-        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
     }>;
     mentalHealthInfo: z.ZodOptional<z.ZodObject<{
         previousTherapy: z.ZodOptional<z.ZodBoolean>;
@@ -145,10 +145,10 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
         birthDate?: string | undefined;
     };
     preferences: {
+        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
-        therapistGender?: "male" | "female" | "no_preference" | undefined;
-        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
     };
     mentalHealthInfo?: {
         previousTherapy?: boolean | undefined;
@@ -163,10 +163,10 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
         birthDate?: string | undefined;
     };
     preferences: {
+        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
-        therapistGender?: "male" | "female" | "no_preference" | undefined;
-        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
     };
     mentalHealthInfo?: {
         previousTherapy?: boolean | undefined;
@@ -202,42 +202,42 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
             startTime: z.ZodString;
             endTime: z.ZodString;
         }, "strip", z.ZodTypeAny, {
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }, {
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         timezone: string;
+        hourlyRate: number;
         weeklyAvailability: {
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
-        hourlyRate: number;
     }, {
         timezone: string;
+        hourlyRate: number;
         weeklyAvailability: {
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
-        hourlyRate: number;
     }>;
     verificationInfo: z.ZodOptional<z.ZodObject<{
         diploma: z.ZodOptional<z.ZodString>;
         license: z.ZodOptional<z.ZodString>;
         references: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        license?: string | undefined;
         diploma?: string | undefined;
+        license?: string | undefined;
         references?: string[] | undefined;
     }, {
-        license?: string | undefined;
         diploma?: string | undefined;
+        license?: string | undefined;
         references?: string[] | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -250,16 +250,16 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
     };
     availabilityInfo: {
         timezone: string;
+        hourlyRate: number;
         weeklyAvailability: {
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
-        hourlyRate: number;
     };
     verificationInfo?: {
-        license?: string | undefined;
         diploma?: string | undefined;
+        license?: string | undefined;
         references?: string[] | undefined;
     } | undefined;
 }, {
@@ -272,16 +272,16 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
     };
     availabilityInfo: {
         timezone: string;
+        hourlyRate: number;
         weeklyAvailability: {
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
-        hourlyRate: number;
     };
     verificationInfo?: {
-        license?: string | undefined;
         diploma?: string | undefined;
+        license?: string | undefined;
         references?: string[] | undefined;
     } | undefined;
 }>;

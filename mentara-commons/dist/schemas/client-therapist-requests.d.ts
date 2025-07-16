@@ -9,13 +9,13 @@ export declare const SendTherapistRequestDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
     message?: string | undefined;
-    matchScore?: number | undefined;
     recommendationRank?: number | undefined;
+    matchScore?: number | undefined;
 }, {
     message?: string | undefined;
-    matchScore?: number | undefined;
     priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
     recommendationRank?: number | undefined;
+    matchScore?: number | undefined;
 }>;
 export declare const SendMultipleTherapistRequestsDtoSchema: z.ZodObject<{
     therapistIds: z.ZodArray<z.ZodString, "many">;
@@ -41,8 +41,8 @@ export declare const ClientRequestFiltersDtoSchema: z.ZodObject<{
     sortBy: z.ZodDefault<z.ZodEnum<["requestedAt", "respondedAt", "priority", "status"]>>;
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: "status" | "priority" | "requestedAt" | "respondedAt";
     sortOrder: "asc" | "desc";
     status?: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN" | undefined;
@@ -52,11 +52,11 @@ export declare const ClientRequestFiltersDtoSchema: z.ZodObject<{
     requestedBefore?: string | undefined;
 }, {
     status?: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN" | undefined;
-    limit?: number | undefined;
+    therapistId?: string | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "status" | "priority" | "requestedAt" | "respondedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    therapistId?: string | undefined;
     priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
     requestedAfter?: string | undefined;
     requestedBefore?: string | undefined;
@@ -76,13 +76,13 @@ export declare const TherapistRequestResponseDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     response: string;
     acceptNewClients: boolean;
-    preferredContactMethod: "email" | "phone" | "platform";
+    preferredContactMethod: "email" | "platform" | "phone";
     schedulingMessage?: string | undefined;
 }, {
     response: string;
     schedulingMessage?: string | undefined;
     acceptNewClients?: boolean | undefined;
-    preferredContactMethod?: "email" | "phone" | "platform" | undefined;
+    preferredContactMethod?: "email" | "platform" | "phone" | undefined;
 }>;
 export declare const TherapistRequestFiltersDtoSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["PENDING", "ACCEPTED", "DECLINED", "EXPIRED", "CANCELLED", "WITHDRAWN"]>>;
@@ -98,8 +98,8 @@ export declare const TherapistRequestFiltersDtoSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
     includeExpired: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    limit: number;
     page: number;
+    limit: number;
     sortBy: "status" | "priority" | "requestedAt" | "respondedAt";
     sortOrder: "asc" | "desc";
     includeExpired: boolean;
@@ -112,11 +112,11 @@ export declare const TherapistRequestFiltersDtoSchema: z.ZodObject<{
     respondedBefore?: string | undefined;
 }, {
     status?: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN" | undefined;
-    limit?: number | undefined;
+    clientId?: string | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "status" | "priority" | "requestedAt" | "respondedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    clientId?: string | undefined;
     priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
     requestedAfter?: string | undefined;
     requestedBefore?: string | undefined;
@@ -175,8 +175,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             avatarUrl: string | null;
         };
         userId: string;
-        hourlyRate: number;
         averageRating: number | null;
+        hourlyRate: number;
         specializations?: string[] | undefined;
     }, {
         user: {
@@ -185,18 +185,18 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             avatarUrl: string | null;
         };
         userId: string;
-        hourlyRate: number;
         averageRating: number | null;
+        hourlyRate: number;
         specializations?: string[] | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
-    matchScore: number | null;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
     recommendationRank: number | null;
+    matchScore: number | null;
     requestedAt: Date;
     respondedAt: Date | null;
     expiresAt: Date | null;
@@ -209,18 +209,18 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             avatarUrl: string | null;
         };
         userId: string;
-        hourlyRate: number;
         averageRating: number | null;
+        hourlyRate: number;
         specializations?: string[] | undefined;
     } | undefined;
 }, {
     id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
-    matchScore: number | null;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
     recommendationRank: number | null;
+    matchScore: number | null;
     requestedAt: Date;
     respondedAt: Date | null;
     expiresAt: Date | null;
@@ -233,8 +233,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             avatarUrl: string | null;
         };
         userId: string;
-        hourlyRate: number;
         averageRating: number | null;
+        hourlyRate: number;
         specializations?: string[] | undefined;
     } | undefined;
 }>;
@@ -287,11 +287,11 @@ export declare const TherapistRequestResponseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
-    matchScore: number | null;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
     recommendationRank: number | null;
+    matchScore: number | null;
     requestedAt: Date;
     respondedAt: Date | null;
     expiresAt: Date | null;
@@ -309,11 +309,11 @@ export declare const TherapistRequestResponseSchema: z.ZodObject<{
 }, {
     id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
-    matchScore: number | null;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
     recommendationRank: number | null;
+    matchScore: number | null;
     requestedAt: Date;
     respondedAt: Date | null;
     expiresAt: Date | null;
@@ -342,9 +342,9 @@ export declare const RequestStatisticsSchema: z.ZodObject<{
     lastRequestAt: z.ZodNullable<z.ZodDate>;
     lastResponseAt: z.ZodNullable<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
-    cancelled: number;
     pending: number;
     averageResponseTime: number;
+    cancelled: number;
     totalSent: number;
     totalReceived: number;
     accepted: number;
@@ -354,9 +354,9 @@ export declare const RequestStatisticsSchema: z.ZodObject<{
     lastRequestAt: Date | null;
     lastResponseAt: Date | null;
 }, {
-    cancelled: number;
     pending: number;
     averageResponseTime: number;
+    cancelled: number;
     totalSent: number;
     totalReceived: number;
     accepted: number;

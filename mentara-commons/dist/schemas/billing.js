@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentMethodIdParamSchema = exports.InvoiceIdParamSchema = exports.BillingQuerySchema = exports.CreatePaymentIntentDtoSchema = exports.InvoiceSchema = exports.PaymentMethodSchema = exports.GetBillingStatisticsQueryDtoSchema = exports.GetUsageRecordsQueryDtoSchema = exports.RecordUsageDtoSchema = exports.RedeemDiscountDtoSchema = exports.ValidateDiscountDtoSchema = exports.CreateDiscountDtoSchema = exports.MarkInvoiceAsPaidDtoSchema = exports.GetInvoicesQueryDtoSchema = exports.CreateInvoiceDtoSchema = exports.UpdatePaymentStatusDtoSchema = exports.GetPaymentsQueryDtoSchema = exports.CreatePaymentDtoSchema = exports.UpdatePaymentMethodDtoSchema = exports.CreatePaymentMethodDtoSchema = exports.UpdatePlanDtoSchema = exports.CreatePlanDtoSchema = exports.GetPlansQueryDtoSchema = exports.SubscriptionUsageAnalyticsQueryDtoSchema = exports.ApplyDiscountDtoSchema = exports.ReactivateSubscriptionDtoSchema = exports.ScheduleSubscriptionCancellationDtoSchema = exports.PauseSubscriptionDtoSchema = exports.ChangeSubscriptionPlanDtoSchema = exports.CancelSubscriptionDtoSchema = exports.UpdateSubscriptionDtoSchema = exports.CreateSubscriptionDtoSchema = void 0;
+exports.BillingListOptionsSchema = exports.BillingApiResponseSchema = exports.CreatePaymentIntentRequestSchema = exports.UpdateSubscriptionRequestSchema = exports.CreateSubscriptionRequestSchema = exports.CreatePaymentMethodRequestSchema = exports.BillingStatsSchema = exports.UsageRecordSchema = exports.BillingPortalSessionSchema = exports.PaymentIntentSchema = exports.InvoiceLineItemSchema = exports.SubscriptionSchema = exports.SubscriptionPlanSchema = exports.PaymentMethodIdParamSchema = exports.InvoiceIdParamSchema = exports.BillingQuerySchema = exports.CreatePaymentIntentDtoSchema = exports.InvoiceSchema = exports.PaymentMethodSchema = exports.GetBillingStatisticsQueryDtoSchema = exports.GetUsageRecordsQueryDtoSchema = exports.RecordUsageDtoSchema = exports.RedeemDiscountDtoSchema = exports.ValidateDiscountDtoSchema = exports.CreateDiscountDtoSchema = exports.MarkInvoiceAsPaidDtoSchema = exports.GetInvoicesQueryDtoSchema = exports.CreateInvoiceDtoSchema = exports.UpdatePaymentStatusDtoSchema = exports.GetPaymentsQueryDtoSchema = exports.CreatePaymentDtoSchema = exports.UpdatePaymentMethodDtoSchema = exports.CreatePaymentMethodDtoSchema = exports.UpdatePlanDtoSchema = exports.CreatePlanDtoSchema = exports.GetPlansQueryDtoSchema = exports.SubscriptionUsageAnalyticsQueryDtoSchema = exports.ApplyDiscountDtoSchema = exports.ReactivateSubscriptionDtoSchema = exports.ScheduleSubscriptionCancellationDtoSchema = exports.PauseSubscriptionDtoSchema = exports.ChangeSubscriptionPlanDtoSchema = exports.CancelSubscriptionDtoSchema = exports.UpdateSubscriptionDtoSchema = exports.CreateSubscriptionDtoSchema = void 0;
 const zod_1 = require("zod");
 // Define enums from Prisma client
 const BillingCycleSchema = zod_1.z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY']);
@@ -237,5 +237,144 @@ exports.InvoiceIdParamSchema = zod_1.z.object({
 });
 exports.PaymentMethodIdParamSchema = zod_1.z.object({
     id: zod_1.z.string().min(1, 'Payment method ID is required')
+});
+// Extended interfaces for complex billing data structures moved from frontend services
+exports.SubscriptionPlanSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    name: zod_1.z.string().min(1),
+    description: zod_1.z.string().min(1),
+    price: zod_1.z.number().min(0),
+    currency: zod_1.z.string().length(3),
+    interval: zod_1.z.enum(['month', 'year']),
+    interval_count: zod_1.z.number().min(1),
+    features: zod_1.z.array(zod_1.z.string()),
+    is_popular: zod_1.z.boolean(),
+    trial_period_days: zod_1.z.number().min(0).optional(),
+    metadata: zod_1.z.record(zod_1.z.any()).optional()
+});
+exports.SubscriptionSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    plan: exports.SubscriptionPlanSchema,
+    status: zod_1.z.enum(['active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'trialing', 'unpaid']),
+    current_period_start: zod_1.z.string().datetime(),
+    current_period_end: zod_1.z.string().datetime(),
+    trial_start: zod_1.z.string().datetime().optional(),
+    trial_end: zod_1.z.string().datetime().optional(),
+    cancel_at_period_end: zod_1.z.boolean(),
+    canceled_at: zod_1.z.string().datetime().optional(),
+    payment_method: exports.PaymentMethodSchema.optional(),
+    latest_invoice: exports.InvoiceSchema.optional(),
+    created_at: zod_1.z.string().datetime(),
+    updated_at: zod_1.z.string().datetime()
+});
+exports.InvoiceLineItemSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    description: zod_1.z.string().min(1),
+    quantity: zod_1.z.number().min(1),
+    unit_amount: zod_1.z.number().min(0),
+    amount: zod_1.z.number().min(0),
+    currency: zod_1.z.string().length(3),
+    period: zod_1.z.object({
+        start: zod_1.z.string().datetime(),
+        end: zod_1.z.string().datetime()
+    }).optional()
+});
+exports.PaymentIntentSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    amount: zod_1.z.number().min(0),
+    currency: zod_1.z.string().length(3),
+    status: zod_1.z.enum(['requires_payment_method', 'requires_confirmation', 'requires_action', 'processing', 'requires_capture', 'canceled', 'succeeded']),
+    client_secret: zod_1.z.string().min(1),
+    payment_method: exports.PaymentMethodSchema.optional(),
+    description: zod_1.z.string().optional(),
+    metadata: zod_1.z.record(zod_1.z.any()).optional(),
+    created_at: zod_1.z.string().datetime()
+});
+exports.BillingPortalSessionSchema = zod_1.z.object({
+    url: zod_1.z.string().url(),
+    return_url: zod_1.z.string().url()
+});
+exports.UsageRecordSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    subscription_item_id: zod_1.z.string().uuid(),
+    quantity: zod_1.z.number().min(0),
+    timestamp: zod_1.z.string().datetime(),
+    action: zod_1.z.enum(['increment', 'set'])
+});
+exports.BillingStatsSchema = zod_1.z.object({
+    total_revenue: zod_1.z.number().min(0),
+    monthly_revenue: zod_1.z.number().min(0),
+    active_subscriptions: zod_1.z.number().min(0),
+    canceled_subscriptions: zod_1.z.number().min(0),
+    trial_subscriptions: zod_1.z.number().min(0),
+    revenue_growth_rate: zod_1.z.number(),
+    churn_rate: zod_1.z.number().min(0).max(100)
+});
+exports.CreatePaymentMethodRequestSchema = zod_1.z.object({
+    type: zod_1.z.enum(['card', 'bank_account']),
+    card: zod_1.z.object({
+        number: zod_1.z.string().min(1),
+        exp_month: zod_1.z.number().min(1).max(12),
+        exp_year: zod_1.z.number().min(2024),
+        cvc: zod_1.z.string().min(3).max(4)
+    }).optional(),
+    bank_account: zod_1.z.object({
+        account_number: zod_1.z.string().min(1),
+        routing_number: zod_1.z.string().min(1),
+        account_type: zod_1.z.enum(['checking', 'savings'])
+    }).optional(),
+    billing_details: zod_1.z.object({
+        name: zod_1.z.string().optional(),
+        email: zod_1.z.string().email().optional(),
+        phone: zod_1.z.string().optional(),
+        address: zod_1.z.object({
+            line1: zod_1.z.string().optional(),
+            line2: zod_1.z.string().optional(),
+            city: zod_1.z.string().optional(),
+            state: zod_1.z.string().optional(),
+            postal_code: zod_1.z.string().optional(),
+            country: zod_1.z.string().optional()
+        }).optional()
+    }).optional()
+});
+exports.CreateSubscriptionRequestSchema = zod_1.z.object({
+    plan_id: zod_1.z.string().uuid(),
+    payment_method_id: zod_1.z.string().uuid().optional(),
+    trial_period_days: zod_1.z.number().min(0).optional(),
+    coupon: zod_1.z.string().optional(),
+    metadata: zod_1.z.record(zod_1.z.any()).optional()
+});
+exports.UpdateSubscriptionRequestSchema = zod_1.z.object({
+    plan_id: zod_1.z.string().uuid().optional(),
+    payment_method_id: zod_1.z.string().uuid().optional(),
+    cancel_at_period_end: zod_1.z.boolean().optional(),
+    proration_behavior: zod_1.z.enum(['create_prorations', 'none', 'always_invoice']).optional(),
+    metadata: zod_1.z.record(zod_1.z.any()).optional()
+});
+exports.CreatePaymentIntentRequestSchema = zod_1.z.object({
+    amount: zod_1.z.number().min(0.01),
+    currency: zod_1.z.string().length(3).default('USD'),
+    payment_method_id: zod_1.z.string().uuid().optional(),
+    description: zod_1.z.string().optional(),
+    metadata: zod_1.z.record(zod_1.z.any()).optional(),
+    automatic_payment_methods: zod_1.z.object({
+        enabled: zod_1.z.boolean()
+    }).optional()
+});
+exports.BillingApiResponseSchema = zod_1.z.object({
+    data: zod_1.z.any(),
+    meta: zod_1.z.object({
+        total_count: zod_1.z.number().optional(),
+        page: zod_1.z.number().optional(),
+        per_page: zod_1.z.number().optional(),
+        has_more: zod_1.z.boolean().optional()
+    }).optional()
+});
+exports.BillingListOptionsSchema = zod_1.z.object({
+    page: zod_1.z.number().min(1).optional(),
+    limit: zod_1.z.number().min(1).max(100).optional(),
+    status: zod_1.z.string().optional(),
+    starting_after: zod_1.z.string().optional(),
+    ending_before: zod_1.z.string().optional()
 });
 //# sourceMappingURL=billing.js.map

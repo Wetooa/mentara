@@ -13,6 +13,7 @@ export { default as PHOBIA_SPECIFIC } from './phobia';
 export { default as DEPRESSION_PHQ9 } from './phq-9';
 export { default as PTSD_PCL5 } from './ptsd';
 export { default as SOCIAL_PHOBIA_SPIN } from './social-phobia';
+export * from './questionnaire-mapping';
 export declare const QUESTIONNAIRE_TO_COMMUNITY_MAP: {
     readonly adhd: "ADHD Support";
     readonly alcohol: "Substance Use Recovery";

@@ -1,6 +1,20 @@
 "use strict";
 // Mental Health Questionnaire Constants
 // Centralized source of truth for all mental health assessment questionnaires
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -36,6 +50,8 @@ var ptsd_1 = require("./ptsd");
 Object.defineProperty(exports, "PTSD_PCL5", { enumerable: true, get: function () { return __importDefault(ptsd_1).default; } });
 var social_phobia_1 = require("./social-phobia");
 Object.defineProperty(exports, "SOCIAL_PHOBIA_SPIN", { enumerable: true, get: function () { return __importDefault(social_phobia_1).default; } });
+// Questionnaire mapping and utilities
+__exportStar(require("./questionnaire-mapping"), exports);
 // Community mapping based on questionnaire results
 exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = {
     'adhd': 'ADHD Support',

@@ -20,12 +20,12 @@ export declare const WorksheetSchema: z.ZodObject<{
     updatedAt: string;
     type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
-    description: string;
     content: string;
+    description: string;
     isPublic: boolean;
     createdBy: string;
-    tags: string[];
     category: string;
+    tags: string[];
     difficulty: "beginner" | "intermediate" | "advanced";
     estimatedTime: number;
     isTemplate: boolean;
@@ -35,12 +35,12 @@ export declare const WorksheetSchema: z.ZodObject<{
     updatedAt: string;
     type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
-    description: string;
     content: string;
+    description: string;
     isPublic: boolean;
     createdBy: string;
-    tags: string[];
     category: string;
+    tags: string[];
     difficulty: "beginner" | "intermediate" | "advanced";
     estimatedTime: number;
     isTemplate: boolean;
@@ -59,8 +59,8 @@ export declare const CreateWorksheetDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
-    description: string;
     content: string;
+    description: string;
     isPublic: boolean;
     category: string;
     difficulty: "beginner" | "intermediate" | "advanced";
@@ -70,8 +70,8 @@ export declare const CreateWorksheetDtoSchema: z.ZodObject<{
 }, {
     type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
-    description: string;
     content: string;
+    description: string;
     category: string;
     estimatedTime: number;
     isPublic?: boolean | undefined;
@@ -93,22 +93,22 @@ export declare const UpdateWorksheetDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
     title?: string | undefined;
-    description?: string | undefined;
     content?: string | undefined;
+    description?: string | undefined;
     isPublic?: boolean | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     estimatedTime?: number | undefined;
     isTemplate?: boolean | undefined;
 }, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
     title?: string | undefined;
-    description?: string | undefined;
     content?: string | undefined;
+    description?: string | undefined;
     isPublic?: boolean | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     estimatedTime?: number | undefined;
     isTemplate?: boolean | undefined;
@@ -126,26 +126,26 @@ export declare const WorksheetAssignmentSchema: z.ZodObject<{
     priority: z.ZodDefault<z.ZodEnum<["low", "medium", "high"]>>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "completed" | "assigned" | "in_progress" | "overdue";
-    worksheetId: string;
+    status: "completed" | "in_progress" | "assigned" | "overdue";
     therapistId: string;
-    assignedAt: string;
     clientId: string;
     priority: "low" | "medium" | "high";
+    worksheetId: string;
+    assignedAt: string;
     notes?: string | undefined;
-    dueDate?: string | undefined;
     completedAt?: string | undefined;
+    dueDate?: string | undefined;
 }, {
     id: string;
-    status: "completed" | "assigned" | "in_progress" | "overdue";
-    worksheetId: string;
+    status: "completed" | "in_progress" | "assigned" | "overdue";
     therapistId: string;
-    assignedAt: string;
     clientId: string;
+    worksheetId: string;
+    assignedAt: string;
     notes?: string | undefined;
+    completedAt?: string | undefined;
     dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
-    completedAt?: string | undefined;
 }>;
 export declare const CreateAssignmentDtoSchema: z.ZodObject<{
     worksheetId: z.ZodString;
@@ -154,14 +154,14 @@ export declare const CreateAssignmentDtoSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;
     priority: z.ZodDefault<z.ZodEnum<["low", "medium", "high"]>>;
 }, "strip", z.ZodTypeAny, {
-    worksheetId: string;
     clientId: string;
     priority: "low" | "medium" | "high";
+    worksheetId: string;
     notes?: string | undefined;
     dueDate?: string | undefined;
 }, {
-    worksheetId: string;
     clientId: string;
+    worksheetId: string;
     notes?: string | undefined;
     dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
@@ -172,12 +172,12 @@ export declare const UpdateAssignmentDtoSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;
     priority: z.ZodOptional<z.ZodEnum<["low", "medium", "high"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "completed" | "assigned" | "in_progress" | "overdue" | undefined;
+    status?: "completed" | "in_progress" | "assigned" | "overdue" | undefined;
     notes?: string | undefined;
     dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
 }, {
-    status?: "completed" | "assigned" | "in_progress" | "overdue" | undefined;
+    status?: "completed" | "in_progress" | "assigned" | "overdue" | undefined;
     notes?: string | undefined;
     dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
@@ -194,23 +194,23 @@ export declare const WorksheetSubmissionSchema: z.ZodObject<{
     reviewedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    submittedAt: string;
     assignmentId: string;
     responses: Record<string, any>;
+    submittedAt: string;
     reviewedAt?: string | undefined;
     reviewedBy?: string | undefined;
-    feedback?: string | undefined;
     attachments?: string[] | undefined;
+    feedback?: string | undefined;
     score?: number | undefined;
 }, {
     id: string;
-    submittedAt: string;
     assignmentId: string;
     responses: Record<string, any>;
+    submittedAt: string;
     reviewedAt?: string | undefined;
     reviewedBy?: string | undefined;
-    feedback?: string | undefined;
     attachments?: string[] | undefined;
+    feedback?: string | undefined;
     score?: number | undefined;
 }>;
 export declare const CreateSubmissionDtoSchema: z.ZodObject<{
@@ -251,28 +251,28 @@ export declare const WorksheetQuerySchema: z.ZodObject<{
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "title" | "difficulty" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
-    search?: string | undefined;
     createdBy?: string | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
+    search?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
 }, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "title" | "difficulty" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
-    search?: string | undefined;
     createdBy?: string | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
+    search?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
 }>;
@@ -288,24 +288,24 @@ export declare const AssignmentQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["assignedAt", "dueDate", "priority", "status"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "completed" | "assigned" | "in_progress" | "overdue" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    sortBy?: "status" | "assignedAt" | "dueDate" | "priority" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
+    status?: "completed" | "in_progress" | "assigned" | "overdue" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "status" | "dueDate" | "priority" | "assignedAt" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
     priority?: "low" | "medium" | "high" | undefined;
     dueDateFrom?: string | undefined;
     dueDateTo?: string | undefined;
 }, {
-    status?: "completed" | "assigned" | "in_progress" | "overdue" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    sortBy?: "status" | "assignedAt" | "dueDate" | "priority" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
+    status?: "completed" | "in_progress" | "assigned" | "overdue" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "status" | "dueDate" | "priority" | "assignedAt" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
     priority?: "low" | "medium" | "high" | undefined;
     dueDateFrom?: string | undefined;
     dueDateTo?: string | undefined;
@@ -362,32 +362,32 @@ export declare const WorksheetsQueryDtoSchema: z.ZodObject<{
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    sortBy?: "createdAt" | "updatedAt" | "title" | "dueDate" | "difficulty" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "updatedAt" | "title" | "dueDate" | "difficulty" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
-    search?: string | undefined;
     createdBy?: string | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
+    search?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
 }, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
-    limit?: number | undefined;
-    page?: number | undefined;
-    sortBy?: "createdAt" | "updatedAt" | "title" | "dueDate" | "difficulty" | undefined;
-    sortOrder?: "asc" | "desc" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    sortBy?: "createdAt" | "updatedAt" | "title" | "dueDate" | "difficulty" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
-    search?: string | undefined;
     createdBy?: string | undefined;
-    tags?: string[] | undefined;
     category?: string | undefined;
+    tags?: string[] | undefined;
+    search?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
 }>;
@@ -417,35 +417,35 @@ export declare const WorksheetCreateInputDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
-    description: string;
     content: string;
+    description: string;
     isPublic: boolean;
     category: string;
     difficulty: "beginner" | "intermediate" | "advanced";
     estimatedTime: number;
     isTemplate: boolean;
     therapistId?: string | undefined;
-    dueDate?: string | undefined;
-    instructions?: string | undefined;
     clientId?: string | undefined;
+    dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
     tags?: string[] | undefined;
+    instructions?: string | undefined;
 }, {
     type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
-    description: string;
     content: string;
+    description: string;
     category: string;
     estimatedTime: number;
     therapistId?: string | undefined;
-    dueDate?: string | undefined;
-    instructions?: string | undefined;
     clientId?: string | undefined;
     isPublic?: boolean | undefined;
+    dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
     tags?: string[] | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
+    instructions?: string | undefined;
 }>;
 export declare const WorksheetUpdateInputDtoSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -464,31 +464,31 @@ export declare const WorksheetUpdateInputDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
     title?: string | undefined;
-    dueDate?: string | undefined;
-    instructions?: string | undefined;
-    description?: string | undefined;
     content?: string | undefined;
+    description?: string | undefined;
     isPublic?: boolean | undefined;
+    category?: string | undefined;
+    dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     estimatedTime?: number | undefined;
     isTemplate?: boolean | undefined;
+    instructions?: string | undefined;
 }, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
     title?: string | undefined;
-    dueDate?: string | undefined;
-    instructions?: string | undefined;
-    description?: string | undefined;
     content?: string | undefined;
+    description?: string | undefined;
     isPublic?: boolean | undefined;
+    category?: string | undefined;
+    dueDate?: string | undefined;
     priority?: "low" | "medium" | "high" | undefined;
     tags?: string[] | undefined;
-    category?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     estimatedTime?: number | undefined;
     isTemplate?: boolean | undefined;
+    instructions?: string | undefined;
 }>;
 export declare const WorksheetSubmissionCreateInputDtoSchema: z.ZodObject<{
     worksheetId: z.ZodString;
@@ -498,17 +498,17 @@ export declare const WorksheetSubmissionCreateInputDtoSchema: z.ZodObject<{
     timeSpent: z.ZodOptional<z.ZodNumber>;
     isCompleted: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    worksheetId: string;
     isCompleted: boolean;
+    worksheetId: string;
     responses: Record<string, any>;
-    notes?: string | undefined;
     attachments?: string[] | undefined;
+    notes?: string | undefined;
     timeSpent?: number | undefined;
 }, {
     worksheetId: string;
     responses: Record<string, any>;
-    notes?: string | undefined;
     attachments?: string[] | undefined;
+    notes?: string | undefined;
     isCompleted?: boolean | undefined;
     timeSpent?: number | undefined;
 }>;
