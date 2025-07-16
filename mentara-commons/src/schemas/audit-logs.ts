@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// IP address validation regex (supports both IPv4 and IPv6)
+const IP_ADDRESS_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+
 // Define enums from Prisma client
 const AuditActionSchema = z.enum([
   'USER_LOGIN',
@@ -243,7 +246,7 @@ export const AuditLogSchema = z.object({
   category: z.string().min(1),
   severity: z.string().min(1),
   success: z.boolean(),
-  ipAddress: z.string().ip(),
+  ipAddress: z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address'),
   userAgent: z.string().min(1),
   metadata: z.record(z.any()),
   timestamp: z.string().datetime(),
@@ -283,7 +286,7 @@ export const SecurityEventSchema = z.object({
   type: z.string().min(1),
   severity: z.string().min(1),
   userId: z.string().uuid().optional(),
-  ipAddress: z.string().ip(),
+  ipAddress: z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address'),
   userAgent: z.string().min(1),
   description: z.string().min(1),
   resolved: z.boolean(),
@@ -299,7 +302,7 @@ export const SecurityEventQuerySchema = z.object({
   severity: z.string().optional(),
   resolved: z.boolean().optional(),
   userId: z.string().uuid().optional(),
-  ipAddress: z.string().ip().optional(),
+  ipAddress: z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address').optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
   limit: z.number().min(1).max(1000).optional(),
@@ -334,7 +337,7 @@ export const AuditLogCreateDtoSchema = z.object({
   category: z.string().optional(),
   severity: z.string().optional(),
   success: z.boolean().optional(),
-  ipAddress: z.string().ip().optional(),
+  ipAddress: z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address').optional(),
   userAgent: z.string().optional(),
   metadata: z.record(z.any()).optional(),
   details: z.string().optional()
@@ -350,7 +353,7 @@ export const AuditLogQuerySchema = z.object({
   success: z.boolean().optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
-  ipAddress: z.string().ip().optional(),
+  ipAddress: z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address').optional(),
   limit: z.number().min(1).max(1000).optional(),
   offset: z.number().min(0).optional(),
   sortBy: z.string().optional(),

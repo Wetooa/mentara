@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuditLogQuerySchema = exports.AuditLogCreateDtoSchema = exports.ComplianceReportSchema = exports.SecurityEventQuerySchema = exports.SecurityEventSchema = exports.AuditLogStatsSchema = exports.AuditLogListResponseSchema = exports.AuditLogSchema = exports.CleanupAuditLogsDtoSchema = exports.LogSystemErrorDtoSchema = exports.LogProfileUpdateDtoSchema = exports.LogUserLogoutDtoSchema = exports.LogUserLoginDtoSchema = exports.CreateDataChangeLogDtoSchema = exports.ResolveSystemEventDtoSchema = exports.CreateSystemEventDtoSchema = exports.CreateAuditLogDtoSchema = exports.SearchAuditLogsQueryDtoSchema = exports.GetAuditStatisticsQueryDtoSchema = exports.FindDataChangeLogsQueryDtoSchema = exports.FindSystemEventsQueryDtoSchema = exports.FindAuditLogsQueryDtoSchema = void 0;
 const zod_1 = require("zod");
+// IP address validation regex (supports both IPv4 and IPv6)
+const IP_ADDRESS_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
 // Define enums from Prisma client
 const AuditActionSchema = zod_1.z.enum([
     'USER_LOGIN',
@@ -211,7 +213,7 @@ exports.AuditLogSchema = zod_1.z.object({
     category: zod_1.z.string().min(1),
     severity: zod_1.z.string().min(1),
     success: zod_1.z.boolean(),
-    ipAddress: zod_1.z.string().ip(),
+    ipAddress: zod_1.z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address'),
     userAgent: zod_1.z.string().min(1),
     metadata: zod_1.z.record(zod_1.z.any()),
     timestamp: zod_1.z.string().datetime(),
@@ -248,7 +250,7 @@ exports.SecurityEventSchema = zod_1.z.object({
     type: zod_1.z.string().min(1),
     severity: zod_1.z.string().min(1),
     userId: zod_1.z.string().uuid().optional(),
-    ipAddress: zod_1.z.string().ip(),
+    ipAddress: zod_1.z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address'),
     userAgent: zod_1.z.string().min(1),
     description: zod_1.z.string().min(1),
     resolved: zod_1.z.boolean(),
@@ -263,7 +265,7 @@ exports.SecurityEventQuerySchema = zod_1.z.object({
     severity: zod_1.z.string().optional(),
     resolved: zod_1.z.boolean().optional(),
     userId: zod_1.z.string().uuid().optional(),
-    ipAddress: zod_1.z.string().ip().optional(),
+    ipAddress: zod_1.z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address').optional(),
     startDate: zod_1.z.string().datetime().optional(),
     endDate: zod_1.z.string().datetime().optional(),
     limit: zod_1.z.number().min(1).max(1000).optional(),
@@ -296,7 +298,7 @@ exports.AuditLogCreateDtoSchema = zod_1.z.object({
     category: zod_1.z.string().optional(),
     severity: zod_1.z.string().optional(),
     success: zod_1.z.boolean().optional(),
-    ipAddress: zod_1.z.string().ip().optional(),
+    ipAddress: zod_1.z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address').optional(),
     userAgent: zod_1.z.string().optional(),
     metadata: zod_1.z.record(zod_1.z.any()).optional(),
     details: zod_1.z.string().optional()
@@ -311,7 +313,7 @@ exports.AuditLogQuerySchema = zod_1.z.object({
     success: zod_1.z.boolean().optional(),
     startDate: zod_1.z.string().datetime().optional(),
     endDate: zod_1.z.string().datetime().optional(),
-    ipAddress: zod_1.z.string().ip().optional(),
+    ipAddress: zod_1.z.string().regex(IP_ADDRESS_REGEX, 'Invalid IP address').optional(),
     limit: zod_1.z.number().min(1).max(1000).optional(),
     offset: zod_1.z.number().min(0).optional(),
     sortBy: zod_1.z.string().optional(),
