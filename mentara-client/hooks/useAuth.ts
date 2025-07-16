@@ -136,37 +136,43 @@ export function useAuth() {
     }
   };
 
-  // Sign up with email (FIXED - uses flat structure)
+  // Sign up with email (Enhanced - accepts complete registration data)
   const signUpWithEmail = async (
-    email: string,
-    password: string,
-    nickname: string = "User"
+    registrationData: RegisterClientDto,
+    options?: {
+      preAssessmentAnswers?: any[];
+      source?: string;
+      sendEmailVerification?: boolean;
+    }
   ) => {
     try {
       setIsAuthenticating(true);
 
-      // Register with JWT backend using flat structure
-      await auth.register({ 
-        email, 
-        password, 
-        firstName: nickname || "User",
-        lastName: "",
-        role: "client"
-      });
+      // Register with JWT backend using complete registration data
+      const result = await api.auth.registerClient(registrationData);
+      
+      // Set tokens in auth context if registration returns them
+      if (result.accessToken && result.refreshToken) {
+        auth.setTokens(result.accessToken, result.refreshToken);
+      }
 
       toast.success("Account created successfully!");
 
-      // Submit pre-assessment if available
-      const assessmentData = getAssessmentData();
-      if (assessmentData?.answers && assessmentData.answers.length > 0) {
+      // Submit pre-assessment if available from options or store
+      const preAssessmentAnswers = options?.preAssessmentAnswers || getAssessmentData()?.answers;
+      if (preAssessmentAnswers && preAssessmentAnswers.length > 0) {
         await submitPreAssessmentMutation.mutateAsync({
-          answerMatrix: assessmentData.answers,
-          metadata: assessmentData.metadata || {},
+          answerMatrix: preAssessmentAnswers,
+          metadata: { source: options?.source || "registration" },
         });
 
         // Assign communities based on assessment
         await assignCommunitiesMutation.mutateAsync();
-        clearAssessmentData();
+        
+        // Clear assessment data if it was from store
+        if (!options?.preAssessmentAnswers) {
+          clearAssessmentData();
+        }
       }
 
       router.push("/user/onboarding/profile");

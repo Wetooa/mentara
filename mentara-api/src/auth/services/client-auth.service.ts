@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
+import { RegisterClientDto } from 'mentara-commons';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from './token.service';
 import { EmailVerificationService } from './email-verification.service';
@@ -16,15 +17,10 @@ export class ClientAuthService {
     private readonly emailVerificationService: EmailVerificationService,
   ) {}
 
-  async registerClient(
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-  ) {
+  async registerClient(registerDto: RegisterClientDto) {
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: { email: registerDto.email },
     });
 
     if (existingUser) {
@@ -32,16 +28,20 @@ export class ClientAuthService {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(registerDto.password, 12);
 
     // Create user and client profile in transaction
     const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          email,
+          email: registerDto.email,
           password: hashedPassword,
-          firstName,
-          lastName,
+          firstName: registerDto.firstName,
+          lastName: registerDto.lastName,
+          middleName: registerDto.middleName || undefined,
+          birthDate: registerDto.birthDate ? new Date(registerDto.birthDate) : undefined,
+          address: registerDto.address || undefined,
+          avatarUrl: registerDto.avatarUrl || undefined,
           role: 'client',
           emailVerified: false,
         },
@@ -50,6 +50,7 @@ export class ClientAuthService {
       const client = await tx.client.create({
         data: {
           userId: user.id,
+          hasSeenTherapistRecommendations: registerDto.hasSeenTherapistRecommendations || false,
         },
       });
 

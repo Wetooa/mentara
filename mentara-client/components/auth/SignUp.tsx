@@ -15,6 +15,11 @@ import { useForm } from "react-hook-form";
 import { RegisterClientDtoSchema, z } from "mentara-commons";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import ContinueWithGoogle from "@/components/auth/ContinueWithGoogle";
 import ContinueWithMicrosoft from "@/components/auth/ContinueWithMicrosoft";
@@ -59,10 +64,13 @@ function PreAssessmentSignUp({
     defaultValues: {
       firstName: "", // Using firstName instead of nickname to match commons schema
       lastName: "",
+      middleName: "",
       email: "",
       confirmEmail: "",
       password: "",
       confirmPassword: "",
+      birthDate: undefined,
+      address: "",
     },
     mode: "onChange",
   });
@@ -84,17 +92,21 @@ function PreAssessmentSignUp({
       const answersList = answersToAnswerMatrix(questionnaires, answers);
 
       // Transform form data to match commons RegisterClientDto
-      // const registrationData: RegisterClientDto = {
-      //   email: values.email,
-      //   password: values.password,
-      //   firstName: values.firstName,
-      //   lastName: values.lastName,
-      //   // Add any other fields from commons schema as needed
-      // };
+      const registrationData = {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        middleName: values.middleName || undefined,
+        birthDate: values.birthDate || undefined,
+        address: values.address || undefined,
+        // Optional fields that could be added later
+        avatarUrl: undefined,
+        hasSeenTherapistRecommendations: false,
+      };
 
-      // Use centralized authentication with pre-assessment support
-      const result = await signUpWithEmail(values.email, values.password, {
-        nickname: values.firstName,
+      // Use centralized authentication with complete registration data
+      const result = await signUpWithEmail(registrationData, {
         preAssessmentAnswers: answersList,
         source: "preAssessment",
         sendEmailVerification: true,
@@ -154,7 +166,74 @@ function PreAssessmentSignUp({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input placeholder="Last name (optional)" {...field} />
+                      <Input placeholder="Last name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="middleName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Middle name (optional)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="birthDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(new Date(field.value), "PPP")
+                            ) : (
+                              <span>Birth date (optional)</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date?.toISOString())}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Address (optional)" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

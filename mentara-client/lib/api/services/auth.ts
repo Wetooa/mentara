@@ -69,7 +69,7 @@ export const createAuthService = (client: AxiosInstance) => ({
    */
   registerClient: async (credentials: RegisterClientDto): Promise<AuthResponse> => {
     const validatedData = RegisterClientDtoSchema.parse(credentials);
-    return client.post("/auth/register/client", validatedData);
+    return client.post("/auth/client/register", validatedData);
   },
 
   /**

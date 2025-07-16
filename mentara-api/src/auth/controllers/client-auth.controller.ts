@@ -34,12 +34,7 @@ export class ClientAuthController {
     @Body(new ZodValidationPipe(RegisterClientDtoSchema))
     registerDto: RegisterClientDto,
   ) {
-    const result = await this.clientAuthService.registerClient(
-      registerDto.email,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-    );
+    const result = await this.clientAuthService.registerClient(registerDto);
 
     return {
       user: {
