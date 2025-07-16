@@ -8,7 +8,7 @@ import { validateSchema, formatValidationErrors } from 'mentara-commons';
 
 // Body validation decorator that validates request body using Zod schemas
 export const ValidatedBody = createParamDecorator(
-  (schema: z.ZodSchema, ctx: ExecutionContext) => {
+  (schema: any, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const body = request.body;
 
@@ -29,7 +29,7 @@ export const ValidatedBody = createParamDecorator(
 
 // Query validation decorator for query parameters
 export const ValidatedQuery = createParamDecorator(
-  (schema: z.ZodSchema, ctx: ExecutionContext) => {
+  (schema: any, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const query = request.query;
 
@@ -73,7 +73,7 @@ export const ValidatedQuery = createParamDecorator(
 
 // Params validation decorator for path parameters
 export const ValidatedParams = createParamDecorator(
-  (schema: z.ZodSchema, ctx: ExecutionContext) => {
+  (schema: any, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const params = request.params;
 

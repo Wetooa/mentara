@@ -93,144 +93,7 @@ export class MeetingsService {
     return meeting;
   }
 
-  /**
-   * Update meeting status
-   */
-  async updateMeetingStatus(
-    meetingId: string,
-    userId: string,
-    status:
-      | 'SCHEDULED'
-      | 'CONFIRMED'
-      | 'IN_PROGRESS'
-      | 'COMPLETED'
-      | 'CANCELLED',
-  ) {
-    // Verify user has access to this meeting
-    const meeting = await this.getMeetingById(meetingId, userId);
 
-    // Only therapist can confirm meetings, either participant can cancel
-    if (status === 'CONFIRMED' && meeting.therapistId !== userId) {
-      throw new ForbiddenException('Only the therapist can confirm meetings');
-    }
-
-    const updatedMeeting = await this.prisma.meeting.update({
-      where: { id: meetingId },
-      data: {
-        status,
-      },
-      include: {
-        client: {
-          include: { user: { select: { firstName: true, lastName: true } } },
-        },
-        therapist: {
-          include: { user: { select: { firstName: true, lastName: true } } },
-        },
-      },
-    });
-
-    // Emit events for status changes
-    switch (status) {
-      case 'CONFIRMED':
-        void this.eventBus.emit(
-          new MeetingConfirmedEvent({
-            meetingId,
-            clientId: updatedMeeting.clientId,
-            therapistId: updatedMeeting.therapistId,
-            confirmedAt: new Date(),
-            startTime: updatedMeeting.startTime,
-            duration: updatedMeeting.duration,
-          }),
-        );
-        break;
-      case 'IN_PROGRESS':
-        void this.eventBus.emit(
-          new MeetingStartedEvent({
-            meetingId,
-            clientId: updatedMeeting.clientId,
-            therapistId: updatedMeeting.therapistId,
-            startedAt: new Date(),
-            actualStartTime: new Date(),
-            scheduledStartTime: updatedMeeting.startTime,
-          }),
-        );
-        break;
-      case 'COMPLETED':
-        void this.eventBus.emit(
-          new MeetingCompletedEvent({
-            meetingId,
-            clientId: updatedMeeting.clientId,
-            therapistId: updatedMeeting.therapistId,
-            completedAt: new Date(),
-            actualDuration: updatedMeeting.duration,
-            scheduledDuration: updatedMeeting.duration,
-          }),
-        );
-        break;
-      case 'CANCELLED':
-        void this.eventBus.emit(
-          new MeetingCancelledEvent({
-            meetingId,
-            clientId: updatedMeeting.clientId,
-            therapistId: updatedMeeting.therapistId,
-            cancelledBy: userId,
-            cancelledAt: new Date(),
-            originalStartTime: updatedMeeting.startTime,
-          }),
-        );
-        break;
-    }
-
-    this.logger.log(
-      `Meeting ${meetingId} status updated to ${status} by user ${userId}`,
-    );
-    return updatedMeeting;
-  }
-
-  /**
-   * Save meeting session data (for analytics and quality tracking)
-   */
-  async saveMeetingSession(sessionData: MeetingSessionData) {
-    try {
-      // Get meeting data to extract clientId
-      const meeting = await this.prisma.meeting.findUnique({
-        where: { id: sessionData.meetingId },
-        select: { clientId: true, therapistId: true },
-      });
-
-      if (!meeting) {
-        throw new NotFoundException('Meeting not found');
-      }
-
-      const session = await this.prisma.sessionLog.create({
-        data: {
-          meetingId: sessionData.meetingId,
-          clientId: meeting.clientId,
-          therapistId: meeting.therapistId,
-          sessionType: 'REGULAR_THERAPY',
-          startTime: sessionData.startTime,
-          endTime: sessionData.endTime,
-          duration: sessionData.duration,
-          status: 'COMPLETED',
-          platform: 'video',
-          recordingUrl: sessionData.recordingUrl,
-          notes: JSON.stringify({
-            chatMessages: sessionData.chatMessages,
-            techIssues: sessionData.techIssues,
-            quality: sessionData.quality,
-          }),
-        },
-      });
-
-      this.logger.log(
-        `Session data saved for meeting ${sessionData.meetingId}`,
-      );
-      return session;
-    } catch (error) {
-      this.logger.error('Failed to save meeting session data:', error);
-      throw error;
-    }
-  }
 
   /**
    * Get user's upcoming meetings
@@ -479,6 +342,8 @@ export class MeetingsService {
         clientId: meeting.clientId,
         therapistId: meeting.therapistId,
         startedAt: new Date(),
+        actualStartTime: new Date(),
+        scheduledStartTime: meeting.startTime,
       }),
     );
 
@@ -558,7 +423,7 @@ export class MeetingsService {
         },
       ],
       startedAt: meeting.startTime.toISOString(),
-      endedAt: meeting.status === 'COMPLETED' ? meeting.endTime?.toISOString() : undefined,
+      endedAt: meeting.status === 'COMPLETED' ? new Date(meeting.startTime.getTime() + meeting.duration * 60000).toISOString() : undefined,
       duration: meeting.status === 'COMPLETED' ? meeting.duration : undefined,
     };
 
@@ -581,7 +446,6 @@ export class MeetingsService {
       where: { id: meetingId },
       data: { 
         status: 'COMPLETED',
-        endTime: new Date(),
       },
     });
 
@@ -615,7 +479,8 @@ export class MeetingsService {
         clientId: meeting.clientId,
         therapistId: meeting.therapistId,
         completedAt: new Date(),
-        duration: endCallDto.sessionSummary?.duration || meeting.duration,
+        actualDuration: endCallDto.sessionSummary?.duration || meeting.duration,
+        scheduledDuration: meeting.duration,
       }),
     );
 
@@ -648,6 +513,8 @@ export class MeetingsService {
             clientId: meeting.clientId,
             therapistId: meeting.therapistId,
             confirmedAt: new Date(),
+            startTime: meeting.startTime,
+            duration: meeting.duration,
           }),
         );
         break;
@@ -657,8 +524,10 @@ export class MeetingsService {
             meetingId,
             clientId: meeting.clientId,
             therapistId: meeting.therapistId,
+            cancelledBy: userId,
             cancelledAt: new Date(),
-            reason: updateStatusDto.reason,
+            cancellationReason: updateStatusDto.reason,
+            originalStartTime: meeting.startTime,
           }),
         );
         break;

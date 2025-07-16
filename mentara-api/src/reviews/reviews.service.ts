@@ -23,7 +23,7 @@ export class ReviewsService {
     meetingId: string,
     clientId: string,
     therapistId: string,
-    createReviewDto: ReviewCreateDto,
+    createReviewDto: CreateReviewDto,
   ) {
     const { rating, title, content, isAnonymous } = createReviewDto;
 
@@ -108,7 +108,7 @@ export class ReviewsService {
   async updateReview(
     reviewId: string,
     clientId: string,
-    updateReviewDto: ReviewUpdateDto,
+    updateReviewDto: UpdateReviewDto,
   ) {
     const review = await this.prisma.review.findUnique({
       where: { id: reviewId },
@@ -239,6 +239,7 @@ export class ReviewsService {
               duration: true,
             },
           },
+          helpfulVotes: true,
         },
       }),
       this.prisma.review.count({ where }),
@@ -264,17 +265,17 @@ export class ReviewsService {
       reviews: reviews.map(review => ({
         id: review.id,
         rating: review.rating,
-        title: review.title,
-        content: review.content,
+        title: review.title || undefined,
+        content: review.content || undefined,
         therapistId: review.therapistId,
         clientId: review.clientId,
-        meetingId: review.meetingId,
+        meetingId: review.meetingId || undefined,
         isAnonymous: review.isAnonymous,
         status: review.status,
-        helpfulCount: review.helpfulCount,
+        helpfulCount: review.helpfulVotes?.length || 0,
         createdAt: review.createdAt.toISOString(),
         updatedAt: review.updatedAt.toISOString(),
-        moderationNote: review.moderationNote,
+        moderationNote: review.moderationNote || undefined,
         client: review.client ? {
           id: review.clientId,
           firstName: review.client.user?.firstName,
@@ -395,6 +396,7 @@ export class ReviewsService {
             },
           },
         },
+        helpfulVotes: true,
       },
     });
 
@@ -406,17 +408,17 @@ export class ReviewsService {
       recentReviews: recentReviews.map(review => ({
         id: review.id,
         rating: review.rating,
-        title: review.title,
-        content: review.content,
+        title: review.title || undefined,
+        content: review.content || undefined,
         therapistId: review.therapistId,
         clientId: review.clientId,
-        meetingId: review.meetingId,
+        meetingId: review.meetingId || undefined,
         isAnonymous: review.isAnonymous,
         status: review.status,
-        helpfulCount: review.helpfulCount,
+        helpfulCount: review.helpfulVotes?.length || 0,
         createdAt: review.createdAt.toISOString(),
         updatedAt: review.updatedAt.toISOString(),
-        moderationNote: review.moderationNote,
+        moderationNote: review.moderationNote || undefined,
         client: review.client ? {
           id: review.clientId,
           firstName: review.client.user?.firstName,
@@ -488,25 +490,51 @@ export class ReviewsService {
       throw new NotFoundException('Review not found');
     }
 
-    // For now, we'll implement a simple toggle without a separate ReviewHelpful table
-    // In production, you might want to track individual user votes
-    
-    // This is a simplified implementation that just increments/decrements the helpful count
-    // You could extend this to track individual user votes using a ReviewHelpful table
-    
-    const updatedReview = await this.prisma.review.update({
-      where: { id: reviewId },
-      data: {
-        helpfulCount: {
-          increment: 1,
+    // Create or update a helpful vote using the ReviewHelpful table
+    const existingVote = await this.prisma.reviewHelpful.findUnique({
+      where: {
+        reviewId_userId: {
+          reviewId,
+          userId,
         },
       },
     });
 
-    return { 
-      helpful: true, 
-      helpfulCount: updatedReview.helpfulCount,
-      message: 'Review marked as helpful'
-    };
+    if (existingVote) {
+      // Remove the vote if it already exists (toggle behavior)
+      await this.prisma.reviewHelpful.delete({
+        where: { id: existingVote.id },
+      });
+      
+      const review = await this.prisma.review.findUnique({
+        where: { id: reviewId },
+        include: { helpfulVotes: true },
+      });
+
+      return { 
+        helpful: false, 
+        helpfulCount: review?.helpfulVotes.length || 0,
+        message: 'Review helpfulness removed'
+      };
+    } else {
+      // Create new helpful vote
+      await this.prisma.reviewHelpful.create({
+        data: {
+          reviewId,
+          userId,
+        },
+      });
+
+      const review = await this.prisma.review.findUnique({
+        where: { id: reviewId },
+        include: { helpfulVotes: true },
+      });
+
+      return { 
+        helpful: true, 
+        helpfulCount: review?.helpfulVotes.length || 0,
+        message: 'Review marked as helpful'
+      };
+    }
   }
 }
