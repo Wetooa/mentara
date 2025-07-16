@@ -10,11 +10,10 @@ import {
   ApplicationStatusUpdateDto,
   TherapistApplicationResponse,
 } from './interfaces/therapist-application.interfaces';
-import {
-  // FileStatus,
-  // AttachmentEntityType,
-  // AttachmentPurpose,
-} from '@prisma/client';
+import {} from // FileStatus,
+// AttachmentEntityType,
+// AttachmentPurpose,
+'@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -553,7 +552,7 @@ export class TherapistApplicationService {
             const fileName = `${Date.now()}-${file.originalname}`;
             const filePath = path.join(uploadsDir, fileName);
 
-            // File upload simplified - stub implementation  
+            // File upload simplified - stub implementation
             const fileRecord = {
               id: 'file-' + Date.now() + '-' + Math.random(),
               filename: file.originalname,

@@ -2,50 +2,121 @@ import { AxiosInstance } from "axios";
 import {
   TherapistRecommendation,
   MatchCriteria,
-  TherapistAvailability,
   TherapistRecommendationResponse,
   TherapistSearchParams,
   TherapistDashboardData,
   PatientData,
-  MeetingData,
   TherapistApplication,
   CreateApplicationRequest,
   UpdateApplicationRequest,
   ApplicationListParams,
   PersonalInfo,
-  LicenseInfo,
-  ProfessionalProfile,
-  AvailabilityServices,
-  TeletherapyInfo,
-  DocumentInfo,
-  WorksheetAssignment,
+  ProfessionalInfo,
+  PracticeInfo,
+  TherapistWorksheetAssignment,
   TherapistCredentials,
-} from "@/types/api/therapists";
+  TherapistRecommendationResponseDto,
+  TherapistRecommendationQuery,
+  WelcomeRecommendationQuery,
+  TherapistApplicationCreateDto,
+  TherapistApplicationIdParam,
+  ApplicationStatusUpdateDto,
+  RegisterTherapistDto,
+  UpdateTherapistDto,
+  TherapistIdParam,
+  TherapistWorksheetQueryDto,
+  TherapistMeetingQueryDto,
+  TherapistClientRequestQueryDto,
+  TherapistApplicationListDto,
+  TherapistRecommendationQuerySchema,
+  TherapistWorksheetQueryDtoSchema,
+  TherapistMeetingQueryDtoSchema,
+  TherapistClientRequestQueryDtoSchema,
+  TherapistApplicationListDtoSchema,
+  Meeting,
+} from 'mentara-commons';
+
+// Re-export commons types for backward compatibility
+export type {
+  TherapistRecommendation,
+  MatchCriteria,
+  TherapistRecommendationResponse,
+  TherapistSearchParams,
+  TherapistDashboardData,
+  PatientData,
+  TherapistApplication,
+  CreateApplicationRequest,
+  UpdateApplicationRequest,
+  ApplicationListParams,
+  PersonalInfo,
+  ProfessionalInfo,
+  PracticeInfo,
+  TherapistWorksheetAssignment,
+  TherapistCredentials,
+  TherapistRecommendationResponseDto,
+  TherapistRecommendationQuery,
+  WelcomeRecommendationQuery,
+  TherapistApplicationCreateDto,
+  TherapistApplicationIdParam,
+  ApplicationStatusUpdateDto,
+  RegisterTherapistDto,
+  UpdateTherapistDto,
+  TherapistIdParam,
+  TherapistWorksheetQueryDto,
+  TherapistMeetingQueryDto,
+  TherapistClientRequestQueryDto,
+  TherapistApplicationListDto,
+  Meeting,
+};
+
+// Extended interfaces for complex UI data structures
+export interface TherapistAvailability {
+  timezone: string;
+  weeklySchedule: Record<string, Array<{ start: string; end: string }>>;
+  exceptions?: Array<{
+    date: string;
+    isAvailable: boolean;
+    timeSlots?: Array<{ start: string; end: string }>;
+  }>;
+}
+
+// Using Meeting type from mentara-commons instead of local MeetingData
+export interface MeetingWithClient extends Meeting {
+  client: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface DocumentInfo {
+  id: string;
+  filename: string;
+  originalName: string;
+  url: string;
+  fileType: 'resume' | 'license' | 'certification' | 'transcript' | 'other';
+  uploadedAt: string;
+}
 
 // Therapist service factory
 export const createTherapistService = (client: AxiosInstance) => ({
+  // ===== BACKEND ENDPOINT ANALYSIS =====
+  // 
+  // FIXED: HTTP Method Mismatches Resolved
+  // All endpoints now correctly use GET methods with query parameters:
+  // 1. getApplications() - Uses GET /admin/therapists/applications with query params
+  // 2. worksheets.getAll() - Uses GET /therapist/worksheets with query params
+  // 3. meetings.getList() - Uses GET /booking/meetings with query params  
+  // 4. getClientRequests() - Uses GET /therapist/requests with query params
+  //
   // Get therapist recommendations
-  getRecommendations: (
-    params: TherapistSearchParams = {}
-  ): Promise<TherapistRecommendationResponse> => {
-    const searchParams = new URLSearchParams();
-
-    if (params.limit) searchParams.append("limit", params.limit.toString());
-    if (params.includeInactive !== undefined)
-      searchParams.append("includeInactive", params.includeInactive.toString());
-    if (params.province) searchParams.append("province", params.province);
-    if (params.maxHourlyRate)
-      searchParams.append("maxHourlyRate", params.maxHourlyRate.toString());
-    if (params.specialties?.length)
-      searchParams.append("specialties", params.specialties.join(","));
-    if (params.minRating)
-      searchParams.append("minRating", params.minRating.toString());
-    if (params.offset) searchParams.append("offset", params.offset.toString());
-
-    const queryString = searchParams.toString()
-      ? `?${searchParams.toString()}`
-      : "";
-    return client.get(`/therapist-recommendations${queryString}`);
+  getRecommendations: async (
+    params: TherapistRecommendationQuery = {}
+  ): Promise<TherapistRecommendationResponseDto> => {
+    const validatedParams = TherapistRecommendationQuerySchema.parse(params);
+    return client.post('/therapist-recommendations', validatedParams);
   },
 
   // Enhanced recommendation endpoints for Module 2
@@ -70,33 +141,27 @@ export const createTherapistService = (client: AxiosInstance) => ({
     message: string;
   }> => client.post('/therapists/requests/send', data),
 
-  // Get therapist profile (BACKEND ENDPOINT MISSING - needs implementation)
+  // ===== BACKEND ENDPOINT ISSUES =====
+  // 
+  // MISSING: GET /therapists/:id - Get therapist profile by ID
+  // Purpose: Retrieve public therapist profile information for client viewing
+  // Current backend: Has GET /therapist/profile (current user) but missing public profile endpoint
+  // Expected response: TherapistRecommendation object with public profile data
+  // Priority: HIGH - needed for therapist directory and client selection
   // getProfile: (id: string): Promise<TherapistRecommendation> =>
   //   client.get(`/therapists/${id}`),
 
   // Admin methods for application management
-  getApplications: (
-    params: ApplicationListParams = {}
+  getApplications: async (
+    params: TherapistApplicationListDto = {}
   ): Promise<{
     applications: TherapistApplication[];
     totalCount: number;
     page: number;
     totalPages: number;
   }> => {
-    const searchParams = new URLSearchParams();
-
-    if (params.status) searchParams.append("status", params.status);
-    if (params.limit) searchParams.append("limit", params.limit.toString());
-    if (params.offset)
-      searchParams.append(
-        "page",
-        Math.floor((params.offset || 0) / (params.limit || 10) + 1).toString()
-      );
-
-    const queryString = searchParams.toString()
-      ? `?${searchParams.toString()}`
-      : "";
-    return client.get(`/therapist/application${queryString}`);
+    const validatedParams = TherapistApplicationListDtoSchema.parse(params);
+    return client.get('/admin/therapists/applications', { params: validatedParams });
   },
 
   getApplicationById: (id: string): Promise<TherapistApplication> =>
@@ -104,33 +169,22 @@ export const createTherapistService = (client: AxiosInstance) => ({
 
   updateApplicationStatus: (
     applicationId: string,
-    data: { status: string; reviewedBy?: string; notes?: string }
+    data: ApplicationStatusUpdateDto
   ): Promise<{ success: boolean; message: string; credentials?: TherapistCredentials }> =>
     client.put(`/therapist/application/${applicationId}/status`, data),
 
   // Application management
   application: {
     // Submit new application
-    submit: (data: CreateApplicationRequest): Promise<TherapistApplication> =>
+    submit: (data: TherapistApplicationCreateDto): Promise<TherapistApplication> =>
       client.post("/therapist/application", data),
 
     // Get applications list
-    getList: (
-      params: ApplicationListParams = {}
+    getList: async (
+      params: TherapistApplicationListDto = {}
     ): Promise<{ applications: TherapistApplication[]; total: number }> => {
-      const searchParams = new URLSearchParams();
-
-      if (params.status) searchParams.append("status", params.status);
-      if (params.limit) searchParams.append("limit", params.limit.toString());
-      if (params.offset)
-        searchParams.append("offset", params.offset.toString());
-      if (params.sortBy) searchParams.append("sortBy", params.sortBy);
-      if (params.sortOrder) searchParams.append("sortOrder", params.sortOrder);
-
-      const queryString = searchParams.toString()
-        ? `?${searchParams.toString()}`
-        : "";
-      return client.get(`/therapist/application${queryString}`);
+      const validatedParams = TherapistApplicationListDtoSchema.parse(params);
+      return client.get('/admin/therapists/applications', { params: validatedParams });
     },
 
     // Get application by ID
@@ -140,11 +194,18 @@ export const createTherapistService = (client: AxiosInstance) => ({
     // Update application
     update: (
       id: string,
-      data: UpdateApplicationRequest
+      data: ApplicationStatusUpdateDto
     ): Promise<TherapistApplication> =>
       client.put(`/therapist/application/${id}/status`, data),
 
-    // Get my application (BACKEND ENDPOINT MISSING - needs implementation)
+    // ===== BACKEND ENDPOINT ISSUES =====
+    // 
+    // MISSING: GET /therapist/application/me - Get current user's application
+    // Purpose: Allow therapists to view their own application status
+    // Current backend: Has GET /auth/therapist/applications but different path structure
+    // Expected response: TherapistApplication object for current user
+    // Priority: MEDIUM - needed for therapist self-service application management
+    // SOLUTION: Either implement endpoint or use GET /auth/therapist/applications
     // getMy: (): Promise<TherapistApplication> =>
     //   client.get("/therapist/application/me"),
   },
@@ -168,31 +229,49 @@ export const createTherapistService = (client: AxiosInstance) => ({
     getById: (patientId: string): Promise<PatientData> =>
       client.get(`/therapist/clients/${patientId}`),
 
-    // BACKEND ENDPOINTS MISSING - These need to be implemented:
-    // updateNotes: Update session notes
-    // getSessions: Get client sessions
-    // getWorksheets: Get client worksheets
-    // assignWorksheet: Assign worksheet to client
-    // Commenting out until backend implementation is ready
+    // ===== BACKEND ENDPOINT ISSUES =====
+    // 
+    // MISSING: PUT /therapist/clients/:id/notes - Update client session notes
+    // Purpose: Allow therapists to update session notes for specific clients
+    // Current backend: Missing - would need to be implemented in TherapistClientController
+    // Expected response: Updated PatientData object with new notes
+    // Priority: HIGH - critical for session management
+    // updateNotes: (clientId: string, notes: string): Promise<PatientData> =>
+    //   client.put(`/therapist/clients/${clientId}/notes`, { notes }),
+    
+    // MISSING: GET /therapist/clients/:id/sessions - Get client sessions
+    // Purpose: Retrieve all sessions for a specific client
+    // Current backend: Missing - would need to be implemented
+    // Expected response: Array of session objects
+    // Priority: HIGH - needed for session history and management
+    // getSessions: (clientId: string): Promise<Session[]> =>
+    //   client.get(`/therapist/clients/${clientId}/sessions`),
+    
+    // MISSING: GET /therapist/clients/:id/worksheets - Get client worksheets
+    // Purpose: Retrieve all worksheets assigned to a specific client
+    // Current backend: Missing - would need to be implemented
+    // Expected response: Array of worksheet objects
+    // Priority: MEDIUM - needed for worksheet management
+    // getWorksheets: (clientId: string): Promise<Worksheet[]> =>
+    //   client.get(`/therapist/clients/${clientId}/worksheets`),
+    
+    // MISSING: POST /therapist/clients/:id/worksheets - Assign worksheet to client
+    // Purpose: Allow therapists to assign worksheets to specific clients
+    // Current backend: Missing - would need to be implemented
+    // Expected response: Assignment confirmation
+    // Priority: MEDIUM - needed for worksheet assignment workflow
+    // assignWorksheet: (clientId: string, worksheetId: string): Promise<void> =>
+    //   client.post(`/therapist/clients/${clientId}/worksheets`, { worksheetId }),
   },
 
   // Therapist worksheets management
   worksheets: {
     // Get all worksheets created by the therapist
-    getAll: (
-      params: { status?: string; clientId?: string; limit?: number; offset?: number } = {}
+    getAll: async (
+      params: TherapistWorksheetQueryDto = {}
     ): Promise<any[]> => {
-      const searchParams = new URLSearchParams();
-
-      if (params.status) searchParams.append("status", params.status);
-      if (params.clientId) searchParams.append("clientId", params.clientId);
-      if (params.limit) searchParams.append("limit", params.limit.toString());
-      if (params.offset) searchParams.append("offset", params.offset.toString());
-
-      const queryString = searchParams.toString()
-        ? `?${searchParams.toString()}`
-        : "";
-      return client.get(`/therapist/worksheets${queryString}`);
+      const validatedParams = TherapistWorksheetQueryDtoSchema.parse(params);
+      return client.get('/therapist/worksheets', { params: validatedParams });
     },
 
     // Get worksheet by ID (corrected path)
@@ -211,65 +290,44 @@ export const createTherapistService = (client: AxiosInstance) => ({
   // Meetings and sessions
   meetings: {
     // Get therapist meetings/sessions
-    getList: (
-      params: { status?: string; limit?: number; offset?: number } = {}
-    ): Promise<MeetingData[]> => {
-      const searchParams = new URLSearchParams();
-
-      if (params.status) searchParams.append("status", params.status);
-      if (params.limit) searchParams.append("limit", params.limit.toString());
-      if (params.offset)
-        searchParams.append("offset", params.offset.toString());
-
-      const queryString = searchParams.toString()
-        ? `?${searchParams.toString()}`
-        : "";
-      return client.get(`/booking/meetings${queryString}`);
+    getList: async (
+      params: TherapistMeetingQueryDto = {}
+    ): Promise<MeetingWithClient[]> => {
+      const validatedParams = TherapistMeetingQueryDtoSchema.parse(params);
+      return client.get('/booking/meetings', { params: validatedParams });
     },
 
     // Get meeting by ID
-    getById: (meetingId: string): Promise<MeetingData> =>
+    getById: (meetingId: string): Promise<MeetingWithClient> =>
       client.get(`/booking/meetings/${meetingId}`),
 
     // Update meeting (corrected method and path)
     updateStatus: (
       meetingId: string,
-      status: MeetingData["status"]
-    ): Promise<MeetingData> =>
+      status: Meeting["status"]
+    ): Promise<MeetingWithClient> =>
       client.put(`/booking/meetings/${meetingId}`, { status }),
 
-    // Start a meeting (BACKEND ENDPOINT MISSING - needs implementation)
+    // ===== BACKEND ENDPOINT ISSUES =====
+    // 
+    // MISSING: POST /booking/meetings/:id/start - Start a meeting
+    // Purpose: Initialize a therapy session and provide meeting URL
+    // Current backend: Missing - would need to be implemented in BookingController
+    // Expected response: { meetingUrl: string } - video call URL
+    // Priority: HIGH - critical for session management
     // start: (meetingId: string): Promise<{ meetingUrl: string }> =>
     //   client.post(`/booking/meetings/${meetingId}/start`),
   },
 
   // Enhanced request management endpoints for Module 2
-  getClientRequests: (params: {
-    status?: 'pending' | 'accepted' | 'declined' | 'expired';
-    priority?: 'high' | 'medium' | 'low';
-    dateRange?: 'today' | 'week' | 'month' | 'all';
-    sortBy?: 'newest' | 'oldest' | 'priority' | 'match_score';
-    search?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{
+  getClientRequests: async (params: TherapistClientRequestQueryDto = {}): Promise<{
     requests: any[];
     total: number;
     page: number;
     totalPages: number;
   }> => {
-    const searchParams = new URLSearchParams();
-    
-    if (params.status) searchParams.append('status', params.status);
-    if (params.priority) searchParams.append('priority', params.priority);
-    if (params.dateRange) searchParams.append('dateRange', params.dateRange);
-    if (params.sortBy) searchParams.append('sortBy', params.sortBy);
-    if (params.search) searchParams.append('search', params.search);
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-
-    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-    return client.get(`/therapist/requests${queryString}`);
+    const validatedParams = TherapistClientRequestQueryDtoSchema.parse(params);
+    return client.get('/therapist/requests', { params: validatedParams });
   },
 
   getRequestStatistics: (): Promise<{

@@ -15,6 +15,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import { AdminUserQuerySchema, type AdminUserQuery } from 'mentara-commons';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
@@ -27,21 +29,19 @@ export class AdminUserController {
   @AdminOnly()
   async getAllUsers(
     @CurrentUserId() currentUserId: string,
-    @Query('role') role?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('search') search?: string,
+    @Query(new ZodValidationPipe(AdminUserQuerySchema)) query: AdminUserQuery,
   ) {
     try {
       this.logger.log(`Admin ${currentUserId} retrieving users`);
-      const pageNum = page ? parseInt(page) : 1;
-      const limitNum = limit ? parseInt(limit) : 10;
 
       return await this.adminService.getAllUsers({
-        role,
-        page: pageNum,
-        limit: limitNum,
-        search,
+        role: query.role,
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        status: query.status,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
       });
     } catch (error) {
       this.logger.error('Failed to retrieve users:', error);

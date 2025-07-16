@@ -5,16 +5,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import {
-  Comment,
-  Prisma,
-  User,
-  Reply,
-} from '@prisma/client';
-import {
-  CommentCreateInputDto,
-  CommentUpdateInputDto,
-} from 'mentara-commons';
+import { Comment, Prisma, User, Reply } from '@prisma/client';
+import { CommentCreateInputDto, CommentUpdateInputDto } from 'mentara-commons';
 
 // Define local response type to match actual return structure
 interface CommentResponse {

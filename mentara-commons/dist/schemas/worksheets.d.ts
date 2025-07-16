@@ -256,9 +256,9 @@ export declare const WorksheetQuerySchema: z.ZodObject<{
     sortBy?: "createdAt" | "updatedAt" | "title" | "difficulty" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
+    search?: string | undefined;
     createdBy?: string | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
     category?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
@@ -269,9 +269,9 @@ export declare const WorksheetQuerySchema: z.ZodObject<{
     sortBy?: "createdAt" | "updatedAt" | "title" | "difficulty" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
+    search?: string | undefined;
     createdBy?: string | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
     category?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
@@ -369,9 +369,9 @@ export declare const WorksheetsQueryDtoSchema: z.ZodObject<{
     therapistId?: string | undefined;
     clientId?: string | undefined;
     isPublic?: boolean | undefined;
+    search?: string | undefined;
     createdBy?: string | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
     category?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;
@@ -384,9 +384,9 @@ export declare const WorksheetsQueryDtoSchema: z.ZodObject<{
     therapistId?: string | undefined;
     clientId?: string | undefined;
     isPublic?: boolean | undefined;
+    search?: string | undefined;
     createdBy?: string | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
     category?: string | undefined;
     difficulty?: "beginner" | "intermediate" | "advanced" | undefined;
     isTemplate?: boolean | undefined;

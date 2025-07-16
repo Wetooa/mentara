@@ -127,7 +127,9 @@ export class ModerationService {
     context: ModerationContext,
   ): Promise<boolean> {
     const result = await this.classifyContent(text, context);
-    return result.crisisLevel === 'critical' || (result.immediateEscalation ?? false);
+    return (
+      result.crisisLevel === 'critical' || (result.immediateEscalation ?? false)
+    );
   }
 
   /**

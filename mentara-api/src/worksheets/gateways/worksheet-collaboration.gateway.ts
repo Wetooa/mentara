@@ -58,7 +58,8 @@ export class WorksheetCollaborationGateway
         `Client connected: ${client.id} (User: ${client.userId})`,
       );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Connection failed: ${errorMessage}`);
       client.disconnect();
     }
@@ -83,7 +84,8 @@ export class WorksheetCollaborationGateway
           `Client disconnected: ${client.id} (User: ${client.userId}, Worksheet: ${client.worksheetId})`,
         );
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         this.logger.error(`Error handling disconnect: ${errorMessage}`);
       }
     }
@@ -145,7 +147,8 @@ export class WorksheetCollaborationGateway
 
       this.logger.log(`User ${client.userId} joined worksheet ${worksheetId}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error joining worksheet: ${errorMessage}`);
       client.emit('error', { message: 'Failed to join worksheet' });
     }
@@ -187,7 +190,8 @@ export class WorksheetCollaborationGateway
 
       this.logger.log(`User ${client.userId} left worksheet ${worksheetId}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error leaving worksheet: ${errorMessage}`);
     }
   }
@@ -220,7 +224,8 @@ export class WorksheetCollaborationGateway
         timestamp: new Date(),
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error updating cursor: ${errorMessage}`);
     }
   }
@@ -267,7 +272,8 @@ export class WorksheetCollaborationGateway
         timestamp: new Date(),
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error applying operation: ${errorMessage}`);
       client.emit('operation-failed', {
         operationId: data.operation.id || 'failed-op',
@@ -307,7 +313,8 @@ export class WorksheetCollaborationGateway
         timestamp: draft.lastSaved,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error auto-saving: ${errorMessage}`);
       client.emit('auto-save-failed', { error: errorMessage });
     }
@@ -349,7 +356,8 @@ export class WorksheetCollaborationGateway
         timestamp: new Date(),
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error adding comment: ${errorMessage}`);
       client.emit('error', { message: 'Failed to add comment' });
     }
@@ -381,7 +389,8 @@ export class WorksheetCollaborationGateway
         timestamp: new Date(),
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error resolving comment: ${errorMessage}`);
       client.emit('error', { message: 'Failed to resolve comment' });
     }

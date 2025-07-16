@@ -124,26 +124,26 @@ export declare const TestNotificationRequestDtoSchema: z.ZodObject<{
     body: string;
     requireInteraction: boolean;
     silent: boolean;
+    data?: Record<string, any> | undefined;
+    icon?: string | undefined;
+    badge?: string | undefined;
     actions?: {
         title: string;
         action: string;
         icon?: string | undefined;
     }[] | undefined;
-    data?: Record<string, any> | undefined;
-    icon?: string | undefined;
-    badge?: string | undefined;
 }, {
     userId: string;
     title: string;
     body: string;
+    data?: Record<string, any> | undefined;
+    icon?: string | undefined;
+    badge?: string | undefined;
     actions?: {
         title: string;
         action: string;
         icon?: string | undefined;
     }[] | undefined;
-    data?: Record<string, any> | undefined;
-    icon?: string | undefined;
-    badge?: string | undefined;
     requireInteraction?: boolean | undefined;
     silent?: boolean | undefined;
 }>;
@@ -188,14 +188,14 @@ export declare const NotificationTemplateSchema: z.ZodObject<{
     isActive: boolean;
     title: string;
     name: string;
-    category: "message" | "system" | "community" | "emergency" | "appointment";
+    category: "message" | "community" | "emergency" | "appointment" | "system";
     body: string;
     variables?: string[] | undefined;
 }, {
     id: string;
     title: string;
     name: string;
-    category: "message" | "system" | "community" | "emergency" | "appointment";
+    category: "message" | "community" | "emergency" | "appointment" | "system";
     body: string;
     isActive?: boolean | undefined;
     variables?: string[] | undefined;
@@ -229,12 +229,12 @@ export declare const NotificationAnalyticsQueryDtoSchema: z.ZodObject<{
     userId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    category?: "message" | "system" | "community" | "emergency" | "appointment" | undefined;
+    category?: "message" | "community" | "emergency" | "appointment" | "system" | undefined;
 }, {
     userId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    category?: "message" | "system" | "community" | "emergency" | "appointment" | undefined;
+    category?: "message" | "community" | "emergency" | "appointment" | "system" | undefined;
     includeClickThrough?: boolean | undefined;
     includeDeliveryRate?: boolean | undefined;
 }>;
@@ -276,6 +276,7 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         enabled?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
+    subscriptionId: string;
     preferences: {
         sessionReminders?: boolean | undefined;
         messageNotifications?: boolean | undefined;
@@ -283,7 +284,6 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         appointmentUpdates?: boolean | undefined;
         communityActivity?: boolean | undefined;
     };
-    subscriptionId: string;
     quietHours?: {
         enabled: boolean;
         timezone?: string | undefined;
@@ -291,6 +291,7 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         endTime?: string | undefined;
     } | undefined;
 }, {
+    subscriptionId: string;
     preferences: {
         sessionReminders?: boolean | undefined;
         messageNotifications?: boolean | undefined;
@@ -298,7 +299,6 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         appointmentUpdates?: boolean | undefined;
         communityActivity?: boolean | undefined;
     };
-    subscriptionId: string;
     quietHours?: {
         timezone?: string | undefined;
         startTime?: string | undefined;

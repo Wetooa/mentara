@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PendingTherapistFiltersDtoSchema = exports.UpdateTherapistStatusDtoSchema = exports.RejectTherapistDtoSchema = exports.ApproveTherapistDtoSchema = exports.AdminIdParamSchema = exports.AdminQuerySchema = exports.AdminResponseDtoSchema = exports.UpdateAdminDtoSchema = exports.CreateAdminDtoSchema = void 0;
+exports.AdminAnalyticsQuerySchema = exports.PendingTherapistFiltersDtoSchema = exports.UpdateTherapistStatusDtoSchema = exports.RejectTherapistDtoSchema = exports.ApproveTherapistDtoSchema = exports.AdminIdParamSchema = exports.AdminUserQuerySchema = exports.AdminQuerySchema = exports.AdminResponseDtoSchema = exports.UpdateAdminDtoSchema = exports.CreateAdminDtoSchema = void 0;
 const zod_1 = require("zod");
 // Admin Creation and Update Schemas
 exports.CreateAdminDtoSchema = zod_1.z.object({
@@ -26,6 +26,16 @@ exports.AdminQuerySchema = zod_1.z.object({
     limit: zod_1.z.number().min(1).max(100).optional(),
     adminLevel: zod_1.z.string().optional(),
     sortBy: zod_1.z.enum(['createdAt', 'updatedAt', 'adminLevel']).optional()
+});
+// Admin User Management Query Parameters
+exports.AdminUserQuerySchema = zod_1.z.object({
+    role: zod_1.z.enum(['client', 'therapist', 'moderator', 'admin']).optional(),
+    page: zod_1.z.number().min(1).default(1),
+    limit: zod_1.z.number().min(1).max(100).default(10),
+    search: zod_1.z.string().optional(),
+    status: zod_1.z.enum(['active', 'inactive', 'suspended']).optional(),
+    sortBy: zod_1.z.enum(['createdAt', 'firstName', 'lastName', 'email', 'role']).default('createdAt'),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).default('desc')
 });
 // Admin ID Parameter Schema
 exports.AdminIdParamSchema = zod_1.z.object({
@@ -59,5 +69,10 @@ exports.PendingTherapistFiltersDtoSchema = zod_1.z.object({
     processedBy: zod_1.z.string().optional(),
     providerType: zod_1.z.string().optional(),
     limit: zod_1.z.number().min(1).max(100).default(50),
+});
+// Admin Analytics Query Schema
+exports.AdminAnalyticsQuerySchema = zod_1.z.object({
+    startDate: zod_1.z.string().datetime().optional(),
+    endDate: zod_1.z.string().datetime().optional(),
 });
 //# sourceMappingURL=admin.js.map

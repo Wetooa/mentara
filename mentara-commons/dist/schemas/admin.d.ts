@@ -5,22 +5,22 @@ export declare const CreateAdminDtoSchema: z.ZodObject<{
     adminLevel: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     userId: string;
-    permissions?: string[] | undefined;
     adminLevel?: string | undefined;
+    permissions?: string[] | undefined;
 }, {
     userId: string;
-    permissions?: string[] | undefined;
     adminLevel?: string | undefined;
+    permissions?: string[] | undefined;
 }>;
 export declare const UpdateAdminDtoSchema: z.ZodObject<{
     permissions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     adminLevel: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    permissions?: string[] | undefined;
     adminLevel?: string | undefined;
+    permissions?: string[] | undefined;
 }, {
-    permissions?: string[] | undefined;
     adminLevel?: string | undefined;
+    permissions?: string[] | undefined;
 }>;
 export declare const AdminResponseDtoSchema: z.ZodObject<{
     userId: z.ZodString;
@@ -32,14 +32,14 @@ export declare const AdminResponseDtoSchema: z.ZodObject<{
     createdAt: Date;
     updatedAt: Date;
     userId: string;
-    permissions?: string[] | undefined;
     adminLevel?: string | undefined;
+    permissions?: string[] | undefined;
 }, {
     createdAt: Date;
     updatedAt: Date;
     userId: string;
-    permissions?: string[] | undefined;
     adminLevel?: string | undefined;
+    permissions?: string[] | undefined;
 }>;
 export declare const AdminQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -47,15 +47,40 @@ export declare const AdminQuerySchema: z.ZodObject<{
     adminLevel: z.ZodOptional<z.ZodString>;
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "updatedAt", "adminLevel"]>>;
 }, "strip", z.ZodTypeAny, {
+    adminLevel?: string | undefined;
     limit?: number | undefined;
     page?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "adminLevel" | undefined;
-    adminLevel?: string | undefined;
 }, {
+    adminLevel?: string | undefined;
     limit?: number | undefined;
     page?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "adminLevel" | undefined;
-    adminLevel?: string | undefined;
+}>;
+export declare const AdminUserQuerySchema: z.ZodObject<{
+    role: z.ZodOptional<z.ZodEnum<["client", "therapist", "moderator", "admin"]>>;
+    page: z.ZodDefault<z.ZodNumber>;
+    limit: z.ZodDefault<z.ZodNumber>;
+    search: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<["active", "inactive", "suspended"]>>;
+    sortBy: z.ZodDefault<z.ZodEnum<["createdAt", "firstName", "lastName", "email", "role"]>>;
+    sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    page: number;
+    sortBy: "email" | "firstName" | "lastName" | "role" | "createdAt";
+    sortOrder: "asc" | "desc";
+    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
+    status?: "active" | "inactive" | "suspended" | undefined;
+    search?: string | undefined;
+}, {
+    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
+    status?: "active" | "inactive" | "suspended" | undefined;
+    limit?: number | undefined;
+    page?: number | undefined;
+    sortBy?: "email" | "firstName" | "lastName" | "role" | "createdAt" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+    search?: string | undefined;
 }>;
 export declare const AdminIdParamSchema: z.ZodObject<{
     id: z.ZodString;
@@ -126,9 +151,21 @@ export type CreateAdminDto = z.infer<typeof CreateAdminDtoSchema>;
 export type UpdateAdminDto = z.infer<typeof UpdateAdminDtoSchema>;
 export type AdminResponseDto = z.infer<typeof AdminResponseDtoSchema>;
 export type AdminQuery = z.infer<typeof AdminQuerySchema>;
+export type AdminUserQuery = z.infer<typeof AdminUserQuerySchema>;
 export type AdminIdParam = z.infer<typeof AdminIdParamSchema>;
+export declare const AdminAnalyticsQuerySchema: z.ZodObject<{
+    startDate: z.ZodOptional<z.ZodString>;
+    endDate: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+}, {
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+}>;
 export type ApproveTherapistDto = z.infer<typeof ApproveTherapistDtoSchema>;
 export type RejectTherapistDto = z.infer<typeof RejectTherapistDtoSchema>;
 export type UpdateTherapistStatusDto = z.infer<typeof UpdateTherapistStatusDtoSchema>;
 export type PendingTherapistFiltersDto = z.infer<typeof PendingTherapistFiltersDtoSchema>;
+export type AdminAnalyticsQuery = z.infer<typeof AdminAnalyticsQuerySchema>;
 //# sourceMappingURL=admin.d.ts.map

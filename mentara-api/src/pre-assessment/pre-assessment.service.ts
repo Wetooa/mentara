@@ -210,14 +210,11 @@ export class PreAssessmentService {
       }
 
       // Comprehensive input validation
-      this.validateQuestionnaires(data.questionnaires as string[]);
-      this.validateAnswersStructure(data.answers as number[][]);
+      this.validateQuestionnaires(data.questionnaires);
+      this.validateAnswersStructure(data.answers);
 
       // Validate questionnaires and answers alignment
-      if (
-        (data.questionnaires as string[]).length !==
-        (data.answers as number[][]).length
-      ) {
+      if (data.questionnaires.length !== data.answers.length) {
         throw new BadRequestException(
           'Number of questionnaires must match number of answer arrays',
         );
@@ -234,8 +231,8 @@ export class PreAssessmentService {
       if (!data.scores || !data.severityLevels) {
         this.logger.debug('Calculating scores and severity levels');
         const calculatedScores = calculateAllScores(
-          data.questionnaires as string[],
-          data.answers as number[][],
+          data.questionnaires,
+          data.answers,
         );
         scores = Object.fromEntries(
           Object.entries(calculatedScores).map(([key, value]) => [
@@ -249,7 +246,7 @@ export class PreAssessmentService {
       // Safely flatten answers and attempt AI prediction
       let aiEstimate: Record<string, boolean> = {};
       try {
-        const flatAnswers = this.flattenAnswers(data.answers as number[][]);
+        const flatAnswers = this.flattenAnswers(data.answers);
 
         if (flatAnswers.length === 201) {
           this.logger.debug('Attempting AI prediction with validated input');
@@ -279,8 +276,8 @@ export class PreAssessmentService {
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          questionnaires: data.questionnaires as string[],
-          answers: data.answers as number[][],
+          questionnaires: data.questionnaires,
+          answers: data.answers,
           answerMatrix: data.answerMatrix as number[][],
           scores,
           severityLevels,

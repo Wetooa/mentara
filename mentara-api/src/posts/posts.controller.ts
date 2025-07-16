@@ -15,7 +15,10 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
-import { SupabaseStorageService, FileUploadResult } from 'src/common/services/supabase-storage.service';
+import {
+  SupabaseStorageService,
+  FileUploadResult,
+} from 'src/common/services/supabase-storage.service';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
 import { PostCreateInputDto, PostUpdateInputDto } from 'mentara-commons';

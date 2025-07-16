@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PostRoomParamsDtoSchema = exports.PostUpdateInputDtoSchema = exports.PostCreateInputDtoSchema = exports.PostParamsDtoSchema = exports.PostReactionParamSchema = exports.PostIdParamSchema = exports.ModeratePostDtoSchema = exports.PostQuerySchema = exports.PollVoteDtoSchema = exports.ReportPostDtoSchema = exports.CreatePostReactionDtoSchema = exports.PostReactionSchema = exports.UpdatePostDtoSchema = exports.CreatePostDtoSchema = exports.PostSchema = void 0;
+exports.ReportContentDtoSchema = exports.CreateNestedCommentDtoSchema = exports.GiveAwardDtoSchema = exports.VoteContentDtoSchema = exports.PostRoomParamsDtoSchema = exports.PostUpdateInputDtoSchema = exports.PostCreateInputDtoSchema = exports.PostParamsDtoSchema = exports.PostReactionParamSchema = exports.PostIdParamSchema = exports.ModeratePostDtoSchema = exports.PostQuerySchema = exports.PollVoteDtoSchema = exports.ReportPostDtoSchema = exports.CreatePostReactionDtoSchema = exports.PostReactionSchema = exports.UpdatePostDtoSchema = exports.CreatePostDtoSchema = exports.PostSchema = void 0;
 const zod_1 = require("zod");
 // Post Schema
 exports.PostSchema = zod_1.z.object({
@@ -125,5 +125,29 @@ exports.PostUpdateInputDtoSchema = zod_1.z.object({
 });
 exports.PostRoomParamsDtoSchema = zod_1.z.object({
     roomId: zod_1.z.string().uuid('Invalid room ID format')
+});
+// Reddit Features Schemas
+exports.VoteContentDtoSchema = zod_1.z.object({
+    contentId: zod_1.z.string().min(1, 'Content ID is required'),
+    contentType: zod_1.z.enum(['POST', 'COMMENT']),
+    voteType: zod_1.z.enum(['UPVOTE', 'DOWNVOTE'])
+});
+exports.GiveAwardDtoSchema = zod_1.z.object({
+    contentId: zod_1.z.string().min(1, 'Content ID is required'),
+    contentType: zod_1.z.enum(['POST', 'COMMENT']),
+    awardType: zod_1.z.enum(['SILVER', 'GOLD', 'PLATINUM', 'HELPFUL', 'WHOLESOME', 'ROCKET_LIKE']),
+    message: zod_1.z.string().max(500, 'Message too long').optional(),
+    isAnonymous: zod_1.z.boolean().default(false)
+});
+exports.CreateNestedCommentDtoSchema = zod_1.z.object({
+    postId: zod_1.z.string().min(1, 'Post ID is required'),
+    parentId: zod_1.z.string().optional(),
+    content: zod_1.z.string().min(1, 'Content is required').max(10000, 'Content too long')
+});
+exports.ReportContentDtoSchema = zod_1.z.object({
+    contentId: zod_1.z.string().min(1, 'Content ID is required'),
+    contentType: zod_1.z.enum(['POST', 'COMMENT']),
+    reason: zod_1.z.enum(['SPAM', 'HARASSMENT', 'HATE_SPEECH', 'VIOLENCE', 'SEXUAL_CONTENT', 'MISINFORMATION', 'COPYRIGHT', 'SELF_HARM', 'OTHER']),
+    description: zod_1.z.string().max(1000, 'Description too long').optional()
 });
 //# sourceMappingURL=posts.js.map

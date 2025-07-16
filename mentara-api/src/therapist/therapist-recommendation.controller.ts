@@ -13,13 +13,17 @@ import { TherapistRecommendationService } from './therapist-recommendation.servi
 import { PrismaService } from '../providers/prisma-client.provider';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { ValidatedQuery } from '../common/decorators/validate-body.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   TherapistRecommendationRequestSchema,
   TherapistRecommendationResponseDtoSchema,
+  TherapistRecommendationQuerySchema,
+  WelcomeRecommendationQuerySchema,
   type TherapistRecommendationRequest,
-  type TherapistRecommendationResponse,
-} from 'mentara-commons';
+  type TherapistRecommendationResponseDto,
+  type TherapistRecommendationQuery,
+  type WelcomeRecommendationQuery,
+} from '@mentara/commons';
 
 @Controller('therapist-recommendations')
 @UseGuards(JwtAuthGuard)
@@ -33,11 +37,9 @@ export class TherapistRecommendationController {
   @HttpCode(HttpStatus.OK)
   async getRecommendedTherapists(
     @CurrentUserId() clerkId: string,
-    @Query('limit') limit?: string,
-    @Query('includeInactive') includeInactive?: string,
-    @Query('province') province?: string,
-    @Query('maxHourlyRate') maxHourlyRate?: string,
-  ): Promise<TherapistRecommendationResponse> {
+    @Query(new ZodValidationPipe(TherapistRecommendationQuerySchema))
+    query: TherapistRecommendationQuery,
+  ): Promise<TherapistRecommendationResponseDto> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: clerkId },
@@ -49,10 +51,10 @@ export class TherapistRecommendationController {
 
       const request: TherapistRecommendationRequest = {
         userId: user.id,
-        limit: limit ? parseInt(limit) : 10,
-        includeInactive: includeInactive === 'true',
-        province,
-        maxHourlyRate: maxHourlyRate ? parseFloat(maxHourlyRate) : undefined,
+        limit: query.limit,
+        includeInactive: query.includeInactive,
+        province: query.province,
+        maxHourlyRate: query.maxHourlyRate,
       };
       return await this.therapistRecommendationService.getRecommendedTherapists(
         request,
@@ -100,9 +102,8 @@ export class TherapistRecommendationController {
   @HttpCode(HttpStatus.OK)
   async getWelcomeRecommendations(
     @CurrentUserId() userId: string,
-    @Query('limit') limit?: string,
-    @Query('province') province?: string,
-    @Query('forceRefresh') forceRefresh?: string,
+    @Query(new ZodValidationPipe(WelcomeRecommendationQuerySchema))
+    query: WelcomeRecommendationQuery,
   ) {
     try {
       // Verify user exists and get client status
@@ -138,7 +139,7 @@ export class TherapistRecommendationController {
 
       // Check if this is truly a first-time user (unless forcing refresh)
       const isFirstTime = !client.hasSeenTherapistRecommendations;
-      const shouldShowWelcome = isFirstTime || forceRefresh === 'true';
+      const shouldShowWelcome = isFirstTime || query.forceRefresh;
 
       if (!shouldShowWelcome) {
         // User has already seen recommendations, redirect to regular recommendations
@@ -153,9 +154,9 @@ export class TherapistRecommendationController {
       // Get personalized welcome recommendations
       const request: TherapistRecommendationRequest = {
         userId: user.id,
-        limit: limit ? parseInt(limit) : 8, // Slightly more for welcome experience
+        limit: query.limit,
         includeInactive: false, // Only active therapists for welcome
-        province,
+        province: query.province,
         maxHourlyRate: undefined, // No rate filter for initial welcome
       };
 

@@ -155,7 +155,10 @@ export class PerformanceTestRunner {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      console.error('❌ Load testing failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        '❌ Load testing failed:',
+        error instanceof Error ? error.message : 'Unknown error',
+      );
     }
   }
 
@@ -204,7 +207,10 @@ export class PerformanceTestRunner {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      console.error('❌ Security testing failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        '❌ Security testing failed:',
+        error instanceof Error ? error.message : 'Unknown error',
+      );
     }
   }
 
@@ -305,7 +311,10 @@ export class PerformanceTestRunner {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      console.error('❌ Memory testing failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        '❌ Memory testing failed:',
+        error instanceof Error ? error.message : 'Unknown error',
+      );
     }
   }
 

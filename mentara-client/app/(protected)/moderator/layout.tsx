@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 
 export default function ModeratorLayout({
@@ -40,15 +40,13 @@ export default function ModeratorLayout({
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isModerator } = useRole();
-  const { signOut } = useClerk();
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded, handleSignOut } = useAuth();
 
-  // Moderator data from Clerk user
+  // Moderator data from auth user
   const moderator = {
-    name:
-      user?.fullName || user?.primaryEmailAddress?.emailAddress || "Moderator",
-    email: user?.primaryEmailAddress?.emailAddress || "moderator@mentara.com",
-    avatarUrl: user?.imageUrl || "/icons/user-avatar.png",
+    name: user?.firstName ? `${user.firstName} ${user.lastName}` : "Moderator",
+    email: user?.email || "moderator@mentara.com",
+    avatarUrl: "/icons/user-avatar.png",
   };
 
   const navItems = [
@@ -86,15 +84,9 @@ export default function ModeratorLayout({
 
   const handleLogout = async () => {
     try {
-      // Use Clerk's signOut method to properly sign out the user
-      await signOut();
-
-      // After successful logout, redirect to main page
-      router.push("/");
+      await handleSignOut();
     } catch (error) {
       console.error("Error during logout:", error);
-      // Even if there's an error, try to redirect to main page
-      router.push("/");
     }
   };
 

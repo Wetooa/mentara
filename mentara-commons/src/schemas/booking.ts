@@ -232,7 +232,8 @@ export const TherapistAvailabilityCreateDtoSchema = z.object({
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
   isAvailable: z.boolean().default(true),
-  timezone: z.string().optional()
+  timezone: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export const TherapistAvailabilityUpdateDtoSchema = z.object({
@@ -240,7 +241,8 @@ export const TherapistAvailabilityUpdateDtoSchema = z.object({
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
   isAvailable: z.boolean().optional(),
-  timezone: z.string().optional()
+  timezone: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export const AvailabilityParamsDtoSchema = z.object({

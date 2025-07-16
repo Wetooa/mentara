@@ -632,9 +632,12 @@ export class SecurityTestingSuite {
 
         // Check for secure session headers
         const setCookieHeaders = response.headers['set-cookie'];
-        const hasSecureHeaders = Array.isArray(setCookieHeaders) && setCookieHeaders.some(
-          (cookie) => cookie.includes('HttpOnly') && cookie.includes('Secure'),
-        );
+        const hasSecureHeaders =
+          Array.isArray(setCookieHeaders) &&
+          setCookieHeaders.some(
+            (cookie) =>
+              cookie.includes('HttpOnly') && cookie.includes('Secure'),
+          );
 
         return {
           passed: hasSecureHeaders || response.status >= 400, // Either secure or properly rejected

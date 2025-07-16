@@ -14,6 +14,37 @@ import { AuditLoggingService } from '../common/services/audit-logging.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import {
+  FindAuditLogsQueryDtoSchema,
+  FindSystemEventsQueryDtoSchema,
+  FindDataChangeLogsQueryDtoSchema,
+  GetAuditStatisticsQueryDtoSchema,
+  SearchAuditLogsQueryDtoSchema,
+  CreateAuditLogDtoSchema,
+  CreateSystemEventDtoSchema,
+  ResolveSystemEventDtoSchema,
+  CreateDataChangeLogDtoSchema,
+  LogUserLoginDtoSchema,
+  LogUserLogoutDtoSchema,
+  LogProfileUpdateDtoSchema,
+  LogSystemErrorDtoSchema,
+  CleanupAuditLogsDtoSchema,
+  type FindAuditLogsQueryDto,
+  type FindSystemEventsQueryDto,
+  type FindDataChangeLogsQueryDto,
+  type GetAuditStatisticsQueryDto,
+  type SearchAuditLogsQueryDto,
+  type CreateAuditLogDto,
+  type CreateSystemEventDto,
+  type ResolveSystemEventDto,
+  type CreateDataChangeLogDto,
+  type LogUserLoginDto,
+  type LogUserLogoutDto,
+  type LogProfileUpdateDto,
+  type LogSystemErrorDto,
+  type CleanupAuditLogsDto,
+} from '@mentara/commons';
 import {
   AuditAction,
   EventSeverity,
@@ -31,19 +62,8 @@ export class AuditLogsController {
 
   @Post()
   createAuditLog(
-    @Body()
-    body: {
-      action: AuditAction;
-      entity: string;
-      entityId: string;
-      oldValues?: any;
-      newValues?: any;
-      description?: string;
-      metadata?: any;
-      ipAddress?: string;
-      userAgent?: string;
-      requestId?: string;
-    },
+    @Body(new ZodValidationPipe(CreateAuditLogDtoSchema))
+    body: CreateAuditLogDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() userRole: string,
   ) {
@@ -57,13 +77,8 @@ export class AuditLogsController {
   @Get()
   findAuditLogs(
     @CurrentUserRole() userRole: string,
-    @Query('userId') userId?: string,
-    @Query('action') action?: AuditAction,
-    @Query('entity') entity?: string,
-    @Query('entityId') entityId?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('limit') limit?: string,
+    @Query(new ZodValidationPipe(FindAuditLogsQueryDtoSchema))
+    query: FindAuditLogsQueryDto,
   ) {
     // Only admins can view all audit logs
     if (userRole !== 'admin' && userRole !== 'moderator') {
@@ -72,29 +87,20 @@ export class AuditLogsController {
     }
 
     return this.auditLogsService.findAuditLogs(
-      userId,
-      action,
-      entity,
-      entityId,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
-      limit ? parseInt(limit) : 100,
+      query.userId,
+      query.action,
+      query.entity,
+      query.entityId,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
+      query.limit,
     );
   }
 
   @Post('system-events')
   createSystemEvent(
-    @Body()
-    body: {
-      eventType: SystemEventType;
-      severity: EventSeverity;
-      title: string;
-      description: string;
-      component?: string;
-      metadata?: any;
-      errorCode?: string;
-      stackTrace?: string;
-    },
+    @Body(new ZodValidationPipe(CreateSystemEventDtoSchema))
+    body: CreateSystemEventDto,
     @CurrentUserRole() userRole: string,
   ) {
     // Only admins can create system events manually
@@ -108,13 +114,8 @@ export class AuditLogsController {
   @Get('system-events')
   findSystemEvents(
     @CurrentUserRole() userRole: string,
-    @Query('eventType') eventType?: SystemEventType,
-    @Query('severity') severity?: EventSeverity,
-    @Query('component') component?: string,
-    @Query('isResolved') isResolved?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('limit') limit?: string,
+    @Query(new ZodValidationPipe(FindSystemEventsQueryDtoSchema))
+    query: FindSystemEventsQueryDto,
   ) {
     // Only admins and moderators can view system events
     if (userRole !== 'admin' && userRole !== 'moderator') {
@@ -122,20 +123,21 @@ export class AuditLogsController {
     }
 
     return this.auditLogsService.findSystemEvents(
-      eventType,
-      severity,
-      component,
-      isResolved !== undefined ? isResolved === 'true' : undefined,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
-      limit ? parseInt(limit) : 100,
+      query.eventType,
+      query.severity,
+      query.component,
+      query.isResolved,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
+      query.limit,
     );
   }
 
   @Patch('system-events/:id/resolve')
   resolveSystemEvent(
     @Param('id') id: string,
-    @Body() body: { resolution: string },
+    @Body(new ZodValidationPipe(ResolveSystemEventDtoSchema))
+    body: ResolveSystemEventDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() userRole: string,
   ) {
@@ -153,17 +155,8 @@ export class AuditLogsController {
 
   @Post('data-changes')
   createDataChangeLog(
-    @Body()
-    body: {
-      tableName: string;
-      recordId: string;
-      operation: 'INSERT' | 'UPDATE' | 'DELETE';
-      changedFields?: string[];
-      oldData?: any;
-      newData?: any;
-      reason?: string;
-      dataClass?: DataClassification;
-    },
+    @Body(new ZodValidationPipe(CreateDataChangeLogDtoSchema))
+    body: CreateDataChangeLogDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() userRole: string,
   ) {
@@ -181,13 +174,8 @@ export class AuditLogsController {
   @Get('data-changes')
   findDataChangeLogs(
     @CurrentUserRole() userRole: string,
-    @Query('tableName') tableName?: string,
-    @Query('recordId') recordId?: string,
-    @Query('operation') operation?: string,
-    @Query('changedBy') changedBy?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('limit') limit?: string,
+    @Query(new ZodValidationPipe(FindDataChangeLogsQueryDtoSchema))
+    query: FindDataChangeLogsQueryDto,
   ) {
     // Only admins can view data change logs
     if (userRole !== 'admin') {
@@ -195,21 +183,21 @@ export class AuditLogsController {
     }
 
     return this.auditLogsService.findDataChangeLogs(
-      tableName,
-      recordId,
-      operation,
-      changedBy,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
-      limit ? parseInt(limit) : 100,
+      query.tableName,
+      query.recordId,
+      query.operation,
+      query.changedBy,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
+      query.limit,
     );
   }
 
   @Get('statistics')
   getAuditStatistics(
     @CurrentUserRole() userRole: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(GetAuditStatisticsQueryDtoSchema))
+    query: GetAuditStatisticsQueryDto,
   ) {
     // Only admins can view audit statistics
     if (userRole !== 'admin') {
@@ -217,8 +205,8 @@ export class AuditLogsController {
     }
 
     return this.auditLogsService.getAuditStatistics(
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 
@@ -226,7 +214,7 @@ export class AuditLogsController {
 
   @Post('user-login')
   logUserLogin(
-    @Body() body: { ipAddress?: string; userAgent?: string },
+    @Body(new ZodValidationPipe(LogUserLoginDtoSchema)) body: LogUserLoginDto,
     @CurrentUserId() userId: string,
   ) {
     return this.auditLogsService.logUserLogin(
@@ -238,7 +226,7 @@ export class AuditLogsController {
 
   @Post('user-logout')
   logUserLogout(
-    @Body() body: { ipAddress?: string; userAgent?: string },
+    @Body(new ZodValidationPipe(LogUserLogoutDtoSchema)) body: LogUserLogoutDto,
     @CurrentUserId() userId: string,
   ) {
     return this.auditLogsService.logUserLogout(
@@ -250,13 +238,8 @@ export class AuditLogsController {
 
   @Post('profile-update')
   logProfileUpdate(
-    @Body()
-    body: {
-      oldValues: any;
-      newValues: any;
-      ipAddress?: string;
-      userAgent?: string;
-    },
+    @Body(new ZodValidationPipe(LogProfileUpdateDtoSchema))
+    body: LogProfileUpdateDto,
     @CurrentUserId() userId: string,
   ) {
     return this.auditLogsService.logProfileUpdate(
@@ -270,12 +253,8 @@ export class AuditLogsController {
 
   @Post('system-error')
   logSystemError(
-    @Body()
-    body: {
-      component: string;
-      error: { name: string; message: string; stack?: string };
-      metadata?: any;
-    },
+    @Body(new ZodValidationPipe(LogSystemErrorDtoSchema))
+    body: LogSystemErrorDto,
     @CurrentUserRole() userRole: string,
   ) {
     // Only system or admins can log system errors
@@ -298,14 +277,8 @@ export class AuditLogsController {
   @Get('enhanced/search')
   searchAuditLogs(
     @CurrentUserRole() userRole: string,
-    @Query('userId') userId?: string,
-    @Query('action') action?: AuditAction,
-    @Query('entity') entity?: string,
-    @Query('entityId') entityId?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query(new ZodValidationPipe(SearchAuditLogsQueryDtoSchema))
+    query: SearchAuditLogsQueryDto,
   ) {
     // Only admins can perform enhanced searches
     if (userRole !== 'admin' && userRole !== 'moderator') {
@@ -313,14 +286,14 @@ export class AuditLogsController {
     }
 
     return this.auditLoggingService.searchAuditLogs({
-      userId,
-      action,
-      entity,
-      entityId,
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-      limit: limit ? parseInt(limit) : 100,
-      offset: offset ? parseInt(offset) : 0,
+      userId: query.userId,
+      action: query.action,
+      entity: query.entity,
+      entityId: query.entityId,
+      startDate: query.startDate ? new Date(query.startDate) : undefined,
+      endDate: query.endDate ? new Date(query.endDate) : undefined,
+      limit: query.limit,
+      offset: query.offset,
     });
   }
 
@@ -337,15 +310,14 @@ export class AuditLogsController {
   @Post('cleanup')
   cleanupOldAuditLogs(
     @CurrentUserRole() userRole: string,
-    @Body() body: { retentionDays?: number },
+    @Body(new ZodValidationPipe(CleanupAuditLogsDtoSchema))
+    body: CleanupAuditLogsDto,
   ) {
     // Only admins can cleanup audit logs
     if (userRole !== 'admin') {
       throw new UnauthorizedException('Admin role required');
     }
 
-    return this.auditLoggingService.cleanupOldAuditLogs(
-      body.retentionDays || 365,
-    );
+    return this.auditLoggingService.cleanupOldAuditLogs(body.retentionDays);
   }
 }

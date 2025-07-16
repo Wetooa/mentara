@@ -14,6 +14,61 @@ import { BillingService } from './billing.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import {
+  CreateSubscriptionDtoSchema,
+  UpdateSubscriptionDtoSchema,
+  CancelSubscriptionDtoSchema,
+  ChangeSubscriptionPlanDtoSchema,
+  PauseSubscriptionDtoSchema,
+  ScheduleSubscriptionCancellationDtoSchema,
+  ReactivateSubscriptionDtoSchema,
+  ApplyDiscountDtoSchema,
+  SubscriptionUsageAnalyticsQueryDtoSchema,
+  GetPlansQueryDtoSchema,
+  CreatePlanDtoSchema,
+  UpdatePlanDtoSchema,
+  CreatePaymentMethodDtoSchema,
+  UpdatePaymentMethodDtoSchema,
+  CreatePaymentDtoSchema,
+  GetPaymentsQueryDtoSchema,
+  UpdatePaymentStatusDtoSchema,
+  CreateInvoiceDtoSchema,
+  GetInvoicesQueryDtoSchema,
+  MarkInvoiceAsPaidDtoSchema,
+  CreateDiscountDtoSchema,
+  ValidateDiscountDtoSchema,
+  RedeemDiscountDtoSchema,
+  RecordUsageDtoSchema,
+  GetUsageRecordsQueryDtoSchema,
+  GetBillingStatisticsQueryDtoSchema,
+  type CreateSubscriptionDto,
+  type UpdateSubscriptionDto,
+  type CancelSubscriptionDto,
+  type ChangeSubscriptionPlanDto,
+  type PauseSubscriptionDto,
+  type ScheduleSubscriptionCancellationDto,
+  type ReactivateSubscriptionDto,
+  type ApplyDiscountDto,
+  type SubscriptionUsageAnalyticsQueryDto,
+  type GetPlansQueryDto,
+  type CreatePlanDto,
+  type UpdatePlanDto,
+  type CreatePaymentMethodDto,
+  type UpdatePaymentMethodDto,
+  type CreatePaymentDto,
+  type GetPaymentsQueryDto,
+  type UpdatePaymentStatusDto,
+  type CreateInvoiceDto,
+  type GetInvoicesQueryDto,
+  type MarkInvoiceAsPaidDto,
+  type CreateDiscountDto,
+  type ValidateDiscountDto,
+  type RedeemDiscountDto,
+  type RecordUsageDto,
+  type GetUsageRecordsQueryDto,
+  type GetBillingStatisticsQueryDto,
+} from '@mentara/commons';
 import {
   BillingCycle,
   SubscriptionTier,
@@ -31,14 +86,8 @@ export class BillingController {
   // Subscription endpoints
   @Post('subscriptions')
   createSubscription(
-    @Body()
-    body: {
-      planId: string;
-      billingCycle?: BillingCycle;
-      defaultPaymentMethodId?: string;
-      trialStart?: string;
-      trialEnd?: string;
-    },
+    @Body(new ZodValidationPipe(CreateSubscriptionDtoSchema))
+    body: CreateSubscriptionDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.createSubscription({
@@ -56,12 +105,8 @@ export class BillingController {
 
   @Patch('subscriptions/me')
   updateMySubscription(
-    @Body()
-    body: {
-      planId?: string;
-      billingCycle?: BillingCycle;
-      defaultPaymentMethodId?: string;
-    },
+    @Body(new ZodValidationPipe(UpdateSubscriptionDtoSchema))
+    body: UpdateSubscriptionDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.updateSubscription(userId, body);
@@ -69,7 +114,8 @@ export class BillingController {
 
   @Post('subscriptions/me/cancel')
   cancelMySubscription(
-    @Body() body: { reason?: string },
+    @Body(new ZodValidationPipe(CancelSubscriptionDtoSchema))
+    body: CancelSubscriptionDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.cancelSubscription(userId);
@@ -79,13 +125,8 @@ export class BillingController {
 
   @Post('subscriptions/me/change-plan')
   changeMySubscriptionPlan(
-    @Body()
-    body: {
-      newPlanId: string;
-      billingCycle?: BillingCycle;
-      prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
-      effectiveDate?: string;
-    },
+    @Body(new ZodValidationPipe(ChangeSubscriptionPlanDtoSchema))
+    body: ChangeSubscriptionPlanDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.changeSubscriptionPlan(userId, body.newPlanId, {
@@ -99,11 +140,8 @@ export class BillingController {
 
   @Post('subscriptions/me/pause')
   pauseMySubscription(
-    @Body()
-    body: {
-      pauseUntil?: string;
-      reason?: string;
-    },
+    @Body(new ZodValidationPipe(PauseSubscriptionDtoSchema))
+    body: PauseSubscriptionDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.pauseSubscription(userId, {
@@ -119,12 +157,8 @@ export class BillingController {
 
   @Post('subscriptions/me/schedule-cancellation')
   scheduleMySubscriptionCancellation(
-    @Body()
-    body: {
-      reason?: string;
-      feedback?: string;
-      cancelAtPeriodEnd?: boolean;
-    },
+    @Body(new ZodValidationPipe(ScheduleSubscriptionCancellationDtoSchema))
+    body: ScheduleSubscriptionCancellationDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.scheduleSubscriptionCancellation(userId, body);
@@ -132,7 +166,8 @@ export class BillingController {
 
   @Post('subscriptions/me/reactivate')
   reactivateMySubscription(
-    @Body() body: { newPaymentMethodId?: string },
+    @Body(new ZodValidationPipe(ReactivateSubscriptionDtoSchema))
+    body: ReactivateSubscriptionDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.reactivateSubscription(
@@ -143,7 +178,7 @@ export class BillingController {
 
   @Post('subscriptions/me/apply-discount')
   applyDiscountToMySubscription(
-    @Body() body: { discountCode: string },
+    @Body(new ZodValidationPipe(ApplyDiscountDtoSchema)) body: ApplyDiscountDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.applyDiscountToSubscription(
@@ -168,8 +203,8 @@ export class BillingController {
     @Param('id') subscriptionId: string,
     @CurrentUserRole() userRole: string,
     @CurrentUserId() userId: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(SubscriptionUsageAnalyticsQueryDtoSchema))
+    query: SubscriptionUsageAnalyticsQueryDto,
   ) {
     // Users can only see their own subscription analytics
     if (userRole !== 'admin') {
@@ -178,32 +213,25 @@ export class BillingController {
 
     return this.billingService.getSubscriptionUsageAnalytics(
       subscriptionId,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 
   // Subscription Plans
   @Get('plans')
-  getAllPlans(@Query('isActive') isActive?: string) {
+  getAllPlans(
+    @Query(new ZodValidationPipe(GetPlansQueryDtoSchema))
+    query: GetPlansQueryDto,
+  ) {
     return this.billingService.findAllPlans(
-      isActive !== undefined ? isActive === 'true' : true,
+      query.isActive !== undefined ? query.isActive : true,
     );
   }
 
   @Post('plans')
   createPlan(
-    @Body()
-    body: {
-      name: string;
-      description?: string;
-      tier: SubscriptionTier;
-      monthlyPrice: number;
-      yearlyPrice?: number;
-      features: any;
-      limits: any;
-      trialDays?: number;
-    },
+    @Body(new ZodValidationPipe(CreatePlanDtoSchema)) body: CreatePlanDto,
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
@@ -215,17 +243,7 @@ export class BillingController {
   @Patch('plans/:id')
   updatePlan(
     @Param('id') id: string,
-    @Body()
-    body: {
-      name?: string;
-      description?: string;
-      monthlyPrice?: number;
-      yearlyPrice?: number;
-      features?: any;
-      limits?: any;
-      trialDays?: number;
-      isActive?: boolean;
-    },
+    @Body(new ZodValidationPipe(UpdatePlanDtoSchema)) body: UpdatePlanDto,
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
@@ -237,16 +255,8 @@ export class BillingController {
   // Payment Methods
   @Post('payment-methods')
   createPaymentMethod(
-    @Body()
-    body: {
-      type: PaymentMethodType;
-      cardLast4?: string;
-      cardBrand?: string;
-      cardExpMonth?: number;
-      cardExpYear?: number;
-      stripePaymentMethodId?: string;
-      isDefault?: boolean;
-    },
+    @Body(new ZodValidationPipe(CreatePaymentMethodDtoSchema))
+    body: CreatePaymentMethodDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.createPaymentMethod({
@@ -263,11 +273,8 @@ export class BillingController {
   @Patch('payment-methods/:id')
   updatePaymentMethod(
     @Param('id') id: string,
-    @Body()
-    body: {
-      isDefault?: boolean;
-      isActive?: boolean;
-    },
+    @Body(new ZodValidationPipe(UpdatePaymentMethodDtoSchema))
+    body: UpdatePaymentMethodDto,
   ) {
     return this.billingService.updatePaymentMethod(id, body);
   }
@@ -280,17 +287,7 @@ export class BillingController {
   // Payments
   @Post('payments')
   createPayment(
-    @Body()
-    body: {
-      amount: number;
-      currency?: string;
-      paymentMethodId?: string;
-      subscriptionId?: string;
-      invoiceId?: string;
-      meetingId?: string;
-      description?: string;
-      providerPaymentId?: string;
-    },
+    @Body(new ZodValidationPipe(CreatePaymentDtoSchema)) body: CreatePaymentDto,
   ) {
     return this.billingService.createPayment(body);
   }
@@ -298,10 +295,8 @@ export class BillingController {
   @Get('payments')
   getPayments(
     @CurrentUserRole() userRole: string,
-    @Query('subscriptionId') subscriptionId?: string,
-    @Query('status') status?: PaymentStatus,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(GetPaymentsQueryDtoSchema))
+    query: GetPaymentsQueryDto,
   ) {
     // Only admins can view all payments
     if (userRole !== 'admin') {
@@ -309,21 +304,18 @@ export class BillingController {
     }
 
     return this.billingService.findPayments(
-      subscriptionId,
-      status,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.subscriptionId,
+      query.status,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 
   @Patch('payments/:id/status')
   updatePaymentStatus(
     @Param('id') id: string,
-    @Body()
-    body: {
-      status: PaymentStatus;
-      metadata?: any;
-    },
+    @Body(new ZodValidationPipe(UpdatePaymentStatusDtoSchema))
+    body: UpdatePaymentStatusDto,
     @CurrentUserRole() userRole?: string,
   ) {
     // Only admins can update payment status
@@ -341,15 +333,7 @@ export class BillingController {
   // Invoices
   @Post('invoices')
   createInvoice(
-    @Body()
-    body: {
-      subscriptionId: string;
-      subtotal: number;
-      taxAmount?: number;
-      discountAmount?: number;
-      dueDate: string;
-      billingAddress?: any;
-    },
+    @Body(new ZodValidationPipe(CreateInvoiceDtoSchema)) body: CreateInvoiceDto,
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
@@ -366,8 +350,8 @@ export class BillingController {
   getInvoices(
     @CurrentUserRole() userRole: string,
     @CurrentUserId() userId: string,
-    @Query('subscriptionId') subscriptionId?: string,
-    @Query('status') status?: InvoiceStatus,
+    @Query(new ZodValidationPipe(GetInvoicesQueryDtoSchema))
+    query: GetInvoicesQueryDto,
   ) {
     // Users can only see their own invoices
     if (userRole !== 'admin') {
@@ -375,13 +359,14 @@ export class BillingController {
       // In a real implementation, you'd need to verify subscriptionId belongs to user
     }
 
-    return this.billingService.findInvoices(subscriptionId, status);
+    return this.billingService.findInvoices(query.subscriptionId, query.status);
   }
 
   @Post('invoices/:id/pay')
   markInvoiceAsPaid(
     @Param('id') id: string,
-    @Body() body: { paymentId: string },
+    @Body(new ZodValidationPipe(MarkInvoiceAsPaidDtoSchema))
+    body: MarkInvoiceAsPaidDto,
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
@@ -394,21 +379,8 @@ export class BillingController {
   // Discounts
   @Post('discounts')
   createDiscount(
-    @Body()
-    body: {
-      code?: string;
-      name: string;
-      description?: string;
-      type: DiscountType;
-      percentOff?: number;
-      amountOff?: number;
-      validFrom?: string;
-      validUntil?: string;
-      maxUses?: number;
-      maxUsesPerUser?: number;
-      applicableTiers?: SubscriptionTier[];
-      minAmount?: number;
-    },
+    @Body(new ZodValidationPipe(CreateDiscountDtoSchema))
+    body: CreateDiscountDto,
     @CurrentUserRole() userRole?: string,
   ) {
     if (userRole !== 'admin') {
@@ -424,11 +396,8 @@ export class BillingController {
 
   @Post('discounts/validate')
   validateDiscount(
-    @Body()
-    body: {
-      code: string;
-      amount: number;
-    },
+    @Body(new ZodValidationPipe(ValidateDiscountDtoSchema))
+    body: ValidateDiscountDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.validateDiscount(body.code, userId, body.amount);
@@ -437,7 +406,8 @@ export class BillingController {
   @Post('discounts/:id/redeem')
   redeemDiscount(
     @Param('id') discountId: string,
-    @Body() body: { amountSaved: number },
+    @Body(new ZodValidationPipe(RedeemDiscountDtoSchema))
+    body: RedeemDiscountDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.redeemDiscount(
@@ -450,15 +420,7 @@ export class BillingController {
   // Usage Records
   @Post('usage')
   recordUsage(
-    @Body()
-    body: {
-      subscriptionId: string;
-      feature: string;
-      quantity: number;
-      unit: string;
-      usageDate?: string;
-      metadata?: any;
-    },
+    @Body(new ZodValidationPipe(RecordUsageDtoSchema)) body: RecordUsageDto,
     @CurrentUserRole() userRole?: string,
   ) {
     // Only admins or system can record usage
@@ -476,9 +438,8 @@ export class BillingController {
   getUsageRecords(
     @Param('subscriptionId') subscriptionId: string,
     @CurrentUserRole() userRole: string,
-    @Query('feature') feature?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(GetUsageRecordsQueryDtoSchema))
+    query: GetUsageRecordsQueryDto,
   ) {
     // Users can only see their own usage
     if (userRole !== 'admin') {
@@ -487,9 +448,9 @@ export class BillingController {
 
     return this.billingService.getUsageRecords(
       subscriptionId,
-      feature,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.feature,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 
@@ -497,16 +458,16 @@ export class BillingController {
   @Get('statistics')
   getBillingStatistics(
     @CurrentUserRole() userRole: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(GetBillingStatisticsQueryDtoSchema))
+    query: GetBillingStatisticsQueryDto,
   ) {
     if (userRole !== 'admin') {
       throw new UnauthorizedException('Insufficient permissions');
     }
 
     return this.billingService.getBillingStatistics(
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 }

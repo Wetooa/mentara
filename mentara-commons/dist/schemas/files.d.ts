@@ -240,10 +240,10 @@ export declare const FindFilesQueryDtoSchema: z.ZodObject<{
     sortBy?: "createdAt" | "filename" | "size" | "downloads" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
+    search?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
     mimeType?: string | undefined;
     uploadedBy?: string | undefined;
     folder?: string | undefined;
@@ -255,10 +255,10 @@ export declare const FindFilesQueryDtoSchema: z.ZodObject<{
     sortBy?: "createdAt" | "filename" | "size" | "downloads" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
+    search?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
     mimeType?: string | undefined;
     uploadedBy?: string | undefined;
     folder?: string | undefined;
@@ -291,13 +291,13 @@ export declare const AttachFileToEntityDtoSchema: z.ZodObject<{
     attachmentType: z.ZodDefault<z.ZodEnum<["primary", "secondary", "thumbnail", "document", "media"]>>;
     description: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    entityType: string;
     entityId: string;
+    entityType: string;
     attachmentType: "document" | "primary" | "secondary" | "thumbnail" | "media";
     description?: string | undefined;
 }, {
-    entityType: string;
     entityId: string;
+    entityType: string;
     description?: string | undefined;
     attachmentType?: "document" | "primary" | "secondary" | "thumbnail" | "media" | undefined;
 }>;
@@ -305,11 +305,11 @@ export declare const GetAttachmentsParamsDtoSchema: z.ZodObject<{
     entityType: z.ZodString;
     entityId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    entityType: string;
     entityId: string;
+    entityType: string;
 }, {
-    entityType: string;
     entityId: string;
+    entityType: string;
 }>;
 export declare const CreateFileVersionDtoSchema: z.ZodObject<{
     filename: z.ZodString;
@@ -424,8 +424,8 @@ export declare const BulkFileOperationDtoSchema: z.ZodObject<{
         allowDownload?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    fileIds: string[];
     operation: "delete" | "archive" | "move" | "copy" | "update_permissions";
+    fileIds: string[];
     permissions?: {
         isPublic?: boolean | undefined;
         allowPreview?: boolean | undefined;
@@ -433,8 +433,8 @@ export declare const BulkFileOperationDtoSchema: z.ZodObject<{
     } | undefined;
     targetFolder?: string | undefined;
 }, {
-    fileIds: string[];
     operation: "delete" | "archive" | "move" | "copy" | "update_permissions";
+    fileIds: string[];
     permissions?: {
         isPublic?: boolean | undefined;
         allowPreview?: boolean | undefined;

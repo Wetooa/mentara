@@ -1,0 +1,1203 @@
+{
+  "info": {
+    "name": "Mentara - Admin",
+    "description": "Admin module endpoints for platform management, user oversight, therapist management, analytics, content moderation, and system configuration. Requires admin role access.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-admin"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure admin token is set",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}",
+          "",
+          "// Check if user role is admin",
+          "if (pm.environment.get('userRole') !== 'admin') {",
+          "    console.warn('⚠️ Admin role required for these endpoints');",
+          "}",
+          "",
+          "// Ensure test environment has valid UUIDs",
+          "if (!pm.environment.get('adminId') || !pm.environment.get('adminId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('adminId', '123e4567-e89b-12d3-a456-426614174000');",
+          "    console.log('⚠️ Set default UUID for adminId');",
+          "}",
+          "",
+          "if (!pm.environment.get('userId') || !pm.environment.get('userId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('userId', '987fcdeb-51a2-43d7-8ace-123456789012');",
+          "    console.log('⚠️ Set default UUID for userId');",
+          "}",
+          "",
+          "if (!pm.environment.get('therapistId') || !pm.environment.get('therapistId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('therapistId', 'abcd1234-5678-90ef-ghij-klmnopqrstuv');",
+          "    console.log('⚠️ Set default UUID for therapistId');",
+          "}",
+          "",
+          "if (!pm.environment.get('therapistApplicationId') || !pm.environment.get('therapistApplicationId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('therapistApplicationId', 'def45678-9012-34gh-ijkl-mnopqrstuvwx');",
+          "    console.log('⚠️ Set default UUID for therapistApplicationId');",
+          "}",
+          "",
+          "if (!pm.environment.get('contentId') || !pm.environment.get('contentId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('contentId', 'fed34567-8901-23ef-ghij-klmnopqrstuv');",
+          "    console.log('⚠️ Set default UUID for contentId');",
+          "}",
+          "",
+          "// Set date parameters",
+          "const now = new Date();",
+          "const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);",
+          "const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);",
+          "pm.environment.set('currentDate', now.toISOString().split('T')[0]);",
+          "pm.environment.set('weekAgoDate', sevenDaysAgo.toISOString().split('T')[0]);",
+          "pm.environment.set('monthAgoDate', thirtyDaysAgo.toISOString().split('T')[0]);",
+          "pm.environment.set('currentYear', now.getFullYear().toString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error(`\u274C Validation Error: ${issue.message} (${issue.path ? issue.path.join('.') : 'general'})`);",
+          "            });",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('\u274C Failed to parse validation error response');",
+          "    }",
+          "}",
+          "",
+          "// Handle authentication errors",
+          "if (pm.response.code === 401) {",
+          "    console.error('\u274C Authentication failed - check access token and admin role');",
+          "}",
+          "",
+          "// Handle permission errors",
+          "if (pm.response.code === 403) {",
+          "    console.error('\u274C Insufficient permissions - admin role required');",
+          "}",
+          "",
+          "// Handle not found errors",
+          "if (pm.response.code === 404) {",
+          "    console.error('\u274C Resource not found - check ID parameters');",
+          "}",
+          "",
+          "// Handle service unavailability",
+          "if (pm.response.code === 503) {",
+          "    console.error('\u274C Service unavailable - check system health');",
+          "}",
+          "",
+          "// Auto-save relevant data from successful responses",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    const responseJson = pm.response.json();",
+          "    ",
+          "    // Save user IDs",
+          "    if (responseJson.id) {",
+          "        pm.environment.set('userId', responseJson.id);",
+          "    }",
+          "    ",
+          "    // Save therapist application IDs",
+          "    if (responseJson.applications && responseJson.applications.length > 0) {",
+          "        pm.environment.set('therapistApplicationId', responseJson.applications[0].id);",
+          "    }",
+          "    ",
+          "    // Save content IDs",
+          "    if (responseJson.flaggedContent && responseJson.flaggedContent.length > 0) {",
+          "        pm.environment.set('contentId', responseJson.flaggedContent[0].id);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Dashboard Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/dashboard/overview?period=month&includeComparisons=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "dashboard", "overview"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "includeComparisons",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get comprehensive admin dashboard overview with key metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "System Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('System health retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Health metrics present', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('overallStatus');",
+                  "    pm.expect(responseJson).to.have.property('services');",
+                  "    pm.expect(responseJson).to.have.property('database');",
+                  "    pm.expect(responseJson).to.have.property('externalServices');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/health?includeDetails=true&checkExternalServices=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "health"],
+              "query": [
+                {
+                  "key": "includeDetails",
+                  "value": "true"
+                },
+                {
+                  "key": "checkExternalServices",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get comprehensive system health status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Administration",
+      "item": [
+        {
+          "name": "Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Users retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('users');",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "    pm.expect(responseJson.users).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?role=client&isActive=true&sortBy=createdAt&sortOrder=desc&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "client"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get all users with advanced filtering and search"
+          },
+          "response": []
+        },
+        {
+          "name": "User Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}?includeActivity=true&includeSessions=true&includeFinancials=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}"],
+              "query": [
+                {
+                  "key": "includeActivity",
+                  "value": "true"
+                },
+                {
+                  "key": "includeSessions",
+                  "value": "true"
+                },
+                {
+                  "key": "includeFinancials",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get comprehensive user details for admin review"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User status updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Status change recorded', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('status');",
+                  "    pm.expect(responseJson).to.have.property('updatedAt');",
+                  "    pm.expect(responseJson).to.have.property('updatedBy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"Violation of community guidelines\",\n  \"notes\": \"User reported for inappropriate behavior in community posts. Temporary suspension pending review.\",\n  \"suspensionDuration\": \"7d\",\n  \"notifyUser\": true,\n  \"restrictActions\": [\"post_creation\", \"messaging\", \"booking\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}", "status"]
+            },
+            "description": "Update user account status with admin notes"
+          },
+          "response": []
+        },
+        {
+          "name": "Send User Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"admin_notice\",\n  \"title\": \"Important Platform Update\",\n  \"message\": \"We have updated our terms of service and privacy policy. Please review the changes in your account settings.\",\n  \"priority\": \"high\",\n  \"actionRequired\": true,\n  \"actionUrl\": \"/settings/terms\",\n  \"actionText\": \"Review Changes\",\n  \"expiresAt\": \"2024-02-15T23:59:59.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{userId}}/notify",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{userId}}", "notify"]
+            },
+            "description": "Send administrative notification to specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Export User Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/export?format=csv&fields=id,email,role,createdAt,isActive&filters=role:client,isActive:true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "export"],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "fields",
+                  "value": "id,email,role,createdAt,isActive"
+                },
+                {
+                  "key": "filters",
+                  "value": "role:client,isActive:true"
+                }
+              ]
+            },
+            "description": "Export user data for administrative reporting"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Therapist Administration",
+      "item": [
+        {
+          "name": "Get All Therapists",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Active therapists retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response includes therapist directory data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('therapists');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson).to.have.property('filters');",
+                  "    pm.expect(responseJson.therapists).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/therapists/active?page=1&limit=25&sortBy=approvalDate&includeMetrics=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "therapists", "active"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "approvalDate"
+                },
+                {
+                  "key": "includeMetrics",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get all active therapists with performance metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Application Review",
+          "item": [
+            {
+              "name": "Get Pending Applications",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Pending applications retrieved successfully', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has pagination data', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('applications');",
+                      "    pm.expect(responseJson).to.have.property('totalCount');",
+                      "    pm.expect(responseJson).to.have.property('page');",
+                      "    pm.expect(responseJson).to.have.property('totalPages');",
+                      "    pm.expect(responseJson.applications).to.be.an('array');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/therapists/pending?page=1&limit=20&sortBy=priority&includeDocuments=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "therapists", "pending"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "priority"
+                    },
+                    {
+                      "key": "includeDocuments",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get all pending therapist applications that require admin review"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Application Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/therapists/{{therapistApplicationId}}/details?includeDocuments=true&includeHistory=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "therapists", "{{therapistApplicationId}}", "details"],
+                  "query": [
+                    {
+                      "key": "includeDocuments",
+                      "value": "true"
+                    },
+                    {
+                      "key": "includeHistory",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get comprehensive details for a specific therapist application"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Application Actions",
+          "item": [
+            {
+              "name": "Approve Application",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Application approval successful', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Approval details recorded', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('success');",
+                      "    pm.expect(responseJson.success).to.be.true;",
+                      "    pm.expect(responseJson).to.have.property('status');",
+                      "    pm.expect(responseJson.status).to.equal('approved');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"approvalNotes\": \"Application thoroughly reviewed and approved. All credentials verified through regulatory body. Excellent fit for our platform.\",\n  \"welcomeMessage\": \"Welcome to Mentara! Your application has been approved and your therapist account is now active.\",\n  \"startDate\": \"2024-01-15\",\n  \"initialClientLimit\": 15,\n  \"probationaryPeriod\": 90,\n  \"mentorAssignment\": {\n    \"assignMentor\": true,\n    \"mentorType\": \"senior_therapist\",\n    \"duration\": 30\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/therapists/{{therapistApplicationId}}/approve",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "therapists", "{{therapistApplicationId}}", "approve"]
+                },
+                "description": "Approve therapist application with comprehensive onboarding configuration"
+              },
+              "response": []
+            },
+            {
+              "name": "Reject Application",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rejectionReason\": \"Insufficient supervised clinical experience for specialized practice areas\",\n  \"applicantFeedback\": \"Thank you for your interest in joining Mentara. We encourage you to gain additional experience and consider reapplying in the future.\",\n  \"canReapply\": true,\n  \"reapplyAfterDate\": \"2025-01-15\",\n  \"improvementSuggestions\": [\n    \"Obtain additional supervised clinical experience\",\n    \"Complete specialized training in evidence-based therapies\",\n    \"Consider pursuing additional certifications\"\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/therapists/{{therapistApplicationId}}/reject",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "therapists", "{{therapistApplicationId}}", "reject"]
+                },
+                "description": "Reject therapist application with detailed feedback and improvement suggestions"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Application Status",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"under_review\",\n  \"reviewNotes\": \"Application shows strong potential. Scheduling verification call to discuss specialization experience.\",\n  \"nextSteps\": \"Schedule phone verification interview within 5 business days\",\n  \"estimatedCompletionDate\": \"2024-01-25\",\n  \"priority\": \"HIGH\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/therapists/{{therapistApplicationId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "therapists", "{{therapistApplicationId}}", "status"]
+                },
+                "description": "Update application status with detailed review notes and next steps"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analytics & Reports",
+      "item": [
+        {
+          "name": "Platform Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/overview?startDate={{monthAgoDate}}&endDate={{currentDate}}&granularity=daily",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "overview"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{monthAgoDate}}"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{currentDate}}"
+                },
+                {
+                  "key": "granularity",
+                  "value": "daily"
+                }
+              ]
+            },
+            "description": "Get comprehensive platform overview with key metrics and growth trends"
+          },
+          "response": []
+        },
+        {
+          "name": "User Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/users?startDate=2024-01-01&endDate=2024-12-31&groupBy=month&includeChurn=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "users"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "month"
+                },
+                {
+                  "key": "includeChurn",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get user registration and activity analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Session Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/sessions?period=quarter&breakdownBy=therapist&includeRatings=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "sessions"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "quarter"
+                },
+                {
+                  "key": "breakdownBy",
+                  "value": "therapist"
+                },
+                {
+                  "key": "includeRatings",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get therapy session analytics and performance metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Financial Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/financial?period=year&currency=CAD&includeProjections=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "financial"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "year"
+                },
+                {
+                  "key": "currency",
+                  "value": "CAD"
+                },
+                {
+                  "key": "includeProjections",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get financial performance and revenue analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Usage Reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/platform-usage?metrics=daily_active_users,session_duration,feature_usage&period=week",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "platform-usage"],
+              "query": [
+                {
+                  "key": "metrics",
+                  "value": "daily_active_users,session_duration,feature_usage"
+                },
+                {
+                  "key": "period",
+                  "value": "week"
+                }
+              ]
+            },
+            "description": "Get detailed platform usage and engagement metrics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Content Moderation",
+      "item": [
+        {
+          "name": "Flagged Content",
+          "item": [
+            {
+              "name": "Get Flagged Content",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Flagged content retrieved', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Content has moderation details', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    if (responseJson.length > 0) {",
+                      "        pm.expect(responseJson[0]).to.have.property('contentType');",
+                      "        pm.expect(responseJson[0]).to.have.property('flagReason');",
+                      "        pm.expect(responseJson[0]).to.have.property('reportedBy');",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/moderation/flagged-content?status=pending&contentType=post&priority=high&page=1&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "moderation", "flagged-content"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "key": "contentType",
+                      "value": "post"
+                    },
+                    {
+                      "key": "priority",
+                      "value": "high"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Get content flagged for moderation review"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Moderation Queue",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/moderation/queue?assignedTo={{adminId}}&sortBy=priority&sortOrder=desc",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "moderation", "queue"],
+                  "query": [
+                    {
+                      "key": "assignedTo",
+                      "value": "{{adminId}}"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "priority"
+                    },
+                    {
+                      "key": "sortOrder",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "Get assigned moderation queue for moderator"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Moderation Actions",
+          "item": [
+            {
+              "name": "Review Flagged Content",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Content review submitted', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Review decision recorded', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('decision');",
+                      "    pm.expect(responseJson).to.have.property('reviewedAt');",
+                      "    pm.expect(responseJson).to.have.property('reviewedBy');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"remove\",\n  \"reason\": \"Content violates community guidelines - inappropriate language\",\n  \"action\": \"content_removal\",\n  \"userAction\": \"warning\",\n  \"notifyUser\": true,\n  \"notificationMessage\": \"Your post has been removed for violating our community guidelines. Please review our posting rules.\",\n  \"reviewNotes\": \"Clear violation of language policy. User has previous warning for similar content.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/moderation/content/{{contentId}}/review",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "moderation", "content", "{{contentId}}", "review"]
+                },
+                "description": "Submit moderation decision for flagged content"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Moderation Statistics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/moderation/statistics?period=month&includeContentTypes=true&includeModerators=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "moderation", "statistics"],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "month"
+                    },
+                    {
+                      "key": "includeContentTypes",
+                      "value": "true"
+                    },
+                    {
+                      "key": "includeModerators",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get moderation performance statistics"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "System Management",
+      "item": [
+        {
+          "name": "Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit-logs?startDate={{monthAgoDate}}&endDate={{currentDate}}&action=user_login&userId={{userId}}&page=1&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "audit-logs"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{monthAgoDate}}"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{currentDate}}"
+                },
+                {
+                  "key": "action",
+                  "value": "user_login"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get detailed audit logs for compliance tracking"
+          },
+          "response": []
+        },
+        {
+          "name": "Update System Configuration",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maintenance\": {\n    \"enabled\": false,\n    \"message\": \"System maintenance completed\",\n    \"allowedRoles\": [\"admin\"]\n  },\n  \"features\": {\n    \"newUserRegistration\": true,\n    \"therapistApplications\": true,\n    \"messagingSystem\": true,\n    \"bookingSystem\": true,\n    \"communityFeatures\": true\n  },\n  \"limits\": {\n    \"maxSessionsPerDay\": 100,\n    \"maxMessagesPerHour\": 1000,\n    \"maxFileUploadSize\": \"10MB\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/configuration",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "configuration"]
+            },
+            "description": "Update system-wide configuration settings"
+          },
+          "response": []
+        },
+        {
+          "name": "Send System Announcement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Platform Maintenance Scheduled\",\n  \"message\": \"We will be performing scheduled maintenance on January 15th from 2:00 AM to 4:00 AM EST. During this time, the platform may be temporarily unavailable.\",\n  \"type\": \"maintenance\",\n  \"priority\": \"high\",\n  \"targetRoles\": [\"client\", \"therapist\"],\n  \"startDate\": \"2024-01-14T00:00:00.000Z\",\n  \"endDate\": \"2024-01-16T00:00:00.000Z\",\n  \"showInDashboard\": true,\n  \"sendEmail\": true,\n  \"sendPushNotification\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "system", "announcements"]
+            },
+            "description": "Send system-wide announcement to users"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Compliance Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportType\": \"hipaa_compliance\",\n  \"period\": {\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-12-31\"\n  },\n  \"includeMetrics\": [\n    \"data_access_logs\",\n    \"encryption_status\",\n    \"user_permissions\",\n    \"security_incidents\",\n    \"backup_status\"\n  ],\n  \"format\": \"pdf\",\n  \"includeCharts\": true,\n  \"deliveryMethod\": \"download\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/compliance/generate-report",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "compliance", "generate-report"]
+            },
+            "description": "Generate comprehensive compliance report"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Access Admin Endpoint Without Permission",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for non-admin user', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions admin access', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('admin');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{clientAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/dashboard/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "dashboard", "overview"]
+            },
+            "description": "Test admin access control with non-admin token"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Date Range in Analytics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for invalid date range', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions date range', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('date');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/users?startDate=2024-12-31&endDate=2024-01-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "users"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-01"
+                }
+              ]
+            },
+            "description": "Test validation with invalid date range"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid User ID Format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for invalid UUID', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message indicates UUID format issue', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+                  "        const uuidError = responseJson.issues.find(issue => ",
+                  "            issue.message && issue.message.includes('uuid'));",
+                  "        pm.expect(uuidError).to.not.be.undefined;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/invalid-uuid-format",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "invalid-uuid-format"]
+            },
+            "description": "Test validation for invalid UUID format in user ID parameter"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

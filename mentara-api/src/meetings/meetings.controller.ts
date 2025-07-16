@@ -3,14 +3,32 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Param,
   Body,
   UseGuards,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import {
+  CreateVideoRoomDto,
+  CreateVideoRoomDtoSchema,
+  JoinVideoRoomDto,
+  JoinVideoRoomDtoSchema,
+  EndVideoCallDto,
+  EndVideoCallDtoSchema,
+  VideoRoomResponse,
+  VideoCallStatus,
+  UpdateMeetingStatusDto,
+  UpdateMeetingStatusDtoSchema,
+  SaveMeetingSessionDto,
+  SaveMeetingSessionDtoSchema,
+} from 'mentara-commons';
 
 @Controller('meetings')
 @UseGuards(JwtAuthGuard)
@@ -26,32 +44,79 @@ export class MeetingsController {
   }
 
   @Put(':id/status')
+  @HttpCode(HttpStatus.OK)
   async updateMeetingStatus(
     @Param('id') meetingId: string,
     @CurrentUserId() userId: string,
-    @Body()
-    body: {
-      status:
-        | 'SCHEDULED'
-        | 'CONFIRMED'
-        | 'IN_PROGRESS'
-        | 'COMPLETED'
-        | 'CANCELLED';
-    },
+    @Body(new ZodValidationPipe(UpdateMeetingStatusDtoSchema))
+    updateStatusDto: UpdateMeetingStatusDto,
   ) {
     return this.meetingsService.updateMeetingStatus(
       meetingId,
       userId,
-      body.status,
+      updateStatusDto,
     );
   }
 
+  // ===== VIDEO CALL INTEGRATION ENDPOINTS =====
+
+  @Post(':id/video-room')
+  @HttpCode(HttpStatus.CREATED)
+  async createVideoRoom(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+    @Body(new ZodValidationPipe(CreateVideoRoomDtoSchema))
+    createRoomDto: CreateVideoRoomDto,
+  ): Promise<VideoRoomResponse> {
+    return this.meetingsService.createVideoRoom(meetingId, userId, createRoomDto);
+  }
+
+  @Post(':id/join-video')
+  @HttpCode(HttpStatus.OK)
+  async joinVideoRoom(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+    @Body(new ZodValidationPipe(JoinVideoRoomDtoSchema))
+    joinRoomDto: JoinVideoRoomDto,
+  ): Promise<VideoRoomResponse> {
+    return this.meetingsService.joinVideoRoom(meetingId, userId, joinRoomDto);
+  }
+
+  @Get(':id/video-status')
+  @HttpCode(HttpStatus.OK)
+  async getVideoCallStatus(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<VideoCallStatus> {
+    return this.meetingsService.getVideoCallStatus(meetingId, userId);
+  }
+
+  @Delete(':id/video-room')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async endVideoCall(
+    @Param('id') meetingId: string,
+    @CurrentUserId() userId: string,
+    @Body(new ZodValidationPipe(EndVideoCallDtoSchema))
+    endCallDto: EndVideoCallDto,
+  ): Promise<void> {
+    return this.meetingsService.endVideoCall(meetingId, userId, endCallDto);
+  }
+
+  // Legacy endpoint for backward compatibility
   @Post(':id/room')
   async generateMeetingRoom(
     @Param('id') meetingId: string,
     @CurrentUserId() userId: string,
   ) {
-    return this.meetingsService.generateMeetingRoom(meetingId, userId);
+    // Redirect to new video room creation with default settings
+    const defaultCreateDto: CreateVideoRoomDto = {
+      meetingId,
+      roomType: 'video',
+      maxParticipants: 2,
+      enableRecording: false,
+      enableChat: true,
+    };
+    return this.meetingsService.createVideoRoom(meetingId, userId, defaultCreateDto);
   }
 
   @Get('upcoming')
@@ -63,18 +128,17 @@ export class MeetingsController {
   }
 
   @Post(':id/session')
+  @HttpCode(HttpStatus.CREATED)
   async saveMeetingSession(
     @Param('id') meetingId: string,
     @CurrentUserId() userId: string,
-    @Body() sessionData: any,
+    @Body(new ZodValidationPipe(SaveMeetingSessionDtoSchema))
+    sessionData: SaveMeetingSessionDto,
   ) {
     // Validate user has access to this meeting
     await this.meetingsService.getMeetingById(meetingId, userId);
 
-    return this.meetingsService.saveMeetingSession({
-      meetingId,
-      ...sessionData,
-    });
+    return this.meetingsService.saveMeetingSession(meetingId, userId, sessionData);
   }
 
   @Get('analytics/therapist')

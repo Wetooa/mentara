@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
@@ -13,6 +14,15 @@ import {
   MeetingCancelledEvent,
   MeetingEmergencyTerminatedEvent,
 } from '../common/events/booking-events';
+import {
+  CreateVideoRoomDto,
+  JoinVideoRoomDto,
+  EndVideoCallDto,
+  VideoRoomResponse,
+  VideoCallStatus,
+  UpdateMeetingStatusDto,
+  SaveMeetingSessionDto,
+} from 'mentara-commons';
 
 export interface MeetingSessionData {
   meetingId: string;
@@ -416,5 +426,281 @@ export class MeetingsService {
       `Emergency termination of meeting ${meetingId}: ${reason}`,
     );
     return meeting;
+  }
+
+  // ===== VIDEO CALL INTEGRATION METHODS =====
+
+  /**
+   * Create a video room for a meeting
+   */
+  async createVideoRoom(
+    meetingId: string,
+    userId: string,
+    createRoomDto: CreateVideoRoomDto,
+  ): Promise<VideoRoomResponse> {
+    // Validate meeting access
+    const meeting = await this.getMeetingById(meetingId, userId);
+    
+    if (meeting.status !== 'SCHEDULED' && meeting.status !== 'CONFIRMED') {
+      throw new BadRequestException('Meeting must be scheduled or confirmed to create video room');
+    }
+
+    // Update meeting status to IN_PROGRESS
+    await this.prisma.meeting.update({
+      where: { id: meetingId },
+      data: { status: 'IN_PROGRESS' },
+    });
+
+    // Generate video room data (in production, integrate with actual video service like Twilio/Zoom)
+    const roomId = `room_${meetingId}_${Date.now()}`;
+    const accessToken = this.generateRoomToken(meetingId, userId);
+    const participantToken = this.generateRoomToken(meetingId, `${userId}_participant`);
+
+    const videoRoomResponse: VideoRoomResponse = {
+      roomId,
+      roomUrl: `https://video.mentara.app/room/${roomId}`, // Replace with actual video service URL
+      accessToken,
+      participantToken,
+      roomConfig: {
+        maxParticipants: createRoomDto.maxParticipants,
+        enableRecording: createRoomDto.enableRecording,
+        enableChat: createRoomDto.enableChat,
+        recordingActive: false,
+      },
+      expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(), // 4 hours
+      participantCount: 1,
+      status: 'waiting',
+    };
+
+    // Emit meeting started event
+    void this.eventBus.emit(
+      new MeetingStartedEvent({
+        meetingId,
+        clientId: meeting.clientId,
+        therapistId: meeting.therapistId,
+        startedAt: new Date(),
+      }),
+    );
+
+    this.logger.log(`Video room created for meeting ${meetingId}`);
+    return videoRoomResponse;
+  }
+
+  /**
+   * Join an existing video room
+   */
+  async joinVideoRoom(
+    meetingId: string,
+    userId: string,
+    joinRoomDto: JoinVideoRoomDto,
+  ): Promise<VideoRoomResponse> {
+    // Validate meeting access
+    const meeting = await this.getMeetingById(meetingId, userId);
+    
+    if (meeting.status !== 'IN_PROGRESS') {
+      throw new BadRequestException('Meeting must be in progress to join video room');
+    }
+
+    // Generate participant credentials
+    const roomId = `room_${meetingId}_${Date.now()}`;
+    const accessToken = this.generateRoomToken(meetingId, userId);
+    const participantToken = this.generateRoomToken(meetingId, `${userId}_${joinRoomDto.role}`);
+
+    const videoRoomResponse: VideoRoomResponse = {
+      roomId,
+      roomUrl: `https://video.mentara.app/room/${roomId}`,
+      accessToken,
+      participantToken,
+      roomConfig: {
+        maxParticipants: 2,
+        enableRecording: false,
+        enableChat: true,
+        recordingActive: false,
+      },
+      expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+      participantCount: 2,
+      status: 'active',
+    };
+
+    this.logger.log(`User ${userId} joined video room for meeting ${meetingId}`);
+    return videoRoomResponse;
+  }
+
+  /**
+   * Get video call status
+   */
+  async getVideoCallStatus(
+    meetingId: string,
+    userId: string,
+  ): Promise<VideoCallStatus> {
+    // Validate meeting access
+    const meeting = await this.getMeetingById(meetingId, userId);
+
+    // Mock video call status (in production, fetch from actual video service)
+    const videoCallStatus: VideoCallStatus = {
+      meetingId,
+      roomId: `room_${meetingId}`,
+      status: meeting.status === 'IN_PROGRESS' ? 'active' : 'waiting',
+      participants: [
+        {
+          id: meeting.clientId,
+          name: 'Client', // In production, fetch actual user names
+          role: 'client',
+          joinedAt: meeting.startTime.toISOString(),
+          connectionStatus: 'connected',
+        },
+        {
+          id: meeting.therapistId,
+          name: 'Therapist',
+          role: 'therapist',
+          joinedAt: meeting.startTime.toISOString(),
+          connectionStatus: 'connected',
+        },
+      ],
+      startedAt: meeting.startTime.toISOString(),
+      endedAt: meeting.status === 'COMPLETED' ? meeting.endTime?.toISOString() : undefined,
+      duration: meeting.status === 'COMPLETED' ? meeting.duration : undefined,
+    };
+
+    return videoCallStatus;
+  }
+
+  /**
+   * End video call
+   */
+  async endVideoCall(
+    meetingId: string,
+    userId: string,
+    endCallDto: EndVideoCallDto,
+  ): Promise<void> {
+    // Validate meeting access
+    const meeting = await this.getMeetingById(meetingId, userId);
+
+    // Update meeting status to completed
+    await this.prisma.meeting.update({
+      where: { id: meetingId },
+      data: { 
+        status: 'COMPLETED',
+        endTime: new Date(),
+      },
+    });
+
+    // Save session summary if provided
+    if (endCallDto.sessionSummary) {
+      await this.prisma.sessionLog.create({
+        data: {
+          meetingId,
+          clientId: meeting.clientId,
+          therapistId: meeting.therapistId,
+          sessionType: 'REGULAR_THERAPY',
+          startTime: meeting.startTime,
+          endTime: new Date(),
+          duration: endCallDto.sessionSummary.duration,
+          status: 'COMPLETED',
+          platform: 'video',
+          notes: JSON.stringify({
+            endReason: endCallDto.endReason,
+            connectionQuality: endCallDto.sessionSummary.connectionQuality,
+            technicalIssues: endCallDto.sessionSummary.technicalIssues,
+            nextSteps: endCallDto.nextSteps,
+          }),
+        },
+      });
+    }
+
+    // Emit meeting completed event
+    void this.eventBus.emit(
+      new MeetingCompletedEvent({
+        meetingId,
+        clientId: meeting.clientId,
+        therapistId: meeting.therapistId,
+        completedAt: new Date(),
+        duration: endCallDto.sessionSummary?.duration || meeting.duration,
+      }),
+    );
+
+    this.logger.log(`Video call ended for meeting ${meetingId}: ${endCallDto.endReason}`);
+  }
+
+  /**
+   * Updated method to use new DTOs
+   */
+  async updateMeetingStatus(
+    meetingId: string,
+    userId: string,
+    updateStatusDto: UpdateMeetingStatusDto,
+  ) {
+    const meeting = await this.getMeetingById(meetingId, userId);
+
+    const updatedMeeting = await this.prisma.meeting.update({
+      where: { id: meetingId },
+      data: {
+        status: updateStatusDto.status.toUpperCase() as any,
+      },
+    });
+
+    // Emit appropriate events based on status
+    switch (updateStatusDto.status) {
+      case 'confirmed':
+        void this.eventBus.emit(
+          new MeetingConfirmedEvent({
+            meetingId,
+            clientId: meeting.clientId,
+            therapistId: meeting.therapistId,
+            confirmedAt: new Date(),
+          }),
+        );
+        break;
+      case 'cancelled':
+        void this.eventBus.emit(
+          new MeetingCancelledEvent({
+            meetingId,
+            clientId: meeting.clientId,
+            therapistId: meeting.therapistId,
+            cancelledAt: new Date(),
+            reason: updateStatusDto.reason,
+          }),
+        );
+        break;
+    }
+
+    this.logger.log(`Meeting ${meetingId} status updated to ${updateStatusDto.status}`);
+    return updatedMeeting;
+  }
+
+  /**
+   * Updated method to use new DTOs
+   */
+  async saveMeetingSession(
+    meetingId: string,
+    userId: string,
+    sessionData: SaveMeetingSessionDto,
+  ) {
+    // Validate meeting access
+    const meeting = await this.getMeetingById(meetingId, userId);
+
+    const session = await this.prisma.sessionLog.create({
+      data: {
+        meetingId,
+        clientId: meeting.clientId,
+        therapistId: meeting.therapistId,
+        sessionType: 'REGULAR_THERAPY',
+        startTime: new Date(sessionData.sessionData.startedAt),
+        endTime: new Date(sessionData.sessionData.endedAt),
+        duration: sessionData.sessionData.duration,
+        status: 'COMPLETED',
+        platform: 'video',
+        notes: JSON.stringify({
+          sessionNotes: sessionData.sessionNotes,
+          clientProgress: sessionData.clientProgress,
+          followUpActions: sessionData.followUpActions,
+          quality: sessionData.sessionData.quality,
+          issues: sessionData.sessionData.issues,
+        }),
+      },
+    });
+
+    this.logger.log(`Session data saved for meeting ${meetingId}`);
+    return session;
   }
 }

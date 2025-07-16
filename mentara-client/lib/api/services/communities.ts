@@ -1,21 +1,125 @@
 import { AxiosInstance } from 'axios';
 import {
   Community,
-  RoomGroup,
-  Room,
-  CommunityWithStructure,
-  Post,
-  PostHeart,
-  Comment,
-  CommentHeart,
-  Reply,
-  Membership,
   CommunityMember,
-  CommunityStats,
-  CreatePostRequest,
-  CreateCommentRequest,
-  CreateReplyRequest,
-} from '@/types/api/communities';
+  CreatePostDto,
+  Post,
+  PostCreateInputDto,
+  PostRoomParamsDto,
+  PostParamsDto,
+  CreateNestedCommentDto,
+  CreateCommunityDto,
+  CreateRoomDto,
+  CreateRoomGroupDto,
+  CommunityQuery,
+  GetCommunityMembersQueryDto,
+  CommunityIdParam,
+  CommunityParamsDto,
+  CommunitySlugParamsDto,
+  RoomGroupParamsDto,
+  RoomParamsDto,
+  UserParamsDto,
+  BulkAssignCommunitiesDto,
+} from '@mentara/commons';
+
+// Local types for extended structures not in commons
+export interface RoomGroup {
+  id: string;
+  name: string;
+  order: number;
+  communityId: string;
+  rooms: Room[];
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  order: number;
+  postingRole: string;
+  roomGroupId: string;
+}
+
+export interface CommunityWithStructure extends Community {
+  roomGroups: RoomGroup[];
+}
+
+export interface PostHeart {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
+  hearts: CommentHeart[];
+  replies: Reply[];
+}
+
+export interface CommentHeart {
+  id: string;
+  commentId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface Reply {
+  id: string;
+  commentId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface Membership {
+  id: string;
+  communityId: string;
+  userId: string;
+  role: string;
+  joinedAt: string;
+  community: Community;
+}
+
+export interface CommunityStats {
+  totalCommunities: number;
+  totalMembers: number;
+  totalPosts: number;
+  totalComments: number;
+}
+
+// Extended Post interface with populated fields
+export interface PostWithDetails extends Post {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
+  hearts: PostHeart[];
+  comments: Comment[];
+  _count: {
+    hearts: number;
+    comments: number;
+  };
+}
 
 // Community service factory
 export const createCommunityService = (client: AxiosInstance) => ({
@@ -70,20 +174,20 @@ export const createCommunityService = (client: AxiosInstance) => ({
     client.get(`/communities/room-group/${roomGroupId}/rooms`),
 
   // Posts
-  createPost: (data: CreatePostRequest): Promise<Post> =>
+  createPost: (data: PostCreateInputDto): Promise<Post> =>
     client.post('/posts', data),
 
-  getPostsByRoom: (roomId: string, limit = 20, offset = 0): Promise<{ posts: Post[]; total: number }> => {
+  getPostsByRoom: (roomId: string, limit = 20, offset = 0): Promise<{ posts: PostWithDetails[]; total: number }> => {
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     params.append('offset', offset.toString());
     return client.get(`/posts/room/${roomId}?${params.toString()}`);
   },
 
-  getPostById: (postId: string): Promise<Post> =>
+  getPostById: (postId: string): Promise<PostWithDetails> =>
     client.get(`/posts/${postId}`),
 
-  updatePost: (postId: string, data: Partial<CreatePostRequest>): Promise<Post> =>
+  updatePost: (postId: string, data: Partial<PostCreateInputDto>): Promise<Post> =>
     client.put(`/posts/${postId}`, data),
 
   deletePost: (postId: string): Promise<{ deleted: boolean }> =>
@@ -96,7 +200,7 @@ export const createCommunityService = (client: AxiosInstance) => ({
     client.delete(`/posts/${postId}/heart`),
 
   // Comments
-  createComment: (data: CreateCommentRequest): Promise<Comment> =>
+  createComment: (data: CreateNestedCommentDto): Promise<Comment> =>
     client.post('/comments', data),
 
   getCommentsByPost: (postId: string): Promise<Comment[]> =>
@@ -115,7 +219,7 @@ export const createCommunityService = (client: AxiosInstance) => ({
     client.delete(`/comments/${commentId}/heart`),
 
   // Replies
-  createReply: (data: CreateReplyRequest): Promise<Reply> =>
+  createReply: (data: CreateNestedCommentDto): Promise<Reply> =>
     client.post('/replies', data),
 
   updateReply: (replyId: string, content: string): Promise<Reply> =>

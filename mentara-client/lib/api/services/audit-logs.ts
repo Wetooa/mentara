@@ -1,14 +1,49 @@
 import { AxiosInstance } from 'axios';
 import {
+  FindAuditLogsQueryDto,
+  CreateAuditLogDto,
+  CreateSystemEventDto,
+  CreateSecurityEventDto,
+  CreateComplianceReportDto,
+  GetAuditLogStatsQueryDto,
+  GetUserActivityQueryDto,
+  GetResourceActivityQueryDto,
+  GetSecurityEventsQueryDto,
+  GetSystemHealthQueryDto,
+  ExportAuditLogsQueryDto,
+  UpdateComplianceReportDto,
+  ResolveSecurityEventDto,
+  AuditLogIdParam,
+  SecurityEventIdParam,
+  ComplianceReportIdParam,
+  AuditAction,
+  AuditSeverity,
+  SecurityEventType,
+  ComplianceReportType,
+  // Complex audit log data structures
   AuditLog,
-  AuditLogCreateDto,
-  AuditLogQuery,
   AuditLogListResponse,
   AuditLogStats,
   SecurityEvent,
   SecurityEventQuery,
   ComplianceReport,
-} from '@/types/api/audit-logs';
+  AuditLogCreateDto,
+  AuditLogQuery,
+} from 'mentara-commons';
+
+// All audit log types are now imported from mentara-commons
+
+// Re-export commons types for backward compatibility
+export type {
+  AuditLog,
+  AuditLogListResponse,
+  AuditLogStats,
+  SecurityEvent,
+  SecurityEventQuery,
+  ComplianceReport,
+  AuditLogCreateDto,
+  AuditLogQuery,
+};
 
 export interface AuditLogService {
   // Audit log management
@@ -49,13 +84,13 @@ export interface AuditLogService {
 
 export const createAuditLogService = (client: AxiosInstance): AuditLogService => ({
   // Audit log management
-  create: (data: AuditLogCreateDto): Promise<AuditLog> =>
+  create: (data: CreateAuditLogDto): Promise<AuditLog> =>
     client.post('/audit-logs', data),
 
   getById: (logId: string): Promise<AuditLog> =>
     client.get(`/audit-logs/${logId}`),
 
-  getList: (query: AuditLogQuery = {}): Promise<AuditLogListResponse> => {
+  getList: (query: FindAuditLogsQueryDto = {}): Promise<AuditLogListResponse> => {
     const params = new URLSearchParams();
     
     if (query.userId) params.append('userId', query.userId);
@@ -77,7 +112,7 @@ export const createAuditLogService = (client: AxiosInstance): AuditLogService =>
     return client.get(`/audit-logs${queryString}`);
   },
 
-  getStats: (query: Omit<AuditLogQuery, 'limit' | 'offset' | 'sortBy' | 'sortOrder'> = {}): Promise<AuditLogStats> => {
+  getStats: (query: GetAuditLogStatsQueryDto = {}): Promise<AuditLogStats> => {
     const params = new URLSearchParams();
     
     if (query.userId) params.append('userId', query.userId);
@@ -91,7 +126,7 @@ export const createAuditLogService = (client: AxiosInstance): AuditLogService =>
   },
 
   // User activity tracking
-  getUserActivity: (userId: string, query: Omit<AuditLogQuery, 'userId'> = {}): Promise<AuditLogListResponse> => {
+  getUserActivity: (userId: string, query: GetUserActivityQueryDto = {}): Promise<AuditLogListResponse> => {
     const params = new URLSearchParams();
     params.append('userId', userId);
     
@@ -117,7 +152,7 @@ export const createAuditLogService = (client: AxiosInstance): AuditLogService =>
   },
 
   // Security events
-  getSecurityEvents: (query: SecurityEventQuery = {}): Promise<{ events: SecurityEvent[]; total: number }> => {
+  getSecurityEvents: (query: GetSecurityEventsQueryDto = {}): Promise<{ events: SecurityEvent[]; total: number }> => {
     const params = new URLSearchParams();
     
     if (query.type) params.append('type', query.type);
@@ -139,8 +174,8 @@ export const createAuditLogService = (client: AxiosInstance): AuditLogService =>
   getSecurityEvent: (eventId: string): Promise<SecurityEvent> =>
     client.get(`/audit-logs/security-events/${eventId}`),
 
-  resolveSecurityEvent: (eventId: string, notes?: string): Promise<SecurityEvent> =>
-    client.patch(`/audit-logs/security-events/${eventId}/resolve`, { notes }),
+  resolveSecurityEvent: (eventId: string, data: ResolveSecurityEventDto): Promise<SecurityEvent> =>
+    client.patch(`/audit-logs/security-events/${eventId}/resolve`, data),
 
   // Compliance and reporting
   generateComplianceReport: (
@@ -192,13 +227,3 @@ export const createAuditLogService = (client: AxiosInstance): AuditLogService =>
     client.get('/audit-logs/system-health'),
 });
 
-export type {
-  AuditLog,
-  AuditLogCreateDto,
-  AuditLogQuery,
-  AuditLogListResponse,
-  AuditLogStats,
-  SecurityEvent,
-  SecurityEventQuery,
-  ComplianceReport,
-};

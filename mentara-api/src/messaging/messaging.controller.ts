@@ -18,16 +18,19 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { MessagingService } from './messaging.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { SupabaseStorageService, FileUploadResult } from '../common/services/supabase-storage.service';
+import {
+  SupabaseStorageService,
+  FileUploadResult,
+} from '../common/services/supabase-storage.service';
 import {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
-  MessageReadDto,
   AddReactionDto,
   BlockUserDto,
   SearchMessagesDto,
-} from './dto/messaging.dto';
+  ConversationListParams,
+} from 'mentara-commons';
 
 @Controller('messaging')
 @UseGuards(JwtAuthGuard)
@@ -53,15 +56,12 @@ export class MessagingController {
   @Get('conversations')
   async getUserConversations(
     @CurrentUserId() userId: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query() params: ConversationListParams,
   ) {
-    const pageNum = page ? parseInt(page) : 1;
-    const limitNum = limit ? parseInt(limit) : 20;
     return this.messagingService.getUserConversations(
       userId,
-      pageNum,
-      limitNum,
+      params.page || 1,
+      params.limit || 20,
     );
   }
 
@@ -69,11 +69,10 @@ export class MessagingController {
   async getConversationMessages(
     @CurrentUserId() userId: string,
     @Param('conversationId') conversationId: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query() params: ConversationListParams,
   ) {
-    const pageNum = page ? parseInt(page) : 1;
-    const limitNum = limit ? parseInt(limit) : 50;
+    const pageNum = params.page || 1;
+    const limitNum = params.limit || 50;
     return this.messagingService.getConversationMessages(
       userId,
       conversationId,
@@ -215,7 +214,7 @@ export class MessagingController {
   ) {
     const { query, conversationId, page, limit } = searchDto;
     const pageNum = page ? Number(page) : 1;
-    const limitNum = limit ? parseInt(limit) : 20;
+    const limitNum = limit ? Number(limit) : 20;
     return this.messagingService.searchMessages(
       userId,
       query,

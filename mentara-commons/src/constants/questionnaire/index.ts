@@ -17,6 +17,9 @@ export { default as DEPRESSION_PHQ9 } from './phq-9';
 export { default as PTSD_PCL5 } from './ptsd';
 export { default as SOCIAL_PHOBIA_SPIN } from './social-phobia';
 
+// Questionnaire mapping and utilities
+export * from './questionnaire-mapping';
+
 // Community mapping based on questionnaire results
 export const QUESTIONNAIRE_TO_COMMUNITY_MAP = {
   'adhd': 'ADHD Support',

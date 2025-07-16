@@ -195,7 +195,7 @@ export class EnhancedCommunityService {
       });
 
       // Join requests removed - simplified community system
-      let pendingRequests: string[] = [];
+      const pendingRequests: string[] = [];
 
       // Transform to search results
       const searchResults: CommunitySearchResult[] = filteredCommunities.map(
@@ -336,8 +336,10 @@ export class EnhancedCommunityService {
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       // Get all posts from this community's rooms for statistics
-      const communityRoomIds = community.roomGroups.flatMap(rg => rg.rooms.map(r => r.id));
-      
+      const communityRoomIds = community.roomGroups.flatMap((rg) =>
+        rg.rooms.map((r) => r.id),
+      );
+
       // Get detailed statistics
       const [
         totalComments,
@@ -416,8 +418,15 @@ export class EnhancedCommunityService {
         updatedAt: community.updatedAt,
         memberCount: community._count.memberships,
         stats: {
-          totalPosts: community.roomGroups.reduce((total, rg) => 
-            total + rg.rooms.reduce((roomTotal, room) => roomTotal + room.posts.length, 0), 0),
+          totalPosts: community.roomGroups.reduce(
+            (total, rg) =>
+              total +
+              rg.rooms.reduce(
+                (roomTotal, room) => roomTotal + room.posts.length,
+                0,
+              ),
+            0,
+          ),
           totalComments,
           activeMembers,
           recentActivity: {
@@ -427,24 +436,26 @@ export class EnhancedCommunityService {
           },
         },
         recentPosts: community.roomGroups
-          .flatMap(rg => rg.rooms.flatMap(room => room.posts))
+          .flatMap((rg) => rg.rooms.flatMap((room) => room.posts))
           .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
           .slice(0, 5)
           .map((post) => ({
             id: post.id,
             title: post.title,
             content: post.content,
-            author: post.user ? {
-              id: post.user.id,
-              firstName: post.user.firstName,
-              lastName: post.user.lastName,
-              avatarUrl: post.user.avatarUrl || undefined,
-            } : { 
-              id: 'unknown', 
-              firstName: 'Unknown', 
-              lastName: 'User',
-              avatarUrl: undefined 
-            },
+            author: post.user
+              ? {
+                  id: post.user.id,
+                  firstName: post.user.firstName,
+                  lastName: post.user.lastName,
+                  avatarUrl: post.user.avatarUrl || undefined,
+                }
+              : {
+                  id: 'unknown',
+                  firstName: 'Unknown',
+                  lastName: 'User',
+                  avatarUrl: undefined,
+                },
             createdAt: post.createdAt,
             heartCount: post._count.hearts,
             commentCount: post._count.comments,
@@ -522,10 +533,10 @@ export class EnhancedCommunityService {
       // Calculate trending data for each community
       const trendingCommunities = await Promise.all(
         communities.map(async (community) => {
-          const allPosts = community.roomGroups.flatMap(rg => 
-            rg.rooms.flatMap(room => room.posts)
+          const allPosts = community.roomGroups.flatMap((rg) =>
+            rg.rooms.flatMap((room) => room.posts),
           );
-          
+
           const trendingData = await this.calculateTrendingData(
             { ...community, posts: allPosts },
             startDate,
@@ -643,11 +654,11 @@ export class EnhancedCommunityService {
             include: {
               rooms: {
                 include: {
-                  _count: { select: { posts: true } }
-                }
-              }
-            }
-          }
+                  _count: { select: { posts: true } },
+                },
+              },
+            },
+          },
         },
       });
 
@@ -672,8 +683,15 @@ export class EnhancedCommunityService {
           imageUrl: community.imageUrl,
           memberCount: community._count.memberships,
           recentActivity: {
-            postCount: community.roomGroups.reduce((total, rg) => 
-              total + rg.rooms.reduce((roomTotal, room) => roomTotal + room._count.posts, 0), 0),
+            postCount: community.roomGroups.reduce(
+              (total, rg) =>
+                total +
+                rg.rooms.reduce(
+                  (roomTotal, room) => roomTotal + room._count.posts,
+                  0,
+                ),
+              0,
+            ),
             commentCount: 0, // Could be calculated if needed
             lastActivityAt: null,
           },
@@ -877,16 +895,18 @@ export class EnhancedCommunityService {
         include: {
           roomGroups: {
             include: {
-              rooms: { select: { id: true } }
-            }
-          }
-        }
+              rooms: { select: { id: true } },
+            },
+          },
+        },
       });
-      
+
       if (!community) return [];
-      
-      const roomIds = community.roomGroups.flatMap(rg => rg.rooms.map(r => r.id));
-      
+
+      const roomIds = community.roomGroups.flatMap((rg) =>
+        rg.rooms.map((r) => r.id),
+      );
+
       // Get users with their contribution counts
       const contributors = await this.prisma.user.findMany({
         where: {

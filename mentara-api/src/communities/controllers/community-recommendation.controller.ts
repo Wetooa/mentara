@@ -110,8 +110,11 @@ export class CommunityRecommendationController {
         user.id,
         dto.force,
       );
-      
-      const recommendations = await this.communityRecommendationService.getUserRecommendations(user.id);
+
+      const recommendations =
+        await this.communityRecommendationService.getUserRecommendations(
+          user.id,
+        );
 
       return {
         success: true,

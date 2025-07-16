@@ -1,108 +1,47 @@
 import { AxiosInstance } from 'axios';
+import {
+  Meeting,
+  CreateMeetingRequest,
+  UpdateMeetingRequest,
+  AvailableSlot,
+  Duration,
+  MeetingListParams,
+  MeetingListResponse,
+  MeetingListParamsSchema,
+  GetAvailableSlotsQueryDto,
+  GetAvailableSlotsQueryDtoSchema,
+  CreateMeetingRequestSchema,
+  UpdateMeetingRequestSchema,
+} from 'mentara-commons';
 
-// Types
-export interface Meeting {
-  id: string;
-  therapistId: string;
-  clientId: string;
-  startTime: string;
-  duration: number;
-  title?: string;
-  description?: string;
-  meetingType: 'video' | 'phone' | 'in-person';
-  status: 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'no-show';
-  meetingUrl?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  therapist?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    title: string;
-  };
-  client?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  };
-}
+// Re-export commons types for backward compatibility
+export type {
+  Meeting,
+  CreateMeetingRequest,
+  UpdateMeetingRequest,
+  AvailableSlot,
+  Duration,
+  MeetingListParams,
+  MeetingListResponse,
+  GetAvailableSlotsQueryDto,
+};
 
-export interface CreateMeetingRequest {
-  therapistId: string;
-  startTime: string;
-  duration: number;
-  title?: string;
-  description?: string;
-  meetingType?: 'video' | 'phone' | 'in-person';
-}
-
-export interface UpdateMeetingRequest {
-  status?: 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'no-show';
-  notes?: string;
-  meetingUrl?: string;
-  startTime?: string;
-  duration?: number;
-  title?: string;
-  description?: string;
-}
-
-export interface AvailableSlot {
-  startTime: string;
-  endTime: string;
-  duration: number;
-  isAvailable: boolean;
-}
-
-export interface Duration {
-  id: string;
-  name: string;
-  minutes: number;
-  isActive: boolean;
-}
-
-export interface MeetingListParams {
-  therapistId?: string;
-  clientId?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-  limit?: number;
-  offset?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface MeetingListResponse {
-  meetings: Meeting[];
-  total: number;
-  hasMore: boolean;
-}
+// Using types from mentara-commons for consistency
 
 // Booking service factory
 export const createBookingService = (client: AxiosInstance) => ({
   // Meeting management
   meetings: {
     // Create new meeting
-    create: (data: CreateMeetingRequest): Promise<Meeting> =>
-      client.post('/booking/meetings', data),
+    create: async (data: CreateMeetingRequest): Promise<Meeting> => {
+      const validatedData = CreateMeetingRequestSchema.parse(data);
+      return client.post('/booking/meetings', validatedData);
+    },
 
     // Get meetings list with optional filters
-    getList: (params: MeetingListParams = {}): Promise<MeetingListResponse> => {
-      const searchParams = new URLSearchParams();
-      
-      if (params.therapistId) searchParams.append('therapistId', params.therapistId);
-      if (params.clientId) searchParams.append('clientId', params.clientId);
-      if (params.status) searchParams.append('status', params.status);
-      if (params.startDate) searchParams.append('startDate', params.startDate);
-      if (params.endDate) searchParams.append('endDate', params.endDate);
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
-      if (params.sortBy) searchParams.append('sortBy', params.sortBy);
-      if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
-
-      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      return client.get(`/booking/meetings${queryString}`);
+    getList: async (params: MeetingListParams = {}): Promise<MeetingListResponse> => {
+      const validatedParams = MeetingListParamsSchema.parse(params);
+      return client.post('/booking/meetings/list', validatedParams);
     },
 
     // Get all meetings for current user
@@ -114,8 +53,10 @@ export const createBookingService = (client: AxiosInstance) => ({
       client.get(`/booking/meetings/${id}`),
 
     // Update meeting
-    update: (id: string, data: UpdateMeetingRequest): Promise<Meeting> =>
-      client.put(`/booking/meetings/${id}`, data),
+    update: async (id: string, data: UpdateMeetingRequest): Promise<Meeting> => {
+      const validatedData = UpdateMeetingRequestSchema.parse(data);
+      return client.put(`/booking/meetings/${id}`, validatedData);
+    },
 
     // Cancel meeting
     cancel: (id: string): Promise<void> =>
@@ -125,12 +66,9 @@ export const createBookingService = (client: AxiosInstance) => ({
   // Availability management (therapist only)
   availability: {
     // Get available slots for a therapist on a specific date
-    getSlots: (therapistId: string, date: string): Promise<AvailableSlot[]> => {
-      const searchParams = new URLSearchParams();
-      searchParams.append('therapistId', therapistId);
-      searchParams.append('date', date);
-      
-      return client.get(`/booking/slots?${searchParams.toString()}`);
+    getSlots: async (therapistId: string, date: string): Promise<AvailableSlot[]> => {
+      const validatedParams = GetAvailableSlotsQueryDtoSchema.parse({ therapistId, date });
+      return client.post('/booking/slots', validatedParams);
     },
 
     // Create availability slot (therapist only)
@@ -156,6 +94,8 @@ export const createBookingService = (client: AxiosInstance) => ({
     getAll: (): Promise<Duration[]> =>
       client.get('/booking/durations'),
   },
-});;
+});
+
+export type BookingService = ReturnType<typeof createBookingService>;
 
 export type BookingService = ReturnType<typeof createBookingService>;

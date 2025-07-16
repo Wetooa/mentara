@@ -38,6 +38,7 @@ __exportStar(require("./worksheets"), exports);
 __exportStar(require("./pre-assessment"), exports);
 __exportStar(require("./meetings"), exports);
 __exportStar(require("./push-notifications"), exports);
+__exportStar(require("./moderator"), exports);
 // Re-export zod for convenience
 var zod_1 = require("zod");
 Object.defineProperty(exports, "z", { enumerable: true, get: function () { return zod_1.z; } });

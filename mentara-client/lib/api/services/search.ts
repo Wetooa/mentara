@@ -1,5 +1,23 @@
 import { AxiosInstance } from 'axios';
 import {
+  SearchRequestDto,
+  SearchResponseDto,
+  SearchResultItem,
+  TherapistSearchDto,
+  AdvancedSearchDto,
+  SearchAutocompleteDto,
+  SearchAnalyticsDto,
+  SearchTherapistsQueryDto,
+  SearchPostsQueryDto,
+  SearchCommunitiesQueryDto,
+  SearchUsersQueryDto,
+  GlobalSearchQueryDto,
+  SearchTherapistsQueryDtoSchema,
+  SearchPostsQueryDtoSchema,
+  SearchCommunitiesQueryDtoSchema,
+  SearchUsersQueryDtoSchema,
+  GlobalSearchQueryDtoSchema,
+  // Legacy interfaces for backward compatibility
   TherapistSearchParams,
   PostSearchParams,
   UserSearchParams,
@@ -11,94 +29,91 @@ import {
   UserSearchResult,
   CommunitySearchResult,
   GlobalSearchResult,
-} from '@/types/api/search';
+} from 'mentara-commons';
+
+// All search types are now imported from mentara-commons
+
+// Re-export commons types for backward compatibility
+export type {
+  TherapistSearchParams,
+  PostSearchParams,
+  UserSearchParams,
+  CommunitySearchParams,
+  GlobalSearchParams,
+  SearchResult,
+  TherapistSearchResult,
+  PostSearchResult,
+  UserSearchResult,
+  CommunitySearchResult,
+  GlobalSearchResult,
+};
 
 export interface SearchService {
-  therapists(params: TherapistSearchParams): Promise<SearchResult<TherapistSearchResult>>;
-  posts(params: PostSearchParams): Promise<SearchResult<PostSearchResult>>;
-  communities(params: CommunitySearchParams): Promise<SearchResult<CommunitySearchResult>>;
-  users(params: UserSearchParams): Promise<SearchResult<UserSearchResult>>;
-  global(params: GlobalSearchParams): Promise<SearchResult<GlobalSearchResult>>;
+  // Primary search methods using mentara-commons DTOs
+  searchTherapists(params: SearchTherapistsQueryDto): Promise<SearchResponseDto>;
+  searchPosts(params: SearchPostsQueryDto): Promise<SearchResponseDto>;
+  searchCommunities(params: SearchCommunitiesQueryDto): Promise<SearchResponseDto>;
+  searchUsers(params: SearchUsersQueryDto): Promise<SearchResponseDto>;
+  globalSearch(params: GlobalSearchQueryDto): Promise<SearchResponseDto>;
+  autocomplete(params: SearchAutocompleteDto): Promise<string[]>;
+  
+  // Legacy aliases for backward compatibility
+  therapists(params: SearchTherapistsQueryDto): Promise<SearchResponseDto>;
+  posts(params: SearchPostsQueryDto): Promise<SearchResponseDto>;
+  communities(params: SearchCommunitiesQueryDto): Promise<SearchResponseDto>;
+  users(params: SearchUsersQueryDto): Promise<SearchResponseDto>;
+  global(params: GlobalSearchQueryDto): Promise<SearchResponseDto>;
 }
 
 export const createSearchService = (client: AxiosInstance): SearchService => ({
-  therapists: (params: TherapistSearchParams): Promise<SearchResult<TherapistSearchResult>> => {
-    const searchParams = new URLSearchParams();
-    searchParams.append('q', params.q);
-    
-    // Add filter parameters
-    if (params.specialties?.length) {
-      params.specialties.forEach(specialty => searchParams.append('specialties', specialty));
-    }
-    if (params.languages?.length) {
-      params.languages.forEach(language => searchParams.append('languages', language));
-    }
-    if (params.minExperience !== undefined) searchParams.append('minExperience', params.minExperience.toString());
-    if (params.maxExperience !== undefined) searchParams.append('maxExperience', params.maxExperience.toString());
-    if (params.minPrice !== undefined) searchParams.append('minPrice', params.minPrice.toString());
-    if (params.maxPrice !== undefined) searchParams.append('maxPrice', params.maxPrice.toString());
-    if (params.location) searchParams.append('location', params.location);
-    if (params.insurance?.length) {
-      params.insurance.forEach(insurance => searchParams.append('insurance', insurance));
-    }
-    if (params.availableFrom) searchParams.append('availableFrom', params.availableFrom);
-    if (params.availableTo) searchParams.append('availableTo', params.availableTo);
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-
-    return client.get(`/search/therapists?${searchParams.toString()}`);
+  // Primary search methods using mentara-commons DTOs
+  searchTherapists: async (params: SearchTherapistsQueryDto): Promise<SearchResponseDto> => {
+    const validatedParams = SearchTherapistsQueryDtoSchema.parse(params);
+    return client.post('/search/therapists', validatedParams);
   },
 
-  posts: (params: PostSearchParams): Promise<SearchResult<PostSearchResult>> => {
-    const searchParams = new URLSearchParams();
-    searchParams.append('q', params.q);
-    
-    if (params.communityId) searchParams.append('communityId', params.communityId);
-    if (params.roomId) searchParams.append('roomId', params.roomId);
-    if (params.authorId) searchParams.append('authorId', params.authorId);
-    if (params.tags?.length) {
-      params.tags.forEach(tag => searchParams.append('tags', tag));
-    }
-    if (params.dateFrom) searchParams.append('dateFrom', params.dateFrom);
-    if (params.dateTo) searchParams.append('dateTo', params.dateTo);
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-
-    return client.get(`/search/posts?${searchParams.toString()}`);
+  searchPosts: async (params: SearchPostsQueryDto): Promise<SearchResponseDto> => {
+    const validatedParams = SearchPostsQueryDtoSchema.parse(params);
+    return client.post('/search/posts', validatedParams);
   },
 
-  communities: (params: CommunitySearchParams): Promise<SearchResult<CommunitySearchResult>> => {
-    const searchParams = new URLSearchParams();
-    searchParams.append('q', params.q);
-    
-    if (params.category) searchParams.append('category', params.category);
-    if (params.isPublic !== undefined) searchParams.append('isPublic', params.isPublic.toString());
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-
-    return client.get(`/search/communities?${searchParams.toString()}`);
+  searchCommunities: async (params: SearchCommunitiesQueryDto): Promise<SearchResponseDto> => {
+    const validatedParams = SearchCommunitiesQueryDtoSchema.parse(params);
+    return client.post('/search/communities', validatedParams);
   },
 
-  users: (params: UserSearchParams): Promise<SearchResult<UserSearchResult>> => {
-    const searchParams = new URLSearchParams();
-    searchParams.append('q', params.q);
-    
-    if (params.role) searchParams.append('role', params.role);
-    if (params.isActive !== undefined) searchParams.append('isActive', params.isActive.toString());
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-
-    return client.get(`/search/users?${searchParams.toString()}`);
+  searchUsers: async (params: SearchUsersQueryDto): Promise<SearchResponseDto> => {
+    const validatedParams = SearchUsersQueryDtoSchema.parse(params);
+    return client.post('/search/users', validatedParams);
   },
 
-  global: (params: GlobalSearchParams): Promise<SearchResult<GlobalSearchResult>> => {
-    const searchParams = new URLSearchParams();
-    searchParams.append('q', params.q);
-    
-    if (params.type) searchParams.append('type', params.type);
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
+  globalSearch: async (params: GlobalSearchQueryDto): Promise<SearchResponseDto> => {
+    const validatedParams = GlobalSearchQueryDtoSchema.parse(params);
+    return client.post('/search/global', validatedParams);
+  },
 
-    return client.get(`/search/global?${searchParams.toString()}`);
+  autocomplete: async (params: SearchAutocompleteDto): Promise<string[]> => {
+    return client.post('/search/autocomplete', params);
+  },
+
+  // Legacy aliases for backward compatibility - point to primary methods
+  therapists: function(params: SearchTherapistsQueryDto): Promise<SearchResponseDto> {
+    return this.searchTherapists(params);
+  },
+
+  posts: function(params: SearchPostsQueryDto): Promise<SearchResponseDto> {
+    return this.searchPosts(params);
+  },
+
+  communities: function(params: SearchCommunitiesQueryDto): Promise<SearchResponseDto> {
+    return this.searchCommunities(params);
+  },
+
+  users: function(params: SearchUsersQueryDto): Promise<SearchResponseDto> {
+    return this.searchUsers(params);
+  },
+
+  global: function(params: GlobalSearchQueryDto): Promise<SearchResponseDto> {
+    return this.globalSearch(params);
   },
 });

@@ -7,7 +7,10 @@ import {
   MarkReadResponse,
   CreateNotificationRequest,
   NotificationSettings,
-} from '@/types/api/notifications';
+  NotificationListParamsSchema,
+  CreateNotificationDtoSchema,
+  UpdateNotificationPreferencesDtoSchema,
+} from 'mentara-commons';
 
 export interface NotificationsService {
   getMy(params?: NotificationListParams): Promise<NotificationListResponse>;
@@ -27,17 +30,8 @@ export interface NotificationsService {
 
 export const createNotificationsService = (client: AxiosInstance): NotificationsService => ({
   getMy: (params: NotificationListParams = {}): Promise<NotificationListResponse> => {
-    const searchParams = new URLSearchParams();
-
-    if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
-    if (params.isRead !== undefined) searchParams.append('isRead', params.isRead.toString());
-    if (params.type) searchParams.append('type', params.type);
-    if (params.startDate) searchParams.append('startDate', params.startDate);
-    if (params.endDate) searchParams.append('endDate', params.endDate);
-
-    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-    return client.get(`/notifications${queryString}`);
+    const validatedParams = NotificationListParamsSchema.parse(params);
+    return client.get('/notifications', { params: validatedParams });
   },
 
   markAsRead: (notificationId: string): Promise<MarkReadResponse> =>
@@ -55,13 +49,17 @@ export const createNotificationsService = (client: AxiosInstance): Notifications
   getSettings: (): Promise<NotificationSettings> =>
     client.get('/notifications/settings'),
 
-  updateSettings: (settings: Partial<NotificationSettings>): Promise<NotificationSettings> =>
-    client.patch('/notifications/settings', settings),
+  updateSettings: (settings: Partial<NotificationSettings>): Promise<NotificationSettings> => {
+    const validatedSettings = UpdateNotificationPreferencesDtoSchema.parse(settings);
+    return client.patch('/notifications/settings', validatedSettings);
+  },
 
   // Admin operations
   admin: {
-    create: (notification: CreateNotificationRequest): Promise<Notification> =>
-      client.post('/admin/notifications', notification),
+    create: (notification: CreateNotificationRequest): Promise<Notification> => {
+      const validatedNotification = CreateNotificationDtoSchema.parse(notification);
+      return client.post('/admin/notifications', validatedNotification);
+    },
 
     broadcast: (notification: Omit<CreateNotificationRequest, 'userId'> & { userIds?: string[]; roles?: string[] }): Promise<{ sent: number }> =>
       client.post('/admin/notifications/broadcast', notification),

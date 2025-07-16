@@ -28,9 +28,7 @@ export class TherapistClientController {
 
   @Get('all')
   @HttpCode(HttpStatus.OK)
-  async getAllClients(
-    @CurrentUserId() therapistId: string,
-  ): Promise<any[]> {
+  async getAllClients(@CurrentUserId() therapistId: string): Promise<any[]> {
     return this.therapistManagementService.getAllClients(therapistId);
   }
 

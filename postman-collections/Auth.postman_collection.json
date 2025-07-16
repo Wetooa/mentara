@@ -1,0 +1,1750 @@
+{
+  "info": {
+    "name": "Mentara - Auth",
+    "description": "Auth module endpoints for JWT token-based authentication, OAuth integration, user registration, and session management with role-based access control.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-auth"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}",
+          "",
+          "// Ensure test environment has valid UUID for userId",
+          "if (!pm.environment.get('userId') || !pm.environment.get('userId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('userId', '123e4567-e89b-12d3-a456-426614174000');",
+          "    console.log('⚠️ Set default UUID for userId');",
+          "}",
+          "",
+          "// Ensure test passwords are strong enough for Zod validation",
+          "if (!pm.environment.get('testPassword') || pm.environment.get('testPassword').length < 8) {",
+          "    pm.environment.set('testPassword', 'SecurePass123!');",
+          "    console.log('⚠️ Set default strong password');",
+          "}",
+          "",
+          "// Set up OAuth callback URLs if needed",
+          "if (!pm.environment.get('oauthCallbackUrl')) {",
+          "    pm.environment.set('oauthCallbackUrl', 'http://localhost:3000/auth/callback');",
+          "    console.log('⚠️ Set default OAuth callback URL');",
+          "}",
+          "",
+          "// Generate unique email for registration tests",
+          "const timestamp = Date.now();",
+          "pm.environment.set('uniqueEmail', `test${timestamp}@example.com`);",
+          "pm.environment.set('uniqueTherapistEmail', `therapist${timestamp}@example.com`);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Auto-save tokens from authentication responses",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    const responseJson = pm.response.json();",
+          "    ",
+          "    if (responseJson.accessToken) {",
+          "        pm.environment.set('accessToken', responseJson.accessToken);",
+          "        console.log('\u2705 Access token saved');",
+          "    }",
+          "    ",
+          "    if (responseJson.refreshToken) {",
+          "        pm.environment.set('refreshToken', responseJson.refreshToken);",
+          "        console.log('\u2705 Refresh token saved');",
+          "    }",
+          "    ",
+          "    if (responseJson.user) {",
+          "        pm.environment.set('userId', responseJson.user.id);",
+          "        pm.environment.set('userRole', responseJson.user.role);",
+          "        pm.environment.set('userEmail', responseJson.user.email);",
+          "        console.log('\u2705 User info saved');",
+          "    }",
+          "}",
+          "",
+          "// Handle OAuth redirects (302)",
+          "if (pm.response.code === 302) {",
+          "    const location = pm.response.headers.get('Location');",
+          "    if (location) {",
+          "        console.log('🔄 OAuth redirect to:', location);",
+          "        pm.environment.set('oauthRedirectUrl', location);",
+          "    }",
+          "}",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error('\u274C Validation Error: ' + issue.message + ' (' + issue.path.join('.') + ');",
+          "            });",
+          "        }",
+          "        if (responseJson.error) {",
+          "            console.error('\u274C OAuth Error:', responseJson.error);",
+          "            if (responseJson.error_description) {",
+          "                console.error('\u274C Error Description:', responseJson.error_description);",
+          "            }",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('\u274C Failed to parse error response');",
+          "    }",
+          "}",
+          "",
+          "// Handle email already exists error",
+          "if (pm.response.code === 409) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        console.log('⚠️ Email already exists - this is expected for test data');",
+          "    } catch (e) {",
+          "        console.error('\u274C Failed to parse conflict error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "test@example.com",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "SecurePass123!",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "oauthCallbackUrl",
+      "value": "http://localhost:3000/auth/callback",
+      "type": "string"
+    },
+    {
+      "key": "googleClientId",
+      "value": "your-google-client-id",
+      "type": "string"
+    },
+    {
+      "key": "microsoftClientId",
+      "value": "your-microsoft-client-id",
+      "type": "string"
+    },
+    {
+      "key": "uniqueEmail",
+      "value": "test1234567890@example.com",
+      "type": "string"
+    },
+    {
+      "key": "uniqueTherapistEmail",
+      "value": "therapist1234567890@example.com",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has access token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('accessToken');",
+                  "});",
+                  "",
+                  "pm.test('Response has refresh token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('refreshToken');",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('user');",
+                  "    pm.expect(responseJson.user).to.have.property('id');",
+                  "    pm.expect(responseJson.user).to.have.property('role');",
+                  "    pm.expect(responseJson.user).to.have.property('email');",
+                  "});",
+                  "",
+                  "pm.test('JWT tokens are properly formatted', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    // Basic JWT format check (three parts separated by dots)",
+                  "    pm.expect(responseJson.accessToken.split('.')).to.have.lengthOf(3);",
+                  "    pm.expect(responseJson.refreshToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.test('User role is valid', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    const validRoles = ['client', 'therapist', 'moderator', 'admin'];",
+                  "    pm.expect(validRoles).to.include(responseJson.user.role);",
+                  "});",
+                  "",
+                  "// Test for Zod validation errors (400 responses)",
+                  "pm.test('Zod validation error format (if 400)', function () {",
+                  "    if (pm.response.code === 400) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('issues');",
+                  "        pm.expect(responseJson.issues).to.be.an('array');",
+                  "        if (responseJson.issues.length > 0) {",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with email and password to get JWT access and refresh tokens. Includes IP tracking and login attempt monitoring.\n\n**DTO Reference**: LoginDto (mentara-commons/src/schemas/user.ts)\n```typescript\nLoginDtoSchema = z.object({\n  email: z.string().email('Invalid email format'),\n  password: z.string().min(1, 'Password is required')\n});\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Validation Tests",
+          "item": [
+            {
+              "name": "Login - Empty Password Validation",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 for empty password', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Zod validation error for empty password', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('issues');",
+                      "    pm.expect(responseJson.issues).to.be.an('array');",
+                      "    const passwordError = responseJson.issues.find(issue => ",
+                      "        issue.path && issue.path.includes('password'));",
+                      "    pm.expect(passwordError).to.not.be.undefined;",
+                      "    pm.expect(passwordError.message).to.equal('Password is required');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Test login validation with empty password (should fail with Zod error)"
+              },
+              "response": []
+            },
+            {
+              "name": "Login - Invalid Email Format",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 for invalid email', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Zod validation error for invalid email', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('issues');",
+                      "    pm.expect(responseJson.issues).to.be.an('array');",
+                      "    const emailError = responseJson.issues.find(issue => ",
+                      "        issue.path && issue.path.includes('email'));",
+                      "    pm.expect(emailError).to.not.be.undefined;",
+                      "    pm.expect(emailError.message).to.equal('Invalid email format');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"invalid-email-format\",\n  \"password\": \"testpassword\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Test login validation with invalid email format (should fail with Zod error)"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has new access token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('accessToken');",
+                  "});",
+                  "",
+                  "pm.test('Response has new refresh token (rotation)', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('refreshToken');",
+                  "    // Verify new refresh token is different from the old one",
+                  "    const oldRefreshToken = pm.environment.get('refreshToken');",
+                  "    if (oldRefreshToken) {",
+                  "        pm.expect(responseJson.refreshToken).to.not.equal(oldRefreshToken);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('JWT tokens are properly formatted', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.accessToken.split('.')).to.have.lengthOf(3);",
+                  "    pm.expect(responseJson.refreshToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "// Test for Zod validation errors (400 responses)",
+                  "pm.test('Zod validation error format (if 400)', function () {",
+                  "    if (pm.response.code === 400) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('issues');",
+                  "        pm.expect(responseJson.issues).to.be.an('array');",
+                  "        if (responseJson.issues.length > 0) {",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
+                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresh access token using refresh token. Implements token rotation for enhanced security.\n\n**DTO Reference**: RefreshTokenDto (mentara-commons/src/schemas/user.ts)\n```typescript\nRefreshTokenDtoSchema = z.object({\n  refreshToken: z.string().min(1, 'Refresh token is required')\n});\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token - Empty Token Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 for empty refresh token', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Zod validation error for empty refresh token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('issues');",
+                  "    pm.expect(responseJson.issues).to.be.an('array');",
+                  "    const tokenError = responseJson.issues.find(issue => ",
+                  "        issue.path && issue.path.includes('refreshToken'));",
+                  "    pm.expect(tokenError).to.not.be.undefined;",
+                  "    pm.expect(tokenError.message).to.equal('Refresh token is required');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Test refresh token validation with empty token (should fail with Zod error)"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Logout response is valid', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('logged out');",
+                  "});",
+                  "",
+                  "// Clear stored tokens on successful logout",
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.unset('accessToken');",
+                  "    pm.environment.unset('refreshToken');",
+                  "    pm.environment.unset('userId');",
+                  "    pm.environment.unset('userRole');",
+                  "    console.log('\u2705 Tokens cleared');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout current user and invalidate refresh token. Requires refresh token for secure logout.\n\n**DTO Reference**: LogoutDto (mentara-commons/src/schemas/user.ts)\n```typescript\nLogoutDtoSchema = z.object({\n  refreshToken: z.string().min(1, 'Refresh token is required')\n});\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Registration",
+      "item": [
+        {
+          "name": "Register Client",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Client registration successful', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has access token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('accessToken');",
+                  "});",
+                  "",
+                  "pm.test('Response has refresh token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('refreshToken');",
+                  "});",
+                  "",
+                  "pm.test('User created with client role', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.user.role).to.equal('client');",
+                  "});",
+                  "",
+                  "pm.test('Client profile fields present', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.user).to.have.property('firstName');",
+                  "    pm.expect(responseJson.user).to.have.property('lastName');",
+                  "    pm.expect(responseJson.user).to.have.property('email');",
+                  "});",
+                  "",
+                  "pm.test('Account activation status', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.user).to.have.property('isActive');",
+                  "    pm.expect(responseJson.user.isActive).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client{{$timestamp}}@example.com\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"John\",\n  \"middleName\": \"\",\n  \"lastName\": \"Doe\",\n  \"birthDate\": \"1990-01-01T00:00:00.000Z\",\n  \"address\": \"123 Main St, Toronto, ON\",\n  \"avatarUrl\": \"\",\n  \"hasSeenTherapistRecommendations\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/client",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register", "client"]
+            },
+            "description": "Register a new client account with client-specific profile fields. Includes emergency contact information and personal details.\n\n**DTO Reference**: RegisterClientDto (mentara-commons/src/schemas/user.ts)\n```typescript\nRegisterClientDtoSchema = z.object({\n  email: z.string().email('Invalid email format'),\n  password: z.string().min(8, 'Password must be at least 8 characters long'),\n  firstName: z.string().min(1, 'First name is required'),\n  middleName: z.string().optional(),\n  lastName: z.string().min(1, 'Last name is required'),\n  birthDate: z.string().datetime().optional(),\n  address: z.string().optional(),\n  avatarUrl: z.string().url().optional(),\n  hasSeenTherapistRecommendations: z.boolean().optional()\n});\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Client - Validation Tests",
+          "item": [
+            {
+              "name": "Register Client - Weak Password Validation",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 for weak password', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Zod validation error for weak password', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('issues');",
+                      "    pm.expect(responseJson.issues).to.be.an('array');",
+                      "    const passwordError = responseJson.issues.find(issue => ",
+                      "        issue.path && issue.path.includes('password'));",
+                      "    pm.expect(passwordError).to.not.be.undefined;",
+                      "    pm.expect(passwordError.message).to.equal('Password must be at least 8 characters long');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"testclient{{$timestamp}}@example.com\",\n  \"password\": \"123\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register/client",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register", "client"]
+                },
+                "description": "Test client registration with weak password (should fail with Zod error)"
+              },
+              "response": []
+            },
+            {
+              "name": "Register Client - Invalid Email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 for invalid email', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Zod validation error for invalid email', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('issues');",
+                      "    pm.expect(responseJson.issues).to.be.an('array');",
+                      "    const emailError = responseJson.issues.find(issue => ",
+                      "        issue.path && issue.path.includes('email'));",
+                      "    pm.expect(emailError).to.not.be.undefined;",
+                      "    pm.expect(emailError.message).to.equal('Invalid email format');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"invalid-email-format\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register/client",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register", "client"]
+                },
+                "description": "Test client registration with invalid email format"
+              },
+              "response": []
+            },
+            {
+              "name": "Register Client - Missing Required Fields",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 for missing fields', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Zod validation errors for missing fields', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('issues');",
+                      "    pm.expect(responseJson.issues).to.be.an('array');",
+                      "    ",
+                      "    const requiredFields = ['firstName', 'lastName'];",
+                      "    requiredFields.forEach(field => {",
+                      "        const fieldError = responseJson.issues.find(issue => ",
+                      "            issue.path && issue.path.includes(field));",
+                      "        pm.expect(fieldError, `Missing error for ${field}`).to.not.be.undefined;",
+                      "    });",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"incomplete{{$timestamp}}@example.com\",\n  \"password\": \"{{testPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register/client",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register", "client"]
+                },
+                "description": "Test client registration with missing required fields"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Register Therapist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Therapist registration successful', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has access token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('accessToken');",
+                  "});",
+                  "",
+                  "pm.test('User created with therapist role', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.user.role).to.equal('therapist');",
+                  "});",
+                  "",
+                  "pm.test('Therapist profile fields present', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.user).to.have.property('firstName');",
+                  "    pm.expect(responseJson.user).to.have.property('lastName');",
+                  "    pm.expect(responseJson.user).to.have.property('email');",
+                  "});",
+                  "",
+                  "pm.test('Therapist account requires approval', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    // Therapist accounts might start as inactive pending approval",
+                  "    if (responseJson.user.hasOwnProperty('isActive')) {",
+                  "        // Account activation status depends on approval process",
+                  "        pm.expect(responseJson.user.isActive).to.be.a('boolean');",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('Professional information captured', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.user.hasOwnProperty('hourlyRate')) {",
+                  "        pm.expect(responseJson.user.hourlyRate).to.be.a('number');",
+                  "        pm.expect(responseJson.user.hourlyRate).to.be.above(0);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{uniqueTherapistEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"mobile\": \"+1234567890\",\n  \"province\": \"Ontario\",\n  \"providerType\": \"Licensed Clinical Psychologist\",\n  \"professionalLicenseType\": \"Clinical Psychology License\",\n  \"isPRCLicensed\": true,\n  \"prcLicenseNumber\": \"PRC123456\",\n  \"expirationDateOfLicense\": \"2025-12-31T23:59:59.000Z\",\n  \"isLicenseActive\": true,\n  \"practiceStartDate\": \"2020-01-01T00:00:00.000Z\",\n  \"yearsOfExperience\": \"5\",\n  \"areasOfExpertise\": [\"anxiety\", \"depression\", \"cognitive-behavioral-therapy\"],\n  \"assessmentTools\": [\"PHQ-9\", \"GAD-7\", \"Beck Depression Inventory\"],\n  \"therapeuticApproachesUsedList\": [\"CBT\", \"Mindfulness\", \"Solution-Focused\"],\n  \"languagesOffered\": [\"English\", \"French\"],\n  \"providedOnlineTherapyBefore\": true,\n  \"comfortableUsingVideoConferencing\": true,\n  \"weeklyAvailability\": \"Monday-Friday 9AM-5PM\",\n  \"preferredSessionLength\": \"50 minutes\",\n  \"accepts\": [\"insurance\", \"self-pay\"],\n  \"privateConfidentialSpace\": true,\n  \"compliesWithDataPrivacyAct\": true,\n  \"professionalLiabilityInsurance\": true,\n  \"complaintsOrDisciplinaryActions\": false,\n  \"willingToAbideByPlatformGuidelines\": true,\n  \"sessionLength\": \"50 minutes\",\n  \"hourlyRate\": 150.00,\n  \"bio\": \"Experienced therapist specializing in anxiety and depression treatment.\",\n  \"profileImageUrl\": \"https://example.com/profile.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/therapist",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register", "therapist"]
+            },
+            "description": "Register a new therapist account with professional credentials and specialization information.\n\n**DTO Reference**: RegisterTherapistDto (mentara-commons/src/schemas/therapist.ts)\n```typescript\nRegisterTherapistDtoSchema = z.object({\n  email: z.string().email('Invalid email format'),\n  password: z.string().min(8, 'Password must be at least 8 characters long'),\n  firstName: z.string().min(1, 'First name is required'),\n  lastName: z.string().min(1, 'Last name is required'),\n  mobile: z.string().min(1, 'Mobile is required'),\n  province: z.string().min(1, 'Province is required'),\n  providerType: z.string().min(1, 'Provider type is required'),\n  professionalLicenseType: z.string().min(1, 'Professional license type is required'),\n  isPRCLicensed: z.boolean(),\n  prcLicenseNumber: z.string().min(1, 'PRC license number is required'),\n  areasOfExpertise: z.array(z.string()).min(1, 'At least one area of expertise is required'),\n  assessmentTools: z.array(z.string()).min(1, 'At least one assessment tool is required'),\n  therapeuticApproachesUsedList: z.array(z.string()).min(1, 'At least one therapeutic approach is required'),\n  languagesOffered: z.array(z.string()).min(1, 'At least one language is required'),\n  // ... and other required fields\n});\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Therapist - Validation Tests",
+          "item": [
+            {
+              "name": "Register Therapist - Missing Credentials",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 for missing credentials', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Zod validation error for missing professional fields', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('issues');",
+                      "    pm.expect(responseJson.issues).to.be.an('array');",
+                      "    ",
+                      "    const requiredFields = ['mobile', 'province', 'providerType', 'professionalLicenseType', 'areasOfExpertise', 'assessmentTools', 'therapeuticApproachesUsedList', 'languagesOffered'];",
+                      "    const hasRequiredError = responseJson.issues.some(issue => ",
+                      "        requiredFields.some(field => issue.path && issue.path.includes(field)));",
+                      "    pm.expect(hasRequiredError).to.be.true;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"incomplete-therapist{{$timestamp}}@example.com\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register/therapist",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register", "therapist"]
+                },
+                "description": "Test therapist registration with missing professional credentials"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Email Verification",
+          "item": [
+            {
+              "name": "Request Email Verification",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Email verification request successful', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Verification email sent confirmation', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('message');",
+                      "    pm.expect(responseJson.message).to.include('verification email sent');",
+                      "});",
+                      "",
+                      "pm.test('Response includes email address', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('email');",
+                      "    pm.expect(responseJson.email).to.be.a('string');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{userEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/request-email-verification",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "request-email-verification"]
+                },
+                "description": "Request email verification for registered user. Sends verification email with token."
+              },
+              "response": []
+            },
+            {
+              "name": "Verify Email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Email verification successful', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Email verified confirmation', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('message');",
+                      "    pm.expect(responseJson.message).to.include('email verified');",
+                      "});",
+                      "",
+                      "pm.test('Updated user status', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('emailVerified');",
+                      "    pm.expect(responseJson.emailVerified).to.be.true;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{emailVerificationToken}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/verify-email",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "verify-email"]
+                },
+                "description": "Verify email address using verification token sent via email."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OAuth Integration",
+      "item": [
+        {
+          "name": "Google OAuth",
+          "item": [
+            {
+              "name": "Initiate Google OAuth",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Google OAuth initiation typically returns a redirect",
+                      "pm.test('OAuth initiation successful', function () {",
+                      "    // Accept both 302 (redirect) and 200 (direct response)",
+                      "    pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "",
+                      "// Check for redirect to Google OAuth",
+                      "if (pm.response.code === 302) {",
+                      "    pm.test('Redirect to Google OAuth', function () {",
+                      "        const location = pm.response.headers.get('Location');",
+                      "        pm.expect(location).to.include('accounts.google.com');",
+                      "        pm.expect(location).to.include('oauth2');",
+                      "    });",
+                      "}",
+                      "",
+                      "// If direct response, check for OAuth URL",
+                      "if (pm.response.code === 200) {",
+                      "    pm.test('Response contains OAuth URL', function () {",
+                      "        const responseJson = pm.response.json();",
+                      "        pm.expect(responseJson).to.have.property('authUrl');",
+                      "        pm.expect(responseJson.authUrl).to.include('accounts.google.com');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/google",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "google"]
+                },
+                "description": "Initiate Google OAuth authentication flow. Redirects to Google OAuth consent screen."
+              },
+              "response": []
+            },
+            {
+              "name": "Google OAuth Callback",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('OAuth callback successful', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has access token', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('accessToken');",
+                      "});",
+                      "",
+                      "pm.test('Response has user data', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('user');",
+                      "    pm.expect(responseJson.user).to.have.property('id');",
+                      "    pm.expect(responseJson.user).to.have.property('email');",
+                      "    pm.expect(responseJson.user).to.have.property('role');",
+                      "});",
+                      "",
+                      "pm.test('User email is verified for OAuth', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.user).to.have.property('emailVerified');",
+                      "    pm.expect(responseJson.user.emailVerified).to.be.true;",
+                      "});",
+                      "",
+                      "pm.test('OAuth provider information included', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.user).to.have.property('provider');",
+                      "    pm.expect(responseJson.user.provider).to.equal('google');",
+                      "});",
+                      "",
+                      "// Test for OAuth errors",
+                      "pm.test('OAuth error handling (if error)', function () {",
+                      "    if (pm.response.code === 400) {",
+                      "        const responseJson = pm.response.json();",
+                      "        pm.expect(responseJson).to.have.property('error');",
+                      "        console.error('OAuth Error:', responseJson.error);",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/google/callback?code={{oauthCode}}&state={{oauthState}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "google", "callback"],
+                  "query": [
+                    {
+                      "key": "code",
+                      "value": "{{oauthCode}}",
+                      "description": "Authorization code from Google OAuth"
+                    },
+                    {
+                      "key": "state",
+                      "value": "{{oauthState}}",
+                      "description": "State parameter for CSRF protection"
+                    }
+                  ]
+                },
+                "description": "Handle Google OAuth callback with authorization code. Creates user account if doesn't exist."
+              },
+              "response": []
+            },
+            {
+              "name": "Google OAuth Callback - Error Handling",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('OAuth error handled properly', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Error response format', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('error');",
+                      "    pm.expect(responseJson).to.have.property('message');",
+                      "});",
+                      "",
+                      "pm.test('OAuth error details', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.error).to.be.oneOf(['access_denied', 'invalid_request', 'invalid_grant']);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/google/callback?error=access_denied&error_description=User%20denied%20access",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "google", "callback"],
+                  "query": [
+                    {
+                      "key": "error",
+                      "value": "access_denied",
+                      "description": "OAuth error code"
+                    },
+                    {
+                      "key": "error_description",
+                      "value": "User denied access",
+                      "description": "OAuth error description"
+                    }
+                  ]
+                },
+                "description": "Test Google OAuth callback error handling when user denies access."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Microsoft OAuth",
+          "item": [
+            {
+              "name": "Initiate Microsoft OAuth",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Microsoft OAuth initiation typically returns a redirect",
+                      "pm.test('OAuth initiation successful', function () {",
+                      "    // Accept both 302 (redirect) and 200 (direct response)",
+                      "    pm.expect([200, 302]).to.include(pm.response.code);",
+                      "});",
+                      "",
+                      "// Check for redirect to Microsoft OAuth",
+                      "if (pm.response.code === 302) {",
+                      "    pm.test('Redirect to Microsoft OAuth', function () {",
+                      "        const location = pm.response.headers.get('Location');",
+                      "        pm.expect(location).to.include('login.microsoftonline.com');",
+                      "        pm.expect(location).to.include('oauth2');",
+                      "    });",
+                      "}",
+                      "",
+                      "// If direct response, check for OAuth URL",
+                      "if (pm.response.code === 200) {",
+                      "    pm.test('Response contains OAuth URL', function () {",
+                      "        const responseJson = pm.response.json();",
+                      "        pm.expect(responseJson).to.have.property('authUrl');",
+                      "        pm.expect(responseJson.authUrl).to.include('login.microsoftonline.com');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/microsoft",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "microsoft"]
+                },
+                "description": "Initiate Microsoft OAuth authentication flow. Redirects to Microsoft OAuth consent screen."
+              },
+              "response": []
+            },
+            {
+              "name": "Microsoft OAuth Callback",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('OAuth callback successful', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Response has access token', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('accessToken');",
+                      "});",
+                      "",
+                      "pm.test('Response has user data', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('user');",
+                      "    pm.expect(responseJson.user).to.have.property('id');",
+                      "    pm.expect(responseJson.user).to.have.property('email');",
+                      "    pm.expect(responseJson.user).to.have.property('role');",
+                      "});",
+                      "",
+                      "pm.test('User email is verified for OAuth', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.user).to.have.property('emailVerified');",
+                      "    pm.expect(responseJson.user.emailVerified).to.be.true;",
+                      "});",
+                      "",
+                      "pm.test('OAuth provider information included', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.user).to.have.property('provider');",
+                      "    pm.expect(responseJson.user.provider).to.equal('microsoft');",
+                      "});",
+                      "",
+                      "// Test for OAuth errors",
+                      "pm.test('OAuth error handling (if error)', function () {",
+                      "    if (pm.response.code === 400) {",
+                      "        const responseJson = pm.response.json();",
+                      "        pm.expect(responseJson).to.have.property('error');",
+                      "        console.error('OAuth Error:', responseJson.error);",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/microsoft/callback?code={{oauthCode}}&state={{oauthState}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "microsoft", "callback"],
+                  "query": [
+                    {
+                      "key": "code",
+                      "value": "{{oauthCode}}",
+                      "description": "Authorization code from Microsoft OAuth"
+                    },
+                    {
+                      "key": "state",
+                      "value": "{{oauthState}}",
+                      "description": "State parameter for CSRF protection"
+                    }
+                  ]
+                },
+                "description": "Handle Microsoft OAuth callback with authorization code. Creates user account if doesn't exist."
+              },
+              "response": []
+            },
+            {
+              "name": "Microsoft OAuth Callback - Error Handling",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('OAuth error handled properly', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "pm.test('Error response format', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson).to.have.property('error');",
+                      "    pm.expect(responseJson).to.have.property('message');",
+                      "});",
+                      "",
+                      "pm.test('OAuth error details', function () {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.error).to.be.oneOf(['access_denied', 'invalid_request', 'invalid_grant']);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/microsoft/callback?error=access_denied&error_description=User%20denied%20access",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "microsoft", "callback"],
+                  "query": [
+                    {
+                      "key": "error",
+                      "value": "access_denied",
+                      "description": "OAuth error code"
+                    },
+                    {
+                      "key": "error_description",
+                      "value": "User denied access",
+                      "description": "OAuth error description"
+                    }
+                  ]
+                },
+                "description": "Test Microsoft OAuth callback error handling when user denies access."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Password Management",
+      "item": [
+        {
+          "name": "Forgot Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Password reset request successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Reset email sent confirmation', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('reset email sent');",
+                  "});",
+                  "",
+                  "pm.test('Response includes email address', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('email');",
+                  "    pm.expect(responseJson.email).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Request password reset email for user account. Sends reset email with token."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Password reset successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Password reset confirmation', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('password reset');",
+                  "});",
+                  "",
+                  "pm.test('User can login with new password', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('success');",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{passwordResetToken}}\",\n  \"newPassword\": \"{{testPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Reset password using reset token sent via email."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Session Management",
+      "item": [
+        {
+          "name": "Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('email');",
+                  "    pm.expect(responseJson).to.have.property('role');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get current authenticated user information"
+          },
+          "response": []
+        },
+        {
+          "name": "Check First Sign-In Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has first sign-in status', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('isFirstSignIn');",
+                  "    pm.expect(responseJson.isFirstSignIn).to.be.a('boolean');",
+                  "});",
+                  "",
+                  "pm.test('Response includes user onboarding info', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('onboardingCompleted');",
+                  "    pm.expect(responseJson.onboardingCompleted).to.be.a('boolean');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/first-sign-in-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "first-sign-in-status"]
+            },
+            "description": "Check if the current user is signing in for the first time. Used for onboarding flow management."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Recommendations Seen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Recommendations marked as seen', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('marked as seen');",
+                  "});",
+                  "",
+                  "pm.test('Updated user status returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('recommendationsSeen');",
+                  "    pm.expect(responseJson.recommendationsSeen).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/mark-recommendations-seen",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "mark-recommendations-seen"]
+            },
+            "description": "Mark user recommendations as seen. Used for onboarding tracking and user experience flow."
+          },
+          "response": []
+        },
+        {
+          "name": "Force Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Force logout response is valid', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('logged out');",
+                  "});",
+                  "",
+                  "// Test admin authorization",
+                  "pm.test('Admin authorization required (if 403)', function () {",
+                  "    if (pm.response.code === 403) {",
+                  "        const responseJson = pm.response.json();",
+                  "        pm.expect(responseJson).to.have.property('message');",
+                  "        pm.expect(responseJson.message).to.include('Insufficient permissions');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{targetUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/force-logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "force-logout"]
+            },
+            "description": "Force logout a specific user by invalidating all their tokens. Admin only. Revokes all refresh tokens for the target user."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

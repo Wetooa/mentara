@@ -17,7 +17,8 @@ export class SupabaseStorageService {
 
   constructor(private configService: ConfigService) {
     this.supabaseUrl = this.configService.get<string>('SUPABASE_URL') || '';
-    this.supabaseApiKey = this.configService.get<string>('SUPABASE_API_KEY') || '';
+    this.supabaseApiKey =
+      this.configService.get<string>('SUPABASE_API_KEY') || '';
 
     if (!this.supabaseUrl || !this.supabaseApiKey) {
       throw new Error(
@@ -71,7 +72,9 @@ export class SupabaseStorageService {
         `Error uploading file to Supabase: ${file.originalname}`,
         error,
       );
-      throw new Error(`Failed to upload file to Supabase: ${(error as any)?.message || 'Unknown error'}`);
+      throw new Error(
+        `Failed to upload file to Supabase: ${error?.message || 'Unknown error'}`,
+      );
     }
   }
 
@@ -103,7 +106,9 @@ export class SupabaseStorageService {
       return results;
     } catch (error: any) {
       this.logger.error(`Error uploading multiple files to Supabase`, error);
-      throw new Error(`Failed to upload files to Supabase: ${(error as any)?.message || 'Unknown error'}`);
+      throw new Error(
+        `Failed to upload files to Supabase: ${error?.message || 'Unknown error'}`,
+      );
     }
   }
 
@@ -141,7 +146,9 @@ export class SupabaseStorageService {
         `Error deleting file from Supabase: ${filename}`,
         error,
       );
-      throw new Error(`Failed to delete file from Supabase: ${(error as any)?.message || 'Unknown error'}`);
+      throw new Error(
+        `Failed to delete file from Supabase: ${error?.message || 'Unknown error'}`,
+      );
     }
   }
 

@@ -18,7 +18,6 @@ export const MessageStatusSchema = z.enum([
 export const MessageTypeSchema = z.enum([
   'TEXT',
   'IMAGE',
-  'DOCUMENT',
   'AUDIO',
   'VIDEO',
   'SYSTEM'
@@ -28,7 +27,8 @@ export const MessageTypeSchema = z.enum([
 export const ConversationTypeSchema = z.enum([
   'DIRECT',
   'GROUP',
-  'THERAPY_SESSION'
+  'SESSION',
+  'SUPPORT'
 ]);
 
 // Attachment Schema
@@ -263,6 +263,56 @@ export const MessageNotificationPreferencesSchema = z.object({
   }).optional()
 });
 
+// Messages List Parameters Schema
+export const MessagesListParamsSchema = z.object({
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  before: z.string().optional(), // Message ID to fetch messages before
+  after: z.string().optional(), // Message ID to fetch messages after
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+// Blocked User Schema
+export const BlockedUserSchema = z.object({
+  id: z.string().uuid(),
+  blockedUserId: z.string().uuid(),
+  blockedBy: z.string().uuid(),
+  reason: z.string().max(500).optional(),
+  createdAt: z.string().datetime(),
+  blockedUser: z.object({
+    id: z.string().uuid(),
+    firstName: z.string(),
+    lastName: z.string(),
+    profileImage: z.string().url().optional()
+  })
+});
+
+// Search Messages Response Schema
+export const SearchMessagesResponseSchema = z.object({
+  messages: z.array(BackendMessageSchema),
+  conversations: z.array(BackendConversationSchema),
+  totalResults: z.number().min(0),
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  totalPages: z.number().min(0),
+  hasMore: z.boolean()
+});
+
+// Message Reaction Schema
+export const MessageReactionSchema = z.object({
+  id: z.string().uuid(),
+  messageId: z.string().uuid(),
+  userId: z.string().uuid(),
+  emoji: z.string().min(1).max(10),
+  createdAt: z.string().datetime(),
+  user: z.object({
+    id: z.string().uuid(),
+    firstName: z.string(),
+    lastName: z.string(),
+    profileImage: z.string().url().optional()
+  }).optional()
+});
+
 // Type inference exports
 export type UserStatus = z.infer<typeof UserStatusSchema>;
 export type MessageStatus = z.infer<typeof MessageStatusSchema>;
@@ -292,3 +342,7 @@ export type MessageSearchResult = z.infer<typeof MessageSearchResultSchema>;
 export type ConversationListParams = z.infer<typeof ConversationListParamsSchema>;
 export type MessageAnalytics = z.infer<typeof MessageAnalyticsSchema>;
 export type MessageNotificationPreferences = z.infer<typeof MessageNotificationPreferencesSchema>;
+export type MessagesListParams = z.infer<typeof MessagesListParamsSchema>;
+export type BlockedUser = z.infer<typeof BlockedUserSchema>;
+export type SearchMessagesResponse = z.infer<typeof SearchMessagesResponseSchema>;
+export type MessageReaction = z.infer<typeof MessageReactionSchema>;

@@ -160,7 +160,10 @@ export class CommunitiesService {
     const community = await this.prisma.community.create({
       data: {
         name: data.name,
-        slug: (data as any).slug || data.name?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
+        slug:
+          (data as any).slug ||
+          data.name?.toLowerCase().replace(/\s+/g, '-') ||
+          'untitled',
         description: data.description,
         imageUrl: (data as any).imageUrl || null,
       },
@@ -176,7 +179,10 @@ export class CommunitiesService {
       where: { id },
       data: {
         name: data.name,
-        slug: (data as any).slug || data.name?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
+        slug:
+          (data as any).slug ||
+          data.name?.toLowerCase().replace(/\s+/g, '-') ||
+          'untitled',
         description: data.description,
         imageUrl: (data as any).imageUrl || null,
       },

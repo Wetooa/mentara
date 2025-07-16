@@ -1,206 +1,95 @@
 import { AxiosInstance } from 'axios';
+import {
+  // Subscription Management
+  CreateSubscriptionDto,
+  UpdateSubscriptionDto,
+  CancelSubscriptionDto,
+  ChangeSubscriptionPlanDto,
+  PauseSubscriptionDto,
+  ScheduleSubscriptionCancellationDto,
+  ReactivateSubscriptionDto,
+  ApplyDiscountDto,
+  SubscriptionUsageAnalyticsQueryDto,
+  
+  // Plans
+  GetPlansQueryDto,
+  CreatePlanDto,
+  UpdatePlanDto,
+  
+  // Payment Methods
+  CreatePaymentMethodDto,
+  UpdatePaymentMethodDto,
+  PaymentMethod,
+  
+  // Payments
+  CreatePaymentDto,
+  GetPaymentsQueryDto,
+  UpdatePaymentStatusDto,
+  
+  // Invoices
+  CreateInvoiceDto,
+  GetInvoicesQueryDto,
+  MarkInvoiceAsPaidDto,
+  Invoice,
+  
+  // Discounts
+  CreateDiscountDto,
+  ValidateDiscountDto,
+  RedeemDiscountDto,
+  
+  // Usage
+  RecordUsageDto,
+  GetUsageRecordsQueryDto,
+  
+  // Statistics
+  GetBillingStatisticsQueryDto,
+  
+  // Legacy types for backward compatibility
+  CreatePaymentIntentDto,
+  BillingQuery,
+  
+  // Complex billing data structures
+  SubscriptionPlan,
+  Subscription,
+  InvoiceLineItem,
+  PaymentIntent,
+  BillingPortalSession,
+  UsageRecord,
+  BillingStats,
+  CreatePaymentMethodRequest,
+  CreateSubscriptionRequest,
+  UpdateSubscriptionRequest,
+  CreatePaymentIntentRequest,
+  BillingApiResponse,
+  BillingListOptions,
+} from 'mentara-commons';
 
-// Stripe-related types
-export interface PaymentMethod {
-  id: string;
-  type: 'card' | 'bank_account' | 'sepa_debit';
-  card?: {
-    brand: string;
-    last4: string;
-    exp_month: number;
-    exp_year: number;
-    funding: 'credit' | 'debit' | 'prepaid';
-    country: string;
-  };
-  bank_account?: {
-    bank_name: string;
-    last4: string;
-    account_type: 'checking' | 'savings';
-    routing_number: string;
-  };
-  billing_details: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    address?: {
-      line1?: string;
-      line2?: string;
-      city?: string;
-      state?: string;
-      postal_code?: string;
-      country?: string;
-    };
-  };
-  is_default: boolean;
-  created_at: string;
-}
+// All billing types are now imported from mentara-commons
 
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  currency: string;
-  interval: 'month' | 'year';
-  interval_count: number;
-  features: string[];
-  is_popular: boolean;
-  trial_period_days?: number;
-  metadata?: Record<string, any>;
-}
-
-export interface Subscription {
-  id: string;
-  plan: SubscriptionPlan;
-  status: 'active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'trialing' | 'unpaid';
-  current_period_start: string;
-  current_period_end: string;
-  trial_start?: string;
-  trial_end?: string;
-  cancel_at_period_end: boolean;
-  canceled_at?: string;
-  payment_method?: PaymentMethod;
-  latest_invoice?: Invoice;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Invoice {
-  id: string;
-  number: string;
-  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
-  amount_due: number;
-  amount_paid: number;
-  amount_remaining: number;
-  currency: string;
-  description?: string;
-  invoice_pdf?: string;
-  hosted_invoice_url?: string;
-  payment_intent_id?: string;
-  subscription_id?: string;
-  line_items: InvoiceLineItem[];
-  period_start: string;
-  period_end: string;
-  due_date?: string;
-  created_at: string;
-  paid_at?: string;
-}
-
-export interface InvoiceLineItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unit_amount: number;
-  amount: number;
-  currency: string;
-  period?: {
-    start: string;
-    end: string;
-  };
-}
-
-export interface PaymentIntent {
-  id: string;
-  amount: number;
-  currency: string;
-  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded';
-  client_secret: string;
-  payment_method?: PaymentMethod;
-  description?: string;
-  metadata?: Record<string, any>;
-  created_at: string;
-}
-
-export interface BillingPortalSession {
-  url: string;
-  return_url: string;
-}
-
-export interface UsageRecord {
-  id: string;
-  subscription_item_id: string;
-  quantity: number;
-  timestamp: string;
-  action: 'increment' | 'set';
-}
-
-export interface BillingStats {
-  total_revenue: number;
-  monthly_revenue: number;
-  active_subscriptions: number;
-  canceled_subscriptions: number;
-  trial_subscriptions: number;
-  revenue_growth_rate: number;
-  churn_rate: number;
-}
-
-// API Request/Response types
-export interface CreatePaymentMethodRequest {
-  type: 'card' | 'bank_account';
-  card?: {
-    number: string;
-    exp_month: number;
-    exp_year: number;
-    cvc: string;
-  };
-  bank_account?: {
-    account_number: string;
-    routing_number: string;
-    account_type: 'checking' | 'savings';
-  };
-  billing_details?: PaymentMethod['billing_details'];
-}
-
-export interface CreateSubscriptionRequest {
-  plan_id: string;
-  payment_method_id?: string;
-  trial_period_days?: number;
-  coupon?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface UpdateSubscriptionRequest {
-  plan_id?: string;
-  payment_method_id?: string;
-  cancel_at_period_end?: boolean;
-  proration_behavior?: 'create_prorations' | 'none' | 'always_invoice';
-  metadata?: Record<string, any>;
-}
-
-export interface CreatePaymentIntentRequest {
-  amount: number;
-  currency?: string;
-  payment_method_id?: string;
-  description?: string;
-  metadata?: Record<string, any>;
-  automatic_payment_methods?: {
-    enabled: boolean;
-  };
-}
-
-export interface BillingApiResponse<T> {
-  data: T;
-  meta?: {
-    total_count?: number;
-    page?: number;
-    per_page?: number;
-    has_more?: boolean;
-  };
-}
-
-export interface BillingListOptions {
-  page?: number;
-  limit?: number;
-  status?: string;
-  starting_after?: string;
-  ending_before?: string;
-}
+// Re-export commons types for backward compatibility
+export type {
+  SubscriptionPlan,
+  Subscription,
+  InvoiceLineItem,
+  PaymentIntent,
+  BillingPortalSession,
+  UsageRecord,
+  BillingStats,
+  CreatePaymentMethodRequest,
+  CreateSubscriptionRequest,
+  UpdateSubscriptionRequest,
+  CreatePaymentIntentRequest,
+  BillingApiResponse,
+  BillingListOptions,
+};
 
 // Factory function to create billing service
 export const createBillingService = (apiClient: AxiosInstance) => ({
   // Subscription Plans
-  getPlans: async (): Promise<SubscriptionPlan[]> => {
-    const response = await apiClient.get<BillingApiResponse<SubscriptionPlan[]>>('/billing/plans');
+  getPlans: async (query?: GetPlansQueryDto): Promise<SubscriptionPlan[]> => {
+    const response = await apiClient.get<BillingApiResponse<SubscriptionPlan[]>>('/billing/plans', {
+      params: query
+    });
     return response.data.data;
   },
 
@@ -222,12 +111,12 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
     }
   },
 
-  createSubscription: async (data: CreateSubscriptionRequest): Promise<Subscription> => {
+  createSubscription: async (data: CreateSubscriptionDto): Promise<Subscription> => {
     const response = await apiClient.post<BillingApiResponse<Subscription>>('/billing/subscription', data);
     return response.data.data;
   },
 
-  updateSubscription: async (data: UpdateSubscriptionRequest): Promise<Subscription> => {
+  updateSubscription: async (data: UpdateSubscriptionDto): Promise<Subscription> => {
     const response = await apiClient.patch<BillingApiResponse<Subscription>>('/billing/subscription', data);
     return response.data.data;
   },
@@ -250,7 +139,7 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
     return response.data.data;
   },
 
-  createPaymentMethod: async (data: CreatePaymentMethodRequest): Promise<PaymentMethod> => {
+  createPaymentMethod: async (data: CreatePaymentMethodDto): Promise<PaymentMethod> => {
     const response = await apiClient.post<BillingApiResponse<PaymentMethod>>('/billing/payment-methods', data);
     return response.data.data;
   },
@@ -302,7 +191,7 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
   },
 
   // Payment Intents (for one-time payments)
-  createPaymentIntent: async (data: CreatePaymentIntentRequest): Promise<PaymentIntent> => {
+  createPaymentIntent: async (data: CreatePaymentIntentDto): Promise<PaymentIntent> => {
     const response = await apiClient.post<BillingApiResponse<PaymentIntent>>('/billing/payment-intents', data);
     return response.data.data;
   },
@@ -331,14 +220,10 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
   },
 
   // Usage-based billing
-  reportUsage: async (subscriptionItemId: string, quantity: number, timestamp?: string): Promise<UsageRecord> => {
+  reportUsage: async (subscriptionItemId: string, data: RecordUsageDto): Promise<UsageRecord> => {
     const response = await apiClient.post<BillingApiResponse<UsageRecord>>(
       `/billing/usage/${subscriptionItemId}`,
-      {
-        quantity,
-        timestamp: timestamp || new Date().toISOString(),
-        action: 'increment'
-      }
+      data
     );
     return response.data.data;
   },
@@ -368,9 +253,9 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
   },
 
   // Billing Analytics (for admin/business intelligence)
-  getBillingStats: async (period: 'month' | 'quarter' | 'year' = 'month'): Promise<BillingStats> => {
+  getBillingStats: async (query?: GetBillingStatisticsQueryDto): Promise<BillingStats> => {
     const response = await apiClient.get<BillingApiResponse<BillingStats>>('/billing/stats', {
-      params: { period }
+      params: query
     });
     return response.data.data;
   },

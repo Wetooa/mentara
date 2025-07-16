@@ -12,6 +12,29 @@ import { SessionsService } from './sessions.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import {
+  CreateSessionLogDtoSchema,
+  FindSessionsQueryDtoSchema,
+  UpdateSessionLogDtoSchema,
+  EndSessionDtoSchema,
+  AddSessionActivityDtoSchema,
+  LogUserActivityDtoSchema,
+  GetUserActivitiesQueryDtoSchema,
+  CreateTherapyProgressDtoSchema,
+  GetTherapyProgressQueryDtoSchema,
+  GetSessionStatisticsQueryDtoSchema,
+  type CreateSessionLogDto,
+  type FindSessionsQueryDto,
+  type UpdateSessionLogDto,
+  type EndSessionDto,
+  type AddSessionActivityDto,
+  type LogUserActivityDto,
+  type GetUserActivitiesQueryDto,
+  type CreateTherapyProgressDto,
+  type GetTherapyProgressQueryDto,
+  type GetSessionStatisticsQueryDto,
+} from '@mentara/commons';
 import {
   SessionType,
   SessionStatus,
@@ -26,14 +49,8 @@ export class SessionsController {
 
   @Post('logs')
   createSessionLog(
-    @Body()
-    body: {
-      clientId: string;
-      therapistId?: string;
-      sessionType: SessionType;
-      meetingId?: string;
-      platform?: string;
-    },
+    @Body(new ZodValidationPipe(CreateSessionLogDtoSchema))
+    body: CreateSessionLogDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() userRole: string,
   ) {
@@ -52,12 +69,11 @@ export class SessionsController {
   findAllSessions(
     @CurrentUserRole() userRole: string,
     @CurrentUserId() userId: string,
-    @Query('clientId') clientId?: string,
-    @Query('therapistId') therapistId?: string,
-    @Query('status') status?: SessionStatus,
-    @Query('sessionType') sessionType?: SessionType,
+    @Query(new ZodValidationPipe(FindSessionsQueryDtoSchema))
+    query: FindSessionsQueryDto,
   ) {
     // Filter based on user role
+    let { clientId, therapistId } = query;
     if (userRole === 'client') {
       clientId = userId;
     } else if (userRole === 'therapist') {
@@ -67,8 +83,8 @@ export class SessionsController {
     return this.sessionsService.findAllSessions(
       clientId,
       therapistId,
-      status,
-      sessionType,
+      query.status,
+      query.sessionType,
     );
   }
 
@@ -80,14 +96,8 @@ export class SessionsController {
   @Patch('logs/:id')
   updateSession(
     @Param('id') id: string,
-    @Body()
-    body: {
-      status?: SessionStatus;
-      notes?: string;
-      quality?: number;
-      connectionIssues?: boolean;
-      recordingUrl?: string;
-    },
+    @Body(new ZodValidationPipe(UpdateSessionLogDtoSchema))
+    body: UpdateSessionLogDto,
   ) {
     return this.sessionsService.updateSession(id, body);
   }
@@ -95,7 +105,7 @@ export class SessionsController {
   @Post('logs/:id/end')
   endSession(
     @Param('id') id: string,
-    @Body() body: { notes?: string; quality?: number },
+    @Body(new ZodValidationPipe(EndSessionDtoSchema)) body: EndSessionDto,
   ) {
     return this.sessionsService.endSession(id, body.notes, body.quality);
   }
@@ -103,13 +113,8 @@ export class SessionsController {
   @Post('logs/:id/activities')
   addSessionActivity(
     @Param('id') sessionId: string,
-    @Body()
-    body: {
-      activityType: ActivityType;
-      description?: string;
-      duration?: number;
-      metadata?: any;
-    },
+    @Body(new ZodValidationPipe(AddSessionActivityDtoSchema))
+    body: AddSessionActivityDto,
   ) {
     return this.sessionsService.addSessionActivity(
       sessionId,
@@ -127,15 +132,8 @@ export class SessionsController {
 
   @Post('user-activities')
   logUserActivity(
-    @Body()
-    body: {
-      action: UserActionType;
-      page?: string;
-      component?: string;
-      metadata?: any;
-      sessionId?: string;
-      deviceInfo?: any;
-    },
+    @Body(new ZodValidationPipe(LogUserActivityDtoSchema))
+    body: LogUserActivityDto,
     @CurrentUserId() userId: string,
   ) {
     return this.sessionsService.logUserActivity(
@@ -152,38 +150,21 @@ export class SessionsController {
   @Get('user-activities')
   getUserActivities(
     @CurrentUserId() userId: string,
-    @Query('action') action?: UserActionType,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(GetUserActivitiesQueryDtoSchema))
+    query: GetUserActivitiesQueryDto,
   ) {
     return this.sessionsService.getUserActivities(
       userId,
-      action,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.action,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 
   @Post('therapy-progress')
   createTherapyProgress(
-    @Body()
-    body: {
-      clientId: string;
-      therapistId: string;
-      progressScore: number;
-      improvementAreas?: string[];
-      concernAreas?: string[];
-      goalsSet?: any;
-      goalsAchieved?: any;
-      nextMilestones?: any;
-      moodScore?: number;
-      anxietyScore?: number;
-      depressionScore?: number;
-      functionalScore?: number;
-      therapistNotes?: string;
-      clientFeedback?: string;
-      recommendations?: string[];
-    },
+    @Body(new ZodValidationPipe(CreateTherapyProgressDtoSchema))
+    body: CreateTherapyProgressDto,
     @CurrentUserRole() userRole: string,
     @CurrentUserId() userId: string,
   ) {
@@ -199,12 +180,11 @@ export class SessionsController {
   getTherapyProgress(
     @CurrentUserRole() userRole: string,
     @CurrentUserId() userId: string,
-    @Query('clientId') clientId?: string,
-    @Query('therapistId') therapistId?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(GetTherapyProgressQueryDtoSchema))
+    query: GetTherapyProgressQueryDto,
   ) {
     // Filter based on user role
+    let { clientId, therapistId } = query;
     if (userRole === 'client') {
       clientId = userId;
     } else if (userRole === 'therapist') {
@@ -214,8 +194,8 @@ export class SessionsController {
     return this.sessionsService.getTherapyProgress(
       clientId,
       therapistId,
-      startDate ? new Date(startDate) : undefined,
-      endDate ? new Date(endDate) : undefined,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
     );
   }
 
@@ -223,10 +203,11 @@ export class SessionsController {
   getSessionStatistics(
     @CurrentUserRole() userRole: string,
     @CurrentUserId() userId: string,
-    @Query('clientId') clientId?: string,
-    @Query('therapistId') therapistId?: string,
+    @Query(new ZodValidationPipe(GetSessionStatisticsQueryDtoSchema))
+    query: GetSessionStatisticsQueryDto,
   ) {
     // Filter based on user role
+    let { clientId, therapistId } = query;
     if (userRole === 'client') {
       clientId = userId;
     } else if (userRole === 'therapist') {

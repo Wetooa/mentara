@@ -55,14 +55,14 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
         endedAt: string;
         participantCount: number;
         issues?: string[] | undefined;
-        quality?: "excellent" | "good" | "poor" | "fair" | undefined;
+        quality?: "excellent" | "good" | "fair" | "poor" | undefined;
     }, {
         duration: number;
         startedAt: string;
         endedAt: string;
         participantCount: number;
         issues?: string[] | undefined;
-        quality?: "excellent" | "good" | "poor" | "fair" | undefined;
+        quality?: "excellent" | "good" | "fair" | "poor" | undefined;
     }>;
     sessionNotes: z.ZodOptional<z.ZodString>;
     clientProgress: z.ZodOptional<z.ZodObject<{
@@ -72,12 +72,12 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
         outcomes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         engagement?: "low" | "medium" | "high" | undefined;
-        mood?: "critical" | "excellent" | "good" | "neutral" | "poor" | undefined;
+        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
         goals?: string[] | undefined;
         outcomes?: string[] | undefined;
     }, {
         engagement?: "low" | "medium" | "high" | undefined;
-        mood?: "critical" | "excellent" | "good" | "neutral" | "poor" | undefined;
+        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
         goals?: string[] | undefined;
         outcomes?: string[] | undefined;
     }>>;
@@ -101,12 +101,12 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
         endedAt: string;
         participantCount: number;
         issues?: string[] | undefined;
-        quality?: "excellent" | "good" | "poor" | "fair" | undefined;
+        quality?: "excellent" | "good" | "fair" | "poor" | undefined;
     };
     sessionNotes?: string | undefined;
     clientProgress?: {
         engagement?: "low" | "medium" | "high" | undefined;
-        mood?: "critical" | "excellent" | "good" | "neutral" | "poor" | undefined;
+        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
         goals?: string[] | undefined;
         outcomes?: string[] | undefined;
     } | undefined;
@@ -122,12 +122,12 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
         endedAt: string;
         participantCount: number;
         issues?: string[] | undefined;
-        quality?: "excellent" | "good" | "poor" | "fair" | undefined;
+        quality?: "excellent" | "good" | "fair" | "poor" | undefined;
     };
     sessionNotes?: string | undefined;
     clientProgress?: {
         engagement?: "low" | "medium" | "high" | undefined;
-        mood?: "critical" | "excellent" | "good" | "neutral" | "poor" | undefined;
+        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
         goals?: string[] | undefined;
         outcomes?: string[] | undefined;
     } | undefined;
@@ -166,16 +166,16 @@ export declare const EmergencyTerminateMeetingDtoSchema: z.ZodObject<{
     followUpRequired: z.ZodDefault<z.ZodBoolean>;
     escalateToSupervisor: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    reason: "emergency" | "technical_issues" | "safety_concern" | "participant_request";
+    reason: "technical_issues" | "emergency" | "safety_concern" | "participant_request";
     description: string;
-    followUpRequired: boolean;
     notifySupport: boolean;
+    followUpRequired: boolean;
     escalateToSupervisor: boolean;
 }, {
-    reason: "emergency" | "technical_issues" | "safety_concern" | "participant_request";
+    reason: "technical_issues" | "emergency" | "safety_concern" | "participant_request";
     description: string;
-    followUpRequired?: boolean | undefined;
     notifySupport?: boolean | undefined;
+    followUpRequired?: boolean | undefined;
     escalateToSupervisor?: boolean | undefined;
 }>;
 export type MeetingParamsDto = z.infer<typeof MeetingParamsDtoSchema>;

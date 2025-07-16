@@ -15,7 +15,6 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { Prisma, User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from 'src/auth/guards/admin-auth.guard';
 import { AdminOnly } from 'src/auth/decorators/admin-only.decorator';
@@ -23,11 +22,12 @@ import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
   UserIdParamSchema,
-  UpdateUserRequestSchema,
   DeactivateUserDtoSchema,
+  UpdateUserRequestSchema,
   type UserIdParam,
-  type UpdateUserRequest,
   type DeactivateUserDto,
+  type UpdateUserRequest,
+  type User,
 } from 'mentara-commons';
 import { UsersService } from './users.service';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
@@ -50,7 +50,7 @@ export class UsersController {
   async findAll(@CurrentUserId() currentUserId: string): Promise<User[]> {
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all users`);
-      return await this.usersService.findAll();
+      return (await this.usersService.findAll()) as any;
     } catch (error) {
       this.logger.error('Failed to fetch users:', error);
       throw new HttpException(
@@ -70,7 +70,7 @@ export class UsersController {
       this.logger.log(
         `Admin ${currentUserId} retrieving all users including inactive`,
       );
-      return await this.usersService.findAllIncludeInactive();
+      return (await this.usersService.findAllIncludeInactive()) as any;
     } catch (error) {
       this.logger.error('Failed to fetch all users:', error);
       throw new HttpException(
@@ -100,7 +100,7 @@ export class UsersController {
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
-      return user;
+      return user as any;
     } catch (error) {
       if (
         error instanceof ForbiddenException ||
@@ -124,8 +124,9 @@ export class UsersController {
     ]),
   )
   async update(
-    @Param('id') id: string,
-    @Body() userData: Prisma.UserUpdateInput,
+    @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
+    @Body(new ZodValidationPipe(UpdateUserRequestSchema))
+    userData: UpdateUserRequest,
     @CurrentUserId() currentUserId: string,
     @UploadedFiles()
     files?: { avatar?: Express.Multer.File[]; cover?: Express.Multer.File[] },
@@ -134,7 +135,7 @@ export class UsersController {
       // Users can only update their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
 
-      if (!isAdmin && id !== currentUserId) {
+      if (!isAdmin && params.id !== currentUserId) {
         throw new ForbiddenException('You can only update your own profile');
       }
 
@@ -189,21 +190,22 @@ export class UsersController {
           'language',
           'theme',
         ];
-        const sanitizedData: Prisma.UserUpdateInput = {};
+        const sanitizedData: Partial<UpdateUserRequest> = {};
 
         for (const field of allowedFields) {
-          if (userData[field] !== undefined) {
-            sanitizedData[field] = userData[field];
+          if (userData[field as keyof UpdateUserRequest] !== undefined) {
+            (sanitizedData as any)[field] =
+              userData[field as keyof UpdateUserRequest];
           }
         }
-        userData = sanitizedData;
+        userData = sanitizedData as UpdateUserRequest;
       }
 
       // Add uploaded file URLs to userData
       if (avatarUrl) userData.avatarUrl = avatarUrl;
       if (coverImageUrl) userData.coverImageUrl = coverImageUrl;
 
-      return await this.usersService.update(id, userData);
+      return (await this.usersService.update(params.id, userData)) as any;
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;
@@ -218,21 +220,23 @@ export class UsersController {
 
   @Delete(':id')
   async remove(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
   ): Promise<{ message: string }> {
     try {
       // Users can only deactivate their own account unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
 
-      if (!isAdmin && id !== currentUserId) {
+      if (!isAdmin && params.id !== currentUserId) {
         throw new ForbiddenException(
           'You can only deactivate your own account',
         );
       }
 
-      this.logger.log(`User/Admin ${currentUserId} deactivating user ${id}`);
-      await this.usersService.remove(id);
+      this.logger.log(
+        `User/Admin ${currentUserId} deactivating user ${params.id}`,
+      );
+      await this.usersService.remove(params.id);
 
       return { message: 'User account deactivated successfully' };
     } catch (error) {
@@ -251,15 +255,16 @@ export class UsersController {
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async deactivateUser(
-    @Param('id') id: string,
-    @Body() body: { reason?: string },
+    @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
+    @Body(new ZodValidationPipe(DeactivateUserDtoSchema))
+    body: DeactivateUserDto,
     @CurrentUserId() currentUserId: string,
   ): Promise<{ message: string }> {
     try {
       this.logger.log(
-        `Admin ${currentUserId} deactivating user ${id} with reason: ${body.reason}`,
+        `Admin ${currentUserId} deactivating user ${params.id} with reason: ${body.reason}`,
       );
-      await this.usersService.deactivate(id, body.reason, currentUserId);
+      await this.usersService.deactivate(params.id, body.reason, currentUserId);
 
       return { message: 'User account deactivated by administrator' };
     } catch (error) {
@@ -275,12 +280,12 @@ export class UsersController {
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async reactivateUser(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
   ): Promise<{ message: string }> {
     try {
-      this.logger.log(`Admin ${currentUserId} reactivating user ${id}`);
-      await this.usersService.reactivate(id);
+      this.logger.log(`Admin ${currentUserId} reactivating user ${params.id}`);
+      await this.usersService.reactivate(params.id);
 
       return { message: 'User account reactivated successfully' };
     } catch (error) {

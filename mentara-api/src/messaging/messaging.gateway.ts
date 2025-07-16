@@ -15,7 +15,7 @@ import {
   JoinConversationDto,
   LeaveConversationDto,
   TypingIndicatorDto,
-} from './dto/messaging.dto';
+} from 'mentara-commons';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -492,13 +492,16 @@ export class MessagingGateway
         participant.user.deviceTokens.map(async (deviceToken: any) => {
           try {
             // Simplified push notification - would implement proper service if available
-            this.logger.log(`Would send push notification to device: ${deviceToken.token}`);
+            this.logger.log(
+              `Would send push notification to device: ${deviceToken.token}`,
+            );
 
             this.logger.log(
               `Push notification sent to user ${participant.userId} for message ${message.id}`,
             );
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(
               `Failed to send push notification to user ${participant.userId}: ${errorMessage}`,
             );

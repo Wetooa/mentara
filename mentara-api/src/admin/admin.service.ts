@@ -346,9 +346,12 @@ export class AdminService {
     page: number;
     limit: number;
     search?: string;
+    status?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }) {
     try {
-      const { role, page, limit, search } = params;
+      const { role, page, limit, search, status, sortBy, sortOrder } = params;
       const skip = (page - 1) * limit;
 
       const where: any = {};
@@ -362,13 +365,33 @@ export class AdminService {
           { email: { contains: search, mode: 'insensitive' } },
         ];
       }
+      if (status) {
+        if (status === 'active') {
+          where.isActive = true;
+        } else if (status === 'inactive') {
+          where.isActive = false;
+        } else if (status === 'suspended') {
+          where.suspendedAt = { not: null };
+        }
+      }
+
+      // Build orderBy clause
+      const orderBy: any = {};
+      if (
+        sortBy &&
+        ['createdAt', 'firstName', 'lastName', 'email', 'role'].includes(sortBy)
+      ) {
+        orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
+      } else {
+        orderBy.createdAt = 'desc';
+      }
 
       const [users, totalCount] = await Promise.all([
         this.prisma.user.findMany({
           where,
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' },
+          orderBy,
           select: {
             id: true,
             firstName: true,

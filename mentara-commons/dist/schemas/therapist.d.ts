@@ -55,6 +55,7 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     weeklyAvailability: string;
     preferredSessionLength: string;
     accepts: string[];
+    bio?: string | undefined;
     expirationDateOfLicense?: string | undefined;
     yearsOfExperience?: string | undefined;
     privateConfidentialSpace?: boolean | undefined;
@@ -64,7 +65,6 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     willingToAbideByPlatformGuidelines?: boolean | undefined;
     sessionLength?: string | undefined;
     hourlyRate?: number | undefined;
-    bio?: string | undefined;
     profileImageUrl?: string | undefined;
     applicationData?: Record<string, any> | undefined;
 }, {
@@ -89,6 +89,7 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     weeklyAvailability: string;
     preferredSessionLength: string;
     accepts: string[];
+    bio?: string | undefined;
     expirationDateOfLicense?: string | undefined;
     yearsOfExperience?: string | undefined;
     privateConfidentialSpace?: boolean | undefined;
@@ -98,7 +99,6 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     willingToAbideByPlatformGuidelines?: boolean | undefined;
     sessionLength?: string | undefined;
     hourlyRate?: number | undefined;
-    bio?: string | undefined;
     profileImageUrl?: string | undefined;
     applicationData?: Record<string, any> | undefined;
 }>;
@@ -118,10 +118,10 @@ export declare const UpdateTherapistDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     firstName?: string | undefined;
     lastName?: string | undefined;
+    bio?: string | undefined;
     mobile?: string | undefined;
     province?: string | undefined;
     hourlyRate?: number | undefined;
-    bio?: string | undefined;
     profileImageUrl?: string | undefined;
     isActive?: boolean | undefined;
     expertise?: string[] | undefined;
@@ -131,10 +131,10 @@ export declare const UpdateTherapistDtoSchema: z.ZodObject<{
 }, {
     firstName?: string | undefined;
     lastName?: string | undefined;
+    bio?: string | undefined;
     mobile?: string | undefined;
     province?: string | undefined;
     hourlyRate?: number | undefined;
-    bio?: string | undefined;
     profileImageUrl?: string | undefined;
     isActive?: boolean | undefined;
     expertise?: string[] | undefined;
@@ -142,7 +142,7 @@ export declare const UpdateTherapistDtoSchema: z.ZodObject<{
     languages?: string[] | undefined;
     illnessSpecializations?: string[] | undefined;
 }>;
-export declare const TherapistRecommendationRequestSchema: z.ZodObject<{
+export declare const TherapistRecommendationRequestSchemaLegacy: z.ZodObject<{
     userId: z.ZodString;
     limit: z.ZodOptional<z.ZodNumber>;
     includeInactive: z.ZodOptional<z.ZodBoolean>;
@@ -161,7 +161,7 @@ export declare const TherapistRecommendationRequestSchema: z.ZodObject<{
     includeInactive?: boolean | undefined;
     maxHourlyRate?: number | undefined;
 }>;
-export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
+export declare const TherapistRecommendationResponseDtoSchemaLegacy: z.ZodObject<{
     totalCount: z.ZodNumber;
     userConditions: z.ZodArray<z.ZodString, "many">;
     therapists: z.ZodArray<z.ZodAny, "many">;
@@ -238,6 +238,7 @@ export declare const TherapistApplicationCreateDtoSchema: z.ZodObject<{
     email: string;
     firstName: string;
     lastName: string;
+    userId: string;
     mobile: string;
     province: string;
     providerType: string;
@@ -258,17 +259,17 @@ export declare const TherapistApplicationCreateDtoSchema: z.ZodObject<{
     professionalLiabilityInsurance: string;
     complaintsOrDisciplinaryActions: string;
     willingToAbideByPlatformGuidelines: boolean;
-    userId: string;
+    bio?: string | undefined;
     prcLicenseNumber?: string | undefined;
     expirationDateOfLicense?: string | undefined;
     isLicenseActive?: string | undefined;
     hourlyRate?: number | undefined;
-    bio?: string | undefined;
     complaintsOrDisciplinaryActions_specify?: string | undefined;
 }, {
     email: string;
     firstName: string;
     lastName: string;
+    userId: string;
     mobile: string;
     province: string;
     providerType: string;
@@ -289,12 +290,11 @@ export declare const TherapistApplicationCreateDtoSchema: z.ZodObject<{
     professionalLiabilityInsurance: string;
     complaintsOrDisciplinaryActions: string;
     willingToAbideByPlatformGuidelines: boolean;
-    userId: string;
+    bio?: string | undefined;
     prcLicenseNumber?: string | undefined;
     expirationDateOfLicense?: string | undefined;
     isLicenseActive?: string | undefined;
     hourlyRate?: number | undefined;
-    bio?: string | undefined;
     complaintsOrDisciplinaryActions_specify?: string | undefined;
 }>;
 export declare const TherapistIdParamSchema: z.ZodObject<{
@@ -1085,8 +1085,8 @@ export declare const ProfessionalInfoSchema: z.ZodObject<{
     bio: z.ZodString;
     approach: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    yearsOfExperience: number;
     bio: string;
+    yearsOfExperience: number;
     languages: string[];
     specialties: string[];
     licenseNumber: string;
@@ -1105,8 +1105,8 @@ export declare const ProfessionalInfoSchema: z.ZodObject<{
     }[];
     approach: string;
 }, {
-    yearsOfExperience: number;
     bio: string;
+    yearsOfExperience: number;
     languages: string[];
     specialties: string[];
     licenseNumber: string;
@@ -1284,8 +1284,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         bio: z.ZodString;
         approach: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1304,8 +1304,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         }[];
         approach: string;
     }, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1420,8 +1420,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         middleName?: string | undefined;
     };
     professionalInfo: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1472,8 +1472,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         middleName?: string | undefined;
     };
     professionalInfo: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1628,8 +1628,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         bio: z.ZodString;
         approach: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1648,8 +1648,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         }[];
         approach: string;
     }, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1810,8 +1810,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         middleName?: string | undefined;
     };
     professionalInfo: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -1890,8 +1890,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         middleName?: string | undefined;
     };
     professionalInfo: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2042,8 +2042,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         bio: z.ZodString;
         approach: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2062,8 +2062,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         }[];
         approach: string;
     }, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2178,8 +2178,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         middleName?: string | undefined;
     };
     professionalInfo: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2230,8 +2230,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         middleName?: string | undefined;
     };
     professionalInfo: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2345,8 +2345,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         bio: z.ZodString;
         approach: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2365,8 +2365,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         }[];
         approach: string;
     }, {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2481,8 +2481,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         middleName?: string | undefined;
     } | undefined;
     professionalInfo?: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2533,8 +2533,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         middleName?: string | undefined;
     } | undefined;
     professionalInfo?: {
-        yearsOfExperience: number;
         bio: string;
+        yearsOfExperience: number;
         languages: string[];
         specialties: string[];
         licenseNumber: string;
@@ -2669,6 +2669,300 @@ export type ProfessionalInfo = z.infer<typeof ProfessionalInfoSchema>;
 export type PracticeInfo = z.infer<typeof PracticeInfoSchema>;
 export type TherapistApplicationDto = z.infer<typeof TherapistApplicationDtoSchema>;
 export type TherapistApplication = z.infer<typeof TherapistApplicationSchema>;
+export declare const TherapistRecommendationRequestSchema: z.ZodObject<{
+    userId: z.ZodString;
+    limit: z.ZodDefault<z.ZodNumber>;
+    includeInactive: z.ZodDefault<z.ZodBoolean>;
+    province: z.ZodOptional<z.ZodString>;
+    maxHourlyRate: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    userId: string;
+    limit: number;
+    includeInactive: boolean;
+    province?: string | undefined;
+    maxHourlyRate?: number | undefined;
+}, {
+    userId: string;
+    province?: string | undefined;
+    limit?: number | undefined;
+    includeInactive?: boolean | undefined;
+    maxHourlyRate?: number | undefined;
+}>;
+export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
+    therapists: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        title: z.ZodString;
+        specialties: z.ZodArray<z.ZodString, "many">;
+        hourlyRate: z.ZodNumber;
+        experience: z.ZodNumber;
+        province: z.ZodString;
+        isActive: z.ZodBoolean;
+        rating: z.ZodOptional<z.ZodNumber>;
+        totalReviews: z.ZodOptional<z.ZodNumber>;
+        bio: z.ZodOptional<z.ZodString>;
+        profileImage: z.ZodOptional<z.ZodString>;
+        availability: z.ZodOptional<z.ZodObject<{
+            timezone: z.ZodString;
+            weeklySchedule: z.ZodRecord<z.ZodString, z.ZodArray<z.ZodObject<{
+                start: z.ZodString;
+                end: z.ZodString;
+            }, "strip", z.ZodTypeAny, {
+                start: string;
+                end: string;
+            }, {
+                start: string;
+                end: string;
+            }>, "many">>;
+            exceptions: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                date: z.ZodString;
+                isAvailable: z.ZodBoolean;
+                timeSlots: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    start: z.ZodString;
+                    end: z.ZodString;
+                }, "strip", z.ZodTypeAny, {
+                    start: string;
+                    end: string;
+                }, {
+                    start: string;
+                    end: string;
+                }>, "many">>;
+            }, "strip", z.ZodTypeAny, {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }, {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }>, "many">>;
+        }, "strip", z.ZodTypeAny, {
+            timezone: string;
+            weeklySchedule: Record<string, {
+                start: string;
+                end: string;
+            }[]>;
+            exceptions?: {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }[] | undefined;
+        }, {
+            timezone: string;
+            weeklySchedule: Record<string, {
+                start: string;
+                end: string;
+            }[]>;
+            exceptions?: {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }[] | undefined;
+        }>>;
+        matchScore: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        province: string;
+        hourlyRate: number;
+        isActive: boolean;
+        title: string;
+        specialties: string[];
+        experience: number;
+        bio?: string | undefined;
+        rating?: number | undefined;
+        totalReviews?: number | undefined;
+        profileImage?: string | undefined;
+        availability?: {
+            timezone: string;
+            weeklySchedule: Record<string, {
+                start: string;
+                end: string;
+            }[]>;
+            exceptions?: {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }[] | undefined;
+        } | undefined;
+        matchScore?: number | undefined;
+    }, {
+        id: string;
+        firstName: string;
+        lastName: string;
+        province: string;
+        hourlyRate: number;
+        isActive: boolean;
+        title: string;
+        specialties: string[];
+        experience: number;
+        bio?: string | undefined;
+        rating?: number | undefined;
+        totalReviews?: number | undefined;
+        profileImage?: string | undefined;
+        availability?: {
+            timezone: string;
+            weeklySchedule: Record<string, {
+                start: string;
+                end: string;
+            }[]>;
+            exceptions?: {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }[] | undefined;
+        } | undefined;
+        matchScore?: number | undefined;
+    }>, "many">;
+    totalCount: z.ZodNumber;
+    userConditions: z.ZodArray<z.ZodString, "many">;
+    matchCriteria: z.ZodObject<{
+        primaryConditions: z.ZodArray<z.ZodString, "many">;
+        secondaryConditions: z.ZodArray<z.ZodString, "many">;
+        severityLevels: z.ZodRecord<z.ZodString, z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        primaryConditions: string[];
+        secondaryConditions: string[];
+        severityLevels: Record<string, string>;
+    }, {
+        primaryConditions: string[];
+        secondaryConditions: string[];
+        severityLevels: Record<string, string>;
+    }>;
+    page: z.ZodNumber;
+    pageSize: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    totalCount: number;
+    userConditions: string[];
+    therapists: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        province: string;
+        hourlyRate: number;
+        isActive: boolean;
+        title: string;
+        specialties: string[];
+        experience: number;
+        bio?: string | undefined;
+        rating?: number | undefined;
+        totalReviews?: number | undefined;
+        profileImage?: string | undefined;
+        availability?: {
+            timezone: string;
+            weeklySchedule: Record<string, {
+                start: string;
+                end: string;
+            }[]>;
+            exceptions?: {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }[] | undefined;
+        } | undefined;
+        matchScore?: number | undefined;
+    }[];
+    matchCriteria: {
+        primaryConditions: string[];
+        secondaryConditions: string[];
+        severityLevels: Record<string, string>;
+    };
+    page: number;
+    pageSize: number;
+}, {
+    totalCount: number;
+    userConditions: string[];
+    therapists: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        province: string;
+        hourlyRate: number;
+        isActive: boolean;
+        title: string;
+        specialties: string[];
+        experience: number;
+        bio?: string | undefined;
+        rating?: number | undefined;
+        totalReviews?: number | undefined;
+        profileImage?: string | undefined;
+        availability?: {
+            timezone: string;
+            weeklySchedule: Record<string, {
+                start: string;
+                end: string;
+            }[]>;
+            exceptions?: {
+                date: string;
+                isAvailable: boolean;
+                timeSlots?: {
+                    start: string;
+                    end: string;
+                }[] | undefined;
+            }[] | undefined;
+        } | undefined;
+        matchScore?: number | undefined;
+    }[];
+    matchCriteria: {
+        primaryConditions: string[];
+        secondaryConditions: string[];
+        severityLevels: Record<string, string>;
+    };
+    page: number;
+    pageSize: number;
+}>;
+export declare const WelcomeRecommendationQuerySchema: z.ZodObject<{
+    limit: z.ZodDefault<z.ZodNumber>;
+    province: z.ZodOptional<z.ZodString>;
+    forceRefresh: z.ZodDefault<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    forceRefresh: boolean;
+    province?: string | undefined;
+}, {
+    province?: string | undefined;
+    limit?: number | undefined;
+    forceRefresh?: boolean | undefined;
+}>;
+export declare const TherapistRecommendationQuerySchema: z.ZodObject<{
+    limit: z.ZodDefault<z.ZodNumber>;
+    includeInactive: z.ZodDefault<z.ZodBoolean>;
+    province: z.ZodOptional<z.ZodString>;
+    maxHourlyRate: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    includeInactive: boolean;
+    province?: string | undefined;
+    maxHourlyRate?: number | undefined;
+}, {
+    province?: string | undefined;
+    limit?: number | undefined;
+    includeInactive?: boolean | undefined;
+    maxHourlyRate?: number | undefined;
+}>;
 export type ApplicationStatus = z.infer<typeof ApplicationStatusSchema>;
 export type ApplicationDocument = z.infer<typeof ApplicationDocumentSchema>;
 export type ApplicationStatusUpdateDto = z.infer<typeof ApplicationStatusUpdateDtoSchema>;
@@ -2680,6 +2974,1063 @@ export type TherapistCredentials = z.infer<typeof TherapistCredentialsSchema>;
 export type SessionFormat = z.infer<typeof SessionFormatSchema>;
 export type Education = z.infer<typeof EducationSchema>;
 export type Certification = z.infer<typeof CertificationSchema>;
+export declare const ApplicationListResponseSchema: z.ZodObject<{
+    applications: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        applicantId: z.ZodString;
+        applicant: z.ZodObject<{
+            id: z.ZodString;
+            firstName: z.ZodString;
+            lastName: z.ZodString;
+            email: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        }, {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        }>;
+        personalInfo: z.ZodObject<{
+            firstName: z.ZodString;
+            lastName: z.ZodString;
+            middleName: z.ZodOptional<z.ZodString>;
+            email: z.ZodString;
+            phone: z.ZodString;
+            birthDate: z.ZodString;
+            address: z.ZodString;
+            city: z.ZodString;
+            state: z.ZodString;
+            zipCode: z.ZodString;
+            country: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        }, {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        }>;
+        professionalInfo: z.ZodObject<{
+            licenseNumber: z.ZodString;
+            licenseState: z.ZodString;
+            licenseExpiration: z.ZodString;
+            specialties: z.ZodArray<z.ZodString, "many">;
+            yearsOfExperience: z.ZodNumber;
+            education: z.ZodArray<z.ZodObject<{
+                degree: z.ZodString;
+                institution: z.ZodString;
+                graduationYear: z.ZodNumber;
+            }, "strip", z.ZodTypeAny, {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }, {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }>, "many">;
+            certifications: z.ZodArray<z.ZodObject<{
+                name: z.ZodString;
+                issuingOrganization: z.ZodString;
+                issueDate: z.ZodString;
+                expirationDate: z.ZodOptional<z.ZodString>;
+            }, "strip", z.ZodTypeAny, {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }, {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }>, "many">;
+            languages: z.ZodArray<z.ZodString, "many">;
+            bio: z.ZodString;
+            approach: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        }, {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        }>;
+        practiceInfo: z.ZodObject<{
+            sessionFormats: z.ZodArray<z.ZodEnum<["in-person", "video", "phone"]>, "many">;
+            availability: z.ZodObject<{
+                timezone: z.ZodString;
+                schedule: z.ZodRecord<z.ZodString, z.ZodObject<{
+                    isAvailable: z.ZodBoolean;
+                    startTime: z.ZodOptional<z.ZodString>;
+                    endTime: z.ZodOptional<z.ZodString>;
+                }, "strip", z.ZodTypeAny, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>>;
+            }, "strip", z.ZodTypeAny, {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            }, {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            }>;
+            pricing: z.ZodObject<{
+                sessionFee: z.ZodNumber;
+                currency: z.ZodString;
+                acceptsInsurance: z.ZodBoolean;
+                insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            }, "strip", z.ZodTypeAny, {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            }, {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            }>;
+        }, "strip", z.ZodTypeAny, {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        }, {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        }>;
+        status: z.ZodEnum<["pending", "under_review", "approved", "rejected", "additional_info_required"]>;
+        submittedAt: z.ZodString;
+        reviewedAt: z.ZodOptional<z.ZodString>;
+        reviewedBy: z.ZodOptional<z.ZodObject<{
+            id: z.ZodString;
+            firstName: z.ZodString;
+            lastName: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            id: string;
+            firstName: string;
+            lastName: string;
+        }, {
+            id: string;
+            firstName: string;
+            lastName: string;
+        }>>;
+        adminNotes: z.ZodOptional<z.ZodString>;
+        rejectionReason: z.ZodOptional<z.ZodString>;
+        documents: z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            filename: z.ZodString;
+            originalName: z.ZodString;
+            url: z.ZodString;
+            fileType: z.ZodEnum<["resume", "license", "certification", "transcript", "other"]>;
+            uploadedAt: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            id: string;
+            url: string;
+            filename: string;
+            originalName: string;
+            fileType: "resume" | "license" | "certification" | "transcript" | "other";
+            uploadedAt: string;
+        }, {
+            id: string;
+            url: string;
+            filename: string;
+            originalName: string;
+            fileType: "resume" | "license" | "certification" | "transcript" | "other";
+            uploadedAt: string;
+        }>, "many">;
+        createdAt: z.ZodString;
+        updatedAt: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        status: "pending" | "under_review" | "approved" | "rejected" | "additional_info_required";
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+        applicantId: string;
+        applicant: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        submittedAt: string;
+        documents: {
+            id: string;
+            url: string;
+            filename: string;
+            originalName: string;
+            fileType: "resume" | "license" | "certification" | "transcript" | "other";
+            uploadedAt: string;
+        }[];
+        reviewedAt?: string | undefined;
+        reviewedBy?: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        } | undefined;
+        adminNotes?: string | undefined;
+        rejectionReason?: string | undefined;
+    }, {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        status: "pending" | "under_review" | "approved" | "rejected" | "additional_info_required";
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+        applicantId: string;
+        applicant: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        submittedAt: string;
+        documents: {
+            id: string;
+            url: string;
+            filename: string;
+            originalName: string;
+            fileType: "resume" | "license" | "certification" | "transcript" | "other";
+            uploadedAt: string;
+        }[];
+        reviewedAt?: string | undefined;
+        reviewedBy?: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        } | undefined;
+        adminNotes?: string | undefined;
+        rejectionReason?: string | undefined;
+    }>, "many">;
+    total: z.ZodNumber;
+    page: z.ZodNumber;
+    limit: z.ZodNumber;
+    hasMore: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    limit: number;
+    page: number;
+    total: number;
+    applications: {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        status: "pending" | "under_review" | "approved" | "rejected" | "additional_info_required";
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+        applicantId: string;
+        applicant: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        submittedAt: string;
+        documents: {
+            id: string;
+            url: string;
+            filename: string;
+            originalName: string;
+            fileType: "resume" | "license" | "certification" | "transcript" | "other";
+            uploadedAt: string;
+        }[];
+        reviewedAt?: string | undefined;
+        reviewedBy?: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        } | undefined;
+        adminNotes?: string | undefined;
+        rejectionReason?: string | undefined;
+    }[];
+    hasMore: boolean;
+}, {
+    limit: number;
+    page: number;
+    total: number;
+    applications: {
+        id: string;
+        createdAt: string;
+        updatedAt: string;
+        status: "pending" | "under_review" | "approved" | "rejected" | "additional_info_required";
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+        applicantId: string;
+        applicant: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        submittedAt: string;
+        documents: {
+            id: string;
+            url: string;
+            filename: string;
+            originalName: string;
+            fileType: "resume" | "license" | "certification" | "transcript" | "other";
+            uploadedAt: string;
+        }[];
+        reviewedAt?: string | undefined;
+        reviewedBy?: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        } | undefined;
+        adminNotes?: string | undefined;
+        rejectionReason?: string | undefined;
+    }[];
+    hasMore: boolean;
+}>;
+export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
+    application: z.ZodObject<{
+        personalInfo: z.ZodObject<{
+            firstName: z.ZodString;
+            lastName: z.ZodString;
+            middleName: z.ZodOptional<z.ZodString>;
+            email: z.ZodString;
+            phone: z.ZodString;
+            birthDate: z.ZodString;
+            address: z.ZodString;
+            city: z.ZodString;
+            state: z.ZodString;
+            zipCode: z.ZodString;
+            country: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        }, {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        }>;
+        professionalInfo: z.ZodObject<{
+            licenseNumber: z.ZodString;
+            licenseState: z.ZodString;
+            licenseExpiration: z.ZodString;
+            specialties: z.ZodArray<z.ZodString, "many">;
+            yearsOfExperience: z.ZodNumber;
+            education: z.ZodArray<z.ZodObject<{
+                degree: z.ZodString;
+                institution: z.ZodString;
+                graduationYear: z.ZodNumber;
+            }, "strip", z.ZodTypeAny, {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }, {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }>, "many">;
+            certifications: z.ZodArray<z.ZodObject<{
+                name: z.ZodString;
+                issuingOrganization: z.ZodString;
+                issueDate: z.ZodString;
+                expirationDate: z.ZodOptional<z.ZodString>;
+            }, "strip", z.ZodTypeAny, {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }, {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }>, "many">;
+            languages: z.ZodArray<z.ZodString, "many">;
+            bio: z.ZodString;
+            approach: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        }, {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        }>;
+        practiceInfo: z.ZodObject<{
+            sessionFormats: z.ZodArray<z.ZodEnum<["in-person", "video", "phone"]>, "many">;
+            availability: z.ZodObject<{
+                timezone: z.ZodString;
+                schedule: z.ZodRecord<z.ZodString, z.ZodObject<{
+                    isAvailable: z.ZodBoolean;
+                    startTime: z.ZodOptional<z.ZodString>;
+                    endTime: z.ZodOptional<z.ZodString>;
+                }, "strip", z.ZodTypeAny, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>>;
+            }, "strip", z.ZodTypeAny, {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            }, {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            }>;
+            pricing: z.ZodObject<{
+                sessionFee: z.ZodNumber;
+                currency: z.ZodString;
+                acceptsInsurance: z.ZodBoolean;
+                insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            }, "strip", z.ZodTypeAny, {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            }, {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            }>;
+        }, "strip", z.ZodTypeAny, {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        }, {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+    }, {
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+    }>;
+    files: z.ZodArray<z.ZodAny, "many">;
+    fileTypes: z.ZodRecord<z.ZodString, z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    application: {
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+    };
+    files: any[];
+    fileTypes: Record<string, string>;
+}, {
+    application: {
+        personalInfo: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            birthDate: string;
+            address: string;
+            phone: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            country: string;
+            middleName?: string | undefined;
+        };
+        professionalInfo: {
+            bio: string;
+            yearsOfExperience: number;
+            languages: string[];
+            specialties: string[];
+            licenseNumber: string;
+            licenseState: string;
+            licenseExpiration: string;
+            education: {
+                degree: string;
+                institution: string;
+                graduationYear: number;
+            }[];
+            certifications: {
+                name: string;
+                issuingOrganization: string;
+                issueDate: string;
+                expirationDate?: string | undefined;
+            }[];
+            approach: string;
+        };
+        practiceInfo: {
+            availability: {
+                timezone: string;
+                schedule: Record<string, {
+                    isAvailable: boolean;
+                    startTime?: string | undefined;
+                    endTime?: string | undefined;
+                }>;
+            };
+            sessionFormats: ("phone" | "in-person" | "video")[];
+            pricing: {
+                sessionFee: number;
+                currency: string;
+                acceptsInsurance: boolean;
+                insuranceProviders?: string[] | undefined;
+            };
+        };
+    };
+    files: any[];
+    fileTypes: Record<string, string>;
+}>;
+export declare const SubmitApplicationResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    status: z.ZodEnum<["pending", "under_review", "approved", "rejected"]>;
+    submittedAt: z.ZodString;
+    message: z.ZodOptional<z.ZodString>;
+    nextSteps: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    status: "pending" | "under_review" | "approved" | "rejected";
+    submittedAt: string;
+    message?: string | undefined;
+    nextSteps?: string[] | undefined;
+}, {
+    id: string;
+    status: "pending" | "under_review" | "approved" | "rejected";
+    submittedAt: string;
+    message?: string | undefined;
+    nextSteps?: string[] | undefined;
+}>;
+export declare const ApplicationStatusUpdateResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    status: z.ZodEnum<["pending", "under_review", "approved", "rejected"]>;
+    updatedAt: z.ZodString;
+    updatedBy: z.ZodString;
+    adminNotes: z.ZodOptional<z.ZodString>;
+    notificationSent: z.ZodDefault<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    updatedAt: string;
+    status: "pending" | "under_review" | "approved" | "rejected";
+    updatedBy: string;
+    notificationSent: boolean;
+    adminNotes?: string | undefined;
+}, {
+    id: string;
+    updatedAt: string;
+    status: "pending" | "under_review" | "approved" | "rejected";
+    updatedBy: string;
+    adminNotes?: string | undefined;
+    notificationSent?: boolean | undefined;
+}>;
 export type RegisterTherapistDto = z.infer<typeof RegisterTherapistDtoSchema>;
 export type UpdateTherapistDto = z.infer<typeof UpdateTherapistDtoSchema>;
 export type TherapistRecommendationRequest = z.infer<typeof TherapistRecommendationRequestSchema>;
@@ -2687,4 +4038,10 @@ export type TherapistRecommendationResponseDto = z.infer<typeof TherapistRecomme
 export type TherapistApplicationCreateDto = z.infer<typeof TherapistApplicationCreateDtoSchema>;
 export type TherapistIdParam = z.infer<typeof TherapistIdParamSchema>;
 export type TherapistApplicationIdParam = z.infer<typeof TherapistApplicationIdParamSchema>;
+export type WelcomeRecommendationQuery = z.infer<typeof WelcomeRecommendationQuerySchema>;
+export type TherapistRecommendationQuery = z.infer<typeof TherapistRecommendationQuerySchema>;
+export type ApplicationListResponse = z.infer<typeof ApplicationListResponseSchema>;
+export type SubmitApplicationWithDocumentsRequest = z.infer<typeof SubmitApplicationWithDocumentsRequestSchema>;
+export type SubmitApplicationResponse = z.infer<typeof SubmitApplicationResponseSchema>;
+export type ApplicationStatusUpdateResponse = z.infer<typeof ApplicationStatusUpdateResponseSchema>;
 //# sourceMappingURL=therapist.d.ts.map

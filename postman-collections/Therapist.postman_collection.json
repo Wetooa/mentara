@@ -1,0 +1,1567 @@
+{
+  "info": {
+    "name": "Mentara - Therapist",
+    "description": "Therapist module endpoints for application processing, profile management, client requests, recommendations, and analytics.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-therapist"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}",
+          "",
+          "// Ensure test environment has valid UUIDs for testing",
+          "if (!pm.environment.get('therapistId') || !pm.environment.get('therapistId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('therapistId', '123e4567-e89b-12d3-a456-426614174000');",
+          "    console.log('⚠️ Set default UUID for therapistId');",
+          "}",
+          "",
+          "if (!pm.environment.get('clientId') || !pm.environment.get('clientId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('clientId', '987fcdeb-51a2-43d7-8ace-123456789012');",
+          "    console.log('⚠️ Set default UUID for clientId');",
+          "}",
+          "",
+          "if (!pm.environment.get('applicationId') || !pm.environment.get('applicationId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('applicationId', 'abcd1234-5678-90ef-ghij-klmnopqrstuv');",
+          "    console.log('⚠️ Set default UUID for applicationId');",
+          "}",
+          "",
+          "if (!pm.environment.get('requestId') || !pm.environment.get('requestId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
+          "    pm.environment.set('requestId', 'def56789-0123-4567-89ab-cdefghijklmn');",
+          "    console.log('⚠️ Set default UUID for requestId');",
+          "}",
+          "",
+          "// Set common search parameters",
+          "if (!pm.environment.get('searchProvince')) {",
+          "    pm.environment.set('searchProvince', 'Ontario');",
+          "    console.log('⚠️ Set default search province');",
+          "}",
+          "",
+          "if (!pm.environment.get('maxHourlyRate')) {",
+          "    pm.environment.set('maxHourlyRate', '300');",
+          "    console.log('⚠️ Set default max hourly rate');",
+          "}",
+          "",
+          "// Set current date for scheduling and filtering",
+          "const now = new Date();",
+          "const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);",
+          "const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);",
+          "pm.environment.set('currentDate', now.toISOString().split('T')[0]);",
+          "pm.environment.set('futureDate', weekFromNow.toISOString().split('T')[0]);",
+          "pm.environment.set('weekAgoDate', sevenDaysAgo.toISOString().split('T')[0]);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-save data from responses",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    const responseJson = pm.response.json();",
+          "    ",
+          "    // Save application data",
+          "    if (responseJson.application && responseJson.application.userId) {",
+          "        pm.environment.set('applicationId', responseJson.application.userId);",
+          "        console.log('✅ Application ID saved:', responseJson.application.userId);",
+          "    }",
+          "    ",
+          "    // Save therapist profile data",
+          "    if (responseJson.id) {",
+          "        pm.environment.set('therapistId', responseJson.id);",
+          "        console.log('✅ Therapist ID saved:', responseJson.id);",
+          "    }",
+          "    ",
+          "    // Save request data",
+          "    if (responseJson.requests && responseJson.requests.length > 0) {",
+          "        pm.environment.set('requestId', responseJson.requests[0].id);",
+          "        console.log('✅ Request ID saved:', responseJson.requests[0].id);",
+          "    }",
+          "    ",
+          "    // Save recommendation data",
+          "    if (responseJson.recommendations && responseJson.recommendations.length > 0) {",
+          "        const firstRecommendation = responseJson.recommendations[0];",
+          "        if (firstRecommendation.therapist && firstRecommendation.therapist.id) {",
+          "            pm.environment.set('recommendedTherapistId', firstRecommendation.therapist.id);",
+          "            console.log('✅ Recommended therapist ID saved:', firstRecommendation.therapist.id);",
+          "        }",
+          "    }",
+          "    ",
+          "    // Save file upload data",
+          "    if (responseJson.uploadedFiles && responseJson.uploadedFiles.length > 0) {",
+          "        pm.environment.set('uploadedFileId', responseJson.uploadedFiles[0].id);",
+          "        console.log('✅ Uploaded file ID saved:', responseJson.uploadedFiles[0].id);",
+          "    }",
+          "}",
+          "",
+          "// Global error handling",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error('❌ Validation Error: ' + issue.message + ' (' + issue.path.join('.') + ');',
+          "            });"",
+          "        } else if (responseJson.message) {",
+          "            console.error('❌ Error:', responseJson.message);",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse error response');",
+          "    }",
+          "}",
+          "",
+          "if (pm.response.code === 401) {",
+          "    console.error('❌ Authentication failed - check access token');",
+          "}",
+          "",
+          "if (pm.response.code === 403) {",
+          "    console.error('❌ Insufficient permissions - check role requirements');",
+          "}",
+          "",
+          "if (pm.response.code === 404) {",
+          "    console.error('❌ Resource not found - check ID parameters');",
+          "}",
+          "",
+          "if (pm.response.code === 413) {",
+          "    console.error('❌ File too large - check file size limits');",
+          "}",
+          "",
+          "if (pm.response.code === 415) {",
+          "    console.error('❌ Unsupported file type - check allowed file formats');",
+          "}",
+          "",
+          "if (pm.response.code === 429) {",
+          "    console.error('❌ Rate limit exceeded - too many requests');",
+          "}",
+          "",
+          "// Response time check",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error(`❌ Validation Error: ${issue.message} (${issue.path ? issue.path.join('.') : 'general'})`);",
+          "            });",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}",
+          "",
+          "// Handle authentication errors",
+          "if (pm.response.code === 401) {",
+          "    console.error('❌ Authentication failed - check access token');",
+          "}",
+          "",
+          "// Handle permission errors",
+          "if (pm.response.code === 403) {",
+          "    console.error('❌ Insufficient permissions');",
+          "}",
+          "",
+          "// Handle not found errors",
+          "if (pm.response.code === 404) {",
+          "    console.error('❌ Resource not found - check ID parameters');",
+          "}",
+          "",
+          "// Handle service unavailability",
+          "if (pm.response.code === 503) {",
+          "    console.error('❌ Service unavailable - check system health');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "therapistId",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "987fcdeb-51a2-43d7-8ace-123456789012",
+      "type": "string"
+    },
+    {
+      "key": "applicationId",
+      "value": "abcd1234-5678-90ef-ghij-klmnopqrstuv",
+      "type": "string"
+    },
+    {
+      "key": "requestId",
+      "value": "def56789-0123-4567-89ab-cdefghijklmn",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "therapist-test@example.com",
+      "type": "string"
+    },
+    {
+      "key": "tempUserId",
+      "value": "temp_test_at_example.com_1234567890",
+      "type": "string"
+    },
+    {
+      "key": "searchProvince",
+      "value": "Ontario",
+      "type": "string"
+    },
+    {
+      "key": "maxHourlyRate",
+      "value": "300",
+      "type": "string"
+    },
+    {
+      "key": "currentDate",
+      "value": "2024-01-15",
+      "type": "string"
+    },
+    {
+      "key": "futureDate",
+      "value": "2024-01-22",
+      "type": "string"
+    },
+    {
+      "key": "weekAgoDate",
+      "value": "2024-01-08",
+      "type": "string"
+    },
+    {
+      "key": "recommendedTherapistId",
+      "value": "456e7890-a12b-34c5-d678-901234567890",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Application Process",
+      "item": [
+        {
+          "name": "Submit Application with Documents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application submitted successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has application data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('application');",
+                  "    pm.expect(responseJson.application).to.have.property('userId');",
+                  "    pm.expect(responseJson.application).to.have.property('status');",
+                  "    pm.expect(responseJson.application.status).to.equal('pending');",
+                  "});",
+                  "",
+                  "pm.test('File attachments properly linked', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('uploadedFiles');",
+                  "    pm.expect(responseJson.uploadedFiles).to.be.an('array');",
+                  "    if (responseJson.uploadedFiles.length > 0) {",
+                  "        responseJson.uploadedFiles.forEach(file => {",
+                  "            pm.expect(file).to.have.property('id');",
+                  "            pm.expect(file).to.have.property('fileName');",
+                  "            pm.expect(file).to.have.property('url');",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "userId",
+                  "value": "{{tempUserId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "{{testEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "firstName",
+                  "value": "Dr. Sarah",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Johnson",
+                  "type": "text"
+                },
+                {
+                  "key": "mobile",
+                  "value": "+639171234567",
+                  "type": "text"
+                },
+                {
+                  "key": "province",
+                  "value": "Metro Manila",
+                  "type": "text"
+                },
+                {
+                  "key": "providerType",
+                  "value": "Clinical Psychologist",
+                  "type": "text"
+                },
+                {
+                  "key": "professionalLicenseType",
+                  "value": "Licensed Clinical Psychologist",
+                  "type": "text"
+                },
+                {
+                  "key": "isPRCLicensed",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "prcLicenseNumber",
+                  "value": "PRC-PSY-2024-001234",
+                  "type": "text"
+                },
+                {
+                  "key": "practiceStartDate",
+                  "value": "2020-01-15T00:00:00.000Z",
+                  "type": "text"
+                },
+                {
+                  "key": "expirationDateOfLicense",
+                  "value": "2025-12-31T00:00:00.000Z",
+                  "type": "text"
+                },
+                {
+                  "key": "areasOfExpertise",
+                  "value": "[\"anxiety\", \"depression\", \"trauma\", \"cognitive-behavioral-therapy\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "assessmentTools",
+                  "value": "[\"Beck Depression Inventory\", \"GAD-7\", \"PTSD Checklist\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "therapeuticApproachesUsedList",
+                  "value": "[\"CBT\", \"EMDR\", \"Mindfulness-Based Therapy\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "languagesOffered",
+                  "value": "[\"English\", \"Filipino\", \"Tagalog\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "providedOnlineTherapyBefore",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "comfortableUsingVideoConferencing",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "privateConfidentialSpace",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "compliesWithDataPrivacyAct",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "professionalLiabilityInsurance",
+                  "value": "Yes, covered by Philippine Psychological Association",
+                  "type": "text"
+                },
+                {
+                  "key": "complaintsOrDisciplinaryActions",
+                  "value": "None",
+                  "type": "text"
+                },
+                {
+                  "key": "willingToAbideByPlatformGuidelines",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "preferredSessionLength",
+                  "value": "60",
+                  "type": "text"
+                },
+                {
+                  "key": "hourlyRate",
+                  "value": "2500",
+                  "type": "text"
+                },
+                {
+                  "key": "license",
+                  "value": "sample-license.pdf",
+                  "type": "file",
+                  "description": "Professional license document"
+                },
+                {
+                  "key": "certificate",
+                  "value": "sample-certificate.pdf",
+                  "type": "file",
+                  "description": "Professional certification"
+                },
+                {
+                  "key": "resume",
+                  "value": "sample-cv.pdf",
+                  "type": "file",
+                  "description": "Professional CV/Resume"
+                },
+                {
+                  "key": "fileTypeMap",
+                  "value": "{\"sample-license.pdf\": \"license\", \"sample-certificate.pdf\": \"certificate\", \"sample-cv.pdf\": \"resume\"}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/apply-with-documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "apply-with-documents"]
+            },
+            "description": "Submit therapist application with documents in a single atomic transaction (public endpoint)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Applications (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Applications retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('applications');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson.applications).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/applications?page=1&limit=10&status=pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "applications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of applications per page"
+                },
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Filter by application status"
+                }
+              ]
+            },
+            "description": "Get all therapist applications with filtering and pagination (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Application has complete details', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('status');",
+                  "    pm.expect(responseJson).to.have.property('firstName');",
+                  "    pm.expect(responseJson).to.have.property('lastName');",
+                  "    pm.expect(responseJson).to.have.property('email');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/applications/{{applicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "applications", "{{applicationId}}"]
+            },
+            "description": "Get detailed information about a specific therapist application"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Application Status (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success confirmation', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('success');",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"adminNotes\": \"Application approved after thorough review. All credentials verified.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/applications/{{applicationId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "applications", "{{applicationId}}", "status"]
+            },
+            "description": "Update application status (approve/reject). Creates therapist account for approved applications (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application Files",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Files retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is array of files', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Files have required properties', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.length > 0) {",
+                  "        const firstFile = responseJson[0];",
+                  "        pm.expect(firstFile).to.have.property('id');",
+                  "        pm.expect(firstFile).to.have.property('fileName');",
+                  "        pm.expect(firstFile).to.have.property('fileUrl');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/applications/{{applicationId}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "applications", "{{applicationId}}", "files"]
+            },
+            "description": "Get all files attached to a specific therapist application"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile Management",
+      "item": [
+        {
+          "name": "Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Profile has complete therapist data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('firstName');",
+                  "    pm.expect(responseJson).to.have.property('lastName');",
+                  "    pm.expect(responseJson).to.have.property('email');",
+                  "    pm.expect(responseJson).to.have.property('specializations');",
+                  "    pm.expect(responseJson).to.have.property('hourlyRate');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Get complete profile information for the current authenticated therapist"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Updated fields reflected in response', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    const requestBody = JSON.parse(pm.request.body.raw);",
+                  "    pm.expect(responseJson.bio).to.equal(requestBody.bio);",
+                  "    pm.expect(responseJson.hourlyRate).to.equal(requestBody.hourlyRate);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated bio: Experienced clinical psychologist with 10+ years specializing in anxiety, depression, and trauma recovery. I use evidence-based approaches including CBT, EMDR, and mindfulness-based interventions.\",\n  \"specializations\": [\"Anxiety Disorders\", \"Depression\", \"PTSD\", \"Trauma Recovery\"],\n  \"hourlyRate\": 225.00,\n  \"acceptingNewClients\": true,\n  \"preferredClientTypes\": [\"Adults\", \"Young Adults\"],\n  \"maxClientsPerWeek\": 30,\n  \"workSettings\": [\"Individual Therapy\", \"Group Therapy\", \"Online Sessions\"],\n  \"languagesSpoken\": [\"English\", \"Spanish\"],\n  \"treatmentApproaches\": [\"CBT\", \"EMDR\", \"Mindfulness-Based Therapy\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Update comprehensive therapist profile information including bio, specializations, and rates"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Profile Avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Avatar upload successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Avatar URL returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('avatar');",
+                  "    pm.expect(responseJson.avatar).to.have.property('url');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "value": "sample-avatar.jpg",
+                  "type": "file",
+                  "description": "Profile avatar image (JPG, PNG, WebP supported, max 5MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{therapistId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{therapistId}}"]
+            },
+            "description": "Upload or update therapist profile avatar image"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile Analytics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile analytics retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('View and engagement metrics included', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('profileViews');",
+                  "    pm.expect(responseJson).to.have.property('contactRequests');",
+                  "    pm.expect(responseJson).to.have.property('conversionRate');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile/analytics?period=30days&includeTrends=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile", "analytics"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30days",
+                  "description": "Analytics period (7days, 30days, 90days)"
+                },
+                {
+                  "key": "includeTrends",
+                  "value": "true",
+                  "description": "Include trend analysis in response"
+                }
+              ]
+            },
+            "description": "Get profile performance analytics including views, contact requests, and conversion metrics"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Availability Settings",
+      "item": [
+        {
+          "name": "Update Availability",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Availability updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Schedule properly formatted', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('availability');",
+                  "    pm.expect(responseJson.availability).to.be.an('object');",
+                  "});",
+                  "",
+                  "pm.test('Timezone properly saved', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('timeZone');",
+                  "    pm.expect(responseJson.timeZone).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"availability\": {\n    \"monday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"breaks\": [{\"start\": \"12:00\", \"end\": \"13:00\"}] },\n    \"tuesday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"breaks\": [{\"start\": \"12:00\", \"end\": \"13:00\"}] },\n    \"wednesday\": { \"start\": \"10:00\", \"end\": \"18:00\", \"breaks\": [{\"start\": \"13:00\", \"end\": \"14:00\"}] },\n    \"thursday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"breaks\": [{\"start\": \"12:00\", \"end\": \"13:00\"}] },\n    \"friday\": { \"start\": \"09:00\", \"end\": \"15:00\" }\n  },\n  \"timeZone\": \"America/Toronto\",\n  \"bufferTimeBetweenSessions\": 15,\n  \"maxConsecutiveSessions\": 6,\n  \"blackoutDates\": [\n    { \"start\": \"2024-12-23\", \"end\": \"2024-12-30\", \"reason\": \"Holiday break\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "availability"]
+            },
+            "description": "Update comprehensive availability schedule including working hours, breaks, and blackout dates"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Availability Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Availability status retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Current availability included', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('currentlyAvailable');",
+                  "    pm.expect(responseJson).to.have.property('nextAvailableSlot');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/availability/status?includeNextWeek=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "availability", "status"],
+              "query": [
+                {
+                  "key": "includeNextWeek",
+                  "value": "true",
+                  "description": "Include next week's availability in response"
+                }
+              ]
+            },
+            "description": "Get current availability status including real-time availability and next available slots"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        {
+          "name": "Get Recommendations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Recommendations retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has therapist recommendations', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('recommendations');",
+                  "    pm.expect(responseJson.recommendations).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Recommendations have match scores', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.recommendations.length > 0) {",
+                  "        pm.expect(responseJson.recommendations[0]).to.have.property('matchScore');",
+                  "        pm.expect(responseJson.recommendations[0]).to.have.property('therapist');",
+                  "        pm.expect(responseJson.recommendations[0]).to.have.property('reasons');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations?limit=10&includeInactive=false&province={{searchProvince}}&maxHourlyRate={{maxHourlyRate}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Maximum number of recommendations"
+                },
+                {
+                  "key": "includeInactive",
+                  "value": "false",
+                  "description": "Whether to include inactive therapists"
+                },
+                {
+                  "key": "province",
+                  "value": "{{searchProvince}}",
+                  "description": "Filter by therapist location"
+                },
+                {
+                  "key": "maxHourlyRate",
+                  "value": "{{maxHourlyRate}}",
+                  "description": "Maximum hourly rate filter"
+                }
+              ]
+            },
+            "description": "Get personalized therapist recommendations based on user preferences and criteria"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Compatibility Analysis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Compatibility analysis retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Analysis has comprehensive breakdown', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('overallScore');",
+                  "    pm.expect(responseJson).to.have.property('categoryScores');",
+                  "    pm.expect(responseJson).to.have.property('strengths');",
+                  "    pm.expect(responseJson).to.have.property('considerations');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations/compatibility/{{therapistId}}?includeProfile=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations", "compatibility", "{{therapistId}}"],
+              "query": [
+                {
+                  "key": "includeProfile",
+                  "value": "true",
+                  "description": "Include therapist profile in response"
+                }
+              ]
+            },
+            "description": "Get detailed compatibility analysis between user and specific therapist"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter by Specialization",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Specialization filtering successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('All therapists match specialization criteria', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.recommendations && responseJson.recommendations.length > 0) {",
+                  "        responseJson.recommendations.forEach(rec => {",
+                  "            pm.expect(rec.therapist).to.have.property('specializations');",
+                  "            pm.expect(rec.therapist.specializations).to.be.an('array');",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist-recommendations?specialization=anxiety&specialization=depression&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist-recommendations"],
+              "query": [
+                {
+                  "key": "specialization",
+                  "value": "anxiety",
+                  "description": "Primary specialization filter"
+                },
+                {
+                  "key": "specialization",
+                  "value": "depression",
+                  "description": "Secondary specialization filter"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Maximum results"
+                }
+              ]
+            },
+            "description": "Filter therapists by specific specializations with relevance-based sorting"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Client Requests",
+      "item": [
+        {
+          "name": "Get Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get requests successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('requests');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson).to.have.property('page');",
+                  "    pm.expect(responseJson.requests).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/requests?page=1&limit=10&status=PENDING&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "requests"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of requests per page"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "description": "Filter by request status"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Sort field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort order"
+                }
+              ]
+            },
+            "description": "Get all client requests for the current therapist with filtering and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Request acceptance successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response confirms acceptance', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('success');",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('accepted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responseMessage\": \"I'm happy to work with you. Let's schedule our first session to discuss your goals and how I can best support you.\",\n  \"suggestedSessionTime\": \"2024-01-20T10:00:00.000Z\",\n  \"notes\": \"Client shows good motivation and clear communication about their needs.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/requests/{{requestId}}/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "requests", "{{requestId}}", "accept"]
+            },
+            "description": "Accept a client request and establish therapeutic relationship"
+          },
+          "response": []
+        },
+        {
+          "name": "Decline Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Request decline successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response confirms decline', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('success');",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('declined');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responseMessage\": \"Thank you for your interest. Unfortunately, I'm not currently accepting new clients, but I'd be happy to provide some referrals to excellent colleagues who might be a good fit.\",\n  \"reason\": \"CAPACITY_FULL\",\n  \"referralSuggestions\": [\n    {\n      \"therapistId\": \"def45678-90ab-cdef-1234-567890abcdef\",\n      \"reason\": \"Specializes in anxiety and has similar approach\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/requests/{{requestId}}/decline",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "requests", "{{requestId}}", "decline"]
+            },
+            "description": "Decline a client request with professional response and optional referrals"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Request Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statistics retrieval successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Statistics include key metrics', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('totalRequests');",
+                  "    pm.expect(responseJson).to.have.property('pendingRequests');",
+                  "    pm.expect(responseJson).to.have.property('acceptedRequests');",
+                  "    pm.expect(responseJson).to.have.property('acceptanceRate');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/requests/statistics?period=30days&includeBreakdown=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "requests", "statistics"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30days",
+                  "description": "Time period for statistics"
+                },
+                {
+                  "key": "includeBreakdown",
+                  "value": "true",
+                  "description": "Include detailed breakdown"
+                }
+              ]
+            },
+            "description": "Get comprehensive request statistics including acceptance rates and response times"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Assigned Clients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get assigned clients successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('clients');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson.clients).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/clients/assigned?page=1&limit=20&status=ACTIVE",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "clients", "assigned"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of clients per page"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "description": "Filter by relationship status"
+                }
+              ]
+            },
+            "description": "Get clients assigned to this therapist through accepted requests"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dashboard data retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Key dashboard metrics included', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('upcomingSessions');",
+                  "    pm.expect(responseJson).to.have.property('pendingRequests');",
+                  "    pm.expect(responseJson).to.have.property('activeClients');",
+                  "    pm.expect(responseJson).to.have.property('weeklyStats');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/dashboard?period=week&startDate={{currentDate}}&includeUpcoming=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "dashboard"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "week",
+                  "description": "Dashboard period"
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{currentDate}}",
+                  "description": "Start date for dashboard period"
+                },
+                {
+                  "key": "includeUpcoming",
+                  "value": "true",
+                  "description": "Include upcoming sessions"
+                }
+              ]
+            },
+            "description": "Get comprehensive therapist dashboard with sessions, requests, and analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dashboard summary successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Summary includes key metrics', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('pendingCount');",
+                  "    pm.expect(responseJson).to.have.property('urgentCount');",
+                  "    pm.expect(responseJson).to.have.property('todayRequests');",
+                  "    pm.expect(responseJson).to.have.property('weekRequests');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/requests/dashboard/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "requests", "dashboard", "summary"]
+            },
+            "description": "Get comprehensive dashboard summary with key metrics and performance indicators"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Validation & Error Handling",
+      "item": [
+        {
+          "name": "Submit Incomplete Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for incomplete application', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Validation errors for missing fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('required');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "incomplete-application@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "firstName",
+                  "value": "Incomplete",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/apply-with-documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "apply-with-documents"]
+            },
+            "description": "Test validation with incomplete application data"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile - Invalid Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Validation error returned for invalid data', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Specific validation errors provided', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('issues');",
+                  "    pm.expect(responseJson.issues).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"\",\n  \"hourlyRate\": -50,\n  \"specializations\": [],\n  \"maxClientsPerWeek\": 0,\n  \"acceptingNewClients\": \"maybe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Test profile validation with invalid data"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Profile Without Authentication",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Authentication required error', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Authentication error message provided', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('authentication');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/therapist/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["therapist", "profile"]
+            },
+            "description": "Test authentication requirement for profile access"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

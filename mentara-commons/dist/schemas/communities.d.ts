@@ -102,17 +102,17 @@ export declare const CommunityQuerySchema: z.ZodObject<{
     page?: number | undefined;
     sortBy?: "createdAt" | "name" | "memberCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    search?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
 }, {
     limit?: number | undefined;
     page?: number | undefined;
     sortBy?: "createdAt" | "name" | "memberCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    search?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
-    search?: string | undefined;
 }>;
 export declare const MemberQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -330,6 +330,123 @@ export declare const RoomParamsDtoSchema: z.ZodObject<{
 }, {
     roomId: string;
 }>;
+export declare const CreateJoinRequestDtoSchema: z.ZodObject<{
+    communityId: z.ZodString;
+    message: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    communityId: string;
+    message?: string | undefined;
+}, {
+    communityId: string;
+    message?: string | undefined;
+}>;
+export declare const ProcessJoinRequestDtoSchema: z.ZodObject<{
+    action: z.ZodEnum<["approve", "reject"]>;
+    moderatorNote: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    action: "approve" | "reject";
+    moderatorNote?: string | undefined;
+}, {
+    action: "approve" | "reject";
+    moderatorNote?: string | undefined;
+}>;
+export declare const JoinRequestFiltersDtoSchema: z.ZodObject<{
+    communityId: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "CANCELLED"]>>;
+    moderatorId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+    page: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    limit: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+}, "strip", z.ZodTypeAny, {
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
+    limit?: number | undefined;
+    page?: number | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    communityId?: string | undefined;
+    moderatorId?: string | undefined;
+}, {
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
+    limit?: number | undefined;
+    page?: number | undefined;
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    communityId?: string | undefined;
+    moderatorId?: string | undefined;
+}>;
+export declare const StatsFiltersDtoSchema: z.ZodObject<{
+    communityId: z.ZodOptional<z.ZodString>;
+    moderatorId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    communityId?: string | undefined;
+    moderatorId?: string | undefined;
+}, {
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+    communityId?: string | undefined;
+    moderatorId?: string | undefined;
+}>;
+export declare const StatsFiltersPartialDtoSchema: z.ZodObject<Pick<{
+    communityId: z.ZodOptional<z.ZodString>;
+    moderatorId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+}, "dateFrom" | "dateTo">, "strip", z.ZodTypeAny, {
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+}, {
+    dateFrom?: string | undefined;
+    dateTo?: string | undefined;
+}>;
+export declare const JoinRequestFiltersPartialDtoSchema: z.ZodObject<Pick<{
+    communityId: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<["PENDING", "APPROVED", "REJECTED", "CANCELLED"]>>;
+    moderatorId: z.ZodOptional<z.ZodString>;
+    dateFrom: z.ZodOptional<z.ZodString>;
+    dateTo: z.ZodOptional<z.ZodString>;
+    page: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    limit: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+}, "status" | "limit" | "page">, "strip", z.ZodTypeAny, {
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
+    limit?: number | undefined;
+    page?: number | undefined;
+}, {
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | undefined;
+    limit?: number | undefined;
+    page?: number | undefined;
+}>;
+export declare const GenerateRecommendationsDtoSchema: z.ZodObject<{
+    force: z.ZodOptional<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    force?: boolean | undefined;
+}, {
+    force?: boolean | undefined;
+}>;
+export declare const RecommendationInteractionDtoSchema: z.ZodObject<{
+    action: z.ZodEnum<["accept", "reject"]>;
+}, "strip", z.ZodTypeAny, {
+    action: "accept" | "reject";
+}, {
+    action: "accept" | "reject";
+}>;
+export declare const RecommendationQueryDtoSchema: z.ZodObject<{
+    status: z.ZodOptional<z.ZodEnum<["pending", "accepted", "rejected"]>>;
+    sortBy: z.ZodOptional<z.ZodEnum<["compatibility", "created", "updated"]>>;
+    sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
+}, "strip", z.ZodTypeAny, {
+    status?: "pending" | "rejected" | "accepted" | undefined;
+    sortBy?: "compatibility" | "created" | "updated" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+}, {
+    status?: "pending" | "rejected" | "accepted" | undefined;
+    sortBy?: "compatibility" | "created" | "updated" | undefined;
+    sortOrder?: "asc" | "desc" | undefined;
+}>;
 export type CommunitySlugParamsDto = z.infer<typeof CommunitySlugParamsDtoSchema>;
 export type CommunityParamsDto = z.infer<typeof CommunityParamsDtoSchema>;
 export type GetCommunityMembersQueryDto = z.infer<typeof GetCommunityMembersQueryDtoSchema>;
@@ -341,4 +458,13 @@ export type CreateRoomDto = z.infer<typeof CreateRoomDtoSchema>;
 export type UserParamsDto = z.infer<typeof UserParamsDtoSchema>;
 export type BulkAssignCommunitiesDto = z.infer<typeof BulkAssignCommunitiesDtoSchema>;
 export type RoomParamsDto = z.infer<typeof RoomParamsDtoSchema>;
+export type CreateJoinRequestDto = z.infer<typeof CreateJoinRequestDtoSchema>;
+export type ProcessJoinRequestDto = z.infer<typeof ProcessJoinRequestDtoSchema>;
+export type JoinRequestFiltersDto = z.infer<typeof JoinRequestFiltersDtoSchema>;
+export type StatsFiltersDto = z.infer<typeof StatsFiltersDtoSchema>;
+export type StatsFiltersPartialDto = z.infer<typeof StatsFiltersPartialDtoSchema>;
+export type JoinRequestFiltersPartialDto = z.infer<typeof JoinRequestFiltersPartialDtoSchema>;
+export type GenerateRecommendationsDto = z.infer<typeof GenerateRecommendationsDtoSchema>;
+export type RecommendationInteractionDto = z.infer<typeof RecommendationInteractionDtoSchema>;
+export type RecommendationQueryDto = z.infer<typeof RecommendationQueryDtoSchema>;
 //# sourceMappingURL=communities.d.ts.map

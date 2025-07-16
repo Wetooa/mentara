@@ -14,12 +14,19 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { BookingService } from './booking.service';
 import {
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
   MeetingCreateDto,
   MeetingUpdateDto,
+  BookingMeetingParamsDtoSchema,
+  AvailabilityParamsDtoSchema,
+  GetAvailableSlotsQueryDtoSchema,
+  type BookingMeetingParamsDto,
+  type AvailabilityParamsDto,
+  type GetAvailableSlotsQueryDto,
 } from 'mentara-commons';
 
 @Controller('booking')
@@ -51,22 +58,24 @@ export class BookingController {
 
   @Get('meetings/:id')
   async getMeeting(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
-    return this.bookingService.getMeeting(id, userId, role);
+    return this.bookingService.getMeeting(params.id, userId, role);
   }
 
   @Put('meetings/:id')
   async updateMeeting(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
     @Body() updateMeetingDto: MeetingUpdateDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
     return this.bookingService.updateMeeting(
-      id,
+      params.id,
       updateMeetingDto,
       userId,
       role,
@@ -75,11 +84,12 @@ export class BookingController {
 
   @Delete('meetings/:id/cancel')
   async cancelMeeting(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
+    params: BookingMeetingParamsDto,
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
   ) {
-    return this.bookingService.cancelMeeting(id, userId, role);
+    return this.bookingService.cancelMeeting(params.id, userId, role);
   }
 
   // Availability endpoints (therapist only)
@@ -115,7 +125,8 @@ export class BookingController {
 
   @Put('availability/:id')
   async updateAvailability(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(AvailabilityParamsDtoSchema))
+    params: AvailabilityParamsDto,
     @Body() updateAvailabilityDto: TherapistAvailabilityUpdateDto,
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
@@ -126,7 +137,7 @@ export class BookingController {
       );
     }
     return this.bookingService.updateAvailability(
-      id,
+      params.id,
       updateAvailabilityDto,
       therapistId,
     );
@@ -134,7 +145,8 @@ export class BookingController {
 
   @Delete('availability/:id')
   async deleteAvailability(
-    @Param('id') id: string,
+    @Param(new ZodValidationPipe(AvailabilityParamsDtoSchema))
+    params: AvailabilityParamsDto,
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
   ) {
@@ -143,7 +155,7 @@ export class BookingController {
         'Only therapists can delete availability',
       );
     }
-    return this.bookingService.deleteAvailability(id, therapistId);
+    return this.bookingService.deleteAvailability(params.id, therapistId);
   }
 
   // Duration endpoints (public)
@@ -155,9 +167,9 @@ export class BookingController {
   // Available slots endpoint
   @Get('slots')
   async getAvailableSlots(
-    @Query('therapistId') therapistId: string,
-    @Query('date') date: string,
+    @Query(new ZodValidationPipe(GetAvailableSlotsQueryDtoSchema))
+    query: GetAvailableSlotsQueryDto,
   ) {
-    return this.bookingService.getAvailableSlots(therapistId, date);
+    return this.bookingService.getAvailableSlots(query.therapistId, query.date);
   }
 }

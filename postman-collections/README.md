@@ -1,20 +1,75 @@
 # Mentara API - Postman Collections
 
-Comprehensive Postman collections for testing the Mentara mental health platform APIs. These collections provide complete coverage of all endpoints with authentication, validation, and error handling examples.
+Comprehensive Postman collections for testing the Mentara mental health platform APIs. These collections are organized by backend module for intuitive navigation and provide complete coverage of all endpoints with authentication, validation, and error handling.
 
 ## 📁 Collection Overview
 
-| Collection | Endpoints | Description |
-|------------|-----------|-------------|
-| **01-Authentication** | 12 | User authentication, registration, JWT token management |
-| **02-User-Management** | 15 | User profiles, account management, admin user operations |
-| **03-AI-Patient-Evaluation** | 18 | Mental health assessments, AI predictions, performance testing |
-| **04-Booking-System** | 22 | Therapy session booking, availability management, scheduling |
-| **05-Messaging-System** | 28 | Real-time messaging, conversations, reactions, blocking |
-| **06-Therapist-Management** | 20 | Therapist applications, recommendations, profile management |
-| **07-Admin-Dashboard** | 25 | Platform analytics, user oversight, system management |
+The collections are organized using a **1-to-1 module mapping** with the backend architecture for maximum clarity and maintainability.
 
-**Total: 140+ API endpoints across 7 collections**
+| Collection | Module | Endpoints | Description |
+|------------|--------|-----------|-------------|
+| **Admin** | `admin/` | 15+ | Platform administration, user management, therapist oversight, analytics, content moderation |
+| **Auth** | `auth/` | 12+ | JWT authentication, OAuth integration, user registration, session management |
+| **Booking** | `booking/` | 22+ | Therapy session booking, availability management, scheduling, conflict detection |
+| **Messaging** | `messaging/` | 28+ | Real-time messaging, conversations, reactions, file sharing, user blocking |
+| **Pre-Assessment** | `pre-assessment/` | 18+ | Mental health assessments, AI predictions, evaluation processing |
+| **Therapist** | `therapist/` | 20+ | Application processing, profile management, client requests, recommendations |
+| **Users** | `users/` | 15+ | User profiles, account management, search functionality, admin operations |
+
+**Total: 130+ API endpoints across 7 core collections**
+
+---
+
+## 🏗️ New Organization Structure
+
+### ✅ **Before vs After**
+
+**Before (Fragmented):**
+```
+├── 01-Authentication.postman_collection.json
+├── 02-User-Management.postman_collection.json
+├── 03-AI-Patient-Evaluation.postman_collection.json
+├── 04-Booking-System.postman_collection.json
+├── 05-Messaging-System.postman_collection.json
+├── 06-Therapist-Management.postman_collection.json
+├── 07-Admin-Dashboard.postman_collection.json
+├── Admin-Analytics.postman_collection.json
+├── Admin-Moderation.postman_collection.json
+├── Admin-System.postman_collection.json
+├── Admin-Therapists.postman_collection.json
+├── Admin-Users.postman_collection.json
+├── Auth-Core.postman_collection.json
+├── Auth-OAuth.postman_collection.json
+├── Auth-Registration.postman_collection.json
+├── Therapist-Applications.postman_collection.json
+├── Therapist-Profiles.postman_collection.json
+├── Therapist-Recommendations.postman_collection.json
+├── Therapist-Requests.postman_collection.json
+├── User-Management.postman_collection.json
+└── User-Profiles.postman_collection.json
+```
+
+**After (Organized):**
+```
+├── Admin.postman_collection.json
+├── Auth.postman_collection.json
+├── Booking.postman_collection.json
+├── Messaging.postman_collection.json
+├── Pre-Assessment.postman_collection.json
+├── Therapist.postman_collection.json
+├── Users.postman_collection.json
+├── README.md
+└── environment.json
+```
+
+### 🎯 **Benefits of New Structure**
+
+1. **Clear Module Mapping**: Each collection corresponds to exactly one backend module
+2. **Reduced Complexity**: 7 collections instead of 21+ fragmented files
+3. **Improved Navigation**: Logical organization by functional area
+4. **Better Maintainability**: Single source of truth for each module
+5. **Easier Onboarding**: Developers can quickly find relevant endpoints
+6. **Scalability**: New modules can be easily added following the same pattern
 
 ---
 
@@ -46,11 +101,12 @@ Create a new environment with these variables:
   "targetUserId": "abc12345-6789-def0-1234-567890abcdef",
   "conversationId": "conv-1234-5678-9abc-def0",
   "meetingId": "meet-1234-5678-9abc-def0",
-  "applicationId": "app-1234-5678-9abc-def0"
+  "applicationId": "app-1234-5678-9abc-def0",
+  "oauthCallbackUrl": "http://localhost:3000/auth/callback"
 }
 ```
 
-**Important**: User ID variables must be valid UUIDs (UUID v4 format) to pass new Zod validation requirements.
+**Important**: User ID variables must be valid UUIDs (UUID v4 format) for Zod validation.
 
 ### 3. Configure Test Accounts
 
@@ -67,477 +123,392 @@ Set up test user credentials:
 }
 ```
 
-**Note**: All passwords must be at least 8 characters long to pass Zod validation requirements.
-
 ---
 
 ## 🔐 Authentication Flow
 
-### Step 1: Login
+### JWT Token-Based Authentication
+
+Most collections use **Bearer Token Authentication** with automatic token management:
+
 ```bash
+# 1. Login (saves tokens automatically)
 POST {{baseUrl}}/auth/login
 {
   "email": "{{testEmail}}",
   "password": "{{testPassword}}"
 }
-```
 
-### Step 2: Auto-Token Setup
-Tokens are automatically saved to environment variables:
-- `accessToken` - Used for Bearer authentication
-- `refreshToken` - Used for token refresh
-- `userId` - Current user ID
-- `userRole` - User role (client, therapist, moderator, admin)
+# 2. All subsequent requests use saved token
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{accessToken}}
 
-### Step 3: Token Refresh
-```bash
+# 3. Automatic token refresh when expired
 POST {{baseUrl}}/auth/refresh
 {
   "refreshToken": "{{refreshToken}}"
 }
 ```
 
----
+### AI Service Authentication
 
-## 🧪 Testing Workflows
+The **Pre-Assessment** collection uses **API Key Authentication** for AI service endpoints:
 
-### Complete User Journey Test
-
-1. **Authentication Flow**
-   ```
-   01-Authentication → Login → Get Current User → Logout
-   ```
-
-2. **Client Journey**
-   ```
-   01-Authentication → Register Client
-   03-AI-Patient-Evaluation → Create Pre-Assessment
-   06-Therapist-Management → Get Recommendations
-   04-Booking-System → Create Meeting
-   05-Messaging-System → Create Conversation
-   ```
-
-3. **Therapist Journey**
-   ```
-   01-Authentication → Register Therapist
-   06-Therapist-Management → Submit Application
-   04-Booking-System → Create Availability
-   05-Messaging-System → Respond to Messages
-   ```
-
-4. **Admin Journey**
-   ```
-   01-Authentication → Admin Login
-   07-Admin-Dashboard → Review Applications
-   06-Therapist-Management → Approve Application
-   07-Admin-Dashboard → View Analytics
-   ```
-
-### AI Service Testing
-
-1. **Health Check**
-   ```
-   03-AI-Patient-Evaluation → Service Health → Health Check
-   ```
-
-2. **Prediction Testing**
-   ```
-   03-AI-Patient-Evaluation → Mental Health Predictions → Predict - Sample Assessment
-   ```
-
-3. **Performance Testing**
-   ```
-   03-AI-Patient-Evaluation → Performance Testing → Load Test - Multiple Predictions
-   ```
+```bash
+# AI Service endpoints
+POST {{aiBaseUrl}}/predict
+X-API-Key: {{aiApiKey}}
+```
 
 ---
 
-## 🎯 Collection Details
+## 📚 Collection Details
 
-### 01-Authentication.postman_collection.json
-**Focus**: User authentication and session management
+### 🔐 Auth.postman_collection.json
+**Module**: `auth/`  
+**Focus**: JWT authentication, OAuth integration, user registration, session management
+
+**Folder Structure**:
+```
+Auth/
+├── Public Authentication/
+│   ├── Login
+│   ├── Refresh Token
+│   └── Logout
+├── Registration/
+│   ├── Register Client
+│   ├── Register Therapist
+│   └── Email Verification
+├── OAuth Integration/
+│   ├── Google OAuth
+│   └── Microsoft OAuth
+├── Password Management/
+│   ├── Forgot Password
+│   └── Reset Password
+└── Session Management/
+    ├── Current User
+    └── Force Logout
+```
 
 **Key Features**:
 - JWT token-based authentication
 - Automatic token storage and refresh
 - Role-based access control
-- Session management
+- OAuth integration (Google, Microsoft)
+- Password reset functionality
+- Email verification system
 
-**Test Scenarios**:
-- Login/logout workflows
-- Token refresh automation
-- User registration validation
-- Admin user management
+### 👥 Users.postman_collection.json
+**Module**: `users/`  
+**Focus**: User profile management, account operations, search functionality
 
-### 02-User-Management.postman_collection.json
-**Focus**: User profile and account operations
+**Folder Structure**:
+```
+Users/
+├── User Management/
+│   ├── Get All Users
+│   ├── Get User by ID
+│   └── Search Users
+├── Profile Management/
+│   ├── Get Profile
+│   ├── Update Profile
+│   └── Delete Profile
+└── Account Administration/
+    ├── Deactivate Account
+    └── Reactivate Account
+```
 
 **Key Features**:
 - Profile CRUD operations
 - Advanced user search and filtering
 - Account status management
-- Admin user oversight
+- Role-based profile access
+- File upload handling
 
-**Test Scenarios**:
-- Profile update validation
-- Admin user deactivation
-- User search functionality
-- Role-based access control
+### 👩‍⚕️ Therapist.postman_collection.json
+**Module**: `therapist/`  
+**Focus**: Application processing, profile management, client requests, recommendations
 
-### 03-AI-Patient-Evaluation.postman_collection.json
-**Focus**: AI-powered mental health assessments
+**Folder Structure**:
+```
+Therapist/
+├── Application Process/
+│   ├── Submit Application
+│   ├── Upload Documents
+│   └── Application Status
+├── Profile Management/
+│   ├── Get Profile
+│   ├── Update Profile
+│   └── Availability Settings
+├── Recommendations/
+│   ├── Get Recommendations
+│   └── Recommendation Filters
+└── Client Requests/
+    ├── Get Requests
+    ├── Accept Request
+    └── Decline Request
+```
 
 **Key Features**:
-- 201-item questionnaire processing
-- 19 mental health condition predictions
-- Performance and load testing
-- Security validation
+- Multi-document application submission
+- AI-powered therapist recommendations
+- Profile and availability management
+- Client request processing
+- Analytics and dashboard data
 
-**Test Scenarios**:
-- Sample mental health assessments
-- Error handling for invalid inputs
-- Performance under load
-- API key authentication
+### 🛡️ Admin.postman_collection.json
+**Module**: `admin/`  
+**Focus**: Platform administration, user oversight, therapist management, analytics
 
-### 04-Booking-System.postman_collection.json
-**Focus**: Therapy session scheduling and management
+**Folder Structure**:
+```
+Admin/
+├── Dashboard/
+│   ├── Dashboard Data
+│   └── System Health
+├── User Administration/
+│   ├── Get All Users
+│   ├── User Details
+│   └── User Actions
+├── Therapist Administration/
+│   ├── Get All Therapists
+│   ├── Application Review
+│   └── Application Actions
+├── Analytics & Reports/
+│   ├── Platform Analytics
+│   └── Usage Reports
+└── Content Moderation/
+    ├── Flagged Content
+    └── Moderation Actions
+```
+
+**Key Features**:
+- Comprehensive platform analytics
+- User and therapist management
+- Application review workflow
+- Content moderation system
+- System health monitoring
+- Compliance reporting
+
+### 📅 Booking.postman_collection.json
+**Module**: `booking/`  
+**Focus**: Therapy session scheduling, availability management, conflict detection
+
+**Folder Structure**:
+```
+Booking/
+├── Meeting Management/
+│   ├── Create Meeting
+│   ├── Get Meetings
+│   ├── Update Meeting
+│   └── Cancel Meeting
+├── Availability Management/
+│   ├── Create Availability
+│   ├── Get Availability
+│   ├── Update Availability
+│   └── Delete Availability
+└── Scheduling/
+    ├── Get Available Slots
+    └── Session Durations
+```
 
 **Key Features**:
 - Meeting CRUD operations
 - Therapist availability management
 - Recurring appointment scheduling
 - Conflict detection and validation
+- Time slot management
 
-**Test Scenarios**:
-- Complete booking workflow
-- Availability management
-- Recurring meeting setup
-- Time conflict validation
+### 💬 Messaging.postman_collection.json
+**Module**: `messaging/`  
+**Focus**: Real-time communication, file sharing, user privacy
 
-### 05-Messaging-System.postman_collection.json
-**Focus**: Secure real-time communication
+**Folder Structure**:
+```
+Messaging/
+├── Conversation Management/
+│   ├── Create Conversation
+│   ├── Get Conversations
+│   └── Conversation Details
+├── Message Operations/
+│   ├── Send Message
+│   ├── Get Messages
+│   ├── Update Message
+│   ├── Delete Message
+│   └── Mark as Read
+├── Message Reactions/
+│   ├── Add Reaction
+│   ├── Remove Reaction
+│   └── Get Read Status
+├── User Blocking/
+│   ├── Block User
+│   ├── Unblock User
+│   └── Get Blocked Users
+├── Search & Discovery/
+│   ├── Search Messages
+│   └── Get Online Users
+└── Real-time Features/
+    ├── Typing Indicator
+    └── Presence Update
+```
 
 **Key Features**:
 - End-to-end encrypted messaging
-- Conversation management
-- Message reactions and status
-- User blocking and privacy
-
-**Test Scenarios**:
-- Complete messaging workflow
 - File attachment handling
+- Message reactions and read receipts
+- User blocking and privacy controls
+- Real-time presence and typing indicators
 - Message search functionality
-- Blocking and privacy controls
 
-### 06-Therapist-Management.postman_collection.json
-**Focus**: Therapist onboarding and matching
+### 🧠 Pre-Assessment.postman_collection.json
+**Module**: `pre-assessment/`  
+**Focus**: Mental health assessments, AI predictions, evaluation processing
+
+**Folder Structure**:
+```
+Pre-Assessment/
+├── Assessment Management/
+│   ├── Create Assessment
+│   ├── Get Assessment
+│   └── Update Assessment
+├── AI Service Integration/
+│   ├── Health Check
+│   ├── Prediction Request
+│   └── Performance Metrics
+└── Service Monitoring/
+    ├── Get Metrics
+    └── Reset Metrics
+```
 
 **Key Features**:
-- Multi-document application submission
-- AI-powered therapist recommendations
-- Admin application review
-- Profile and availability management
-
-**Test Scenarios**:
-- Complete application process
-- Recommendation algorithm testing
-- Admin approval workflow
-- Profile management
-
-### 07-Admin-Dashboard.postman_collection.json
-**Focus**: Platform administration and analytics
-
-**Key Features**:
-- Comprehensive analytics and reporting
-- User and content moderation
-- System health monitoring
-- Compliance and audit logging
-
-**Test Scenarios**:
-- Dashboard analytics retrieval
-- Content moderation workflow
-- System health monitoring
-- Compliance reporting
+- 201-item questionnaire processing
+- 19 mental health condition predictions
+- AI service health monitoring
+- Performance and load testing
+- Comprehensive error handling
 
 ---
 
-## 🔒 Security Testing
+## 🧪 Testing Workflows
+
+### Complete User Journey Testing
+
+#### 1. **Client Journey**
+```
+Auth → Register Client
+↓
+Pre-Assessment → Create Assessment
+↓
+Therapist → Get Recommendations
+↓
+Booking → Create Meeting
+↓
+Messaging → Start Conversation
+```
+
+#### 2. **Therapist Journey**
+```
+Auth → Register Therapist
+↓
+Therapist → Submit Application
+↓
+Booking → Set Availability
+↓
+Messaging → Respond to Messages
+↓
+Users → Update Profile
+```
+
+#### 3. **Admin Journey**
+```
+Auth → Admin Login
+↓
+Admin → Review Applications
+↓
+Therapist → Approve Application
+↓
+Admin → View Analytics
+↓
+Users → Manage Users
+```
+
+### Cross-Module Testing
+
+The reorganized structure makes it easy to test workflows that span multiple modules:
+
+```bash
+# Complete booking workflow
+1. Auth → Login as Client
+2. Users → Get Profile
+3. Therapist → Get Recommendations
+4. Booking → Create Meeting
+5. Messaging → Start Conversation
+```
+
+---
+
+## 🔒 Security & Validation
 
 ### Authentication Security
-- **Invalid credentials testing**: All collections test invalid login attempts
-- **Token expiration handling**: Automatic refresh token logic
-- **Role-based access control**: Admin-only endpoint protection
-- **API key validation**: AI service authentication testing
+- **JWT Token Management**: Automatic token storage and refresh
+- **Role-Based Access Control**: Proper role validation for all endpoints
+- **OAuth Integration**: Secure Google and Microsoft authentication
+- **API Key Validation**: Secure AI service authentication
 
 ### Input Validation
 - **Zod Schema Validation**: All request bodies validated with Zod schemas
 - **UUID Parameter Validation**: User IDs must be valid UUID v4 format
 - **Password Strength**: Minimum 8 characters for new passwords
 - **Email Format**: Strict email validation using Zod email schema
-- **SQL injection protection**: Parameterized query testing
-- **XSS prevention**: Input sanitization validation
-- **File upload security**: File type and size validation
-- **Rate limiting**: Load testing with concurrent requests
 
-### HIPAA Compliance Testing
-- **Data encryption**: Encrypted message testing
-- **Audit logging**: Comprehensive audit trail verification
-- **Access controls**: Role-based data access testing
-- **Data retention**: Compliance with retention policies
+### Error Handling
+Each collection includes comprehensive error testing:
+- **400 Bad Request**: Zod validation failures
+- **401 Unauthorized**: Missing or invalid authentication
+- **403 Forbidden**: Insufficient permissions
+- **404 Not Found**: Non-existent resources
+- **409 Conflict**: Resource conflicts
+- **422 Unprocessable Entity**: Business logic validation failures
+- **429 Too Many Requests**: Rate limiting
+- **500 Internal Server Error**: Server-side error handling
 
 ---
 
 ## 📊 Performance Testing
 
 ### Load Testing Scenarios
-1. **High-Volume User Registration**
+
+Each collection includes performance testing capabilities:
+
+1. **High-Volume Authentication**
    ```
-   01-Authentication → Register Client (100 concurrent users)
+   Auth → Login (100 concurrent users)
    ```
 
 2. **AI Service Load Testing**
    ```
-   03-AI-Patient-Evaluation → Load Test - Multiple Predictions (50 requests/second)
+   Pre-Assessment → Predict (50 requests/second)
    ```
 
 3. **Messaging System Stress Test**
    ```
-   05-Messaging-System → Send Message (1000 messages/minute)
+   Messaging → Send Message (1000 messages/minute)
    ```
 
 4. **Booking System Concurrent Access**
    ```
-   04-Booking-System → Create Meeting (Multiple users booking same time)
+   Booking → Create Meeting (Multiple users, same time slot)
    ```
 
 ### Performance Metrics
-- **Response Time**: < 2000ms for most endpoints
+- **Response Time**: < 2000ms for API endpoints, < 10000ms for AI service
 - **Throughput**: > 50 requests/second
 - **Error Rate**: < 1% under normal load
 - **Memory Usage**: Stable under sustained load
 
 ---
 
-## 🐛 Error Handling
-
-### Common Error Scenarios
-Each collection includes comprehensive error testing:
-
-- **400 Bad Request**: Zod validation failures (see Error Response Format above)
-- **401 Unauthorized**: Missing or invalid authentication
-- **403 Forbidden**: Insufficient permissions
-- **404 Not Found**: Non-existent resources
-- **409 Conflict**: Resource conflicts (booking conflicts, etc.)
-- **422 Unprocessable Entity**: Business logic validation failures
-- **429 Too Many Requests**: Rate limiting
-- **500 Internal Server Error**: Server-side error handling
-
-### Error Response Format
-
-#### Zod Validation Errors (400 Bad Request)
-```json
-{
-  "issues": [
-    {
-      "path": ["email"],
-      "message": "Invalid email format"
-    },
-    {
-      "path": ["password"],
-      "message": "Password is required"
-    }
-  ]
-}
-```
-
-#### Parameter Validation Errors (400 Bad Request)
-```json
-{
-  "issues": [
-    {
-      "path": ["id"],
-      "message": "Invalid user ID format"
-    }
-  ]
-}
-```
-
-#### General Error Format (Non-validation errors)
-```json
-{
-  "error": "Error type",
-  "message": "Human-readable error message",
-  "timestamp": "2025-01-15T10:30:00.000Z",
-  "path": "/api/endpoint",
-  "statusCode": 404
-}
-```
-
----
-
-## ⚡ Zod Validation Guide
-
-### Overview
-As of January 2025, all Mentara API endpoints use **Zod validation** instead of class-validator. This provides:
-- Stricter type validation
-- Better error messages with path information
-- UUID format validation for user IDs
-- Enhanced password requirements
-
-### Common Validation Requirements
-
-#### Password Validation
-- **Login**: `password: z.string().min(1)` - Password cannot be empty
-- **Registration**: `password: z.string().min(8)` - Must be at least 8 characters
-- **Change Password**: `newPassword: z.string().min(8)` - Must be at least 8 characters
-
-#### User ID Validation
-- **Parameter Routes**: `id: z.string().uuid()` - Must be valid UUID v4 format
-- **Examples**: `123e4567-e89b-12d3-a456-426614174000`
-- **Invalid**: `"user123"`, `"invalid-id"`, `""`
-
-#### Email Validation
-- **Format**: `email: z.string().email()` - Stricter email validation
-- **Valid**: `"user@example.com"`
-- **Invalid**: `"invalid-email"`, `"user@"`, `""`
-
-### Testing Validation Errors
-
-All collections now include validation error tests:
-
-```javascript
-// Test for Zod validation errors (400 responses)
-pm.test('Zod validation error format (if 400)', function () {
-    if (pm.response.code === 400) {
-        const responseJson = pm.response.json();
-        pm.expect(responseJson).to.have.property('issues');
-        pm.expect(responseJson.issues).to.be.an('array');
-        if (responseJson.issues.length > 0) {
-            pm.expect(responseJson.issues[0]).to.have.property('path');
-            pm.expect(responseJson.issues[0]).to.have.property('message');
-        }
-    }
-});
-```
-
-### Migration from Class-Validator
-
-If updating existing tests:
-
-**Before (Class-Validator)**:
-```javascript
-expect(response.body.message).to.contain('email must be an email');
-```
-
-**After (Zod)**:
-```javascript
-const emailError = response.body.issues.find(issue => 
-    issue.path && issue.path.includes('email'));
-expect(emailError.message).to.equal('Invalid email format');
-```
-
----
-
-## 📝 Usage Examples
-
-### Running a Complete Test Suite
-
-1. **Setup Environment**:
-   - Import all collections
-   - Configure environment variables
-   - Set up test user accounts
-
-2. **Authentication Test**:
-   ```bash
-   # Run the authentication collection
-   newman run 01-Authentication.postman_collection.json \
-     --environment mentara-environment.json \
-     --reporters cli,json
-   ```
-
-3. **Full Integration Test**:
-   ```bash
-   # Run all collections in sequence
-   for collection in *.postman_collection.json; do
-     newman run "$collection" --environment mentara-environment.json
-   done
-   ```
-
-### Automated Testing Integration
-
-#### GitHub Actions Example
-```yaml
-name: API Integration Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Newman
-        run: npm install -g newman
-      - name: Run Postman Collections
-        run: |
-          newman run postman-collections/01-Authentication.postman_collection.json \
-            --environment postman-collections/environment.json \
-            --reporters cli,junit --reporter-junit-export results.xml
-```
-
-#### CI/CD Pipeline Integration
-```bash
-# Pre-deployment testing
-newman run postman-collections/*.json \
-  --environment staging-environment.json \
-  --bail \
-  --reporters cli,json \
-  --reporter-json-export test-results.json
-```
-
----
-
-## 🔧 Advanced Configuration
-
-### Custom Scripts
-
-#### Pre-request Script (Global)
-```javascript
-// Set dynamic timestamps
-pm.environment.set("timestamp", new Date().toISOString());
-
-// Generate random data
-pm.environment.set("randomEmail", `test${Math.random().toString(36).substr(2, 9)}@example.com`);
-
-// Auto-refresh expired tokens
-if (pm.environment.get("accessToken")) {
-    const token = pm.environment.get("accessToken");
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.exp * 1000 < Date.now()) {
-            // Token expired, trigger refresh
-            console.log("Token expired, refreshing...");
-        }
-    } catch (e) {
-        console.log("Invalid token format");
-    }
-}
-```
-
-#### Test Script (Global)
-```javascript
-// Global response validation
-pm.test("Response time is acceptable", function () {
-    pm.expect(pm.response.responseTime).to.be.below(5000);
-});
-
-pm.test("No server errors", function () {
-    pm.expect(pm.response.code).to.be.below(500);
-});
-
-// Automatic error logging
-if (pm.response.code >= 400) {
-    console.error(`API Error ${pm.response.code}: ${pm.response.json().message || 'Unknown error'}`);
-}
-```
+## 🛠️ Advanced Configuration
 
 ### Environment Switching
 ```javascript
@@ -549,6 +520,38 @@ const baseUrls = {
     "production": "https://api.mentara.com/api"
 };
 pm.environment.set("baseUrl", baseUrls[environment]);
+```
+
+### Automated Testing Integration
+
+#### Newman CLI Usage
+```bash
+# Run all collections
+newman run Admin.postman_collection.json --environment environment.json
+newman run Auth.postman_collection.json --environment environment.json
+newman run Booking.postman_collection.json --environment environment.json
+newman run Messaging.postman_collection.json --environment environment.json
+newman run Pre-Assessment.postman_collection.json --environment environment.json
+newman run Therapist.postman_collection.json --environment environment.json
+newman run Users.postman_collection.json --environment environment.json
+```
+
+#### CI/CD Pipeline Integration
+```yaml
+name: API Testing
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Newman
+        run: npm install -g newman
+      - name: Run Postman Collections
+        run: |
+          for collection in postman-collections/*.postman_collection.json; do
+            newman run "$collection" --environment postman-collections/environment.json
+          done
 ```
 
 ---
@@ -564,10 +567,10 @@ pm.environment.set("baseUrl", baseUrls[environment]);
 POST {{baseUrl}}/auth/refresh
 ```
 
-#### CORS Errors
+#### Missing Environment Variables
 ```bash
-# Issue: CORS policy errors in browser
-# Solution: Use Postman desktop app or configure CORS headers
+# Issue: Environment variables not set
+# Solution: Verify all required variables are configured
 ```
 
 #### AI Service Connection
@@ -580,7 +583,7 @@ GET {{aiBaseUrl}}/health
 #### Rate Limiting
 ```bash
 # Issue: 429 Too Many Requests
-# Solution: Add delays between requests or check rate limits
+# Solution: Add delays between requests
 ```
 
 ### Debug Mode
@@ -590,44 +593,51 @@ Enable detailed logging in Postman:
 3. Turn on "Request validation"
 4. Check "Automatically follow redirects"
 
-### Logging and Monitoring
-```javascript
-// Enhanced logging script
-console.log(`🚀 ${pm.info.requestName} - ${pm.request.method} ${pm.request.url}`);
-console.log(`📊 Response: ${pm.response.code} - ${pm.response.responseTime}ms`);
-
-if (pm.response.code >= 400) {
-    console.error(`❌ Error Response:`, pm.response.json());
-} else {
-    console.log(`✅ Success:`, pm.response.json());
-}
-```
-
 ---
 
-## 📚 Additional Resources
+## 📞 Support & Resources
 
-### Documentation Links
-- [Mentara API Documentation](./docs/api/)
-- [Authentication Guide](./docs/authentication.md)
-- [Testing Best Practices](./docs/testing-guide.md)
-- [Security Guidelines](./SECURITY_AUDIT_REPORT.md)
+### Documentation
+- [Backend API Documentation](../mentara-api/docs/)
+- [Authentication Guide](../mentara-api/docs/api/auth/)
+- [Testing Best Practices](../project-docs/technical-docs/INTEGRATION_TESTING_STRATEGY.md)
 
 ### Development Tools
 - **Newman**: Command-line Postman runner
 - **Postman Monitors**: Automated collection running
 - **Postman Mock Servers**: API mocking for testing
-- **Documentation Generator**: Auto-generate API docs
 
-### Support
-- **GitHub Issues**: [Report bugs or request features](https://github.com/mentara/api/issues)
-- **Team Slack**: #api-testing channel
-- **Documentation**: [Full API reference](./docs/)
+### Contributing
+When adding new endpoints or modules:
+1. Follow the 1-to-1 module mapping principle
+2. Use the standardized collection template
+3. Include comprehensive test coverage
+4. Update this documentation
 
 ---
 
-**Last Updated**: 2025-07-14  
-**Version**: 1.0.0  
-**Maintainer**: AI/DevOps Agent
+## 🎉 Migration Benefits
 
-*These collections are continuously updated to match the latest API changes and testing requirements.*
+### Before Reorganization
+- ❌ 21+ fragmented collections
+- ❌ Inconsistent naming conventions
+- ❌ Scattered admin functionality
+- ❌ Duplicate auth endpoints
+- ❌ Hard to maintain and navigate
+
+### After Reorganization
+- ✅ 7 organized collections
+- ✅ Consistent naming conventions
+- ✅ 1-to-1 module mapping
+- ✅ Comprehensive coverage
+- ✅ Easy to maintain and extend
+
+**Result**: A clean, organized, and maintainable Postman testing suite that directly maps to the backend architecture and provides comprehensive API coverage.
+
+---
+
+**Last Updated**: 2025-07-17  
+**Version**: 2.0.0  
+**Maintainer**: Development Team
+
+*These collections are continuously maintained to match the latest API changes and backend architecture.*

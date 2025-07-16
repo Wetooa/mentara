@@ -21,6 +21,7 @@ export * from './worksheets';
 export * from './pre-assessment';
 export * from './meetings';
 export * from './push-notifications';
+export * from './moderator';
 
 // Re-export zod for convenience
 export { z } from 'zod';

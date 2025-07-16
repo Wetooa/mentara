@@ -30,7 +30,10 @@ export class EnhancedWorksheetsController {
   @ApiOperation({ summary: 'Get all enhanced worksheets with pagination' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
-  @ApiResponse({ status: 200, description: 'Enhanced worksheets retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Enhanced worksheets retrieved successfully',
+  })
   async getEnhancedWorksheets(
     @Query('page') page = 1,
     @Query('limit') limit = 20,
@@ -44,7 +47,10 @@ export class EnhancedWorksheetsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get enhanced worksheet by ID' })
   @ApiParam({ name: 'id', description: 'Worksheet ID' })
-  @ApiResponse({ status: 200, description: 'Enhanced worksheet retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Enhanced worksheet retrieved successfully',
+  })
   @ApiResponse({ status: 404, description: 'Worksheet not found' })
   async getEnhancedWorksheet(@Param('id', ParseUUIDPipe) id: string) {
     return this.enhancedWorksheetsService.getWorksheet(id);

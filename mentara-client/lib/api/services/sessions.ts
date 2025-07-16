@@ -6,7 +6,7 @@ import {
   SessionListParams,
   SessionListResponse,
   SessionStats,
-} from '@/types/api/sessions';
+} from 'mentara-commons';
 
 export interface SessionService {
   // Session CRUD operations

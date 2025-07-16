@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomParamsDtoSchema = exports.BulkAssignCommunitiesDtoSchema = exports.UserParamsDtoSchema = exports.CreateRoomDtoSchema = exports.RoomGroupParamsDtoSchema = exports.CreateRoomGroupDtoSchema = exports.CommunityUpdateInputDtoSchema = exports.CommunityCreateInputDtoSchema = exports.GetCommunityMembersQueryDtoSchema = exports.CommunityParamsDtoSchema = exports.CommunitySlugParamsDtoSchema = exports.CommunityMemberParamSchema = exports.CommunityIdParamSchema = exports.MemberQuerySchema = exports.CommunityQuerySchema = exports.UpdateMemberRoleDtoSchema = exports.JoinCommunityDtoSchema = exports.CommunityMemberSchema = exports.UpdateCommunityDtoSchema = exports.CreateCommunityDtoSchema = exports.CommunitySchema = void 0;
+exports.RecommendationQueryDtoSchema = exports.RecommendationInteractionDtoSchema = exports.GenerateRecommendationsDtoSchema = exports.JoinRequestFiltersPartialDtoSchema = exports.StatsFiltersPartialDtoSchema = exports.StatsFiltersDtoSchema = exports.JoinRequestFiltersDtoSchema = exports.ProcessJoinRequestDtoSchema = exports.CreateJoinRequestDtoSchema = exports.RoomParamsDtoSchema = exports.BulkAssignCommunitiesDtoSchema = exports.UserParamsDtoSchema = exports.CreateRoomDtoSchema = exports.RoomGroupParamsDtoSchema = exports.CreateRoomGroupDtoSchema = exports.CommunityUpdateInputDtoSchema = exports.CommunityCreateInputDtoSchema = exports.GetCommunityMembersQueryDtoSchema = exports.CommunityParamsDtoSchema = exports.CommunitySlugParamsDtoSchema = exports.CommunityMemberParamSchema = exports.CommunityIdParamSchema = exports.MemberQuerySchema = exports.CommunityQuerySchema = exports.UpdateMemberRoleDtoSchema = exports.JoinCommunityDtoSchema = exports.CommunityMemberSchema = exports.UpdateCommunityDtoSchema = exports.CreateCommunityDtoSchema = exports.CommunitySchema = void 0;
 const zod_1 = require("zod");
 // Community Schema
 exports.CommunitySchema = zod_1.z.object({
@@ -132,5 +132,51 @@ exports.BulkAssignCommunitiesDtoSchema = zod_1.z.object({
 });
 exports.RoomParamsDtoSchema = zod_1.z.object({
     roomId: zod_1.z.string().uuid('Invalid room ID format')
+});
+// Community Moderation Schemas
+exports.CreateJoinRequestDtoSchema = zod_1.z.object({
+    communityId: zod_1.z.string().uuid('Invalid community ID format'),
+    message: zod_1.z.string().optional()
+});
+exports.ProcessJoinRequestDtoSchema = zod_1.z.object({
+    action: zod_1.z.enum(['approve', 'reject']),
+    moderatorNote: zod_1.z.string().optional()
+});
+exports.JoinRequestFiltersDtoSchema = zod_1.z.object({
+    communityId: zod_1.z.string().uuid('Invalid community ID format').optional(),
+    status: zod_1.z.enum(['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED']).optional(),
+    moderatorId: zod_1.z.string().uuid('Invalid moderator ID format').optional(),
+    dateFrom: zod_1.z.string().datetime().optional(),
+    dateTo: zod_1.z.string().datetime().optional(),
+    page: zod_1.z.number().int().min(1).default(1).optional(),
+    limit: zod_1.z.number().int().min(1).max(100).default(20).optional()
+});
+exports.StatsFiltersDtoSchema = zod_1.z.object({
+    communityId: zod_1.z.string().uuid('Invalid community ID format').optional(),
+    moderatorId: zod_1.z.string().uuid('Invalid moderator ID format').optional(),
+    dateFrom: zod_1.z.string().datetime().optional(),
+    dateTo: zod_1.z.string().datetime().optional()
+});
+// Partial schemas for specific endpoints
+exports.StatsFiltersPartialDtoSchema = exports.StatsFiltersDtoSchema.pick({
+    dateFrom: true,
+    dateTo: true
+});
+exports.JoinRequestFiltersPartialDtoSchema = exports.JoinRequestFiltersDtoSchema.pick({
+    status: true,
+    page: true,
+    limit: true
+});
+// Community Recommendation Schemas
+exports.GenerateRecommendationsDtoSchema = zod_1.z.object({
+    force: zod_1.z.boolean().optional()
+});
+exports.RecommendationInteractionDtoSchema = zod_1.z.object({
+    action: zod_1.z.enum(['accept', 'reject'])
+});
+exports.RecommendationQueryDtoSchema = zod_1.z.object({
+    status: zod_1.z.enum(['pending', 'accepted', 'rejected']).optional(),
+    sortBy: zod_1.z.enum(['compatibility', 'created', 'updated']).optional(),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
 });
 //# sourceMappingURL=communities.js.map

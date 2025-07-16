@@ -104,7 +104,11 @@ export class EnhancedWorksheetsService {
     return [];
   }
 
-  async updateCursorPosition(worksheetId: string, userId: string, position: any) {
+  async updateCursorPosition(
+    worksheetId: string,
+    userId: string,
+    position: any,
+  ) {
     return { success: true };
   }
 

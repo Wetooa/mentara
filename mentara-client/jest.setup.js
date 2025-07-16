@@ -41,34 +41,38 @@ jest.mock('axios', () => ({
   patch: jest.fn(),
 }))
 
-// Mock Clerk
-jest.mock('@clerk/nextjs', () => ({
+// Mock our auth system (replaces Clerk)
+jest.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
-    isLoaded: true,
-    isSignedIn: true,
-    userId: 'test-user-id',
-    sessionId: 'test-session-id',
-    getToken: jest.fn().mockResolvedValue('test-token'),
-  }),
-  useUser: () => ({
     isLoaded: true,
     isSignedIn: true,
     user: {
       id: 'test-user-id',
       firstName: 'Test',
       lastName: 'User',
-      emailAddresses: [{ emailAddress: 'test@example.com' }],
+      email: 'test@example.com',
+      role: 'client',
     },
-  }),
-  SignIn: ({ children }) => children,
-  SignUp: ({ children }) => children,
-  UserButton: () => <div data-testid="user-button">User Button</div>,
-  ClerkProvider: ({ children }) => children,
-  auth: () => ({
-    userId: 'test-user-id',
-    sessionId: 'test-session-id',
+    handleSignOut: jest.fn(),
+    signInWithEmail: jest.fn(),
+    signUpWithEmail: jest.fn(),
     getToken: jest.fn().mockResolvedValue('test-token'),
   }),
+}))
+
+// Mock AuthContext
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    isLoading: false,
+    accessToken: 'test-token',
+    refreshToken: 'test-refresh-token',
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+    setTokens: jest.fn(),
+  }),
+  AuthProvider: ({ children }) => children,
 }))
 
 // Mock our API client
@@ -132,7 +136,8 @@ jest.mock('@/lib/api', () => ({
 
 // Setup test environment variables
 process.env.NODE_ENV = 'test'
-process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'test-clerk-key'
+process.env.NEXT_PUBLIC_API_URL = 'http://localhost:3001'
+process.env.JWT_SECRET = 'test-jwt-secret'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

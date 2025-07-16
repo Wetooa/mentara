@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ScaleIdParamSchema = exports.AssessmentIdParamSchema = exports.CrisisAssessmentDtoSchema = exports.ExportAssessmentDtoSchema = exports.ProcessAssessmentDtoSchema = exports.AssessmentQuerySchema = exports.AssessmentAnalyticsSchema = exports.AssessmentResultSchema = exports.UpdatePreAssessmentDtoSchema = exports.CreatePreAssessmentDtoSchema = exports.PreAssessmentSchema = exports.AssessmentResponseSchema = exports.AssessmentQuestionSchema = exports.AssessmentScaleSchema = void 0;
+exports.ReprocessRequestSchema = exports.AIServiceHealthResponseSchema = exports.PreAssessmentListResponseSchema = exports.PreAssessmentListParamsSchema = exports.ScaleIdParamSchema = exports.AssessmentIdParamSchema = exports.CrisisAssessmentDtoSchema = exports.ExportAssessmentDtoSchema = exports.ProcessAssessmentDtoSchema = exports.AssessmentQuerySchema = exports.AssessmentAnalyticsSchema = exports.AssessmentResultSchema = exports.UpdatePreAssessmentDtoSchema = exports.CreatePreAssessmentDtoSchema = exports.PreAssessmentSchema = exports.AssessmentResponseSchema = exports.AssessmentQuestionSchema = exports.AssessmentScaleSchema = void 0;
 const zod_1 = require("zod");
 // Assessment Scale Schema
 exports.AssessmentScaleSchema = zod_1.z.object({
@@ -131,5 +131,43 @@ exports.AssessmentIdParamSchema = zod_1.z.object({
 });
 exports.ScaleIdParamSchema = zod_1.z.object({
     id: zod_1.z.string().min(1, 'Scale ID is required')
+});
+// Pre-Assessment List Parameters Schema
+exports.PreAssessmentListParamsSchema = zod_1.z.object({
+    userId: zod_1.z.string().uuid().optional(),
+    isProcessed: zod_1.z.boolean().optional(),
+    overallRisk: zod_1.z.enum(['low', 'moderate', 'high', 'critical']).optional(),
+    processedAfter: zod_1.z.string().datetime().optional(),
+    processedBefore: zod_1.z.string().datetime().optional(),
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0),
+    sortBy: zod_1.z.enum(['completedAt', 'processedAt', 'overallScore', 'riskLevel']).default('completedAt'),
+    sortOrder: zod_1.z.enum(['asc', 'desc']).default('desc')
+});
+// Pre-Assessment List Response Schema
+exports.PreAssessmentListResponseSchema = zod_1.z.object({
+    assessments: zod_1.z.array(exports.PreAssessmentSchema),
+    total: zod_1.z.number().min(0),
+    page: zod_1.z.number().min(1),
+    limit: zod_1.z.number().min(1),
+    hasMore: zod_1.z.boolean()
+});
+// AI Service Health Response Schema
+exports.AIServiceHealthResponseSchema = zod_1.z.object({
+    status: zod_1.z.enum(['healthy', 'degraded', 'unhealthy']),
+    uptime: zod_1.z.number().min(0),
+    responseTime: zod_1.z.number().min(0),
+    processedToday: zod_1.z.number().min(0),
+    queueLength: zod_1.z.number().min(0),
+    lastProcessedAt: zod_1.z.string().datetime().optional(),
+    version: zod_1.z.string().optional(),
+    message: zod_1.z.string().optional()
+});
+// Reprocess Request Schema
+exports.ReprocessRequestSchema = zod_1.z.object({
+    forceReprocess: zod_1.z.boolean().default(false),
+    updateScores: zod_1.z.boolean().default(true),
+    recalculateRecommendations: zod_1.z.boolean().default(true),
+    reason: zod_1.z.string().max(500, 'Reason too long').optional()
 });
 //# sourceMappingURL=pre-assessment.js.map

@@ -164,6 +164,61 @@ export const RoomParamsDtoSchema = z.object({
   roomId: z.string().uuid('Invalid room ID format')
 });
 
+// Community Moderation Schemas
+export const CreateJoinRequestDtoSchema = z.object({
+  communityId: z.string().uuid('Invalid community ID format'),
+  message: z.string().optional()
+});
+
+export const ProcessJoinRequestDtoSchema = z.object({
+  action: z.enum(['approve', 'reject']),
+  moderatorNote: z.string().optional()
+});
+
+export const JoinRequestFiltersDtoSchema = z.object({
+  communityId: z.string().uuid('Invalid community ID format').optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED']).optional(),
+  moderatorId: z.string().uuid('Invalid moderator ID format').optional(),
+  dateFrom: z.string().datetime().optional(),
+  dateTo: z.string().datetime().optional(),
+  page: z.number().int().min(1).default(1).optional(),
+  limit: z.number().int().min(1).max(100).default(20).optional()
+});
+
+export const StatsFiltersDtoSchema = z.object({
+  communityId: z.string().uuid('Invalid community ID format').optional(),
+  moderatorId: z.string().uuid('Invalid moderator ID format').optional(),
+  dateFrom: z.string().datetime().optional(),
+  dateTo: z.string().datetime().optional()
+});
+
+// Partial schemas for specific endpoints
+export const StatsFiltersPartialDtoSchema = StatsFiltersDtoSchema.pick({
+  dateFrom: true,
+  dateTo: true
+});
+
+export const JoinRequestFiltersPartialDtoSchema = JoinRequestFiltersDtoSchema.pick({
+  status: true,
+  page: true,
+  limit: true
+});
+
+// Community Recommendation Schemas
+export const GenerateRecommendationsDtoSchema = z.object({
+  force: z.boolean().optional()
+});
+
+export const RecommendationInteractionDtoSchema = z.object({
+  action: z.enum(['accept', 'reject'])
+});
+
+export const RecommendationQueryDtoSchema = z.object({
+  status: z.enum(['pending', 'accepted', 'rejected']).optional(),
+  sortBy: z.enum(['compatibility', 'created', 'updated']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional()
+});
+
 // Type exports for new DTOs
 export type CommunitySlugParamsDto = z.infer<typeof CommunitySlugParamsDtoSchema>;
 export type CommunityParamsDto = z.infer<typeof CommunityParamsDtoSchema>;
@@ -176,3 +231,16 @@ export type CreateRoomDto = z.infer<typeof CreateRoomDtoSchema>;
 export type UserParamsDto = z.infer<typeof UserParamsDtoSchema>;
 export type BulkAssignCommunitiesDto = z.infer<typeof BulkAssignCommunitiesDtoSchema>;
 export type RoomParamsDto = z.infer<typeof RoomParamsDtoSchema>;
+
+// Community Moderation Type exports
+export type CreateJoinRequestDto = z.infer<typeof CreateJoinRequestDtoSchema>;
+export type ProcessJoinRequestDto = z.infer<typeof ProcessJoinRequestDtoSchema>;
+export type JoinRequestFiltersDto = z.infer<typeof JoinRequestFiltersDtoSchema>;
+export type StatsFiltersDto = z.infer<typeof StatsFiltersDtoSchema>;
+export type StatsFiltersPartialDto = z.infer<typeof StatsFiltersPartialDtoSchema>;
+export type JoinRequestFiltersPartialDto = z.infer<typeof JoinRequestFiltersPartialDtoSchema>;
+
+// Community Recommendation Type exports
+export type GenerateRecommendationsDto = z.infer<typeof GenerateRecommendationsDtoSchema>;
+export type RecommendationInteractionDto = z.infer<typeof RecommendationInteractionDtoSchema>;
+export type RecommendationQueryDto = z.infer<typeof RecommendationQueryDtoSchema>;

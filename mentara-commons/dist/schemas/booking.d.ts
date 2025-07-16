@@ -975,6 +975,7 @@ export declare const TherapistAvailabilityCreateDtoSchema: z.ZodObject<{
     endTime: z.ZodString;
     isAvailable: z.ZodDefault<z.ZodBoolean>;
     timezone: z.ZodOptional<z.ZodString>;
+    notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     isAvailable: boolean;
     startTime: string;
@@ -982,6 +983,7 @@ export declare const TherapistAvailabilityCreateDtoSchema: z.ZodObject<{
     therapistId: string;
     dayOfWeek: number;
     timezone?: string | undefined;
+    notes?: string | undefined;
 }, {
     startTime: string;
     endTime: string;
@@ -989,6 +991,7 @@ export declare const TherapistAvailabilityCreateDtoSchema: z.ZodObject<{
     dayOfWeek: number;
     timezone?: string | undefined;
     isAvailable?: boolean | undefined;
+    notes?: string | undefined;
 }>;
 export declare const TherapistAvailabilityUpdateDtoSchema: z.ZodObject<{
     dayOfWeek: z.ZodOptional<z.ZodNumber>;
@@ -996,15 +999,18 @@ export declare const TherapistAvailabilityUpdateDtoSchema: z.ZodObject<{
     endTime: z.ZodOptional<z.ZodString>;
     isAvailable: z.ZodOptional<z.ZodBoolean>;
     timezone: z.ZodOptional<z.ZodString>;
+    notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     timezone?: string | undefined;
     isAvailable?: boolean | undefined;
+    notes?: string | undefined;
     startTime?: string | undefined;
     endTime?: string | undefined;
     dayOfWeek?: number | undefined;
 }, {
     timezone?: string | undefined;
     isAvailable?: boolean | undefined;
+    notes?: string | undefined;
     startTime?: string | undefined;
     endTime?: string | undefined;
     dayOfWeek?: number | undefined;

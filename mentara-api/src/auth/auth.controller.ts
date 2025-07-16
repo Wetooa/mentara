@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   UseGuards,
   Req,
   UnauthorizedException,
@@ -18,15 +19,33 @@ import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
   LoginDtoSchema,
   RefreshTokenDtoSchema,
+  RegisterUserDtoSchema,
+  LogoutDtoSchema,
+  RequestPasswordResetDtoSchema,
+  ResetPasswordDtoSchema,
+  VerifyEmailDtoSchema,
+  ResendVerificationEmailDtoSchema,
   type LoginDto,
   type RefreshTokenDto,
+  type RegisterUserDto,
+  type LogoutDto,
+  type RequestPasswordResetDto,
+  type ResetPasswordDto,
+  type VerifyEmailDto,
+  type ResendVerificationEmailDto,
 } from 'mentara-commons';
 import { AuthService } from './auth.service';
+import { EmailVerificationService } from './services/email-verification.service';
+import { PasswordResetService } from './services/password-reset.service';
 import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly emailVerificationService: EmailVerificationService,
+    private readonly passwordResetService: PasswordResetService,
+  ) {}
 
   // Role-specific registration endpoints moved to dedicated controllers:
   // - /auth/client/register
@@ -60,21 +79,19 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
-    @Body()
-    registerDto: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-      role?: 'client' | 'therapist';
-    },
+    @Body(new ZodValidationPipe(RegisterUserDtoSchema))
+    registerDto: RegisterUserDto,
   ) {
+    // Only allow client and therapist roles for general registration
+    const allowedRole =
+      registerDto.role === 'therapist' ? 'therapist' : 'client';
+
     return await this.authService.registerUserWithEmail(
       registerDto.email,
       registerDto.password,
       registerDto.firstName,
       registerDto.lastName,
-      registerDto.role || 'client',
+      allowedRole,
     );
   }
 
@@ -139,7 +156,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Body() logoutDto: { refreshToken: string }) {
+  async logout(
+    @Body(new ZodValidationPipe(LogoutDtoSchema)) logoutDto: LogoutDto,
+  ) {
     if (logoutDto.refreshToken) {
       await this.authService.logout(logoutDto.refreshToken);
     }
@@ -162,11 +181,92 @@ export class AuthController {
   // - /auth/admin/profile
   // - /auth/moderator/profile
 
+  // ===== PASSWORD RESET ENDPOINTS =====
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 reset requests per 5 minutes
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK)
+  async requestPasswordReset(
+    @Body(new ZodValidationPipe(RequestPasswordResetDtoSchema))
+    requestResetDto: RequestPasswordResetDto,
+  ) {
+    await this.passwordResetService.requestPasswordReset(requestResetDto.email);
+    return {
+      message: 'If an account with that email exists, we will send a password reset link.',
+    };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 reset attempts per 5 minutes
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Body(new ZodValidationPipe(ResetPasswordDtoSchema))
+    resetDto: ResetPasswordDto,
+  ) {
+    // Validate that passwords match
+    if (resetDto.newPassword !== resetDto.confirmPassword) {
+      throw new UnauthorizedException('Passwords do not match');
+    }
+
+    const result = await this.passwordResetService.resetPassword(
+      resetDto.token,
+      resetDto.newPassword,
+    );
+    return result;
+  }
+
+  @Public()
+  @Get('validate-reset-token')
+  async validateResetToken(@Query('token') token: string) {
+    const result = await this.passwordResetService.validateResetToken(token);
+    return result;
+  }
+
+  // ===== EMAIL VERIFICATION ENDPOINTS =====
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 300000 } }) // 3 verification emails per 5 minutes
+  @Post('send-verification-email')
+  @HttpCode(HttpStatus.OK)
+  async sendVerificationEmail(@CurrentUserId() userId: string) {
+    await this.emailVerificationService.sendVerificationEmail(userId);
+    return {
+      message: 'Verification email sent successfully',
+    };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 resend attempts per 5 minutes
+  @Post('resend-verification-email')
+  @HttpCode(HttpStatus.OK)
+  async resendVerificationEmail(
+    @Body(new ZodValidationPipe(ResendVerificationEmailDtoSchema))
+    resendDto: ResendVerificationEmailDto,
+  ) {
+    await this.emailVerificationService.resendVerificationEmail(resendDto.email);
+    return {
+      message: 'If an account with that email exists, we will send a verification link.',
+    };
+  }
+
+  @Public()
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(
+    @Body(new ZodValidationPipe(VerifyEmailDtoSchema))
+    verifyDto: VerifyEmailDto,
+  ) {
+    const result = await this.emailVerificationService.verifyEmail(verifyDto.token);
+    return result;
+  }
+
   // Google OAuth Routes
   @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {
+  async googleAuth(@Req() _req) {
     // Initiates Google OAuth flow
   }
 
@@ -182,7 +282,7 @@ export class AuthController {
   @Public()
   @Get('microsoft')
   @UseGuards(AuthGuard('microsoft'))
-  async microsoftAuth(@Req() req) {
+  async microsoftAuth(@Req() _req) {
     // Initiates Microsoft OAuth flow
   }
 

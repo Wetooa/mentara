@@ -3,13 +3,62 @@ import {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
   Worksheet,
-  WorksheetListParams,
-  WorksheetListResponse,
+  WorksheetQuery,
   WorksheetSubmissionCreateInputDto,
   WorksheetSubmission,
-  SubmitWorksheetRequest,
-  WorksheetStats,
-} from '@/types/api/worksheets';
+  CreateSubmissionDto,
+  ReviewSubmissionDto,
+  WorksheetAssignment,
+  CreateAssignmentDto,
+  UpdateAssignmentDto,
+  WorksheetIdParam,
+  AssignmentIdParam,
+  SubmissionIdParam,
+  WorksheetParamsDto,
+  WorksheetsQueryDto,
+  SubmissionParamsDto,
+} from 'mentara-commons';
+
+// Extended interfaces for UI-specific data structures
+export interface WorksheetListParams {
+  userId?: string;
+  therapistId?: string;
+  isCompleted?: boolean;
+  overdue?: boolean;
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface WorksheetListResponse {
+  worksheets: Worksheet[];
+  total: number;
+  hasMore: boolean;
+}
+
+export interface SubmitWorksheetRequest {
+  responses: Record<string, any>;
+  attachments?: string[];
+  notes?: string;
+  timeSpent?: number;
+}
+
+export interface WorksheetStats {
+  totalWorksheets: number;
+  completedWorksheets: number;
+  pendingWorksheets: number;
+  overdueWorksheets: number;
+  averageCompletionTime: number;
+  completionRate: number;
+  recentActivity: Array<{
+    id: string;
+    title: string;
+    status: string;
+    completedAt?: string;
+    dueDate?: string;
+  }>;
+}
 
 export interface WorksheetsService {
   getAll(params?: WorksheetListParams): Promise<WorksheetListResponse>;

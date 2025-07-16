@@ -20,7 +20,10 @@
     "noFallthroughCasesInSwitch": false,
     "strict": true,
     "isolatedModules": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@mentara/commons": ["../mentara-commons/dist/index"]
+    }
   },
   "exclude": [
     "scripts/**/*",

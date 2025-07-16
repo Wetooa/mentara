@@ -192,14 +192,16 @@ exports.TherapistAvailabilityCreateDtoSchema = zod_1.z.object({
     startTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
     endTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
     isAvailable: zod_1.z.boolean().default(true),
-    timezone: zod_1.z.string().optional()
+    timezone: zod_1.z.string().optional(),
+    notes: zod_1.z.string().optional()
 });
 exports.TherapistAvailabilityUpdateDtoSchema = zod_1.z.object({
     dayOfWeek: zod_1.z.number().min(0).max(6).optional(),
     startTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
     endTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)').optional(),
     isAvailable: zod_1.z.boolean().optional(),
-    timezone: zod_1.z.string().optional()
+    timezone: zod_1.z.string().optional(),
+    notes: zod_1.z.string().optional()
 });
 exports.AvailabilityParamsDtoSchema = zod_1.z.object({
     id: zod_1.z.string().uuid('Invalid availability ID format')

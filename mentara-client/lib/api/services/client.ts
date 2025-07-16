@@ -1,16 +1,40 @@
 import { AxiosInstance } from "axios";
 import {
-  OnboardingData,
+  ClientOnboardingDto,
+  OnboardingProgress,
+  CompleteStepDto,
+  UpdateOnboardingDataDto,
+  UpdateClientDto,
+  User,
+  CreatePreAssessmentDto,
+  ProcessAssessmentDto,
+  SendTherapistRequestDto,
+  ClientRequestResponse,
+  CreateTherapyProgressDto,
+  // Client-specific data structures
   ClientProfile,
   ClientProgress,
   AssignedTherapist,
   AssessmentSubmission,
   AssessmentResults,
-} from "@/types/api/client";
+  OnboardingData,
+} from 'mentara-commons';
+
+// All client types are now imported from mentara-commons
+
+// Re-export commons types for backward compatibility
+export type {
+  ClientProfile,
+  ClientProgress,
+  AssignedTherapist,
+  AssessmentSubmission,
+  AssessmentResults,
+  OnboardingData,
+};
 
 export interface ClientService {
   completeOnboarding: (
-    data: OnboardingData
+    data: ClientOnboardingDto
   ) => Promise<{ success: boolean; profile: ClientProfile }>;
   getProfile: () => Promise<ClientProfile>;
   updateProfile: (data: Partial<ClientProfile>) => Promise<ClientProfile>;
@@ -60,4 +84,3 @@ export const createClientService = (client: AxiosInstance): ClientService => ({
     client.post("/client/therapist/change-request", { reason }),
 });
 
-export type { OnboardingData, ClientProfile, ClientProgress };

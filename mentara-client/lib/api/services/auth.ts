@@ -17,10 +17,9 @@ import {
 import {
   AuthUser,
   AuthResponse,
-  RegisterUserRequest,
   PreAssessmentSubmission,
   CommunityAssignmentResponse,
-} from "@/types/api/auth";
+} from "@/types/api/auth-extensions";
 
 // JWT Authentication Types (legacy - being migrated to commons)
 interface RegisterCredentials {

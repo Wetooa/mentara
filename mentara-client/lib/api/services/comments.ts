@@ -3,21 +3,66 @@ import {
   CommentCreateInputDto,
   CommentUpdateInputDto,
   Comment,
-  CommentListParams,
-  CommentListResponse,
-  HeartCommentResponse,
-  CreateReplyRequest,
-} from '@/types/api/comments';
+  CommentQuery,
+  CommentIdParam,
+  CommentParamsDto,
+  CommentPostParamsDto,
+  CreateCommentDto,
+  UpdateCommentDto,
+  CreateReactionDto,
+  ReportCommentDto,
+  CommentReaction,
+} from '@mentara/commons';
+
+// Extended interfaces for UI-specific data structures
+export interface CommentListParams {
+  postId?: string;
+  authorId?: string;
+  parentId?: string;
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+}
+
+export interface CommentListResponse {
+  comments: CommentWithDetails[];
+  total: number;
+  hasMore: boolean;
+}
+
+export interface CommentWithDetails extends Comment {
+  author: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
+  reactions: CommentReaction[];
+  reactionCount: number;
+  isReacted?: boolean;
+  replies?: CommentWithDetails[];
+  replyCount: number;
+}
+
+export interface HeartCommentResponse {
+  isHearted: boolean;
+  heartCount: number;
+}
+
+export interface CreateReplyRequest {
+  content: string;
+  parentId: string;
+}
 
 export interface CommentsService {
   getAll(params?: CommentListParams): Promise<CommentListResponse>;
-  getById(id: string): Promise<Comment>;
-  create(data: CommentCreateInputDto): Promise<Comment>;
-  update(id: string, data: CommentUpdateInputDto): Promise<Comment>;
+  getById(id: string): Promise<CommentWithDetails>;
+  create(data: CommentCreateInputDto): Promise<CommentWithDetails>;
+  update(id: string, data: CommentUpdateInputDto): Promise<CommentWithDetails>;
   delete(id: string): Promise<void>;
   
   // Reply functionality
-  createReply(data: CreateReplyRequest): Promise<Comment>;
+  createReply(data: CreateReplyRequest): Promise<CommentWithDetails>;
   
   // Heart/Like functionality
   heart(id: string): Promise<HeartCommentResponse>;
@@ -39,20 +84,20 @@ export const createCommentsService = (client: AxiosInstance): CommentsService =>
     return client.get(`/comments${queryString}`);
   },
 
-  getById: (id: string): Promise<Comment> =>
+  getById: (id: string): Promise<CommentWithDetails> =>
     client.get(`/comments/${id}`),
 
-  create: (data: CommentCreateInputDto): Promise<Comment> =>
+  create: (data: CommentCreateInputDto): Promise<CommentWithDetails> =>
     client.post('/comments', data),
 
-  update: (id: string, data: CommentUpdateInputDto): Promise<Comment> =>
+  update: (id: string, data: CommentUpdateInputDto): Promise<CommentWithDetails> =>
     client.put(`/comments/${id}`, data),
 
   delete: (id: string): Promise<void> =>
     client.delete(`/comments/${id}`),
 
   // Reply functionality
-  createReply: (data: CreateReplyRequest): Promise<Comment> =>
+  createReply: (data: CreateReplyRequest): Promise<CommentWithDetails> =>
     client.post('/comments', {
       content: data.content,
       postId: '', // Will be inferred from parent comment

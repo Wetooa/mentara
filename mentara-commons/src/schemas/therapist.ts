@@ -53,8 +53,8 @@ export const UpdateTherapistDtoSchema = z.object({
   illnessSpecializations: z.array(z.string()).optional()
 });
 
-// Therapist Recommendation Request Schema
-export const TherapistRecommendationRequestSchema = z.object({
+// Therapist Recommendation Request Schema (Legacy)
+export const TherapistRecommendationRequestSchemaLegacy = z.object({
   userId: z.string().uuid('Invalid user ID format'),
   limit: z.number().min(1).max(100).optional(),
   includeInactive: z.boolean().optional(),
@@ -62,8 +62,8 @@ export const TherapistRecommendationRequestSchema = z.object({
   maxHourlyRate: z.number().min(0).optional()
 });
 
-// Therapist Recommendation Response Schema  
-export const TherapistRecommendationResponseDtoSchema = z.object({
+// Therapist Recommendation Response Schema (Legacy)
+export const TherapistRecommendationResponseDtoSchemaLegacy = z.object({
   totalCount: z.number().min(0),
   userConditions: z.array(z.string()),
   therapists: z.array(z.any()), // TherapistWithUser with matchScore
@@ -416,6 +416,40 @@ export type ProfessionalInfo = z.infer<typeof ProfessionalInfoSchema>;
 export type PracticeInfo = z.infer<typeof PracticeInfoSchema>;
 export type TherapistApplicationDto = z.infer<typeof TherapistApplicationDtoSchema>;
 export type TherapistApplication = z.infer<typeof TherapistApplicationSchema>;
+// Therapist Recommendation Request Schema
+export const TherapistRecommendationRequestSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  limit: z.number().min(1).max(100).default(10),
+  includeInactive: z.boolean().default(false),
+  province: z.string().optional(),
+  maxHourlyRate: z.number().min(0).optional(),
+});
+
+// Therapist Recommendation Response Schema
+export const TherapistRecommendationResponseDtoSchema = z.object({
+  therapists: z.array(TherapistRecommendationSchema),
+  totalCount: z.number().min(0),
+  userConditions: z.array(z.string()),
+  matchCriteria: MatchCriteriaSchema,
+  page: z.number().min(1),
+  pageSize: z.number().min(1),
+});
+
+// Welcome Recommendation Query Schema
+export const WelcomeRecommendationQuerySchema = z.object({
+  limit: z.number().min(1).max(100).default(8),
+  province: z.string().optional(),
+  forceRefresh: z.boolean().default(false),
+});
+
+// Therapist Recommendation Query Schema for GET /therapist-recommendations
+export const TherapistRecommendationQuerySchema = z.object({
+  limit: z.number().min(1).max(100).default(10),
+  includeInactive: z.boolean().default(false),
+  province: z.string().optional(),
+  maxHourlyRate: z.number().min(0).optional(),
+});
+
 export type ApplicationStatus = z.infer<typeof ApplicationStatusSchema>;
 export type ApplicationDocument = z.infer<typeof ApplicationDocumentSchema>;
 export type ApplicationStatusUpdateDto = z.infer<typeof ApplicationStatusUpdateDtoSchema>;
@@ -428,6 +462,41 @@ export type SessionFormat = z.infer<typeof SessionFormatSchema>;
 export type Education = z.infer<typeof EducationSchema>;
 export type Certification = z.infer<typeof CertificationSchema>;
 
+// Application List Response Schema
+export const ApplicationListResponseSchema = z.object({
+  applications: z.array(TherapistApplicationSchema),
+  total: z.number().min(0),
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  hasMore: z.boolean()
+});
+
+// Submit Application With Documents Request Schema
+export const SubmitApplicationWithDocumentsRequestSchema = z.object({
+  application: TherapistApplicationDtoSchema,
+  files: z.array(z.any()), // File objects
+  fileTypes: z.record(z.string()) // Mapping of file indices to document types
+});
+
+// Submit Application Response Schema
+export const SubmitApplicationResponseSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(['pending', 'under_review', 'approved', 'rejected']),
+  submittedAt: z.string().datetime(),
+  message: z.string().optional(),
+  nextSteps: z.array(z.string()).optional()
+});
+
+// Application Status Update Response Schema
+export const ApplicationStatusUpdateResponseSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(['pending', 'under_review', 'approved', 'rejected']),
+  updatedAt: z.string().datetime(),
+  updatedBy: z.string().uuid(),
+  adminNotes: z.string().optional(),
+  notificationSent: z.boolean().default(false)
+});
+
 // New type exports from converted DTOs
 export type RegisterTherapistDto = z.infer<typeof RegisterTherapistDtoSchema>;
 export type UpdateTherapistDto = z.infer<typeof UpdateTherapistDtoSchema>;
@@ -436,3 +505,47 @@ export type TherapistRecommendationResponseDto = z.infer<typeof TherapistRecomme
 export type TherapistApplicationCreateDto = z.infer<typeof TherapistApplicationCreateDtoSchema>;
 export type TherapistIdParam = z.infer<typeof TherapistIdParamSchema>;
 export type TherapistApplicationIdParam = z.infer<typeof TherapistApplicationIdParamSchema>;
+export type WelcomeRecommendationQuery = z.infer<typeof WelcomeRecommendationQuerySchema>;
+export type TherapistRecommendationQuery = z.infer<typeof TherapistRecommendationQuerySchema>;
+export type ApplicationListResponse = z.infer<typeof ApplicationListResponseSchema>;
+export type SubmitApplicationWithDocumentsRequest = z.infer<typeof SubmitApplicationWithDocumentsRequestSchema>;
+export type SubmitApplicationResponse = z.infer<typeof SubmitApplicationResponseSchema>;
+export type ApplicationStatusUpdateResponse = z.infer<typeof ApplicationStatusUpdateResponseSchema>;
+
+// Additional DTOs for service operations
+export const TherapistWorksheetQueryDtoSchema = z.object({
+  status: z.enum(['assigned', 'in_progress', 'completed', 'overdue']).optional(),
+  clientId: z.string().uuid().optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0)
+});
+
+export const TherapistMeetingQueryDtoSchema = z.object({
+  status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'no_show']).optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0)
+});
+
+export const TherapistClientRequestQueryDtoSchema = z.object({
+  status: z.enum(['pending', 'accepted', 'declined', 'expired']).optional(),
+  priority: z.enum(['high', 'medium', 'low']).optional(),
+  dateRange: z.enum(['today', 'week', 'month', 'all']).optional(),
+  sortBy: z.enum(['newest', 'oldest', 'priority', 'match_score']).optional(),
+  search: z.string().optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0)
+});
+
+export const TherapistApplicationListDtoSchema = z.object({
+  status: z.enum(['pending', 'under_review', 'approved', 'rejected', 'additional_info_required']).optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sortBy: z.enum(['submittedAt', 'status', 'lastName']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional()
+});
+
+// Type exports for new DTOs
+export type TherapistWorksheetQueryDto = z.infer<typeof TherapistWorksheetQueryDtoSchema>;
+export type TherapistMeetingQueryDto = z.infer<typeof TherapistMeetingQueryDtoSchema>;
+export type TherapistClientRequestQueryDto = z.infer<typeof TherapistClientRequestQueryDtoSchema>;
+export type TherapistApplicationListDto = z.infer<typeof TherapistApplicationListDtoSchema>;

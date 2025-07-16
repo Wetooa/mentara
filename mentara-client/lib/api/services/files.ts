@@ -1,16 +1,120 @@
 import { AxiosInstance } from 'axios';
 import {
-  FileUploadRequest,
-  FileMetadata,
-  UploadedFile,
-  FileListParams,
-  FileListResponse,
-  SecureUrlRequest,
-  SecureUrlResponse,
-  FileStats,
-  ApplicationDocument,
-  ApplicationDocumentListResponse,
-} from '@/types/api/files';
+  File,
+  FileUploadDto,
+  UpdateFileDto,
+  FileQuery,
+  FileIdParam,
+  FileParamsDto,
+  FindFilesQueryDto,
+  EnhancedFileUploadDto,
+  UpdateFileStatusDto,
+  AttachFileToEntityDto,
+  GetAttachmentsParamsDto,
+  CreateFileVersionDto,
+  CreateFileShareDto,
+  ShareTokenParamsDto,
+  DownloadSharedFileDto,
+  BulkFileOperationDto,
+  FileAnalyticsQueryDto,
+  FileDownloadDto,
+  MultipleFileUploadDto,
+  FileUploadProgress,
+} from '@mentara/commons';
+
+// Extended interfaces for complex file data structures
+export interface FileMetadata {
+  folder?: string;
+  description?: string;
+  tags?: string[];
+  expiresAt?: string;
+  attachmentType?: 'primary' | 'secondary' | 'thumbnail' | 'document' | 'media';
+  entityType?: string;
+  entityId?: string;
+}
+
+export interface UploadedFile extends File {
+  downloadUrl?: string;
+  thumbnailUrl?: string;
+  shareUrl?: string;
+  attachments?: Array<{
+    entityType: string;
+    entityId: string;
+    attachmentType: string;
+    description?: string;
+  }>;
+}
+
+export interface FileListParams {
+  type?: string;
+  uploadedBy?: string;
+  associatedId?: string;
+  isPublic?: boolean;
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface FileListResponse {
+  files: UploadedFile[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
+}
+
+export interface SecureUrlRequest {
+  downloadType?: 'direct' | 'attachment';
+  expires?: number;
+}
+
+export interface SecureUrlResponse {
+  url: string;
+  expires: string;
+  downloadType: string;
+}
+
+export interface FileStats {
+  totalFiles: number;
+  totalSize: number;
+  totalDownloads: number;
+  storageUsed: number;
+  storageLimit: number;
+  filesByType: Record<string, number>;
+  uploadsByPeriod: Array<{
+    date: string;
+    count: number;
+    size: number;
+  }>;
+}
+
+export interface ApplicationDocument {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  url: string;
+  documentType: string;
+  applicationId: string;
+  uploadedAt: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+  status: 'pending' | 'verified' | 'rejected';
+}
+
+export interface ApplicationDocumentListResponse {
+  documents: ApplicationDocument[];
+  total: number;
+  applicationId: string;
+}
+
+// Legacy compatibility types
+export interface FileUploadRequest {
+  file: File;
+  metadata?: FileMetadata;
+}
 
 export interface FilesService {
   upload(file: File, metadata?: FileMetadata): Promise<UploadedFile>;

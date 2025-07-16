@@ -131,26 +131,17 @@ export type SessionRecordingIdParam = z.infer<typeof SessionRecordingIdParamSche
 // Additional DTOs for SessionsController endpoints
 export const CreateSessionLogDtoSchema = z.object({
   clientId: z.string().uuid('Invalid client ID format'),
-  therapistId: z.string().uuid('Invalid therapist ID format'),
-  sessionType: z.enum(['individual', 'group', 'emergency']).default('individual'),
-  startTime: z.string().datetime('Invalid start time format'),
-  plannedDuration: z.number().min(15).max(180),
-  notes: z.string().max(2000, 'Notes too long').optional(),
-  mood: z.enum(['excellent', 'good', 'neutral', 'poor', 'critical']).optional(),
-  goals: z.array(z.string()).optional()
+  therapistId: z.string().uuid('Invalid therapist ID format').optional(),
+  sessionType: z.enum(['INITIAL_CONSULTATION', 'REGULAR_THERAPY', 'CRISIS_INTERVENTION', 'GROUP_THERAPY', 'FAMILY_THERAPY', 'FOLLOW_UP', 'ASSESSMENT', 'SELF_GUIDED']).default('REGULAR_THERAPY'),
+  meetingId: z.string().optional(),
+  platform: z.string().optional(),
 });
 
 export const FindSessionsQueryDtoSchema = z.object({
-  page: z.number().min(1).optional(),
-  limit: z.number().min(1).max(100).optional(),
   clientId: z.string().uuid().optional(),
   therapistId: z.string().uuid().optional(),
-  status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional(),
-  dateFrom: z.string().datetime().optional(),
-  dateTo: z.string().datetime().optional(),
-  sessionType: z.enum(['individual', 'group', 'emergency']).optional(),
-  sortBy: z.enum(['startTime', 'createdAt', 'duration']).optional(),
-  sortOrder: z.enum(['asc', 'desc']).optional()
+  status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'TECHNICAL_ISSUE', 'RESCHEDULED']).optional(),
+  sessionType: z.enum(['INITIAL_CONSULTATION', 'REGULAR_THERAPY', 'CRISIS_INTERVENTION', 'GROUP_THERAPY', 'FAMILY_THERAPY', 'FOLLOW_UP', 'ASSESSMENT', 'SELF_GUIDED']).optional(),
 });
 
 export const SessionParamsDtoSchema = z.object({
@@ -158,81 +149,131 @@ export const SessionParamsDtoSchema = z.object({
 });
 
 export const UpdateSessionLogDtoSchema = z.object({
-  status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional(),
+  status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'TECHNICAL_ISSUE', 'RESCHEDULED']).optional(),
   notes: z.string().max(2000, 'Notes too long').optional(),
-  mood: z.enum(['excellent', 'good', 'neutral', 'poor', 'critical']).optional(),
-  actualDuration: z.number().min(1).optional(),
-  endTime: z.string().datetime().optional(),
-  goals: z.array(z.string()).optional(),
-  outcomes: z.array(z.string()).optional()
+  quality: z.number().min(1).max(5).optional(),
+  connectionIssues: z.boolean().optional(),
+  recordingUrl: z.string().optional(),
 });
 
 export const EndSessionDtoSchema = z.object({
-  endTime: z.string().datetime('Invalid end time format'),
-  actualDuration: z.number().min(1, 'Duration must be at least 1 minute'),
-  sessionSummary: z.string().max(2000, 'Summary too long').optional(),
-  clientProgress: z.enum(['significant', 'moderate', 'minimal', 'none']).optional(),
-  nextSessionRecommendation: z.string().max(500, 'Recommendation too long').optional()
+  notes: z.string().max(2000, 'Notes too long').optional(),
+  quality: z.number().min(1).max(5).optional(),
 });
 
 export const AddSessionActivityDtoSchema = z.object({
-  activityType: z.enum(['discussion', 'exercise', 'assignment', 'assessment', 'break']),
-  description: z.string().min(1, 'Description is required').max(500, 'Description too long'),
-  duration: z.number().min(1, 'Duration must be at least 1 minute'),
-  notes: z.string().max(1000, 'Notes too long').optional(),
-  effectiveness: z.enum(['very_effective', 'effective', 'somewhat_effective', 'not_effective']).optional()
+  activityType: z.enum(['SESSION_START', 'SESSION_END', 'SCREEN_SHARE', 'FILE_SHARE', 'WHITEBOARD_USE', 'CHAT_MESSAGE', 'GOAL_SETTING', 'PROGRESS_REVIEW', 'HOMEWORK_ASSIGNMENT', 'ASSESSMENT_COMPLETION', 'MOOD_CHECK_IN', 'CONNECTION_ISSUE', 'AUDIO_PROBLEM', 'VIDEO_PROBLEM', 'RECONNECTION', 'RECORDING_START', 'RECORDING_STOP']),
+  description: z.string().max(500, 'Description too long').optional(),
+  duration: z.number().min(1, 'Duration must be at least 1 minute').optional(),
+  metadata: z.any().optional(),
 });
 
 export const LogUserActivityDtoSchema = z.object({
-  userId: z.string().uuid('Invalid user ID format'),
-  activityType: z.enum(['login', 'logout', 'page_view', 'interaction', 'session_join', 'session_leave']),
-  details: z.record(z.any()).optional(),
-  timestamp: z.string().datetime('Invalid timestamp format').optional(),
+  action: z.enum(['PAGE_VIEW', 'PAGE_EXIT', 'CLICK', 'SCROLL', 'SEARCH', 'POST_CREATE', 'POST_VIEW', 'POST_LIKE', 'COMMENT_CREATE', 'COMMENT_LIKE', 'THERAPIST_SEARCH', 'THERAPIST_PROFILE_VIEW', 'APPOINTMENT_BOOK', 'APPOINTMENT_CANCEL', 'MESSAGE_SEND', 'WORKSHEET_COMPLETE', 'PROFILE_UPDATE', 'SETTINGS_CHANGE', 'PASSWORD_CHANGE', 'LOGOUT']),
+  page: z.string().optional(),
+  component: z.string().optional(),
+  metadata: z.any().optional(),
   sessionId: z.string().uuid().optional(),
-  ipAddress: z.string().optional(),
-  userAgent: z.string().optional()
+  deviceInfo: z.any().optional(),
 });
 
 export const GetUserActivitiesQueryDtoSchema = z.object({
-  userId: z.string().uuid('Invalid user ID format').optional(),
-  activityType: z.enum(['login', 'logout', 'page_view', 'interaction', 'session_join', 'session_leave']).optional(),
-  dateFrom: z.string().datetime().optional(),
-  dateTo: z.string().datetime().optional(),
-  page: z.number().min(1).optional(),
-  limit: z.number().min(1).max(100).optional(),
-  sortBy: z.enum(['timestamp', 'activityType']).optional(),
-  sortOrder: z.enum(['asc', 'desc']).optional()
+  action: z.enum(['PAGE_VIEW', 'PAGE_EXIT', 'CLICK', 'SCROLL', 'SEARCH', 'POST_CREATE', 'POST_VIEW', 'POST_LIKE', 'COMMENT_CREATE', 'COMMENT_LIKE', 'THERAPIST_SEARCH', 'THERAPIST_PROFILE_VIEW', 'APPOINTMENT_BOOK', 'APPOINTMENT_CANCEL', 'MESSAGE_SEND', 'WORKSHEET_COMPLETE', 'PROFILE_UPDATE', 'SETTINGS_CHANGE', 'PASSWORD_CHANGE', 'LOGOUT']).optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
 });
 
 export const CreateTherapyProgressDtoSchema = z.object({
   clientId: z.string().uuid('Invalid client ID format'),
   therapistId: z.string().uuid('Invalid therapist ID format'),
-  sessionId: z.string().uuid('Invalid session ID format').optional(),
-  progressType: z.enum(['goal_achievement', 'symptom_improvement', 'skill_development', 'behavior_change']),
-  description: z.string().min(1, 'Description is required').max(1000, 'Description too long'),
-  progressLevel: z.number().min(1).max(10), // 1-10 scale
-  notes: z.string().max(2000, 'Notes too long').optional(),
-  nextSteps: z.array(z.string()).optional()
+  progressScore: z.number().min(0).max(10),
+  improvementAreas: z.array(z.string()).optional(),
+  concernAreas: z.array(z.string()).optional(),
+  goalsSet: z.any().optional(),
+  goalsAchieved: z.any().optional(),
+  nextMilestones: z.any().optional(),
+  moodScore: z.number().min(1).max(10).optional(),
+  anxietyScore: z.number().min(1).max(10).optional(),
+  depressionScore: z.number().min(1).max(10).optional(),
+  functionalScore: z.number().min(1).max(10).optional(),
+  therapistNotes: z.string().max(2000, 'Notes too long').optional(),
+  clientFeedback: z.string().max(2000, 'Feedback too long').optional(),
+  recommendations: z.array(z.string()).optional(),
 });
 
 export const GetTherapyProgressQueryDtoSchema = z.object({
   clientId: z.string().uuid('Invalid client ID format').optional(),
   therapistId: z.string().uuid('Invalid therapist ID format').optional(),
-  progressType: z.enum(['goal_achievement', 'symptom_improvement', 'skill_development', 'behavior_change']).optional(),
-  dateFrom: z.string().datetime().optional(),
-  dateTo: z.string().datetime().optional(),
-  page: z.number().min(1).optional(),
-  limit: z.number().min(1).max(100).optional()
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
 });
 
 export const GetSessionStatisticsQueryDtoSchema = z.object({
-  therapistId: z.string().uuid().optional(),
   clientId: z.string().uuid().optional(),
-  timeframe: z.enum(['week', 'month', 'quarter', 'year']).default('month'),
-  dateFrom: z.string().datetime().optional(),
-  dateTo: z.string().datetime().optional(),
-  includeProgress: z.boolean().default(false),
-  includeActivities: z.boolean().default(false)
+  therapistId: z.string().uuid().optional(),
+});
+
+// Session Create DTO (for frontend service)
+export const SessionCreateDtoSchema = z.object({
+  clientId: z.string().uuid('Invalid client ID format'),
+  therapistId: z.string().uuid('Invalid therapist ID format'),
+  scheduledAt: z.string().datetime('Invalid date format'),
+  duration: z.number().min(30, 'Minimum session duration is 30 minutes').max(180, 'Maximum session duration is 180 minutes'),
+  sessionType: z.enum(['video', 'audio', 'phone', 'in_person']).default('video'),
+  notes: z.string().max(1000, 'Notes too long').optional()
+});
+
+// Session Update DTO (for frontend service)
+export const SessionUpdateDtoSchema = z.object({
+  scheduledAt: z.string().datetime('Invalid date format').optional(),
+  duration: z.number().min(30, 'Minimum session duration is 30 minutes').max(180, 'Maximum session duration is 180 minutes').optional(),
+  sessionType: z.enum(['video', 'audio', 'phone', 'in_person']).optional(),
+  notes: z.string().max(1000, 'Notes too long').optional(),
+  sessionNotes: z.string().max(5000, 'Session notes too long').optional()
+});
+
+// Session List Parameters Schema
+export const SessionListParamsSchema = z.object({
+  clientId: z.string().uuid().optional(),
+  therapistId: z.string().uuid().optional(),
+  sessionType: z.enum(['video', 'audio', 'phone', 'in_person']).optional(),
+  status: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'no_show']).optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sortBy: z.enum(['scheduledAt', 'createdAt', 'duration', 'status']).default('scheduledAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+// Session List Response Schema
+export const SessionListResponseSchema = z.object({
+  sessions: z.array(SessionSchema),
+  total: z.number().min(0),
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  hasMore: z.boolean()
+});
+
+// Session Stats Schema
+export const SessionStatsSchema = z.object({
+  totalSessions: z.number().min(0),
+  completedSessions: z.number().min(0),
+  cancelledSessions: z.number().min(0),
+  noShowSessions: z.number().min(0),
+  averageDuration: z.number().min(0),
+  totalDuration: z.number().min(0),
+  completionRate: z.number().min(0).max(100),
+  noShowRate: z.number().min(0).max(100),
+  cancellationRate: z.number().min(0).max(100),
+  sessionsByType: z.record(z.number().min(0)),
+  sessionsByStatus: z.record(z.number().min(0)),
+  monthlyStats: z.array(z.object({
+    month: z.string(),
+    totalSessions: z.number().min(0),
+    completedSessions: z.number().min(0),
+    averageDuration: z.number().min(0)
+  }))
 });
 
 // Type exports for new DTOs
@@ -247,3 +288,8 @@ export type GetUserActivitiesQueryDto = z.infer<typeof GetUserActivitiesQueryDto
 export type CreateTherapyProgressDto = z.infer<typeof CreateTherapyProgressDtoSchema>;
 export type GetTherapyProgressQueryDto = z.infer<typeof GetTherapyProgressQueryDtoSchema>;
 export type GetSessionStatisticsQueryDto = z.infer<typeof GetSessionStatisticsQueryDtoSchema>;
+export type SessionCreateDto = z.infer<typeof SessionCreateDtoSchema>;
+export type SessionUpdateDto = z.infer<typeof SessionUpdateDtoSchema>;
+export type SessionListParams = z.infer<typeof SessionListParamsSchema>;
+export type SessionListResponse = z.infer<typeof SessionListResponseSchema>;
+export type SessionStats = z.infer<typeof SessionStatsSchema>;

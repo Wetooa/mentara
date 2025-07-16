@@ -9,7 +9,7 @@ import {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
-} from './dto/messaging.dto';
+} from 'mentara-commons';
 import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
 import { EventBusService } from '../common/events/event-bus.service';
 import {

@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "node --max-old-space-size=3072 node_modules/.bin/nest start --watch",
     "start:debug": "node --max-old-space-size=3072 node_modules/.bin/nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "node --max-old-space-size=2048 node_modules/.bin/jest",
     "test:watch": "node --max-old-space-size=2048 node_modules/.bin/jest --watch",
@@ -99,7 +99,6 @@
     "zod-to-ts": "^1.2.0"
   },
   "trustedDependencies": [
-    "@clerk/shared",
     "@nestjs/core",
     "@prisma/client",
     "@prisma/engines",

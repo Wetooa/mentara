@@ -174,8 +174,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             lastName: string;
             avatarUrl: string | null;
         };
-        hourlyRate: number;
         userId: string;
+        hourlyRate: number;
         averageRating: number | null;
         specializations?: string[] | undefined;
     }, {
@@ -184,8 +184,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             lastName: string;
             avatarUrl: string | null;
         };
-        hourlyRate: number;
         userId: string;
+        hourlyRate: number;
         averageRating: number | null;
         specializations?: string[] | undefined;
     }>>;
@@ -208,8 +208,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             lastName: string;
             avatarUrl: string | null;
         };
-        hourlyRate: number;
         userId: string;
+        hourlyRate: number;
         averageRating: number | null;
         specializations?: string[] | undefined;
     } | undefined;
@@ -232,8 +232,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
             lastName: string;
             avatarUrl: string | null;
         };
-        hourlyRate: number;
         userId: string;
+        hourlyRate: number;
         averageRating: number | null;
         specializations?: string[] | undefined;
     } | undefined;

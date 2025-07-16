@@ -155,8 +155,168 @@ export const PostRoomParamsDtoSchema = z.object({
   roomId: z.string().uuid('Invalid room ID format')
 });
 
+// Reddit Features Schemas
+export const VoteContentDtoSchema = z.object({
+  contentId: z.string().min(1, 'Content ID is required'),
+  contentType: z.enum(['POST', 'COMMENT']),
+  voteType: z.enum(['UPVOTE', 'DOWNVOTE'])
+});
+
+export const GiveAwardDtoSchema = z.object({
+  contentId: z.string().min(1, 'Content ID is required'),
+  contentType: z.enum(['POST', 'COMMENT']),
+  awardType: z.enum(['SILVER', 'GOLD', 'PLATINUM', 'HELPFUL', 'WHOLESOME', 'ROCKET_LIKE']),
+  message: z.string().max(500, 'Message too long').optional(),
+  isAnonymous: z.boolean().default(false)
+});
+
+export const CreateNestedCommentDtoSchema = z.object({
+  postId: z.string().min(1, 'Post ID is required'),
+  parentId: z.string().optional(),
+  content: z.string().min(1, 'Content is required').max(10000, 'Content too long')
+});
+
+export const ReportContentDtoSchema = z.object({
+  contentId: z.string().min(1, 'Content ID is required'),
+  contentType: z.enum(['POST', 'COMMENT']),
+  reason: z.enum(['SPAM', 'HARASSMENT', 'HATE_SPEECH', 'VIOLENCE', 'SEXUAL_CONTENT', 'MISINFORMATION', 'COPYRIGHT', 'SELF_HARM', 'OTHER']),
+  description: z.string().max(1000, 'Description too long').optional()
+});
+
 // Type exports for new DTOs
 export type PostParamsDto = z.infer<typeof PostParamsDtoSchema>;
 export type PostCreateInputDto = z.infer<typeof PostCreateInputDtoSchema>;
 export type PostUpdateInputDto = z.infer<typeof PostUpdateInputDtoSchema>;
 export type PostRoomParamsDto = z.infer<typeof PostRoomParamsDtoSchema>;
+
+// Reddit Features Type exports
+export type VoteContentDto = z.infer<typeof VoteContentDtoSchema>;
+export type GiveAwardDto = z.infer<typeof GiveAwardDtoSchema>;
+export type CreateNestedCommentDto = z.infer<typeof CreateNestedCommentDtoSchema>;
+export type ReportContentDto = z.infer<typeof ReportContentDtoSchema>;
+
+// Additional DTOs for posts service query operations
+export const PostListParamsDtoSchema = z.object({
+  roomId: z.string().uuid().optional(),
+  authorId: z.string().uuid().optional(),
+  tags: z.array(z.string()).optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sortBy: z.enum(['newest', 'oldest', 'popular']).default('newest'),
+  isAnonymous: z.boolean().optional()
+});
+
+export const PostByUserParamsDtoSchema = z.object({
+  userId: z.string().uuid('Invalid user ID format'),
+  roomId: z.string().uuid().optional(),
+  tags: z.array(z.string()).optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sortBy: z.enum(['newest', 'oldest', 'popular']).default('newest'),
+  isAnonymous: z.boolean().optional()
+});
+
+export const PostByRoomParamsDtoSchema = z.object({
+  roomId: z.string().uuid('Invalid room ID format'),
+  authorId: z.string().uuid().optional(),
+  tags: z.array(z.string()).optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sortBy: z.enum(['newest', 'oldest', 'popular']).default('newest'),
+  isAnonymous: z.boolean().optional()
+});
+
+// Type exports for new DTOs
+export type PostListParamsDto = z.infer<typeof PostListParamsDtoSchema>;
+export type PostByUserParamsDto = z.infer<typeof PostByUserParamsDtoSchema>;
+export type PostByRoomParamsDto = z.infer<typeof PostByRoomParamsDtoSchema>;
+
+// UI-specific data structures moved from frontend services
+export const PostHeartSchema = z.object({
+  id: z.string().uuid(),
+  postId: z.string().uuid(),
+  userId: z.string().uuid(),
+  user: z.object({
+    id: z.string().uuid(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    avatarUrl: z.string().url()
+  }),
+  createdAt: z.string().datetime()
+});
+
+export const CommentHeartSchema = z.object({
+  id: z.string().uuid(),
+  commentId: z.string().uuid(),
+  userId: z.string().uuid(),
+  user: z.object({
+    id: z.string().uuid(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    avatarUrl: z.string().url()
+  }),
+  createdAt: z.string().datetime()
+});
+
+export const CommentSchema = z.object({
+  id: z.string().uuid(),
+  content: z.string().min(1),
+  postId: z.string().uuid(),
+  authorId: z.string().uuid(),
+  author: z.object({
+    id: z.string().uuid(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    avatarUrl: z.string().url()
+  }),
+  parentId: z.string().uuid().optional(),
+  replies: z.array(z.lazy(() => CommentSchema)).optional(),
+  hearts: z.array(CommentHeartSchema),
+  heartCount: z.number().min(0),
+  isHearted: z.boolean().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+
+export const PostWithDetailsSchema = PostSchema.extend({
+  author: z.object({
+    id: z.string().uuid(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    avatarUrl: z.string().url()
+  }),
+  room: z.object({
+    id: z.string().uuid(),
+    name: z.string().min(1),
+    slug: z.string().min(1)
+  }),
+  hearts: z.array(PostHeartSchema),
+  heartCount: z.number().min(0),
+  isHearted: z.boolean().optional(),
+  comments: z.array(CommentSchema),
+  commentCount: z.number().min(0)
+});
+
+export const PostListResponseSchema = z.object({
+  posts: z.array(PostWithDetailsSchema),
+  total: z.number().min(0),
+  hasMore: z.boolean()
+});
+
+export const HeartPostResponseSchema = z.object({
+  isHearted: z.boolean(),
+  heartCount: z.number().min(0)
+});
+
+export const CheckHeartedResponseSchema = z.object({
+  isHearted: z.boolean()
+});
+
+// Export type inference helpers for new schemas
+export type PostHeart = z.infer<typeof PostHeartSchema>;
+export type CommentHeart = z.infer<typeof CommentHeartSchema>;
+export type Comment = z.infer<typeof CommentSchema>;
+export type PostWithDetails = z.infer<typeof PostWithDetailsSchema>;
+export type PostListResponse = z.infer<typeof PostListResponseSchema>;
+export type HeartPostResponse = z.infer<typeof HeartPostResponseSchema>;
+export type CheckHeartedResponse = z.infer<typeof CheckHeartedResponseSchema>;

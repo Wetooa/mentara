@@ -8,7 +8,7 @@ import {
   SubmitApplicationWithDocumentsRequest,
   SubmitApplicationResponse,
   ApplicationStatusUpdateResponse,
-} from '@/types/api/therapist-application';
+} from 'mentara-commons';
 
 export interface TherapistApplicationService {
   // Public submission (no auth required)

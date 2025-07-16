@@ -5,13 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
+import { LogOut } from "lucide-react";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { UserSearchBar, User } from "@/components/search";
 
@@ -22,12 +17,21 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, handleSignOut } = useAuth();
 
   const handleUserSelect = (user: User) => {
     // Navigate to user profile or handle user selection
     console.log("Selected user:", user);
     // For now, we'll just log the user. In a real app, you might navigate to their profile
     router.push(`/user/profile/${user.id}`);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await handleSignOut();
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   // Navigation menu items
@@ -148,7 +152,7 @@ export default function MainLayout({
 
               <div className="flex items-center gap-2">
                 <span className="hidden text-sm font-medium text-gray-700 md:block">
-                  Tristan
+                  {user?.firstName || "User"}
                 </span>
                 <div className="h-8 w-8 overflow-hidden rounded-full bg-gray-200">
                   <Image
@@ -158,16 +162,14 @@ export default function MainLayout({
                     height={32}
                   />
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-700 hover:text-red-600 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
               </div>
-
-              {/* FIX: dummy User Authentication Buttons */}
-              <SignedOut>
-                <SignInButton />
-                <SignUpButton />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
             </div>
           </header>
 

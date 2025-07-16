@@ -100,13 +100,13 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         firstName: string;
         lastName: string;
-        birthDate?: string | undefined;
         phoneNumber?: string | undefined;
+        birthDate?: string | undefined;
     }, {
         firstName: string;
         lastName: string;
-        birthDate?: string | undefined;
         phoneNumber?: string | undefined;
+        birthDate?: string | undefined;
     }>;
     preferences: z.ZodObject<{
         therapistGender: z.ZodOptional<z.ZodEnum<["male", "female", "no_preference"]>>;
@@ -141,8 +141,8 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
     personalInfo: {
         firstName: string;
         lastName: string;
-        birthDate?: string | undefined;
         phoneNumber?: string | undefined;
+        birthDate?: string | undefined;
     };
     preferences: {
         specialties?: string[] | undefined;
@@ -159,8 +159,8 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
     personalInfo: {
         firstName: string;
         lastName: string;
-        birthDate?: string | undefined;
         phoneNumber?: string | undefined;
+        birthDate?: string | undefined;
     };
     preferences: {
         specialties?: string[] | undefined;
@@ -211,21 +211,21 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
             day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
+        timezone: string;
         weeklyAvailability: {
             startTime: string;
             endTime: string;
             day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
         hourlyRate: number;
-        timezone: string;
     }, {
+        timezone: string;
         weeklyAvailability: {
             startTime: string;
             endTime: string;
             day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
         hourlyRate: number;
-        timezone: string;
     }>;
     verificationInfo: z.ZodOptional<z.ZodObject<{
         diploma: z.ZodOptional<z.ZodString>;
@@ -249,13 +249,13 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
         experienceYears: number;
     };
     availabilityInfo: {
+        timezone: string;
         weeklyAvailability: {
             startTime: string;
             endTime: string;
             day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
         hourlyRate: number;
-        timezone: string;
     };
     verificationInfo?: {
         license?: string | undefined;
@@ -271,13 +271,13 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
         experienceYears: number;
     };
     availabilityInfo: {
+        timezone: string;
         weeklyAvailability: {
             startTime: string;
             endTime: string;
             day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
         hourlyRate: number;
-        timezone: string;
     };
     verificationInfo?: {
         license?: string | undefined;

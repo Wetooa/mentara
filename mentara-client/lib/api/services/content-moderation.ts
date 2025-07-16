@@ -1,84 +1,16 @@
 import { AxiosInstance } from 'axios';
-import { Post, Comment, User, ModerationReport } from '@/types/api';
-
-// Content moderation specific types
-export interface FlaggedContent {
-  id: string;
-  type: 'post' | 'comment';
-  content: string;
-  author: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  flagCount: number;
-  reports: ModerationReport[];
-  createdAt: string;
-  lastReportedAt: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'pending' | 'approved' | 'rejected' | 'removed';
-  // For posts
-  title?: string;
-  community?: {
-    id: string;
-    name: string;
-  };
-  // For comments
-  postTitle?: string;
-  postId?: string;
-}
-
-export interface ModerationAction {
-  id: string;
-  contentType: 'post' | 'comment' | 'user';
-  contentId: string;
-  action: 'approve' | 'reject' | 'remove' | 'flag' | 'warn' | 'suspend';
-  reason: string;
-  note?: string;
-  moderatorId: string;
-  moderatorName: string;
-  createdAt: string;
-}
-
-export interface ModerationStats {
-  totalReports: number;
-  pendingReports: number;
-  resolvedToday: number;
-  flaggedContent: number;
-  suspendedUsers: number;
-  averageResponseTime: number; // in hours
-  topReportReasons: { reason: string; count: number }[];
-}
-
-export interface ContentModerationFilters {
-  type?: 'post' | 'comment';
-  status?: 'pending' | 'approved' | 'rejected' | 'removed';
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-  reportReason?: string;
-  authorId?: string;
-  communityId?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  limit?: number;
-  offset?: number;
-  sortBy?: 'createdAt' | 'reportCount' | 'priority' | 'lastReportedAt';
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface BulkModerationRequest {
-  contentIds: string[];
-  action: 'approve' | 'reject' | 'remove';
-  reason: string;
-  note?: string;
-}
-
-export interface ReportSubmission {
-  contentType: 'post' | 'comment' | 'user';
-  contentId: string;
-  reason: string;
-  description: string;
-  evidence?: string[];
-}
+import {
+  Post,
+  Comment,
+  User,
+  ModerationReport,
+  FlaggedContent,
+  ModerationAction,
+  ModerationStats,
+  ContentModerationFilters,
+  BulkModerationRequest,
+  ReportSubmission,
+} from '@mentara/commons';
 
 export interface ContentModerationService {
   // Content Management

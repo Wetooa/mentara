@@ -72,8 +72,11 @@ export class PushNotificationService implements OnModuleInit {
   ): Promise<void> {
     try {
       // Convert lowercase platform to uppercase for Prisma enum
-      const prismaPlatform = platform.toUpperCase() as 'IOS' | 'ANDROID' | 'WEB';
-      
+      const prismaPlatform = platform.toUpperCase() as
+        | 'IOS'
+        | 'ANDROID'
+        | 'WEB';
+
       // Check if token already exists
       const existingToken = await this.prisma.deviceToken.findFirst({
         where: { token },
@@ -109,7 +112,8 @@ export class PushNotificationService implements OnModuleInit {
         `Device token registered for user ${userId} on ${platform}`,
       );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to register device token: ${errorMessage}`);
       throw error;
     }
@@ -124,28 +128,32 @@ export class PushNotificationService implements OnModuleInit {
 
       this.logger.log(`Device token unregistered: ${token}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to unregister device token: ${errorMessage}`);
       throw error;
     }
   }
 
   async sendPushNotification(payload: PushNotificationPayload): Promise<void> {
-    this.logger.log(`Stub: Would send push notification to user ${payload.userId}: ${payload.title}`);
+    this.logger.log(
+      `Stub: Would send push notification to user ${payload.userId}: ${payload.title}`,
+    );
   }
 
   async sendPushNotificationToMultipleUsers(
     userIds: string[],
     payload: Omit<PushNotificationPayload, 'userId'>,
   ): Promise<void> {
-    this.logger.log(`Stub: Would send push notification to ${userIds.length} users: ${payload.title}`);
+    this.logger.log(
+      `Stub: Would send push notification to ${userIds.length} users: ${payload.title}`,
+    );
   }
 
-  async sendTestNotification(
-    userId: string,
-    message: string,
-  ): Promise<void> {
-    this.logger.log(`Stub: Would send test notification to user ${userId}: ${message}`);
+  async sendTestNotification(userId: string, message: string): Promise<void> {
+    this.logger.log(
+      `Stub: Would send test notification to user ${userId}: ${message}`,
+    );
   }
 
   async getUserDeviceTokens(userId: string): Promise<DeviceToken[]> {
@@ -158,7 +166,7 @@ export class PushNotificationService implements OnModuleInit {
         orderBy: { lastUsedAt: 'desc' },
       });
 
-      return tokens.map(token => ({
+      return tokens.map((token) => ({
         id: token.id,
         userId: token.userId,
         token: token.token,
@@ -168,7 +176,8 @@ export class PushNotificationService implements OnModuleInit {
         deviceInfo: token.deviceInfo as any,
       }));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to get user device tokens: ${errorMessage}`);
       return [];
     }
@@ -200,7 +209,8 @@ export class PushNotificationService implements OnModuleInit {
 
       return result.count;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to cleanup inactive tokens: ${errorMessage}`);
       return 0;
     }

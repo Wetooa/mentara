@@ -215,7 +215,11 @@ export class ClientRequestService {
       }
 
       const results: {
-        successful: Array<{ therapistId: string; requestId: string; status: string }>;
+        successful: Array<{
+          therapistId: string;
+          requestId: string;
+          status: string;
+        }>;
         failed: Array<{ therapistId: string; error: string }>;
         totalSent: number;
       } = {

@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "./ThemeProvider";
 import QueryProvider from "./QueryProvider";
 import { ApiAuthProvider } from "./ApiAuthProvider";
@@ -16,18 +15,16 @@ interface ProvidersProps {
  */
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ClerkProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <QueryProvider>
-          <ApiAuthProvider>{children}</ApiAuthProvider>
-        </QueryProvider>
-      </ThemeProvider>
-    </ClerkProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <QueryProvider>
+        <ApiAuthProvider>{children}</ApiAuthProvider>
+      </QueryProvider>
+    </ThemeProvider>
   );
 }
 

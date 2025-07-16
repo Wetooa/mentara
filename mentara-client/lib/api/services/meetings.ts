@@ -1,32 +1,48 @@
 import { AxiosInstance } from 'axios';
-import { Meeting, MeetingSessionData } from '@/types/api/meetings';
+import {
+  MeetingParamsDto,
+  UpdateMeetingStatusDto,
+  GetUpcomingMeetingsQueryDto,
+  SaveMeetingSessionDto,
+  GetMeetingAnalyticsQueryDto,
+  EmergencyTerminateMeetingDto,
+  // Video call DTOs
+  CreateVideoRoomDto,
+  JoinVideoRoomDto,
+  EndVideoCallDto,
+  VideoRoomResponse,
+  VideoCallStatus,
+  // Complex meeting data structures
+  Meeting,
+  MeetingSessionData,
+  MeetingAnalytics,
+  MeetingRoomResponse,
+  MeetingStatusUpdate,
+  EmergencyTerminationRequest,
+  // Zod schemas for validation
+  MeetingListParamsSchema,
+  BookingStatsSchema,
+  SlotGenerationConfigSchema,
+  ValidationConfigSchema,
+} from 'mentara-commons';
 
-export interface MeetingAnalytics {
-  totalMeetings: number;
-  totalDuration: number;
-  averageDuration: number;
-  meetingsByType: {
-    video: number;
-    audio: number;
-    chat: number;
-  };
-  completionRate: number;
-}
+// All meeting types are now imported from mentara-commons
 
-export interface MeetingRoomResponse {
-  roomUrl: string;
-  roomToken: string;
-  meetingId: string;
-  expires: string;
-}
-
-export interface MeetingStatusUpdate {
-  status: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
-}
-
-export interface EmergencyTerminationRequest {
-  reason: string;
-}
+// Re-export commons types for backward compatibility
+export type {
+  Meeting,
+  MeetingSessionData,
+  MeetingAnalytics,
+  MeetingRoomResponse,
+  MeetingStatusUpdate,
+  EmergencyTerminationRequest,
+  // Video call types
+  CreateVideoRoomDto,
+  JoinVideoRoomDto,
+  EndVideoCallDto,
+  VideoRoomResponse,
+  VideoCallStatus,
+};
 
 export const createMeetingsService = (api: AxiosInstance) => ({
   /**
@@ -42,7 +58,7 @@ export const createMeetingsService = (api: AxiosInstance) => ({
    */
   updateMeetingStatus: async (
     meetingId: string,
-    statusUpdate: MeetingStatusUpdate
+    statusUpdate: UpdateMeetingStatusDto
   ): Promise<Meeting> => {
     const { data } = await api.put(`/meetings/${meetingId}/status`, statusUpdate);
     return data;
@@ -59,9 +75,10 @@ export const createMeetingsService = (api: AxiosInstance) => ({
   /**
    * Get upcoming meetings for current user
    */
-  getUpcomingMeetings: async (limit?: number): Promise<Meeting[]> => {
-    const params = limit ? { limit } : {};
-    const { data } = await api.get('/meetings/upcoming', { params });
+  getUpcomingMeetings: async (query?: GetUpcomingMeetingsQueryDto): Promise<Meeting[]> => {
+    const params = query || {};
+    const validatedParams = MeetingListParamsSchema.parse(params);
+    const { data } = await api.get('/meetings/upcoming', { params: validatedParams });
     return data;
   },
 
@@ -70,7 +87,7 @@ export const createMeetingsService = (api: AxiosInstance) => ({
    */
   saveMeetingSession: async (
     meetingId: string,
-    sessionData: Omit<MeetingSessionData, 'meetingId'>
+    sessionData: SaveMeetingSessionDto
   ): Promise<any> => {
     const { data } = await api.post(`/meetings/${meetingId}/session`, sessionData);
     return data;
@@ -80,13 +97,9 @@ export const createMeetingsService = (api: AxiosInstance) => ({
    * Get meeting analytics for therapists
    */
   getTherapistMeetingAnalytics: async (
-    startDate?: string,
-    endDate?: string
+    query?: GetMeetingAnalyticsQueryDto
   ): Promise<MeetingAnalytics> => {
-    const params: Record<string, string> = {};
-    if (startDate) params.startDate = startDate;
-    if (endDate) params.endDate = endDate;
-    
+    const params = query || {};
     const { data } = await api.get('/meetings/analytics/therapist', { params });
     return data;
   },
@@ -96,7 +109,7 @@ export const createMeetingsService = (api: AxiosInstance) => ({
    */
   emergencyTerminateMeeting: async (
     meetingId: string,
-    terminationData: EmergencyTerminationRequest
+    terminationData: EmergencyTerminateMeetingDto
   ): Promise<Meeting> => {
     const { data } = await api.post(`/meetings/${meetingId}/emergency-terminate`, terminationData);
     return data;
@@ -119,30 +132,130 @@ export const createMeetingsService = (api: AxiosInstance) => ({
    */
   confirmMeeting: async (meetingId: string): Promise<Meeting> => {
     const { data } = await api.put(`/meetings/${meetingId}/status`, { 
-      status: 'CONFIRMED' 
+      status: 'confirmed' 
     });
     return data;
   },
 
   startMeeting: async (meetingId: string): Promise<Meeting> => {
     const { data } = await api.put(`/meetings/${meetingId}/status`, { 
-      status: 'IN_PROGRESS' 
+      status: 'in_progress' 
     });
     return data;
   },
 
   completeMeeting: async (meetingId: string): Promise<Meeting> => {
     const { data } = await api.put(`/meetings/${meetingId}/status`, { 
-      status: 'COMPLETED' 
+      status: 'completed' 
     });
     return data;
   },
 
   cancelMeeting: async (meetingId: string): Promise<Meeting> => {
     const { data } = await api.put(`/meetings/${meetingId}/status`, { 
-      status: 'CANCELLED' 
+      status: 'cancelled' 
     });
     return data;
+  },
+
+  // ===== VIDEO CALL METHODS =====
+
+  /**
+   * Create a video room for a meeting
+   */
+  createVideoRoom: async (
+    meetingId: string,
+    createRoomData: CreateVideoRoomDto
+  ): Promise<VideoRoomResponse> => {
+    const { data } = await api.post(`/meetings/${meetingId}/video-room`, createRoomData);
+    return data;
+  },
+
+  /**
+   * Join an existing video room
+   */
+  joinVideoRoom: async (
+    meetingId: string,
+    joinRoomData: JoinVideoRoomDto
+  ): Promise<VideoRoomResponse> => {
+    const { data } = await api.post(`/meetings/${meetingId}/join-video`, joinRoomData);
+    return data;
+  },
+
+  /**
+   * Get video call status
+   */
+  getVideoCallStatus: async (meetingId: string): Promise<VideoCallStatus> => {
+    const { data } = await api.get(`/meetings/${meetingId}/video-status`);
+    return data;
+  },
+
+  /**
+   * End video call
+   */
+  endVideoCall: async (
+    meetingId: string,
+    endCallData: EndVideoCallDto
+  ): Promise<void> => {
+    await api.delete(`/meetings/${meetingId}/video-room`, { data: endCallData });
+  },
+
+  /**
+   * Helper method to create a basic video room with default settings
+   */
+  createBasicVideoRoom: async (meetingId: string): Promise<VideoRoomResponse> => {
+    const defaultCreateDto: CreateVideoRoomDto = {
+      meetingId,
+      roomType: 'video',
+      maxParticipants: 2,
+      enableRecording: false,
+      enableChat: true,
+    };
+    return api.post(`/meetings/${meetingId}/video-room`, defaultCreateDto).then(res => res.data);
+  },
+
+  /**
+   * Helper method to join as a client
+   */
+  joinAsClient: async (meetingId: string): Promise<VideoRoomResponse> => {
+    const joinDto: JoinVideoRoomDto = {
+      role: 'client',
+      enableVideo: true,
+      enableAudio: true,
+    };
+    return api.post(`/meetings/${meetingId}/join-video`, joinDto).then(res => res.data);
+  },
+
+  /**
+   * Helper method to join as a therapist
+   */
+  joinAsTherapist: async (meetingId: string): Promise<VideoRoomResponse> => {
+    const joinDto: JoinVideoRoomDto = {
+      role: 'therapist',
+      enableVideo: true,
+      enableAudio: true,
+    };
+    return api.post(`/meetings/${meetingId}/join-video`, joinDto).then(res => res.data);
+  },
+
+  /**
+   * Helper method to end call with session summary
+   */
+  endCallWithSummary: async (
+    meetingId: string,
+    duration: number,
+    nextSteps?: string[]
+  ): Promise<void> => {
+    const endCallDto: EndVideoCallDto = {
+      endReason: 'session_completed',
+      sessionSummary: {
+        duration,
+        connectionQuality: 'good',
+        technicalIssues: [],
+      },
+      nextSteps,
+    };
+    await api.delete(`/meetings/${meetingId}/video-room`, { data: endCallDto });
   },
 });
 

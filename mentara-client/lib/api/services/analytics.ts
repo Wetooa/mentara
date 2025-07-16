@@ -1,5 +1,27 @@
 import { AxiosInstance } from 'axios';
 import {
+  AnalyticsQuery,
+  AnalyticsResponseDto,
+  DashboardAnalytics,
+  UserAnalyticsDto,
+  PlatformAnalyticsQueryDto,
+  TherapistAnalyticsQueryDto,
+  ClientAnalyticsQueryDto,
+  CommunityAnalyticsQueryDto,
+  SessionAnalyticsQueryDto,
+  RevenueAnalyticsQueryDto,
+  ExportAnalyticsQueryDto,
+  CustomAnalyticsQueryDto,
+  AnalyticsQuerySchema,
+  PlatformAnalyticsQueryDtoSchema,
+  TherapistAnalyticsQueryDtoSchema,
+  ClientAnalyticsQueryDtoSchema,
+  CommunityAnalyticsQueryDtoSchema,
+  SessionAnalyticsQueryDtoSchema,
+  RevenueAnalyticsQueryDtoSchema,
+  ExportAnalyticsQueryDtoSchema,
+  CustomAnalyticsQueryDtoSchema,
+  // Extended analytics response types
   AnalyticsTimeRange,
   UserAnalytics,
   TherapistAnalytics,
@@ -8,24 +30,52 @@ import {
   SessionAnalytics,
   RevenueAnalytics,
   PlatformAnalytics,
-  AnalyticsQuery,
   CustomAnalyticsReport,
-} from '@/types/api/analytics';
+} from 'mentara-commons';
 
-export interface AnalyticsService {
+// Re-export commons types for backward compatibility
+export type {
+  AnalyticsQuery,
+  AnalyticsResponseDto,
+  DashboardAnalytics,
+  UserAnalyticsDto,
+  PlatformAnalyticsQueryDto,
+  TherapistAnalyticsQueryDto,
+  ClientAnalyticsQueryDto,
+  CommunityAnalyticsQueryDto,
+  SessionAnalyticsQueryDto,
+  RevenueAnalyticsQueryDto,
+  ExportAnalyticsQueryDto,
+  CustomAnalyticsQueryDto,
+  // Extended analytics response types
+  AnalyticsTimeRange,
+  UserAnalytics,
+  TherapistAnalytics,
+  ClientAnalytics,
+  CommunityAnalytics,
+  SessionAnalytics,
+  RevenueAnalytics,
+  PlatformAnalytics,
+  CustomAnalyticsReport,
+};
+
+// All analytics types are now imported from mentara-commons
+
+// Service interface for type checking (use factory function instead)
+interface AnalyticsService {
   // Platform overview
-  getPlatformAnalytics(timeRange?: AnalyticsTimeRange): Promise<PlatformAnalytics>;
+  getPlatformAnalytics(query?: PlatformAnalyticsQueryDto): Promise<PlatformAnalytics>;
   
   // Specific analytics
   getUserAnalytics(query?: AnalyticsQuery): Promise<UserAnalytics>;
-  getTherapistAnalytics(query?: AnalyticsQuery): Promise<TherapistAnalytics>;
-  getClientAnalytics(query?: AnalyticsQuery): Promise<ClientAnalytics>;
-  getCommunityAnalytics(query?: AnalyticsQuery): Promise<CommunityAnalytics>;
-  getSessionAnalytics(query?: AnalyticsQuery): Promise<SessionAnalytics>;
-  getRevenueAnalytics(query?: AnalyticsQuery): Promise<RevenueAnalytics>;
+  getTherapistAnalytics(query?: TherapistAnalyticsQueryDto): Promise<TherapistAnalytics>;
+  getClientAnalytics(query?: ClientAnalyticsQueryDto): Promise<ClientAnalytics>;
+  getCommunityAnalytics(query?: CommunityAnalyticsQueryDto): Promise<CommunityAnalytics>;
+  getSessionAnalytics(query?: SessionAnalyticsQueryDto): Promise<SessionAnalytics>;
+  getRevenueAnalytics(query?: RevenueAnalyticsQueryDto): Promise<RevenueAnalytics>;
   
   // Custom reports
-  createReport(report: Omit<CustomAnalyticsReport, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<CustomAnalyticsReport>;
+  createReport(report: CustomAnalyticsQueryDto): Promise<CustomAnalyticsReport>;
   getReports(): Promise<CustomAnalyticsReport[]>;
   getReport(reportId: string): Promise<CustomAnalyticsReport>;
   updateReport(reportId: string, report: Partial<CustomAnalyticsReport>): Promise<CustomAnalyticsReport>;
@@ -33,133 +83,53 @@ export interface AnalyticsService {
   runReport(reportId: string): Promise<any>;
   
   // Export functionality
-  exportData(query: AnalyticsQuery, format: 'csv' | 'xlsx' | 'pdf'): Promise<Blob>;
+  exportData(query: ExportAnalyticsQueryDto): Promise<Blob>;
 }
 
-export const createAnalyticsService = (client: AxiosInstance): AnalyticsService => ({
+// Analytics service factory
+export const createAnalyticsService = (client: AxiosInstance) => ({
   // Platform overview
-  getPlatformAnalytics: (timeRange?: AnalyticsTimeRange): Promise<PlatformAnalytics> => {
-    const params = new URLSearchParams();
-    if (timeRange) {
-      params.append('startDate', timeRange.startDate);
-      params.append('endDate', timeRange.endDate);
-      params.append('period', timeRange.period);
-    }
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/platform${queryString}`);
+  getPlatformAnalytics: async (query?: PlatformAnalyticsQueryDto): Promise<PlatformAnalytics> => {
+    const validatedQuery = query ? PlatformAnalyticsQueryDtoSchema.parse(query) : {};
+    return client.post('/analytics/platform', validatedQuery);
   },
 
   // Specific analytics
-  getUserAnalytics: (query?: AnalyticsQuery): Promise<UserAnalytics> => {
-    const params = new URLSearchParams();
-    
-    if (query?.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query?.filters?.userRole) params.append('userRole', query.filters.userRole);
-    if (query?.groupBy) params.append('groupBy', query.groupBy);
-    if (query?.limit) params.append('limit', query.limit.toString());
-    if (query?.offset) params.append('offset', query.offset.toString());
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/users${queryString}`);
+  getUserAnalytics: async (query?: AnalyticsQuery): Promise<UserAnalytics> => {
+    const validatedQuery = query ? AnalyticsQuerySchema.parse(query) : {};
+    return client.post('/analytics/users', validatedQuery);
   },
 
-  getTherapistAnalytics: (query?: AnalyticsQuery): Promise<TherapistAnalytics> => {
-    const params = new URLSearchParams();
-    
-    if (query?.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query?.filters?.therapistId) params.append('therapistId', query.filters.therapistId);
-    if (query?.groupBy) params.append('groupBy', query.groupBy);
-    if (query?.limit) params.append('limit', query.limit.toString());
-    if (query?.offset) params.append('offset', query.offset.toString());
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/therapists${queryString}`);
+  getTherapistAnalytics: async (query?: TherapistAnalyticsQueryDto): Promise<TherapistAnalytics> => {
+    const validatedQuery = query ? TherapistAnalyticsQueryDtoSchema.parse(query) : {};
+    return client.post('/analytics/therapists', validatedQuery);
   },
 
-  getClientAnalytics: (query?: AnalyticsQuery): Promise<ClientAnalytics> => {
-    const params = new URLSearchParams();
-    
-    if (query?.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query?.filters?.clientId) params.append('clientId', query.filters.clientId);
-    if (query?.filters?.therapistId) params.append('therapistId', query.filters.therapistId);
-    if (query?.groupBy) params.append('groupBy', query.groupBy);
-    if (query?.limit) params.append('limit', query.limit.toString());
-    if (query?.offset) params.append('offset', query.offset.toString());
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/clients${queryString}`);
+  getClientAnalytics: async (query?: ClientAnalyticsQueryDto): Promise<ClientAnalytics> => {
+    const validatedQuery = query ? ClientAnalyticsQueryDtoSchema.parse(query) : {};
+    return client.post('/analytics/clients', validatedQuery);
   },
 
-  getCommunityAnalytics: (query?: AnalyticsQuery): Promise<CommunityAnalytics> => {
-    const params = new URLSearchParams();
-    
-    if (query?.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query?.filters?.communityId) params.append('communityId', query.filters.communityId);
-    if (query?.groupBy) params.append('groupBy', query.groupBy);
-    if (query?.limit) params.append('limit', query.limit.toString());
-    if (query?.offset) params.append('offset', query.offset.toString());
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/communities${queryString}`);
+  getCommunityAnalytics: async (query?: CommunityAnalyticsQueryDto): Promise<CommunityAnalytics> => {
+    const validatedQuery = query ? CommunityAnalyticsQueryDtoSchema.parse(query) : {};
+    return client.post('/analytics/communities', validatedQuery);
   },
 
-  getSessionAnalytics: (query?: AnalyticsQuery): Promise<SessionAnalytics> => {
-    const params = new URLSearchParams();
-    
-    if (query?.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query?.filters?.therapistId) params.append('therapistId', query.filters.therapistId);
-    if (query?.filters?.clientId) params.append('clientId', query.filters.clientId);
-    if (query?.filters?.sessionType) params.append('sessionType', query.filters.sessionType);
-    if (query?.filters?.status) params.append('status', query.filters.status);
-    if (query?.groupBy) params.append('groupBy', query.groupBy);
-    if (query?.limit) params.append('limit', query.limit.toString());
-    if (query?.offset) params.append('offset', query.offset.toString());
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/sessions${queryString}`);
+  getSessionAnalytics: async (query?: SessionAnalyticsQueryDto): Promise<SessionAnalytics> => {
+    const validatedQuery = query ? SessionAnalyticsQueryDtoSchema.parse(query) : {};
+    return client.post('/analytics/sessions', validatedQuery);
   },
 
-  getRevenueAnalytics: (query?: AnalyticsQuery): Promise<RevenueAnalytics> => {
-    const params = new URLSearchParams();
-    
-    if (query?.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query?.filters?.therapistId) params.append('therapistId', query.filters.therapistId);
-    if (query?.groupBy) params.append('groupBy', query.groupBy);
-    if (query?.limit) params.append('limit', query.limit.toString());
-    if (query?.offset) params.append('offset', query.offset.toString());
-
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    return client.get(`/analytics/revenue${queryString}`);
+  getRevenueAnalytics: async (query?: RevenueAnalyticsQueryDto): Promise<RevenueAnalytics> => {
+    const validatedQuery = query ? RevenueAnalyticsQueryDtoSchema.parse(query) : {};
+    return client.post('/analytics/revenue', validatedQuery);
   },
 
   // Custom reports
-  createReport: (report: Omit<CustomAnalyticsReport, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<CustomAnalyticsReport> =>
-    client.post('/analytics/reports', report),
+  createReport: async (report: CustomAnalyticsQueryDto): Promise<CustomAnalyticsReport> => {
+    const validatedReport = CustomAnalyticsQueryDtoSchema.parse(report);
+    return client.post('/analytics/reports', validatedReport);
+  },
 
   getReports: (): Promise<CustomAnalyticsReport[]> =>
     client.get('/analytics/reports'),
@@ -177,42 +147,10 @@ export const createAnalyticsService = (client: AxiosInstance): AnalyticsService 
     client.post(`/analytics/reports/${reportId}/run`),
 
   // Export functionality
-  exportData: (query: AnalyticsQuery, format: 'csv' | 'xlsx' | 'pdf'): Promise<Blob> => {
-    const params = new URLSearchParams();
-    params.append('format', format);
-    
-    if (query.timeRange) {
-      params.append('startDate', query.timeRange.startDate);
-      params.append('endDate', query.timeRange.endDate);
-      params.append('period', query.timeRange.period);
-    }
-    if (query.metrics?.length) {
-      query.metrics.forEach(metric => params.append('metrics', metric));
-    }
-    if (query.filters) {
-      Object.entries(query.filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-    }
-    if (query.groupBy) params.append('groupBy', query.groupBy);
-    if (query.limit) params.append('limit', query.limit.toString());
-    if (query.offset) params.append('offset', query.offset.toString());
-
-    return client.get(`/analytics/export?${params.toString()}`, {
-      responseType: 'blob'
-    });
+  exportData: async (query: ExportAnalyticsQueryDto): Promise<Blob> => {
+    const validatedQuery = ExportAnalyticsQueryDtoSchema.parse(query);
+    return client.post('/analytics/export', validatedQuery, { responseType: 'blob' });
   },
 });
 
-export type {
-  AnalyticsTimeRange,
-  UserAnalytics,
-  TherapistAnalytics,
-  ClientAnalytics,
-  CommunityAnalytics,
-  SessionAnalytics,
-  RevenueAnalytics,
-  PlatformAnalytics,
-  AnalyticsQuery,
-  CustomAnalyticsReport,
-};
+export type AnalyticsService = ReturnType<typeof createAnalyticsService>;

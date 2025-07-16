@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, User, LogOut, ChevronDown } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 
 export default function TherapistLayout({
@@ -15,14 +15,13 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { signOut } = useClerk();
+  const { handleSignOut } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
   const handleLogout = async () => {
     try {
-      await signOut();
-      router.push("/sign-in");
+      await handleSignOut();
     } catch (error) {
       console.error("Error during logout:", error);
     }

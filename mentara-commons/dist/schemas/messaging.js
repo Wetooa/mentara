@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageNotificationPreferencesSchema = exports.MessageAnalyticsSchema = exports.ConversationListParamsSchema = exports.MessageSearchResultSchema = exports.BackendConversationSchema = exports.ConversationParticipantSchema = exports.TypingIndicatorDtoSchema = exports.LeaveConversationDtoSchema = exports.JoinConversationDtoSchema = exports.SearchMessagesDtoSchema = exports.BlockUserDtoSchema = exports.AddReactionDtoSchema = exports.UpdateMessageDtoSchema = exports.SendMessageDtoSchema = exports.CreateConversationDtoSchema = exports.MessagesStateSchema = exports.MessageGroupSchema = exports.ConversationSchema = exports.ContactSchema = exports.BackendMessageSchema = exports.MessageSchema = exports.ReadReceiptSchema = exports.ReactionSchema = exports.AttachmentSchema = exports.ConversationTypeSchema = exports.MessageTypeSchema = exports.MessageStatusSchema = exports.UserStatusSchema = void 0;
+exports.MessageReactionSchema = exports.SearchMessagesResponseSchema = exports.BlockedUserSchema = exports.MessagesListParamsSchema = exports.MessageNotificationPreferencesSchema = exports.MessageAnalyticsSchema = exports.ConversationListParamsSchema = exports.MessageSearchResultSchema = exports.BackendConversationSchema = exports.ConversationParticipantSchema = exports.TypingIndicatorDtoSchema = exports.LeaveConversationDtoSchema = exports.JoinConversationDtoSchema = exports.SearchMessagesDtoSchema = exports.BlockUserDtoSchema = exports.AddReactionDtoSchema = exports.UpdateMessageDtoSchema = exports.SendMessageDtoSchema = exports.CreateConversationDtoSchema = exports.MessagesStateSchema = exports.MessageGroupSchema = exports.ConversationSchema = exports.ContactSchema = exports.BackendMessageSchema = exports.MessageSchema = exports.ReadReceiptSchema = exports.ReactionSchema = exports.AttachmentSchema = exports.ConversationTypeSchema = exports.MessageTypeSchema = exports.MessageStatusSchema = exports.UserStatusSchema = void 0;
 const zod_1 = require("zod");
 // User Status Schema
 exports.UserStatusSchema = zod_1.z.enum([
@@ -18,7 +18,6 @@ exports.MessageStatusSchema = zod_1.z.enum([
 exports.MessageTypeSchema = zod_1.z.enum([
     'TEXT',
     'IMAGE',
-    'DOCUMENT',
     'AUDIO',
     'VIDEO',
     'SYSTEM'
@@ -27,7 +26,8 @@ exports.MessageTypeSchema = zod_1.z.enum([
 exports.ConversationTypeSchema = zod_1.z.enum([
     'DIRECT',
     'GROUP',
-    'THERAPY_SESSION'
+    'SESSION',
+    'SUPPORT'
 ]);
 // Attachment Schema
 exports.AttachmentSchema = zod_1.z.object({
@@ -232,6 +232,52 @@ exports.MessageNotificationPreferencesSchema = zod_1.z.object({
         enabled: zod_1.z.boolean().default(false),
         startTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
         endTime: zod_1.z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    }).optional()
+});
+// Messages List Parameters Schema
+exports.MessagesListParamsSchema = zod_1.z.object({
+    limit: zod_1.z.number().min(1).max(100).default(50),
+    offset: zod_1.z.number().min(0).default(0),
+    before: zod_1.z.string().optional(), // Message ID to fetch messages before
+    after: zod_1.z.string().optional(), // Message ID to fetch messages after
+    sortOrder: zod_1.z.enum(['asc', 'desc']).default('desc')
+});
+// Blocked User Schema
+exports.BlockedUserSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    blockedUserId: zod_1.z.string().uuid(),
+    blockedBy: zod_1.z.string().uuid(),
+    reason: zod_1.z.string().max(500).optional(),
+    createdAt: zod_1.z.string().datetime(),
+    blockedUser: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        firstName: zod_1.z.string(),
+        lastName: zod_1.z.string(),
+        profileImage: zod_1.z.string().url().optional()
+    })
+});
+// Search Messages Response Schema
+exports.SearchMessagesResponseSchema = zod_1.z.object({
+    messages: zod_1.z.array(exports.BackendMessageSchema),
+    conversations: zod_1.z.array(exports.BackendConversationSchema),
+    totalResults: zod_1.z.number().min(0),
+    page: zod_1.z.number().min(1),
+    limit: zod_1.z.number().min(1),
+    totalPages: zod_1.z.number().min(0),
+    hasMore: zod_1.z.boolean()
+});
+// Message Reaction Schema
+exports.MessageReactionSchema = zod_1.z.object({
+    id: zod_1.z.string().uuid(),
+    messageId: zod_1.z.string().uuid(),
+    userId: zod_1.z.string().uuid(),
+    emoji: zod_1.z.string().min(1).max(10),
+    createdAt: zod_1.z.string().datetime(),
+    user: zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        firstName: zod_1.z.string(),
+        lastName: zod_1.z.string(),
+        profileImage: zod_1.z.string().url().optional()
     }).optional()
 });
 //# sourceMappingURL=messaging.js.map

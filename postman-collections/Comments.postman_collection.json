@@ -1,0 +1,1044 @@
+{
+  "info": {
+    "name": "Mentara - Comments",
+    "description": "Comments module endpoints for community interaction, discussion management, comment moderation, and threaded conversations on posts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-comments"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error('❌ Validation Error: ' + issue.message + ' (' + issue.path.join('.') + ');',
+          "            });"",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Comment Management",
+      "item": [
+        {
+          "name": "Create Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comment created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has comment ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('commentId', responseJson.id);",
+                  "});",
+                  "",
+                  "pm.test('Comment has required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('content');",
+                  "    pm.expect(responseJson).to.have.property('authorId');",
+                  "    pm.expect(responseJson).to.have.property('postId');",
+                  "    pm.expect(responseJson).to.have.property('createdAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Thank you for sharing this! The 4-7-8 breathing technique has been a game changer for me too. I find it especially helpful right before bed when my mind is racing.\\n\\nHave you tried the 5-4-3-2-1 grounding technique? It's another one that helps me when I'm feeling overwhelmed.\",\n  \"postId\": \"{{postId}}\",\n  \"isAnonymous\": false,\n  \"mentionedUsers\": [],\n  \"attachments\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Create a new comment on a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Reply Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reply created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Reply has parent comment ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('parentCommentId');",
+                  "    pm.environment.set('replyId', responseJson.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"@{{username}} Yes! The 5-4-3-2-1 technique is amazing. I use it when I'm having a panic attack and it really helps bring me back to the present moment. Thanks for mentioning it!\",\n  \"postId\": \"{{postId}}\",\n  \"parentCommentId\": \"{{commentId}}\",\n  \"isAnonymous\": false,\n  \"mentionedUsers\": [\"{{userId}}\"],\n  \"attachments\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Create a reply to an existing comment"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comments for Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comments retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has comments array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('comments');",
+                  "    pm.expect(responseJson.comments).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Comments are properly threaded', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.comments.length > 0) {",
+                  "        const comment = responseJson.comments[0];",
+                  "        pm.expect(comment).to.have.property('replies');",
+                  "        pm.expect(comment.replies).to.be.an('array');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/comments?page=1&limit=20&sort=oldest&includeReplies=true&maxDepth=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "comments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "oldest"
+                },
+                {
+                  "key": "includeReplies",
+                  "value": "true"
+                },
+                {
+                  "key": "maxDepth",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Get comments for a post with threading"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}?includeReplies=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"],
+              "query": [
+                {
+                  "key": "includeReplies",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get a specific comment with its replies"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comment updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Edit timestamp updated', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('editedAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Thank you for sharing this! The 4-7-8 breathing technique has been a game changer for me too. I find it especially helpful right before bed when my mind is racing.\\n\\nHave you tried the 5-4-3-2-1 grounding technique? It's another one that helps me when I'm feeling overwhelmed.\\n\\n**Edit**: I also wanted to mention that the Headspace app has some great guided breathing exercises if anyone is interested!\",\n  \"editReason\": \"Added app recommendation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            },
+            "description": "Update a comment (only by author)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comment deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Deletion confirmed', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Duplicate comment\",\n  \"deleteReplies\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}"]
+            },
+            "description": "Delete a comment (author/moderator/admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Interactions",
+      "item": [
+        {
+          "name": "Like Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comment liked successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Like details returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('commentId');",
+                  "    pm.expect(responseJson).to.have.property('userId');",
+                  "    pm.expect(responseJson).to.have.property('likedAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reactionType\": \"like\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "reactions"]
+            },
+            "description": "Like a comment"
+          },
+          "response": []
+        },
+        {
+          "name": "Unlike Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "reactions"]
+            },
+            "description": "Remove like from a comment"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment Reactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/reactions?type=like&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "reactions"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "like"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get users who reacted to a comment"
+          },
+          "response": []
+        },
+        {
+          "name": "Pin Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Helpful resource for the community\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/pin",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "pin"]
+            },
+            "description": "Pin a comment to the top of the discussion (moderator/admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Unpin Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/pin",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "pin"]
+            },
+            "description": "Unpin a comment (moderator/admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Moderation",
+      "item": [
+        {
+          "name": "Report Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Comment reported successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Report details returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('reportId');",
+                  "    pm.expect(responseJson).to.have.property('status');",
+                  "    pm.environment.set('reportId', responseJson.reportId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"inappropriate_content\",\n  \"description\": \"This comment contains harmful advice about medication that could be dangerous.\",\n  \"category\": \"safety_concern\",\n  \"evidence\": {\n    \"specificContent\": \"The part about mixing medications without consulting a doctor\",\n    \"context\": \"This advice could be harmful to someone following it\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "report"]
+            },
+            "description": "Report a comment for violations"
+          },
+          "response": []
+        },
+        {
+          "name": "Hide Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Not helpful to me\",\n  \"hideReplies\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/hide",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "hide"]
+            },
+            "description": "Hide a comment from personal view"
+          },
+          "response": []
+        },
+        {
+          "name": "Moderate Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"remove\",\n  \"reason\": \"Violation of community guidelines - inappropriate medical advice\",\n  \"notifyAuthor\": true,\n  \"publicReason\": \"This comment was removed for containing potentially harmful medical advice\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/moderate",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "moderate"]
+            },
+            "description": "Moderate a comment (moderator/admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"reason\": \"Comment reviewed and found to be appropriate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/moderate",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "moderate"]
+            },
+            "description": "Approve a flagged comment (moderator/admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment Reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/reports?status=pending&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "reports"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get reports for a comment (moderator/admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Search & Discovery",
+      "item": [
+        {
+          "name": "Search Comments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Search results structure valid', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('results');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/search?q=breathing exercises&postId={{postId}}&authorId={{userId}}&sort=relevance",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "breathing exercises"
+                },
+                {
+                  "key": "postId",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "authorId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "sort",
+                  "value": "relevance"
+                }
+              ]
+            },
+            "description": "Search comments by content and filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Top Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/top?postId={{postId}}&timeframe=week&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "top"],
+              "query": [
+                {
+                  "key": "postId",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "timeframe",
+                  "value": "week"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get top-rated comments for a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/recent?communityId={{communityId}}&limit=20&includeReplies=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "recent"],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "includeReplies",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get most recent comments in a community"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Comment Management",
+      "item": [
+        {
+          "name": "Get User Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comments?page=1&limit=20&sort=recent&includeAnonymous=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "comments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "recent"
+                },
+                {
+                  "key": "includeAnonymous",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get all comments by a specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User's Liked Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/liked-comments?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "liked-comments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get comments liked by user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User's Comment History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comment-history?postId={{postId}}&includeDeleted=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "comment-history"],
+              "query": [
+                {
+                  "key": "postId",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "includeDeleted",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get user's comment history on a specific post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comment Notifications",
+      "item": [
+        {
+          "name": "Get Comment Mentions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/mentions?userId={{userId}}&status=unread&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "mentions"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "unread"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get comments where user is mentioned"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Mention as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"readAt\": \"{{$isoTimestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/mentions/{{commentId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "mentions", "{{commentId}}", "read"]
+            },
+            "description": "Mark a comment mention as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reply Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}/replies/notifications?status=unread",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{commentId}}", "replies", "notifications"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "unread"
+                }
+              ]
+            },
+            "description": "Get notification about replies to user's comment"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Create Comment - Missing Content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for missing content', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions content', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('content');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": \"{{postId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Test validation for missing comment content"
+          },
+          "response": []
+        },
+        {
+          "name": "Comment on Locked Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for locked post', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions post is locked', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('locked');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This comment should be blocked\",\n  \"postId\": \"{{lockedPostId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments"]
+            },
+            "description": "Test commenting on a locked post"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment - Unauthorized",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for unauthorized update', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions permissions', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('permission');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Trying to update someone else's comment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{otherUserCommentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "{{otherUserCommentId}}"]
+            },
+            "description": "Test unauthorized comment update"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Deleted Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 404 for deleted comment', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions not found', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('not found');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/deleted-comment-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "deleted-comment-id"]
+            },
+            "description": "Test access to deleted comment"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

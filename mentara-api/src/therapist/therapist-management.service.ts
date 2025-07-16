@@ -221,10 +221,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getClientById(
-    therapistId: string,
-    clientId: string,
-  ): Promise<any> {
+  async getClientById(therapistId: string, clientId: string): Promise<any> {
     try {
       // Find the specific client assigned to this therapist
       const assignedClient = await this.prisma.clientTherapist.findFirst({

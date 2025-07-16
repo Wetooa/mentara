@@ -1,109 +1,53 @@
 import { AxiosInstance } from 'axios';
-
-// Types
-export interface Review {
-  id: string;
-  rating: number;
-  title?: string;
-  content?: string;
-  therapistId: string;
-  clientId: string;
-  meetingId?: string;
-  isAnonymous: boolean;
-  status: 'pending' | 'approved' | 'rejected';
-  helpfulCount: number;
-  createdAt: string;
-  updatedAt: string;
-  moderationNote?: string;
-  client?: {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-  };
-  therapist?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  };
-}
-
-export interface CreateReviewRequest {
-  rating: number;
-  title?: string;
-  content?: string;
-  therapistId: string;
-  meetingId?: string;
-  isAnonymous?: boolean;
-}
-
-export interface UpdateReviewRequest {
-  rating?: number;
-  title?: string;
-  content?: string;
-  isAnonymous?: boolean;
-}
-
-export interface ReviewListParams {
-  therapistId?: string;
-  clientId?: string;
-  status?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  rating?: number;
-}
-
-export interface TherapistReviewParams {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  rating?: number;
-}
-
-export interface ReviewStats {
-  averageRating: number;
-  totalReviews: number;
-  ratingDistribution: {
-    1: number;
-    2: number;
-    3: number;
-    4: number;
-    5: number;
-  };
-  recentReviews: Review[];
-}
-
-export interface ModerateReviewRequest {
-  status: 'approved' | 'rejected';
-  moderationNote?: string;
-}
-
-export interface ReviewListResponse {
-  reviews: Review[];
-  total: number;
-  hasMore: boolean;
-  currentPage: number;
-  totalPages: number;
-}
+import {
+  Review,
+  CreateReviewRequest,
+  UpdateReviewRequest,
+  ReviewListParams,
+  TherapistReviewParams,
+  ReviewStats,
+  ReviewListResponse,
+  ModerateReviewRequest,
+  ReviewHelpfulAction,
+  ReviewReport,
+  ReviewResponse,
+  ReviewAnalytics,
+  CreateReviewDto,
+  UpdateReviewDto,
+  ModerateReviewDto,
+  GetReviewsDto,
+  ReviewStatsDto,
+  ReviewIdParam,
+  ReviewStatus,
+  Rating,
+} from 'mentara-commons';
 
 // Reviews service factory
 export const createReviewsService = (client: AxiosInstance) => ({
-  // Create new review (BACKEND ENDPOINT PARAMETER MISMATCH - needs fixing)
-  // Backend expects meetingId and therapistId as path parameters
-  // create: (data: CreateReviewRequest): Promise<Review> =>
-  //   client.post('/reviews', data),
+  // ===== BACKEND ENDPOINT ISSUES =====
+  // 
+  // Create review - FIXED: Backend route now matches expected parameters
+  create: (meetingId: string, therapistId: string, data: CreateReviewDto): Promise<Review> =>
+    client.post(`/reviews/${meetingId}/${therapistId}`, data),
 
   // Update review
-  update: (id: string, data: UpdateReviewRequest): Promise<Review> =>
+  update: (id: string, data: UpdateReviewDto): Promise<Review> =>
     client.put(`/reviews/${id}`, data),
 
   // Delete review
   delete: (id: string): Promise<void> =>
     client.delete(`/reviews/${id}`),
 
-  // Get all reviews with filters (BACKEND ENDPOINT COMMENTED OUT - needs implementation)
+  // ===== MISSING BACKEND ENDPOINTS =====
+  // The following endpoints are commented out in backend ReviewsController
+  // Backend service methods exist but controller endpoints are not implemented
+  //
+  // MISSING: GET /reviews - Get all reviews with filters
+  // Purpose: Retrieve reviews with filtering, pagination, and sorting
+  // Expected query params: therapistId, clientId, status, page, limit, sortBy, sortOrder, rating
+  // Backend service: getReviews() - EXISTS but commented out
+  // Priority: HIGH - needed for admin/moderator review management
+  //
   // getAll: (params: ReviewListParams = {}): Promise<ReviewListResponse> => {
   //   const searchParams = new URLSearchParams();
   //   
@@ -134,16 +78,16 @@ export const createReviewsService = (client: AxiosInstance) => ({
   //   return client.get(`/reviews/therapist/${therapistId}${queryString}`);
   // },
 
-  // Get therapist review statistics (BACKEND ENDPOINT COMMENTED OUT - needs implementation)
-  // getTherapistStats: (therapistId: string): Promise<ReviewStats> =>
-  //   client.get(`/reviews/therapist/${therapistId}/stats`),
+  // Get therapist review statistics - FIXED: Backend endpoint now available
+  getTherapistStats: (therapistId: string): Promise<ReviewStats> =>
+    client.get(`/reviews/therapist/${therapistId}/stats`),
 
   // Mark review as helpful (BACKEND ENDPOINT COMMENTED OUT - needs implementation)
   // markHelpful: (reviewId: string): Promise<void> =>
   //   client.post(`/reviews/${reviewId}/helpful`),
 
   // Moderate review (BACKEND ENDPOINT COMMENTED OUT - needs implementation)
-  // moderate: (reviewId: string, data: ModerateReviewRequest): Promise<Review> =>
+  // moderate: (reviewId: string, data: ModerateReviewDto): Promise<Review> =>
   //   client.post(`/reviews/${reviewId}/moderate`, data),
 
   // Get pending reviews for moderation (BACKEND ENDPOINT COMMENTED OUT - needs implementation)

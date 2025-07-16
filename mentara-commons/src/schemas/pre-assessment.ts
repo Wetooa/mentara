@@ -144,6 +144,48 @@ export const ScaleIdParamSchema = z.object({
   id: z.string().min(1, 'Scale ID is required')
 });
 
+// Pre-Assessment List Parameters Schema
+export const PreAssessmentListParamsSchema = z.object({
+  userId: z.string().uuid().optional(),
+  isProcessed: z.boolean().optional(),
+  overallRisk: z.enum(['low', 'moderate', 'high', 'critical']).optional(),
+  processedAfter: z.string().datetime().optional(),
+  processedBefore: z.string().datetime().optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sortBy: z.enum(['completedAt', 'processedAt', 'overallScore', 'riskLevel']).default('completedAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+// Pre-Assessment List Response Schema
+export const PreAssessmentListResponseSchema = z.object({
+  assessments: z.array(PreAssessmentSchema),
+  total: z.number().min(0),
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  hasMore: z.boolean()
+});
+
+// AI Service Health Response Schema
+export const AIServiceHealthResponseSchema = z.object({
+  status: z.enum(['healthy', 'degraded', 'unhealthy']),
+  uptime: z.number().min(0),
+  responseTime: z.number().min(0),
+  processedToday: z.number().min(0),
+  queueLength: z.number().min(0),
+  lastProcessedAt: z.string().datetime().optional(),
+  version: z.string().optional(),
+  message: z.string().optional()
+});
+
+// Reprocess Request Schema
+export const ReprocessRequestSchema = z.object({
+  forceReprocess: z.boolean().default(false),
+  updateScores: z.boolean().default(true),
+  recalculateRecommendations: z.boolean().default(true),
+  reason: z.string().max(500, 'Reason too long').optional()
+});
+
 // Export type inference helpers
 export type AssessmentScale = z.infer<typeof AssessmentScaleSchema>;
 export type AssessmentQuestion = z.infer<typeof AssessmentQuestionSchema>;
@@ -159,3 +201,7 @@ export type ExportAssessmentDto = z.infer<typeof ExportAssessmentDtoSchema>;
 export type CrisisAssessmentDto = z.infer<typeof CrisisAssessmentDtoSchema>;
 export type AssessmentIdParam = z.infer<typeof AssessmentIdParamSchema>;
 export type ScaleIdParam = z.infer<typeof ScaleIdParamSchema>;
+export type PreAssessmentListParams = z.infer<typeof PreAssessmentListParamsSchema>;
+export type PreAssessmentListResponse = z.infer<typeof PreAssessmentListResponseSchema>;
+export type AIServiceHealthResponse = z.infer<typeof AIServiceHealthResponseSchema>;
+export type ReprocessRequest = z.infer<typeof ReprocessRequestSchema>;

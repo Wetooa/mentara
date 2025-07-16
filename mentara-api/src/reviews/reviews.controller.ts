@@ -1,47 +1,50 @@
 import {
   Controller,
+  Get,
   Post,
   Put,
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-// Local DTO interfaces to replace mentara-commons imports
-interface ReviewCreateDto {
-  rating: number;
-  title?: string;
-  content?: string;
-  comment?: string;
-  therapistId: string;
-  isAnonymous?: boolean;
-}
-
-interface ReviewUpdateDto {
-  rating?: number;
-  title?: string;
-  content?: string;
-  comment?: string;
-  isAnonymous?: boolean;
-}
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import {
+  CreateReviewDto,
+  CreateReviewDtoSchema,
+  UpdateReviewDto,
+  UpdateReviewDtoSchema,
+  ModerateReviewDto,
+  ModerateReviewDtoSchema,
+  GetReviewsDto,
+  GetReviewsDtoSchema,
+  ReviewIdParam,
+  ReviewIdParamSchema,
+  Review,
+  ReviewListResponse,
+  ReviewStats,
+} from 'mentara-commons';
 
 @Controller('reviews')
 @UseGuards(JwtAuthGuard)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
-  @Post()
+  @Post(':meetingId/:therapistId')
   @HttpCode(HttpStatus.CREATED)
   async createReview(
     @Param('meetingId') meetingId: string,
     @CurrentUserId() clientId: string,
     @Param('therapistId') therapistId: string,
-    @Body() createReviewDto: ReviewCreateDto,
+    @Body(new ZodValidationPipe(CreateReviewDtoSchema)) createReviewDto: CreateReviewDto,
   ) {
     return this.reviewsService.createReview(
       meetingId,
@@ -55,7 +58,7 @@ export class ReviewsController {
   async updateReview(
     @Param('id') reviewId: string,
     @CurrentUserId() clientId: string,
-    @Body() updateReviewDto: ReviewUpdateDto,
+    @Body(new ZodValidationPipe(UpdateReviewDtoSchema)) updateReviewDto: UpdateReviewDto,
   ) {
     return this.reviewsService.updateReview(
       reviewId,
@@ -73,65 +76,69 @@ export class ReviewsController {
     return this.reviewsService.deleteReview(reviewId, clientId);
   }
 
-  // @Get()
-  // async getReviews(@Query() query: ReviewGetDto) {
-  //   return this.reviewsService.getReviews(query);
-  // }
+  @Get()
+  async getReviews(
+    @Query(new ZodValidationPipe(GetReviewsDtoSchema)) query: GetReviewsDto,
+  ): Promise<ReviewListResponse> {
+    return this.reviewsService.getReviews(query);
+  }
 
-  // @Get('therapist/:therapistId')
-  // async getTherapistReviews(
-  //   @Param('therapistId') therapistId: string,
-  //   @Query() query: Omit<ReviewGetDto, 'therapistId'>,
-  // ) {
-  //   return this.reviewsService.getTherapistReviews(therapistId, query);
-  // }
+  @Get('therapist/:therapistId')
+  async getTherapistReviews(
+    @Param('therapistId') therapistId: string,
+    @Query(new ZodValidationPipe(GetReviewsDtoSchema)) query: Omit<GetReviewsDto, 'therapistId'>,
+  ): Promise<ReviewListResponse> {
+    return this.reviewsService.getTherapistReviews(therapistId, query);
+  }
 
-  // @Get('therapist/:therapistId/stats')
-  // async getTherapistReviewStats(@Param('therapistId') therapistId: string) {
-  //   return this.reviewsService.getReviewStats(therapistId);
-  // }
+  @Get('therapist/:therapistId/stats')
+  async getTherapistReviewStats(@Param('therapistId') therapistId: string) {
+    return this.reviewsService.getReviewStats(therapistId);
+  }
 
-  // @Post(':id/helpful')
-  // async markReviewHelpful(
-  //   @Param('id') reviewId: string,
-  //   @CurrentUserId() userId: string,
-  // ) {
-  //   return this.reviewsService.markReviewHelpful(reviewId, userId);
-  // }
+  @Post(':id/helpful')
+  @HttpCode(HttpStatus.OK)
+  async markReviewHelpful(
+    @Param('id', new ZodValidationPipe(ReviewIdParamSchema)) reviewId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.reviewsService.markReviewHelpful(reviewId, userId);
+  }
 
-  // // Admin/Moderator endpoints
-  // @Post(':id/moderate')
-  // async moderateReview(
-  //   @Param('id') reviewId: string,
-  //   @CurrentUserId() moderatorId: string,
-  //   @CurrentUserRole() userRole: string,
-  //   @Body() moderateReviewDto: ReviewStatusDto,
-  // ) {
-  //   // Only allow moderators and admins to moderate reviews
-  //   if (!['moderator', 'admin'].includes(userRole)) {
-  //     throw new ForbiddenException('Insufficient permissions');
-  //   }
+  // Admin/Moderator endpoints
+  @Post(':id/moderate')
+  @HttpCode(HttpStatus.OK)
+  async moderateReview(
+    @Param('id', new ZodValidationPipe(ReviewIdParamSchema)) reviewId: string,
+    @CurrentUserId() moderatorId: string,
+    @CurrentUserRole() userRole: string,
+    @Body(new ZodValidationPipe(ModerateReviewDtoSchema)) moderateReviewDto: ModerateReviewDto,
+  ) {
+    // Only allow moderators and admins to moderate reviews
+    if (!['moderator', 'admin'].includes(userRole)) {
+      throw new ForbiddenException('Insufficient permissions');
+    }
 
-  //   return this.reviewsService.moderateReview(
-  //     reviewId,
-  //     moderatorId,
-  //     moderateReviewDto,
-  //   );
-  // }
+    return this.reviewsService.moderateReview(
+      reviewId,
+      moderatorId,
+      moderateReviewDto,
+    );
+  }
 
-  // @Get('pending')
-  // async getPendingReviews(
-  //   @CurrentUserRole() userRole: string,
-  //   @Query() query: ReviewGetDto,
-  // ) {
-  //   // Only allow moderators and admins to view pending reviews
-  //   if (!['moderator', 'admin'].includes(userRole)) {
-  //     throw new ForbiddenException('Insufficient permissions');
-  //   }
+  @Get('pending')
+  async getPendingReviews(
+    @CurrentUserRole() userRole: string,
+    @Query(new ZodValidationPipe(GetReviewsDtoSchema)) query: GetReviewsDto,
+  ): Promise<ReviewListResponse> {
+    // Only allow moderators and admins to view pending reviews
+    if (!['moderator', 'admin'].includes(userRole)) {
+      throw new ForbiddenException('Insufficient permissions');
+    }
 
-  //   return this.reviewsService.getReviews({
-  //     ...query,
-  //     status: ReviewStatusEnum.Enum.PENDING,
-  //   });
-  // }
+    return this.reviewsService.getReviews({
+      ...query,
+      status: 'PENDING',
+    });
+  }
 }

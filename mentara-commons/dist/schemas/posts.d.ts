@@ -150,9 +150,9 @@ export declare const PostQuerySchema: z.ZodObject<{
     page?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    search?: string | undefined;
     tags?: string[] | undefined;
     communityId?: string | undefined;
-    search?: string | undefined;
     authorId?: string | undefined;
     includeDeleted?: boolean | undefined;
     isPinned?: boolean | undefined;
@@ -162,9 +162,9 @@ export declare const PostQuerySchema: z.ZodObject<{
     page?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
+    search?: string | undefined;
     tags?: string[] | undefined;
     communityId?: string | undefined;
-    search?: string | undefined;
     authorId?: string | undefined;
     includeDeleted?: boolean | undefined;
     isPinned?: boolean | undefined;
@@ -312,8 +312,73 @@ export declare const PostRoomParamsDtoSchema: z.ZodObject<{
 }, {
     roomId: string;
 }>;
+export declare const VoteContentDtoSchema: z.ZodObject<{
+    contentId: z.ZodString;
+    contentType: z.ZodEnum<["POST", "COMMENT"]>;
+    voteType: z.ZodEnum<["UPVOTE", "DOWNVOTE"]>;
+}, "strip", z.ZodTypeAny, {
+    contentId: string;
+    contentType: "POST" | "COMMENT";
+    voteType: "UPVOTE" | "DOWNVOTE";
+}, {
+    contentId: string;
+    contentType: "POST" | "COMMENT";
+    voteType: "UPVOTE" | "DOWNVOTE";
+}>;
+export declare const GiveAwardDtoSchema: z.ZodObject<{
+    contentId: z.ZodString;
+    contentType: z.ZodEnum<["POST", "COMMENT"]>;
+    awardType: z.ZodEnum<["SILVER", "GOLD", "PLATINUM", "HELPFUL", "WHOLESOME", "ROCKET_LIKE"]>;
+    message: z.ZodOptional<z.ZodString>;
+    isAnonymous: z.ZodDefault<z.ZodBoolean>;
+}, "strip", z.ZodTypeAny, {
+    isAnonymous: boolean;
+    contentId: string;
+    contentType: "POST" | "COMMENT";
+    awardType: "SILVER" | "GOLD" | "PLATINUM" | "HELPFUL" | "WHOLESOME" | "ROCKET_LIKE";
+    message?: string | undefined;
+}, {
+    contentId: string;
+    contentType: "POST" | "COMMENT";
+    awardType: "SILVER" | "GOLD" | "PLATINUM" | "HELPFUL" | "WHOLESOME" | "ROCKET_LIKE";
+    message?: string | undefined;
+    isAnonymous?: boolean | undefined;
+}>;
+export declare const CreateNestedCommentDtoSchema: z.ZodObject<{
+    postId: z.ZodString;
+    parentId: z.ZodOptional<z.ZodString>;
+    content: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    content: string;
+    postId: string;
+    parentId?: string | undefined;
+}, {
+    content: string;
+    postId: string;
+    parentId?: string | undefined;
+}>;
+export declare const ReportContentDtoSchema: z.ZodObject<{
+    contentId: z.ZodString;
+    contentType: z.ZodEnum<["POST", "COMMENT"]>;
+    reason: z.ZodEnum<["SPAM", "HARASSMENT", "HATE_SPEECH", "VIOLENCE", "SEXUAL_CONTENT", "MISINFORMATION", "COPYRIGHT", "SELF_HARM", "OTHER"]>;
+    description: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    reason: "SPAM" | "HARASSMENT" | "HATE_SPEECH" | "VIOLENCE" | "SEXUAL_CONTENT" | "MISINFORMATION" | "COPYRIGHT" | "SELF_HARM" | "OTHER";
+    contentId: string;
+    contentType: "POST" | "COMMENT";
+    description?: string | undefined;
+}, {
+    reason: "SPAM" | "HARASSMENT" | "HATE_SPEECH" | "VIOLENCE" | "SEXUAL_CONTENT" | "MISINFORMATION" | "COPYRIGHT" | "SELF_HARM" | "OTHER";
+    contentId: string;
+    contentType: "POST" | "COMMENT";
+    description?: string | undefined;
+}>;
 export type PostParamsDto = z.infer<typeof PostParamsDtoSchema>;
 export type PostCreateInputDto = z.infer<typeof PostCreateInputDtoSchema>;
 export type PostUpdateInputDto = z.infer<typeof PostUpdateInputDtoSchema>;
 export type PostRoomParamsDto = z.infer<typeof PostRoomParamsDtoSchema>;
+export type VoteContentDto = z.infer<typeof VoteContentDtoSchema>;
+export type GiveAwardDto = z.infer<typeof GiveAwardDtoSchema>;
+export type CreateNestedCommentDto = z.infer<typeof CreateNestedCommentDtoSchema>;
+export type ReportContentDto = z.infer<typeof ReportContentDtoSchema>;
 //# sourceMappingURL=posts.d.ts.map
