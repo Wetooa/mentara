@@ -10,13 +10,13 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { WorksheetsService } from '../../worksheets/worksheets.service';
 import {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'schema/worksheet';
+} from 'mentara-commons';
 
 @Controller('therapist/worksheets')
 @UseGuards(JwtAuthGuard)

@@ -6,9 +6,9 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../decorators/current-user-role.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
 
 @Controller('analytics')
 @UseGuards(JwtAuthGuard)

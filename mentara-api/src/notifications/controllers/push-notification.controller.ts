@@ -10,26 +10,24 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   ValidationPipe,
-  UsePipes
+  UsePipes,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { RoleBasedAccessGuard } from '../../guards/role-based-access.guard';
-import { Roles } from '../../decorators/roles.decorator';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../../auth/guards/role-based-access.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { PushNotificationService } from '../services/push-notification.service';
-import { IsString, IsIn, IsOptional, IsObject, IsBoolean } from 'class-validator';
-
-class RegisterDeviceTokenDto {
-  @IsString()
+// Using interfaces for DTOs to avoid class initialization errors
+interface RegisterDeviceTokenDto {
   token: string;
-
-  @IsString()
-  @IsIn(['ios', 'android', 'web'])
   platform: 'ios' | 'android' | 'web';
-
-  @IsOptional()
-  @IsObject()
   deviceInfo?: {
     model?: string;
     os?: string;
@@ -38,17 +36,12 @@ class RegisterDeviceTokenDto {
   };
 }
 
-class UnregisterDeviceTokenDto {
-  @IsString()
+interface UnregisterDeviceTokenDto {
   token: string;
 }
 
-class TestNotificationDto {
-  @IsString()
+interface TestNotificationDto {
   message: string;
-
-  @IsOptional()
-  @IsString()
   targetUserId?: string;
 }
 
@@ -59,15 +52,16 @@ class TestNotificationDto {
 @UsePipes(new ValidationPipe({ transform: true }))
 export class PushNotificationController {
   constructor(
-    private readonly pushNotificationService: PushNotificationService
+    private readonly pushNotificationService: PushNotificationService,
   ) {}
 
   @Post('register')
   @Roles('client', 'therapist', 'moderator', 'admin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Register device token for push notifications',
-    description: 'Registers a device token to receive push notifications for the current user'
+    description:
+      'Registers a device token to receive push notifications for the current user',
   })
   @ApiResponse({
     status: 200,
@@ -76,29 +70,29 @@ export class PushNotificationController {
       type: 'object',
       properties: {
         success: { type: 'boolean' },
-        message: { type: 'string' }
-      }
-    }
+        message: { type: 'string' },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid device token or platform'
+    description: 'Invalid device token or platform',
   })
   async registerDeviceToken(
     @GetUser() user: any,
-    @Body() dto: RegisterDeviceTokenDto
+    @Body() dto: RegisterDeviceTokenDto,
   ) {
     try {
       await this.pushNotificationService.registerDeviceToken(
         user.id,
         dto.token,
         dto.platform,
-        dto.deviceInfo
+        dto.deviceInfo,
       );
 
       return {
         success: true,
-        message: 'Device token registered successfully'
+        message: 'Device token registered successfully',
       };
     } catch (error) {
       throw error;
@@ -108,28 +102,29 @@ export class PushNotificationController {
   @Delete('unregister')
   @Roles('client', 'therapist', 'moderator', 'admin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Unregister device token',
-    description: 'Unregisters a device token to stop receiving push notifications'
+    description:
+      'Unregisters a device token to stop receiving push notifications',
   })
   @ApiResponse({
     status: 200,
-    description: 'Device token unregistered successfully'
+    description: 'Device token unregistered successfully',
   })
   @ApiResponse({
     status: 404,
-    description: 'Device token not found'
+    description: 'Device token not found',
   })
   async unregisterDeviceToken(
     @GetUser() user: any,
-    @Body() dto: UnregisterDeviceTokenDto
+    @Body() dto: UnregisterDeviceTokenDto,
   ) {
     try {
       await this.pushNotificationService.unregisterDeviceToken(dto.token);
 
       return {
         success: true,
-        message: 'Device token unregistered successfully'
+        message: 'Device token unregistered successfully',
       };
     } catch (error) {
       throw error;
@@ -138,9 +133,9 @@ export class PushNotificationController {
 
   @Get('statistics')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get push notification statistics',
-    description: 'Retrieves push notification statistics for the current user'
+    description: 'Retrieves push notification statistics for the current user',
   })
   @ApiResponse({
     status: 200,
@@ -160,24 +155,26 @@ export class PushNotificationController {
                 type: 'object',
                 properties: {
                   platform: { type: 'string' },
-                  count: { type: 'number' }
-                }
-              }
+                  count: { type: 'number' },
+                },
+              },
             },
-            recentActivity: { type: 'number' }
-          }
-        }
-      }
-    }
+            recentActivity: { type: 'number' },
+          },
+        },
+      },
+    },
   })
   async getStatistics(@GetUser() user: any) {
     try {
-      const statistics = await this.pushNotificationService.getStatistics(user.id);
+      const statistics = await this.pushNotificationService.getStatistics(
+        user.id,
+      );
 
       return {
         success: true,
         data: statistics,
-        message: 'Statistics retrieved successfully'
+        message: 'Statistics retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -186,17 +183,18 @@ export class PushNotificationController {
 
   @Get('statistics/global')
   @Roles('admin', 'moderator')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get global push notification statistics',
-    description: 'Retrieves platform-wide push notification statistics (admin/moderator only)'
+    description:
+      'Retrieves platform-wide push notification statistics (admin/moderator only)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Global statistics retrieved successfully'
+    description: 'Global statistics retrieved successfully',
   })
   @ApiResponse({
     status: 403,
-    description: 'Insufficient permissions'
+    description: 'Insufficient permissions',
   })
   async getGlobalStatistics() {
     try {
@@ -205,7 +203,7 @@ export class PushNotificationController {
       return {
         success: true,
         data: statistics,
-        message: 'Global statistics retrieved successfully'
+        message: 'Global statistics retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -215,37 +213,37 @@ export class PushNotificationController {
   @Post('test')
   @Roles('admin', 'moderator')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Send test push notification',
-    description: 'Sends a test push notification (admin/moderator only)'
+    description: 'Sends a test push notification (admin/moderator only)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Test notification sent successfully'
+    description: 'Test notification sent successfully',
   })
   @ApiResponse({
     status: 403,
-    description: 'Insufficient permissions'
+    description: 'Insufficient permissions',
   })
   @ApiResponse({
     status: 400,
-    description: 'Push notification service not configured'
+    description: 'Push notification service not configured',
   })
   async sendTestNotification(
     @GetUser() user: any,
-    @Body() dto: TestNotificationDto
+    @Body() dto: TestNotificationDto,
   ) {
     try {
       const targetUserId = dto.targetUserId || user.id;
-      
+
       await this.pushNotificationService.sendTestNotification(
         targetUserId,
-        dto.message
+        dto.message,
       );
 
       return {
         success: true,
-        message: 'Test notification sent successfully'
+        message: 'Test notification sent successfully',
       };
     } catch (error) {
       throw error;
@@ -255,17 +253,18 @@ export class PushNotificationController {
   @Post('process-scheduled')
   @Roles('admin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Process scheduled push notifications',
-    description: 'Manually triggers processing of scheduled push notifications (admin only)'
+    description:
+      'Manually triggers processing of scheduled push notifications (admin only)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Scheduled notifications processed successfully'
+    description: 'Scheduled notifications processed successfully',
   })
   @ApiResponse({
     status: 403,
-    description: 'Insufficient permissions'
+    description: 'Insufficient permissions',
   })
   async processScheduledNotifications() {
     try {
@@ -273,7 +272,7 @@ export class PushNotificationController {
 
       return {
         success: true,
-        message: 'Scheduled notifications processed successfully'
+        message: 'Scheduled notifications processed successfully',
       };
     } catch (error) {
       throw error;

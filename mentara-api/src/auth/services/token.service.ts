@@ -67,8 +67,8 @@ export class TokenService {
 
     const expiresAt = new Date();
     expiresAt.setDate(
-      expiresAt.getDate() + 
-      parseInt(process.env.JWT_REFRESH_EXPIRES_IN?.replace('d', '') || '7')
+      expiresAt.getDate() +
+        parseInt(process.env.JWT_REFRESH_EXPIRES_IN?.replace('d', '') || '7'),
     );
 
     // Store hashed token in database
@@ -96,7 +96,10 @@ export class TokenService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<TokenPair> {
-    const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { token: hashedToken },
@@ -140,10 +143,13 @@ export class TokenService {
   }
 
   async revokeRefreshToken(refreshToken: string): Promise<void> {
-    const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
     await this.prisma.refreshToken.updateMany({
-      where: { 
+      where: {
         token: hashedToken,
         revokedAt: null,
       },
@@ -153,7 +159,7 @@ export class TokenService {
 
   async revokeAllUserTokens(userId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
-      where: { 
+      where: {
         userId,
         revokedAt: null,
       },
@@ -164,10 +170,7 @@ export class TokenService {
   async cleanupExpiredTokens(): Promise<void> {
     await this.prisma.refreshToken.deleteMany({
       where: {
-        OR: [
-          { expiresAt: { lt: new Date() } },
-          { revokedAt: { not: null } },
-        ],
+        OR: [{ expiresAt: { lt: new Date() } }, { revokedAt: { not: null } }],
       },
     });
   }
@@ -178,15 +181,22 @@ export class TokenService {
     return bcrypt.hash(password, saltRounds);
   }
 
-  async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+  async comparePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
 
   // Email verification token generation
-  async generateEmailVerificationToken(): Promise<{ token: string; hashedToken: string; expiresAt: Date }> {
+  async generateEmailVerificationToken(): Promise<{
+    token: string;
+    hashedToken: string;
+    expiresAt: Date;
+  }> {
     const token = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-    
+
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24); // 24 hours expiry
 
@@ -194,10 +204,14 @@ export class TokenService {
   }
 
   // Password reset token generation
-  async generatePasswordResetToken(): Promise<{ token: string; hashedToken: string; expiresAt: Date }> {
+  async generatePasswordResetToken(): Promise<{
+    token: string;
+    hashedToken: string;
+    expiresAt: Date;
+  }> {
     const token = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-    
+
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiry for security
 
@@ -222,9 +236,9 @@ export class TokenService {
     if (user.lockoutUntil && user.lockoutUntil <= new Date()) {
       await this.prisma.user.update({
         where: { id: userId },
-        data: { 
-          lockoutUntil: null, 
-          failedLoginCount: 0 
+        data: {
+          lockoutUntil: null,
+          failedLoginCount: 0,
         },
       });
     }
@@ -234,7 +248,9 @@ export class TokenService {
 
   async handleFailedLogin(userId: string): Promise<void> {
     const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
-    const lockoutDuration = parseInt(process.env.LOCKOUT_DURATION_MINUTES || '15');
+    const lockoutDuration = parseInt(
+      process.env.LOCKOUT_DURATION_MINUTES || '15',
+    );
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -262,8 +278,8 @@ export class TokenService {
   async resetFailedLoginCount(userId: string): Promise<void> {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { 
-        failedLoginCount: 0, 
+      data: {
+        failedLoginCount: 0,
         lockoutUntil: null,
         lastLoginAt: new Date(),
       },

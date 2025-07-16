@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  CreateAdminDto,
-  UpdateAdminDto,
-  AdminResponseDto,
-} from './dto/admin.dto';
+  type CreateAdminDto,
+  type UpdateAdminDto,
+  type AdminResponseDto,
+} from 'mentara-commons';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

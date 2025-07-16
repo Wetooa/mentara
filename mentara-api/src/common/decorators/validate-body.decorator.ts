@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext, BadRequestException } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  BadRequestException,
+} from '@nestjs/common';
 import { z } from 'zod';
 import { validateSchema, formatValidationErrors } from 'mentara-commons';
 
@@ -13,12 +17,12 @@ export const ValidatedBody = createParamDecorator(
     }
 
     const result = validateSchema(schema, body);
-    
+
     if (!result.success) {
       const errorMessage = formatValidationErrors(result.errors);
       throw new BadRequestException(`Validation failed: ${errorMessage}`);
     }
-    
+
     return result.data;
   },
 );
@@ -57,12 +61,12 @@ export const ValidatedQuery = createParamDecorator(
     });
 
     const result = validateSchema(schema, processedQuery);
-    
+
     if (!result.success) {
       const errorMessage = formatValidationErrors(result.errors);
       throw new BadRequestException(`Query validation failed: ${errorMessage}`);
     }
-    
+
     return result.data;
   },
 );
@@ -78,12 +82,14 @@ export const ValidatedParams = createParamDecorator(
     }
 
     const result = validateSchema(schema, params);
-    
+
     if (!result.success) {
       const errorMessage = formatValidationErrors(result.errors);
-      throw new BadRequestException(`Path parameter validation failed: ${errorMessage}`);
+      throw new BadRequestException(
+        `Path parameter validation failed: ${errorMessage}`,
+      );
     }
-    
+
     return result.data;
   },
 );

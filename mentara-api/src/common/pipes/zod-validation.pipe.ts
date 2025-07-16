@@ -1,4 +1,9 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import {
+  PipeTransform,
+  Injectable,
+  ArgumentMetadata,
+  BadRequestException,
+} from '@nestjs/common';
 import { z } from 'zod';
 
 @Injectable()
@@ -16,12 +21,12 @@ export class ZodValidationPipe implements PipeTransform {
           const path = err.path.length > 0 ? err.path.join('.') : 'root';
           return `${path}: ${err.message}`;
         });
-        
+
         throw new BadRequestException({
           message: 'Validation failed',
           errors: errorMessages,
           statusCode: 400,
-          type: metadata.type
+          type: metadata.type,
         });
       }
       throw new BadRequestException('Validation failed');
@@ -52,6 +57,6 @@ export function ValidateQuery(schema: z.ZodType<any, any, any>) {
 // Decorator for param validation
 export function ValidateParam(schema: z.ZodType<any, any, any>) {
   return function (target: any, propertyKey: string, parameterIndex: number) {
-    // This would work with a custom decorator implementation  
+    // This would work with a custom decorator implementation
   };
 }

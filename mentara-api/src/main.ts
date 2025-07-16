@@ -9,7 +9,6 @@ import {
   logEnvironmentInfo,
 } from './config/env-validation';
 
-
 async function bootstrap() {
   console.log('Memory before app load:', process.memoryUsage());
 

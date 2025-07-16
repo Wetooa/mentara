@@ -3,7 +3,6 @@ import { TherapistRecommendationController } from './therapist-recommendation.co
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { TherapistManagementController } from './therapist-management.controller';
 import { TherapistManagementService } from './therapist-management.service';
-import { TherapistApplicationController } from './therapist-application.controller';
 import { TherapistApplicationService } from './therapist-application.service';
 import { TherapistProfileController } from './controllers/therapist-profile.controller';
 import { TherapistClientController } from './controllers/therapist-client.controller';
@@ -23,7 +22,6 @@ import { RoleUtils } from 'src/utils/role-utils';
   controllers: [
     TherapistRecommendationController,
     TherapistManagementController,
-    TherapistApplicationController,
     TherapistProfileController,
     TherapistClientController,
     TherapistWorksheetController,

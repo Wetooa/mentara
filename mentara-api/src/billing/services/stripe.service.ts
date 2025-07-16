@@ -1,15 +1,21 @@
-import { Injectable, Logger, OnModuleInit, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import Stripe from 'stripe';
 import { BillingService } from '../billing.service';
-import { 
-  PaymentMethodType, 
-  PaymentStatus, 
-  SubscriptionStatus, 
+import {
+  PaymentMethodType,
+  PaymentStatus,
+  SubscriptionStatus,
   BillingCycle,
-  InvoiceStatus 
+  InvoiceStatus,
 } from '@prisma/client';
 
 interface StripeCustomerData {
@@ -65,15 +71,15 @@ interface WebhookEvent {
 @Injectable()
 export class StripeService implements OnModuleInit {
   private readonly logger = new Logger(StripeService.name);
-  private stripe: Stripe;
+  private stripe!: Stripe;
   private isInitialized = false;
-  private webhookSecret: string;
+  private webhookSecret!: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly billingService: BillingService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async onModuleInit() {
@@ -85,16 +91,19 @@ export class StripeService implements OnModuleInit {
    */
   private async initializeStripe(): Promise<void> {
     try {
-      const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-      this.webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || '';
+      const stripeSecretKey =
+        this.configService.get<string>('STRIPE_SECRET_KEY');
+      this.webhookSecret =
+        this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || '';
 
       if (!stripeSecretKey) {
-        this.logger.warn('Stripe secret key not configured. Payment processing will be disabled.');
+        this.logger.warn(
+          'Stripe secret key not configured. Payment processing will be disabled.',
+        );
         return;
       }
 
       this.stripe = new Stripe(stripeSecretKey, {
-        apiVersion: '2023-10-16',
         typescript: true,
       });
 
@@ -102,7 +111,6 @@ export class StripeService implements OnModuleInit {
       await this.stripe.balance.retrieve();
       this.isInitialized = true;
       this.logger.log('Stripe initialized successfully');
-
     } catch (error) {
       this.logger.error('Failed to initialize Stripe:', error);
       this.isInitialized = false;
@@ -114,7 +122,9 @@ export class StripeService implements OnModuleInit {
    */
   private ensureInitialized(): void {
     if (!this.isInitialized || !this.stripe) {
-      throw new BadRequestException('Stripe is not configured. Please contact support.');
+      throw new BadRequestException(
+        'Stripe is not configured. Please contact support.',
+      );
     }
   }
 
@@ -123,25 +133,33 @@ export class StripeService implements OnModuleInit {
   /**
    * Create or retrieve Stripe customer
    */
-  async createOrGetCustomer(userId: string, data: StripeCustomerData): Promise<Stripe.Customer> {
+  async createOrGetCustomer(
+    userId: string,
+    data: StripeCustomerData,
+  ): Promise<Stripe.Customer> {
     this.ensureInitialized();
 
     try {
       // Check if customer already exists in our database
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { stripeCustomerId: true }
+        select: { stripeCustomerId: true },
       });
 
       if (user?.stripeCustomerId) {
         try {
           // Retrieve existing customer
-          const customer = await this.stripe.customers.retrieve(user.stripeCustomerId) as Stripe.Customer;
+          const customer = (await this.stripe.customers.retrieve(
+            user.stripeCustomerId,
+          )) as Stripe.Customer;
           if (!customer.deleted) {
             return customer;
           }
         } catch (error) {
-          this.logger.warn(`Failed to retrieve existing customer ${user.stripeCustomerId}:`, error);
+          this.logger.warn(
+            `Failed to retrieve existing customer ${user.stripeCustomerId}:`,
+            error,
+          );
         }
       }
 
@@ -153,21 +171,25 @@ export class StripeService implements OnModuleInit {
         address: data.address,
         metadata: {
           userId,
-          ...data.metadata
-        }
+          ...data.metadata,
+        },
       });
 
       // Update user with Stripe customer ID
       await this.prisma.user.update({
         where: { id: userId },
-        data: { stripeCustomerId: customer.id }
+        data: { stripeCustomerId: customer.id },
       });
 
-      this.logger.log(`Created Stripe customer ${customer.id} for user ${userId}`);
+      this.logger.log(
+        `Created Stripe customer ${customer.id} for user ${userId}`,
+      );
       return customer;
-
     } catch (error) {
-      this.logger.error(`Error creating Stripe customer for user ${userId}:`, error);
+      this.logger.error(
+        `Error creating Stripe customer for user ${userId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -175,14 +197,16 @@ export class StripeService implements OnModuleInit {
   /**
    * Update Stripe customer
    */
-  async updateCustomer(customerId: string, data: Partial<StripeCustomerData>): Promise<Stripe.Customer> {
+  async updateCustomer(
+    customerId: string,
+    data: Partial<StripeCustomerData>,
+  ): Promise<Stripe.Customer> {
     this.ensureInitialized();
 
     try {
       const customer = await this.stripe.customers.update(customerId, data);
       this.logger.log(`Updated Stripe customer ${customerId}`);
       return customer;
-
     } catch (error) {
       this.logger.error(`Error updating Stripe customer ${customerId}:`, error);
       throw error;
@@ -204,13 +228,14 @@ export class StripeService implements OnModuleInit {
         exp_year: number;
         cvc: string;
       };
-    }
+    },
   ): Promise<Stripe.PaymentMethod> {
     this.ensureInitialized();
 
     try {
-      const paymentMethod = await this.stripe.paymentMethods.create(paymentMethodData);
-      
+      const paymentMethod =
+        await this.stripe.paymentMethods.create(paymentMethodData);
+
       // Store payment method in database
       await this.billingService.createPaymentMethod({
         userId,
@@ -219,14 +244,18 @@ export class StripeService implements OnModuleInit {
         cardBrand: paymentMethod.card?.brand,
         cardExpMonth: paymentMethod.card?.exp_month,
         cardExpYear: paymentMethod.card?.exp_year,
-        stripePaymentMethodId: paymentMethod.id
+        stripePaymentMethodId: paymentMethod.id,
       });
 
-      this.logger.log(`Created payment method ${paymentMethod.id} for user ${userId}`);
+      this.logger.log(
+        `Created payment method ${paymentMethod.id} for user ${userId}`,
+      );
       return paymentMethod;
-
     } catch (error) {
-      this.logger.error(`Error creating payment method for user ${userId}:`, error);
+      this.logger.error(
+        `Error creating payment method for user ${userId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -234,19 +263,29 @@ export class StripeService implements OnModuleInit {
   /**
    * Attach payment method to customer
    */
-  async attachPaymentMethod(paymentMethodId: string, customerId: string): Promise<Stripe.PaymentMethod> {
+  async attachPaymentMethod(
+    paymentMethodId: string,
+    customerId: string,
+  ): Promise<Stripe.PaymentMethod> {
     this.ensureInitialized();
 
     try {
-      const paymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, {
-        customer: customerId
-      });
+      const paymentMethod = await this.stripe.paymentMethods.attach(
+        paymentMethodId,
+        {
+          customer: customerId,
+        },
+      );
 
-      this.logger.log(`Attached payment method ${paymentMethodId} to customer ${customerId}`);
+      this.logger.log(
+        `Attached payment method ${paymentMethodId} to customer ${customerId}`,
+      );
       return paymentMethod;
-
     } catch (error) {
-      this.logger.error(`Error attaching payment method ${paymentMethodId} to customer ${customerId}:`, error);
+      this.logger.error(
+        `Error attaching payment method ${paymentMethodId} to customer ${customerId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -254,16 +293,21 @@ export class StripeService implements OnModuleInit {
   /**
    * Detach payment method from customer
    */
-  async detachPaymentMethod(paymentMethodId: string): Promise<Stripe.PaymentMethod> {
+  async detachPaymentMethod(
+    paymentMethodId: string,
+  ): Promise<Stripe.PaymentMethod> {
     this.ensureInitialized();
 
     try {
-      const paymentMethod = await this.stripe.paymentMethods.detach(paymentMethodId);
+      const paymentMethod =
+        await this.stripe.paymentMethods.detach(paymentMethodId);
       this.logger.log(`Detached payment method ${paymentMethodId}`);
       return paymentMethod;
-
     } catch (error) {
-      this.logger.error(`Error detaching payment method ${paymentMethodId}:`, error);
+      this.logger.error(
+        `Error detaching payment method ${paymentMethodId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -273,7 +317,9 @@ export class StripeService implements OnModuleInit {
   /**
    * Create payment intent
    */
-  async createPaymentIntent(data: CreatePaymentIntentData): Promise<Stripe.PaymentIntent> {
+  async createPaymentIntent(
+    data: CreatePaymentIntentData,
+  ): Promise<Stripe.PaymentIntent> {
     this.ensureInitialized();
 
     try {
@@ -285,12 +331,13 @@ export class StripeService implements OnModuleInit {
         confirmation_method: data.confirmationMethod || 'automatic',
         confirm: data.confirmationMethod === 'automatic',
         description: data.description,
-        metadata: data.metadata || {}
+        metadata: data.metadata || {},
       });
 
-      this.logger.log(`Created payment intent ${paymentIntent.id} for amount $${data.amount}`);
+      this.logger.log(
+        `Created payment intent ${paymentIntent.id} for amount $${data.amount}`,
+      );
       return paymentIntent;
-
     } catch (error) {
       this.logger.error(`Error creating payment intent:`, error);
       throw error;
@@ -300,19 +347,27 @@ export class StripeService implements OnModuleInit {
   /**
    * Confirm payment intent
    */
-  async confirmPaymentIntent(paymentIntentId: string, paymentMethodId?: string): Promise<Stripe.PaymentIntent> {
+  async confirmPaymentIntent(
+    paymentIntentId: string,
+    paymentMethodId?: string,
+  ): Promise<Stripe.PaymentIntent> {
     this.ensureInitialized();
 
     try {
-      const paymentIntent = await this.stripe.paymentIntents.confirm(paymentIntentId, {
-        payment_method: paymentMethodId
-      });
+      const paymentIntent = await this.stripe.paymentIntents.confirm(
+        paymentIntentId,
+        {
+          payment_method: paymentMethodId,
+        },
+      );
 
       this.logger.log(`Confirmed payment intent ${paymentIntentId}`);
       return paymentIntent;
-
     } catch (error) {
-      this.logger.error(`Error confirming payment intent ${paymentIntentId}:`, error);
+      this.logger.error(
+        `Error confirming payment intent ${paymentIntentId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -325,7 +380,7 @@ export class StripeService implements OnModuleInit {
     amount: number,
     paymentMethodId: string,
     description?: string,
-    metadata?: { [key: string]: string }
+    metadata?: { [key: string]: string },
   ): Promise<{
     paymentIntent: Stripe.PaymentIntent;
     payment: any;
@@ -336,7 +391,12 @@ export class StripeService implements OnModuleInit {
       // Get or create customer
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { email: true, firstName: true, lastName: true, stripeCustomerId: true }
+        select: {
+          email: true,
+          firstName: true,
+          lastName: true,
+          stripeCustomerId: true,
+        },
       });
 
       if (!user) {
@@ -345,7 +405,7 @@ export class StripeService implements OnModuleInit {
 
       const customer = await this.createOrGetCustomer(userId, {
         email: user.email,
-        name: `${user.firstName} ${user.lastName}`.trim()
+        name: `${user.firstName} ${user.lastName}`.trim(),
       });
 
       // Create payment intent
@@ -354,7 +414,7 @@ export class StripeService implements OnModuleInit {
         customerId: customer.id,
         paymentMethodId,
         description,
-        metadata: { userId, ...metadata }
+        metadata: { userId, ...metadata },
       });
 
       // Create payment record
@@ -362,18 +422,23 @@ export class StripeService implements OnModuleInit {
         amount,
         paymentMethodId,
         description,
-        providerPaymentId: paymentIntent.id
+        providerPaymentId: paymentIntent.id,
       });
 
       // Update payment status based on payment intent status
       if (paymentIntent.status === 'succeeded') {
-        await this.billingService.updatePaymentStatus(payment.id, PaymentStatus.SUCCEEDED);
+        await this.billingService.updatePaymentStatus(
+          payment.id,
+          PaymentStatus.SUCCEEDED,
+        );
       } else if (paymentIntent.status === 'requires_action') {
-        await this.billingService.updatePaymentStatus(payment.id, PaymentStatus.REQUIRES_ACTION);
+        await this.billingService.updatePaymentStatus(
+          payment.id,
+          PaymentStatus.REQUIRES_ACTION,
+        );
       }
 
       return { paymentIntent, payment };
-
     } catch (error) {
       this.logger.error(`Error processing payment for user ${userId}:`, error);
       throw error;
@@ -385,7 +450,10 @@ export class StripeService implements OnModuleInit {
   /**
    * Create Stripe subscription
    */
-  async createSubscription(userId: string, data: CreateSubscriptionData): Promise<{
+  async createSubscription(
+    userId: string,
+    data: CreateSubscriptionData,
+  ): Promise<{
     subscription: Stripe.Subscription;
     localSubscription: any;
   }> {
@@ -399,12 +467,12 @@ export class StripeService implements OnModuleInit {
         default_payment_method: data.defaultPaymentMethod,
         trial_period_days: data.trialPeriodDays,
         metadata: { userId, ...data.metadata },
-        expand: ['latest_invoice.payment_intent']
+        expand: ['latest_invoice.payment_intent'],
       });
 
       // Get subscription plan details
       const price = await this.stripe.prices.retrieve(data.priceId, {
-        expand: ['product']
+        expand: ['product'],
       });
 
       // Create local subscription record
@@ -414,14 +482,20 @@ export class StripeService implements OnModuleInit {
         billingCycle: data.billingCycle || BillingCycle.MONTHLY,
         defaultPaymentMethodId: data.defaultPaymentMethod,
         trialStart: data.trialPeriodDays ? new Date() : undefined,
-        trialEnd: data.trialPeriodDays ? new Date(Date.now() + data.trialPeriodDays * 24 * 60 * 60 * 1000) : undefined
+        trialEnd: data.trialPeriodDays
+          ? new Date(Date.now() + data.trialPeriodDays * 24 * 60 * 60 * 1000)
+          : undefined,
       });
 
-      this.logger.log(`Created subscription ${subscription.id} for user ${userId}`);
+      this.logger.log(
+        `Created subscription ${subscription.id} for user ${userId}`,
+      );
       return { subscription, localSubscription };
-
     } catch (error) {
-      this.logger.error(`Error creating subscription for user ${userId}:`, error);
+      this.logger.error(
+        `Error creating subscription for user ${userId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -429,24 +503,30 @@ export class StripeService implements OnModuleInit {
   /**
    * Update subscription
    */
-  async updateSubscription(subscriptionId: string, data: {
-    priceId?: string;
-    defaultPaymentMethod?: string;
-    trialEnd?: number;
-    metadata?: { [key: string]: string };
-  }): Promise<Stripe.Subscription> {
+  async updateSubscription(
+    subscriptionId: string,
+    data: {
+      priceId?: string;
+      defaultPaymentMethod?: string;
+      trialEnd?: number;
+      metadata?: { [key: string]: string };
+    },
+  ): Promise<Stripe.Subscription> {
     this.ensureInitialized();
 
     try {
-      const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
-      
+      const subscription =
+        await this.stripe.subscriptions.retrieve(subscriptionId);
+
       const updateData: Stripe.SubscriptionUpdateParams = {};
 
       if (data.priceId) {
-        updateData.items = [{ 
-          id: subscription.items.data[0].id,
-          price: data.priceId 
-        }];
+        updateData.items = [
+          {
+            id: subscription.items.data[0].id,
+            price: data.priceId,
+          },
+        ];
       }
 
       if (data.defaultPaymentMethod) {
@@ -461,13 +541,18 @@ export class StripeService implements OnModuleInit {
         updateData.metadata = data.metadata;
       }
 
-      const updatedSubscription = await this.stripe.subscriptions.update(subscriptionId, updateData);
+      const updatedSubscription = await this.stripe.subscriptions.update(
+        subscriptionId,
+        updateData,
+      );
       this.logger.log(`Updated subscription ${subscriptionId}`);
-      
-      return updatedSubscription;
 
+      return updatedSubscription;
     } catch (error) {
-      this.logger.error(`Error updating subscription ${subscriptionId}:`, error);
+      this.logger.error(
+        `Error updating subscription ${subscriptionId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -475,19 +560,29 @@ export class StripeService implements OnModuleInit {
   /**
    * Cancel subscription
    */
-  async cancelSubscription(subscriptionId: string, cancelAtPeriodEnd = true): Promise<Stripe.Subscription> {
+  async cancelSubscription(
+    subscriptionId: string,
+    cancelAtPeriodEnd = true,
+  ): Promise<Stripe.Subscription> {
     this.ensureInitialized();
 
     try {
-      const subscription = await this.stripe.subscriptions.update(subscriptionId, {
-        cancel_at_period_end: cancelAtPeriodEnd
-      });
+      const subscription = await this.stripe.subscriptions.update(
+        subscriptionId,
+        {
+          cancel_at_period_end: cancelAtPeriodEnd,
+        },
+      );
 
-      this.logger.log(`Cancelled subscription ${subscriptionId} (cancel_at_period_end: ${cancelAtPeriodEnd})`);
+      this.logger.log(
+        `Cancelled subscription ${subscriptionId} (cancel_at_period_end: ${cancelAtPeriodEnd})`,
+      );
       return subscription;
-
     } catch (error) {
-      this.logger.error(`Error cancelling subscription ${subscriptionId}:`, error);
+      this.logger.error(
+        `Error cancelling subscription ${subscriptionId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -497,11 +592,14 @@ export class StripeService implements OnModuleInit {
   /**
    * Create invoice
    */
-  async createInvoice(customerId: string, data: {
-    description?: string;
-    metadata?: { [key: string]: string };
-    dueDate?: number;
-  }): Promise<Stripe.Invoice> {
+  async createInvoice(
+    customerId: string,
+    data: {
+      description?: string;
+      metadata?: { [key: string]: string };
+      dueDate?: number;
+    },
+  ): Promise<Stripe.Invoice> {
     this.ensureInitialized();
 
     try {
@@ -510,14 +608,18 @@ export class StripeService implements OnModuleInit {
         description: data.description,
         metadata: data.metadata,
         due_date: data.dueDate,
-        auto_advance: false
+        auto_advance: false,
       });
 
-      this.logger.log(`Created invoice ${invoice.id} for customer ${customerId}`);
+      this.logger.log(
+        `Created invoice ${invoice.id} for customer ${customerId}`,
+      );
       return invoice;
-
     } catch (error) {
-      this.logger.error(`Error creating invoice for customer ${customerId}:`, error);
+      this.logger.error(
+        `Error creating invoice for customer ${customerId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -530,12 +632,11 @@ export class StripeService implements OnModuleInit {
 
     try {
       const invoice = await this.stripe.invoices.finalizeInvoice(invoiceId, {
-        auto_advance: true
+        auto_advance: true,
       });
 
       this.logger.log(`Finalized invoice ${invoiceId}`);
       return invoice;
-
     } catch (error) {
       this.logger.error(`Error finalizing invoice ${invoiceId}:`, error);
       throw error;
@@ -545,17 +646,19 @@ export class StripeService implements OnModuleInit {
   /**
    * Pay invoice
    */
-  async payInvoice(invoiceId: string, paymentMethodId?: string): Promise<Stripe.Invoice> {
+  async payInvoice(
+    invoiceId: string,
+    paymentMethodId?: string,
+  ): Promise<Stripe.Invoice> {
     this.ensureInitialized();
 
     try {
       const invoice = await this.stripe.invoices.pay(invoiceId, {
-        payment_method: paymentMethodId
+        payment_method: paymentMethodId,
       });
 
       this.logger.log(`Paid invoice ${invoiceId}`);
       return invoice;
-
     } catch (error) {
       this.logger.error(`Error paying invoice ${invoiceId}:`, error);
       throw error;
@@ -571,7 +674,11 @@ export class StripeService implements OnModuleInit {
     this.ensureInitialized();
 
     try {
-      return this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);
+      return this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        this.webhookSecret,
+      );
     } catch (error) {
       this.logger.error('Error constructing webhook event:', error);
       throw error;
@@ -587,41 +694,40 @@ export class StripeService implements OnModuleInit {
 
       switch (event.type) {
         case 'payment_intent.succeeded':
-          await this.handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+          await this.handlePaymentIntentSucceeded(event.data.object);
           break;
 
         case 'payment_intent.payment_failed':
-          await this.handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+          await this.handlePaymentIntentFailed(event.data.object);
           break;
 
         case 'customer.subscription.created':
-          await this.handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionCreated(event.data.object);
           break;
 
         case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionUpdated(event.data.object);
           break;
 
         case 'customer.subscription.deleted':
-          await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionDeleted(event.data.object);
           break;
 
         case 'invoice.payment_succeeded':
-          await this.handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaymentSucceeded(event.data.object);
           break;
 
         case 'invoice.payment_failed':
-          await this.handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaymentFailed(event.data.object);
           break;
 
         case 'customer.subscription.trial_will_end':
-          await this.handleTrialWillEnd(event.data.object as Stripe.Subscription);
+          await this.handleTrialWillEnd(event.data.object);
           break;
 
         default:
           this.logger.log(`Unhandled webhook event type: ${event.type}`);
       }
-
     } catch (error) {
       this.logger.error(`Error handling webhook event ${event.type}:`, error);
       throw error;
@@ -631,24 +737,28 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle payment intent succeeded
    */
-  private async handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+  private async handlePaymentIntentSucceeded(
+    paymentIntent: Stripe.PaymentIntent,
+  ): Promise<void> {
     try {
       const payment = await this.prisma.payment.findFirst({
-        where: { providerPaymentId: paymentIntent.id }
+        where: { providerPaymentId: paymentIntent.id },
       });
 
       if (payment) {
-        await this.billingService.updatePaymentStatus(payment.id, PaymentStatus.SUCCEEDED);
-        
+        await this.billingService.updatePaymentStatus(
+          payment.id,
+          PaymentStatus.SUCCEEDED,
+        );
+
         // Emit event for notifications
         this.eventEmitter.emit('payment.succeeded', {
           userId: paymentIntent.metadata.userId,
           amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
-          paymentIntentId: paymentIntent.id
+          paymentIntentId: paymentIntent.id,
         });
       }
-
     } catch (error) {
       this.logger.error('Error handling payment intent succeeded:', error);
     }
@@ -657,17 +767,23 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle payment intent failed
    */
-  private async handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+  private async handlePaymentIntentFailed(
+    paymentIntent: Stripe.PaymentIntent,
+  ): Promise<void> {
     try {
       const payment = await this.prisma.payment.findFirst({
-        where: { providerPaymentId: paymentIntent.id }
+        where: { providerPaymentId: paymentIntent.id },
       });
 
       if (payment) {
-        await this.billingService.updatePaymentStatus(payment.id, PaymentStatus.FAILED, {
-          failureCode: paymentIntent.last_payment_error?.code,
-          failureMessage: paymentIntent.last_payment_error?.message
-        });
+        await this.billingService.updatePaymentStatus(
+          payment.id,
+          PaymentStatus.FAILED,
+          {
+            failureCode: paymentIntent.last_payment_error?.code,
+            failureMessage: paymentIntent.last_payment_error?.message,
+          },
+        );
 
         // Emit event for notifications
         this.eventEmitter.emit('payment.failed', {
@@ -675,10 +791,9 @@ export class StripeService implements OnModuleInit {
           amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
           paymentIntentId: paymentIntent.id,
-          error: paymentIntent.last_payment_error
+          error: paymentIntent.last_payment_error,
         });
       }
-
     } catch (error) {
       this.logger.error('Error handling payment intent failed:', error);
     }
@@ -687,7 +802,9 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle subscription created
    */
-  private async handleSubscriptionCreated(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionCreated(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     try {
       const userId = subscription.metadata.userId;
       if (!userId) return;
@@ -697,10 +814,13 @@ export class StripeService implements OnModuleInit {
         userId,
         subscriptionId: subscription.id,
         status: subscription.status,
-        currentPeriodStart: subscription.current_period_start,
-        currentPeriodEnd: subscription.current_period_end
+        currentPeriodStart: new Date(
+          (subscription as any).current_period_start * 1000,
+        ),
+        currentPeriodEnd: new Date(
+          (subscription as any).current_period_end * 1000,
+        ),
       });
-
     } catch (error) {
       this.logger.error('Error handling subscription created:', error);
     }
@@ -709,14 +829,16 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle subscription updated
    */
-  private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionUpdated(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     try {
       const userId = subscription.metadata.userId;
       if (!userId) return;
 
       // Update local subscription status
       await this.billingService.updateSubscription(userId, {
-        status: this.mapStripeSubscriptionStatus(subscription.status)
+        status: this.mapStripeSubscriptionStatus(subscription.status),
       });
 
       // Emit event for notifications
@@ -724,10 +846,13 @@ export class StripeService implements OnModuleInit {
         userId,
         subscriptionId: subscription.id,
         status: subscription.status,
-        currentPeriodStart: subscription.current_period_start,
-        currentPeriodEnd: subscription.current_period_end
+        currentPeriodStart: new Date(
+          (subscription as any).current_period_start * 1000,
+        ),
+        currentPeriodEnd: new Date(
+          (subscription as any).current_period_end * 1000,
+        ),
       });
-
     } catch (error) {
       this.logger.error('Error handling subscription updated:', error);
     }
@@ -736,23 +861,24 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle subscription deleted
    */
-  private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionDeleted(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     try {
       const userId = subscription.metadata.userId;
       if (!userId) return;
 
       // Update local subscription status
       await this.billingService.updateSubscription(userId, {
-        status: SubscriptionStatus.CANCELED
+        status: SubscriptionStatus.CANCELED,
       });
 
       // Emit event for notifications
       this.eventEmitter.emit('subscription.cancelled', {
         userId,
         subscriptionId: subscription.id,
-        canceledAt: subscription.canceled_at
+        canceledAt: subscription.canceled_at,
       });
-
     } catch (error) {
       this.logger.error('Error handling subscription deleted:', error);
     }
@@ -761,7 +887,9 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle invoice payment succeeded
    */
-  private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
+  private async handleInvoicePaymentSucceeded(
+    invoice: Stripe.Invoice,
+  ): Promise<void> {
     try {
       const userId = invoice.metadata?.userId;
       if (!userId) return;
@@ -771,9 +899,8 @@ export class StripeService implements OnModuleInit {
         userId,
         invoiceId: invoice.id,
         amount: invoice.amount_paid / 100,
-        currency: invoice.currency
+        currency: invoice.currency,
       });
-
     } catch (error) {
       this.logger.error('Error handling invoice payment succeeded:', error);
     }
@@ -782,7 +909,9 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle invoice payment failed
    */
-  private async handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  private async handleInvoicePaymentFailed(
+    invoice: Stripe.Invoice,
+  ): Promise<void> {
     try {
       const userId = invoice.metadata?.userId;
       if (!userId) return;
@@ -793,9 +922,8 @@ export class StripeService implements OnModuleInit {
         invoiceId: invoice.id,
         amount: invoice.amount_due / 100,
         currency: invoice.currency,
-        attemptCount: invoice.attempt_count
+        attemptCount: invoice.attempt_count,
       });
-
     } catch (error) {
       this.logger.error('Error handling invoice payment failed:', error);
     }
@@ -804,7 +932,9 @@ export class StripeService implements OnModuleInit {
   /**
    * Handle trial will end
    */
-  private async handleTrialWillEnd(subscription: Stripe.Subscription): Promise<void> {
+  private async handleTrialWillEnd(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     try {
       const userId = subscription.metadata.userId;
       if (!userId) return;
@@ -813,9 +943,8 @@ export class StripeService implements OnModuleInit {
       this.eventEmitter.emit('subscription.trial_will_end', {
         userId,
         subscriptionId: subscription.id,
-        trialEnd: subscription.trial_end
+        trialEnd: subscription.trial_end,
       });
-
     } catch (error) {
       this.logger.error('Error handling trial will end:', error);
     }
@@ -824,7 +953,9 @@ export class StripeService implements OnModuleInit {
   /**
    * Map Stripe subscription status to local enum
    */
-  private mapStripeSubscriptionStatus(stripeStatus: string): SubscriptionStatus {
+  private mapStripeSubscriptionStatus(
+    stripeStatus: string,
+  ): SubscriptionStatus {
     switch (stripeStatus) {
       case 'active':
         return SubscriptionStatus.ACTIVE;
@@ -851,7 +982,7 @@ export class StripeService implements OnModuleInit {
   getStripeConfig(): { isInitialized: boolean; webhookSecret: string } {
     return {
       isInitialized: this.isInitialized,
-      webhookSecret: this.webhookSecret
+      webhookSecret: this.webhookSecret,
     };
   }
 }

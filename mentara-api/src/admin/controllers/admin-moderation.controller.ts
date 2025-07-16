@@ -13,11 +13,14 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../guards/admin-auth.guard';
-import { AdminOnly } from '../../decorators/admin-only.decorator';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
-import { ModerationService, ModerationContext } from '../../common/services/moderation.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import {
+  ModerationService,
+  ModerationContext,
+} from '../../common/services/moderation.service';
 
 @Controller('admin/moderation')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
@@ -139,8 +142,11 @@ export class AdminModerationController {
         timestamp: new Date(),
       };
 
-      const result = await this.moderationService.classifyContent(body.text, context);
-      
+      const result = await this.moderationService.classifyContent(
+        body.text,
+        context,
+      );
+
       return {
         result,
         testInfo: {
@@ -177,9 +183,15 @@ export class AdminModerationController {
         timestamp: new Date(),
       };
 
-      const isCrisis = await this.moderationService.checkCrisisContent(body.text, context);
-      const fullResult = await this.moderationService.classifyContent(body.text, context);
-      
+      const isCrisis = await this.moderationService.checkCrisisContent(
+        body.text,
+        context,
+      );
+      const fullResult = await this.moderationService.classifyContent(
+        body.text,
+        context,
+      );
+
       return {
         isCrisis,
         crisisLevel: fullResult.crisisLevel,
@@ -212,7 +224,7 @@ export class AdminModerationController {
     @Body() body: { items: Array<{ text: string; context: string }> },
   ) {
     try {
-      const items = body.items.map(item => ({
+      const items = body.items.map((item) => ({
         text: item.text,
         context: {
           context: item.context,
@@ -223,7 +235,7 @@ export class AdminModerationController {
       }));
 
       const results = await this.moderationService.batchClassify(items);
-      
+
       return {
         results,
         testInfo: {

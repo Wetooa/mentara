@@ -1,5 +1,16 @@
 import { Therapist, User } from '@prisma/client';
 
+// Extend Express Request interface to include auth properties
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+      userRole?: string;
+      user?: User | undefined;
+    }
+  }
+}
+
 export interface CommunityStats {
   totalMembers: number;
   totalPosts: number;

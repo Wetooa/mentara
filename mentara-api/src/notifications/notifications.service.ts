@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Server } from 'socket.io';
@@ -38,11 +43,13 @@ export class NotificationsService implements OnModuleInit {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   onModuleInit() {
-    this.logger.log('NotificationsService initialized with real-time capabilities');
+    this.logger.log(
+      'NotificationsService initialized with real-time capabilities',
+    );
   }
 
   /**
@@ -53,16 +60,19 @@ export class NotificationsService implements OnModuleInit {
     this.logger.log('WebSocket server configured for real-time notifications');
   }
 
-  async create(data: {
-    userId: string;
-    title: string;
-    message: string;
-    type: NotificationType;
-    priority?: NotificationPriority;
-    data?: any;
-    actionUrl?: string;
-    scheduledFor?: Date;
-  }, deliveryOptions?: NotificationDeliveryOptions): Promise<Notification> {
+  async create(
+    data: {
+      userId: string;
+      title: string;
+      message: string;
+      type: NotificationType;
+      priority?: NotificationPriority;
+      data?: any;
+      actionUrl?: string;
+      scheduledFor?: Date;
+    },
+    deliveryOptions?: NotificationDeliveryOptions,
+  ): Promise<Notification> {
     const notification = await this.prisma.notification.create({
       data: {
         ...data,
@@ -86,7 +96,7 @@ export class NotificationsService implements OnModuleInit {
       email: false,
       push: false,
       scheduled: false,
-      ...deliveryOptions
+      ...deliveryOptions,
     };
 
     // Deliver notification immediately if not scheduled
@@ -232,7 +242,7 @@ export class NotificationsService implements OnModuleInit {
    */
   private async deliverNotification(
     notification: Notification & { user: any },
-    options: NotificationDeliveryOptions
+    options: NotificationDeliveryOptions,
   ): Promise<void> {
     try {
       // Real-time WebSocket delivery
@@ -249,9 +259,11 @@ export class NotificationsService implements OnModuleInit {
       if (options.push) {
         await this.deliverPushNotification(notification);
       }
-
     } catch (error) {
-      this.logger.error(`Error delivering notification ${notification.id}:`, error);
+      this.logger.error(
+        `Error delivering notification ${notification.id}:`,
+        error,
+      );
     }
   }
 
@@ -259,35 +271,42 @@ export class NotificationsService implements OnModuleInit {
    * Deliver real-time notification via WebSocket
    */
   private async deliverRealTimeNotification(
-    notification: Notification & { user: any }
+    notification: Notification & { user: any },
   ): Promise<void> {
     if (!this.webSocketServer) {
-      this.logger.warn('WebSocket server not configured for real-time notifications');
+      this.logger.warn(
+        'WebSocket server not configured for real-time notifications',
+      );
       return;
     }
 
     try {
       // Send to user's personal room
-      this.webSocketServer.to(`user:${notification.userId}`).emit('notification', {
-        id: notification.id,
-        title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        priority: notification.priority,
-        actionUrl: notification.actionUrl,
-        data: notification.data,
-        createdAt: notification.createdAt,
-        isRead: false
-      });
+      this.webSocketServer
+        .to(`user:${notification.userId}`)
+        .emit('notification', {
+          id: notification.id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          priority: notification.priority,
+          actionUrl: notification.actionUrl,
+          data: notification.data,
+          createdAt: notification.createdAt,
+          isRead: false,
+        });
 
       // Send unread count update
       const unreadCount = await this.getUnreadCount(notification.userId);
-      this.webSocketServer.to(`user:${notification.userId}`).emit('unreadCount', {
-        count: unreadCount
-      });
+      this.webSocketServer
+        .to(`user:${notification.userId}`)
+        .emit('unreadCount', {
+          count: unreadCount,
+        });
 
-      this.logger.log(`Real-time notification delivered to user ${notification.userId}`);
-
+      this.logger.log(
+        `Real-time notification delivered to user ${notification.userId}`,
+      );
     } catch (error) {
       this.logger.error(`Error delivering real-time notification:`, error);
     }
@@ -297,17 +316,19 @@ export class NotificationsService implements OnModuleInit {
    * Deliver email notification (placeholder for email service integration)
    */
   private async deliverEmailNotification(
-    notification: Notification & { user: any }
+    notification: Notification & { user: any },
   ): Promise<void> {
     // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
-    this.logger.log(`Email notification queued for user ${notification.userId}`);
+    this.logger.log(
+      `Email notification queued for user ${notification.userId}`,
+    );
   }
 
   /**
    * Deliver push notification (placeholder for push service integration)
    */
   private async deliverPushNotification(
-    notification: Notification & { user: any }
+    notification: Notification & { user: any },
   ): Promise<void> {
     // TODO: Integrate with push notification service (FCM, APNS, etc.)
     this.logger.log(`Push notification queued for user ${notification.userId}`);
@@ -327,7 +348,7 @@ export class NotificationsService implements OnModuleInit {
       actionUrl?: string;
       scheduledFor?: Date;
     }>,
-    deliveryOptions?: NotificationDeliveryOptions
+    deliveryOptions?: NotificationDeliveryOptions,
   ): Promise<Notification[]> {
     const createdNotifications: Notification[] = [];
 
@@ -346,27 +367,33 @@ export class NotificationsService implements OnModuleInit {
   async sendToCommunity(
     communityId: string,
     notification: Omit<Parameters<typeof this.create>[0], 'userId'>,
-    deliveryOptions?: NotificationDeliveryOptions
+    deliveryOptions?: NotificationDeliveryOptions,
   ): Promise<void> {
     try {
       // Get all community members
       const members = await this.prisma.membership.findMany({
         where: { communityId },
-        select: { userId: true }
+        select: { userId: true },
       });
 
-      // Create notifications for all members
-      const notifications = members.map(member => ({
-        ...notification,
-        userId: member.userId
-      }));
+      // Create notifications for all members (filter out null userIds)
+      const notifications = members
+        .filter((member) => member.userId !== null)
+        .map((member) => ({
+          ...notification,
+          userId: member.userId!,
+        }));
 
       await this.createBatch(notifications, deliveryOptions);
 
-      this.logger.log(`Sent notifications to ${members.length} community members`);
-
+      this.logger.log(
+        `Sent notifications to ${members.length} community members`,
+      );
     } catch (error) {
-      this.logger.error(`Error sending notifications to community ${communityId}:`, error);
+      this.logger.error(
+        `Error sending notifications to community ${communityId}:`,
+        error,
+      );
     }
   }
 
@@ -382,27 +409,34 @@ export class NotificationsService implements OnModuleInit {
     timestamp: Date;
   }) {
     try {
-      await this.create({
-        userId: payload.userId,
-        title: 'New Community Recommendations',
-        message: `We've found ${payload.recommendationCount} new communities that might interest you based on your assessment results.`,
-        type: NotificationType.COMMUNITY_RECOMMENDATION,
-        priority: NotificationPriority.NORMAL,
-        actionUrl: '/communities/recommendations',
-        data: {
-          recommendationCount: payload.recommendationCount,
-          generatedAt: payload.timestamp
-        }
-      }, {
-        realTime: true,
-        email: false,
-        push: true
-      });
+      await this.create(
+        {
+          userId: payload.userId,
+          title: 'New Community Recommendations',
+          message: `We've found ${payload.recommendationCount} new communities that might interest you based on your assessment results.`,
+          type: NotificationType.COMMUNITY_RECOMMENDATION,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: '/communities/recommendations',
+          data: {
+            recommendationCount: payload.recommendationCount,
+            generatedAt: payload.timestamp,
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: true,
+        },
+      );
 
-      this.logger.log(`Community recommendation notification sent to user ${payload.userId}`);
-
+      this.logger.log(
+        `Community recommendation notification sent to user ${payload.userId}`,
+      );
     } catch (error) {
-      this.logger.error(`Error handling recommendations generated event:`, error);
+      this.logger.error(
+        `Error handling recommendations generated event:`,
+        error,
+      );
     }
   }
 
@@ -420,30 +454,37 @@ export class NotificationsService implements OnModuleInit {
   }) {
     try {
       if (payload.action === 'accept') {
-        await this.create({
-          userId: payload.userId,
-          title: `Welcome to ${payload.communityName}!`,
-          message: `You've successfully joined ${payload.communityName}. Start exploring and connecting with the community.`,
-          type: NotificationType.COMMUNITY_JOINED,
-          priority: NotificationPriority.HIGH,
-          actionUrl: `/communities/${payload.communityId}`,
-          data: {
-            communityId: payload.communityId,
-            communityName: payload.communityName,
-            compatibilityScore: payload.compatibilityScore,
-            joinMethod: 'recommendation_accepted'
-          }
-        }, {
-          realTime: true,
-          email: false,
-          push: true
-        });
+        await this.create(
+          {
+            userId: payload.userId,
+            title: `Welcome to ${payload.communityName}!`,
+            message: `You've successfully joined ${payload.communityName}. Start exploring and connecting with the community.`,
+            type: NotificationType.COMMUNITY_JOINED,
+            priority: NotificationPriority.HIGH,
+            actionUrl: `/communities/${payload.communityId}`,
+            data: {
+              communityId: payload.communityId,
+              communityName: payload.communityName,
+              compatibilityScore: payload.compatibilityScore,
+              joinMethod: 'recommendation_accepted',
+            },
+          },
+          {
+            realTime: true,
+            email: false,
+            push: true,
+          },
+        );
 
-        this.logger.log(`Community join notification sent to user ${payload.userId}`);
+        this.logger.log(
+          `Community join notification sent to user ${payload.userId}`,
+        );
       }
-
     } catch (error) {
-      this.logger.error(`Error handling recommendation interaction event:`, error);
+      this.logger.error(
+        `Error handling recommendation interaction event:`,
+        error,
+      );
     }
   }
 
@@ -461,33 +502,37 @@ export class NotificationsService implements OnModuleInit {
       // Get community details
       const community = await this.prisma.community.findUnique({
         where: { id: payload.communityId },
-        select: { name: true, _count: { select: { memberships: true } } }
+        select: { name: true, _count: { select: { memberships: true } } },
       });
 
       if (!community) return;
 
       // Send welcome notification to the new member
-      await this.create({
-        userId: payload.userId,
-        title: `Welcome to ${community.name}!`,
-        message: `You're now part of a community with ${community._count.memberships} members. Start exploring and connecting!`,
-        type: NotificationType.COMMUNITY_WELCOME,
-        priority: NotificationPriority.HIGH,
-        actionUrl: `/communities/${payload.communityId}`,
-        data: {
-          communityId: payload.communityId,
-          communityName: community.name,
-          memberCount: community._count.memberships,
-          joinMethod: payload.joinMethod
-        }
-      }, {
-        realTime: true,
-        email: false,
-        push: true
-      });
+      await this.create(
+        {
+          userId: payload.userId,
+          title: `Welcome to ${community.name}!`,
+          message: `You're now part of a community with ${community._count.memberships} members. Start exploring and connecting!`,
+          type: NotificationType.COMMUNITY_WELCOME,
+          priority: NotificationPriority.HIGH,
+          actionUrl: `/communities/${payload.communityId}`,
+          data: {
+            communityId: payload.communityId,
+            communityName: community.name,
+            memberCount: community._count.memberships,
+            joinMethod: payload.joinMethod,
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: true,
+        },
+      );
 
-      this.logger.log(`Community welcome notification sent to user ${payload.userId}`);
-
+      this.logger.log(
+        `Community welcome notification sent to user ${payload.userId}`,
+      );
     } catch (error) {
       this.logger.error(`Error handling member joined event:`, error);
     }
@@ -502,27 +547,35 @@ export class NotificationsService implements OnModuleInit {
     timestamp: Date;
   }) {
     try {
-      await this.create({
-        userId: payload.userId,
-        title: 'Community Recommendations Updated',
-        message: 'Your community recommendations have been updated based on your latest assessment results.',
-        type: NotificationType.RECOMMENDATIONS_UPDATED,
-        priority: NotificationPriority.NORMAL,
-        actionUrl: '/communities/recommendations',
-        data: {
-          refreshedAt: payload.timestamp,
-          reason: 'assessment_change'
-        }
-      }, {
-        realTime: true,
-        email: false,
-        push: false
-      });
+      await this.create(
+        {
+          userId: payload.userId,
+          title: 'Community Recommendations Updated',
+          message:
+            'Your community recommendations have been updated based on your latest assessment results.',
+          type: NotificationType.RECOMMENDATIONS_UPDATED,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: '/communities/recommendations',
+          data: {
+            refreshedAt: payload.timestamp,
+            reason: 'assessment_change',
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: false,
+        },
+      );
 
-      this.logger.log(`Recommendations refreshed notification sent to user ${payload.userId}`);
-
+      this.logger.log(
+        `Recommendations refreshed notification sent to user ${payload.userId}`,
+      );
     } catch (error) {
-      this.logger.error(`Error handling recommendations refreshed event:`, error);
+      this.logger.error(
+        `Error handling recommendations refreshed event:`,
+        error,
+      );
     }
   }
 
@@ -647,8 +700,9 @@ export class NotificationsService implements OnModuleInit {
     requestMessage?: string,
     priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT' = 'NORMAL',
   ) {
-    const notificationPriority = priority === 'HIGH' || priority === 'URGENT' ? 'HIGH' : 'NORMAL';
-    
+    const notificationPriority =
+      priority === 'HIGH' || priority === 'URGENT' ? 'HIGH' : 'NORMAL';
+
     return this.create({
       userId: therapistId,
       title: `New Client Request ${priority === 'URGENT' ? '(Urgent)' : ''}`,
@@ -745,7 +799,11 @@ export class NotificationsService implements OnModuleInit {
       actionUrl: '/therapist/dashboard',
       data: {
         approvalMessage,
-        nextSteps: ['complete_profile', 'set_availability', 'review_guidelines'],
+        nextSteps: [
+          'complete_profile',
+          'set_availability',
+          'review_guidelines',
+        ],
         welcomeFlow: true,
       },
     });
@@ -763,7 +821,9 @@ export class NotificationsService implements OnModuleInit {
       message: `Your therapist application has been reviewed. ${rejectionMessage}`,
       type: 'THERAPIST_REJECTED',
       priority: 'HIGH',
-      actionUrl: allowReapplication ? '/therapist/reapply' : '/therapist/application-status',
+      actionUrl: allowReapplication
+        ? '/therapist/reapply'
+        : '/therapist/application-status',
       data: {
         rejectionReason,
         rejectionMessage,
@@ -776,7 +836,10 @@ export class NotificationsService implements OnModuleInit {
   async createNewRecommendationsNotification(
     clientId: string,
     therapistCount: number,
-    updateReason: 'profile_update' | 'new_therapists' | 'algorithm_improvement' = 'new_therapists',
+    updateReason:
+      | 'profile_update'
+      | 'new_therapists'
+      | 'algorithm_improvement' = 'new_therapists',
   ) {
     const reasonMessages = {
       profile_update: 'based on your updated preferences',
@@ -890,7 +953,7 @@ export class NotificationsService implements OnModuleInit {
       data: {
         missingFields,
         userType,
-        profileCompleteness: Math.max(0, 100 - (missingFields.length * 10)),
+        profileCompleteness: Math.max(0, 100 - missingFields.length * 10),
       },
     });
   }

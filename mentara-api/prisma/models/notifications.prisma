@@ -92,6 +92,13 @@ enum NotificationType {
   THERAPIST_APPLICATION // Application status update
   THERAPIST_APPROVED // Application approved
   THERAPIST_REJECTED // Application rejected
+  THERAPIST_STATUS_UPDATED // Therapist status changed
+  THERAPIST_REQUEST_ACCEPTED // Therapist request accepted
+  THERAPIST_REQUEST_DECLINED // Therapist request declined
+  ALTERNATIVE_RECOMMENDATIONS // Alternative recommendations available
+  CLIENT_REQUEST_RECEIVED // Therapist received client request
+  CLIENT_REQUEST_CANCELLED // Client cancelled therapist request
+  PROFILE_COMPLETION // Profile completion reminder
 
   COMMUNITY_POST // New post in followed community
   COMMUNITY_REPLY // Reply to your post/comment
@@ -99,10 +106,14 @@ enum NotificationType {
   COMMUNITY_JOINED // Successfully joined a community
   COMMUNITY_WELCOME // Welcome message after joining
   RECOMMENDATIONS_UPDATED // Community recommendations refreshed
+  NEW_RECOMMENDATIONS // New community recommendations available
+  RELATIONSHIP_ESTABLISHED // Therapist-client relationship established  
+  REQUEST_REMINDER // Reminder for pending request
 
   SYSTEM_MAINTENANCE // System maintenance notice
   SYSTEM_UPDATE // Platform update
   SECURITY_ALERT // Security-related notification
+  SCHEDULING_INFO // Session scheduling information
 
   PAYMENT_SUCCESS // Payment processed
   PAYMENT_FAILED // Payment failed

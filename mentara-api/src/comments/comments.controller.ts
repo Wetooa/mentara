@@ -9,17 +9,24 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { SupabaseStorageService, FileUploadResult } from 'src/common/services/supabase-storage.service';
 import { CommentsService } from './comments.service';
 import { Comment } from '@prisma/client';
-import { CommentCreateInputDto, CommentUpdateInputDto } from 'schema/comment';
+import { CommentCreateInputDto, CommentUpdateInputDto } from 'mentara-commons';
 
 @Controller('comments')
 @UseGuards(JwtAuthGuard)
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   @Get()
   async findAll(@CurrentUserId() id: string): Promise<Comment[]> {
@@ -65,12 +72,41 @@ export class CommentsController {
   }
 
   @Post()
+  @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   async create(
     @CurrentUserId() userId: string,
     @Body() commentData: CommentCreateInputDto,
+    @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ): Promise<Comment> {
     try {
-      return await this.commentsService.create(commentData, userId);
+      // Validate and upload files if provided
+      const fileResults: FileUploadResult[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const validation = this.supabaseStorageService.validateFile(file);
+          if (!validation.isValid) {
+            throw new HttpException(
+              `File validation failed: ${validation.error}`,
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+        }
+
+        // Upload files to Supabase
+        const uploadResults = await this.supabaseStorageService.uploadFiles(
+          files,
+          SupabaseStorageService.getSupportedBuckets().POST_ATTACHMENTS,
+        );
+        fileResults.push(...uploadResults);
+      }
+
+      return await this.commentsService.create(
+        commentData,
+        userId,
+        fileResults.map((f) => f.url),
+        fileResults.map((f) => f.filename),
+        files.map((f) => f.size),
+      );
     } catch (error) {
       throw new HttpException(
         `Failed to create comment: ${error instanceof Error ? error.message : 'Unknown error'}`,

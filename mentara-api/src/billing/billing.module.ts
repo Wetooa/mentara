@@ -8,18 +8,8 @@ import { PrismaService } from 'src/providers/prisma-client.provider';
 
 @Module({
   imports: [ConfigModule],
-  controllers: [
-    BillingController,
-    StripeWebhookController
-  ],
-  providers: [
-    BillingService,
-    StripeService,
-    PrismaService
-  ],
-  exports: [
-    BillingService,
-    StripeService
-  ],
+  controllers: [BillingController, StripeWebhookController],
+  providers: [BillingService, StripeService, PrismaService],
+  exports: [BillingService, StripeService],
 })
 export class BillingModule {}

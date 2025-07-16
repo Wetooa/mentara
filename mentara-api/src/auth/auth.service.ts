@@ -6,12 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import {
-  ClientCreateDto,
-  ClientResponse,
-  TherapistCreateDto,
-  TherapistResponse,
-} from '../../schema/auth';
+// Remove unused imports - these DTOs don't exist in mentara-commons
 import { EventBusService } from '../common/events/event-bus.service';
 import { UserRegisteredEvent } from '../common/events/user-events';
 import { TokenService, TokenPair } from './services/token.service';
@@ -56,7 +51,8 @@ export class AuthService {
       return {
         user,
         tokens,
-        message: 'Client registered successfully. Please check your email to verify your account.',
+        message:
+          'Client registered successfully. Please check your email to verify your account.',
       };
     } catch (error) {
       console.error(
@@ -98,7 +94,8 @@ export class AuthService {
       return {
         user,
         tokens,
-        message: 'Therapist registered successfully. Please check your email to verify your account. Your application is pending approval.',
+        message:
+          'Therapist registered successfully. Please check your email to verify your account. Your application is pending approval.',
       };
     } catch (error) {
       console.error(
@@ -128,12 +125,12 @@ export class AuthService {
         updatedAt: true,
         client: {
           select: {
-            id: true,
+            userId: true,
           },
         },
         therapist: {
           select: {
-            id: true,
+            userId: true,
             status: true,
           },
         },
@@ -146,7 +143,7 @@ export class AuthService {
 
   async getUser(userId: string) {
     const user = await this.prisma.user.findUnique({
-      where: { 
+      where: {
         id: userId,
         deactivatedAt: null,
       },
@@ -161,12 +158,12 @@ export class AuthService {
         updatedAt: true,
         client: {
           select: {
-            id: true,
+            userId: true,
           },
         },
         therapist: {
           select: {
-            id: true,
+            userId: true,
             status: true,
           },
         },
@@ -217,7 +214,8 @@ export class AuthService {
     const hashedPassword = await this.tokenService.hashPassword(password);
 
     // Generate email verification token
-    const { hashedToken, expiresAt } = await this.tokenService.generateEmailVerificationToken();
+    const { hashedToken, expiresAt } =
+      await this.tokenService.generateEmailVerificationToken();
 
     // Create user
     const userData = {
@@ -250,9 +248,24 @@ export class AuthService {
       });
     } else if (role === 'therapist') {
       await this.prisma.therapist.create({
-        data: { 
+        data: {
           userId: user.id,
           status: 'pending',
+          mobile: '',
+          province: '',
+          providerType: '',
+          professionalLicenseType: '',
+          isPRCLicensed: '',
+          prcLicenseNumber: '',
+          expirationDateOfLicense: new Date(),
+          practiceStartDate: new Date(),
+          sessionLength: '',
+          hourlyRate: 0,
+          providedOnlineTherapyBefore: false,
+          comfortableUsingVideoConferencing: false,
+          compliesWithDataPrivacyAct: false,
+          willingToAbideByPlatformGuidelines: false,
+          treatmentSuccessRates: {},
         },
       });
     }
@@ -274,7 +287,8 @@ export class AuthService {
 
     return {
       user,
-      message: 'User registered successfully. Please check your email to verify your account.',
+      message:
+        'User registered successfully. Please check your email to verify your account.',
     };
   }
 
@@ -311,17 +325,24 @@ export class AuthService {
     }
 
     if (!user.password) {
-      throw new UnauthorizedException('Please complete account setup or reset your password');
+      throw new UnauthorizedException(
+        'Please complete account setup or reset your password',
+      );
     }
 
     // Check account lockout
     const isLockedOut = await this.tokenService.checkAccountLockout(user.id);
     if (isLockedOut) {
-      throw new UnauthorizedException('Account is temporarily locked due to too many failed login attempts');
+      throw new UnauthorizedException(
+        'Account is temporarily locked due to too many failed login attempts',
+      );
     }
 
     // Verify password
-    const isPasswordValid = await this.tokenService.comparePassword(password, user.password);
+    const isPasswordValid = await this.tokenService.comparePassword(
+      password,
+      user.password,
+    );
     if (!isPasswordValid) {
       await this.tokenService.handleFailedLogin(user.id);
       throw new UnauthorizedException('Invalid credentials');
@@ -329,7 +350,9 @@ export class AuthService {
 
     // Check email verification
     if (!user.emailVerified) {
-      throw new UnauthorizedException('Please verify your email address before logging in');
+      throw new UnauthorizedException(
+        'Please verify your email address before logging in',
+      );
     }
 
     // Reset failed login count and update last login
@@ -345,7 +368,12 @@ export class AuthService {
     );
 
     // Remove sensitive data from user object
-    const { password: _, lockoutUntil: __, failedLoginCount: ___, ...safeUser } = user;
+    const {
+      password: _,
+      lockoutUntil: __,
+      failedLoginCount: ___,
+      ...safeUser
+    } = user;
 
     return { user: safeUser, tokens };
   }
@@ -355,7 +383,11 @@ export class AuthService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<TokenPair> {
-    return this.tokenService.refreshAccessToken(refreshToken, ipAddress, userAgent);
+    return this.tokenService.refreshAccessToken(
+      refreshToken,
+      ipAddress,
+      userAgent,
+    );
   }
 
   async logout(refreshToken: string): Promise<void> {
@@ -364,7 +396,7 @@ export class AuthService {
 
   async validateUser(userId: string) {
     return this.prisma.user.findUnique({
-      where: { 
+      where: {
         id: userId,
         deactivatedAt: null,
       },
@@ -381,7 +413,9 @@ export class AuthService {
   }
 
   // Email verification methods
-  async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+  async verifyEmail(
+    token: string,
+  ): Promise<{ success: boolean; message: string }> {
     return this.emailVerificationService.verifyEmail(token);
   }
 
@@ -394,11 +428,16 @@ export class AuthService {
     return this.passwordResetService.requestPasswordReset(email);
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
     return this.passwordResetService.resetPassword(token, newPassword);
   }
 
-  async validateResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
+  async validateResetToken(
+    token: string,
+  ): Promise<{ valid: boolean; email?: string }> {
     return this.passwordResetService.validateResetToken(token);
   }
 
@@ -422,15 +461,23 @@ export class AuthService {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await this.tokenService.comparePassword(currentPassword, user.password);
+    const isCurrentPasswordValid = await this.tokenService.comparePassword(
+      currentPassword,
+      user.password,
+    );
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     // Check if new password is different
-    const isSamePassword = await this.tokenService.comparePassword(newPassword, user.password);
+    const isSamePassword = await this.tokenService.comparePassword(
+      newPassword,
+      user.password,
+    );
     if (isSamePassword) {
-      throw new BadRequestException('New password must be different from current password');
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
     }
 
     // Hash new password
@@ -474,7 +521,9 @@ export class AuthService {
     };
   }
 
-  async reactivateAccount(userId: string): Promise<{ success: boolean; message: string }> {
+  async reactivateAccount(
+    userId: string,
+  ): Promise<{ success: boolean; message: string }> {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -496,17 +545,17 @@ export class AuthService {
     try {
       // Check if user exists
       const existingUser = await this.prisma.user.findUnique({
-        where: { email: oauthUser.email }
+        where: { email: oauthUser.email },
       });
 
       if (existingUser) {
         // User exists, generate tokens and return
-        const tokens = await this.tokenService.generateTokenPair({
-          userId: existingUser.id,
-          email: existingUser.email,
-          role: existingUser.role
-        });
-        
+        const tokens = await this.tokenService.generateTokenPair(
+          existingUser.id,
+          existingUser.email,
+          existingUser.role,
+        );
+
         return {
           user: {
             id: existingUser.id,
@@ -519,7 +568,7 @@ export class AuthService {
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           expiresIn: tokens.expiresIn,
-          message: 'Login successful'
+          message: 'Login successful',
         };
       } else {
         // Create new user from OAuth data
@@ -530,7 +579,7 @@ export class AuthService {
             lastName: oauthUser.lastName,
             role: 'client', // Default role
             emailVerified: true, // OAuth emails are pre-verified
-            avatarUrl: oauthUser.picture
+            avatarUrl: oauthUser.picture,
           },
           select: {
             id: true,
@@ -547,26 +596,26 @@ export class AuthService {
           data: { userId: newUser.id },
         });
 
-        const tokens = await this.tokenService.generateTokenPair({
-          userId: newUser.id,
-          email: newUser.email,
-          role: newUser.role
-        });
+        const tokens = await this.tokenService.generateTokenPair(
+          newUser.id,
+          newUser.email,
+          newUser.role,
+        );
 
         // Emit user registration event
         this.eventBus.emit(
-          new UserRegisteredEvent(
-            newUser.id,
-            newUser.email,
-            newUser.role,
-            'oauth',
-            {
-              provider,
-              email: newUser.email,
-              firstName: newUser.firstName,
-              lastName: newUser.lastName,
-            }
-          )
+          new UserRegisteredEvent({
+            userId: newUser.id,
+            email: newUser.email,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            role: newUser.role as
+              | 'client'
+              | 'therapist'
+              | 'moderator'
+              | 'admin',
+            registrationMethod: 'oauth',
+          }),
         );
 
         return {
@@ -574,11 +623,13 @@ export class AuthService {
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           expiresIn: tokens.expiresIn,
-          message: 'Account created successfully'
+          message: 'Account created successfully',
         };
       }
     } catch (error) {
-      throw new InternalServerErrorException(`OAuth login failed: ${error.message}`);
+      throw new InternalServerErrorException(
+        `OAuth login failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -587,7 +638,7 @@ export class AuthService {
   async getFirstSignInStatus(userId: string) {
     const client = await this.prisma.client.findUnique({
       where: { userId },
-      select: { 
+      select: {
         hasSeenTherapistRecommendations: true,
         createdAt: true,
       },

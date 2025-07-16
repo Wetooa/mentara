@@ -188,6 +188,9 @@ export class MessagingService {
     userId: string,
     conversationId: string,
     sendMessageDto: SendMessageDto,
+    attachmentUrls: string[] = [],
+    attachmentNames: string[] = [],
+    attachmentSizes: number[] = [],
   ) {
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
@@ -208,9 +211,14 @@ export class MessagingService {
         content,
         messageType,
         replyToId,
-        attachmentUrl,
-        attachmentName,
-        attachmentSize,
+        // Keep backward compatibility with single attachment fields
+        attachmentUrl: attachmentUrls[0] || attachmentUrl,
+        attachmentName: attachmentNames[0] || attachmentName,
+        attachmentSize: attachmentSizes[0] || attachmentSize,
+        // Add new multiple attachment fields
+        attachmentUrls,
+        attachmentNames,
+        attachmentSizes,
       },
       include: {
         sender: {
@@ -285,9 +293,12 @@ export class MessagingService {
         sentAt: message.createdAt,
         recipientIds,
         replyToMessageId: message.replyToId || undefined,
-        fileAttachments: message.attachmentUrl
-          ? [message.attachmentUrl]
-          : undefined,
+        fileAttachments:
+          attachmentUrls.length > 0
+            ? attachmentUrls
+            : message.attachmentUrl
+              ? [message.attachmentUrl]
+              : undefined,
       }),
     );
 

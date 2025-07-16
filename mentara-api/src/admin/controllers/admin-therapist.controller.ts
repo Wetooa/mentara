@@ -13,10 +13,10 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../guards/admin-auth.guard';
-import { AdminOnly } from '../../decorators/admin-only.decorator';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   ApproveTherapistDtoSchema,
@@ -41,7 +41,8 @@ export class AdminTherapistController {
   @Get('pending')
   @HttpCode(HttpStatus.OK)
   async getPendingApplications(
-    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema)) filters: PendingTherapistFiltersDto,
+    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
+    filters: PendingTherapistFiltersDto,
     @CurrentUserId() adminId: string,
   ) {
     this.logger.log(`Admin ${adminId} fetching pending therapist applications`);
@@ -51,7 +52,8 @@ export class AdminTherapistController {
   @Get('applications')
   @HttpCode(HttpStatus.OK)
   async getAllApplications(
-    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema)) filters: PendingTherapistFiltersDto,
+    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
+    filters: PendingTherapistFiltersDto,
     @CurrentUserId() adminId: string,
   ) {
     this.logger.log(`Admin ${adminId} fetching all therapist applications`);
@@ -64,7 +66,9 @@ export class AdminTherapistController {
     @Param('id') therapistId: string,
     @CurrentUserId() adminId: string,
   ) {
-    this.logger.log(`Admin ${adminId} viewing therapist application ${therapistId}`);
+    this.logger.log(
+      `Admin ${adminId} viewing therapist application ${therapistId}`,
+    );
     return this.adminTherapistService.getApplicationDetails(therapistId);
   }
 
@@ -72,33 +76,50 @@ export class AdminTherapistController {
   @HttpCode(HttpStatus.OK)
   async approveTherapist(
     @Param('id') therapistId: string,
-    @Body(new ZodValidationPipe(ApproveTherapistDtoSchema)) approvalDto: ApproveTherapistDto,
+    @Body(new ZodValidationPipe(ApproveTherapistDtoSchema))
+    approvalDto: ApproveTherapistDto,
     @CurrentUserId() adminId: string,
   ) {
     this.logger.log(`Admin ${adminId} approving therapist ${therapistId}`);
-    return this.adminTherapistService.approveTherapist(therapistId, adminId, approvalDto);
+    return this.adminTherapistService.approveTherapist(
+      therapistId,
+      adminId,
+      approvalDto,
+    );
   }
 
   @Post(':id/reject')
   @HttpCode(HttpStatus.OK)
   async rejectTherapist(
     @Param('id') therapistId: string,
-    @Body(new ZodValidationPipe(RejectTherapistDtoSchema)) rejectionDto: RejectTherapistDto,
+    @Body(new ZodValidationPipe(RejectTherapistDtoSchema))
+    rejectionDto: RejectTherapistDto,
     @CurrentUserId() adminId: string,
   ) {
     this.logger.log(`Admin ${adminId} rejecting therapist ${therapistId}`);
-    return this.adminTherapistService.rejectTherapist(therapistId, adminId, rejectionDto);
+    return this.adminTherapistService.rejectTherapist(
+      therapistId,
+      adminId,
+      rejectionDto,
+    );
   }
 
   @Put(':id/status')
   @HttpCode(HttpStatus.OK)
   async updateTherapistStatus(
     @Param('id') therapistId: string,
-    @Body(new ZodValidationPipe(UpdateTherapistStatusDtoSchema)) statusDto: UpdateTherapistStatusDto,
+    @Body(new ZodValidationPipe(UpdateTherapistStatusDtoSchema))
+    statusDto: UpdateTherapistStatusDto,
     @CurrentUserId() adminId: string,
   ) {
-    this.logger.log(`Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`);
-    return this.adminTherapistService.updateTherapistStatus(therapistId, adminId, statusDto);
+    this.logger.log(
+      `Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`,
+    );
+    return this.adminTherapistService.updateTherapistStatus(
+      therapistId,
+      adminId,
+      statusDto,
+    );
   }
 
   @Get('metrics')
@@ -109,6 +130,9 @@ export class AdminTherapistController {
     @CurrentUserId() adminId?: string,
   ) {
     this.logger.log(`Admin ${adminId} fetching therapist application metrics`);
-    return this.adminTherapistService.getTherapistApplicationMetrics(startDate, endDate);
+    return this.adminTherapistService.getTherapistApplicationMetrics(
+      startDate,
+      endDate,
+    );
   }
 }

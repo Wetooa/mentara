@@ -9,24 +9,28 @@ import {
   Put,
   Post,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   Logger,
   ForbiddenException,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Prisma, User } from '@prisma/client';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { AdminAuthGuard } from 'src/guards/admin-auth.guard';
-import { AdminOnly } from 'src/decorators/admin-only.decorator';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin-auth.guard';
+import { AdminOnly } from 'src/auth/decorators/admin-only.decorator';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
-import { 
+import {
   UserIdParamSchema,
   UpdateUserRequestSchema,
   DeactivateUserDtoSchema,
   type UserIdParam,
   type UpdateUserRequest,
-  type DeactivateUserDto
+  type DeactivateUserDto,
 } from 'mentara-commons';
 import { UsersService } from './users.service';
+import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { RoleUtils } from 'src/utils/role-utils';
 
 @Controller('users')
@@ -36,6 +40,7 @@ export class UsersController {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly supabaseStorageService: SupabaseStorageService,
     private readonly roleUtils: RoleUtils,
   ) {}
 
@@ -112,10 +117,18 @@ export class UsersController {
   }
 
   @Put(':id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
+  )
   async update(
     @Param('id') id: string,
     @Body() userData: Prisma.UserUpdateInput,
     @CurrentUserId() currentUserId: string,
+    @UploadedFiles()
+    files?: { avatar?: Express.Multer.File[]; cover?: Express.Multer.File[] },
   ): Promise<User> {
     try {
       // Users can only update their own profile unless they're admin
@@ -125,6 +138,44 @@ export class UsersController {
         throw new ForbiddenException('You can only update your own profile');
       }
 
+      // Handle file uploads if provided
+      let avatarUrl: string | undefined;
+      let coverImageUrl: string | undefined;
+
+      if (files?.avatar?.[0]) {
+        const validation = this.supabaseStorageService.validateFile(
+          files.avatar[0],
+        );
+        if (!validation.isValid) {
+          throw new HttpException(
+            `Avatar validation failed: ${validation.error}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        const uploadResult = await this.supabaseStorageService.uploadFile(
+          files.avatar[0],
+          SupabaseStorageService.getSupportedBuckets().USER_PROFILES,
+        );
+        avatarUrl = uploadResult.url;
+      }
+
+      if (files?.cover?.[0]) {
+        const validation = this.supabaseStorageService.validateFile(
+          files.cover[0],
+        );
+        if (!validation.isValid) {
+          throw new HttpException(
+            `Cover image validation failed: ${validation.error}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        const uploadResult = await this.supabaseStorageService.uploadFile(
+          files.cover[0],
+          SupabaseStorageService.getSupportedBuckets().USER_PROFILES,
+        );
+        coverImageUrl = uploadResult.url;
+      }
+
       // Prevent non-admins from changing sensitive fields
       if (!isAdmin) {
         const allowedFields = [
@@ -132,6 +183,7 @@ export class UsersController {
           'lastName',
           'bio',
           'avatarUrl',
+          'coverImageUrl',
           'phoneNumber',
           'timezone',
           'language',
@@ -146,6 +198,10 @@ export class UsersController {
         }
         userData = sanitizedData;
       }
+
+      // Add uploaded file URLs to userData
+      if (avatarUrl) userData.avatarUrl = avatarUrl;
+      if (coverImageUrl) userData.coverImageUrl = coverImageUrl;
 
       return await this.usersService.update(id, userData);
     } catch (error) {

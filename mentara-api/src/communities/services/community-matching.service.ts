@@ -76,11 +76,11 @@ export class CommunityMatchingService {
           'anxiety-depression',
           'mental-wellness',
           'recovery-journey',
-          'therapy-discussion'
+          'therapy-discussion',
         ],
-        weight: 0.8 // High weight for depression matching
+        weight: 0.8, // High weight for depression matching
       },
-      
+
       // GAD-7 Anxiety Scale (0-21)
       gad7: {
         score: 0,
@@ -90,11 +90,11 @@ export class CommunityMatchingService {
           'social-anxiety',
           'anxiety-depression',
           'mindfulness-meditation',
-          'coping-strategies'
+          'coping-strategies',
         ],
-        weight: 0.7
+        weight: 0.7,
       },
-      
+
       // PTSD-5 Scale (0-20)
       ptsd5: {
         score: 0,
@@ -104,11 +104,11 @@ export class CommunityMatchingService {
           'veterans-support',
           'complex-trauma',
           'healing-journey',
-          'therapy-discussion'
+          'therapy-discussion',
         ],
-        weight: 0.9 // Very high weight for PTSD matching
+        weight: 0.9, // Very high weight for PTSD matching
       },
-      
+
       // Additional assessments can be added here
       // bipolar: { score: 0, communities: ['bipolar-support', 'mood-disorders'], weight: 0.8 },
       // ocd: { score: 0, communities: ['ocd-support', 'anxiety-disorders'], weight: 0.7 },
@@ -120,7 +120,7 @@ export class CommunityMatchingService {
    */
   async calculateCompatibilityScore(
     userAssessmentProfile: UserAssessmentProfile,
-    communitySlug: string
+    communitySlug: string,
   ): Promise<CommunityCompatibilityResult> {
     const mappings = this.getAssessmentCommunityMappings();
     let totalScore = 0;
@@ -131,7 +131,7 @@ export class CommunityMatchingService {
     // Get community information
     const community = await this.prisma.community.findUnique({
       where: { slug: communitySlug },
-      select: { id: true, name: true, slug: true }
+      select: { id: true, name: true, slug: true },
     });
 
     if (!community) {
@@ -139,7 +139,9 @@ export class CommunityMatchingService {
     }
 
     // Calculate contribution from each assessment
-    for (const [assessmentType, assessmentData] of Object.entries(userAssessmentProfile.assessments)) {
+    for (const [assessmentType, assessmentData] of Object.entries(
+      userAssessmentProfile.assessments,
+    )) {
       const mapping = mappings[assessmentType];
       if (!mapping) continue;
 
@@ -148,35 +150,43 @@ export class CommunityMatchingService {
 
       if (isRelevantCommunity) {
         // Calculate compatibility based on severity and community focus
-        const severityMultiplier = this.getSeverityMultiplier(assessmentType, userScore);
-        const communitySpecificityBonus = this.getCommunitySpecificityBonus(communitySlug, assessmentType);
-        
-        const contribution = severityMultiplier * communitySpecificityBonus * mapping.weight;
-        
+        const severityMultiplier = this.getSeverityMultiplier(
+          assessmentType,
+          userScore,
+        );
+        const communitySpecificityBonus = this.getCommunitySpecificityBonus(
+          communitySlug,
+          assessmentType,
+        );
+
+        const contribution =
+          severityMultiplier * communitySpecificityBonus * mapping.weight;
+
         totalScore += contribution;
         totalWeight += mapping.weight;
-        
+
         matchingFactors.push(
-          `${assessmentType.toUpperCase()} (${assessmentData.severity})`
+          `${assessmentType.toUpperCase()} (${assessmentData.severity})`,
         );
-        
+
         assessmentContributions[assessmentType] = {
           score: userScore,
           weight: mapping.weight,
-          contribution: contribution
+          contribution: contribution,
         };
       }
     }
 
     // Normalize score to 0-1 range
-    const compatibilityScore = totalWeight > 0 ? Math.min(totalScore / totalWeight, 1.0) : 0;
+    const compatibilityScore =
+      totalWeight > 0 ? Math.min(totalScore / totalWeight, 1.0) : 0;
 
     // Generate reasoning text
     const reasoning = this.generateReasoningText(
       community.name,
       matchingFactors,
       compatibilityScore,
-      assessmentContributions
+      assessmentContributions,
     );
 
     return {
@@ -185,7 +195,7 @@ export class CommunityMatchingService {
       compatibilityScore,
       reasoning,
       matchingFactors,
-      assessmentContributions
+      assessmentContributions,
     };
   }
 
@@ -201,21 +211,21 @@ export class CommunityMatchingService {
         if (score <= 14) return 0.9; // Moderate depression - high community benefit
         if (score <= 19) return 1.0; // Moderately severe - maximum community benefit
         return 1.0; // Severe depression - maximum community benefit
-        
+
       case 'gad7':
         // GAD-7: 0-4 minimal, 5-9 mild, 10-14 moderate, 15-21 severe
         if (score <= 4) return 0.3;
         if (score <= 9) return 0.6;
         if (score <= 14) return 0.9;
         return 1.0;
-        
+
       case 'ptsd5':
         // PTSD-5: 0-2 minimal, 3-7 mild, 8-14 moderate, 15-20 severe
         if (score <= 2) return 0.3;
         if (score <= 7) return 0.6;
         if (score <= 14) return 0.9;
         return 1.0;
-        
+
       default:
         return 0.5; // Default multiplier for unknown assessment types
     }
@@ -224,7 +234,10 @@ export class CommunityMatchingService {
   /**
    * Get bonus for community-specific focus
    */
-  private getCommunitySpecificityBonus(communitySlug: string, assessmentType: string): number {
+  private getCommunitySpecificityBonus(
+    communitySlug: string,
+    assessmentType: string,
+  ): number {
     // Bonus for highly specific communities
     const specificCommunities = {
       'depression-support': ['phq9'],
@@ -232,7 +245,7 @@ export class CommunityMatchingService {
       'ptsd-support': ['ptsd5'],
       'trauma-recovery': ['ptsd5'],
       'panic-disorder': ['gad7'],
-      'social-anxiety': ['gad7']
+      'social-anxiety': ['gad7'],
     };
 
     const communityAssessments = specificCommunities[communitySlug];
@@ -241,7 +254,11 @@ export class CommunityMatchingService {
     }
 
     // General communities get no bonus
-    const generalCommunities = ['general-support', 'mental-wellness', 'therapy-discussion'];
+    const generalCommunities = [
+      'general-support',
+      'mental-wellness',
+      'therapy-discussion',
+    ];
     if (generalCommunities.includes(communitySlug)) {
       return 0.8; // Slight reduction for general communities
     }
@@ -256,74 +273,90 @@ export class CommunityMatchingService {
     communityName: string,
     matchingFactors: string[],
     compatibilityScore: number,
-    assessmentContributions: { [key: string]: any }
+    assessmentContributions: { [key: string]: any },
   ): string {
     const scorePercentage = Math.round(compatibilityScore * 100);
-    
+
     let reasoning = `Based on your assessment results, you have a ${scorePercentage}% compatibility with ${communityName}. `;
-    
+
     if (matchingFactors.length > 0) {
       reasoning += `This recommendation is based on your ${matchingFactors.join(', ')} scores. `;
     }
-    
+
     if (compatibilityScore >= 0.8) {
-      reasoning += "This community appears to be an excellent match for your current needs and may provide valuable support and resources.";
+      reasoning +=
+        'This community appears to be an excellent match for your current needs and may provide valuable support and resources.';
     } else if (compatibilityScore >= 0.6) {
-      reasoning += "This community could be a good fit and may offer helpful support for your situation.";
+      reasoning +=
+        'This community could be a good fit and may offer helpful support for your situation.';
     } else if (compatibilityScore >= 0.4) {
-      reasoning += "This community may provide some relevant support, though it might not be the most targeted for your specific needs.";
+      reasoning +=
+        'This community may provide some relevant support, though it might not be the most targeted for your specific needs.';
     } else {
-      reasoning += "While this community offers general support, there may be other communities that are more specifically aligned with your assessment results.";
+      reasoning +=
+        'While this community offers general support, there may be other communities that are more specifically aligned with your assessment results.';
     }
-    
+
     return reasoning;
   }
 
   /**
    * Get comprehensive community recommendations for a user
    */
-  async getRecommendationsForUser(userId: string): Promise<CommunityCompatibilityResult[]> {
+  async getRecommendationsForUser(
+    userId: string,
+  ): Promise<CommunityCompatibilityResult[]> {
     try {
       // Get user's latest assessment scores
       const userAssessmentProfile = await this.getUserAssessmentProfile(userId);
-      
-      if (!userAssessmentProfile || Object.keys(userAssessmentProfile.assessments).length === 0) {
+
+      if (
+        !userAssessmentProfile ||
+        Object.keys(userAssessmentProfile.assessments).length === 0
+      ) {
         this.logger.warn(`No assessment data found for user ${userId}`);
         return [];
       }
 
       // Get all available communities
       const communities = await this.prisma.community.findMany({
-        select: { slug: true, name: true }
+        select: { slug: true, name: true },
       });
 
       // Calculate compatibility for each community
       const recommendations: CommunityCompatibilityResult[] = [];
-      
+
       for (const community of communities) {
         try {
           const compatibility = await this.calculateCompatibilityScore(
             userAssessmentProfile,
-            community.slug
+            community.slug,
           );
-          
+
           // Only include communities with meaningful compatibility (>20%)
           if (compatibility.compatibilityScore > 0.2) {
             recommendations.push(compatibility);
           }
         } catch (error) {
-          this.logger.error(`Error calculating compatibility for ${community.slug}:`, error);
+          this.logger.error(
+            `Error calculating compatibility for ${community.slug}:`,
+            error,
+          );
         }
       }
 
       // Sort by compatibility score (highest first)
-      recommendations.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+      recommendations.sort(
+        (a, b) => b.compatibilityScore - a.compatibilityScore,
+      );
 
       // Return top 10 recommendations
       return recommendations.slice(0, 10);
-      
     } catch (error) {
-      this.logger.error(`Error getting recommendations for user ${userId}:`, error);
+      this.logger.error(
+        `Error getting recommendations for user ${userId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -331,17 +364,18 @@ export class CommunityMatchingService {
   /**
    * Get user's assessment profile from database
    */
-  private async getUserAssessmentProfile(userId: string): Promise<UserAssessmentProfile | null> {
+  private async getUserAssessmentProfile(
+    userId: string,
+  ): Promise<UserAssessmentProfile | null> {
     try {
       // Get user's pre-assessment data
       const preAssessment = await this.prisma.preAssessment.findUnique({
-        where: { userId },
+        where: { clientId: userId },
         select: {
-          phq9Score: true,
-          gad7Score: true,
-          ptsd5Score: true,
-          completedAt: true
-        }
+          scores: true,
+          severityLevels: true,
+          createdAt: true,
+        },
       });
 
       if (!preAssessment) {
@@ -349,40 +383,45 @@ export class CommunityMatchingService {
       }
 
       const assessments: { [key: string]: any } = {};
+      const scores = preAssessment.scores as any;
+      const severityLevels = preAssessment.severityLevels as any;
 
-      // Map PHQ-9 score
-      if (preAssessment.phq9Score !== null) {
+      // Map PHQ-9 score from JSON data
+      if (scores?.phq9Score !== null && scores?.phq9Score !== undefined) {
         assessments.phq9 = {
-          score: preAssessment.phq9Score,
-          severity: this.getDepressionSeverity(preAssessment.phq9Score),
-          date: preAssessment.completedAt
+          score: scores.phq9Score,
+          severity: this.getDepressionSeverity(scores.phq9Score),
+          date: preAssessment.createdAt,
         };
       }
 
-      // Map GAD-7 score
-      if (preAssessment.gad7Score !== null) {
+      // Map GAD-7 score from JSON data
+      if (scores?.gad7Score !== null && scores?.gad7Score !== undefined) {
         assessments.gad7 = {
-          score: preAssessment.gad7Score,
-          severity: this.getAnxietySeverity(preAssessment.gad7Score),
-          date: preAssessment.completedAt
+          score: scores.gad7Score,
+          severity: this.getAnxietySeverity(scores.gad7Score),
+          date: preAssessment.createdAt,
         };
       }
 
-      // Map PTSD-5 score
-      if (preAssessment.ptsd5Score !== null) {
+      // Map PTSD-5 score from JSON data
+      if (scores?.ptsd5Score !== null && scores?.ptsd5Score !== undefined) {
         assessments.ptsd5 = {
-          score: preAssessment.ptsd5Score,
-          severity: this.getPTSDSeverity(preAssessment.ptsd5Score),
-          date: preAssessment.completedAt
+          score: scores.ptsd5Score,
+          severity: this.getPTSDSeverity(scores.ptsd5Score),
+          date: preAssessment.createdAt,
         };
       }
 
       return {
         userId,
-        assessments
+        assessments,
       };
     } catch (error) {
-      this.logger.error(`Error getting assessment profile for user ${userId}:`, error);
+      this.logger.error(
+        `Error getting assessment profile for user ${userId}:`,
+        error,
+      );
       return null;
     }
   }
@@ -421,22 +460,31 @@ export class CommunityMatchingService {
   /**
    * Detect when user's assessments have changed and trigger recommendation refresh
    */
-  async handleAssessmentChange(userId: string, assessmentType: string): Promise<void> {
+  async handleAssessmentChange(
+    userId: string,
+    assessmentType: string,
+  ): Promise<void> {
     try {
-      this.logger.log(`Assessment change detected for user ${userId}: ${assessmentType}`);
-      
+      this.logger.log(
+        `Assessment change detected for user ${userId}: ${assessmentType}`,
+      );
+
       // Get new recommendations
       const newRecommendations = await this.getRecommendationsForUser(userId);
-      
+
       // Store recommendations in database (will be handled by CommunityRecommendationService)
       // For now, just log the change
-      this.logger.log(`Generated ${newRecommendations.length} new recommendations for user ${userId}`);
-      
+      this.logger.log(
+        `Generated ${newRecommendations.length} new recommendations for user ${userId}`,
+      );
+
       // TODO: Trigger notification to user about new community matches
       // TODO: Update existing recommendations if they exist
-      
     } catch (error) {
-      this.logger.error(`Error handling assessment change for user ${userId}:`, error);
+      this.logger.error(
+        `Error handling assessment change for user ${userId}:`,
+        error,
+      );
     }
   }
 }

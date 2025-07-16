@@ -253,4 +253,38 @@ export class EmailService {
       };
     }
   }
+
+  /**
+   * Public method for sending generic emails
+   */
+  async sendGenericEmail(emailData: {
+    to: string;
+    subject: string;
+    template: string;
+    data: any;
+  }): Promise<void> {
+    try {
+      console.log('Sending email:', {
+        to: emailData.to,
+        subject: emailData.subject,
+        template: emailData.template,
+      });
+
+      // For now, this is a placeholder implementation
+      // In production, integrate with actual email service like SendGrid, AWS SES, etc.
+      const emailContent = {
+        subject: emailData.subject,
+        template: emailData.template,
+        ...emailData.data,
+      };
+      const result = this.sendEmail(emailContent, emailData.to);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send email');
+      }
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      throw error;
+    }
+  }
 }

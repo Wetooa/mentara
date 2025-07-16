@@ -1,9 +1,9 @@
 /**
  * Automated Security Testing Framework
- * 
+ *
  * Advanced security testing automation specifically designed to support
  * Backend Agent's Phase 1 controller audit and security validation.
- * 
+ *
  * Features:
  * - OWASP Top 10 vulnerability scanning
  * - Automated penetration testing
@@ -17,7 +17,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../app.module';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import { createMockClerkClient, createMockAuthGuard } from '../index';
 
 export interface SecurityTestConfig {
@@ -87,9 +87,9 @@ interface TestResult {
 }
 
 export class SecurityAutomationFramework {
-  private app: INestApplication;
-  private prisma: PrismaService;
-  private moduleRef: TestingModule;
+  private app!: INestApplication;
+  private prisma!: PrismaService;
+  private moduleRef!: TestingModule;
 
   constructor() {}
 
@@ -123,7 +123,9 @@ export class SecurityAutomationFramework {
   /**
    * Run comprehensive security testing
    */
-  async runSecurityTests(config: SecurityTestConfig): Promise<SecurityTestResults> {
+  async runSecurityTests(
+    config: SecurityTestConfig,
+  ): Promise<SecurityTestResults> {
     console.log('🔒 Starting comprehensive security testing...');
 
     const vulnerabilities: SecurityVulnerability[] = [];
@@ -176,10 +178,11 @@ export class SecurityAutomationFramework {
     // Analyze results
     const summary = this.analyzeSummary(vulnerabilities, detailedResults);
     const complianceStatus = this.assessCompliance(vulnerabilities);
-    const recommendations = this.generateSecurityRecommendations(vulnerabilities);
+    const recommendations =
+      this.generateSecurityRecommendations(vulnerabilities);
 
     console.log('✅ Security testing completed');
-    
+
     return {
       summary,
       vulnerabilities,
@@ -199,7 +202,7 @@ export class SecurityAutomationFramework {
     const tests: TestResult[] = [];
     const vulnerabilities: SecurityVulnerability[] = [];
 
-    for (const endpoint of endpoints.filter(ep => ep.requiresAuth)) {
+    for (const endpoint of endpoints.filter((ep) => ep.requiresAuth)) {
       // Test 1: Unauthenticated access should be denied
       try {
         const response = await request(this.app.getHttpServer())
@@ -215,7 +218,7 @@ export class SecurityAutomationFramework {
                 remediation: 'Implement proper authentication guards',
                 owaspCategory: 'A01:2021 – Broken Access Control',
               });
-              
+
               tests.push({
                 testName: 'Unauthenticated Access Denied',
                 endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -253,7 +256,7 @@ export class SecurityAutomationFramework {
                 remediation: 'Implement proper token validation',
                 owaspCategory: 'A02:2021 – Cryptographic Failures',
               });
-              
+
               tests.push({
                 testName: 'Invalid Token Rejected',
                 endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -289,11 +292,16 @@ export class SecurityAutomationFramework {
     const tests: TestResult[] = [];
     const vulnerabilities: SecurityVulnerability[] = [];
 
-    for (const endpoint of endpoints.filter(ep => ep.roles && ep.roles.length > 0)) {
+    for (const endpoint of endpoints.filter(
+      (ep) => ep.roles && ep.roles.length > 0,
+    )) {
       // Test role-based access control
-      const unauthorizedRoles = ['client', 'therapist', 'moderator', 'admin'].filter(
-        role => !endpoint.roles!.includes(role)
-      );
+      const unauthorizedRoles = [
+        'client',
+        'therapist',
+        'moderator',
+        'admin',
+      ].filter((role) => !endpoint.roles!.includes(role));
 
       for (const role of unauthorizedRoles) {
         try {
@@ -336,39 +344,50 @@ export class SecurityAutomationFramework {
       // SQL Injection
       { name: "'; DROP TABLE users; --", type: 'SQL Injection' },
       { email: "test@test.com'; DELETE FROM users; --", type: 'SQL Injection' },
-      
+
       // XSS
       { comment: '<script>alert("XSS")</script>', type: 'XSS' },
       { name: '<img src=x onerror=alert("XSS")>', type: 'XSS' },
-      
+
       // Command Injection
       { filename: '"; rm -rf /; echo "', type: 'Command Injection' },
-      
+
       // Path Traversal
       { file: '../../../etc/passwd', type: 'Path Traversal' },
-      
+
       // XXE
-      { xml: '<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM "file:///etc/passwd">]><root>&test;</root>', type: 'XXE' },
+      {
+        xml: '<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM "file:///etc/passwd">]><root>&test;</root>',
+        type: 'XXE',
+      },
     ];
 
-    for (const endpoint of endpoints.filter(ep => ['POST', 'PUT', 'PATCH'].includes(ep.method))) {
+    for (const endpoint of endpoints.filter((ep) =>
+      ['POST', 'PUT', 'PATCH'].includes(ep.method),
+    )) {
       for (const payload of maliciousPayloads) {
         try {
           const response = await request(this.app.getHttpServer())
             [endpoint.method.toLowerCase() as 'post'](endpoint.path)
             .send(payload)
             .expect((res) => {
-              if (res.status === 200 || (res.text && res.text.includes('<script>'))) {
+              if (
+                res.status === 200 ||
+                (res.text && res.text.includes('<script>'))
+              ) {
                 vulnerabilities.push({
                   severity: payload.type.includes('SQL') ? 'CRITICAL' : 'HIGH',
                   category: 'Input Validation',
                   endpoint: `${endpoint.method} ${endpoint.path}`,
                   vulnerability: payload.type,
                   description: `Endpoint vulnerable to ${payload.type} attacks`,
-                  remediation: 'Implement proper input validation and sanitization',
-                  owaspCategory: payload.type.includes('SQL') ? 'A03:2021 – Injection' : 'A07:2021 – Cross-Site Scripting',
+                  remediation:
+                    'Implement proper input validation and sanitization',
+                  owaspCategory: payload.type.includes('SQL')
+                    ? 'A03:2021 – Injection'
+                    : 'A07:2021 – Cross-Site Scripting',
                 });
-                
+
                 tests.push({
                   testName: `${payload.type} Protection`,
                   endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -413,8 +432,15 @@ export class SecurityAutomationFramework {
     const vulnerabilities: SecurityVulnerability[] = [];
 
     const sensitiveFields = [
-      'password', 'ssn', 'creditCard', 'bankAccount', 'healthRecord',
-      'diagnosis', 'medication', 'therapy_notes', 'session_notes'
+      'password',
+      'ssn',
+      'creditCard',
+      'bankAccount',
+      'healthRecord',
+      'diagnosis',
+      'medication',
+      'therapy_notes',
+      'session_notes',
     ];
 
     for (const endpoint of endpoints) {
@@ -431,10 +457,11 @@ export class SecurityAutomationFramework {
                     endpoint: `${endpoint.method} ${endpoint.path}`,
                     vulnerability: 'Sensitive Data Exposure',
                     description: `Response may contain sensitive field: ${field}`,
-                    remediation: 'Implement data minimization and response filtering',
+                    remediation:
+                      'Implement data minimization and response filtering',
                     hipaaImpact: endpoint.handlesHealthData,
                   });
-                  
+
                   tests.push({
                     testName: 'Sensitive Data Exposure Check',
                     endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -490,7 +517,7 @@ export class SecurityAutomationFramework {
                   remediation: `Configure ${header} header in security middleware`,
                   owaspCategory: 'A05:2021 – Security Misconfiguration',
                 });
-                
+
                 tests.push({
                   testName: `Security Header: ${header}`,
                   endpoint: 'Global',
@@ -527,7 +554,7 @@ export class SecurityAutomationFramework {
     const tests: TestResult[] = [];
     const vulnerabilities: SecurityVulnerability[] = [];
 
-    const healthDataEndpoints = endpoints.filter(ep => ep.handlesHealthData);
+    const healthDataEndpoints = endpoints.filter((ep) => ep.handlesHealthData);
 
     for (const endpoint of healthDataEndpoints) {
       // HIPAA requires encryption in transit
@@ -541,7 +568,7 @@ export class SecurityAutomationFramework {
           remediation: 'Enforce HTTPS for all health data endpoints',
           hipaaImpact: true,
         });
-        
+
         tests.push({
           testName: 'HIPAA: Encryption in Transit',
           endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -562,7 +589,7 @@ export class SecurityAutomationFramework {
           remediation: 'Implement authentication for all health data endpoints',
           hipaaImpact: true,
         });
-        
+
         tests.push({
           testName: 'HIPAA: Access Controls',
           endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -581,7 +608,7 @@ export class SecurityAutomationFramework {
    */
   private async runOWASPTop10Tests(
     endpoints: SecurityEndpoint[],
-    vulnerabilities: SecurityVulnerability[]
+    vulnerabilities: SecurityVulnerability[],
   ): Promise<void> {
     // A01:2021 – Broken Access Control (covered in auth/authz tests)
     // A02:2021 – Cryptographic Failures (covered in HIPAA tests)
@@ -595,23 +622,30 @@ export class SecurityAutomationFramework {
     // A10:2021 – Server-Side Request Forgery (SSRF)
 
     // Additional OWASP-specific tests can be added here
-    console.log('OWASP Top 10 coverage implemented through individual test categories');
+    console.log(
+      'OWASP Top 10 coverage implemented through individual test categories',
+    );
   }
 
   /**
    * Analyze summary statistics
    */
-  private analyzeSummary(vulnerabilities: SecurityVulnerability[], detailedResults: any): any {
+  private analyzeSummary(
+    vulnerabilities: SecurityVulnerability[],
+    detailedResults: any,
+  ): any {
     const allTests = Object.values(detailedResults).flat() as TestResult[];
-    
+
     return {
       totalTests: allTests.length,
-      passed: allTests.filter(t => t.passed).length,
-      failed: allTests.filter(t => !t.passed).length,
-      criticalIssues: vulnerabilities.filter(v => v.severity === 'CRITICAL').length,
-      highIssues: vulnerabilities.filter(v => v.severity === 'HIGH').length,
-      mediumIssues: vulnerabilities.filter(v => v.severity === 'MEDIUM').length,
-      lowIssues: vulnerabilities.filter(v => v.severity === 'LOW').length,
+      passed: allTests.filter((t) => t.passed).length,
+      failed: allTests.filter((t) => !t.passed).length,
+      criticalIssues: vulnerabilities.filter((v) => v.severity === 'CRITICAL')
+        .length,
+      highIssues: vulnerabilities.filter((v) => v.severity === 'HIGH').length,
+      mediumIssues: vulnerabilities.filter((v) => v.severity === 'MEDIUM')
+        .length,
+      lowIssues: vulnerabilities.filter((v) => v.severity === 'LOW').length,
     };
   }
 
@@ -619,9 +653,11 @@ export class SecurityAutomationFramework {
    * Assess compliance status
    */
   private assessCompliance(vulnerabilities: SecurityVulnerability[]): any {
-    const criticalIssues = vulnerabilities.filter(v => v.severity === 'CRITICAL').length;
-    const hipaaIssues = vulnerabilities.filter(v => v.hipaaImpact).length;
-    const owaspIssues = vulnerabilities.filter(v => v.owaspCategory).length;
+    const criticalIssues = vulnerabilities.filter(
+      (v) => v.severity === 'CRITICAL',
+    ).length;
+    const hipaaIssues = vulnerabilities.filter((v) => v.hipaaImpact).length;
+    const owaspIssues = vulnerabilities.filter((v) => v.owaspCategory).length;
 
     return {
       owasp: owaspIssues === 0,
@@ -633,29 +669,45 @@ export class SecurityAutomationFramework {
   /**
    * Generate security recommendations
    */
-  private generateSecurityRecommendations(vulnerabilities: SecurityVulnerability[]): string[] {
+  private generateSecurityRecommendations(
+    vulnerabilities: SecurityVulnerability[],
+  ): string[] {
     const recommendations: string[] = [];
 
-    const criticalCount = vulnerabilities.filter(v => v.severity === 'CRITICAL').length;
-    const highCount = vulnerabilities.filter(v => v.severity === 'HIGH').length;
+    const criticalCount = vulnerabilities.filter(
+      (v) => v.severity === 'CRITICAL',
+    ).length;
+    const highCount = vulnerabilities.filter(
+      (v) => v.severity === 'HIGH',
+    ).length;
 
     if (criticalCount > 0) {
-      recommendations.push(`URGENT: Address ${criticalCount} critical security vulnerabilities before deployment`);
+      recommendations.push(
+        `URGENT: Address ${criticalCount} critical security vulnerabilities before deployment`,
+      );
     }
 
     if (highCount > 0) {
-      recommendations.push(`HIGH PRIORITY: Resolve ${highCount} high-severity security issues`);
+      recommendations.push(
+        `HIGH PRIORITY: Resolve ${highCount} high-severity security issues`,
+      );
     }
 
-    const categories = [...new Set(vulnerabilities.map(v => v.category))];
+    const categories = [...new Set(vulnerabilities.map((v) => v.category))];
     for (const category of categories) {
-      const categoryCount = vulnerabilities.filter(v => v.category === category).length;
-      recommendations.push(`Review and enhance ${category.toLowerCase()} security controls (${categoryCount} issues)`);
+      const categoryCount = vulnerabilities.filter(
+        (v) => v.category === category,
+      ).length;
+      recommendations.push(
+        `Review and enhance ${category.toLowerCase()} security controls (${categoryCount} issues)`,
+      );
     }
 
-    const hipaaIssues = vulnerabilities.filter(v => v.hipaaImpact).length;
+    const hipaaIssues = vulnerabilities.filter((v) => v.hipaaImpact).length;
     if (hipaaIssues > 0) {
-      recommendations.push(`COMPLIANCE: Address ${hipaaIssues} HIPAA compliance issues for health data protection`);
+      recommendations.push(
+        `COMPLIANCE: Address ${hipaaIssues} HIPAA compliance issues for health data protection`,
+      );
     }
 
     return recommendations;
@@ -665,10 +717,12 @@ export class SecurityAutomationFramework {
 // Export utility functions for Backend Agent integration
 export const createSecurityTestSuite = () => new SecurityAutomationFramework();
 
-export const runEndpointSecurityAudit = async (config: SecurityTestConfig): Promise<SecurityTestResults> => {
+export const runEndpointSecurityAudit = async (
+  config: SecurityTestConfig,
+): Promise<SecurityTestResults> => {
   const securitySuite = createSecurityTestSuite();
   await securitySuite.initialize();
-  
+
   try {
     const results = await securitySuite.runSecurityTests(config);
     return results;
@@ -706,7 +760,7 @@ export const CriticalEndpointSecurityConfigs = {
     testDataExposure: true,
     testInputValidation: true,
   },
-  
+
   bookingEndpoints: {
     endpoints: [
       {

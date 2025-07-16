@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { EmailService } from '../../services/email.service';
 import { TokenService } from './token.service';
@@ -15,10 +19,10 @@ export class EmailVerificationService {
   async sendVerificationEmail(userId: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { 
-        id: true, 
-        email: true, 
-        firstName: true, 
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
         emailVerified: true,
         emailVerifyToken: true,
         emailVerifyTokenExp: true,
@@ -34,14 +38,23 @@ export class EmailVerificationService {
     }
 
     // Check if there's an existing valid token
-    if (user.emailVerifyToken && user.emailVerifyTokenExp && user.emailVerifyTokenExp > new Date()) {
+    if (
+      user.emailVerifyToken &&
+      user.emailVerifyTokenExp &&
+      user.emailVerifyTokenExp > new Date()
+    ) {
       // Resend existing token (rate limiting would be handled at controller level)
-      await this.sendVerificationEmailWithToken(user.email, user.firstName, user.emailVerifyToken);
+      await this.sendVerificationEmailWithToken(
+        user.email,
+        user.firstName,
+        user.emailVerifyToken,
+      );
       return;
     }
 
     // Generate new verification token
-    const { token, hashedToken, expiresAt } = await this.tokenService.generateEmailVerificationToken();
+    const { token, hashedToken, expiresAt } =
+      await this.tokenService.generateEmailVerificationToken();
 
     // Update user with new token
     await this.prisma.user.update({
@@ -53,10 +66,16 @@ export class EmailVerificationService {
     });
 
     // Send verification email
-    await this.sendVerificationEmailWithToken(user.email, user.firstName, token);
+    await this.sendVerificationEmailWithToken(
+      user.email,
+      user.firstName,
+      token,
+    );
   }
 
-  async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+  async verifyEmail(
+    token: string,
+  ): Promise<{ success: boolean; message: string }> {
     if (!token) {
       throw new BadRequestException('Verification token is required');
     }
@@ -116,10 +135,10 @@ export class EmailVerificationService {
   async resendVerificationEmail(email: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { email },
-      select: { 
-        id: true, 
-        email: true, 
-        firstName: true, 
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
         emailVerified: true,
       },
     });
@@ -137,14 +156,14 @@ export class EmailVerificationService {
   }
 
   private async sendVerificationEmailWithToken(
-    email: string, 
-    firstName: string, 
-    token: string
+    email: string,
+    firstName: string,
+    token: string,
   ): Promise<void> {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
-    
+
     try {
-      await this.emailService.sendEmail({
+      await this.emailService.sendGenericEmail({
         to: email,
         subject: 'Verify Your Mentara Account',
         template: 'email-verification',

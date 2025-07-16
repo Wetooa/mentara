@@ -54,11 +54,15 @@ export class ClientRequestService {
         });
 
         if (!therapist) {
-          throw new NotFoundException(`Therapist with ID ${therapistId} not found`);
+          throw new NotFoundException(
+            `Therapist with ID ${therapistId} not found`,
+          );
         }
 
         if (therapist.status !== 'approved') {
-          throw new BadRequestException('Cannot send request to unapproved therapist');
+          throw new BadRequestException(
+            'Cannot send request to unapproved therapist',
+          );
         }
 
         if (!therapist.user.isActive) {
@@ -142,7 +146,10 @@ export class ClientRequestService {
           title: 'New Client Request',
           message: `${client.user.firstName} ${client.user.lastName} has sent you a therapy request.`,
           type: 'CLIENT_REQUEST_RECEIVED',
-          priority: requestDto.priority === 'HIGH' || requestDto.priority === 'URGENT' ? 'HIGH' : 'NORMAL',
+          priority:
+            requestDto.priority === 'HIGH' || requestDto.priority === 'URGENT'
+              ? 'HIGH'
+              : 'NORMAL',
           actionUrl: `/therapist/requests/${request.id}`,
           data: {
             requestId: request.id,
@@ -181,24 +188,37 @@ export class ClientRequestService {
         };
       });
     } catch (error) {
-      this.logger.error(`Failed to send therapist request from ${clientId} to ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to send therapist request from ${clientId} to ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
 
   async sendMultipleTherapistRequests(
     clientId: string,
-    requestData: { therapistIds: string[]; message?: string; priority?: string },
+    requestData: {
+      therapistIds: string[];
+      message?: string;
+      priority?: string;
+    },
   ) {
     try {
       const { therapistIds, message, priority = 'NORMAL' } = requestData;
 
       // Validate therapist IDs limit
       if (therapistIds.length > 10) {
-        throw new BadRequestException('Cannot send requests to more than 10 therapists at once');
+        throw new BadRequestException(
+          'Cannot send requests to more than 10 therapists at once',
+        );
       }
 
-      const results = {
+      const results: {
+        successful: Array<{ therapistId: string; requestId: string; status: string }>;
+        failed: Array<{ therapistId: string; error: string }>;
+        totalSent: number;
+      } = {
         successful: [],
         failed: [],
         totalSent: 0,
@@ -207,10 +227,14 @@ export class ClientRequestService {
       // Send requests sequentially to avoid database conflicts
       for (const therapistId of therapistIds) {
         try {
-          const result = await this.sendTherapistRequest(clientId, therapistId, {
-            message,
-            priority: priority as any,
-          });
+          const result = await this.sendTherapistRequest(
+            clientId,
+            therapistId,
+            {
+              message,
+              priority: priority as any,
+            },
+          );
 
           results.successful.push({
             therapistId,
@@ -218,12 +242,14 @@ export class ClientRequestService {
             status: 'sent',
           });
           results.totalSent++;
-        } catch (error) {
+        } catch (error: any) {
           results.failed.push({
             therapistId,
-            error: error.message,
+            error: error?.message || 'Unknown error',
           });
-          this.logger.warn(`Failed to send request to therapist ${therapistId}: ${error.message}`);
+          this.logger.warn(
+            `Failed to send request to therapist ${therapistId}: ${error?.message || 'Unknown error'}`,
+          );
         }
       }
 
@@ -241,7 +267,10 @@ export class ClientRequestService {
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to send multiple therapist requests for client ${clientId}:`, error);
+      this.logger.error(
+        `Failed to send multiple therapist requests for client ${clientId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -271,12 +300,11 @@ export class ClientRequestService {
       if (status) where.status = status;
       if (priority) where.priority = priority;
       if (therapistId) where.therapistId = therapistId;
-      if (requestedAfter) where.requestedAt = { gte: new Date(requestedAfter) };
-      if (requestedBefore) {
-        where.requestedAt = { 
-          ...where.requestedAt,
-          lte: new Date(requestedBefore),
-        };
+      if (requestedAfter || requestedBefore) {
+        const requestedAtFilter: any = {};
+        if (requestedAfter) requestedAtFilter.gte = new Date(requestedAfter);
+        if (requestedBefore) requestedAtFilter.lte = new Date(requestedBefore);
+        where.requestedAt = requestedAtFilter;
       }
 
       const [requests, totalCount] = await Promise.all([
@@ -302,7 +330,9 @@ export class ClientRequestService {
         this.prisma.clientTherapistRequest.count({ where }),
       ]);
 
-      this.logger.log(`Retrieved ${requests.length} requests for client ${clientId}`);
+      this.logger.log(
+        `Retrieved ${requests.length} requests for client ${clientId}`,
+      );
 
       return {
         requests,
@@ -315,7 +345,10 @@ export class ClientRequestService {
         filters,
       };
     } catch (error) {
-      this.logger.error(`Failed to retrieve requests for client ${clientId}:`, error);
+      this.logger.error(
+        `Failed to retrieve requests for client ${clientId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -400,7 +433,10 @@ export class ClientRequestService {
         };
       });
     } catch (error) {
-      this.logger.error(`Failed to cancel request ${requestId} for client ${clientId}:`, error);
+      this.logger.error(
+        `Failed to cancel request ${requestId} for client ${clientId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -459,19 +495,23 @@ export class ClientRequestService {
 
       // Calculate acceptance rate
       const totalResponded = accepted + declined;
-      const acceptanceRate = totalResponded > 0 ? (accepted / totalResponded) * 100 : 0;
+      const acceptanceRate =
+        totalResponded > 0 ? (accepted / totalResponded) * 100 : 0;
 
       // Calculate average response time
       const responseTimes = recentRequests
-        .filter(req => req.respondedAt)
-        .map(req => {
-          const responseTime = req.respondedAt!.getTime() - req.requestedAt.getTime();
+        .filter((req) => req.respondedAt)
+        .map((req) => {
+          const responseTime =
+            req.respondedAt!.getTime() - req.requestedAt.getTime();
           return responseTime / (1000 * 60 * 60); // Convert to hours
         });
 
-      const averageResponseTime = responseTimes.length > 0
-        ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
-        : 0;
+      const averageResponseTime =
+        responseTimes.length > 0
+          ? responseTimes.reduce((sum, time) => sum + time, 0) /
+            responseTimes.length
+          : 0;
 
       // Get last request and response dates
       const lastRequest = await this.prisma.clientTherapistRequest.findFirst({
@@ -501,7 +541,10 @@ export class ClientRequestService {
         lastResponseAt: lastResponse?.respondedAt || null,
       };
     } catch (error) {
-      this.logger.error(`Failed to generate statistics for client ${clientId}:`, error);
+      this.logger.error(
+        `Failed to generate statistics for client ${clientId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -512,16 +555,17 @@ export class ClientRequestService {
     try {
       const now = new Date();
 
-      const expiredRequests = await this.prisma.clientTherapistRequest.updateMany({
-        where: {
-          status: 'PENDING',
-          expiresAt: { lte: now },
-        },
-        data: {
-          status: 'EXPIRED',
-          respondedAt: now,
-        },
-      });
+      const expiredRequests =
+        await this.prisma.clientTherapistRequest.updateMany({
+          where: {
+            status: 'PENDING',
+            expiresAt: { lte: now },
+          },
+          data: {
+            status: 'EXPIRED',
+            respondedAt: now,
+          },
+        });
 
       this.logger.log(`Expired ${expiredRequests.count} stale requests`);
 

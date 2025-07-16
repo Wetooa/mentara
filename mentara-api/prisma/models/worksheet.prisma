@@ -10,6 +10,12 @@ model Worksheet {
     isCompleted  Boolean               @default(false) // Completion status
     submittedAt  DateTime? // When the worksheet was submitted
     feedback     String? // Therapist feedback
+    
+    // Additional attachments (beyond materials and submissions)
+    attachmentUrls  String[] @default([])
+    attachmentNames String[] @default([])
+    attachmentSizes Int[]    @default([])
+    
     createdAt    DateTime              @default(now())
     updatedAt    DateTime              @updatedAt
     materials    WorksheetMaterial[]

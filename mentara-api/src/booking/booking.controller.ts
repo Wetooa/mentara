@@ -11,16 +11,16 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../decorators/current-user-role.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
 import { BookingService } from './booking.service';
 import {
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
   MeetingCreateDto,
   MeetingUpdateDto,
-} from '../../schema/booking';
+} from 'mentara-commons';
 
 @Controller('booking')
 @UseGuards(JwtAuthGuard)

@@ -6,10 +6,10 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { TherapistManagementService } from '../therapist-management.service';
-import { ClientResponse } from 'schema/auth';
+// Using any type to avoid conflicts with service definitions
 
 @Controller('therapist/clients')
 @UseGuards(JwtAuthGuard)
@@ -22,7 +22,7 @@ export class TherapistClientController {
   @HttpCode(HttpStatus.OK)
   async getAssignedPatients(
     @CurrentUserId() therapistId: string,
-  ): Promise<ClientResponse[]> {
+  ): Promise<any[]> {
     return this.therapistManagementService.getAssignedPatients(therapistId);
   }
 
@@ -30,7 +30,7 @@ export class TherapistClientController {
   @HttpCode(HttpStatus.OK)
   async getAllClients(
     @CurrentUserId() therapistId: string,
-  ): Promise<ClientResponse[]> {
+  ): Promise<any[]> {
     return this.therapistManagementService.getAllClients(therapistId);
   }
 
@@ -39,7 +39,7 @@ export class TherapistClientController {
   async getClientById(
     @CurrentUserId() therapistId: string,
     @Param('id') clientId: string,
-  ): Promise<ClientResponse> {
+  ): Promise<any> {
     return this.therapistManagementService.getClientById(therapistId, clientId);
   }
 }

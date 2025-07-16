@@ -7,7 +7,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import * as request from 'supertest';
 import { performance } from 'perf_hooks';
 import { TestDataFactory } from '../test-data.factory';

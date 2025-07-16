@@ -28,16 +28,21 @@ describe('ClientService', () => {
   };
 
   const mockTherapist = {
-    id: 'therapist-123',
     userId: 'therapist-user-123',
     hourlyRate: 150,
-    treatmentSuccessRates: {},
+    areasOfExpertise: ['Anxiety', 'Depression'],
+    yearsOfExperience: 5,
+    province: 'Metro Manila',
+    status: 'approved',
     user: {
       id: 'therapist-user-123',
       email: 'therapist@example.com',
       firstName: 'Dr. Jane',
       lastName: 'Smith',
       role: 'therapist',
+      title: 'Clinical Psychologist',
+      bio: 'Experienced therapist specializing in anxiety and depression.',
+      profileImage: 'https://example.com/profile.jpg',
     },
   };
 
@@ -297,7 +302,19 @@ describe('ClientService', () => {
 
       const result = await service.getAssignedTherapist('user-123');
 
-      expect(result).toEqual(mockTherapist);
+      expect(result).toEqual({
+        id: mockTherapist.userId,
+        firstName: mockTherapist.user.firstName,
+        lastName: mockTherapist.user.lastName,
+        title: mockTherapist.user.title,
+        specialties: mockTherapist.areasOfExpertise,
+        hourlyRate: Number(mockTherapist.hourlyRate),
+        experience: mockTherapist.yearsOfExperience,
+        province: mockTherapist.province,
+        isActive: mockTherapist.status === 'approved',
+        bio: mockTherapist.user.bio,
+        profileImage: mockTherapist.user.profileImage,
+      });
       expect(prismaService.clientTherapist.findFirst).toHaveBeenCalledWith({
         where: {
           clientId: 'user-123',

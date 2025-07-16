@@ -26,7 +26,10 @@ export class TherapistRequestService {
 
   // ===== RETRIEVING THERAPIST REQUESTS =====
 
-  async getTherapistRequests(therapistId: string, filters: TherapistRequestFiltersDto) {
+  async getTherapistRequests(
+    therapistId: string,
+    filters: TherapistRequestFiltersDto,
+  ) {
     try {
       const {
         status,
@@ -54,15 +57,15 @@ export class TherapistRequestService {
       if (clientId) where.clientId = clientId;
       if (requestedAfter) where.requestedAt = { gte: new Date(requestedAfter) };
       if (requestedBefore) {
-        where.requestedAt = { 
-          ...where.requestedAt,
+        where.requestedAt = {
+          ...(typeof where.requestedAt === 'object' ? where.requestedAt : {}),
           lte: new Date(requestedBefore),
         };
       }
       if (respondedAfter) where.respondedAt = { gte: new Date(respondedAfter) };
       if (respondedBefore) {
-        where.respondedAt = { 
-          ...where.respondedAt,
+        where.respondedAt = {
+          ...(typeof where.respondedAt === 'object' ? where.respondedAt : {}),
           lte: new Date(respondedBefore),
         };
       }
@@ -102,15 +105,17 @@ export class TherapistRequestService {
           where: { therapistId, status: 'PENDING' },
         }),
         this.prisma.clientTherapistRequest.count({
-          where: { 
-            therapistId, 
+          where: {
+            therapistId,
             status: 'PENDING',
             priority: { in: ['HIGH', 'URGENT'] },
           },
         }),
       ]);
 
-      this.logger.log(`Retrieved ${requests.length} requests for therapist ${therapistId}`);
+      this.logger.log(
+        `Retrieved ${requests.length} requests for therapist ${therapistId}`,
+      );
 
       return {
         requests,
@@ -128,7 +133,10 @@ export class TherapistRequestService {
         filters,
       };
     } catch (error) {
-      this.logger.error(`Failed to retrieve requests for therapist ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to retrieve requests for therapist ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -175,7 +183,9 @@ export class TherapistRequestService {
         }
 
         if (existingRequest.therapistId !== therapistId) {
-          throw new ForbiddenException('You can only respond to your own requests');
+          throw new ForbiddenException(
+            'You can only respond to your own requests',
+          );
         }
 
         if (existingRequest.status !== 'PENDING') {
@@ -185,12 +195,17 @@ export class TherapistRequestService {
         }
 
         // 2. Check if request has expired
-        if (existingRequest.expiresAt && existingRequest.expiresAt < new Date()) {
+        if (
+          existingRequest.expiresAt &&
+          existingRequest.expiresAt < new Date()
+        ) {
           await tx.clientTherapistRequest.update({
             where: { id: requestId },
             data: { status: 'EXPIRED', respondedAt: new Date() },
           });
-          throw new BadRequestException('Request has expired and cannot be accepted');
+          throw new BadRequestException(
+            'Request has expired and cannot be accepted',
+          );
         }
 
         // 3. Verify therapist is still approved and active
@@ -199,8 +214,14 @@ export class TherapistRequestService {
           include: { user: true },
         });
 
-        if (!therapist || therapist.status !== 'approved' || !therapist.user.isActive) {
-          throw new BadRequestException('Therapist is not currently approved or active');
+        if (
+          !therapist ||
+          therapist.status !== 'approved' ||
+          !therapist.user.isActive
+        ) {
+          throw new BadRequestException(
+            'Therapist is not currently approved or active',
+          );
         }
 
         // 4. Check for existing client-therapist relationship
@@ -296,14 +317,19 @@ export class TherapistRequestService {
           relationship: clientTherapistRelationship,
           message: 'Client request accepted successfully',
           nextSteps: {
-            scheduleSession: responseDto.schedulingMessage ? 'Contact information provided' : 'Schedule first session',
+            scheduleSession: responseDto.schedulingMessage
+              ? 'Contact information provided'
+              : 'Schedule first session',
             clientNotified: true,
             relationshipEstablished: true,
           },
         };
       });
     } catch (error) {
-      this.logger.error(`Failed to accept request ${requestId} for therapist ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to accept request ${requestId} for therapist ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -349,7 +375,9 @@ export class TherapistRequestService {
         }
 
         if (existingRequest.therapistId !== therapistId) {
-          throw new ForbiddenException('You can only respond to your own requests');
+          throw new ForbiddenException(
+            'You can only respond to your own requests',
+          );
         }
 
         if (existingRequest.status !== 'PENDING') {
@@ -388,7 +416,8 @@ export class TherapistRequestService {
           await this.notificationsService.create({
             userId: existingRequest.clientId,
             title: 'Alternative Therapist Recommendations',
-            message: 'We can help you find other qualified therapists who may be a good fit.',
+            message:
+              'We can help you find other qualified therapists who may be a good fit.',
             type: 'ALTERNATIVE_RECOMMENDATIONS',
             priority: 'NORMAL',
             actionUrl: '/client/therapists/recommendations',
@@ -424,7 +453,10 @@ export class TherapistRequestService {
         };
       });
     } catch (error) {
-      this.logger.error(`Failed to decline request ${requestId} for therapist ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to decline request ${requestId} for therapist ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -439,8 +471,8 @@ export class TherapistRequestService {
       const { requestIds, action, response } = actionDto;
 
       const results = {
-        successful: [],
-        failed: [],
+        successful: [] as any[],
+        failed: [] as any[],
         totalProcessed: 0,
       };
 
@@ -452,7 +484,9 @@ export class TherapistRequestService {
           switch (action) {
             case 'accept':
               if (!response) {
-                throw new BadRequestException('Response message required for accept action');
+                throw new BadRequestException(
+                  'Response message required for accept action',
+                );
               }
               result = await this.acceptClientRequest(requestId, therapistId, {
                 response,
@@ -463,7 +497,9 @@ export class TherapistRequestService {
 
             case 'decline':
               if (!response) {
-                throw new BadRequestException('Response message required for decline action');
+                throw new BadRequestException(
+                  'Response message required for decline action',
+                );
               }
               result = await this.declineClientRequest(requestId, therapistId, {
                 response,
@@ -491,9 +527,11 @@ export class TherapistRequestService {
           results.failed.push({
             requestId,
             action,
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
           });
-          this.logger.warn(`Failed to ${action} request ${requestId}: ${error.message}`);
+          this.logger.warn(
+            `Failed to ${action} request ${requestId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          );
         }
       }
 
@@ -512,7 +550,10 @@ export class TherapistRequestService {
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to perform bulk action for therapist ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to perform bulk action for therapist ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -571,19 +612,23 @@ export class TherapistRequestService {
 
       // Calculate acceptance rate
       const totalResponded = accepted + declined;
-      const acceptanceRate = totalResponded > 0 ? (accepted / totalResponded) * 100 : 0;
+      const acceptanceRate =
+        totalResponded > 0 ? (accepted / totalResponded) * 100 : 0;
 
       // Calculate average response time
       const responseTimes = recentRequests
-        .filter(req => req.respondedAt)
-        .map(req => {
-          const responseTime = req.respondedAt!.getTime() - req.requestedAt.getTime();
+        .filter((req) => req.respondedAt)
+        .map((req) => {
+          const responseTime =
+            req.respondedAt!.getTime() - req.requestedAt.getTime();
           return responseTime / (1000 * 60 * 60); // Convert to hours
         });
 
-      const averageResponseTime = responseTimes.length > 0
-        ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
-        : 0;
+      const averageResponseTime =
+        responseTimes.length > 0
+          ? responseTimes.reduce((sum, time) => sum + time, 0) /
+            responseTimes.length
+          : 0;
 
       // Get last request and response dates
       const lastRequest = await this.prisma.clientTherapistRequest.findFirst({
@@ -598,7 +643,9 @@ export class TherapistRequestService {
         select: { respondedAt: true },
       });
 
-      this.logger.log(`Generated request statistics for therapist ${therapistId}`);
+      this.logger.log(
+        `Generated request statistics for therapist ${therapistId}`,
+      );
 
       return {
         totalReceived,
@@ -613,7 +660,10 @@ export class TherapistRequestService {
         lastResponseAt: lastResponse?.respondedAt || null,
       };
     } catch (error) {
-      this.logger.error(`Failed to generate statistics for therapist ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to generate statistics for therapist ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -627,7 +677,9 @@ export class TherapistRequestService {
     });
 
     if (!request || request.therapistId !== therapistId) {
-      throw new NotFoundException(`Request ${requestId} not found or not accessible`);
+      throw new NotFoundException(
+        `Request ${requestId} not found or not accessible`,
+      );
     }
 
     // This could update a custom "reviewed" field if it existed in the schema

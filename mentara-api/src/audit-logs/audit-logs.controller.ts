@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { AuditLogsService } from './audit-logs.service';
 import { AuditLoggingService } from '../common/services/audit-logging.service';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
 import {
   AuditAction,
   EventSeverity,

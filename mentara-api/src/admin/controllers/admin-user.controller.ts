@@ -11,10 +11,10 @@ import {
   Body,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../guards/admin-auth.guard';
-import { AdminOnly } from '../../decorators/admin-only.decorator';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)

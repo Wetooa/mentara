@@ -10,9 +10,7 @@ model Community {
     moderatorCommunities ModeratorCommunity[]
     roomGroups           RoomGroup[]
     
-    // Community recommendation system relations
-    recommendations      CommunityRecommendation[] @relation("CommunityRecommendations")
-    joinRequests         CommunityJoinRequest[]    @relation("CommunityJoinRequests")
+    // Simplified community system (removed complex recommendation and join request features)
 
     @@index([name])
     @@index([slug])
@@ -64,3 +62,4 @@ model Room {
     roomGroupId String
     posts       Post[]
 }
+

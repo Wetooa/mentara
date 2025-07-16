@@ -8,7 +8,8 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, 'microsoft') {
     super({
       clientID: process.env.MICROSOFT_CLIENT_ID,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-      callbackURL: process.env.MICROSOFT_CALLBACK_URL || '/auth/microsoft/callback',
+      callbackURL:
+        process.env.MICROSOFT_CALLBACK_URL || '/auth/microsoft/callback',
       scope: ['user.read'],
     });
   }

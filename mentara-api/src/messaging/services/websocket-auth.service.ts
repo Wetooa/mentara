@@ -30,7 +30,7 @@ export class WebSocketAuthService {
 
       // Verify JWT token
       const payload = this.jwtService.verify(token);
-      
+
       if (!payload.sub) {
         this.logger.warn(`Socket ${socket.id} has invalid token payload`);
         return null;
@@ -38,7 +38,7 @@ export class WebSocketAuthService {
 
       // Validate user exists in database and is not deactivated
       const user = await this.prisma.user.findUnique({
-        where: { 
+        where: {
           id: payload.sub,
           deactivatedAt: null,
         },
@@ -128,10 +128,10 @@ export class WebSocketAuthService {
     try {
       // Simply verify if the JWT token is valid
       const payload = this.jwtService.verify(token);
-      
+
       // Additional validation: check if user still exists and is active
       const user = await this.prisma.user.findUnique({
-        where: { 
+        where: {
           id: payload.sub,
           deactivatedAt: null,
         },

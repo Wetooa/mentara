@@ -127,7 +127,7 @@ export class ModerationService {
     context: ModerationContext,
   ): Promise<boolean> {
     const result = await this.classifyContent(text, context);
-    return result.crisisLevel === 'critical' || result.immediateEscalation;
+    return result.crisisLevel === 'critical' || (result.immediateEscalation ?? false);
   }
 
   /**
@@ -137,7 +137,7 @@ export class ModerationService {
     items: Array<{ text: string; context: ModerationContext }>,
   ): Promise<ModerationResult[]> {
     if (!this.enabled) {
-      return items.map(item => this.createSafeResult(item.text));
+      return items.map((item) => this.createSafeResult(item.text));
     }
 
     try {
@@ -147,7 +147,7 @@ export class ModerationService {
         this.httpService.post(
           `${this.moderationApiUrl}/api/v1/classify/batch`,
           {
-            items: items.map(item => ({
+            items: items.map((item) => ({
               text: item.text,
               context: item.context.context,
               user_id: item.context.userId,
@@ -173,7 +173,7 @@ export class ModerationService {
       }));
     } catch (error) {
       this.logger.error('Batch moderation service error:', error);
-      return items.map(item => this.createSafeResult(item.text));
+      return items.map((item) => this.createSafeResult(item.text));
     }
   }
 
@@ -191,7 +191,7 @@ export class ModerationService {
 
     try {
       const startTime = Date.now();
-      
+
       await firstValueFrom(
         this.httpService.get(`${this.moderationApiUrl}/health`, {
           timeout: this.timeout,

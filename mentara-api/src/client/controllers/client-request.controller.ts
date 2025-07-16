@@ -13,8 +13,8 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   SendTherapistRequestDtoSchema,
@@ -39,33 +39,47 @@ export class ClientRequestController {
   @HttpCode(HttpStatus.CREATED)
   async sendTherapistRequest(
     @Param('therapistId') therapistId: string,
-    @Body(new ZodValidationPipe(SendTherapistRequestDtoSchema)) requestDto: SendTherapistRequestDto,
+    @Body(new ZodValidationPipe(SendTherapistRequestDtoSchema))
+    requestDto: SendTherapistRequestDto,
     @CurrentUserId() clientId: string,
   ) {
-    this.logger.log(`Client ${clientId} sending request to therapist ${therapistId}`);
-    
+    this.logger.log(
+      `Client ${clientId} sending request to therapist ${therapistId}`,
+    );
+
     // Validate therapist ID format
     if (!therapistId || therapistId.length !== 36) {
       throw new BadRequestException('Invalid therapist ID format');
     }
 
-    return this.clientRequestService.sendTherapistRequest(clientId, therapistId, requestDto);
+    return this.clientRequestService.sendTherapistRequest(
+      clientId,
+      therapistId,
+      requestDto,
+    );
   }
 
   @Post('therapists/bulk')
   @HttpCode(HttpStatus.CREATED)
   async sendMultipleTherapistRequests(
-    @Body(new ZodValidationPipe(SendMultipleTherapistRequestsDtoSchema)) requestData: SendMultipleTherapistRequestsDto,
+    @Body(new ZodValidationPipe(SendMultipleTherapistRequestsDtoSchema))
+    requestData: SendMultipleTherapistRequestsDto,
     @CurrentUserId() clientId: string,
   ) {
-    this.logger.log(`Client ${clientId} sending requests to ${requestData.therapistIds.length} therapists`);
-    return this.clientRequestService.sendMultipleTherapistRequests(clientId, requestData);
+    this.logger.log(
+      `Client ${clientId} sending requests to ${requestData.therapistIds.length} therapists`,
+    );
+    return this.clientRequestService.sendMultipleTherapistRequests(
+      clientId,
+      requestData,
+    );
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   async getMyRequests(
-    @Query(new ZodValidationPipe(ClientRequestFiltersDtoSchema)) filters: ClientRequestFiltersDto,
+    @Query(new ZodValidationPipe(ClientRequestFiltersDtoSchema))
+    filters: ClientRequestFiltersDto,
     @CurrentUserId() clientId: string,
   ) {
     this.logger.log(`Client ${clientId} fetching their therapist requests`);
@@ -78,22 +92,31 @@ export class ClientRequestController {
     @Param('id') requestId: string,
     @CurrentUserId() clientId: string,
   ) {
-    this.logger.log(`Client ${clientId} fetching request details for ${requestId}`);
-    
+    this.logger.log(
+      `Client ${clientId} fetching request details for ${requestId}`,
+    );
+
     // Validate request ID format
     if (!requestId || requestId.length !== 36) {
       throw new BadRequestException('Invalid request ID format');
     }
 
-    const requests = await this.clientRequestService.getClientRequests(clientId, {
-      page: 1,
-      limit: 1,
-    });
+    const requests = await this.clientRequestService.getClientRequests(
+      clientId,
+      {
+        page: 1,
+        limit: 1,
+        sortBy: 'requestedAt',
+        sortOrder: 'desc',
+      },
+    );
 
-    const request = requests.requests.find(r => r.id === requestId);
-    
+    const request = requests.requests.find((r) => r.id === requestId);
+
     if (!request) {
-      throw new NotFoundException(`Request with ID ${requestId} not found or not accessible`);
+      throw new NotFoundException(
+        `Request with ID ${requestId} not found or not accessible`,
+      );
     }
 
     return {
@@ -106,17 +129,22 @@ export class ClientRequestController {
   @HttpCode(HttpStatus.OK)
   async cancelRequest(
     @Param('id') requestId: string,
-    @Body(new ZodValidationPipe(CancelClientRequestDtoSchema)) cancelDto: CancelClientRequestDto,
+    @Body(new ZodValidationPipe(CancelClientRequestDtoSchema))
+    cancelDto: CancelClientRequestDto,
     @CurrentUserId() clientId: string,
   ) {
     this.logger.log(`Client ${clientId} cancelling request ${requestId}`);
-    
+
     // Validate request ID format
     if (!requestId || requestId.length !== 36) {
       throw new BadRequestException('Invalid request ID format');
     }
 
-    return this.clientRequestService.cancelRequest(requestId, clientId, cancelDto.reason);
+    return this.clientRequestService.cancelRequest(
+      requestId,
+      clientId,
+      cancelDto.reason,
+    );
   }
 
   @Get('statistics')
@@ -130,9 +158,10 @@ export class ClientRequestController {
   @HttpCode(HttpStatus.OK)
   async getPendingRequestsCount(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching pending requests count`);
-    
-    const statistics = await this.clientRequestService.getClientRequestStatistics(clientId);
-    
+
+    const statistics =
+      await this.clientRequestService.getClientRequestStatistics(clientId);
+
     return {
       success: true,
       pendingCount: statistics.pending,
@@ -144,13 +173,16 @@ export class ClientRequestController {
   @HttpCode(HttpStatus.OK)
   async getRecentRequests(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching recent requests`);
-    
-    const recentRequests = await this.clientRequestService.getClientRequests(clientId, {
-      page: 1,
-      limit: 5,
-      sortBy: 'requestedAt',
-      sortOrder: 'desc',
-    });
+
+    const recentRequests = await this.clientRequestService.getClientRequests(
+      clientId,
+      {
+        page: 1,
+        limit: 5,
+        sortBy: 'requestedAt',
+        sortOrder: 'desc',
+      },
+    );
 
     return {
       success: true,
@@ -163,7 +195,7 @@ export class ClientRequestController {
   @HttpCode(HttpStatus.OK)
   async expireStaleRequests(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} triggering stale request expiration`);
-    
+
     // This endpoint allows clients to manually trigger expiration check
     // In production, this would typically be a scheduled job
     return this.clientRequestService.expireStaleRequests();
@@ -175,20 +207,25 @@ export class ClientRequestController {
     @Param('therapistId') therapistId: string,
     @CurrentUserId() clientId: string,
   ) {
-    this.logger.log(`Client ${clientId} checking request status with therapist ${therapistId}`);
-    
+    this.logger.log(
+      `Client ${clientId} checking request status with therapist ${therapistId}`,
+    );
+
     // Validate therapist ID format
     if (!therapistId || therapistId.length !== 36) {
       throw new BadRequestException('Invalid therapist ID format');
     }
 
-    const requests = await this.clientRequestService.getClientRequests(clientId, {
-      therapistId,
-      page: 1,
-      limit: 1,
-      sortBy: 'requestedAt',
-      sortOrder: 'desc',
-    });
+    const requests = await this.clientRequestService.getClientRequests(
+      clientId,
+      {
+        therapistId,
+        page: 1,
+        limit: 1,
+        sortBy: 'requestedAt',
+        sortOrder: 'desc',
+      },
+    );
 
     const hasActiveRequest = requests.requests.length > 0;
     const latestRequest = hasActiveRequest ? requests.requests[0] : null;
@@ -196,14 +233,19 @@ export class ClientRequestController {
     return {
       success: true,
       hasActiveRequest,
-      latestRequest: latestRequest ? {
-        id: latestRequest.id,
-        status: latestRequest.status,
-        requestedAt: latestRequest.requestedAt,
-        respondedAt: latestRequest.respondedAt,
-        expiresAt: latestRequest.expiresAt,
-      } : null,
-      canSendNewRequest: !hasActiveRequest || (latestRequest && !['PENDING', 'ACCEPTED'].includes(latestRequest.status)),
+      latestRequest: latestRequest
+        ? {
+            id: latestRequest.id,
+            status: latestRequest.status,
+            requestedAt: latestRequest.requestedAt,
+            respondedAt: latestRequest.respondedAt,
+            expiresAt: latestRequest.expiresAt,
+          }
+        : null,
+      canSendNewRequest:
+        !hasActiveRequest ||
+        (latestRequest &&
+          !['PENDING', 'ACCEPTED'].includes(latestRequest.status)),
     };
   }
 
@@ -211,12 +253,19 @@ export class ClientRequestController {
   @HttpCode(HttpStatus.OK)
   async getFilterOptions(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching filter options`);
-    
+
     // Return available filter options for the frontend
     return {
       success: true,
       filterOptions: {
-        statuses: ['PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'CANCELLED', 'WITHDRAWN'],
+        statuses: [
+          'PENDING',
+          'ACCEPTED',
+          'DECLINED',
+          'EXPIRED',
+          'CANCELLED',
+          'WITHDRAWN',
+        ],
         priorities: ['LOW', 'NORMAL', 'HIGH', 'URGENT'],
         sortOptions: [
           { value: 'requestedAt', label: 'Request Date' },

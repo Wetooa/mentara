@@ -1,9 +1,9 @@
 /**
  * Load Testing Framework for Backend Agent Support
- * 
+ *
  * Advanced load testing capabilities specifically designed to support
  * Backend Agent's critical endpoint verification and performance testing needs.
- * 
+ *
  * Features:
  * - Concurrent user simulation
  * - Response time analysis
@@ -64,14 +64,17 @@ export interface LoadTestResults {
     errorRate: number;
     testDuration: number;
   };
-  endpointStats: Map<string, {
-    requests: number;
-    successes: number;
-    failures: number;
-    averageResponseTime: number;
-    minResponseTime: number;
-    maxResponseTime: number;
-  }>;
+  endpointStats: Map<
+    string,
+    {
+      requests: number;
+      successes: number;
+      failures: number;
+      averageResponseTime: number;
+      minResponseTime: number;
+      maxResponseTime: number;
+    }
+  >;
   timeSeriesData: {
     timestamp: number;
     requestsPerSecond: number;
@@ -120,9 +123,10 @@ export class LoadTestFramework extends EventEmitter {
 
     // Create user simulation promises
     const userPromises: Promise<void>[] = [];
-    
+
     for (let i = 0; i < this.config.concurrentUsers; i++) {
-      const delay = (this.config.rampUpTime * 1000 * i) / this.config.concurrentUsers;
+      const delay =
+        (this.config.rampUpTime * 1000 * i) / this.config.concurrentUsers;
       userPromises.push(this.simulateUser(delay));
     }
 
@@ -169,7 +173,10 @@ export class LoadTestFramework extends EventEmitter {
    * Select random endpoint based on weights
    */
   private selectRandomEndpoint(): EndpointConfig {
-    const totalWeight = this.config.endpoints.reduce((sum, ep) => sum + ep.weight, 0);
+    const totalWeight = this.config.endpoints.reduce(
+      (sum, ep) => sum + ep.weight,
+      0,
+    );
     let random = Math.random() * totalWeight;
 
     for (const endpoint of this.config.endpoints) {
@@ -188,7 +195,7 @@ export class LoadTestFramework extends EventEmitter {
   private async makeRequest(endpoint: EndpointConfig): Promise<RequestResult> {
     const startTime = Date.now();
     const url = new URL(endpoint.path, this.config.baseUrl);
-    
+
     const requestOptions: any = {
       method: endpoint.method,
       headers: {
@@ -202,14 +209,16 @@ export class LoadTestFramework extends EventEmitter {
     if (this.config.authentication) {
       switch (this.config.authentication.type) {
         case 'bearer':
-          requestOptions.headers['Authorization'] = `Bearer ${this.config.authentication.token}`;
+          requestOptions.headers['Authorization'] =
+            `Bearer ${this.config.authentication.token}`;
           break;
         case 'api-key':
-          requestOptions.headers['X-API-Key'] = this.config.authentication.apiKey;
+          requestOptions.headers['X-API-Key'] =
+            this.config.authentication.apiKey;
           break;
         case 'basic':
           const auth = Buffer.from(
-            `${this.config.authentication.username}:${this.config.authentication.password}`
+            `${this.config.authentication.username}:${this.config.authentication.password}`,
           ).toString('base64');
           requestOptions.headers['Authorization'] = `Basic ${auth}`;
           break;
@@ -218,17 +227,17 @@ export class LoadTestFramework extends EventEmitter {
 
     return new Promise((resolve) => {
       const protocol = url.protocol === 'https:' ? https : http;
-      
+
       const req = protocol.request(url, requestOptions, (res) => {
         let data = '';
-        
+
         res.on('data', (chunk) => {
           data += chunk;
         });
-        
+
         res.on('end', () => {
           const responseTime = Date.now() - startTime;
-          const success = endpoint.expectedStatusCodes 
+          const success = endpoint.expectedStatusCodes
             ? endpoint.expectedStatusCodes.includes(res.statusCode || 0)
             : (res.statusCode || 0) >= 200 && (res.statusCode || 0) < 400;
 
@@ -271,7 +280,10 @@ export class LoadTestFramework extends EventEmitter {
       });
 
       // Send payload for POST/PUT/PATCH requests
-      if (endpoint.payload && ['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {
+      if (
+        endpoint.payload &&
+        ['POST', 'PUT', 'PATCH'].includes(endpoint.method)
+      ) {
         req.write(JSON.stringify(endpoint.payload));
       }
 
@@ -284,14 +296,15 @@ export class LoadTestFramework extends EventEmitter {
    */
   private analyzeResults(): LoadTestResults {
     const totalRequests = this.results.length;
-    const successfulRequests = this.results.filter(r => r.success).length;
+    const successfulRequests = this.results.filter((r) => r.success).length;
     const failedRequests = totalRequests - successfulRequests;
-    
-    const responseTimes = this.results.map(r => r.responseTime);
-    const averageResponseTime = responseTimes.reduce((sum, rt) => sum + rt, 0) / responseTimes.length;
+
+    const responseTimes = this.results.map((r) => r.responseTime);
+    const averageResponseTime =
+      responseTimes.reduce((sum, rt) => sum + rt, 0) / responseTimes.length;
     const minResponseTime = Math.min(...responseTimes);
     const maxResponseTime = Math.max(...responseTimes);
-    
+
     const testDuration = (this.endTime - this.startTime) / 1000;
     const requestsPerSecond = totalRequests / testDuration;
     const errorRate = (failedRequests / totalRequests) * 100;
@@ -321,7 +334,9 @@ export class LoadTestFramework extends EventEmitter {
 
     // Calculate averages for each endpoint
     for (const [key, stats] of endpointStats.entries()) {
-      const avgRT = stats.responseTimes.reduce((sum: number, rt: number) => sum + rt, 0) / stats.responseTimes.length;
+      const avgRT =
+        stats.responseTimes.reduce((sum: number, rt: number) => sum + rt, 0) /
+        stats.responseTimes.length;
       endpointStats.set(key, {
         requests: stats.requests,
         successes: stats.successes,
@@ -387,22 +402,28 @@ export class LoadTestFramework extends EventEmitter {
   private generateTimeSeriesData(): any[] {
     const timeSeriesData: any[] = [];
     const intervalMs = 1000; // 1 second intervals
-    
+
     const startTime = this.startTime;
     const endTime = this.endTime;
-    
-    for (let timestamp = startTime; timestamp < endTime; timestamp += intervalMs) {
+
+    for (
+      let timestamp = startTime;
+      timestamp < endTime;
+      timestamp += intervalMs
+    ) {
       const intervalResults = this.results.filter(
-        r => r.timestamp >= timestamp && r.timestamp < timestamp + intervalMs
+        (r) => r.timestamp >= timestamp && r.timestamp < timestamp + intervalMs,
       );
-      
+
       const requests = intervalResults.length;
-      const avgResponseTime = requests > 0 
-        ? intervalResults.reduce((sum, r) => sum + r.responseTime, 0) / requests 
-        : 0;
-      const errors = intervalResults.filter(r => !r.success).length;
+      const avgResponseTime =
+        requests > 0
+          ? intervalResults.reduce((sum, r) => sum + r.responseTime, 0) /
+            requests
+          : 0;
+      const errors = intervalResults.filter((r) => !r.success).length;
       const errorRate = requests > 0 ? (errors / requests) * 100 : 0;
-      
+
       timeSeriesData.push({
         timestamp: timestamp - startTime,
         requestsPerSecond: requests,
@@ -410,7 +431,7 @@ export class LoadTestFramework extends EventEmitter {
         errorRate,
       });
     }
-    
+
     return timeSeriesData;
   }
 
@@ -422,35 +443,49 @@ export class LoadTestFramework extends EventEmitter {
 
     // Response time recommendations
     if (metrics.averageResponseTime > 1000) {
-      recommendations.push('Average response time is high (>1s). Consider optimizing database queries and adding caching.');
+      recommendations.push(
+        'Average response time is high (>1s). Consider optimizing database queries and adding caching.',
+      );
     }
-    
+
     if (metrics.maxResponseTime > 5000) {
-      recommendations.push('Maximum response time is very high (>5s). Investigate slow endpoints and implement timeouts.');
+      recommendations.push(
+        'Maximum response time is very high (>5s). Investigate slow endpoints and implement timeouts.',
+      );
     }
 
     // Error rate recommendations
     if (metrics.errorRate > 5) {
-      recommendations.push('Error rate is high (>5%). Review error logs and improve error handling.');
+      recommendations.push(
+        'Error rate is high (>5%). Review error logs and improve error handling.',
+      );
     }
-    
+
     if (metrics.errorRate > 1) {
-      recommendations.push('Consider implementing circuit breakers for external service calls.');
+      recommendations.push(
+        'Consider implementing circuit breakers for external service calls.',
+      );
     }
 
     // Throughput recommendations
     if (metrics.requestsPerSecond < 10) {
-      recommendations.push('Low throughput detected. Consider horizontal scaling or performance optimization.');
+      recommendations.push(
+        'Low throughput detected. Consider horizontal scaling or performance optimization.',
+      );
     }
 
     // Endpoint-specific recommendations
     for (const [endpoint, stats] of metrics.endpointStats.entries()) {
       if (stats.averageResponseTime > 2000) {
-        recommendations.push(`Endpoint ${endpoint} is slow (${stats.averageResponseTime.toFixed(0)}ms average). Priority optimization target.`);
+        recommendations.push(
+          `Endpoint ${endpoint} is slow (${stats.averageResponseTime.toFixed(0)}ms average). Priority optimization target.`,
+        );
       }
-      
+
       if (stats.failures > stats.successes) {
-        recommendations.push(`Endpoint ${endpoint} has high failure rate. Requires immediate attention.`);
+        recommendations.push(
+          `Endpoint ${endpoint} has high failure rate. Requires immediate attention.`,
+        );
       }
     }
 
@@ -461,7 +496,7 @@ export class LoadTestFramework extends EventEmitter {
    * Utility function for delays
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -572,14 +607,16 @@ export const CriticalEndpointLoadTests = {
 
 // Export utility functions
 export const runCriticalEndpointLoadTest = async (
-  testName: keyof typeof CriticalEndpointLoadTests
+  testName: keyof typeof CriticalEndpointLoadTests,
 ): Promise<LoadTestResults> => {
   const config = CriticalEndpointLoadTests[testName];
   const loadTest = new LoadTestFramework(config);
-  
+
   return await loadTest.runLoadTest();
 };
 
-export const createCustomLoadTest = (config: LoadTestConfig): LoadTestFramework => {
+export const createCustomLoadTest = (
+  config: LoadTestConfig,
+): LoadTestFramework => {
   return new LoadTestFramework(config);
 };

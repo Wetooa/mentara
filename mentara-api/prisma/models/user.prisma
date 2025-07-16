@@ -1,70 +1,49 @@
 model User {
-    id         String    @id @unique @default(uuid()) // Local user ID for authentication
-    email      String    @unique // User's email address
+    id         String    @id @unique @default(uuid())
+    email      String    @unique
     firstName  String
-    middleName String?
+    middleName String?   // Optional middle name
     lastName   String
-    birthDate  DateTime?
-    address    String?
-    avatarUrl  String? // Profile image URL
+    birthDate  DateTime? // User's birth date
+    address    String?   // User's address
     role       String    @default("client") // client, therapist, moderator, admin
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
 
-    // Authentication fields for local auth
-    password              String? // Hashed password (nullable for migration compatibility)
-    emailVerified         Boolean   @default(false) // Email verification status
-    emailVerifyToken      String?   @unique // Token for email verification
-    emailVerifyTokenExp   DateTime? // Email verification token expiry
-    resetToken            String?   @unique // Password reset token
-    resetTokenExpiry      DateTime? // Password reset token expiry
-    lastLoginAt           DateTime? // Last successful login
-    failedLoginCount      Int       @default(0) // Failed login attempts
-    lockoutUntil          DateTime? // Account lockout until timestamp
-    twoFactorEnabled      Boolean   @default(false) // Two-factor authentication
-    twoFactorSecret       String? // 2FA secret key
+    // Authentication fields
+    password             String? // Hashed password
+    emailVerified        Boolean @default(false)
+    emailVerifyToken     String? @unique
+    emailVerifyTokenExp  DateTime?
+    resetToken           String? @unique
+    resetTokenExpiry     DateTime?
+    isActive             Boolean @default(true)
+    isVerified           Boolean @default(false)
+    failedLoginCount     Int     @default(0)
+    avatarUrl            String?
+    coverImageUrl        String? // Cover/banner image URL
+    bio                  String?
+    
+    // Account status fields
+    suspendedAt       DateTime?
+    suspendedBy       String?
+    suspensionReason  String?
+    deactivatedAt     DateTime?
+    deactivatedBy     String?
+    deactivationReason String?
+    lastLoginAt       DateTime?
+    lockoutUntil      DateTime?
 
-    // Account status and deactivation
-    deactivatedAt         DateTime? // When account was deactivated
-    deactivatedBy         String? // Who deactivated the account
-    deactivationReason    String? // Reason for deactivation
-
-    // Profile and verification
-    bio           String?
-    coverImageUrl String?
-    isActive      Boolean @default(true)
-    isVerified    Boolean @default(false)
-
-    // Contact information
-    phoneNumber   String?
-    phoneVerified Boolean @default(false)
-
-    // Preferences
-    timezone String? @default("UTC")
-    language String? @default("en")
-    theme    String? @default("light")
-
-    // Privacy settings
-    profileVisibility String @default("private") // public, private, therapists_only
-    allowMessagesFrom String @default("therapists") // all, therapists, none
-
-    // Account status
-    lastActiveAt     DateTime?
-    suspendedAt      DateTime?
-    suspendedBy      String?
-    suspensionReason String?
-
-    // Community and content relations (available to all users)
-    memberships   Membership[]
+    // Essential content relations
     posts         Post[]
     comments      Comment[]
+    replies       Reply[]       @relation("UserReplies")
     postHearts    PostHeart[]
     commentHearts CommentHeart[]
-    
-    // Community recommendation system relations
-    communityRecommendations CommunityRecommendation[] @relation("UserCommunityRecommendations")
-    joinRequests            CommunityJoinRequest[]     @relation("UserJoinRequests")
-    moderatedJoinRequests   CommunityJoinRequest[]     @relation("ModeratedJoinRequests")
+    replyHearts   ReplyHeart[]  @relation("UserReplyHearts")
+
+    // Reports (instead of reddit-like features)
+    reports Report[] @relation("UserReports")
 
     // Role-specific relations
     client    Client?    @relation("UserClient")
@@ -72,60 +51,43 @@ model User {
     moderator Moderator? @relation("UserModerator")
     admin     Admin?     @relation("UserAdmin")
 
-    replies        Reply[]
-    replyHearts    ReplyHeart[]
-    reviewsHelpful ReviewHelpful[]
-
-    // Messaging relations
+    // Essential messaging
     conversations       ConversationParticipant[] @relation("UserConversations")
     sentMessages        Message[]                 @relation("UserMessages")
     messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
     messageReactions    MessageReaction[]         @relation("UserMessageReactions")
+    
+    // User blocking system
     blocking            UserBlock[]               @relation("UserBlocking")
     blockedBy           UserBlock[]               @relation("UserBlocked")
 
-    // Notification relations
-    notifications        Notification[]        @relation("UserNotifications")
-    notificationSettings NotificationSettings? @relation("UserNotificationSettings")
+    // Essential notifications
+    notifications         Notification[]         @relation("UserNotifications")
+    notificationSettings  NotificationSettings?  @relation("UserNotificationSettings")
+    deviceTokens          DeviceToken[]          @relation("UserDeviceTokens")
+    scheduledNotifications ScheduledNotification[] @relation("UserScheduledNotifications")
 
-    // Audit and activity relations
-    auditLogs  AuditLog[]     @relation("UserAuditLogs")
-    activities UserActivity[] @relation("UserActivities")
-
-    // File relations
-    uploadedFiles File[]         @relation("UserUploadedFiles")
-    fileVersions  FileVersion[]  @relation("UserFileVersions")
-    fileShares    FileShare[]    @relation("UserFileShares")
-    fileDownloads FileDownload[] @relation("UserFileDownloads")
-
-    // Billing relations
-    subscription        Subscription?        @relation("UserSubscription")
-    paymentMethods      PaymentMethod[]      @relation("UserPaymentMethods")
+    // Essential billing
+    subscription     Subscription? @relation("UserSubscription")
+    paymentMethods   PaymentMethod[] @relation("UserPaymentMethods")
     discountRedemptions DiscountRedemption[] @relation("UserDiscountRedemptions")
-    stripeCustomerId    String?              @unique // Stripe customer ID
+    stripeCustomerId String?       @unique
 
-    // Authentication relations
+    // Essential community features (minimal)
+    memberships Membership[]
+
+    // Essential audit
+    auditLogs AuditLog[] @relation("UserAuditLogs")
+
+    // Essential auth
     refreshTokens RefreshToken[] @relation("UserRefreshTokens")
+    userActivities UserActivity[] @relation("UserActivities")
 
-    // Push notification relations
-    deviceTokens             DeviceToken[]             @relation("UserDeviceTokens")
-    scheduledNotifications   ScheduledNotification[]   @relation("UserScheduledNotifications")
-
-    // Reddit-like features relations
-    postVotes                PostVote[]                @relation("UserPostVotes")
-    commentVotes             CommentVote[]             @relation("UserCommentVotes")
-    givenAwards              PostAward[]               @relation("UserGivenAwards")
-    givenCommentAwards       CommentAward[]            @relation("UserGivenCommentAwards")
-    reports                  ContentReport[]           @relation("UserReports")
-    moderatedReports         ContentReport[]           @relation("UserModeratedReports")
-    savedContent             SavedContent[]            @relation("UserSavedContent")
-    karma                    UserKarma?                @relation("UserKarma")
+    // Reviews
+    reviewsHelpful ReviewHelpful[]
 
     @@index([email])
     @@index([role])
-    @@index([emailVerifyToken])
-    @@index([resetToken])
-    @@index([deactivatedAt])
 }
 
 model Client {

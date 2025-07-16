@@ -12,15 +12,18 @@ import {
   Logger,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
+import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
+import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { ValidatedBody } from '../../common/decorators/validate-body.decorator';
 import {
-  CreateAdminDto,
-  UpdateAdminDto,
-  AdminResponseDto,
-} from '../dto/admin.dto';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../guards/admin-auth.guard';
-import { AdminOnly } from '../../decorators/admin-only.decorator';
-import { CurrentUserId } from '../../decorators/current-user-id.decorator';
+  CreateAdminDtoSchema,
+  UpdateAdminDtoSchema,
+  type CreateAdminDto,
+  type UpdateAdminDto,
+  type AdminResponseDto,
+} from 'mentara-commons';
 
 @Controller('admin/accounts')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
@@ -32,7 +35,7 @@ export class AdminAccountController {
   @Post()
   @AdminOnly()
   async create(
-    @Body() createAdminDto: CreateAdminDto,
+    @ValidatedBody(CreateAdminDtoSchema) createAdminDto: CreateAdminDto,
     @CurrentUserId() currentUserId: string,
   ): Promise<AdminResponseDto> {
     try {
@@ -97,7 +100,7 @@ export class AdminAccountController {
   @AdminOnly()
   async update(
     @Param('id') id: string,
-    @Body() updateAdminDto: UpdateAdminDto,
+    @ValidatedBody(UpdateAdminDtoSchema) updateAdminDto: UpdateAdminDto,
     @CurrentUserId() currentUserId: string,
   ): Promise<AdminResponseDto> {
     try {

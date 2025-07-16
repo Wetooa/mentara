@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Request } from 'express';
 
 @Injectable()
@@ -11,20 +16,20 @@ export class SecurityGuard implements CanActivate {
     /delete\s+from/i,
     /update\s+.*set/i,
     /script\s*>/i,
-    
+
     // XSS patterns
     /<script/i,
     /javascript:/i,
     /vbscript:/i,
     /onload\s*=/i,
     /onerror\s*=/i,
-    
+
     // Command injection patterns
     /\|\s*cat\s+/,
     /;\s*rm\s+-rf/,
     /&&\s*curl/,
     /`.*`/,
-    
+
     // Path traversal patterns
     /\.\.\//,
     /\.\.\\\\\\\\\\\\\\\\w+/,
@@ -76,12 +81,14 @@ export class SecurityGuard implements CanActivate {
 
   private validateHeaders(request: Request): void {
     Object.entries(request.headers).forEach(([name, value]) => {
-      const headerValue = Array.isArray(value) ? value.join('') : String(value || '');
-      
+      const headerValue = Array.isArray(value)
+        ? value.join('')
+        : String(value || '');
+
       if (headerValue.length > this.maxHeaderLength) {
         throw new ForbiddenException(`Header ${name} too long`);
       }
-      
+
       this.validateInput(headerValue, `Header ${name}`);
     });
   }
@@ -89,7 +96,9 @@ export class SecurityGuard implements CanActivate {
   private validateInput(input: string, context: string): void {
     for (const pattern of this.suspiciousPatterns) {
       if (pattern.test(input)) {
-        throw new ForbiddenException(`Suspicious content detected in ${context}`);
+        throw new ForbiddenException(
+          `Suspicious content detected in ${context}`,
+        );
       }
     }
   }
@@ -106,14 +115,14 @@ export class SecurityGuard implements CanActivate {
       if (body.length > 1000) {
         throw new ForbiddenException('Array too large');
       }
-      body.forEach(item => this.validateRequestBody(item, depth + 1));
+      body.forEach((item) => this.validateRequestBody(item, depth + 1));
     } else if (typeof body === 'object' && body !== null) {
       const keys = Object.keys(body);
       if (keys.length > 100) {
         throw new ForbiddenException('Too many object properties');
       }
-      
-      keys.forEach(key => {
+
+      keys.forEach((key) => {
         this.validateInput(key, 'Object key');
         this.validateRequestBody(body[key], depth + 1);
       });

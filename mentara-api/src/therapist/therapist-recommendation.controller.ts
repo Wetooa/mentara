@@ -11,12 +11,15 @@ import {
 } from '@nestjs/common';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { ValidatedQuery } from '../common/decorators/validate-body.decorator';
 import {
-  TherapistRecommendationRequest,
-  TherapistRecommendationResponse,
-} from './dto/therapist-application.dto';
+  TherapistRecommendationRequestSchema,
+  TherapistRecommendationResponseDtoSchema,
+  type TherapistRecommendationRequest,
+  type TherapistRecommendationResponse,
+} from 'mentara-commons';
 
 @Controller('therapist-recommendations')
 @UseGuards(JwtAuthGuard)
@@ -128,7 +131,9 @@ export class TherapistRecommendationController {
       }
 
       if (!client) {
-        throw new NotFoundException(`Client profile not found for user ${userId}`);
+        throw new NotFoundException(
+          `Client profile not found for user ${userId}`,
+        );
       }
 
       // Check if this is truly a first-time user (unless forcing refresh)
@@ -154,12 +159,18 @@ export class TherapistRecommendationController {
         maxHourlyRate: undefined, // No rate filter for initial welcome
       };
 
-      const recommendations = await this.therapistRecommendationService.getRecommendedTherapists(request);
+      const recommendations =
+        await this.therapistRecommendationService.getRecommendedTherapists(
+          request,
+        );
 
       // Enhance recommendations with welcome-specific data
       const enhancedRecommendations = {
         ...recommendations,
-        welcomeMessage: this.generateWelcomeMessage(user.firstName, isFirstTime),
+        welcomeMessage: this.generateWelcomeMessage(
+          user.firstName,
+          isFirstTime,
+        ),
         isFirstTime,
         userInfo: {
           firstName: user.firstName,
@@ -193,7 +204,10 @@ export class TherapistRecommendationController {
     }
   }
 
-  private generateWelcomeMessage(firstName: string, isFirstTime: boolean): string {
+  private generateWelcomeMessage(
+    firstName: string,
+    isFirstTime: boolean,
+  ): string {
     if (isFirstTime) {
       return `Welcome to Mentara, ${firstName}! We've curated a personalized list of therapists who may be a great fit for you. Take your time browsing through their profiles and don't hesitate to reach out to those who resonate with you.`;
     } else {

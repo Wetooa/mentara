@@ -11,9 +11,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { BillingService } from './billing.service';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
 import {
   BillingCycle,
   SubscriptionTier,
@@ -91,7 +91,9 @@ export class BillingController {
     return this.billingService.changeSubscriptionPlan(userId, body.newPlanId, {
       billingCycle: body.billingCycle,
       prorationBehavior: body.prorationBehavior,
-      effectiveDate: body.effectiveDate ? new Date(body.effectiveDate) : undefined,
+      effectiveDate: body.effectiveDate
+        ? new Date(body.effectiveDate)
+        : undefined,
     });
   }
 
@@ -133,7 +135,10 @@ export class BillingController {
     @Body() body: { newPaymentMethodId?: string },
     @CurrentUserId() userId: string,
   ) {
-    return this.billingService.reactivateSubscription(userId, body.newPaymentMethodId);
+    return this.billingService.reactivateSubscription(
+      userId,
+      body.newPaymentMethodId,
+    );
   }
 
   @Post('subscriptions/me/apply-discount')
@@ -141,7 +146,10 @@ export class BillingController {
     @Body() body: { discountCode: string },
     @CurrentUserId() userId: string,
   ) {
-    return this.billingService.applyDiscountToSubscription(userId, body.discountCode);
+    return this.billingService.applyDiscountToSubscription(
+      userId,
+      body.discountCode,
+    );
   }
 
   @Post('subscriptions/:id/renew')

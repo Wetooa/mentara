@@ -20,7 +20,6 @@ import { ModeratorModule } from './moderator/moderator.module';
 import { ClientModule } from './client/client.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { MeetingsModule } from './meetings/meetings.module';
-import { FilesModule } from './files/files.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
@@ -34,7 +33,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { EventBusService } from './common/events/event-bus.service';
 import { CommonModule } from './common/common.module';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
@@ -87,7 +86,6 @@ import { JwtService } from '@nestjs/jwt';
     ClientModule,
     MessagingModule,
     MeetingsModule,
-    FilesModule,
     SessionsModule,
     NotificationsModule,
     AuditLogsModule,
@@ -127,12 +125,8 @@ import { JwtService } from '@nestjs/jwt';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(SecurityHeadersMiddleware)
-      .forRoutes('*');
-    
-    consumer
-      .apply(RateLimitMiddleware)
-      .forRoutes('*');
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
+
+    consumer.apply(RateLimitMiddleware).forRoutes('*');
   }
 }

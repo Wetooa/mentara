@@ -8,6 +8,8 @@ export interface RequiredEnvVars {
   GOOGLE_CLIENT_SECRET: string;
   MICROSOFT_CLIENT_ID: string;
   MICROSOFT_CLIENT_SECRET: string;
+  SUPABASE_URL: string;
+  SUPABASE_API_KEY: string;
   PORT?: string;
   FRONTEND_URL?: string;
   AI_SERVICE_URL?: string;
@@ -40,6 +42,8 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
     'GOOGLE_CLIENT_SECRET',
     'MICROSOFT_CLIENT_ID',
     'MICROSOFT_CLIENT_SECRET',
+    'SUPABASE_URL',
+    'SUPABASE_API_KEY',
   ];
 
   const missingVars: string[] = [];
@@ -103,11 +107,25 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
     invalidVars.push('MICROSOFT_CLIENT_SECRET (appears to be too short)');
   }
 
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+    invalidVars.push(
+      'JWT_SECRET (must be at least 32 characters for security)',
+    );
+  }
+
+  // Validate Supabase configuration
   if (
-    process.env.JWT_SECRET &&
-    process.env.JWT_SECRET.length < 32
+    process.env.SUPABASE_URL &&
+    !process.env.SUPABASE_URL.startsWith('https://')
   ) {
-    invalidVars.push('JWT_SECRET (must be at least 32 characters for security)');
+    invalidVars.push('SUPABASE_URL (must be a valid HTTPS URL)');
+  }
+
+  if (
+    process.env.SUPABASE_API_KEY &&
+    process.env.SUPABASE_API_KEY.length < 20
+  ) {
+    invalidVars.push('SUPABASE_API_KEY (appears to be too short)');
   }
 
   // Log warnings for missing optional variables in production
@@ -153,6 +171,8 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
     MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID!,
     MICROSOFT_CLIENT_SECRET: process.env.MICROSOFT_CLIENT_SECRET!,
+    SUPABASE_URL: process.env.SUPABASE_URL!,
+    SUPABASE_API_KEY: process.env.SUPABASE_API_KEY!,
     NODE_ENV: process.env.NODE_ENV as 'development' | 'production' | 'test',
     PORT: process.env.PORT,
     FRONTEND_URL: process.env.FRONTEND_URL,
@@ -185,5 +205,8 @@ export function logEnvironmentInfo(): void {
   );
   logger.log(
     `🤖 AI Service: ${process.env.AI_SERVICE_URL || 'Not configured'}`,
+  );
+  logger.log(
+    `☁️ Supabase Storage: ${process.env.SUPABASE_URL ? 'Configured' : 'Not configured'}`,
   );
 }

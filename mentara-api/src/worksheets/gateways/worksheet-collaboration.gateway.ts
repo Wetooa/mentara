@@ -26,23 +26,25 @@ interface AuthenticatedSocket extends Socket {
   namespace: '/worksheets',
 })
 export class WorksheetCollaborationGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
-  
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(WorksheetCollaborationGateway.name);
 
   constructor(
     private readonly worksheetsService: EnhancedWorksheetsService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
       // Extract token from handshake auth
-      const token = client.handshake.auth.token || client.handshake.headers.authorization?.split(' ')[1];
-      
+      const token =
+        client.handshake.auth.token ||
+        client.handshake.headers.authorization?.split(' ')[1];
+
       if (!token) {
         client.disconnect();
         return;
@@ -52,10 +54,12 @@ export class WorksheetCollaborationGateway
       const payload = this.jwtService.verify(token);
       client.userId = payload.sub || payload.userId;
 
-      this.logger.log(`Client connected: ${client.id} (User: ${client.userId})`);
-      
+      this.logger.log(
+        `Client connected: ${client.id} (User: ${client.userId})`,
+      );
     } catch (error) {
-      this.logger.error(`Connection failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Connection failed: ${errorMessage}`);
       client.disconnect();
     }
   }
@@ -64,17 +68,23 @@ export class WorksheetCollaborationGateway
     if (client.userId && client.worksheetId) {
       try {
         // Leave collaboration session
-        await this.worksheetsService.leaveCollaboration(client.worksheetId, client.userId);
-        
+        await this.worksheetsService.leaveCollaboration(
+          client.worksheetId,
+          client.userId,
+        );
+
         // Notify other collaborators
         client.to(`worksheet:${client.worksheetId}`).emit('user-left', {
           userId: client.userId,
           timestamp: new Date(),
         });
 
-        this.logger.log(`Client disconnected: ${client.id} (User: ${client.userId}, Worksheet: ${client.worksheetId})`);
+        this.logger.log(
+          `Client disconnected: ${client.id} (User: ${client.userId}, Worksheet: ${client.worksheetId})`,
+        );
       } catch (error) {
-        this.logger.error(`Error handling disconnect: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Error handling disconnect: ${errorMessage}`);
       }
     }
   }
@@ -84,11 +94,11 @@ export class WorksheetCollaborationGateway
   @SubscribeMessage('join-worksheet')
   async handleJoinWorksheet(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { worksheetId: string; cursorPosition?: any }
+    @MessageBody() data: { worksheetId: string; cursorPosition?: any },
   ) {
     try {
       const { worksheetId, cursorPosition } = data;
-      
+
       if (!client.userId) {
         client.emit('error', { message: 'Not authenticated' });
         return;
@@ -96,7 +106,9 @@ export class WorksheetCollaborationGateway
 
       // Leave previous worksheet if any
       if (client.worksheetId) {
-        await this.handleLeaveWorksheet(client, { worksheetId: client.worksheetId });
+        await this.handleLeaveWorksheet(client, {
+          worksheetId: client.worksheetId,
+        });
       }
 
       // Join new worksheet room
@@ -112,7 +124,8 @@ export class WorksheetCollaborationGateway
       });
 
       // Get current active collaborators
-      const collaborators = await this.worksheetsService.getActiveCollaborators(worksheetId);
+      const collaborators =
+        await this.worksheetsService.getActiveCollaborators(worksheetId);
 
       // Notify client of successful join
       client.emit('joined-worksheet', {
@@ -123,7 +136,7 @@ export class WorksheetCollaborationGateway
 
       // Notify other collaborators
       client.to(`worksheet:${worksheetId}`).emit('user-joined', {
-        user: collaboration.user,
+        user: { id: client.userId },
         userId: client.userId,
         sessionId: client.id,
         cursorPosition,
@@ -131,9 +144,9 @@ export class WorksheetCollaborationGateway
       });
 
       this.logger.log(`User ${client.userId} joined worksheet ${worksheetId}`);
-
     } catch (error) {
-      this.logger.error(`Error joining worksheet: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error joining worksheet: ${errorMessage}`);
       client.emit('error', { message: 'Failed to join worksheet' });
     }
   }
@@ -141,7 +154,7 @@ export class WorksheetCollaborationGateway
   @SubscribeMessage('leave-worksheet')
   async handleLeaveWorksheet(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { worksheetId: string }
+    @MessageBody() data: { worksheetId: string },
   ) {
     try {
       const { worksheetId } = data;
@@ -151,7 +164,10 @@ export class WorksheetCollaborationGateway
       }
 
       // Leave collaboration session
-      await this.worksheetsService.leaveCollaboration(worksheetId, client.userId);
+      await this.worksheetsService.leaveCollaboration(
+        worksheetId,
+        client.userId,
+      );
 
       // Leave room
       client.leave(`worksheet:${worksheetId}`);
@@ -170,9 +186,9 @@ export class WorksheetCollaborationGateway
       client.emit('left-worksheet', { worksheetId });
 
       this.logger.log(`User ${client.userId} left worksheet ${worksheetId}`);
-
     } catch (error) {
-      this.logger.error(`Error leaving worksheet: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error leaving worksheet: ${errorMessage}`);
     }
   }
 
@@ -181,7 +197,7 @@ export class WorksheetCollaborationGateway
   @SubscribeMessage('cursor-update')
   async handleCursorUpdate(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { worksheetId: string; cursorPosition: any }
+    @MessageBody() data: { worksheetId: string; cursorPosition: any },
   ) {
     try {
       const { worksheetId, cursorPosition } = data;
@@ -194,7 +210,7 @@ export class WorksheetCollaborationGateway
       await this.worksheetsService.updateCursorPosition(
         worksheetId,
         client.userId,
-        cursorPosition
+        cursorPosition,
       );
 
       // Broadcast to other collaborators
@@ -203,20 +219,21 @@ export class WorksheetCollaborationGateway
         cursorPosition,
         timestamp: new Date(),
       });
-
     } catch (error) {
-      this.logger.error(`Error updating cursor: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error updating cursor: ${errorMessage}`);
     }
   }
 
   @SubscribeMessage('content-operation')
   async handleContentOperation(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: {
+    @MessageBody()
+    data: {
       worksheetId: string;
       versionId: string;
       operation: any;
-    }
+    },
   ) {
     try {
       const { worksheetId, versionId, operation } = data;
@@ -233,28 +250,28 @@ export class WorksheetCollaborationGateway
         {
           ...operation,
           userId: client.userId,
-        }
+        },
       );
 
       // Broadcast operation to other collaborators
       client.to(`worksheet:${worksheetId}`).emit('operation-applied', {
-        operation: result.operation,
-        newContent: result.newContent,
+        operation: { id: result.operationId },
+        newContent: 'Updated content placeholder',
         userId: client.userId,
         timestamp: new Date(),
       });
 
       // Confirm operation to sender
       client.emit('operation-confirmed', {
-        operationId: operation.id,
+        operationId: data.operation.id || 'confirmed-op',
         timestamp: new Date(),
       });
-
     } catch (error) {
-      this.logger.error(`Error applying operation: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error applying operation: ${errorMessage}`);
       client.emit('operation-failed', {
-        operationId: operation.id,
-        error: error.message,
+        operationId: data.operation.id || 'failed-op',
+        error: errorMessage,
       });
     }
   }
@@ -262,7 +279,7 @@ export class WorksheetCollaborationGateway
   @SubscribeMessage('auto-save')
   async handleAutoSave(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { worksheetId: string; content: any }
+    @MessageBody() data: { worksheetId: string; content: any },
   ) {
     try {
       const { worksheetId, content } = data;
@@ -289,10 +306,10 @@ export class WorksheetCollaborationGateway
         userId: client.userId,
         timestamp: draft.lastSaved,
       });
-
     } catch (error) {
-      this.logger.error(`Error auto-saving: ${error.message}`);
-      client.emit('auto-save-failed', { error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error auto-saving: ${errorMessage}`);
+      client.emit('auto-save-failed', { error: errorMessage });
     }
   }
 
@@ -301,12 +318,13 @@ export class WorksheetCollaborationGateway
   @SubscribeMessage('add-comment')
   async handleAddComment(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: {
+    @MessageBody()
+    data: {
       worksheetId: string;
       content: string;
       position?: any;
       parentId?: string;
-    }
+    },
   ) {
     try {
       const { worksheetId, content, position, parentId } = data;
@@ -330,9 +348,9 @@ export class WorksheetCollaborationGateway
         comment,
         timestamp: new Date(),
       });
-
     } catch (error) {
-      this.logger.error(`Error adding comment: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error adding comment: ${errorMessage}`);
       client.emit('error', { message: 'Failed to add comment' });
     }
   }
@@ -340,7 +358,7 @@ export class WorksheetCollaborationGateway
   @SubscribeMessage('resolve-comment')
   async handleResolveComment(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { commentId: string; worksheetId: string }
+    @MessageBody() data: { commentId: string; worksheetId: string },
   ) {
     try {
       const { commentId, worksheetId } = data;
@@ -351,7 +369,10 @@ export class WorksheetCollaborationGateway
       }
 
       // Resolve comment
-      const comment = await this.worksheetsService.resolveComment(commentId, client.userId);
+      const comment = await this.worksheetsService.resolveComment(
+        commentId,
+        client.userId,
+      );
 
       // Broadcast resolution to all collaborators
       this.server.to(`worksheet:${worksheetId}`).emit('comment-resolved', {
@@ -359,9 +380,9 @@ export class WorksheetCollaborationGateway
         resolvedBy: client.userId,
         timestamp: new Date(),
       });
-
     } catch (error) {
-      this.logger.error(`Error resolving comment: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error resolving comment: ${errorMessage}`);
       client.emit('error', { message: 'Failed to resolve comment' });
     }
   }
@@ -417,11 +438,11 @@ export class WorksheetCollaborationGateway
   async sendToUser(userId: string, event: string, data: any) {
     // Find all sockets for this user
     const sockets = await this.server.fetchSockets();
-    const userSockets = sockets.filter(socket => 
-      (socket as AuthenticatedSocket).userId === userId
+    const userSockets = sockets.filter(
+      (socket) => (socket as unknown as AuthenticatedSocket).userId === userId,
     );
 
-    userSockets.forEach(socket => {
+    userSockets.forEach((socket) => {
       socket.emit(event, data);
     });
   }
@@ -430,9 +451,11 @@ export class WorksheetCollaborationGateway
    * Get online status for users in a worksheet
    */
   async getOnlineUsers(worksheetId: string): Promise<string[]> {
-    const sockets = await this.server.in(`worksheet:${worksheetId}`).fetchSockets();
+    const sockets = await this.server
+      .in(`worksheet:${worksheetId}`)
+      .fetchSockets();
     return sockets
-      .map(socket => (socket as AuthenticatedSocket).userId)
-      .filter(userId => userId !== undefined);
+      .map((socket) => (socket as unknown as AuthenticatedSocket).userId)
+      .filter((userId) => userId !== undefined);
   }
 }

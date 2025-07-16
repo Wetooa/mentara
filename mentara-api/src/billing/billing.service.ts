@@ -22,7 +22,7 @@ export class BillingService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // Subscription Management
@@ -595,7 +595,7 @@ export class BillingService {
       billingCycle?: BillingCycle;
       prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
       effectiveDate?: Date;
-    } = {}
+    } = {},
   ) {
     const subscription = await this.findUserSubscription(userId);
     if (!subscription) {
@@ -612,9 +612,10 @@ export class BillingService {
 
     const effectiveDate = options.effectiveDate || new Date();
     const newBillingCycle = options.billingCycle || subscription.billingCycle;
-    const newAmount = newBillingCycle === BillingCycle.YEARLY 
-      ? newPlan.yearlyPrice || newPlan.monthlyPrice 
-      : newPlan.monthlyPrice;
+    const newAmount =
+      newBillingCycle === BillingCycle.YEARLY
+        ? newPlan.yearlyPrice || newPlan.monthlyPrice
+        : newPlan.monthlyPrice;
 
     // Calculate proration if needed
     let prorationAmount = 0;
@@ -622,7 +623,7 @@ export class BillingService {
       prorationAmount = await this.calculateProration(
         subscription,
         Number(newAmount),
-        effectiveDate
+        effectiveDate,
       );
     }
 
@@ -636,7 +637,10 @@ export class BillingService {
           billingCycle: newBillingCycle,
           amount: newAmount,
           metadata: {
-            ...subscription.metadata,
+            ...(typeof subscription.metadata === 'object' &&
+            subscription.metadata !== null
+              ? (subscription.metadata as Record<string, any>)
+              : {}),
             lastPlanChange: effectiveDate.toISOString(),
             previousPlanId: subscription.planId,
           },
@@ -649,7 +653,12 @@ export class BillingService {
 
       // Create proration invoice if needed
       if (prorationAmount !== 0 && options.prorationBehavior !== 'none') {
-        await this.createProrationInvoice(tx, subscription.id, prorationAmount, effectiveDate);
+        await this.createProrationInvoice(
+          tx,
+          subscription.id,
+          prorationAmount,
+          effectiveDate,
+        );
       }
 
       // Emit event
@@ -662,7 +671,9 @@ export class BillingService {
         effectiveDate,
       });
 
-      this.logger.log(`User ${userId} changed subscription plan from ${subscription.planId} to ${newPlanId}`);
+      this.logger.log(
+        `User ${userId} changed subscription plan from ${subscription.planId} to ${newPlanId}`,
+      );
 
       return updatedSubscription;
     });
@@ -676,7 +687,7 @@ export class BillingService {
     options: {
       pauseUntil?: Date;
       reason?: string;
-    } = {}
+    } = {},
   ) {
     const subscription = await this.findUserSubscription(userId);
     if (!subscription) {
@@ -692,7 +703,10 @@ export class BillingService {
       data: {
         status: SubscriptionStatus.PAUSED,
         metadata: {
-          ...subscription.metadata,
+          ...(typeof subscription.metadata === 'object' &&
+          subscription.metadata !== null
+            ? (subscription.metadata as Record<string, any>)
+            : {}),
           pausedAt: new Date().toISOString(),
           pauseUntil: options.pauseUntil?.toISOString(),
           pauseReason: options.reason,
@@ -712,7 +726,9 @@ export class BillingService {
       reason: options.reason,
     });
 
-    this.logger.log(`Subscription ${subscription.id} paused for user ${userId}`);
+    this.logger.log(
+      `Subscription ${subscription.id} paused for user ${userId}`,
+    );
 
     return updatedSubscription;
   }
@@ -731,7 +747,8 @@ export class BillingService {
     }
 
     const metadata = subscription.metadata as any;
-    const previousStatus = metadata?.previousStatus || SubscriptionStatus.ACTIVE;
+    const previousStatus =
+      metadata?.previousStatus || SubscriptionStatus.ACTIVE;
 
     const updatedSubscription = await this.prisma.subscription.update({
       where: { userId },
@@ -757,7 +774,9 @@ export class BillingService {
       subscriptionId: subscription.id,
     });
 
-    this.logger.log(`Subscription ${subscription.id} resumed for user ${userId}`);
+    this.logger.log(
+      `Subscription ${subscription.id} resumed for user ${userId}`,
+    );
 
     return updatedSubscription;
   }
@@ -771,7 +790,7 @@ export class BillingService {
       reason?: string;
       feedback?: string;
       cancelAtPeriodEnd?: boolean;
-    } = {}
+    } = {},
   ) {
     const subscription = await this.findUserSubscription(userId);
     if (!subscription) {
@@ -779,18 +798,25 @@ export class BillingService {
     }
 
     const cancelAtPeriodEnd = options.cancelAtPeriodEnd ?? true;
-    const cancelDate = cancelAtPeriodEnd ? subscription.currentPeriodEnd : new Date();
+    const cancelDate = cancelAtPeriodEnd
+      ? subscription.currentPeriodEnd
+      : new Date();
 
     const updatedSubscription = await this.prisma.subscription.update({
       where: { userId },
       data: {
-        status: cancelAtPeriodEnd ? subscription.status : SubscriptionStatus.CANCELED,
+        status: cancelAtPeriodEnd
+          ? subscription.status
+          : SubscriptionStatus.CANCELED,
         canceledAt: cancelAtPeriodEnd ? null : new Date(),
         endedAt: cancelAtPeriodEnd ? subscription.currentPeriodEnd : new Date(),
         cancelReason: options.reason,
         canceledBy: userId,
         metadata: {
-          ...subscription.metadata,
+          ...(typeof subscription.metadata === 'object' &&
+          subscription.metadata !== null
+            ? (subscription.metadata as Record<string, any>)
+            : {}),
           scheduledCancellation: cancelAtPeriodEnd,
           cancellationFeedback: options.feedback,
           cancellationScheduledAt: new Date().toISOString(),
@@ -811,7 +837,9 @@ export class BillingService {
       cancelAtPeriodEnd,
     });
 
-    this.logger.log(`Subscription cancellation scheduled for user ${userId}, effective ${cancelDate}`);
+    this.logger.log(
+      `Subscription cancellation scheduled for user ${userId}, effective ${cancelDate}`,
+    );
 
     return updatedSubscription;
   }
@@ -826,13 +854,15 @@ export class BillingService {
     }
 
     if (subscription.status !== SubscriptionStatus.CANCELED) {
-      throw new BadRequestException('Can only reactivate canceled subscriptions');
+      throw new BadRequestException(
+        'Can only reactivate canceled subscriptions',
+      );
     }
 
     // Reset period dates
     const currentPeriodStart = new Date();
     const currentPeriodEnd = new Date();
-    
+
     if (subscription.billingCycle === BillingCycle.YEARLY) {
       currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
     } else {
@@ -848,9 +878,13 @@ export class BillingService {
         canceledAt: null,
         endedAt: null,
         cancelReason: null,
-        defaultPaymentMethodId: newPaymentMethodId || subscription.defaultPaymentMethodId,
+        defaultPaymentMethodId:
+          newPaymentMethodId || subscription.defaultPaymentMethodId,
         metadata: {
-          ...subscription.metadata,
+          ...(typeof subscription.metadata === 'object' &&
+          subscription.metadata !== null
+            ? (subscription.metadata as Record<string, any>)
+            : {}),
           reactivatedAt: new Date().toISOString(),
           scheduledCancellation: false,
         },
@@ -866,7 +900,9 @@ export class BillingService {
       subscriptionId: subscription.id,
     });
 
-    this.logger.log(`Subscription ${subscription.id} reactivated for user ${userId}`);
+    this.logger.log(
+      `Subscription ${subscription.id} reactivated for user ${userId}`,
+    );
 
     return updatedSubscription;
   }
@@ -874,22 +910,27 @@ export class BillingService {
   /**
    * Apply discount to subscription
    */
-  async applyDiscountToSubscription(
-    userId: string,
-    discountCode: string
-  ) {
+  async applyDiscountToSubscription(userId: string, discountCode: string) {
     const subscription = await this.findUserSubscription(userId);
     if (!subscription) {
       throw new NotFoundException(`Subscription for user ${userId} not found`);
     }
 
-    const discount = await this.validateDiscount(discountCode, userId, Number(subscription.amount));
-    
+    const discount = await this.validateDiscount(
+      discountCode,
+      userId,
+      Number(subscription.amount),
+    );
+
     // Calculate discount amount
     let discountAmount = 0;
     if (discount.type === DiscountType.PERCENTAGE && discount.percentOff) {
-      discountAmount = Number(subscription.amount) * (Number(discount.percentOff) / 100);
-    } else if (discount.type === DiscountType.FIXED_AMOUNT && discount.amountOff) {
+      discountAmount =
+        Number(subscription.amount) * (Number(discount.percentOff) / 100);
+    } else if (
+      discount.type === DiscountType.FIXED_AMOUNT &&
+      discount.amountOff
+    ) {
       discountAmount = Number(discount.amountOff);
     }
 
@@ -902,9 +943,12 @@ export class BillingService {
         data: {
           amount: newAmount,
           metadata: {
-            ...subscription.metadata,
+            ...(typeof subscription.metadata === 'object' &&
+            subscription.metadata !== null
+              ? (subscription.metadata as Record<string, any>)
+              : {}),
             appliedDiscounts: [
-              ...(subscription.metadata?.appliedDiscounts || []),
+              ...((subscription.metadata as any)?.appliedDiscounts || []),
               {
                 discountId: discount.id,
                 code: discountCode,
@@ -984,7 +1028,10 @@ export class BillingService {
           currentPeriodStart: nextPeriodStart,
           currentPeriodEnd: nextPeriodEnd,
           metadata: {
-            ...subscription.metadata,
+            ...(typeof subscription.metadata === 'object' &&
+            subscription.metadata !== null
+              ? (subscription.metadata as Record<string, any>)
+              : {}),
             lastRenewal: now.toISOString(),
           },
         },
@@ -1012,7 +1059,7 @@ export class BillingService {
   async getSubscriptionUsageAnalytics(
     subscriptionId: string,
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ) {
     const subscription = await this.prisma.subscription.findUnique({
       where: { id: subscriptionId },
@@ -1051,13 +1098,13 @@ export class BillingService {
     return {
       subscription,
       usageRecords,
-      usageByFeature: usageByFeature.map(usage => ({
+      usageByFeature: usageByFeature.map((usage) => ({
         feature: usage.feature,
         totalQuantity: usage._sum.quantity || 0,
         recordCount: usage._count.quantity,
         limit: planLimits?.[usage.feature] || null,
-        utilizationPercentage: planLimits?.[usage.feature] 
-          ? ((usage._sum.quantity || 0) / planLimits[usage.feature]) * 100 
+        utilizationPercentage: planLimits?.[usage.feature]
+          ? ((usage._sum.quantity || 0) / planLimits[usage.feature]) * 100
           : null,
       })),
       totalUsage: {
@@ -1072,22 +1119,26 @@ export class BillingService {
   private async calculateProration(
     subscription: any,
     newAmount: number,
-    effectiveDate: Date
+    effectiveDate: Date,
   ): Promise<number> {
     const currentAmount = Number(subscription.amount);
     const periodStart = subscription.currentPeriodStart;
     const periodEnd = subscription.currentPeriodEnd;
-    
-    const totalPeriodDays = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
-    const remainingDays = Math.ceil((periodEnd.getTime() - effectiveDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
+    const totalPeriodDays = Math.ceil(
+      (periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const remainingDays = Math.ceil(
+      (periodEnd.getTime() - effectiveDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
     if (remainingDays <= 0) return 0;
 
     const dailyCurrentRate = currentAmount / totalPeriodDays;
     const dailyNewRate = newAmount / totalPeriodDays;
-    
+
     const prorationAmount = (dailyNewRate - dailyCurrentRate) * remainingDays;
-    
+
     return Math.round(prorationAmount * 100) / 100; // Round to 2 decimal places
   }
 
@@ -1095,14 +1146,15 @@ export class BillingService {
     tx: any,
     subscriptionId: string,
     prorationAmount: number,
-    effectiveDate: Date
+    effectiveDate: Date,
   ) {
     if (prorationAmount === 0) return;
 
     const invoiceNumber = await this.generateInvoiceNumber();
-    const description = prorationAmount > 0 
-      ? 'Proration charge for plan upgrade'
-      : 'Proration credit for plan downgrade';
+    const description =
+      prorationAmount > 0
+        ? 'Proration charge for plan upgrade'
+        : 'Proration credit for plan downgrade';
 
     return await tx.invoice.create({
       data: {

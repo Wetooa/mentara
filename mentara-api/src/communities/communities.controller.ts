@@ -14,19 +14,58 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
 import {
   CommunityCreateInputDto,
-  CommunityResponse,
-  CommunityStatsResponse,
   CommunityUpdateInputDto,
-  CommunityWithMembersResponse,
-  CommunityWithRoomGroupsResponse,
-} from 'schema/community';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+} from 'mentara-commons';
+
+// Local response interfaces
+interface CommunityResponse {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  imageUrl: string;
+  isPrivate?: boolean;
+  memberCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CommunityStatsResponse {
+  memberCount?: number;
+  postCount?: number;
+  activeMembers?: number;
+  totalMembers?: number;
+  totalPosts?: number;
+  activeCommunities?: number;
+  illnessCommunities?: any[];
+}
+
+interface CommunityWithMembersResponse extends CommunityResponse {
+  members: any[];
+}
+
+interface CommunityWithRoomGroupsResponse extends CommunityResponse {
+  roomGroups: Array<{
+    id: string;
+    name: string;
+    order: number;
+    communityId: string;
+    rooms: Array<{
+      id: string;
+      name: string;
+      order: number;
+      postingRole: string;
+      roomGroupId: string;
+    }>;
+  }>;
+}
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 
 @Controller('communities')
 @UseGuards(JwtAuthGuard)

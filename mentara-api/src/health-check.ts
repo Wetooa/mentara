@@ -6,7 +6,7 @@
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { PrismaService } from './database/prisma.service';
+import { PrismaService } from './providers/prisma-client.provider';
 import * as http from 'http';
 
 interface HealthCheckResult {
@@ -37,8 +37,8 @@ interface HealthCheckResult {
 }
 
 class HealthCheckService {
-  private app: INestApplication;
-  private prisma: PrismaService;
+  private app!: INestApplication;
+  private prisma!: PrismaService;
 
   async initialize(): Promise<void> {
     try {
@@ -52,21 +52,21 @@ class HealthCheckService {
 
   async performHealthCheck(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     const result: HealthCheckResult = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       checks: {
         database: { status: 'unhealthy' },
         server: { status: 'unhealthy' },
-        dependencies: { status: 'healthy', details: {} }
+        dependencies: { status: 'healthy', details: {} },
       },
       metadata: {
         uptime: process.uptime(),
         version: process.env.npm_package_version || '1.0.0',
         environment: process.env.NODE_ENV || 'development',
         nodeVersion: process.version,
-      }
+      },
     };
 
     // Database health check
@@ -75,12 +75,13 @@ class HealthCheckService {
       await this.prisma.$queryRaw`SELECT 1 as health_check`;
       result.checks.database = {
         status: 'healthy',
-        responseTime: Date.now() - dbStartTime
+        responseTime: Date.now() - dbStartTime,
       };
     } catch (error) {
       result.checks.database = {
         status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Database connection failed'
+        error:
+          error instanceof Error ? error.message : 'Database connection failed',
       };
       result.status = 'unhealthy';
     }
@@ -91,16 +92,17 @@ class HealthCheckService {
       const serverCheck = await this.checkServerHealth();
       result.checks.server = {
         status: serverCheck ? 'healthy' : 'unhealthy',
-        responseTime: Date.now() - serverStartTime
+        responseTime: Date.now() - serverStartTime,
       };
-      
+
       if (!serverCheck) {
         result.status = 'unhealthy';
       }
     } catch (error) {
       result.checks.server = {
         status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Server health check failed'
+        error:
+          error instanceof Error ? error.message : 'Server health check failed',
       };
       result.status = 'unhealthy';
     }
@@ -110,17 +112,23 @@ class HealthCheckService {
       const dependencyChecks = await this.checkDependencies();
       result.checks.dependencies = {
         status: dependencyChecks.allHealthy ? 'healthy' : 'unhealthy',
-        details: dependencyChecks.details
+        details: dependencyChecks.details,
       };
-      
+
       if (!dependencyChecks.allHealthy) {
         // Dependencies are not critical for overall health, but log issues
-        console.warn('Some dependencies are unhealthy:', dependencyChecks.details);
+        console.warn(
+          'Some dependencies are unhealthy:',
+          dependencyChecks.details,
+        );
       }
     } catch (error) {
       result.checks.dependencies = {
         status: 'unhealthy',
-        details: { error: error instanceof Error ? error.message : 'Dependency check failed' }
+        details: {
+          error:
+            error instanceof Error ? error.message : 'Dependency check failed',
+        },
       };
     }
 
@@ -144,7 +152,10 @@ class HealthCheckService {
     });
   }
 
-  private async checkDependencies(): Promise<{ allHealthy: boolean; details: Record<string, any> }> {
+  private async checkDependencies(): Promise<{
+    allHealthy: boolean;
+    details: Record<string, any>;
+  }> {
     const checks: Record<string, any> = {};
     let allHealthy = true;
 
@@ -155,25 +166,25 @@ class HealthCheckService {
       status: memoryHealthy ? 'healthy' : 'unhealthy',
       heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`,
       heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
-      usage: `${Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100)}%`
+      usage: `${Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100)}%`,
     };
-    
+
     if (!memoryHealthy) {
       allHealthy = false;
     }
 
     // Event loop lag check
     const eventLoopStart = process.hrtime();
-    await new Promise(resolve => setImmediate(resolve));
+    await new Promise((resolve) => setImmediate(resolve));
     const eventLoopLag = process.hrtime(eventLoopStart);
     const lagMs = eventLoopLag[0] * 1000 + eventLoopLag[1] * 1e-6;
     const eventLoopHealthy = lagMs < 10; // Less than 10ms lag
-    
+
     checks.eventLoop = {
       status: eventLoopHealthy ? 'healthy' : 'unhealthy',
-      lag: `${lagMs.toFixed(2)}ms`
+      lag: `${lagMs.toFixed(2)}ms`,
     };
-    
+
     if (!eventLoopHealthy) {
       allHealthy = false;
     }
@@ -188,7 +199,8 @@ class HealthCheckService {
     } catch (error) {
       checks.filesystem = {
         status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Filesystem check failed'
+        error:
+          error instanceof Error ? error.message : 'Filesystem check failed',
       };
       allHealthy = false;
     }
@@ -209,11 +221,11 @@ class HealthCheckService {
 // Main execution for Docker health check
 async function main(): Promise<void> {
   const healthCheck = new HealthCheckService();
-  
+
   try {
     await healthCheck.initialize();
     const result = await healthCheck.performHealthCheck();
-    
+
     // Output result for Docker health check
     if (result.status === 'healthy') {
       console.log('HEALTHY');
@@ -236,4 +248,5 @@ if (require.main === module) {
   main();
 }
 
-export { HealthCheckService, HealthCheckResult };
+export { HealthCheckService };
+export type { HealthCheckResult };

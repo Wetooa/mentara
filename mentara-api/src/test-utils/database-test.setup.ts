@@ -158,7 +158,10 @@ export class DatabaseTestSetup {
       try {
         // Get count before deletion for statistics
         const countQuery = `SELECT COUNT(*) as count FROM "${tableName}"`;
-        const countResult = await this.prismaService.$queryRawUnsafe<[{ count: string }]>(countQuery);
+        const countResult =
+          await this.prismaService.$queryRawUnsafe<[{ count: string }]>(
+            countQuery,
+          );
         const recordCount = parseInt(countResult[0]?.count || '0', 10);
 
         if (recordCount > 0) {
@@ -172,19 +175,25 @@ export class DatabaseTestSetup {
         stats.tablesProcessed++;
       } catch (error) {
         // Log error but continue with cleanup
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
         // Only log as error if it's not a "table doesn't exist" error
         if (!errorMessage.includes('does not exist')) {
           stats.errors.push(`${tableName}: ${errorMessage}`);
         }
-        
+
         // Try alternative cleanup method for problematic tables
         try {
-          await this.prismaService.$executeRawUnsafe(`DELETE FROM "${tableName}";`);
+          await this.prismaService.$executeRawUnsafe(
+            `DELETE FROM "${tableName}";`,
+          );
           stats.tablesProcessed++;
         } catch (alternativeError) {
-          const altErrorMessage = alternativeError instanceof Error ? alternativeError.message : String(alternativeError);
+          const altErrorMessage =
+            alternativeError instanceof Error
+              ? alternativeError.message
+              : String(alternativeError);
           if (!altErrorMessage.includes('does not exist')) {
             stats.errors.push(`${tableName} (alternative): ${altErrorMessage}`);
           }
@@ -330,7 +339,9 @@ export class DatabaseTestSetup {
       health.isConnected = true;
 
       // Count tables in the database
-      const tableCountResult = await this.prismaService.$queryRaw<[{ count: bigint }]>`
+      const tableCountResult = await this.prismaService.$queryRaw<
+        [{ count: bigint }]
+      >`
         SELECT COUNT(*) as count 
         FROM information_schema.tables 
         WHERE table_schema = 'public'
@@ -341,7 +352,9 @@ export class DatabaseTestSetup {
       const keyTables = ['User', 'Client', 'Therapist', 'Meeting', 'Community'];
       for (const table of keyTables) {
         try {
-          await this.prismaService.$queryRawUnsafe(`SELECT 1 FROM "${table}" LIMIT 1`);
+          await this.prismaService.$queryRawUnsafe(
+            `SELECT 1 FROM "${table}" LIMIT 1`,
+          );
         } catch (error) {
           health.errors.push(`Missing or inaccessible table: ${table}`);
         }
@@ -349,7 +362,8 @@ export class DatabaseTestSetup {
 
       health.schemaValid = health.errors.length === 0;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       health.errors.push(`Database connection error: ${errorMessage}`);
     }
 
@@ -422,7 +436,10 @@ export class DatabaseTestSetup {
       return performance;
     } catch (error) {
       const endTime = Date.now();
-      console.error(`❌ ${operationName} failed after ${endTime - startTime}ms:`, error);
+      console.error(
+        `❌ ${operationName} failed after ${endTime - startTime}ms:`,
+        error,
+      );
       throw error;
     }
   }

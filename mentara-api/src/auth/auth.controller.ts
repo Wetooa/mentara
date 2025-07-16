@@ -11,21 +11,15 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { Public } from 'src/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
-import { 
-  RegisterClientDtoSchema, 
-  RegisterTherapistDtoSchema,
+import {
   LoginDtoSchema,
   RefreshTokenDtoSchema,
-  ChangePasswordDtoSchema,
-  type RegisterClientDto,
-  type RegisterTherapistDto,
   type LoginDto,
   type RefreshTokenDto,
-  type ChangePasswordDto
 } from 'mentara-commons';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
@@ -34,65 +28,11 @@ import { Request } from 'express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registrations per 5 minutes
-  @Post('register/client')
-  @HttpCode(HttpStatus.CREATED)
-  async registerClient(
-    @Body(new ZodValidationPipe(RegisterClientDtoSchema)) registerDto: RegisterClientDto,
-  ) {
-    const result = await this.authService.registerClient(
-      registerDto.email,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-    );
-
-    return {
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
-      },
-      accessToken: result.tokens.accessToken,
-      refreshToken: result.tokens.refreshToken,
-      expiresIn: result.tokens.expiresIn,
-      message: result.message,
-    };
-  }
-
-  @Public()
-  @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 therapist registrations per 10 minutes
-  @Post('register/therapist')
-  @HttpCode(HttpStatus.CREATED)
-  async registerTherapist(
-    @Body(new ZodValidationPipe(RegisterTherapistDtoSchema)) registerDto: RegisterTherapistDto,
-  ) {
-    const result = await this.authService.registerTherapist(
-      registerDto.email,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-    );
-
-    return {
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
-      },
-      accessToken: result.tokens.accessToken,
-      refreshToken: result.tokens.refreshToken,
-      expiresIn: result.tokens.expiresIn,
-      message: result.message,
-    };
-  }
+  // Role-specific registration endpoints moved to dedicated controllers:
+  // - /auth/client/register
+  // - /auth/therapist/register
+  // - /auth/admin/create-account
+  // - /auth/moderator/create-account
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -120,11 +60,12 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
-    @Body() registerDto: { 
-      email: string; 
-      password: string; 
-      firstName: string; 
-      lastName: string; 
+    @Body()
+    registerDto: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
       role?: 'client' | 'therapist';
     },
   ) {
@@ -147,7 +88,7 @@ export class AuthController {
   ) {
     const ipAddress = req.ip;
     const userAgent = req.get('User-Agent');
-    
+
     const result = await this.authService.loginWithEmail(
       loginDto.email,
       loginDto.password,
@@ -175,7 +116,8 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
-    @Body(new ZodValidationPipe(RefreshTokenDtoSchema)) refreshDto: RefreshTokenDto,
+    @Body(new ZodValidationPipe(RefreshTokenDtoSchema))
+    refreshDto: RefreshTokenDto,
     @Req() req: Request,
   ) {
     if (!refreshDto.refreshToken) {
@@ -214,19 +156,11 @@ export class AuthController {
     return user;
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('first-sign-in-status')
-  @HttpCode(HttpStatus.OK)
-  async getFirstSignInStatus(@CurrentUserId() userId: string) {
-    return this.authService.getFirstSignInStatus(userId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('mark-recommendations-seen')
-  @HttpCode(HttpStatus.OK)
-  async markRecommendationsSeen(@CurrentUserId() userId: string) {
-    return this.authService.markRecommendationsSeen(userId);
-  }
+  // Role-specific profile endpoints moved to dedicated controllers:
+  // - /auth/client/profile
+  // - /auth/therapist/profile
+  // - /auth/admin/profile
+  // - /auth/moderator/profile
 
   // Google OAuth Routes
   @Public()
@@ -244,7 +178,7 @@ export class AuthController {
     return this.authService.handleOAuthLogin(req.user, 'google');
   }
 
-  // Microsoft OAuth Routes  
+  // Microsoft OAuth Routes
   @Public()
   @Get('microsoft')
   @UseGuards(AuthGuard('microsoft'))

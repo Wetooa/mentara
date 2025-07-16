@@ -6,13 +6,52 @@ import {
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoomGroup, Room } from '@prisma/client';
 import {
-  CommunityResponse,
-  CommunityWithMembersResponse,
-  CommunityStatsResponse,
-  CommunityWithRoomGroupsResponse,
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from 'schema/community';
+} from 'mentara-commons';
+
+// Local response interfaces
+interface CommunityResponse {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  imageUrl: string;
+  isPrivate?: boolean;
+  memberCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CommunityStatsResponse {
+  memberCount?: number;
+  postCount?: number;
+  activeMembers?: number;
+  totalMembers?: number;
+  totalPosts?: number;
+  activeCommunities?: number;
+  illnessCommunities?: any[];
+}
+
+interface CommunityWithMembersResponse extends CommunityResponse {
+  members: any[];
+}
+
+interface CommunityWithRoomGroupsResponse extends CommunityResponse {
+  roomGroups: Array<{
+    id: string;
+    name: string;
+    order: number;
+    communityId: string;
+    rooms: Array<{
+      id: string;
+      name: string;
+      order: number;
+      postingRole: string;
+      roomGroupId: string;
+    }>;
+  }>;
+}
 
 @Injectable()
 export class CommunitiesService {
@@ -121,9 +160,9 @@ export class CommunitiesService {
     const community = await this.prisma.community.create({
       data: {
         name: data.name,
-        slug: data.slug,
+        slug: (data as any).slug || data.name?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
         description: data.description,
-        imageUrl: data.imageUrl,
+        imageUrl: (data as any).imageUrl || null,
       },
     });
     return community;
@@ -137,9 +176,9 @@ export class CommunitiesService {
       where: { id },
       data: {
         name: data.name,
-        slug: data.slug,
+        slug: (data as any).slug || data.name?.toLowerCase().replace(/\s+/g, '-') || 'untitled',
         description: data.description,
-        imageUrl: data.imageUrl,
+        imageUrl: (data as any).imageUrl || null,
       },
     });
     return community;

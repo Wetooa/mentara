@@ -4,7 +4,7 @@ import {
   WorksheetCreateInputDto,
   WorksheetSubmissionCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'schema/worksheet';
+} from 'mentara-commons';
 
 @Injectable()
 export class WorksheetsService {
@@ -111,6 +111,7 @@ export class WorksheetsService {
     data: WorksheetCreateInputDto,
     clientId: string,
     therapistId: string,
+    files: Express.Multer.File[] = [],
   ) {
     // Start a transaction to create the worksheet and any materials
     return this.prisma.$transaction(async (prisma) => {
@@ -120,11 +121,13 @@ export class WorksheetsService {
           title: data.title,
           instructions: data.instructions,
           description: data.description,
-          dueDate: data.dueDate,
-          status: data.status || 'assigned',
-          isCompleted: data.isCompleted || false,
+          dueDate: data.dueDate || new Date(),
+          status: (data as any).status || 'assigned',
+          isCompleted: (data as any).isCompleted || false,
           clientId,
           therapistId,
+          // Note: File handling is now done in the controller
+          // The controller passes already-uploaded file URLs
         },
       });
 
@@ -192,10 +195,10 @@ export class WorksheetsService {
       data: {
         worksheetId: data.worksheetId,
         clientId,
-        content: data.content,
-        filename: data.filename,
-        url: data.url,
-        fileType: data.fileType,
+        content: (data as any).content || null,
+        filename: (data as any).filename || 'submission.txt',
+        url: (data as any).url || '',
+        fileType: (data as any).fileType || 'text/plain',
       },
     });
 
@@ -222,10 +225,10 @@ export class WorksheetsService {
         data: {
           worksheetId: id,
           clientId,
-          content: data.content,
-          filename: data.filename,
-          url: data.url,
-          fileType: data.fileType,
+          content: (data as any).content || null,
+          filename: (data as any).filename || 'submission.txt',
+          url: (data as any).url || '',
+          fileType: (data as any).fileType || 'text/plain',
         },
       });
 

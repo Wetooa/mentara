@@ -9,7 +9,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../app.module';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import { LoadTestingSuite } from './load-testing.suite';
 import { SecurityTestingSuite } from '../security/security-testing.suite';
 import { createMockClerkClient, createMockAuthGuard } from '../index';
@@ -35,8 +35,8 @@ interface TestSuiteResult {
 }
 
 export class PerformanceTestRunner {
-  private app: INestApplication;
-  private prisma: PrismaService;
+  private app!: INestApplication;
+  private prisma!: PrismaService;
   private config: TestRunnerConfig;
   private suiteResults: TestSuiteResult[] = [];
 
@@ -152,10 +152,10 @@ export class PerformanceTestRunner {
         duration: endTime - startTime,
         success: false,
         results: null,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      console.error('❌ Load testing failed:', error.message);
+      console.error('❌ Load testing failed:', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
@@ -201,10 +201,10 @@ export class PerformanceTestRunner {
         duration: endTime - startTime,
         success: false,
         results: null,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      console.error('❌ Security testing failed:', error.message);
+      console.error('❌ Security testing failed:', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
@@ -248,7 +248,7 @@ export class PerformanceTestRunner {
         duration: endTime - startTime,
         success: false,
         results: null,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
 
       console.log('⚠️ Database performance testing completed with issues');
@@ -302,10 +302,10 @@ export class PerformanceTestRunner {
         duration: endTime - startTime,
         success: false,
         results: null,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      console.error('❌ Memory testing failed:', error.message);
+      console.error('❌ Memory testing failed:', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
@@ -313,7 +313,7 @@ export class PerformanceTestRunner {
    * Perform memory-specific tests
    */
   private async performMemoryTests(): Promise<any[]> {
-    const results = [];
+    const results: any[] = [];
 
     // Test 1: Large data processing
     const largeDataResult = await this.testLargeDataProcessing();
@@ -384,7 +384,7 @@ export class PerformanceTestRunner {
     const startMemory = process.memoryUsage().heapUsed;
 
     // Create and then clean up large objects
-    let largeObjects = [];
+    let largeObjects: any[] = [];
     for (let i = 0; i < 1000; i++) {
       largeObjects.push({
         id: i,
@@ -395,7 +395,7 @@ export class PerformanceTestRunner {
     const peakMemory = process.memoryUsage().heapUsed;
 
     // Clean up
-    largeObjects = null;
+    largeObjects = [];
 
     // Force garbage collection if available
     if (global.gc) {
@@ -454,7 +454,7 @@ export class PerformanceTestRunner {
   }
 
   private generateRecommendations(): string[] {
-    const recommendations = [];
+    const recommendations: string[] = [];
 
     const failedSuites = this.suiteResults.filter((r) => !r.success);
     if (failedSuites.length > 0) {

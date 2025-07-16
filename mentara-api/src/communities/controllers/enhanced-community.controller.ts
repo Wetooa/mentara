@@ -8,15 +8,30 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   ValidationPipe,
-  UsePipes
+  UsePipes,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-import { RoleBasedAccessGuard } from '../../guards/role-based-access.guard';
-import { Roles } from '../../decorators/roles.decorator';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RoleBasedAccessGuard } from '../../auth/guards/role-based-access.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { EnhancedCommunityService } from '../services/enhanced-community.service';
-import { IsString, IsOptional, IsIn, IsInt, IsBoolean, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsIn,
+  IsInt,
+  IsBoolean,
+  Min,
+  Max,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 class CommunitySearchDto {
@@ -112,20 +127,45 @@ class SimilarCommunitiesDto {
 @UsePipes(new ValidationPipe({ transform: true }))
 export class EnhancedCommunityController {
   constructor(
-    private readonly enhancedCommunityService: EnhancedCommunityService
+    private readonly enhancedCommunityService: EnhancedCommunityService,
   ) {}
 
   @Get('search')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Advanced community search',
-    description: 'Search communities with advanced filtering, sorting, and faceting capabilities'
+    description:
+      'Search communities with advanced filtering, sorting, and faceting capabilities',
   })
-  @ApiQuery({ name: 'query', required: false, type: 'string', description: 'Search text' })
-  @ApiQuery({ name: 'tags', required: false, type: 'string', description: 'Comma-separated tags' })
-  @ApiQuery({ name: 'minMembers', required: false, type: 'number', description: 'Minimum member count' })
-  @ApiQuery({ name: 'maxMembers', required: false, type: 'number', description: 'Maximum member count' })
-  @ApiQuery({ name: 'sortBy', required: false, enum: ['relevance', 'members', 'activity', 'newest', 'alphabetical'] })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    type: 'string',
+    description: 'Search text',
+  })
+  @ApiQuery({
+    name: 'tags',
+    required: false,
+    type: 'string',
+    description: 'Comma-separated tags',
+  })
+  @ApiQuery({
+    name: 'minMembers',
+    required: false,
+    type: 'number',
+    description: 'Minimum member count',
+  })
+  @ApiQuery({
+    name: 'maxMembers',
+    required: false,
+    type: 'number',
+    description: 'Maximum member count',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['relevance', 'members', 'activity', 'newest', 'alphabetical'],
+  })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   @ApiQuery({ name: 'hasDescription', required: false, type: 'boolean' })
   @ApiQuery({ name: 'hasImage', required: false, type: 'boolean' })
@@ -153,24 +193,27 @@ export class EnhancedCommunityController {
                   description: { type: 'string' },
                   memberCount: { type: 'number' },
                   recentActivity: { type: 'object' },
-                  membershipStatus: { type: 'string', enum: ['member', 'pending', 'none'] },
-                  compatibility: { type: 'object' }
-                }
-              }
+                  membershipStatus: {
+                    type: 'string',
+                    enum: ['member', 'pending', 'none'],
+                  },
+                  compatibility: { type: 'object' },
+                },
+              },
             },
             total: { type: 'number' },
             page: { type: 'number' },
             limit: { type: 'number' },
             totalPages: { type: 'number' },
-            facets: { type: 'object' }
-          }
-        }
-      }
-    }
+            facets: { type: 'object' },
+          },
+        },
+      },
+    },
   })
   async searchCommunities(
     @Query() searchDto: CommunitySearchDto,
-    @GetUser() user: any
+    @GetUser() user: any,
   ) {
     try {
       const result = await this.enhancedCommunityService.searchCommunities(
@@ -183,17 +226,17 @@ export class EnhancedCommunityController {
           sortOrder: searchDto.sortOrder,
           hasDescription: searchDto.hasDescription,
           hasImage: searchDto.hasImage,
-          membershipRequired: searchDto.membershipRequired
+          membershipRequired: searchDto.membershipRequired,
         },
         user.id,
         searchDto.page,
-        searchDto.limit
+        searchDto.limit,
       );
 
       return {
         success: true,
         data: result,
-        message: 'Community search completed successfully'
+        message: 'Community search completed successfully',
       };
     } catch (error) {
       throw error;
@@ -202,15 +245,16 @@ export class EnhancedCommunityController {
 
   @Get(':communityId/details')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get enhanced community details',
-    description: 'Retrieve comprehensive community information including stats, recent posts, and top contributors'
+    description:
+      'Retrieve comprehensive community information including stats, recent posts, and top contributors',
   })
   @ApiParam({
     name: 'communityId',
     type: 'string',
     format: 'uuid',
-    description: 'Community ID'
+    description: 'Community ID',
   })
   @ApiResponse({
     status: 200,
@@ -233,37 +277,37 @@ export class EnhancedCommunityController {
                 totalPosts: { type: 'number' },
                 totalComments: { type: 'number' },
                 activeMembers: { type: 'number' },
-                recentActivity: { type: 'object' }
-              }
+                recentActivity: { type: 'object' },
+              },
             },
             recentPosts: { type: 'array' },
             topContributors: { type: 'array' },
             moderators: { type: 'array' },
             membershipStatus: { type: 'string' },
-            userPermissions: { type: 'object' }
-          }
-        }
-      }
-    }
+            userPermissions: { type: 'object' },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
-    description: 'Community not found'
+    description: 'Community not found',
   })
   async getCommunityDetails(
     @Param('communityId', ParseUUIDPipe) communityId: string,
-    @GetUser() user: any
+    @GetUser() user: any,
   ) {
     try {
       const details = await this.enhancedCommunityService.getCommunityDetails(
         communityId,
-        user.id
+        user.id,
       );
 
       return {
         success: true,
         data: details,
-        message: 'Community details retrieved successfully'
+        message: 'Community details retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -272,12 +316,18 @@ export class EnhancedCommunityController {
 
   @Get('trending')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get trending communities',
-    description: 'Retrieve communities that are trending based on growth rate and activity'
+    description:
+      'Retrieve communities that are trending based on growth rate and activity',
   })
   @ApiQuery({ name: 'limit', required: false, type: 'number', example: 10 })
-  @ApiQuery({ name: 'timeframe', required: false, enum: ['week', 'month'], example: 'week' })
+  @ApiQuery({
+    name: 'timeframe',
+    required: false,
+    enum: ['week', 'month'],
+    example: 'week',
+  })
   @ApiResponse({
     status: 200,
     description: 'Trending communities retrieved successfully',
@@ -300,26 +350,27 @@ export class EnhancedCommunityController {
                   growthRate: { type: 'number' },
                   activityScore: { type: 'number' },
                   engagementRate: { type: 'number' },
-                  retentionRate: { type: 'number' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                  retentionRate: { type: 'number' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   })
   async getTrendingCommunities(@Query() dto: TrendingCommunitiesDto) {
     try {
-      const trendingCommunities = await this.enhancedCommunityService.getTrendingCommunities(
-        dto.limit,
-        dto.timeframe
-      );
+      const trendingCommunities =
+        await this.enhancedCommunityService.getTrendingCommunities(
+          dto.limit,
+          dto.timeframe,
+        );
 
       return {
         success: true,
         data: trendingCommunities,
-        message: 'Trending communities retrieved successfully'
+        message: 'Trending communities retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -328,45 +379,49 @@ export class EnhancedCommunityController {
 
   @Get(':communityId/similar')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get similar communities',
-    description: 'Find communities similar to the specified one based on member overlap and activity patterns'
+    description:
+      'Find communities similar to the specified one based on member overlap and activity patterns',
   })
   @ApiParam({
     name: 'communityId',
     type: 'string',
     format: 'uuid',
-    description: 'Reference community ID'
+    description: 'Reference community ID',
   })
-  @ApiQuery({ name: 'excludeJoined', required: false, type: 'boolean', example: true })
+  @ApiQuery({
+    name: 'excludeJoined',
+    required: false,
+    type: 'boolean',
+    example: true,
+  })
   @ApiQuery({ name: 'maxResults', required: false, type: 'number', example: 5 })
   @ApiResponse({
     status: 200,
-    description: 'Similar communities retrieved successfully'
+    description: 'Similar communities retrieved successfully',
   })
   @ApiResponse({
     status: 404,
-    description: 'Reference community not found'
+    description: 'Reference community not found',
   })
   async getSimilarCommunities(
     @Param('communityId', ParseUUIDPipe) communityId: string,
     @Query() dto: SimilarCommunitiesDto,
-    @GetUser() user: any
+    @GetUser() user: any,
   ) {
     try {
-      const similarCommunities = await this.enhancedCommunityService.getSimilarCommunities(
-        communityId,
-        {
+      const similarCommunities =
+        await this.enhancedCommunityService.getSimilarCommunities(communityId, {
           userId: user.id,
           excludeJoined: dto.excludeJoined,
-          maxResults: dto.maxResults
-        }
-      );
+          maxResults: dto.maxResults,
+        });
 
       return {
         success: true,
         data: similarCommunities,
-        message: 'Similar communities retrieved successfully'
+        message: 'Similar communities retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -375,42 +430,46 @@ export class EnhancedCommunityController {
 
   @Get('discover')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Discover communities',
-    description: 'Get personalized community recommendations based on user activity and preferences'
+    description:
+      'Get personalized community recommendations based on user activity and preferences',
   })
   @ApiQuery({ name: 'limit', required: false, type: 'number', example: 10 })
   @ApiResponse({
     status: 200,
-    description: 'Community recommendations retrieved successfully'
+    description: 'Community recommendations retrieved successfully',
   })
   async discoverCommunities(
     @GetUser() user: any,
-    @Query('limit') limit?: number
+    @Query('limit') limit?: number,
   ) {
     try {
       // This could integrate with the CommunityRecommendationService
       // For now, return trending communities as a discovery mechanism
-      const trendingCommunities = await this.enhancedCommunityService.getTrendingCommunities(
-        limit || 10,
-        'week'
-      );
+      const trendingCommunities =
+        await this.enhancedCommunityService.getTrendingCommunities(
+          limit || 10,
+          'week',
+        );
 
       // Filter out communities the user has already joined
-      const userMemberships = await this.enhancedCommunityService['prisma'].membership.findMany({
+      const userMemberships = await this.enhancedCommunityService[
+        'prisma'
+      ].membership.findMany({
         where: { userId: user.id },
-        select: { communityId: true }
+        select: { communityId: true },
       });
-      
-      const userCommunityIds = userMemberships.map(m => m.communityId);
+
+      const userCommunityIds = userMemberships.map((m) => m.communityId);
       const recommendations = trendingCommunities.filter(
-        community => !userCommunityIds.includes(community.id)
+        (community) => !userCommunityIds.includes(community.id),
       );
 
       return {
         success: true,
         data: recommendations,
-        message: 'Community recommendations retrieved successfully'
+        message: 'Community recommendations retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -419,13 +478,13 @@ export class EnhancedCommunityController {
 
   @Get('categories')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get community categories',
-    description: 'Retrieve available community categories for browsing'
+    description: 'Retrieve available community categories for browsing',
   })
   @ApiResponse({
     status: 200,
-    description: 'Community categories retrieved successfully'
+    description: 'Community categories retrieved successfully',
   })
   async getCommunityCategories() {
     try {
@@ -436,47 +495,59 @@ export class EnhancedCommunityController {
           name: 'Depression Support',
           description: 'Communities focused on depression and mood disorders',
           icon: '😔',
-          communityCount: 0
+          communityCount: 0,
         },
         {
           id: 'anxiety',
           name: 'Anxiety Support',
           description: 'Communities for anxiety, panic, and stress management',
           icon: '😰',
-          communityCount: 0
+          communityCount: 0,
         },
         {
           id: 'trauma',
           name: 'Trauma & PTSD',
           description: 'Support for trauma recovery and PTSD',
           icon: '🛡️',
-          communityCount: 0
+          communityCount: 0,
         },
         {
           id: 'general',
           name: 'General Support',
           description: 'Broad mental health support communities',
           icon: '🤝',
-          communityCount: 0
+          communityCount: 0,
         },
         {
           id: 'wellness',
           name: 'Mental Wellness',
           description: 'Focus on mental health maintenance and wellness',
           icon: '🌱',
-          communityCount: 0
-        }
+          communityCount: 0,
+        },
       ];
 
       // Count communities for each category (simplified)
       for (const category of categories) {
-        const count = await this.enhancedCommunityService['prisma'].community.count({
+        const count = await this.enhancedCommunityService[
+          'prisma'
+        ].community.count({
           where: {
             OR: [
-              { name: { contains: category.name.split(' ')[0], mode: 'insensitive' } },
-              { description: { contains: category.name.split(' ')[0], mode: 'insensitive' } }
-            ]
-          }
+              {
+                name: {
+                  contains: category.name.split(' ')[0],
+                  mode: 'insensitive',
+                },
+              },
+              {
+                description: {
+                  contains: category.name.split(' ')[0],
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          },
         });
         category.communityCount = count;
       }
@@ -484,7 +555,7 @@ export class EnhancedCommunityController {
       return {
         success: true,
         data: categories,
-        message: 'Community categories retrieved successfully'
+        message: 'Community categories retrieved successfully',
       };
     } catch (error) {
       throw error;
@@ -493,34 +564,35 @@ export class EnhancedCommunityController {
 
   @Get('popular')
   @Roles('client', 'therapist', 'moderator', 'admin')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get popular communities',
-    description: 'Retrieve communities with the highest member counts and activity'
+    description:
+      'Retrieve communities with the highest member counts and activity',
   })
   @ApiQuery({ name: 'limit', required: false, type: 'number', example: 10 })
   @ApiResponse({
     status: 200,
-    description: 'Popular communities retrieved successfully'
+    description: 'Popular communities retrieved successfully',
   })
   async getPopularCommunities(
     @GetUser() user: any,
-    @Query('limit') limit?: number
+    @Query('limit') limit?: number,
   ) {
     try {
       const result = await this.enhancedCommunityService.searchCommunities(
         {
           sortBy: 'members',
-          sortOrder: 'desc'
+          sortOrder: 'desc',
         },
         user.id,
         1,
-        limit || 10
+        limit || 10,
       );
 
       return {
         success: true,
         data: result.communities,
-        message: 'Popular communities retrieved successfully'
+        message: 'Popular communities retrieved successfully',
       };
     } catch (error) {
       throw error;

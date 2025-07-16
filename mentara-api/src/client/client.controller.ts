@@ -9,14 +9,14 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ClientService } from './client.service';
 import {
-  ClientResponse,
-  ClientUpdateDto,
-  TherapistResponse,
-} from 'schema/auth';
+  UpdateClientDto,
+  User,
+  TherapistRecommendation,
+} from 'mentara-commons';
 
 @Controller('client')
 @UseGuards(JwtAuthGuard)
@@ -24,7 +24,7 @@ export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   @Get('profile')
-  async getProfile(@CurrentUserId() id: string): Promise<ClientResponse> {
+  async getProfile(@CurrentUserId() id: string): Promise<User> {
     try {
       return await this.clientService.getProfile(id);
     } catch (error) {
@@ -38,8 +38,8 @@ export class ClientController {
   @Put('profile')
   async updateProfile(
     @CurrentUserId() id: string,
-    @Body() data: ClientUpdateDto,
-  ): Promise<ClientResponse> {
+    @Body() data: UpdateClientDto,
+  ): Promise<User> {
     try {
       return await this.clientService.updateProfile(id, data);
     } catch (error) {
@@ -83,7 +83,7 @@ export class ClientController {
   @Get('therapist')
   async getAssignedTherapist(
     @CurrentUserId() id: string,
-  ): Promise<{ therapist: TherapistResponse | null }> {
+  ): Promise<{ therapist: TherapistRecommendation | null }> {
     try {
       const therapist = await this.clientService.getAssignedTherapist(id);
       return { therapist };
@@ -99,7 +99,7 @@ export class ClientController {
   async assignTherapist(
     @CurrentUserId() id: string,
     @Body() data: { therapistId: string },
-  ): Promise<{ therapist: TherapistResponse }> {
+  ): Promise<{ therapist: TherapistRecommendation }> {
     try {
       const therapist = await this.clientService.assignTherapist(
         id,

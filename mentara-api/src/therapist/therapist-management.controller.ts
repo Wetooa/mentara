@@ -1,7 +1,7 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
 import { WorksheetsService } from '../worksheets/worksheets.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('therapist-management')
 @UseGuards(JwtAuthGuard)

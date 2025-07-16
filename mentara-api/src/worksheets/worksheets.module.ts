@@ -22,17 +22,14 @@ import { MulterModule } from '@nestjs/platform-express';
   controllers: [
     WorksheetsController,
     WorksheetUploadsController,
-    EnhancedWorksheetsController
+    EnhancedWorksheetsController,
   ],
   providers: [
     WorksheetsService,
     EnhancedWorksheetsService,
     WorksheetCollaborationGateway,
-    PrismaService
+    PrismaService,
   ],
-  exports: [
-    WorksheetsService,
-    EnhancedWorksheetsService
-  ],
+  exports: [WorksheetsService, EnhancedWorksheetsService],
 })
 export class WorksheetsModule {}

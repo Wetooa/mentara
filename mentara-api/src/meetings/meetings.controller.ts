@@ -9,8 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 
 @Controller('meetings')
 @UseGuards(JwtAuthGuard)

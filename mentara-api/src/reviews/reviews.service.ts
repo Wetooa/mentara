@@ -6,7 +6,23 @@ import {
 } from '@nestjs/common';
 import { MeetingStatus, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ReviewCreateDto, ReviewUpdateDto } from 'schema/review';
+// Local DTO interfaces to replace mentara-commons imports
+interface ReviewCreateDto {
+  rating: number;
+  title?: string;
+  content?: string;
+  comment?: string;
+  therapistId: string;
+  isAnonymous?: boolean;
+}
+
+interface ReviewUpdateDto {
+  rating?: number;
+  title?: string;
+  content?: string;
+  comment?: string;
+  isAnonymous?: boolean;
+}
 
 @Injectable()
 export class ReviewsService {

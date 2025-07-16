@@ -4,7 +4,6 @@ import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
 import { CommunityMatchingService } from './services/community-matching.service';
 import { CommunityRecommendationService } from './services/community-recommendation.service';
-import { JoinRequestService } from './services/join-request.service';
 import { EnhancedCommunityService } from './services/enhanced-community.service';
 import { CommunityRecommendationController } from './controllers/community-recommendation.controller';
 import { ModerationController } from './controllers/moderation.controller';
@@ -16,24 +15,22 @@ import { PrismaService } from 'src/providers/prisma-client.provider';
     CommunitiesController,
     CommunityRecommendationController,
     ModerationController,
-    EnhancedCommunityController
+    EnhancedCommunityController,
   ],
   providers: [
     CommunitiesService,
     CommunityAssignmentService,
     CommunityMatchingService,
     CommunityRecommendationService,
-    JoinRequestService,
     EnhancedCommunityService,
-    PrismaService
+    PrismaService,
   ],
   exports: [
     CommunitiesService,
     CommunityAssignmentService,
     CommunityMatchingService,
     CommunityRecommendationService,
-    JoinRequestService,
-    EnhancedCommunityService
+    EnhancedCommunityService,
   ],
 })
 export class CommunitiesModule {}

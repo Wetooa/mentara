@@ -10,9 +10,25 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { ReviewCreateDto, ReviewUpdateDto } from 'schema/review';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+// Local DTO interfaces to replace mentara-commons imports
+interface ReviewCreateDto {
+  rating: number;
+  title?: string;
+  content?: string;
+  comment?: string;
+  therapistId: string;
+  isAnonymous?: boolean;
+}
+
+interface ReviewUpdateDto {
+  rating?: number;
+  title?: string;
+  content?: string;
+  comment?: string;
+  isAnonymous?: boolean;
+}
 
 @Controller('reviews')
 @UseGuards(JwtAuthGuard)

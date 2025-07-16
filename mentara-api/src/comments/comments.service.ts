@@ -10,14 +10,31 @@ import {
   Prisma,
   User,
   Reply,
-  AttachmentEntityType,
-  AttachmentPurpose,
 } from '@prisma/client';
 import {
   CommentCreateInputDto,
-  CommentResponse,
   CommentUpdateInputDto,
-} from 'schema/comment';
+} from 'mentara-commons';
+
+// Define local response type to match actual return structure
+interface CommentResponse {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  postId: string;
+  userId: string;
+  content: string;
+  parentId: string | null;
+  attachmentUrls: string[];
+  attachmentNames: string[];
+  attachmentSizes: number[];
+  user?: any;
+  hearts?: number; // This is the count, not an array
+  files?: any[];
+  heartCount?: number;
+  replyCount?: number;
+  isHearted?: boolean;
+}
 
 @Injectable()
 export class CommentsService {
@@ -125,7 +142,7 @@ export class CommentsService {
       return {
         ...comment,
         hearts: comment.hearts.length, // Count hearts instead of returning array
-        files: await this.getCommentAttachments(comment.id),
+        files: [], // No longer using centralized file system
       };
     } catch (error) {
       if (
@@ -201,6 +218,9 @@ export class CommentsService {
   async create(
     data: CommentCreateInputDto,
     userId: string,
+    attachmentUrls: string[] = [],
+    attachmentNames: string[] = [],
+    attachmentSizes: number[] = [],
   ): Promise<CommentResponse> {
     try {
       const comment = await this.prisma.comment.create({
@@ -208,6 +228,9 @@ export class CommentsService {
           userId,
           postId: data.postId,
           content: data.content,
+          attachmentUrls,
+          attachmentNames,
+          attachmentSizes,
         },
         include: {
           user: true,
@@ -218,7 +241,7 @@ export class CommentsService {
       return {
         ...comment,
         hearts: comment.hearts.length, // Count hearts instead of returning array
-        files: await this.getCommentAttachments(comment.id),
+        files: [], // No longer using centralized file system
       };
     } catch (error) {
       if (
@@ -273,7 +296,7 @@ export class CommentsService {
       return {
         ...updatedComment,
         hearts: updatedComment.hearts.length,
-        files: await this.getCommentAttachments(updatedComment.id),
+        files: [], // No longer using centralized file system
       };
     } catch (error) {
       if (
@@ -604,94 +627,6 @@ export class CommentsService {
     }
   }
 
-  // File attachment methods for comments
-  async attachFilesToComment(
-    commentId: string,
-    fileIds: string[],
-    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
-  ) {
-    const attachments = fileIds.map((fileId, index) => ({
-      fileId,
-      entityType: AttachmentEntityType.COMMENT,
-      entityId: commentId,
-      purpose,
-      order: index,
-    }));
-
-    return this.prisma.fileAttachment.createMany({
-      data: attachments,
-    });
-  }
-
-  async getCommentAttachments(commentId: string) {
-    const attachments = await this.prisma.fileAttachment.findMany({
-      where: {
-        entityType: AttachmentEntityType.COMMENT,
-        entityId: commentId,
-      },
-      include: {
-        file: true,
-      },
-      orderBy: { order: 'asc' },
-    });
-
-    return attachments.map((attachment) => ({
-      id: attachment.id,
-      commentId: attachment.entityId,
-      url: attachment.file.storageUrl || `/api/files/${attachment.file.id}`,
-      type: attachment.file.mimeType,
-    }));
-  }
-
-  async removeCommentAttachment(commentId: string, fileId: string) {
-    return this.prisma.fileAttachment.deleteMany({
-      where: {
-        entityType: AttachmentEntityType.COMMENT,
-        entityId: commentId,
-        fileId,
-      },
-    });
-  }
-
-  // File attachment methods for replies
-  async attachFilesToReply(
-    replyId: string,
-    fileIds: string[],
-    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
-  ) {
-    const attachments = fileIds.map((fileId, index) => ({
-      fileId,
-      entityType: AttachmentEntityType.REPLY,
-      entityId: replyId,
-      purpose,
-      order: index,
-    }));
-
-    return this.prisma.fileAttachment.createMany({
-      data: attachments,
-    });
-  }
-
-  async getReplyAttachments(replyId: string) {
-    return this.prisma.fileAttachment.findMany({
-      where: {
-        entityType: AttachmentEntityType.REPLY,
-        entityId: replyId,
-      },
-      include: {
-        file: true,
-      },
-      orderBy: { order: 'asc' },
-    });
-  }
-
-  async removeReplyAttachment(replyId: string, fileId: string) {
-    return this.prisma.fileAttachment.deleteMany({
-      where: {
-        entityType: AttachmentEntityType.REPLY,
-        entityId: replyId,
-        fileId,
-      },
-    });
-  }
+  // File attachments are now handled directly with attachment arrays
+  // No separate file attachment models needed
 }

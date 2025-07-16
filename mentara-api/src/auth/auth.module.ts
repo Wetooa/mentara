@@ -13,6 +13,21 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
 import { EmailService } from '../services/email.service';
 
+// Role-specific controllers
+import { ClientAuthController } from './controllers/client-auth.controller';
+import { TherapistAuthController } from './controllers/therapist-auth.controller';
+import { AdminAuthController } from './controllers/admin-auth.controller';
+import { ModeratorAuthController } from './controllers/moderator-auth.controller';
+
+// Role-specific services
+import { ClientAuthService } from './services/client-auth.service';
+import { TherapistAuthService } from './services/therapist-auth.service';
+import { AdminAuthService } from './services/admin-auth.service';
+import { ModeratorAuthService } from './services/moderator-auth.service';
+
+// External dependencies
+import { SupabaseStorageService } from '../common/services/supabase-storage.service';
+
 @Module({
   imports: [
     PassportModule,
@@ -23,11 +38,17 @@ import { EmailService } from '../services/email.service';
       },
     }),
   ],
-  controllers: [AuthController],
+  controllers: [
+    AuthController,
+    ClientAuthController,
+    TherapistAuthController,
+    AdminAuthController,
+    ModeratorAuthController,
+  ],
   providers: [
-    AuthService, 
-    PrismaService, 
-    EventBusService, 
+    AuthService,
+    PrismaService,
+    EventBusService,
     TokenService,
     EmailVerificationService,
     PasswordResetService,
@@ -35,7 +56,26 @@ import { EmailService } from '../services/email.service';
     JwtStrategy,
     GoogleStrategy,
     MicrosoftStrategy,
+
+    // Role-specific services
+    ClientAuthService,
+    TherapistAuthService,
+    AdminAuthService,
+    ModeratorAuthService,
+
+    // External dependencies
+    SupabaseStorageService,
   ],
-  exports: [AuthService, TokenService, EmailVerificationService, PasswordResetService, JwtStrategy],
+  exports: [
+    AuthService,
+    TokenService,
+    EmailVerificationService,
+    PasswordResetService,
+    JwtStrategy,
+    ClientAuthService,
+    TherapistAuthService,
+    AdminAuthService,
+    ModeratorAuthService,
+  ],
 })
 export class AuthModule {}

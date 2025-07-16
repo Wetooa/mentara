@@ -31,6 +31,14 @@ model Therapist {
   // Additional certifications
   certifications Json? // Array of certification objects
 
+  // Document uploads (replaces FileAttachment polymorphic system)
+  certificateUrls  String[] @default([])
+  certificateNames String[] @default([])
+  licenseUrls      String[] @default([])
+  licenseNames     String[] @default([])
+  documentUrls     String[] @default([]) // For resumes, transcripts, etc.
+  documentNames    String[] @default([])
+
   // Professional background
   yearsOfExperience     Int?
   educationBackground   String?  @db.Text

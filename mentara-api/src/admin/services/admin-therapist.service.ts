@@ -76,10 +76,7 @@ export class AdminTherapistService {
       const applications = await this.prisma.therapist.findMany({
         where,
         take: limit,
-        orderBy: [
-          { submissionDate: 'desc' },
-          { createdAt: 'desc' },
-        ],
+        orderBy: [{ submissionDate: 'desc' }, { createdAt: 'desc' }],
         include: {
           user: {
             select: {
@@ -160,7 +157,7 @@ export class AdminTherapistService {
             },
           },
           // Include related data for comprehensive view
-          clients: {
+          assignedClients: {
             take: 5, // Show recent clients if any
             include: {
               client: {
@@ -205,7 +202,7 @@ export class AdminTherapistService {
           entity: 'therapist',
           entityId: therapistId,
         },
-        orderBy: { timestamp: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: 10,
         include: {
           user: {
@@ -218,19 +215,30 @@ export class AdminTherapistService {
         },
       });
 
-      this.logger.log(`Retrieved detailed application for therapist ${therapistId}`);
+      this.logger.log(
+        `Retrieved detailed application for therapist ${therapistId}`,
+      );
 
       return {
         application,
         auditTrail,
         statistics: {
-          totalClients: application.clients.length,
-          averageRating: application.averageRating,
-          totalReviews: application.totalReviews,
+          totalClients: application.assignedClients.length,
+          averageRating:
+            application.reviews.length > 0
+              ? application.reviews.reduce(
+                  (sum, review) => sum + review.rating,
+                  0,
+                ) / application.reviews.length
+              : 0,
+          totalReviews: application.reviews.length,
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to retrieve application details for ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to retrieve application details for ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -251,7 +259,9 @@ export class AdminTherapistService {
         });
 
         if (!existingTherapist) {
-          throw new NotFoundException(`Therapist with ID ${therapistId} not found`);
+          throw new NotFoundException(
+            `Therapist with ID ${therapistId} not found`,
+          );
         }
 
         if (existingTherapist.status !== 'pending') {
@@ -267,15 +277,14 @@ export class AdminTherapistService {
             status: 'approved',
             processedByAdminId: adminId,
             processingDate: new Date(),
-            verifiedLicense: approvalData.verifyLicense || false,
-            specialPermissions: approvalData.grantSpecialPermissions || [],
+            licenseVerified: approvalData.verifyLicense || false,
           },
         });
 
         // 3. Update user role to therapist
         await tx.user.update({
           where: { id: therapistId },
-          data: { 
+          data: {
             role: 'therapist',
             isVerified: true, // Mark as verified when approved
           },
@@ -348,7 +357,9 @@ export class AdminTherapistService {
         });
 
         if (!existingTherapist) {
-          throw new NotFoundException(`Therapist with ID ${therapistId} not found`);
+          throw new NotFoundException(
+            `Therapist with ID ${therapistId} not found`,
+          );
         }
 
         if (existingTherapist.status === 'approved') {
@@ -364,8 +375,6 @@ export class AdminTherapistService {
             status: 'rejected',
             processedByAdminId: adminId,
             processingDate: new Date(),
-            rejectionReason: rejectionData.rejectionReason,
-            allowReapplication: rejectionData.allowReapplication,
           },
         });
 
@@ -394,7 +403,9 @@ export class AdminTherapistService {
           message: `Your therapist application has been reviewed. ${rejectionData.rejectionMessage}`,
           type: 'THERAPIST_REJECTED',
           priority: 'HIGH',
-          actionUrl: rejectionData.allowReapplication ? '/therapist/reapply' : '/therapist/application',
+          actionUrl: rejectionData.allowReapplication
+            ? '/therapist/reapply'
+            : '/therapist/application',
         });
 
         this.logger.log(
@@ -430,11 +441,15 @@ export class AdminTherapistService {
         });
 
         if (!existingTherapist) {
-          throw new NotFoundException(`Therapist with ID ${therapistId} not found`);
+          throw new NotFoundException(
+            `Therapist with ID ${therapistId} not found`,
+          );
         }
 
         // 2. Validate status transition
-        const validTransitions = this.getValidStatusTransitions(existingTherapist.status);
+        const validTransitions = this.getValidStatusTransitions(
+          existingTherapist.status,
+        );
         if (!validTransitions.includes(statusData.status)) {
           throw new BadRequestException(
             `Invalid status transition from ${existingTherapist.status} to ${statusData.status}`,
@@ -494,7 +509,9 @@ export class AdminTherapistService {
         });
 
         // 6. Send status change notification
-        const notificationTitle = this.getStatusChangeNotificationTitle(statusData.status);
+        const notificationTitle = this.getStatusChangeNotificationTitle(
+          statusData.status,
+        );
         const notificationMessage = this.getStatusChangeNotificationMessage(
           statusData.status,
           statusData.reason,
@@ -522,7 +539,10 @@ export class AdminTherapistService {
         };
       });
     } catch (error) {
-      this.logger.error(`Failed to update therapist status for ${therapistId}:`, error);
+      this.logger.error(
+        `Failed to update therapist status for ${therapistId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -531,7 +551,9 @@ export class AdminTherapistService {
 
   async getTherapistApplicationMetrics(startDate?: string, endDate?: string) {
     try {
-      const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const start = startDate
+        ? new Date(startDate)
+        : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const end = endDate ? new Date(endDate) : new Date();
 
       const [
@@ -596,19 +618,26 @@ export class AdminTherapistService {
       ]);
 
       // Calculate average processing time
-      const averageProcessingTime = processingTimes.reduce((acc, app) => {
-        if (app.processingDate && app.submissionDate) {
-          const processingTimeMs = app.processingDate.getTime() - app.submissionDate.getTime();
-          return acc + processingTimeMs / (1000 * 60 * 60 * 24); // Convert to days
-        }
-        return acc;
-      }, 0) / (processingTimes.length || 1);
+      const averageProcessingTime =
+        processingTimes.reduce((acc, app) => {
+          if (app.processingDate && app.submissionDate) {
+            const processingTimeMs =
+              app.processingDate.getTime() - app.submissionDate.getTime();
+            return acc + processingTimeMs / (1000 * 60 * 60 * 24); // Convert to days
+          }
+          return acc;
+        }, 0) / (processingTimes.length || 1);
 
       // Calculate approval rate
       const processedApplications = approvedApplications + rejectedApplications;
-      const approvalRate = processedApplications > 0 ? (approvedApplications / processedApplications) * 100 : 0;
+      const approvalRate =
+        processedApplications > 0
+          ? (approvedApplications / processedApplications) * 100
+          : 0;
 
-      this.logger.log(`Generated therapist application metrics for period ${start} to ${end}`);
+      this.logger.log(
+        `Generated therapist application metrics for period ${start} to ${end}`,
+      );
 
       return {
         period: { start, end },
@@ -621,13 +650,17 @@ export class AdminTherapistService {
         },
         metrics: {
           approvalRate: Math.round(approvalRate * 100) / 100,
-          averageProcessingTimeDays: Math.round(averageProcessingTime * 100) / 100,
+          averageProcessingTimeDays:
+            Math.round(averageProcessingTime * 100) / 100,
           applicationTrend: this.calculateApplicationTrend(recentApplications),
         },
         recentActivity: recentApplications.slice(0, 10),
       };
     } catch (error) {
-      this.logger.error('Failed to generate therapist application metrics:', error);
+      this.logger.error(
+        'Failed to generate therapist application metrics:',
+        error,
+      );
       throw error;
     }
   }
@@ -658,29 +691,39 @@ export class AdminTherapistService {
     return titles[status] || 'Status Update';
   }
 
-  private getStatusChangeNotificationMessage(status: string, reason?: string): string {
+  private getStatusChangeNotificationMessage(
+    status: string,
+    reason?: string,
+  ): string {
     const baseMessages = {
-      approved: 'Congratulations! Your therapist application has been approved.',
+      approved:
+        'Congratulations! Your therapist application has been approved.',
       rejected: 'Your therapist application has been reviewed.',
       suspended: 'Your therapist account has been temporarily suspended.',
       under_review: 'Your application is currently under additional review.',
       pending: 'Your application status has been updated.',
     };
 
-    const baseMessage = baseMessages[status] || 'Your account status has been updated.';
+    const baseMessage =
+      baseMessages[status] || 'Your account status has been updated.';
     return reason ? `${baseMessage} Reason: ${reason}` : baseMessage;
   }
 
-  private calculateApplicationTrend(applications: any[]): 'increasing' | 'decreasing' | 'stable' {
+  private calculateApplicationTrend(
+    applications: any[],
+  ): 'increasing' | 'decreasing' | 'stable' {
     if (applications.length < 7) return 'stable';
 
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-    const recentWeekCount = applications.filter(app => app.submissionDate >= weekAgo).length;
+    const recentWeekCount = applications.filter(
+      (app) => app.submissionDate >= weekAgo,
+    ).length;
     const previousWeekCount = applications.filter(
-      app => app.submissionDate >= twoWeeksAgo && app.submissionDate < weekAgo
+      (app) =>
+        app.submissionDate >= twoWeeksAgo && app.submissionDate < weekAgo,
     ).length;
 
     if (recentWeekCount > previousWeekCount * 1.1) return 'increasing';

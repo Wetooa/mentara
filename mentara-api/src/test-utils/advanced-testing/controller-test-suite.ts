@@ -1,9 +1,9 @@
 /**
  * Advanced Controller Testing Suite
- * 
+ *
  * Comprehensive testing framework specifically designed to support
  * Backend Agent's Phase 1 controller audit and testing requirements.
- * 
+ *
  * Features:
  * - Automated endpoint discovery and testing
  * - Authentication/authorization validation
@@ -16,7 +16,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../app.module';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../providers/prisma-client.provider';
 import * as request from 'supertest';
 import { createMockClerkClient, createMockAuthGuard } from '../index';
 
@@ -54,9 +54,9 @@ export interface ControllerTestReport {
 }
 
 export class AdvancedControllerTestSuite {
-  private app: INestApplication;
-  private prisma: PrismaService;
-  private moduleRef: TestingModule;
+  private app!: INestApplication;
+  private prisma!: PrismaService;
+  private moduleRef!: TestingModule;
 
   constructor() {}
 
@@ -92,9 +92,11 @@ export class AdvancedControllerTestSuite {
    */
   async testController(
     controllerName: string,
-    endpoints: ControllerEndpoint[]
+    endpoints: ControllerEndpoint[],
   ): Promise<ControllerTestReport> {
-    console.log(`🧪 Testing ${controllerName} with ${endpoints.length} endpoints...`);
+    console.log(
+      `🧪 Testing ${controllerName} with ${endpoints.length} endpoints...`,
+    );
 
     const results: ControllerTestResult[] = [];
     const securityIssues: string[] = [];
@@ -113,11 +115,16 @@ export class AdvancedControllerTestSuite {
       }
     }
 
-    const passedTests = results.filter(r => r.passed).length;
+    const passedTests = results.filter((r) => r.passed).length;
     const failedTests = results.length - passedTests;
-    const averageResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
+    const averageResponseTime =
+      results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
 
-    const recommendations = this.generateRecommendations(results, securityIssues, performanceIssues);
+    const recommendations = this.generateRecommendations(
+      results,
+      securityIssues,
+      performanceIssues,
+    );
 
     return {
       controllerName,
@@ -128,14 +135,16 @@ export class AdvancedControllerTestSuite {
       securityIssues: [...new Set(securityIssues)],
       performanceIssues: [...new Set(performanceIssues)],
       results,
-      recommendations
+      recommendations,
     };
   }
 
   /**
    * Test individual endpoint with comprehensive checks
    */
-  private async testEndpoint(endpoint: ControllerEndpoint): Promise<ControllerTestResult> {
+  private async testEndpoint(
+    endpoint: ControllerEndpoint,
+  ): Promise<ControllerTestResult> {
     const startTime = Date.now();
     const securityIssues: string[] = [];
     const performanceIssues: string[] = [];
@@ -150,13 +159,19 @@ export class AdvancedControllerTestSuite {
           response = await agent.get(endpoint.path);
           break;
         case 'POST':
-          response = await agent.post(endpoint.path).send(endpoint.testPayload || {});
+          response = await agent
+            .post(endpoint.path)
+            .send(endpoint.testPayload || {});
           break;
         case 'PUT':
-          response = await agent.put(endpoint.path).send(endpoint.testPayload || {});
+          response = await agent
+            .put(endpoint.path)
+            .send(endpoint.testPayload || {});
           break;
         case 'PATCH':
-          response = await agent.patch(endpoint.path).send(endpoint.testPayload || {});
+          response = await agent
+            .patch(endpoint.path)
+            .send(endpoint.testPayload || {});
           break;
         case 'DELETE':
           response = await agent.delete(endpoint.path);
@@ -188,8 +203,12 @@ export class AdvancedControllerTestSuite {
         await this.testInputValidation(endpoint, securityIssues);
       }
 
-      const passed = response.status === endpoint.expectedStatus || 
-                    (endpoint.expectedStatus >= 200 && endpoint.expectedStatus < 300 && response.status >= 200 && response.status < 300);
+      const passed =
+        response.status === endpoint.expectedStatus ||
+        (endpoint.expectedStatus >= 200 &&
+          endpoint.expectedStatus < 300 &&
+          response.status >= 200 &&
+          response.status < 300);
 
       return {
         endpoint: `${endpoint.method} ${endpoint.path}`,
@@ -198,12 +217,11 @@ export class AdvancedControllerTestSuite {
         responseTime,
         statusCode: response.status,
         securityIssues,
-        performanceIssues
+        performanceIssues,
       };
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       return {
         endpoint: `${endpoint.method} ${endpoint.path}`,
         method: endpoint.method,
@@ -212,7 +230,7 @@ export class AdvancedControllerTestSuite {
         statusCode: 500,
         error: error instanceof Error ? error.message : 'Unknown error',
         securityIssues,
-        performanceIssues
+        performanceIssues,
       };
     }
   }
@@ -220,13 +238,16 @@ export class AdvancedControllerTestSuite {
   /**
    * Perform security checks on endpoint
    */
-  private async performSecurityChecks(endpoint: ControllerEndpoint, issues: string[]): Promise<void> {
+  private async performSecurityChecks(
+    endpoint: ControllerEndpoint,
+    issues: string[],
+  ): Promise<void> {
     // SQL injection check
     if (endpoint.method !== 'GET') {
-      const maliciousPayload = { 
-        ...endpoint.testPayload, 
-        id: "1' OR '1'='1", 
-        email: "test@test.com'; DROP TABLE users; --" 
+      const maliciousPayload = {
+        ...endpoint.testPayload,
+        id: "1' OR '1'='1",
+        email: "test@test.com'; DROP TABLE users; --",
       };
 
       try {
@@ -255,10 +276,10 @@ export class AdvancedControllerTestSuite {
 
     // XSS check
     if (endpoint.method !== 'GET') {
-      const xssPayload = { 
-        ...endpoint.testPayload, 
+      const xssPayload = {
+        ...endpoint.testPayload,
         name: '<script>alert("XSS")</script>',
-        comment: '<img src=x onerror=alert("XSS")>'
+        comment: '<img src=x onerror=alert("XSS")>',
       };
 
       try {
@@ -289,7 +310,10 @@ export class AdvancedControllerTestSuite {
   /**
    * Test that authentication is required
    */
-  private async testAuthenticationRequired(endpoint: ControllerEndpoint, issues: string[]): Promise<void> {
+  private async testAuthenticationRequired(
+    endpoint: ControllerEndpoint,
+    issues: string[],
+  ): Promise<void> {
     try {
       const agent = request(this.app.getHttpServer());
       let response;
@@ -300,13 +324,19 @@ export class AdvancedControllerTestSuite {
           response = await agent.get(endpoint.path);
           break;
         case 'POST':
-          response = await agent.post(endpoint.path).send(endpoint.testPayload || {});
+          response = await agent
+            .post(endpoint.path)
+            .send(endpoint.testPayload || {});
           break;
         case 'PUT':
-          response = await agent.put(endpoint.path).send(endpoint.testPayload || {});
+          response = await agent
+            .put(endpoint.path)
+            .send(endpoint.testPayload || {});
           break;
         case 'PATCH':
-          response = await agent.patch(endpoint.path).send(endpoint.testPayload || {});
+          response = await agent
+            .patch(endpoint.path)
+            .send(endpoint.testPayload || {});
           break;
         case 'DELETE':
           response = await agent.delete(endpoint.path);
@@ -324,23 +354,33 @@ export class AdvancedControllerTestSuite {
   /**
    * Test role-based access control
    */
-  private async testRoleBasedAccess(endpoint: ControllerEndpoint, issues: string[]): Promise<void> {
+  private async testRoleBasedAccess(
+    endpoint: ControllerEndpoint,
+    issues: string[],
+  ): Promise<void> {
     // This would test with different user roles to ensure proper access control
     // Implementation depends on how roles are implemented in the auth system
-    issues.push('Role-based access control testing requires specific role implementation');
+    issues.push(
+      'Role-based access control testing requires specific role implementation',
+    );
   }
 
   /**
    * Test input validation
    */
-  private async testInputValidation(endpoint: ControllerEndpoint, issues: string[]): Promise<void> {
+  private async testInputValidation(
+    endpoint: ControllerEndpoint,
+    issues: string[],
+  ): Promise<void> {
     const invalidPayloads = [
-      { /* empty object */ },
+      {
+        /* empty object */
+      },
       { invalidField: 'invalid_value' },
       { email: 'not-an-email' },
       { id: 'not-a-number' },
       { data: null },
-      { data: undefined }
+      { data: undefined },
     ];
 
     for (const payload of invalidPayloads) {
@@ -376,31 +416,40 @@ export class AdvancedControllerTestSuite {
   private generateRecommendations(
     results: ControllerTestResult[],
     securityIssues: string[],
-    performanceIssues: string[]
+    performanceIssues: string[],
   ): string[] {
     const recommendations: string[] = [];
 
-    const failedTests = results.filter(r => !r.passed);
+    const failedTests = results.filter((r) => !r.passed);
     if (failedTests.length > 0) {
       recommendations.push(`Fix ${failedTests.length} failing endpoint(s)`);
     }
 
-    const slowEndpoints = results.filter(r => r.responseTime > 1000);
+    const slowEndpoints = results.filter((r) => r.responseTime > 1000);
     if (slowEndpoints.length > 0) {
-      recommendations.push(`Optimize ${slowEndpoints.length} slow endpoint(s) (>1s response time)`);
+      recommendations.push(
+        `Optimize ${slowEndpoints.length} slow endpoint(s) (>1s response time)`,
+      );
     }
 
     if (securityIssues.length > 0) {
-      recommendations.push(`Address ${securityIssues.length} security issue(s)`);
+      recommendations.push(
+        `Address ${securityIssues.length} security issue(s)`,
+      );
     }
 
     if (performanceIssues.length > 0) {
-      recommendations.push(`Resolve ${performanceIssues.length} performance issue(s)`);
+      recommendations.push(
+        `Resolve ${performanceIssues.length} performance issue(s)`,
+      );
     }
 
-    const averageResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
+    const averageResponseTime =
+      results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
     if (averageResponseTime > 500) {
-      recommendations.push('Consider implementing response caching for better performance');
+      recommendations.push(
+        'Consider implementing response caching for better performance',
+      );
     }
 
     return recommendations;
@@ -410,13 +459,18 @@ export class AdvancedControllerTestSuite {
    * Generate detailed test report
    */
   async generateTestReport(reports: ControllerTestReport[]): Promise<string> {
-    const totalEndpoints = reports.reduce((sum, r) => sum + r.totalEndpoints, 0);
+    const totalEndpoints = reports.reduce(
+      (sum, r) => sum + r.totalEndpoints,
+      0,
+    );
     const totalPassed = reports.reduce((sum, r) => sum + r.passedTests, 0);
     const totalFailed = reports.reduce((sum, r) => sum + r.failedTests, 0);
-    const overallAvgResponseTime = reports.reduce((sum, r) => sum + r.averageResponseTime, 0) / reports.length;
+    const overallAvgResponseTime =
+      reports.reduce((sum, r) => sum + r.averageResponseTime, 0) /
+      reports.length;
 
-    const allSecurityIssues = reports.flatMap(r => r.securityIssues);
-    const allPerformanceIssues = reports.flatMap(r => r.performanceIssues);
+    const allSecurityIssues = reports.flatMap((r) => r.securityIssues);
+    const allPerformanceIssues = reports.flatMap((r) => r.performanceIssues);
 
     const report = `
 # Advanced Controller Testing Report
@@ -435,16 +489,18 @@ export class AdvancedControllerTestSuite {
 ## Security Analysis
 
 - **Security Issues Found**: ${allSecurityIssues.length}
-- **Critical Security Vulnerabilities**: ${allSecurityIssues.filter(i => i.includes('SQL') || i.includes('XSS')).length}
+- **Critical Security Vulnerabilities**: ${allSecurityIssues.filter((i) => i.includes('SQL') || i.includes('XSS')).length}
 
 ## Performance Analysis
 
 - **Performance Issues Found**: ${allPerformanceIssues.length}
-- **Slow Endpoints (>1s)**: ${reports.flatMap(r => r.results).filter(r => r.responseTime > 1000).length}
+- **Slow Endpoints (>1s)**: ${reports.flatMap((r) => r.results).filter((r) => r.responseTime > 1000).length}
 
 ## Controller-Specific Results
 
-${reports.map(report => `
+${reports
+  .map(
+    (report) => `
 ### ${report.controllerName}
 
 - **Endpoints**: ${report.totalEndpoints}
@@ -454,20 +510,30 @@ ${reports.map(report => `
 - **Performance Issues**: ${report.performanceIssues.length}
 
 **Recommendations**:
-${report.recommendations.map(rec => `- ${rec}`).join('\n')}
+${report.recommendations.map((rec) => `- ${rec}`).join('\n')}
 
 **Detailed Results**:
-${report.results.map(result => `
+${report.results
+  .map(
+    (result) => `
 - **${result.endpoint}**: ${result.passed ? '✅' : '❌'} (${result.responseTime}ms, Status: ${result.statusCode})
   ${result.error ? `Error: ${result.error}` : ''}
   ${result.securityIssues.length > 0 ? `Security: ${result.securityIssues.join(', ')}` : ''}
   ${result.performanceIssues.length > 0 ? `Performance: ${result.performanceIssues.join(', ')}` : ''}
-`).join('\n')}
-`).join('\n')}
+`,
+  )
+  .join('\n')}
+`,
+  )
+  .join('\n')}
 
 ## Overall Recommendations
 
-${reports.flatMap(r => r.recommendations).filter((rec, index, arr) => arr.indexOf(rec) === index).map(rec => `- ${rec}`).join('\n')}
+${reports
+  .flatMap((r) => r.recommendations)
+  .filter((rec, index, arr) => arr.indexOf(rec) === index)
+  .map((rec) => `- ${rec}`)
+  .join('\n')}
 
 ## Next Steps
 
@@ -486,15 +552,16 @@ ${reports.flatMap(r => r.recommendations).filter((rec, index, arr) => arr.indexO
 }
 
 // Export utility functions for Backend Agent integration
-export const createControllerTestSuite = () => new AdvancedControllerTestSuite();
+export const createControllerTestSuite = () =>
+  new AdvancedControllerTestSuite();
 
 export const runControllerAudit = async (
   controllerName: string,
-  endpoints: ControllerEndpoint[]
+  endpoints: ControllerEndpoint[],
 ): Promise<ControllerTestReport> => {
   const testSuite = createControllerTestSuite();
   await testSuite.initialize();
-  
+
   try {
     const report = await testSuite.testController(controllerName, endpoints);
     return report;

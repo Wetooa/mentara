@@ -9,10 +9,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { OnboardingService, OnboardingStatus } from './onboarding.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../guards/admin-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { AdminOnly } from '../decorators/admin-only.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 
 @Controller('onboarding')
 @UseGuards(JwtAuthGuard)

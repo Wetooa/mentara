@@ -1,4 +1,9 @@
-import { Injectable, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
 interface RateLimitConfig {
@@ -92,13 +97,16 @@ export class RateLimitMiddleware implements NestMiddleware {
     // Add rate limit headers for successful requests
     res.set({
       'X-RateLimit-Limit': config.maxRequests.toString(),
-      'X-RateLimit-Remaining': Math.max(0, config.maxRequests - client.count).toString(),
+      'X-RateLimit-Remaining': Math.max(
+        0,
+        config.maxRequests - client.count,
+      ).toString(),
       'X-RateLimit-Reset': Math.ceil(client.resetTime / 1000).toString(),
     });
 
     // Track response status for adaptive rate limiting
     const originalSend = res.send;
-    res.send = function(body: any) {
+    res.send = function (body: any) {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         client.successCount++;
       } else if (res.statusCode >= 400) {
@@ -119,22 +127,26 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     // Get IP address, handling proxy headers
     const forwarded = req.headers['x-forwarded-for'];
-    const ip = typeof forwarded === 'string' 
-      ? forwarded.split(',')[0].trim()
-      : req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+    const ip =
+      typeof forwarded === 'string'
+        ? forwarded.split(',')[0].trim()
+        : req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
 
     return `ip:${ip}`;
   }
 
   private getConfigKey(req: Request): string {
     const path = req.path;
-    
+
     if (path.startsWith('/auth')) {
       return 'auth';
     }
-    
-    if (path.includes('/upload') || req.method === 'POST' && 
-        (path.includes('/files') || path.includes('/worksheets'))) {
+
+    if (
+      path.includes('/upload') ||
+      (req.method === 'POST' &&
+        (path.includes('/files') || path.includes('/worksheets')))
+    ) {
       return 'upload';
     }
 
@@ -160,7 +172,10 @@ export class RateLimitMiddleware implements NestMiddleware {
   }
 
   // Method to adjust rate limits dynamically
-  public adjustRateLimit(endpoint: string, config: Partial<RateLimitConfig>): void {
+  public adjustRateLimit(
+    endpoint: string,
+    config: Partial<RateLimitConfig>,
+  ): void {
     const existing = this.configs.get(endpoint);
     if (existing) {
       this.configs.set(endpoint, { ...existing, ...config });

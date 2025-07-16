@@ -7,10 +7,7 @@ import { PrismaService } from '../providers/prisma-client.provider';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Module({
-  controllers: [
-    ClientController,
-    ClientRequestController,
-  ],
+  controllers: [ClientController, ClientRequestController],
   providers: [
     ClientService,
     ClientRequestService,

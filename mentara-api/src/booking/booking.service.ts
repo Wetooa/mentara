@@ -11,7 +11,7 @@ import {
   MeetingUpdateDto,
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
-} from '../../schema/booking';
+} from 'mentara-commons';
 import { EventBusService } from '../common/events/event-bus.service';
 import { SlotGeneratorService } from './services/slot-generator.service';
 import { ConflictDetectionService } from './services/conflict-detection.service';
@@ -261,7 +261,8 @@ export class BookingService {
           startTime: updateMeetingDto.startTime,
           duration: updateMeetingDto.duration,
           meetingType: updateMeetingDto.meetingType,
-          therapistId: updateMeetingDto.therapistId,
+          notes: updateMeetingDto.notes,
+          meetingUrl: updateMeetingDto.meetingUrl,
           ...(updateMeetingDto.status && {
             status: updateMeetingDto.status as MeetingStatus,
           }),
@@ -293,7 +294,7 @@ export class BookingService {
       });
 
       // Publish appropriate events
-      if (updateMeetingDto.status === 'COMPLETED') {
+      if (updateMeetingDto.status === 'completed') {
         await this.eventBus.emit(
           new AppointmentCompletedEvent({
             appointmentId: updatedMeeting.id,

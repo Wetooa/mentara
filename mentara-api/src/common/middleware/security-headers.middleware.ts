@@ -22,7 +22,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      'upgrade-insecure-requests',
     ].join('; ');
 
     // Security Headers
@@ -31,16 +31,25 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    
+    res.setHeader(
+      'Permissions-Policy',
+      'camera=(), microphone=(), geolocation=()',
+    );
+
     // HSTS (HTTP Strict Transport Security)
     if (process.env.NODE_ENV === 'production') {
-      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+      res.setHeader(
+        'Strict-Transport-Security',
+        'max-age=31536000; includeSubDomains; preload',
+      );
     }
 
     // Cache Control for sensitive endpoints
     if (this.isSensitiveEndpoint(req.path)) {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.setHeader(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, private',
+      );
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
     }
@@ -57,8 +66,14 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
 
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With',
+    );
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
 
@@ -82,6 +97,6 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       '/messaging',
     ];
 
-    return sensitivePatterns.some(pattern => path.startsWith(pattern));
+    return sensitivePatterns.some((pattern) => path.startsWith(pattern));
   }
 }

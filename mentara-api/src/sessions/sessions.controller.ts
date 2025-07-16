@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/decorators/current-user-role.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
 import {
   SessionType,
   SessionStatus,

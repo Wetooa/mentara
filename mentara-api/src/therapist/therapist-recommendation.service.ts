@@ -8,7 +8,7 @@ import { PreAssessment } from '@prisma/client';
 import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-} from './dto/therapist-application.dto';
+} from 'mentara-commons';
 import {
   AdvancedMatchingService,
   TherapistScore,
@@ -40,7 +40,7 @@ export class TherapistRecommendationService {
 
   async getRecommendedTherapists(
     request: TherapistRecommendationRequest,
-  ): Promise<TherapistRecommendationResponse> {
+  ): Promise<any> {
     try {
       // Get user's comprehensive data including preferences
       const user = await this.prisma.client.findUnique({

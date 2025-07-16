@@ -1,9 +1,9 @@
 /**
  * Real-time Performance Monitoring Dashboard
- * 
+ *
  * Advanced performance monitoring system to support Backend Agent's
  * controller performance analysis and optimization efforts.
- * 
+ *
  * Features:
  * - Real-time API endpoint monitoring
  * - Database query performance tracking
@@ -39,6 +39,7 @@ export interface EndpointStats {
   minResponseTime: number;
   maxResponseTime: number;
   errorRate: number;
+  errorCount: number;
   requestsPerMinute: number;
   lastUpdated: number;
   performance95thPercentile: number;
@@ -101,24 +102,24 @@ export class PerformanceDashboard extends EventEmitter {
   // Performance thresholds
   private readonly thresholds = {
     responseTime: {
-      warning: 1000,    // 1 second
-      critical: 5000,   // 5 seconds
+      warning: 1000, // 1 second
+      critical: 5000, // 5 seconds
     },
     errorRate: {
-      warning: 5,       // 5%
-      critical: 10,     // 10%
+      warning: 5, // 5%
+      critical: 10, // 10%
     },
     memoryUsage: {
-      warning: 80,      // 80%
-      critical: 90,     // 90%
+      warning: 80, // 80%
+      critical: 90, // 90%
     },
     cpuUsage: {
-      warning: 80,      // 80%
-      critical: 90,     // 90%
+      warning: 80, // 80%
+      critical: 90, // 90%
     },
     databaseResponseTime: {
-      warning: 500,     // 500ms
-      critical: 2000,   // 2 seconds
+      warning: 500, // 500ms
+      critical: 2000, // 2 seconds
     },
   };
 
@@ -138,7 +139,7 @@ export class PerformanceDashboard extends EventEmitter {
 
     this.isMonitoring = true;
     this.startTime = Date.now();
-    
+
     // Collect system metrics every 5 seconds
     this.monitoringInterval = setInterval(() => {
       this.collectSystemMetrics();
@@ -157,7 +158,7 @@ export class PerformanceDashboard extends EventEmitter {
     }
 
     this.isMonitoring = false;
-    
+
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
@@ -175,7 +176,7 @@ export class PerformanceDashboard extends EventEmitter {
     method: string,
     responseTime: number,
     statusCode: number,
-    databaseConnections: number = 0
+    databaseConnections: number = 0,
   ): void {
     const metric: PerformanceMetrics = {
       timestamp: Date.now(),
@@ -244,7 +245,7 @@ export class PerformanceDashboard extends EventEmitter {
     this.endpointStatsMap.clear();
     this.alerts = [];
     this.startTime = Date.now();
-    
+
     this.logger.log('Performance metrics reset');
     this.emit('metrics-reset');
   }
@@ -293,34 +294,51 @@ export class PerformanceDashboard extends EventEmitter {
    */
   private updateEndpointStats(metric: PerformanceMetrics): void {
     const existing = this.endpointStatsMap.get(metric.endpoint);
-    
+
     if (existing) {
       existing.totalRequests++;
-      existing.averageResponseTime = 
-        (existing.averageResponseTime * (existing.totalRequests - 1) + metric.responseTime) / existing.totalRequests;
-      existing.minResponseTime = Math.min(existing.minResponseTime, metric.responseTime);
-      existing.maxResponseTime = Math.max(existing.maxResponseTime, metric.responseTime);
+      existing.averageResponseTime =
+        (existing.averageResponseTime * (existing.totalRequests - 1) +
+          metric.responseTime) /
+        existing.totalRequests;
+      existing.minResponseTime = Math.min(
+        existing.minResponseTime,
+        metric.responseTime,
+      );
+      existing.maxResponseTime = Math.max(
+        existing.maxResponseTime,
+        metric.responseTime,
+      );
       existing.errorCount = (existing.errorCount || 0) + metric.errorCount;
       existing.errorRate = (existing.errorCount / existing.totalRequests) * 100;
       existing.lastUpdated = metric.timestamp;
 
       // Calculate percentiles
       const recentMetrics = this.metrics
-        .filter(m => m.endpoint === metric.endpoint && m.timestamp > Date.now() - 300000) // Last 5 minutes
-        .map(m => m.responseTime)
+        .filter(
+          (m) =>
+            m.endpoint === metric.endpoint && m.timestamp > Date.now() - 300000,
+        ) // Last 5 minutes
+        .map((m) => m.responseTime)
         .sort((a, b) => a - b);
 
       if (recentMetrics.length > 0) {
-        existing.performance95thPercentile = this.calculatePercentile(recentMetrics, 95);
-        existing.performance99thPercentile = this.calculatePercentile(recentMetrics, 99);
+        existing.performance95thPercentile = this.calculatePercentile(
+          recentMetrics,
+          95,
+        );
+        existing.performance99thPercentile = this.calculatePercentile(
+          recentMetrics,
+          99,
+        );
       }
 
       // Calculate requests per minute
       const recentCount = this.metrics.filter(
-        m => m.endpoint === metric.endpoint && m.timestamp > Date.now() - 60000
+        (m) =>
+          m.endpoint === metric.endpoint && m.timestamp > Date.now() - 60000,
       ).length;
       existing.requestsPerMinute = recentCount;
-
     } else {
       this.endpointStatsMap.set(metric.endpoint, {
         endpoint: metric.endpoint,
@@ -344,25 +362,51 @@ export class PerformanceDashboard extends EventEmitter {
   private checkThresholds(metric: PerformanceMetrics): void {
     // Response time alerts
     if (metric.responseTime > this.thresholds.responseTime.critical) {
-      this.createAlert('CRITICAL', 'RESPONSE_TIME', 
+      this.createAlert(
+        'CRITICAL',
+        'RESPONSE_TIME',
         `Critical response time: ${metric.responseTime}ms for ${metric.endpoint}`,
-        metric.endpoint, metric.responseTime, this.thresholds.responseTime.critical);
+        metric.endpoint,
+        metric.responseTime,
+        this.thresholds.responseTime.critical,
+      );
     } else if (metric.responseTime > this.thresholds.responseTime.warning) {
-      this.createAlert('HIGH', 'RESPONSE_TIME',
+      this.createAlert(
+        'HIGH',
+        'RESPONSE_TIME',
         `Slow response time: ${metric.responseTime}ms for ${metric.endpoint}`,
-        metric.endpoint, metric.responseTime, this.thresholds.responseTime.warning);
+        metric.endpoint,
+        metric.responseTime,
+        this.thresholds.responseTime.warning,
+      );
     }
 
     // Error rate alerts
     const endpointStats = this.endpointStatsMap.get(metric.endpoint);
-    if (endpointStats && endpointStats.errorRate > this.thresholds.errorRate.critical) {
-      this.createAlert('CRITICAL', 'ERROR_RATE',
+    if (
+      endpointStats &&
+      endpointStats.errorRate > this.thresholds.errorRate.critical
+    ) {
+      this.createAlert(
+        'CRITICAL',
+        'ERROR_RATE',
         `Critical error rate: ${endpointStats.errorRate.toFixed(1)}% for ${metric.endpoint}`,
-        metric.endpoint, endpointStats.errorRate, this.thresholds.errorRate.critical);
-    } else if (endpointStats && endpointStats.errorRate > this.thresholds.errorRate.warning) {
-      this.createAlert('HIGH', 'ERROR_RATE',
+        metric.endpoint,
+        endpointStats.errorRate,
+        this.thresholds.errorRate.critical,
+      );
+    } else if (
+      endpointStats &&
+      endpointStats.errorRate > this.thresholds.errorRate.warning
+    ) {
+      this.createAlert(
+        'HIGH',
+        'ERROR_RATE',
         `High error rate: ${endpointStats.errorRate.toFixed(1)}% for ${metric.endpoint}`,
-        metric.endpoint, endpointStats.errorRate, this.thresholds.errorRate.warning);
+        metric.endpoint,
+        endpointStats.errorRate,
+        this.thresholds.errorRate.warning,
+      );
     }
   }
 
@@ -372,24 +416,46 @@ export class PerformanceDashboard extends EventEmitter {
   private checkSystemThresholds(systemMetrics: SystemMetrics): void {
     // Memory usage alerts
     if (systemMetrics.memory.usage > this.thresholds.memoryUsage.critical) {
-      this.createAlert('CRITICAL', 'MEMORY',
+      this.createAlert(
+        'CRITICAL',
+        'MEMORY',
         `Critical memory usage: ${systemMetrics.memory.usage.toFixed(1)}%`,
-        undefined, systemMetrics.memory.usage, this.thresholds.memoryUsage.critical);
-    } else if (systemMetrics.memory.usage > this.thresholds.memoryUsage.warning) {
-      this.createAlert('MEDIUM', 'MEMORY',
+        undefined,
+        systemMetrics.memory.usage,
+        this.thresholds.memoryUsage.critical,
+      );
+    } else if (
+      systemMetrics.memory.usage > this.thresholds.memoryUsage.warning
+    ) {
+      this.createAlert(
+        'MEDIUM',
+        'MEMORY',
         `High memory usage: ${systemMetrics.memory.usage.toFixed(1)}%`,
-        undefined, systemMetrics.memory.usage, this.thresholds.memoryUsage.warning);
+        undefined,
+        systemMetrics.memory.usage,
+        this.thresholds.memoryUsage.warning,
+      );
     }
 
     // CPU usage alerts
     if (systemMetrics.cpu.usage > this.thresholds.cpuUsage.critical) {
-      this.createAlert('CRITICAL', 'CPU',
+      this.createAlert(
+        'CRITICAL',
+        'CPU',
         `Critical CPU usage: ${systemMetrics.cpu.usage.toFixed(1)}%`,
-        undefined, systemMetrics.cpu.usage, this.thresholds.cpuUsage.critical);
+        undefined,
+        systemMetrics.cpu.usage,
+        this.thresholds.cpuUsage.critical,
+      );
     } else if (systemMetrics.cpu.usage > this.thresholds.cpuUsage.warning) {
-      this.createAlert('MEDIUM', 'CPU',
+      this.createAlert(
+        'MEDIUM',
+        'CPU',
         `High CPU usage: ${systemMetrics.cpu.usage.toFixed(1)}%`,
-        undefined, systemMetrics.cpu.usage, this.thresholds.cpuUsage.warning);
+        undefined,
+        systemMetrics.cpu.usage,
+        this.thresholds.cpuUsage.warning,
+      );
     }
   }
 
@@ -402,7 +468,7 @@ export class PerformanceDashboard extends EventEmitter {
     message: string,
     endpoint?: string,
     value: number = 0,
-    threshold: number = 0
+    threshold: number = 0,
   ): void {
     const alert: PerformanceAlert = {
       severity,
@@ -415,7 +481,7 @@ export class PerformanceDashboard extends EventEmitter {
     };
 
     this.alerts.push(alert);
-    
+
     // Keep only last 100 alerts
     if (this.alerts.length > 100) {
       this.alerts = this.alerts.slice(-100);
@@ -438,14 +504,19 @@ export class PerformanceDashboard extends EventEmitter {
    */
   private calculateRequestsPerSecond(): number {
     const oneSecondAgo = Date.now() - 1000;
-    const recentRequests = this.metrics.filter(m => m.timestamp > oneSecondAgo);
+    const recentRequests = this.metrics.filter(
+      (m) => m.timestamp > oneSecondAgo,
+    );
     return recentRequests.length;
   }
 
   /**
    * Calculate percentile from sorted array
    */
-  private calculatePercentile(sortedArray: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedArray: number[],
+    percentile: number,
+  ): number {
     const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
     return sortedArray[Math.max(0, index)] || 0;
   }
@@ -493,39 +564,58 @@ export class PerformanceDashboard extends EventEmitter {
     const endpointStats = Array.from(this.endpointStatsMap.values());
 
     // Slow endpoints
-    const slowEndpoints = endpointStats.filter(stats => stats.averageResponseTime > 1000);
+    const slowEndpoints = endpointStats.filter(
+      (stats) => stats.averageResponseTime > 1000,
+    );
     if (slowEndpoints.length > 0) {
-      recommendations.push(`Optimize ${slowEndpoints.length} slow endpoint(s) with >1s average response time`);
+      recommendations.push(
+        `Optimize ${slowEndpoints.length} slow endpoint(s) with >1s average response time`,
+      );
     }
 
     // High error rate endpoints
-    const errorProneEndpoints = endpointStats.filter(stats => stats.errorRate > 5);
+    const errorProneEndpoints = endpointStats.filter(
+      (stats) => stats.errorRate > 5,
+    );
     if (errorProneEndpoints.length > 0) {
-      recommendations.push(`Investigate ${errorProneEndpoints.length} endpoint(s) with >5% error rate`);
+      recommendations.push(
+        `Investigate ${errorProneEndpoints.length} endpoint(s) with >5% error rate`,
+      );
     }
 
     // High traffic endpoints
-    const highTrafficEndpoints = endpointStats.filter(stats => stats.requestsPerMinute > 100);
+    const highTrafficEndpoints = endpointStats.filter(
+      (stats) => stats.requestsPerMinute > 100,
+    );
     if (highTrafficEndpoints.length > 0) {
-      recommendations.push(`Consider caching for ${highTrafficEndpoints.length} high-traffic endpoint(s)`);
+      recommendations.push(
+        `Consider caching for ${highTrafficEndpoints.length} high-traffic endpoint(s)`,
+      );
     }
 
     // Recent critical alerts
     const recentCriticalAlerts = this.alerts.filter(
-      alert => alert.severity === 'CRITICAL' && alert.timestamp > Date.now() - 300000
+      (alert) =>
+        alert.severity === 'CRITICAL' && alert.timestamp > Date.now() - 300000,
     );
     if (recentCriticalAlerts.length > 0) {
-      recommendations.push(`Address ${recentCriticalAlerts.length} critical performance issue(s) from the last 5 minutes`);
+      recommendations.push(
+        `Address ${recentCriticalAlerts.length} critical performance issue(s) from the last 5 minutes`,
+      );
     }
 
     // System resource recommendations
     const systemMetrics = this.getCurrentSystemMetrics();
     if (systemMetrics.memory.usage > 80) {
-      recommendations.push('High memory usage detected - consider optimizing memory allocation or scaling');
+      recommendations.push(
+        'High memory usage detected - consider optimizing memory allocation or scaling',
+      );
     }
 
     if (systemMetrics.cpu.usage > 80) {
-      recommendations.push('High CPU usage detected - consider optimizing algorithms or scaling');
+      recommendations.push(
+        'High CPU usage detected - consider optimizing algorithms or scaling',
+      );
     }
 
     return recommendations;
@@ -547,11 +637,14 @@ export class PerformanceDashboard extends EventEmitter {
     };
   } {
     const totalRequests = this.metrics.length;
-    const averageResponseTime = totalRequests > 0 
-      ? this.metrics.reduce((sum, m) => sum + m.responseTime, 0) / totalRequests 
-      : 0;
-    const errorCount = this.metrics.filter(m => m.errorCount > 0).length;
-    const errorRate = totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0;
+    const averageResponseTime =
+      totalRequests > 0
+        ? this.metrics.reduce((sum, m) => sum + m.responseTime, 0) /
+          totalRequests
+        : 0;
+    const errorCount = this.metrics.filter((m) => m.errorCount > 0).length;
+    const errorRate =
+      totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0;
 
     return {
       metrics: this.metrics,
@@ -581,7 +674,7 @@ export const performanceMiddleware = (req: any, res: any, next: any) => {
       req.route?.path || req.path,
       req.method,
       responseTime,
-      res.statusCode
+      res.statusCode,
     );
   });
 
