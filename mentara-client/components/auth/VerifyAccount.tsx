@@ -3,57 +3,48 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSignUpStore } from "@/store/pre-assessment";
-import { useAuth } from "@/hooks/auth";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 import Image from "next/image";
 import Link from "next/link";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
-import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function VerifyAccount() {
-  const { isLoaded } = useAuth();
   const { details } = useSignUpStore();
+  const { 
+    isLoading, 
+    isResending, 
+    resendVerificationEmail, 
+    verificationStatus 
+  } = useEmailVerification();
 
-  useEffect(() => {
-    const sendVerificationEmail = async () => {
-      if (isLoaded && details?.email) {
-        try {
-          // Note: Email verification is now handled by the backend
-          // The verification link should be sent automatically upon registration
-          toast.success("Verification email sent! Please check your inbox.");
-        } catch (error) {
-          console.error("Failed to send initial verification email:", error);
-        }
-      }
-    };
-
-    sendVerificationEmail();
-  }, [isLoaded, signUp]);
-
-  if (!signUp) {
-    return null;
-  }
-
-  async function handleResendEmail() {
-    if (isLoaded) {
-      try {
-        const protocol = window.location.protocol;
-        const host = window.location.host;
-
-        toast.loading("Resending verification email...");
-
-        const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
-        
-        await startEmailLinkFlow({
-          redirectUrl: `${protocol}//${host}/verify`,
-        });
-        
-        toast.success("Verification email sent! Please check your inbox.");
-      } catch (error: unknown) {
-        toast.error(`Failed to resend verification email. ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
+  // If no email details available, redirect or show error
+  if (!details?.email) {
+    return (
+      <motion.div
+        variants={fadeDown}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="flex items-center justify-center min-h-screen"
+      >
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            No Email Information Found
+          </h2>
+          <p className="text-gray-600">
+            Please complete the sign-up process first.
+          </p>
+          <Link
+            href="/auth/sign-up"
+            className={cn(buttonVariants({ variant: "default" }))}
+          >
+            Back to Sign Up
+          </Link>
+        </div>
+      </motion.div>
+    );
   }
 
   return (
@@ -93,12 +84,25 @@ export default function VerifyAccount() {
               Didn&apos;t receive an email?
             </p>
             <Button
-              onClick={handleResendEmail}
+              onClick={resendVerificationEmail}
               variant="outline"
               className="w-full mb-3"
+              disabled={isResending || isLoading}
             >
-              Resend Email
+              {isResending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Resending...
+                </>
+              ) : (
+                "Resend Email"
+              )}
             </Button>
+            {verificationStatus === 'error' && (
+              <p className="text-xs text-red-600 mt-2">
+                Failed to send email. Please try again.
+              </p>
+            )}
           </div>
         </div>
       </div>

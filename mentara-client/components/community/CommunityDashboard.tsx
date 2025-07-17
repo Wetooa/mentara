@@ -1,9 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,14 +13,13 @@ import {
   Clock,
   Plus,
   Search,
-  Filter,
   Star,
   Activity,
   UserPlus,
   Eye
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { useCommunityDashboard } from '@/hooks/community';
 
 interface Community {
   id: string;
