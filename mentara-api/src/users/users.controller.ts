@@ -15,6 +15,15 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from 'src/auth/guards/admin-auth.guard';
 import { AdminOnly } from 'src/auth/decorators/admin-only.decorator';
@@ -33,6 +42,8 @@ import { UsersService } from './users.service';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { RoleUtils } from 'src/utils/role-utils';
 
+@ApiTags('users')
+@ApiBearerAuth('JWT-auth')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
@@ -47,6 +58,36 @@ export class UsersController {
   @Get()
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
+  @ApiOperation({ 
+    summary: 'Get all users',
+    description: 'Retrieve all users in the system. Admin access required.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Users retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          email: { type: 'string' },
+          firstName: { type: 'string' },
+          lastName: { type: 'string' },
+          role: { type: 'string' },
+          createdAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - Admin access required' 
+  })
   async findAll(@CurrentUserId() currentUserId: string): Promise<User[]> {
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all users`);

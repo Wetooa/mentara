@@ -29,7 +29,18 @@ import {
   type PendingTherapistFiltersDto,
 } from 'mentara-commons';
 import { AdminTherapistService } from '../services/admin-therapist.service';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('admin-therapist')
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/therapists')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
 @AdminOnly()
@@ -39,6 +50,36 @@ export class AdminTherapistController {
   constructor(private readonly adminTherapistService: AdminTherapistService) {}
 
   @Get('pending')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get pending applications',
+
+
+    description: 'Retrieve get pending applications' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getPendingApplications(
     @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
@@ -50,6 +91,36 @@ export class AdminTherapistController {
   }
 
   @Get('applications')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get all applications',
+
+
+    description: 'Retrieve get all applications' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getAllApplications(
     @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
@@ -61,6 +132,36 @@ export class AdminTherapistController {
   }
 
   @Get(':id/details')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get application details',
+
+
+    description: 'Retrieve get application details' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getApplicationDetails(
     @Param('id') therapistId: string,
@@ -73,6 +174,36 @@ export class AdminTherapistController {
   }
 
   @Post(':id/approve')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Create approve therapist',
+
+
+    description: 'Create approve therapist' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 201, 
+
+
+    description: 'Created successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async approveTherapist(
     @Param('id') therapistId: string,
@@ -89,6 +220,36 @@ export class AdminTherapistController {
   }
 
   @Post(':id/reject')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Create reject therapist',
+
+
+    description: 'Create reject therapist' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 201, 
+
+
+    description: 'Created successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async rejectTherapist(
     @Param('id') therapistId: string,
@@ -105,6 +266,36 @@ export class AdminTherapistController {
   }
 
   @Put(':id/status')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Update update therapist status',
+
+
+    description: 'Update update therapist status' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Updated successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async updateTherapistStatus(
     @Param('id') therapistId: string,
@@ -123,6 +314,36 @@ export class AdminTherapistController {
   }
 
   @Get('metrics')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get therapist application metrics',
+
+
+    description: 'Retrieve get therapist application metrics' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getTherapistApplicationMetrics(
     @Query('startDate') startDate?: string,

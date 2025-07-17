@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiExcludeEndpoint,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { StripeService } from '../services/stripe.service';
@@ -23,6 +24,8 @@ import { PrismaService } from '../../providers/prisma-client.provider';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @ApiTags('Stripe Webhooks')
+@ApiTags('stripe-webhook')
+@ApiBearerAuth('JWT-auth')
 @Controller('billing/stripe/webhooks')
 export class StripeWebhookController {
   private readonly logger = new Logger(StripeWebhookController.name);

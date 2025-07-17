@@ -14,10 +14,21 @@ import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import {
   AdminAnalyticsQuerySchema,
   type AdminAnalyticsQuery,
 } from '@mentara/commons';
 
+@ApiTags('admin-analytics')
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/analytics')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminAnalyticsController {
@@ -26,6 +37,36 @@ export class AdminAnalyticsController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('overview')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get platform overview',
+
+
+    description: 'Retrieve get platform overview' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @AdminOnly()
   async getPlatformOverview(@CurrentUserId() currentUserId: string) {
     try {
@@ -41,6 +82,36 @@ export class AdminAnalyticsController {
   }
 
   @Get('matching-performance')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get matching performance',
+
+
+    description: 'Retrieve get matching performance' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @AdminOnly()
   async getMatchingPerformance(
     @CurrentUserId() currentUserId: string,

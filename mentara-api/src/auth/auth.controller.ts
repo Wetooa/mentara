@@ -12,6 +12,16 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -39,6 +49,7 @@ import { EmailVerificationService } from './services/email-verification.service'
 import { PasswordResetService } from './services/password-reset.service';
 import { Request } from 'express';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -54,6 +65,19 @@ export class AuthController {
   // - /auth/moderator/create-account
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Get current user profile',
+    description: 'Retrieve the authenticated user\'s profile information'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User profile retrieved successfully' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid or missing JWT token' 
+  })
   @Get('me')
   async getMe(@CurrentUserId() id: string) {
     return await this.authService.getUser(id);
@@ -75,6 +99,53 @@ export class AuthController {
 
   // Local Authentication Endpoints
   @Public()
+  @ApiOperation({ 
+    summary: 'Register new user',
+    description: 'Register a new user account with email and password. Supports client and therapist roles only.' 
+  })
+  @ApiBody({ 
+    description: 'User registration details',
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email', example: 'user@example.com' },
+        password: { type: 'string', minLength: 8, example: 'SecurePassword123!' },
+        firstName: { type: 'string', example: 'John' },
+        lastName: { type: 'string', example: 'Doe' },
+        role: { type: 'string', enum: ['client', 'therapist'], example: 'client' }
+      },
+      required: ['email', 'password', 'firstName', 'lastName', 'role']
+    }
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'User registered successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            email: { type: 'string' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            role: { type: 'string' }
+          }
+        },
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid input data' 
+  })
+  @ApiResponse({ 
+    status: 409, 
+    description: 'Conflict - Email already exists' 
+  })
   @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registration attempts per 5 minutes
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -96,6 +167,52 @@ export class AuthController {
   }
 
   @Public()
+  @ApiOperation({ 
+    summary: 'User login',
+    description: 'Authenticate user with email and password, returning JWT tokens' 
+  })
+  @ApiBody({ 
+    description: 'Login credentials',
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', format: 'email', example: 'user@example.com' },
+        password: { type: 'string', example: 'SecurePassword123!' }
+      },
+      required: ['email', 'password']
+    }
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Login successful',
+    schema: {
+      type: 'object',
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            email: { type: 'string' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            role: { type: 'string' },
+            emailVerified: { type: 'boolean' }
+          }
+        },
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' },
+        expiresIn: { type: 'number' }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - Invalid credentials' 
+  })
+  @ApiResponse({ 
+    status: 429, 
+    description: 'Too many login attempts' 
+  })
   @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
   @Post('login')
   @HttpCode(HttpStatus.OK)

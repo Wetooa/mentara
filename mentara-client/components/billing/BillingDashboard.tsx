@@ -34,26 +34,20 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  TrendingUp,
   DollarSign,
   Receipt,
   Settings,
   Plus,
   MoreHorizontal,
-  Eye,
   Trash2,
   Star,
   Building,
-  RefreshCw,
-  AlertCircle,
-  Crown,
-  Zap
+  Crown
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
-  useSubscription,
   useSubscriptionPlans,
   usePaymentMethods,
   useInvoices,
@@ -80,16 +74,14 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
   const {
     subscription,
     isActive,
-    isTrial,
     isPastDue,
     isCanceled,
     willCancel,
     hasPaymentIssue,
-    needsPaymentMethod,
     isLoading: subscriptionLoading
   } = useSubscriptionStatus();
   
-  const { data: plans, isLoading: plansLoading } = useSubscriptionPlans();
+  const { data: plans } = useSubscriptionPlans();
   const { data: paymentMethods, isLoading: paymentMethodsLoading } = usePaymentMethods();
   const { data: invoices, isLoading: invoicesLoading } = useInvoices({ limit: 10 });
   

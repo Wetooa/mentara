@@ -15,6 +15,15 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import {
   TherapistRecommendationRequestSchema,
   TherapistRecommendationResponseDtoSchema,
   TherapistRecommendationQuerySchema,
@@ -25,6 +34,8 @@ import {
   type WelcomeRecommendationQuery,
 } from '@mentara/commons';
 
+@ApiTags('therapist-recommendation')
+@ApiBearerAuth('JWT-auth')
 @Controller('therapist-recommendations')
 @UseGuards(JwtAuthGuard)
 export class TherapistRecommendationController {
@@ -34,6 +45,36 @@ export class TherapistRecommendationController {
   ) {}
 
   @Get()
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get recommended therapists',
+
+
+    description: 'Retrieve get recommended therapists' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getRecommendedTherapists(
     @CurrentUserId() clerkId: string,
@@ -70,6 +111,36 @@ export class TherapistRecommendationController {
   }
 
   @Get('compatibility/:therapistId')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get compatibility analysis',
+
+
+    description: 'Retrieve get compatibility analysis' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getCompatibilityAnalysis(
     @CurrentUserId() clerkId: string,
@@ -99,6 +170,36 @@ export class TherapistRecommendationController {
   }
 
   @Get('welcome')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get welcome recommendations',
+
+
+    description: 'Retrieve get welcome recommendations' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @HttpCode(HttpStatus.OK)
   async getWelcomeRecommendations(
     @CurrentUserId() userId: string,

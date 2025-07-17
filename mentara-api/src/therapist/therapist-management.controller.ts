@@ -2,7 +2,18 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
 import { WorksheetsService } from '../worksheets/worksheets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('therapists')
+@ApiBearerAuth('JWT-auth')
 @Controller('therapist-management')
 @UseGuards(JwtAuthGuard)
 export class TherapistManagementController {

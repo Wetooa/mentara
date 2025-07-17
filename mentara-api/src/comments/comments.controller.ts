@@ -22,7 +22,18 @@ import {
 import { CommentsService } from './comments.service';
 import { Comment } from '@prisma/client';
 import { CommentCreateInputDto, CommentUpdateInputDto } from 'mentara-commons';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('comments')
+@ApiBearerAuth('JWT-auth')
 @Controller('comments')
 @UseGuards(JwtAuthGuard)
 export class CommentsController {
@@ -32,6 +43,36 @@ export class CommentsController {
   ) {}
 
   @Get()
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve find all',
+
+
+    description: 'Retrieve find all' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async findAll(@CurrentUserId() id: string): Promise<Comment[]> {
     try {
       return await this.commentsService.findAll(id);
@@ -44,6 +85,36 @@ export class CommentsController {
   }
 
   @Get(':id')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve find one',
+
+
+    description: 'Retrieve find one' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async findOne(@Param('id') id: string): Promise<Comment> {
     try {
       const comment = await this.commentsService.findOne(id);
@@ -60,6 +131,36 @@ export class CommentsController {
   }
 
   @Get('post/:postId')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve find by post id',
+
+
+    description: 'Retrieve find by post id' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async findByPostId(
     @Param('postId') postId: string,
     @CurrentUserId() userId: string,
@@ -75,6 +176,36 @@ export class CommentsController {
   }
 
   @Post()
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Create create',
+
+
+    description: 'Create create' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 201, 
+
+
+    description: 'Created successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   async create(
     @CurrentUserId() userId: string,
@@ -119,6 +250,36 @@ export class CommentsController {
   }
 
   @Put(':id')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Update update',
+
+
+    description: 'Update update' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Updated successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async update(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
@@ -135,6 +296,36 @@ export class CommentsController {
   }
 
   @Delete(':id')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Delete remove',
+
+
+    description: 'Delete remove' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Deleted successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async remove(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
@@ -151,6 +342,26 @@ export class CommentsController {
 
   // Heart functionality
   @Post(':id/heart')
+
+  @ApiOperation({ 
+
+    summary: 'Create heart comment',
+
+    description: 'Create heart comment' 
+
+  })
+
+  @ApiResponse({ 
+
+    status: 201, 
+
+    description: 'Created successfully' 
+
+  })
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+  
   async heartComment(
     @CurrentUserId() userId: string,
     @Param('id') commentId: string,
@@ -166,6 +377,36 @@ export class CommentsController {
   }
 
   @Get(':id/hearted')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve is comment hearted',
+
+
+    description: 'Retrieve is comment hearted' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async isCommentHearted(
     @CurrentUserId() userId: string,
     @Param('id') commentId: string,

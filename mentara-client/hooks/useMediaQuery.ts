@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './utils/useMediaQuery';
+export * from './utils/useMediaQuery';

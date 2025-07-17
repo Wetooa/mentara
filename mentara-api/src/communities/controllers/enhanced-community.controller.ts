@@ -121,6 +121,8 @@ class SimilarCommunitiesDto {
 }
 
 @ApiTags('Enhanced Communities')
+@ApiTags('enhanced-community')
+@ApiBearerAuth('JWT-auth')
 @Controller('communities/enhanced')
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
 @ApiBearerAuth()

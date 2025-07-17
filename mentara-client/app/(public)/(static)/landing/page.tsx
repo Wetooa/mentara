@@ -194,7 +194,7 @@ export default function LandingPage() {
               </h2>
               <Separator className="w-20 mx-auto bg-primary/30 h-1 rounded-full" />
               <p className="mt-6 text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                We're committed to making mental wellness accessible to everyone through compassionate care, innovative approaches, and a supportive community.
+                We&apos;re committed to making mental wellness accessible to everyone through compassionate care, innovative approaches, and a supportive community.
               </p>
             </motion.div>
           </motion.div>

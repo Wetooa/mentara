@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './booking/useAvailableSlots';
+export * from './booking/useAvailableSlots';

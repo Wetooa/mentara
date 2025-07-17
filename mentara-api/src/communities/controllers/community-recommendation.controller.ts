@@ -38,6 +38,8 @@ import {
 } from 'mentara-commons';
 
 @ApiTags('Community Recommendations')
+@ApiTags('community-recommendation')
+@ApiBearerAuth('JWT-auth')
 @Controller('communities/recommendations')
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
 @ApiBearerAuth()

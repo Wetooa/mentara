@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './dashboard/useDashboard';
+export * from './dashboard/useDashboard';

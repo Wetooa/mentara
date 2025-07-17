@@ -11,12 +11,53 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { PrismaService } from '../providers/prisma-client.provider';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('worksheet-uploads')
+@ApiBearerAuth('JWT-auth')
 @Controller('worksheets/upload')
 export class WorksheetUploadsController {
   constructor(private prisma: PrismaService) {}
 
   @Post()
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Create upload file',
+
+
+    description: 'Create upload file' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 201, 
+
+
+    description: 'Created successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

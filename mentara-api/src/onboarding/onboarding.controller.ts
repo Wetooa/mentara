@@ -13,7 +13,18 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('onboarding')
+@ApiBearerAuth('JWT-auth')
 @Controller('onboarding')
 @UseGuards(JwtAuthGuard)
 export class OnboardingController {
@@ -22,6 +33,36 @@ export class OnboardingController {
   constructor(private readonly onboardingService: OnboardingService) {}
 
   @Get('status')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get my onboarding status',
+
+
+    description: 'Retrieve get my onboarding status' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async getMyOnboardingStatus(
     @CurrentUserId() userId: string,
   ): Promise<OnboardingStatus> {
@@ -40,6 +81,36 @@ export class OnboardingController {
   }
 
   @Get('status/:userId')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get user onboarding status',
+
+
+    description: 'Retrieve get user onboarding status' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async getUserOnboardingStatus(
@@ -63,6 +134,36 @@ export class OnboardingController {
   }
 
   @Post('complete-step/:stepName')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Create complete step',
+
+
+    description: 'Create complete step' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 201, 
+
+
+    description: 'Created successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async completeStep(
     @CurrentUserId() userId: string,
     @Param('stepName') stepName: string,
@@ -82,6 +183,36 @@ export class OnboardingController {
   }
 
   @Get('validate')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve validate onboarding',
+
+
+    description: 'Retrieve validate onboarding' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async validateOnboarding(@CurrentUserId() userId: string) {
     try {
       return await this.onboardingService.validateOnboardingCompleteness(
@@ -100,6 +231,36 @@ export class OnboardingController {
   }
 
   @Get('insights')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get onboarding insights',
+
+
+    description: 'Retrieve get onboarding insights' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async getOnboardingInsights() {

@@ -3,5 +3,5 @@ export { useContacts } from "../messaging/useContacts";
 export { useConversations } from "../messaging/useConversations";
 export { useWebSocket } from "../messaging/useWebSocket";
 
-// Re-export useConversations as the default useMessaging hook
-export { useConversations as default } from "../messaging/useConversations";
+// Re-export useConversations as useMessaging for backward compatibility
+export { useConversations as useMessaging } from "../messaging/useConversations";

@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './utils/useMobile';
+export * from './utils/useMobile';

@@ -10,6 +10,16 @@ import {
   Delete,
   UnauthorizedException,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { BillingService } from './billing.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
@@ -78,6 +88,8 @@ import {
   DiscountType,
 } from '@prisma/client';
 
+@ApiTags('billing')
+@ApiBearerAuth('JWT-auth')
 @Controller('billing')
 @UseGuards(JwtAuthGuard)
 export class BillingController {
@@ -85,6 +97,40 @@ export class BillingController {
 
   // Subscription endpoints
   @Post('subscriptions')
+  @ApiOperation({ 
+    summary: 'Create new subscription',
+    description: 'Create a new subscription plan for the authenticated user' 
+  })
+  @ApiBody({ 
+    description: 'Subscription creation details',
+    schema: {
+      type: 'object',
+      properties: {
+        planId: { type: 'string', description: 'ID of the subscription plan' },
+        paymentMethodId: { type: 'string', description: 'Payment method to use' },
+        trialStart: { type: 'string', format: 'date-time', description: 'Trial start date' },
+        trialEnd: { type: 'string', format: 'date-time', description: 'Trial end date' }
+      },
+      required: ['planId', 'paymentMethodId']
+    }
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Subscription created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        userId: { type: 'string' },
+        planId: { type: 'string' },
+        status: { type: 'string', enum: ['active', 'trialing', 'past_due', 'canceled'] },
+        createdAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Invalid subscription data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 409, description: 'User already has an active subscription' })
   createSubscription(
     @Body(new ZodValidationPipe(CreateSubscriptionDtoSchema))
     body: CreateSubscriptionDto,

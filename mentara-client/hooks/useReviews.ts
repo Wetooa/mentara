@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './reviews/useReviews';
+export * from './reviews/useReviews';

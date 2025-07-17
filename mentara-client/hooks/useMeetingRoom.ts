@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './sessions/useMeetingRoom';
+export * from './sessions/useMeetingRoom';

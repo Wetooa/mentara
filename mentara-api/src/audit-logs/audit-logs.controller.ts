@@ -16,6 +16,15 @@ import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import {
   FindAuditLogsQueryDtoSchema,
   FindSystemEventsQueryDtoSchema,
   FindDataChangeLogsQueryDtoSchema,
@@ -52,6 +61,8 @@ import {
   DataClassification,
 } from '@prisma/client';
 
+@ApiTags('audit-logs')
+@ApiBearerAuth('JWT-auth')
 @Controller('audit-logs')
 @UseGuards(JwtAuthGuard)
 export class AuditLogsController {
@@ -61,6 +72,13 @@ export class AuditLogsController {
   ) {}
 
   @Post()
+  @ApiOperation({
+    summary: 'Create audit log entry',
+    description: 'Create a new audit log entry for tracking system activities',
+  })
+  @ApiBody({ description: 'Audit log data' })
+  @ApiResponse({ status: 201, description: 'Audit log created successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   createAuditLog(
     @Body(new ZodValidationPipe(CreateAuditLogDtoSchema))
     body: CreateAuditLogDto,
@@ -75,6 +93,16 @@ export class AuditLogsController {
   }
 
   @Get()
+  @ApiOperation({
+    summary: 'Get audit logs',
+    description: 'Retrieve audit logs with optional filtering and pagination',
+  })
+  @ApiQuery({ name: 'userId', required: false })
+  @ApiQuery({ name: 'action', required: false })
+  @ApiQuery({ name: 'startDate', required: false })
+  @ApiQuery({ name: 'endDate', required: false })
+  @ApiResponse({ status: 200, description: 'Audit logs retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAuditLogs(
     @CurrentUserRole() userRole: string,
     @Query(new ZodValidationPipe(FindAuditLogsQueryDtoSchema))
@@ -98,6 +126,13 @@ export class AuditLogsController {
   }
 
   @Post('system-events')
+  @ApiOperation({
+    summary: 'Create system event',
+    description: 'Log a system event for monitoring and alerting',
+  })
+  @ApiBody({ description: 'System event data' })
+  @ApiResponse({ status: 201, description: 'System event logged successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   createSystemEvent(
     @Body(new ZodValidationPipe(CreateSystemEventDtoSchema))
     body: CreateSystemEventDto,
@@ -112,6 +147,14 @@ export class AuditLogsController {
   }
 
   @Get('system-events')
+  @ApiOperation({
+    summary: 'Get system events',
+    description: 'Retrieve system events with filtering options',
+  })
+  @ApiQuery({ name: 'severity', required: false })
+  @ApiQuery({ name: 'category', required: false })
+  @ApiResponse({ status: 200, description: 'System events retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findSystemEvents(
     @CurrentUserRole() userRole: string,
     @Query(new ZodValidationPipe(FindSystemEventsQueryDtoSchema))
@@ -134,6 +177,15 @@ export class AuditLogsController {
   }
 
   @Patch('system-events/:id/resolve')
+  @ApiOperation({
+    summary: 'Resolve system event',
+    description: 'Mark a system event as resolved',
+  })
+  @ApiParam({ name: 'id', description: 'System event ID' })
+  @ApiBody({ description: 'Resolution data' })
+  @ApiResponse({ status: 200, description: 'System event resolved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'System event not found' })
   resolveSystemEvent(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(ResolveSystemEventDtoSchema))
@@ -154,6 +206,9 @@ export class AuditLogsController {
   }
 
   @Post('data-changes')
+  @ApiOperation({ summary: 'Log data change', description: 'Log a data change event' })
+  @ApiResponse({ status: 201, description: 'Data change logged successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   createDataChangeLog(
     @Body(new ZodValidationPipe(CreateDataChangeLogDtoSchema))
     body: CreateDataChangeLogDto,

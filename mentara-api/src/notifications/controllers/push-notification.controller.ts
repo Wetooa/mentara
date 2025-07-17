@@ -46,6 +46,8 @@ interface TestNotificationDto {
 }
 
 @ApiTags('Push Notifications')
+@ApiTags('push-notification')
+@ApiBearerAuth('JWT-auth')
 @Controller('notifications/push')
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
 @ApiBearerAuth()

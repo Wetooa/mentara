@@ -1,2 +1,2 @@
 // Compatibility re-export
-export { default } from './therapist/useTherapist';
+export * from './therapist/useTherapist';

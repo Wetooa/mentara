@@ -13,17 +13,58 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ClientService } from './client.service';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import {
   UpdateClientDto,
   User,
   TherapistRecommendation,
 } from 'mentara-commons';
 
+@ApiTags('clients')
+@ApiBearerAuth('JWT-auth')
 @Controller('client')
 @UseGuards(JwtAuthGuard)
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   @Get('profile')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get profile',
+
+
+    description: 'Retrieve get profile' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async getProfile(@CurrentUserId() id: string): Promise<User> {
     try {
       return await this.clientService.getProfile(id);
@@ -36,6 +77,36 @@ export class ClientController {
   }
 
   @Put('profile')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Update update profile',
+
+
+    description: 'Update update profile' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Updated successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async updateProfile(
     @CurrentUserId() id: string,
     @Body() data: UpdateClientDto,
@@ -51,6 +122,36 @@ export class ClientController {
   }
 
   @Get('needs-therapist-recommendations')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve needs therapist recommendations',
+
+
+    description: 'Retrieve needs therapist recommendations' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async needsTherapistRecommendations(
     @CurrentUserId() id: string,
   ): Promise<{ needsTherapistRecommendations: boolean }> {
@@ -66,6 +167,36 @@ export class ClientController {
   }
 
   @Put('mark-therapist-recommendations-seen')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Update mark therapist recommendations seen',
+
+
+    description: 'Update mark therapist recommendations seen' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Updated successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async markTherapistRecommendationsSeen(
     @CurrentUserId() id: string,
   ): Promise<{ success: boolean }> {
@@ -81,6 +212,36 @@ export class ClientController {
   }
 
   @Get('therapist')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Retrieve get assigned therapist',
+
+
+    description: 'Retrieve get assigned therapist' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Retrieved successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async getAssignedTherapist(
     @CurrentUserId() id: string,
   ): Promise<{ therapist: TherapistRecommendation | null }> {
@@ -96,6 +257,36 @@ export class ClientController {
   }
 
   @Post('therapist')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Create assign therapist',
+
+
+    description: 'Create assign therapist' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 201, 
+
+
+    description: 'Created successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async assignTherapist(
     @CurrentUserId() id: string,
     @Body() data: { therapistId: string },
@@ -117,6 +308,36 @@ export class ClientController {
   }
 
   @Delete('therapist')
+
+
+  @ApiOperation({ 
+
+
+    summary: 'Delete remove therapist',
+
+
+    description: 'Delete remove therapist' 
+
+
+  })
+
+
+  @ApiResponse({ 
+
+
+    status: 200, 
+
+
+    description: 'Deleted successfully' 
+
+
+  })
+
+
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+
+
+  
   async removeTherapist(
     @CurrentUserId() id: string,
   ): Promise<{ success: boolean }> {
