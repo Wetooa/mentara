@@ -3,86 +3,77 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { useUser } from "@clerk/nextjs";
+// useUser functionality now handled by useAuth
 import { toast } from "sonner";
 
 export default function SSOCallbackPage() {
   const router = useRouter();
-  const { user } = useUser();
-  const { registerUser, submitPreAssessment } = useAuth();
+  const { user, isLoaded, handleOAuthCallback } = useAuth();
 
   useEffect(() => {
     const handleSSOCallback = async () => {
-      if (!user) {
-        toast.error("Authentication failed. Please try again.");
-        router.push("/sign-in");
-        return;
-      }
+      if (!isLoaded) return;
 
       try {
         toast.info("Completing authentication...");
         
-        // Check if user has pre-assessment data (indicates new user from pre-assessment flow)
-        const assessmentAnswers = localStorage.getItem("assessmentAnswers");
+        // Get token from URL parameters (OAuth callback)
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const code = urlParams.get('code');
         
-        if (assessmentAnswers) {
-          // New user from pre-assessment flow - register with backend
-          try {
-            const answersList = JSON.parse(assessmentAnswers);
-            
-            // Create user data for backend registration
-            const userData = {
-              user: {
-                email: user.primaryEmailAddress?.emailAddress || user.emailAddresses[0]?.emailAddress || "user@example.com",
-                firstName: user.firstName || "User",
-                middleName: "",
-                lastName: user.lastName || "",
-                birthDate: new Date().toISOString(),
-                address: "",
-                avatarUrl: user.imageUrl || "",
-                role: "client" as const,
-                bio: "",
-                coverImageUrl: "",
-                isActive: true,
-              },
-            };
-
-            // Register with backend
-            await registerUser(userData);
-            
-            // Submit pre-assessment data
-            await submitPreAssessment({
-              answerMatrix: answersList,
-              metadata: { source: "preAssessment_oauth" },
-            });
-            
+        if (token || code) {
+          // Handle OAuth callback with token
+          await handleOAuthCallback(token || code);
+          
+          // Check if user has pre-assessment data (indicates new user from pre-assessment flow)
+          const pendingAssessmentData = localStorage.getItem("pendingAssessmentData");
+          
+          if (pendingAssessmentData) {
+            // Clear assessment data and redirect to welcome
+            localStorage.removeItem("pendingAssessmentData");
             toast.success("Welcome! Your account has been created.");
-          } catch (regError) {
-            console.error("Backend registration error:", regError);
-            toast.error("Account created but registration incomplete. Please contact support.");
+            router.push("/user/welcome");
+          } else {
+            // Existing user signing in
+            toast.success("Signed in successfully!");
+            
+            // Redirect based on user role if available
+            if (user?.role) {
+              switch (user.role) {
+                case 'client':
+                  router.push("/user/dashboard");
+                  break;
+                case 'therapist':
+                  router.push("/therapist/dashboard");
+                  break;
+                case 'moderator':
+                  router.push("/moderator/dashboard");
+                  break;
+                case 'admin':
+                  router.push("/admin/dashboard");
+                  break;
+                default:
+                  router.push("/user/dashboard");
+              }
+            } else {
+              router.push("/user/dashboard");
+            }
           }
-        }
-        
-        if (assessmentAnswers) {
-          // Clear assessment data and redirect to welcome
-          localStorage.removeItem("assessmentAnswers");
-          router.push("/user/welcome");
         } else {
-          // Existing user signing in
-          toast.success("Signed in successfully!");
-          router.push("/user/dashboard");
+          // No token found, redirect to sign-in
+          toast.error("Authentication failed. No token found.");
+          router.push("/auth/sign-in");
         }
       } catch (error) {
         console.error("SSO callback error:", error);
         toast.error("Authentication failed. Please try again.");
-        router.push("/sign-in");
+        router.push("/auth/sign-in");
       }
     };
 
-    if (user) {
-      handleSSOCallback();
-    }
-  }, [user, router, registerUser, submitPreAssessment]);
+    handleSSOCallback();
+  }, [isLoaded, user, router, handleOAuthCallback]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

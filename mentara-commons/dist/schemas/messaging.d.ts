@@ -12,16 +12,16 @@ export declare const AttachmentSchema: z.ZodObject<{
     previewUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    type: "image" | "document" | "audio" | "video";
-    url: string;
+    type: "video" | "audio" | "image" | "document";
     name: string;
+    url: string;
     size?: number | undefined;
     previewUrl?: string | undefined;
 }, {
     id: string;
-    type: "image" | "document" | "audio" | "video";
-    url: string;
+    type: "video" | "audio" | "image" | "document";
     name: string;
+    url: string;
     size?: number | undefined;
     previewUrl?: string | undefined;
 }>;
@@ -63,16 +63,16 @@ export declare const MessageSchema: z.ZodObject<{
         previewUrl: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        type: "image" | "document" | "audio" | "video";
-        url: string;
+        type: "video" | "audio" | "image" | "document";
         name: string;
+        url: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }, {
         id: string;
-        type: "image" | "document" | "audio" | "video";
-        url: string;
+        type: "video" | "audio" | "image" | "document";
         name: string;
+        url: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }>, "many">>;
@@ -100,9 +100,9 @@ export declare const MessageSchema: z.ZodObject<{
     status?: "sent" | "delivered" | "read" | undefined;
     attachments?: {
         id: string;
-        type: "image" | "document" | "audio" | "video";
-        url: string;
+        type: "video" | "audio" | "image" | "document";
         name: string;
+        url: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }[] | undefined;
@@ -120,9 +120,9 @@ export declare const MessageSchema: z.ZodObject<{
     status?: "sent" | "delivered" | "read" | undefined;
     attachments?: {
         id: string;
-        type: "image" | "document" | "audio" | "video";
-        url: string;
+        type: "video" | "audio" | "image" | "document";
         name: string;
+        url: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }[] | undefined;
@@ -159,12 +159,12 @@ export declare const BackendMessageSchema: z.ZodObject<{
         name: z.ZodString;
         size: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        url: string;
         name: string;
+        url: string;
         size: number;
     }, {
-        url: string;
         name: string;
+        url: string;
         size: number;
     }>>;
     attachmentUrl: z.ZodOptional<z.ZodString>;
@@ -196,8 +196,8 @@ export declare const BackendMessageSchema: z.ZodObject<{
         emoji: string;
     }[] | undefined;
     attachment?: {
-        url: string;
         name: string;
+        url: string;
         size: number;
     } | undefined;
     attachmentUrl?: string | undefined;
@@ -222,8 +222,8 @@ export declare const BackendMessageSchema: z.ZodObject<{
     isRead?: boolean | undefined;
     messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
     attachment?: {
-        url: string;
         name: string;
+        url: string;
         size: number;
     } | undefined;
     attachmentUrl?: string | undefined;
@@ -281,16 +281,16 @@ export declare const ConversationSchema: z.ZodObject<{
             previewUrl: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }, {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }>, "many">>;
@@ -318,9 +318,9 @@ export declare const ConversationSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -338,9 +338,9 @@ export declare const ConversationSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -365,9 +365,9 @@ export declare const ConversationSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -390,9 +390,9 @@ export declare const ConversationSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -423,16 +423,16 @@ export declare const MessageGroupSchema: z.ZodObject<{
             previewUrl: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }, {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }>, "many">>;
@@ -460,9 +460,9 @@ export declare const MessageGroupSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -480,9 +480,9 @@ export declare const MessageGroupSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -505,9 +505,9 @@ export declare const MessageGroupSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -528,9 +528,9 @@ export declare const MessageGroupSchema: z.ZodObject<{
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
             id: string;
-            type: "image" | "document" | "audio" | "video";
-            url: string;
+            type: "video" | "audio" | "image" | "document";
             name: string;
+            url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }[] | undefined;
@@ -590,16 +590,16 @@ export declare const MessagesStateSchema: z.ZodObject<{
                 previewUrl: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }, {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }>, "many">>;
@@ -627,9 +627,9 @@ export declare const MessagesStateSchema: z.ZodObject<{
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
@@ -647,9 +647,9 @@ export declare const MessagesStateSchema: z.ZodObject<{
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
@@ -674,9 +674,9 @@ export declare const MessagesStateSchema: z.ZodObject<{
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
@@ -699,9 +699,9 @@ export declare const MessagesStateSchema: z.ZodObject<{
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
@@ -719,6 +719,7 @@ export declare const MessagesStateSchema: z.ZodObject<{
     isLoadingMessages: z.ZodDefault<z.ZodBoolean>;
     error: z.ZodNullable<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    error: string | null;
     contacts: {
         id: string;
         status: "online" | "offline" | "away";
@@ -741,9 +742,9 @@ export declare const MessagesStateSchema: z.ZodObject<{
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
@@ -758,8 +759,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
     }[];
     selectedContactId: string | null;
     isLoadingMessages: boolean;
-    error: string | null;
 }, {
+    error: string | null;
     contacts: {
         id: string;
         status: "online" | "offline" | "away";
@@ -781,9 +782,9 @@ export declare const MessagesStateSchema: z.ZodObject<{
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
                 id: string;
-                type: "image" | "document" | "audio" | "video";
-                url: string;
+                type: "video" | "audio" | "image" | "document";
                 name: string;
+                url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }[] | undefined;
@@ -798,7 +799,6 @@ export declare const MessagesStateSchema: z.ZodObject<{
         lastReadMessageId?: string | undefined;
     }[];
     selectedContactId: string | null;
-    error: string | null;
     isLoadingMessages?: boolean | undefined;
 }>;
 export declare const CreateConversationDtoSchema: z.ZodObject<{
@@ -926,15 +926,15 @@ export declare const ConversationParticipantSchema: z.ZodObject<{
     id: string;
     role: "ADMIN" | "MODERATOR" | "MEMBER";
     userId: string;
-    conversationId: string;
-    joinedAt: string;
-    leftAt: string | null;
     isActive: boolean;
+    joinedAt: string;
+    conversationId: string;
+    leftAt: string | null;
 }, {
     id: string;
     userId: string;
-    conversationId: string;
     joinedAt: string;
+    conversationId: string;
     leftAt: string | null;
     role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
     isActive?: boolean | undefined;
@@ -957,15 +957,15 @@ export declare const BackendConversationSchema: z.ZodObject<{
         id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
         userId: string;
-        conversationId: string;
-        joinedAt: string;
-        leftAt: string | null;
         isActive: boolean;
+        joinedAt: string;
+        conversationId: string;
+        leftAt: string | null;
     }, {
         id: string;
         userId: string;
-        conversationId: string;
         joinedAt: string;
+        conversationId: string;
         leftAt: string | null;
         role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
         isActive?: boolean | undefined;
@@ -995,12 +995,12 @@ export declare const BackendConversationSchema: z.ZodObject<{
             name: z.ZodString;
             size: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            url: string;
             name: string;
+            url: string;
             size: number;
         }, {
-            url: string;
             name: string;
+            url: string;
             size: number;
         }>>;
         attachmentUrl: z.ZodOptional<z.ZodString>;
@@ -1032,8 +1032,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
             emoji: string;
         }[] | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1058,8 +1058,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1078,6 +1078,16 @@ export declare const BackendConversationSchema: z.ZodObject<{
     createdAt: string;
     updatedAt: string;
     type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+    isActive: boolean;
+    participants: {
+        id: string;
+        role: "ADMIN" | "MODERATOR" | "MEMBER";
+        userId: string;
+        isActive: boolean;
+        joinedAt: string;
+        conversationId: string;
+        leftAt: string | null;
+    }[];
     messages: {
         id: string;
         createdAt: string;
@@ -1092,8 +1102,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
             emoji: string;
         }[] | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1105,16 +1115,6 @@ export declare const BackendConversationSchema: z.ZodObject<{
             readAt: string;
         }[] | undefined;
     }[];
-    isActive: boolean;
-    participants: {
-        id: string;
-        role: "ADMIN" | "MODERATOR" | "MEMBER";
-        userId: string;
-        conversationId: string;
-        joinedAt: string;
-        leftAt: string | null;
-        isActive: boolean;
-    }[];
     title?: string | undefined;
     lastMessageAt?: string | undefined;
 }, {
@@ -1122,6 +1122,15 @@ export declare const BackendConversationSchema: z.ZodObject<{
     createdAt: string;
     updatedAt: string;
     type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+    participants: {
+        id: string;
+        userId: string;
+        joinedAt: string;
+        conversationId: string;
+        leftAt: string | null;
+        role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
+        isActive?: boolean | undefined;
+    }[];
     messages: {
         id: string;
         createdAt: string;
@@ -1136,8 +1145,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1148,15 +1157,6 @@ export declare const BackendConversationSchema: z.ZodObject<{
             userId: string;
             readAt: string;
         }[] | undefined;
-    }[];
-    participants: {
-        id: string;
-        userId: string;
-        conversationId: string;
-        joinedAt: string;
-        leftAt: string | null;
-        role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
-        isActive?: boolean | undefined;
     }[];
     title?: string | undefined;
     isActive?: boolean | undefined;
@@ -1188,12 +1188,12 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
             name: z.ZodString;
             size: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            url: string;
             name: string;
+            url: string;
             size: number;
         }, {
-            url: string;
             name: string;
+            url: string;
             size: number;
         }>>;
         attachmentUrl: z.ZodOptional<z.ZodString>;
@@ -1225,8 +1225,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
             emoji: string;
         }[] | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1251,8 +1251,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1287,8 +1287,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
             emoji: string;
         }[] | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1319,8 +1319,8 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1432,9 +1432,9 @@ export declare const MessageNotificationPreferencesSchema: z.ZodObject<{
         startTime: z.ZodString;
         endTime: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        enabled: boolean;
         startTime: string;
         endTime: string;
+        enabled: boolean;
     }, {
         startTime: string;
         endTime: string;
@@ -1446,9 +1446,9 @@ export declare const MessageNotificationPreferencesSchema: z.ZodObject<{
     pushNotifications: boolean;
     soundEnabled: boolean;
     quietHours?: {
-        enabled: boolean;
         startTime: string;
         endTime: string;
+        enabled: boolean;
     } | undefined;
 }, {
     userId: string;
@@ -1553,12 +1553,12 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             name: z.ZodString;
             size: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            url: string;
             name: string;
+            url: string;
             size: number;
         }, {
-            url: string;
             name: string;
+            url: string;
             size: number;
         }>>;
         attachmentUrl: z.ZodOptional<z.ZodString>;
@@ -1590,8 +1590,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             emoji: string;
         }[] | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1616,8 +1616,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1647,15 +1647,15 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             userId: string;
-            conversationId: string;
-            joinedAt: string;
-            leftAt: string | null;
             isActive: boolean;
+            joinedAt: string;
+            conversationId: string;
+            leftAt: string | null;
         }, {
             id: string;
             userId: string;
-            conversationId: string;
             joinedAt: string;
+            conversationId: string;
             leftAt: string | null;
             role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
             isActive?: boolean | undefined;
@@ -1685,12 +1685,12 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 name: z.ZodString;
                 size: z.ZodNumber;
             }, "strip", z.ZodTypeAny, {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             }, {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             }>>;
             attachmentUrl: z.ZodOptional<z.ZodString>;
@@ -1722,8 +1722,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 emoji: string;
             }[] | undefined;
             attachment?: {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             } | undefined;
             attachmentUrl?: string | undefined;
@@ -1748,8 +1748,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             isRead?: boolean | undefined;
             messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
             attachment?: {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             } | undefined;
             attachmentUrl?: string | undefined;
@@ -1768,6 +1768,16 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         createdAt: string;
         updatedAt: string;
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+        isActive: boolean;
+        participants: {
+            id: string;
+            role: "ADMIN" | "MODERATOR" | "MEMBER";
+            userId: string;
+            isActive: boolean;
+            joinedAt: string;
+            conversationId: string;
+            leftAt: string | null;
+        }[];
         messages: {
             id: string;
             createdAt: string;
@@ -1782,8 +1792,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 emoji: string;
             }[] | undefined;
             attachment?: {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             } | undefined;
             attachmentUrl?: string | undefined;
@@ -1795,16 +1805,6 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 readAt: string;
             }[] | undefined;
         }[];
-        isActive: boolean;
-        participants: {
-            id: string;
-            role: "ADMIN" | "MODERATOR" | "MEMBER";
-            userId: string;
-            conversationId: string;
-            joinedAt: string;
-            leftAt: string | null;
-            isActive: boolean;
-        }[];
         title?: string | undefined;
         lastMessageAt?: string | undefined;
     }, {
@@ -1812,6 +1812,15 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         createdAt: string;
         updatedAt: string;
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+        participants: {
+            id: string;
+            userId: string;
+            joinedAt: string;
+            conversationId: string;
+            leftAt: string | null;
+            role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
+            isActive?: boolean | undefined;
+        }[];
         messages: {
             id: string;
             createdAt: string;
@@ -1826,8 +1835,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             isRead?: boolean | undefined;
             messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
             attachment?: {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             } | undefined;
             attachmentUrl?: string | undefined;
@@ -1838,15 +1847,6 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 userId: string;
                 readAt: string;
             }[] | undefined;
-        }[];
-        participants: {
-            id: string;
-            userId: string;
-            conversationId: string;
-            joinedAt: string;
-            leftAt: string | null;
-            role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
-            isActive?: boolean | undefined;
         }[];
         title?: string | undefined;
         isActive?: boolean | undefined;
@@ -1875,8 +1875,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             emoji: string;
         }[] | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1893,6 +1893,16 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         createdAt: string;
         updatedAt: string;
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+        isActive: boolean;
+        participants: {
+            id: string;
+            role: "ADMIN" | "MODERATOR" | "MEMBER";
+            userId: string;
+            isActive: boolean;
+            joinedAt: string;
+            conversationId: string;
+            leftAt: string | null;
+        }[];
         messages: {
             id: string;
             createdAt: string;
@@ -1907,8 +1917,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 emoji: string;
             }[] | undefined;
             attachment?: {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             } | undefined;
             attachmentUrl?: string | undefined;
@@ -1919,16 +1929,6 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 userId: string;
                 readAt: string;
             }[] | undefined;
-        }[];
-        isActive: boolean;
-        participants: {
-            id: string;
-            role: "ADMIN" | "MODERATOR" | "MEMBER";
-            userId: string;
-            conversationId: string;
-            joinedAt: string;
-            leftAt: string | null;
-            isActive: boolean;
         }[];
         title?: string | undefined;
         lastMessageAt?: string | undefined;
@@ -1953,8 +1953,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         isRead?: boolean | undefined;
         messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
         attachment?: {
-            url: string;
             name: string;
+            url: string;
             size: number;
         } | undefined;
         attachmentUrl?: string | undefined;
@@ -1971,6 +1971,15 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         createdAt: string;
         updatedAt: string;
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+        participants: {
+            id: string;
+            userId: string;
+            joinedAt: string;
+            conversationId: string;
+            leftAt: string | null;
+            role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
+            isActive?: boolean | undefined;
+        }[];
         messages: {
             id: string;
             createdAt: string;
@@ -1985,8 +1994,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             isRead?: boolean | undefined;
             messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
             attachment?: {
-                url: string;
                 name: string;
+                url: string;
                 size: number;
             } | undefined;
             attachmentUrl?: string | undefined;
@@ -1997,15 +2006,6 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 userId: string;
                 readAt: string;
             }[] | undefined;
-        }[];
-        participants: {
-            id: string;
-            userId: string;
-            conversationId: string;
-            joinedAt: string;
-            leftAt: string | null;
-            role?: "ADMIN" | "MODERATOR" | "MEMBER" | undefined;
-            isActive?: boolean | undefined;
         }[];
         title?: string | undefined;
         isActive?: boolean | undefined;

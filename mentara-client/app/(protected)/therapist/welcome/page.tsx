@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -10,13 +10,13 @@ import { useEffect } from "react";
 
 export default function TherapistWelcomePage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useAuth();
 
   // Redirect to dashboard if already authenticated as a therapist
   useEffect(() => {
     if (isLoaded && user) {
       // Check if user has therapist role
-      const userRole = user.publicMetadata?.role;
+      const userRole = user.role;
       if (userRole === "therapist") {
         // Redirect to dashboard after a brief delay
         const timer = setTimeout(() => {

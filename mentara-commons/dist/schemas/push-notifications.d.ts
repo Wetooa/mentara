@@ -160,8 +160,8 @@ export declare const BulkNotificationRequestDtoSchema: z.ZodObject<{
     title: string;
     userIds: string[];
     body: string;
-    data?: Record<string, any> | undefined;
     expiresAt?: string | undefined;
+    data?: Record<string, any> | undefined;
     scheduledFor?: string | undefined;
     icon?: string | undefined;
     badge?: string | undefined;
@@ -169,8 +169,8 @@ export declare const BulkNotificationRequestDtoSchema: z.ZodObject<{
     title: string;
     userIds: string[];
     body: string;
-    data?: Record<string, any> | undefined;
     expiresAt?: string | undefined;
+    data?: Record<string, any> | undefined;
     scheduledFor?: string | undefined;
     icon?: string | undefined;
     badge?: string | undefined;
@@ -188,14 +188,14 @@ export declare const NotificationTemplateSchema: z.ZodObject<{
     title: string;
     name: string;
     isActive: boolean;
-    category: "message" | "appointment" | "community" | "system" | "emergency";
+    category: "message" | "emergency" | "appointment" | "community" | "system";
     body: string;
     variables?: string[] | undefined;
 }, {
     id: string;
     title: string;
     name: string;
-    category: "message" | "appointment" | "community" | "system" | "emergency";
+    category: "message" | "emergency" | "appointment" | "community" | "system";
     body: string;
     isActive?: boolean | undefined;
     variables?: string[] | undefined;
@@ -229,12 +229,12 @@ export declare const NotificationAnalyticsQueryDtoSchema: z.ZodObject<{
     userId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    category?: "message" | "appointment" | "community" | "system" | "emergency" | undefined;
+    category?: "message" | "emergency" | "appointment" | "community" | "system" | undefined;
 }, {
     userId?: string | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    category?: "message" | "appointment" | "community" | "system" | "emergency" | undefined;
+    category?: "message" | "emergency" | "appointment" | "community" | "system" | undefined;
     includeClickThrough?: boolean | undefined;
     includeDeliveryRate?: boolean | undefined;
 }>;
@@ -271,9 +271,9 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         endTime?: string | undefined;
     }, {
         timezone?: string | undefined;
-        enabled?: boolean | undefined;
         startTime?: string | undefined;
         endTime?: string | undefined;
+        enabled?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     subscriptionId: string;
@@ -301,9 +301,9 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
     };
     quietHours?: {
         timezone?: string | undefined;
-        enabled?: boolean | undefined;
         startTime?: string | undefined;
         endTime?: string | undefined;
+        enabled?: boolean | undefined;
     } | undefined;
 }>;
 export type SubscribeRequestDto = z.infer<typeof SubscribeRequestDtoSchema>;

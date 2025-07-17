@@ -100,7 +100,7 @@ export declare const PreAssessmentSchema: z.ZodObject<{
     }[];
     scores: Record<string, number>;
     overallScore: number;
-    riskLevel: "low" | "high" | "moderate" | "critical";
+    riskLevel: "critical" | "high" | "low" | "moderate";
     isProcessed: boolean;
     processedAt?: string | undefined;
 }, {
@@ -115,7 +115,7 @@ export declare const PreAssessmentSchema: z.ZodObject<{
     }[];
     scores: Record<string, number>;
     overallScore: number;
-    riskLevel: "low" | "high" | "moderate" | "critical";
+    riskLevel: "critical" | "high" | "low" | "moderate";
     isProcessed: boolean;
     processedAt?: string | undefined;
 }>;
@@ -190,12 +190,12 @@ export declare const AssessmentResultSchema: z.ZodObject<{
         urgentCare: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
         recommendations: string[];
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         summary: string;
         urgentCare: boolean;
     }, {
         recommendations: string[];
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         summary: string;
         urgentCare: boolean;
     }>;
@@ -224,7 +224,7 @@ export declare const AssessmentResultSchema: z.ZodObject<{
     }>;
     overallAssessment: {
         recommendations: string[];
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         summary: string;
         urgentCare: boolean;
     };
@@ -243,7 +243,7 @@ export declare const AssessmentResultSchema: z.ZodObject<{
     }>;
     overallAssessment: {
         recommendations: string[];
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         summary: string;
         urgentCare: boolean;
     };
@@ -294,7 +294,7 @@ export declare const AssessmentQuerySchema: z.ZodObject<{
     sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    riskLevel?: "low" | "high" | "moderate" | "critical" | undefined;
+    riskLevel?: "critical" | "high" | "low" | "moderate" | undefined;
     isProcessed?: boolean | undefined;
 }, {
     userId?: string | undefined;
@@ -304,7 +304,7 @@ export declare const AssessmentQuerySchema: z.ZodObject<{
     sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
-    riskLevel?: "low" | "high" | "moderate" | "critical" | undefined;
+    riskLevel?: "critical" | "high" | "low" | "moderate" | undefined;
     isProcessed?: boolean | undefined;
 }>;
 export declare const ProcessAssessmentDtoSchema: z.ZodObject<{
@@ -345,14 +345,14 @@ export declare const CrisisAssessmentDtoSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     userId: string;
-    severity: "low" | "high" | "moderate" | "critical";
+    severity: "critical" | "high" | "low" | "moderate";
     symptoms: string[];
     immediateRisk: boolean;
     supportNeeded: boolean;
     notes?: string | undefined;
 }, {
     userId: string;
-    severity: "low" | "high" | "moderate" | "critical";
+    severity: "critical" | "high" | "low" | "moderate";
     symptoms: string[];
     immediateRisk: boolean;
     supportNeeded: boolean;
@@ -389,7 +389,7 @@ export declare const PreAssessmentListParamsSchema: z.ZodObject<{
     offset: number;
     userId?: string | undefined;
     isProcessed?: boolean | undefined;
-    overallRisk?: "low" | "high" | "moderate" | "critical" | undefined;
+    overallRisk?: "critical" | "high" | "low" | "moderate" | undefined;
     processedAfter?: string | undefined;
     processedBefore?: string | undefined;
 }, {
@@ -399,7 +399,7 @@ export declare const PreAssessmentListParamsSchema: z.ZodObject<{
     sortOrder?: "asc" | "desc" | undefined;
     offset?: number | undefined;
     isProcessed?: boolean | undefined;
-    overallRisk?: "low" | "high" | "moderate" | "critical" | undefined;
+    overallRisk?: "critical" | "high" | "low" | "moderate" | undefined;
     processedAfter?: string | undefined;
     processedBefore?: string | undefined;
 }>;
@@ -439,7 +439,7 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
         }[];
         scores: Record<string, number>;
         overallScore: number;
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         isProcessed: boolean;
         processedAt?: string | undefined;
     }, {
@@ -454,7 +454,7 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
         }[];
         scores: Record<string, number>;
         overallScore: number;
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         isProcessed: boolean;
         processedAt?: string | undefined;
     }>, "many">;
@@ -479,7 +479,7 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
         }[];
         scores: Record<string, number>;
         overallScore: number;
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         isProcessed: boolean;
         processedAt?: string | undefined;
     }[];
@@ -500,7 +500,7 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
         }[];
         scores: Record<string, number>;
         overallScore: number;
-        riskLevel: "low" | "high" | "moderate" | "critical";
+        riskLevel: "critical" | "high" | "low" | "moderate";
         isProcessed: boolean;
         processedAt?: string | undefined;
     }[];

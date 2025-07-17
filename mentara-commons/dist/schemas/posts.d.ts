@@ -18,7 +18,7 @@ export declare const PostSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "image" | "video" | "text" | "link" | "poll";
+    type: "video" | "image" | "text" | "link" | "poll";
     title: string;
     content: string;
     isDeleted: boolean;
@@ -33,7 +33,7 @@ export declare const PostSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "image" | "video" | "text" | "link" | "poll";
+    type: "video" | "image" | "text" | "link" | "poll";
     title: string;
     content: string;
     isDeleted: boolean;
@@ -55,7 +55,7 @@ export declare const CreatePostDtoSchema: z.ZodObject<{
     pollOptions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     linkUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "image" | "video" | "text" | "link" | "poll";
+    type: "video" | "image" | "text" | "link" | "poll";
     title: string;
     content: string;
     communityId: string;
@@ -67,7 +67,7 @@ export declare const CreatePostDtoSchema: z.ZodObject<{
     title: string;
     content: string;
     communityId: string;
-    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
     attachments?: string[] | undefined;
     tags?: string[] | undefined;
     pollOptions?: string[] | undefined;
@@ -145,7 +145,7 @@ export declare const PostQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "updatedAt", "likeCount", "commentCount", "viewCount"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
@@ -157,7 +157,7 @@ export declare const PostQuerySchema: z.ZodObject<{
     includeDeleted?: boolean | undefined;
     isPinned?: boolean | undefined;
 }, {
-    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
@@ -231,53 +231,53 @@ export declare const PostCreateInputDtoSchema: z.ZodEffects<z.ZodObject<{
     pollOptions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     linkUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "image" | "video" | "text" | "link" | "poll" | "announcement";
+    type: "video" | "image" | "text" | "link" | "poll" | "announcement";
     title: string;
     content: string;
     isAnonymous: boolean;
     allowComments: boolean;
+    roomId?: string | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
 }, {
     title: string;
     content: string;
-    type?: "image" | "video" | "text" | "link" | "poll" | "announcement" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | "announcement" | undefined;
     isAnonymous?: boolean | undefined;
+    roomId?: string | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
     allowComments?: boolean | undefined;
 }>, {
-    type: "image" | "video" | "text" | "link" | "poll" | "announcement";
+    type: "video" | "image" | "text" | "link" | "poll" | "announcement";
     title: string;
     content: string;
     isAnonymous: boolean;
     allowComments: boolean;
+    roomId?: string | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
 }, {
     title: string;
     content: string;
-    type?: "image" | "video" | "text" | "link" | "poll" | "announcement" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | "announcement" | undefined;
     isAnonymous?: boolean | undefined;
+    roomId?: string | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     scheduledAt?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
@@ -394,16 +394,16 @@ export declare const PostListParamsDtoSchema: z.ZodObject<{
     sortBy: "newest" | "oldest" | "popular";
     offset: number;
     isAnonymous?: boolean | undefined;
-    tags?: string[] | undefined;
     roomId?: string | undefined;
+    tags?: string[] | undefined;
     authorId?: string | undefined;
 }, {
     isAnonymous?: boolean | undefined;
     limit?: number | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
+    roomId?: string | undefined;
     offset?: number | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     authorId?: string | undefined;
 }>;
 export declare const PostByUserParamsDtoSchema: z.ZodObject<{
@@ -420,16 +420,16 @@ export declare const PostByUserParamsDtoSchema: z.ZodObject<{
     sortBy: "newest" | "oldest" | "popular";
     offset: number;
     isAnonymous?: boolean | undefined;
-    tags?: string[] | undefined;
     roomId?: string | undefined;
+    tags?: string[] | undefined;
 }, {
     userId: string;
     isAnonymous?: boolean | undefined;
     limit?: number | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
+    roomId?: string | undefined;
     offset?: number | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
 }>;
 export declare const PostByRoomParamsDtoSchema: z.ZodObject<{
     roomId: z.ZodString;
@@ -442,8 +442,8 @@ export declare const PostByRoomParamsDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     sortBy: "newest" | "oldest" | "popular";
-    offset: number;
     roomId: string;
+    offset: number;
     isAnonymous?: boolean | undefined;
     tags?: string[] | undefined;
     authorId?: string | undefined;
@@ -644,7 +644,7 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "image" | "video" | "text" | "link" | "poll";
+    type: "video" | "image" | "text" | "link" | "poll";
     title: string;
     content: string;
     isDeleted: boolean;
@@ -685,7 +685,7 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "image" | "video" | "text" | "link" | "poll";
+    type: "video" | "image" | "text" | "link" | "poll";
     title: string;
     content: string;
     isDeleted: boolean;
@@ -820,7 +820,7 @@ export declare const PostListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "image" | "video" | "text" | "link" | "poll";
+        type: "video" | "image" | "text" | "link" | "poll";
         title: string;
         content: string;
         isDeleted: boolean;
@@ -861,7 +861,7 @@ export declare const PostListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "image" | "video" | "text" | "link" | "poll";
+        type: "video" | "image" | "text" | "link" | "poll";
         title: string;
         content: string;
         isDeleted: boolean;
@@ -907,7 +907,7 @@ export declare const PostListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "image" | "video" | "text" | "link" | "poll";
+        type: "video" | "image" | "text" | "link" | "poll";
         title: string;
         content: string;
         isDeleted: boolean;
@@ -952,7 +952,7 @@ export declare const PostListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "image" | "video" | "text" | "link" | "poll";
+        type: "video" | "image" | "text" | "link" | "poll";
         title: string;
         content: string;
         isDeleted: boolean;

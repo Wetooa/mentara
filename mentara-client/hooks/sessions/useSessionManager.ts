@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback, useRef } from "react";
-import { useAuth } from "./useAuth";
+import { useAuth } from "../auth/useAuth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { UserRole } from "@/lib/auth";

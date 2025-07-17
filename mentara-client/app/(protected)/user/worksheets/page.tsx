@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
 import { Task } from "@/components/worksheets/types";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 
 
 export default function WorksheetsPage() {
@@ -13,7 +13,8 @@ export default function WorksheetsPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { userId, getToken } = useAuth();
+  const { user, getToken } = useAuth();
+  const userId = user?.id;
 
   // Fetch worksheets from API
   useEffect(() => {
@@ -25,7 +26,8 @@ export default function WorksheetsPage() {
         setError(null);
 
         // Create authenticated API client
-        const worksheetsApi = createWorksheetsApi(getToken);
+        const token = await getToken();
+        const worksheetsApi = createWorksheetsApi(() => Promise.resolve(token));
 
         // Convert activeFilter to status filter for API
         let statusFilter: string | undefined;

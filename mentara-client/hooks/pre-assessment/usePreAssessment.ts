@@ -1,5 +1,5 @@
 import { usePreAssessmentChecklistStore, useSignUpStore } from "@/store/pre-assessment";
-import { useSignUp } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { toast } from "sonner";
 import { answersToAnswerMatrix } from "@/lib/questionnaire";
@@ -8,7 +8,7 @@ export function usePreAssessment() {
   const [isLoading, setIsLoading] = useState(false);
   const { questionnaires, answers } = usePreAssessmentChecklistStore();
   const { setDetails } = useSignUpStore();
-  const { isLoaded, signUp } = useSignUp();
+  const { isLoaded, signUpWithEmail, signUpWithOAuth } = useAuth();
 
   const storeAssessmentAnswers = () => {
     try {
@@ -21,7 +21,7 @@ export function usePreAssessment() {
   };
 
   const handleSignUp = async (email: string, password: string, nickname: string) => {
-    if (!isLoaded || !signUp) return;
+    if (!isLoaded) return;
     
     setIsLoading(true);
     try {
@@ -31,22 +31,23 @@ export function usePreAssessment() {
         email: email,
       });
 
-      await signUp.create({
-        emailAddress: email,
-        password: password,
-      });
+      // Use local auth with basic registration data
+      const registrationData = {
+        email,
+        password,
+        firstName: nickname, // Use nickname as firstName for compatibility
+        lastName: '',
+      };
 
-      const protocol = window.location.protocol;
-      const host = window.location.host;
-
-      toast.info("Sending verification email...");
-      signUp.createEmailLinkFlow().startEmailLinkFlow({
-        redirectUrl: `${protocol}//${host}/sign-up/verify`,
+      await signUpWithEmail(registrationData, {
+        preAssessmentAnswers: answersToAnswerMatrix(questionnaires, answers),
+        source: "preAssessment",
+        sendEmailVerification: true,
       });
 
       return true;
-    } catch (error) {
-      toast.error(`Failed to sign up: ${error.message}`);
+    } catch (error: any) {
+      toast.error(`Failed to sign up: ${error?.message || error}`);
       return false;
     } finally {
       setIsLoading(false);
@@ -54,22 +55,21 @@ export function usePreAssessment() {
   };
 
   const handleOAuthSignUp = async (provider: "oauth_google" | "oauth_microsoft") => {
-    if (!isLoaded || !signUp) return;
+    if (!isLoaded) return;
     
     setIsLoading(true);
     try {
       storeAssessmentAnswers();
       toast.info(`Signing in with ${provider === "oauth_google" ? "Google" : "Microsoft"}...`);
 
-      await signUp.authenticateWithRedirect({
-        strategy: provider,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/user/welcome",
+      await signUpWithOAuth(provider, {
+        hasPreAssessmentData: true,
+        redirectPath: "/user/welcome",
       });
 
       return true;
-    } catch (error) {
-      toast.error(`Failed to sign up with ${provider}: ${error.message}`);
+    } catch (error: any) {
+      toast.error(`Failed to sign up with ${provider}: ${error?.message || error}`);
       return false;
     } finally {
       setIsLoading(false);

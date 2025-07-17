@@ -34,28 +34,28 @@ export declare const ClientProfileSchema: z.ZodObject<{
             relationship: z.ZodString;
             phone: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         }, {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         }>>;
     }, "strip", z.ZodTypeAny, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     }, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     }>>;
@@ -80,8 +80,8 @@ export declare const ClientProfileSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     } | undefined;
@@ -106,8 +106,8 @@ export declare const ClientProfileSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     } | undefined;
@@ -250,18 +250,18 @@ export declare const AssessmentResultsSchema: z.ZodObject<{
     followUpRequired: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    followUpRequired: boolean;
     recommendations: string[];
     scores: Record<string, number>;
     overallScore: number;
-    riskLevel: "low" | "medium" | "high";
-    followUpRequired: boolean;
+    riskLevel: "high" | "medium" | "low";
 }, {
     id: string;
+    followUpRequired: boolean;
     recommendations: string[];
     scores: Record<string, number>;
     overallScore: number;
-    riskLevel: "low" | "medium" | "high";
-    followUpRequired: boolean;
+    riskLevel: "high" | "medium" | "low";
 }>;
 export declare const OnboardingDataSchema: z.ZodObject<{
     personalInfo: z.ZodObject<{
@@ -304,33 +304,34 @@ export declare const OnboardingDataSchema: z.ZodObject<{
             relationship: z.ZodString;
             phone: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         }, {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         }>>;
     }, "strip", z.ZodTypeAny, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     }, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     }>;
     goals: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
+    goals: string[];
     personalInfo: {
         firstName: string;
         lastName: string;
@@ -347,13 +348,13 @@ export declare const OnboardingDataSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     };
-    goals: string[];
 }, {
+    goals: string[];
     personalInfo: {
         firstName: string;
         lastName: string;
@@ -370,12 +371,11 @@ export declare const OnboardingDataSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            name: string;
             phone: string;
+            name: string;
             relationship: string;
         } | undefined;
     };
-    goals: string[];
 }>;
 export type ClientProfile = z.infer<typeof ClientProfileSchema>;
 export type ClientProgress = z.infer<typeof ClientProgressSchema>;

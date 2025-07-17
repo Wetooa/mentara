@@ -18,7 +18,18 @@ export { default as PTSD_PCL5 } from './ptsd';
 export { default as SOCIAL_PHOBIA_SPIN } from './social-phobia';
 
 // Questionnaire mapping and utilities
-export * from './questionnaire-mapping';
+export {
+  LIST_OF_QUESTIONNAIRES,
+  type ListOfQuestionnaires,
+  QUESTIONNAIRE_MAP as QUESTIONNAIRE_MAPPING,
+  QUESTIONNAIRE_ID_TO_NAME_MAP,
+  getQuestionnaireByName,
+  getAllQuestionnaireNames,
+  getQuestionnaireById,
+  isValidQuestionnaireName
+} from './questionnaire-mapping';
+
+export type QuestionnaireMapping = typeof import('./questionnaire-mapping').QUESTIONNAIRE_MAP;
 
 // Community mapping based on questionnaire results
 export const QUESTIONNAIRE_TO_COMMUNITY_MAP = {

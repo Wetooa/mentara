@@ -31,7 +31,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
 import ReviewSection from "@/components/reviews/ReviewSection";
 import ReviewForm from "@/components/reviews/ReviewForm";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/auth";
 
 interface TherapistProfileModalProps {
   therapist: TherapistCardData | null;
@@ -49,7 +49,8 @@ export default function TherapistProfileModal({
   onMessage,
 }: TherapistProfileModalProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { userId } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
   const [isReviewFormOpen, setIsReviewFormOpen] = React.useState(false);
 
   if (!therapist) return null;

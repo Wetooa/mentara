@@ -165,8 +165,8 @@ export declare const FileDownloadDtoSchema: z.ZodObject<{
     downloadType: "attachment" | "direct";
     expires?: number | undefined;
 }, {
-    downloadType?: "attachment" | "direct" | undefined;
     expires?: number | undefined;
+    downloadType?: "attachment" | "direct" | undefined;
 }>;
 export declare const FileIdParamSchema: z.ZodObject<{
     id: z.ZodString;

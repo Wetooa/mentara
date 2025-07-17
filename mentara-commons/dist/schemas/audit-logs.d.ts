@@ -105,10 +105,10 @@ export declare const SearchAuditLogsQueryDtoSchema: z.ZodObject<{
 }, {
     userId?: string | undefined;
     limit?: number | undefined;
-    offset?: number | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
     action?: "USER_LOGIN" | "USER_LOGOUT" | "USER_REGISTER" | "USER_UPDATE_PROFILE" | "USER_DELETE_ACCOUNT" | "USER_CHANGE_PASSWORD" | "USER_RESET_PASSWORD" | "THERAPIST_APPLICATION_SUBMIT" | "THERAPIST_APPLICATION_APPROVE" | "THERAPIST_APPLICATION_REJECT" | "THERAPIST_PROFILE_UPDATE" | "THERAPIST_AVAILABILITY_UPDATE" | "UPDATE_THERAPIST_STATUS" | "ACCEPT_CLIENT_REQUEST" | "DECLINE_CLIENT_REQUEST" | "REVIEW_CLIENT_REQUEST" | "SEND_THERAPIST_REQUEST" | "CANCEL_THERAPIST_REQUEST" | "APPROVE_THERAPIST_APPLICATION" | "REJECT_THERAPIST_APPLICATION" | "SUSPEND_USER" | "UNSUSPEND_USER" | "MODERATE_POST" | "MODERATE_COMMENT" | "COMPLETE_ONBOARDING_STEP" | "MEETING_CREATE" | "MEETING_UPDATE" | "MEETING_CANCEL" | "MEETING_COMPLETE" | "MEETING_NO_SHOW" | "WORKSHEET_CREATE" | "WORKSHEET_ASSIGN" | "WORKSHEET_SUBMIT" | "WORKSHEET_GRADE" | "REVIEW_CREATE" | "REVIEW_UPDATE" | "REVIEW_DELETE" | "REVIEW_MODERATE" | "MESSAGE_SEND" | "MESSAGE_EDIT" | "MESSAGE_DELETE" | "MESSAGE_REPORT" | "ADMIN_USER_SUSPEND" | "ADMIN_USER_ACTIVATE" | "ADMIN_CONTENT_MODERATE" | "ADMIN_SYSTEM_CONFIG" | "SYSTEM_BACKUP" | "SYSTEM_MAINTENANCE" | "SYSTEM_ERROR" | "DATA_EXPORT" | "DATA_PURGE" | undefined;
+    offset?: number | undefined;
     entity?: string | undefined;
     entityId?: string | undefined;
 }>;
@@ -535,9 +535,9 @@ export declare const SecurityEventSchema: z.ZodObject<{
     timestamp: string;
     resolved: boolean;
     userId?: string | undefined;
+    notes?: string | undefined;
     resolvedBy?: string | undefined;
     resolvedAt?: string | undefined;
-    notes?: string | undefined;
 }, {
     id: string;
     type: string;
@@ -549,9 +549,9 @@ export declare const SecurityEventSchema: z.ZodObject<{
     timestamp: string;
     resolved: boolean;
     userId?: string | undefined;
+    notes?: string | undefined;
     resolvedBy?: string | undefined;
     resolvedAt?: string | undefined;
-    notes?: string | undefined;
 }>;
 export declare const SecurityEventQuerySchema: z.ZodObject<{
     type: z.ZodOptional<z.ZodString>;
@@ -571,9 +571,9 @@ export declare const SecurityEventQuerySchema: z.ZodObject<{
     limit?: number | undefined;
     sortBy?: string | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    offset?: number | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
+    offset?: number | undefined;
     severity?: string | undefined;
     ipAddress?: string | undefined;
     resolved?: boolean | undefined;
@@ -583,9 +583,9 @@ export declare const SecurityEventQuerySchema: z.ZodObject<{
     limit?: number | undefined;
     sortBy?: string | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    offset?: number | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
+    offset?: number | undefined;
     severity?: string | undefined;
     ipAddress?: string | undefined;
     resolved?: boolean | undefined;
@@ -702,10 +702,10 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     limit?: number | undefined;
     sortBy?: string | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    offset?: number | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
     action?: string | undefined;
+    offset?: number | undefined;
     severity?: string | undefined;
     ipAddress?: string | undefined;
     resource?: string | undefined;
@@ -717,10 +717,10 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     limit?: number | undefined;
     sortBy?: string | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    offset?: number | undefined;
     startDate?: string | undefined;
     endDate?: string | undefined;
     action?: string | undefined;
+    offset?: number | undefined;
     severity?: string | undefined;
     ipAddress?: string | undefined;
     resource?: string | undefined;

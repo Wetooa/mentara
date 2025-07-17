@@ -11,11 +11,11 @@ export declare const UpdateMeetingStatusDtoSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;
     notifyParticipants: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     notifyParticipants: boolean;
     reason?: string | undefined;
 }, {
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     reason?: string | undefined;
     notifyParticipants?: boolean | undefined;
 }>;
@@ -71,15 +71,15 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
         goals: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         outcomes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     }, {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     }>>;
     followUpActions: z.ZodOptional<z.ZodArray<z.ZodObject<{
         action: z.ZodString;
@@ -87,12 +87,12 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
         dueDate: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         action: string;
-        priority: "low" | "medium" | "high";
+        priority: "high" | "medium" | "low";
         dueDate?: string | undefined;
     }, {
         action: string;
+        priority?: "high" | "medium" | "low" | undefined;
         dueDate?: string | undefined;
-        priority?: "low" | "medium" | "high" | undefined;
     }>, "many">>;
 }, "strip", z.ZodTypeAny, {
     sessionData: {
@@ -105,14 +105,14 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
     };
     sessionNotes?: string | undefined;
     clientProgress?: {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     } | undefined;
     followUpActions?: {
         action: string;
-        priority: "low" | "medium" | "high";
+        priority: "high" | "medium" | "low";
         dueDate?: string | undefined;
     }[] | undefined;
 }, {
@@ -126,15 +126,15 @@ export declare const SaveMeetingSessionDtoSchema: z.ZodObject<{
     };
     sessionNotes?: string | undefined;
     clientProgress?: {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     } | undefined;
     followUpActions?: {
         action: string;
+        priority?: "high" | "medium" | "low" | undefined;
         dueDate?: string | undefined;
-        priority?: "low" | "medium" | "high" | undefined;
     }[] | undefined;
 }>;
 export declare const GetMeetingAnalyticsQueryDtoSchema: z.ZodObject<{
@@ -166,16 +166,16 @@ export declare const EmergencyTerminateMeetingDtoSchema: z.ZodObject<{
     followUpRequired: z.ZodDefault<z.ZodBoolean>;
     escalateToSupervisor: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    reason: "emergency" | "technical_issues" | "safety_concern" | "participant_request";
+    reason: "technical_issues" | "emergency" | "safety_concern" | "participant_request";
     description: string;
-    followUpRequired: boolean;
     notifySupport: boolean;
+    followUpRequired: boolean;
     escalateToSupervisor: boolean;
 }, {
-    reason: "emergency" | "technical_issues" | "safety_concern" | "participant_request";
+    reason: "technical_issues" | "emergency" | "safety_concern" | "participant_request";
     description: string;
-    followUpRequired?: boolean | undefined;
     notifySupport?: boolean | undefined;
+    followUpRequired?: boolean | undefined;
     escalateToSupervisor?: boolean | undefined;
 }>;
 export type MeetingParamsDto = z.infer<typeof MeetingParamsDtoSchema>;
@@ -235,8 +235,8 @@ export declare const SessionMeetingSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "audio" | "video" | "chat";
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    type: "video" | "audio" | "chat";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     title: string;
     therapistId: string;
     clientId: string;
@@ -262,8 +262,8 @@ export declare const SessionMeetingSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "audio" | "video" | "chat";
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    type: "video" | "audio" | "chat";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     title: string;
     therapistId: string;
     clientId: string;
@@ -301,15 +301,15 @@ export declare const MeetingSessionDataSchema: z.ZodObject<{
         goals: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         outcomes: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     }, {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     }>>;
     followUpActions: z.ZodOptional<z.ZodArray<z.ZodObject<{
         action: z.ZodString;
@@ -317,11 +317,11 @@ export declare const MeetingSessionDataSchema: z.ZodObject<{
         dueDate: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         action: string;
-        priority: "low" | "medium" | "high";
+        priority: "high" | "medium" | "low";
         dueDate?: string | undefined;
     }, {
         action: string;
-        priority: "low" | "medium" | "high";
+        priority: "high" | "medium" | "low";
         dueDate?: string | undefined;
     }>, "many">>;
 }, "strip", z.ZodTypeAny, {
@@ -331,17 +331,17 @@ export declare const MeetingSessionDataSchema: z.ZodObject<{
     endedAt: string;
     participantCount: number;
     issues?: string[] | undefined;
-    sessionNotes?: string | undefined;
     quality?: "excellent" | "good" | "fair" | "poor" | undefined;
+    sessionNotes?: string | undefined;
     clientProgress?: {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     } | undefined;
     followUpActions?: {
         action: string;
-        priority: "low" | "medium" | "high";
+        priority: "high" | "medium" | "low";
         dueDate?: string | undefined;
     }[] | undefined;
 }, {
@@ -351,17 +351,17 @@ export declare const MeetingSessionDataSchema: z.ZodObject<{
     endedAt: string;
     participantCount: number;
     issues?: string[] | undefined;
-    sessionNotes?: string | undefined;
     quality?: "excellent" | "good" | "fair" | "poor" | undefined;
+    sessionNotes?: string | undefined;
     clientProgress?: {
-        engagement?: "low" | "medium" | "high" | undefined;
-        outcomes?: string[] | undefined;
-        mood?: "critical" | "excellent" | "good" | "poor" | "neutral" | undefined;
+        mood?: "excellent" | "good" | "poor" | "neutral" | "critical" | undefined;
+        engagement?: "high" | "medium" | "low" | undefined;
         goals?: string[] | undefined;
+        outcomes?: string[] | undefined;
     } | undefined;
     followUpActions?: {
         action: string;
-        priority: "low" | "medium" | "high";
+        priority: "high" | "medium" | "low";
         dueDate?: string | undefined;
     }[] | undefined;
 }>;
@@ -374,35 +374,35 @@ export declare const MeetingAnalyticsSchema: z.ZodObject<{
         audio: z.ZodNumber;
         chat: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        audio: number;
         video: number;
+        audio: number;
         chat: number;
     }, {
-        audio: number;
         video: number;
+        audio: number;
         chat: number;
     }>;
     completionRate: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    completionRate: number;
     averageDuration: number;
-    totalDuration: number;
     totalMeetings: number;
+    totalDuration: number;
     meetingsByType: {
-        audio: number;
         video: number;
+        audio: number;
         chat: number;
     };
+    completionRate: number;
 }, {
-    completionRate: number;
     averageDuration: number;
-    totalDuration: number;
     totalMeetings: number;
+    totalDuration: number;
     meetingsByType: {
-        audio: number;
         video: number;
+        audio: number;
         chat: number;
     };
+    completionRate: number;
 }>;
 export declare const MeetingRoomResponseSchema: z.ZodObject<{
     roomUrl: z.ZodString;
@@ -411,25 +411,25 @@ export declare const MeetingRoomResponseSchema: z.ZodObject<{
     expires: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     meetingId: string;
-    expires: string;
     roomUrl: string;
     roomToken: string;
+    expires: string;
 }, {
     meetingId: string;
-    expires: string;
     roomUrl: string;
     roomToken: string;
+    expires: string;
 }>;
 export declare const MeetingStatusUpdateSchema: z.ZodObject<{
     status: z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>;
     reason: z.ZodOptional<z.ZodString>;
     notifyParticipants: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     reason?: string | undefined;
     notifyParticipants?: boolean | undefined;
 }, {
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     reason?: string | undefined;
     notifyParticipants?: boolean | undefined;
 }>;
@@ -440,16 +440,16 @@ export declare const EmergencyTerminationRequestSchema: z.ZodObject<{
     followUpRequired: z.ZodOptional<z.ZodBoolean>;
     escalateToSupervisor: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    reason: "emergency" | "technical_issues" | "safety_concern" | "participant_request";
+    reason: "technical_issues" | "emergency" | "safety_concern" | "participant_request";
     description: string;
-    followUpRequired?: boolean | undefined;
     notifySupport?: boolean | undefined;
+    followUpRequired?: boolean | undefined;
     escalateToSupervisor?: boolean | undefined;
 }, {
-    reason: "emergency" | "technical_issues" | "safety_concern" | "participant_request";
+    reason: "technical_issues" | "emergency" | "safety_concern" | "participant_request";
     description: string;
-    followUpRequired?: boolean | undefined;
     notifySupport?: boolean | undefined;
+    followUpRequired?: boolean | undefined;
     escalateToSupervisor?: boolean | undefined;
 }>;
 export declare const CreateVideoRoomDtoSchema: z.ZodObject<{
@@ -470,7 +470,7 @@ export declare const CreateVideoRoomDtoSchema: z.ZodObject<{
     }>>;
 }, "strip", z.ZodTypeAny, {
     meetingId: string;
-    roomType: "audio" | "video" | "screen_share";
+    roomType: "video" | "audio" | "screen_share";
     maxParticipants: number;
     enableRecording: boolean;
     enableChat: boolean;
@@ -480,7 +480,7 @@ export declare const CreateVideoRoomDtoSchema: z.ZodObject<{
     } | undefined;
 }, {
     meetingId: string;
-    roomType?: "audio" | "video" | "screen_share" | undefined;
+    roomType?: "video" | "audio" | "screen_share" | undefined;
     maxParticipants?: number | undefined;
     enableRecording?: boolean | undefined;
     enableChat?: boolean | undefined;
@@ -498,12 +498,12 @@ export declare const JoinVideoRoomDtoSchema: z.ZodObject<{
         audio: z.ZodDefault<z.ZodBoolean>;
         screenShare: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        audio: boolean;
         video: boolean;
+        audio: boolean;
         screenShare: boolean;
     }, {
-        audio?: boolean | undefined;
         video?: boolean | undefined;
+        audio?: boolean | undefined;
         screenShare?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -511,8 +511,8 @@ export declare const JoinVideoRoomDtoSchema: z.ZodObject<{
     meetingId: string;
     participantName: string;
     devicePreferences?: {
-        audio: boolean;
         video: boolean;
+        audio: boolean;
         screenShare: boolean;
     } | undefined;
 }, {
@@ -520,8 +520,8 @@ export declare const JoinVideoRoomDtoSchema: z.ZodObject<{
     meetingId: string;
     participantName: string;
     devicePreferences?: {
-        audio?: boolean | undefined;
         video?: boolean | undefined;
+        audio?: boolean | undefined;
         screenShare?: boolean | undefined;
     } | undefined;
 }>;
@@ -550,11 +550,10 @@ export declare const VideoRoomResponseSchema: z.ZodObject<{
     participantCount: z.ZodNumber;
     status: z.ZodEnum<["waiting", "active", "ended"]>;
 }, "strip", z.ZodTypeAny, {
-    status: "active" | "waiting" | "ended";
-    expiresAt: string;
-    roomId: string;
+    status: "waiting" | "active" | "ended";
     participantCount: number;
     roomUrl: string;
+    roomId: string;
     accessToken: string;
     participantToken: string;
     roomConfig: {
@@ -563,12 +562,12 @@ export declare const VideoRoomResponseSchema: z.ZodObject<{
         enableChat: boolean;
         recordingActive: boolean;
     };
+    expiresAt: string;
 }, {
-    status: "active" | "waiting" | "ended";
-    expiresAt: string;
-    roomId: string;
+    status: "waiting" | "active" | "ended";
     participantCount: number;
     roomUrl: string;
+    roomId: string;
     accessToken: string;
     participantToken: string;
     roomConfig: {
@@ -577,6 +576,7 @@ export declare const VideoRoomResponseSchema: z.ZodObject<{
         enableChat: boolean;
         recordingActive: boolean;
     };
+    expiresAt: string;
 }>;
 export declare const EndVideoCallDtoSchema: z.ZodObject<{
     meetingId: z.ZodString;
@@ -589,33 +589,33 @@ export declare const EndVideoCallDtoSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         duration: number;
         participantCount: number;
-        technicalIssues?: string[] | undefined;
         connectionQuality?: "excellent" | "good" | "fair" | "poor" | undefined;
+        technicalIssues?: string[] | undefined;
     }, {
         duration: number;
         participantCount: number;
-        technicalIssues?: string[] | undefined;
         connectionQuality?: "excellent" | "good" | "fair" | "poor" | undefined;
+        technicalIssues?: string[] | undefined;
     }>>;
     nextSteps: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     meetingId: string;
-    endReason: "emergency" | "technical_issues" | "session_complete" | "participant_left";
+    endReason: "technical_issues" | "emergency" | "session_complete" | "participant_left";
     sessionSummary?: {
         duration: number;
         participantCount: number;
-        technicalIssues?: string[] | undefined;
         connectionQuality?: "excellent" | "good" | "fair" | "poor" | undefined;
+        technicalIssues?: string[] | undefined;
     } | undefined;
     nextSteps?: string | undefined;
 }, {
     meetingId: string;
-    endReason?: "emergency" | "technical_issues" | "session_complete" | "participant_left" | undefined;
+    endReason?: "technical_issues" | "emergency" | "session_complete" | "participant_left" | undefined;
     sessionSummary?: {
         duration: number;
         participantCount: number;
-        technicalIssues?: string[] | undefined;
         connectionQuality?: "excellent" | "good" | "fair" | "poor" | undefined;
+        technicalIssues?: string[] | undefined;
     } | undefined;
     nextSteps?: string | undefined;
 }>;
@@ -646,8 +646,9 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
     endedAt: z.ZodOptional<z.ZodString>;
     duration: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    status: "error" | "active" | "waiting" | "ended";
+    status: "waiting" | "active" | "ended" | "error";
     meetingId: string;
+    roomId: string;
     participants: {
         id: string;
         role: "client" | "therapist";
@@ -655,13 +656,13 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
         joinedAt: string;
         connectionStatus: "connected" | "connecting" | "disconnected";
     }[];
-    roomId: string;
     duration?: number | undefined;
     startedAt?: string | undefined;
     endedAt?: string | undefined;
 }, {
-    status: "error" | "active" | "waiting" | "ended";
+    status: "waiting" | "active" | "ended" | "error";
     meetingId: string;
+    roomId: string;
     participants: {
         id: string;
         role: "client" | "therapist";
@@ -669,7 +670,6 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
         joinedAt: string;
         connectionStatus: "connected" | "connecting" | "disconnected";
     }[];
-    roomId: string;
     duration?: number | undefined;
     startedAt?: string | undefined;
     endedAt?: string | undefined;

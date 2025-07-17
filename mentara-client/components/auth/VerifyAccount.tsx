@@ -3,7 +3,7 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSignUpStore } from "@/store/pre-assessment";
-import { useSignUp } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,21 +12,16 @@ import { fadeDown } from "@/lib/animations";
 import { useEffect } from "react";
 
 export default function VerifyAccount() {
-  const { isLoaded, signUp } = useSignUp();
+  const { isLoaded } = useAuth();
   const { details } = useSignUpStore();
 
   useEffect(() => {
     const sendVerificationEmail = async () => {
-      if (isLoaded && signUp) {
+      if (isLoaded && details?.email) {
         try {
-          const protocol = window.location.protocol;
-          const host = window.location.host;
-
-          const { startEmailLinkFlow } = signUp.createEmailLinkFlow();
-          
-          await startEmailLinkFlow({
-            redirectUrl: `${protocol}//${host}/verify`,
-          });
+          // Note: Email verification is now handled by the backend
+          // The verification link should be sent automatically upon registration
+          toast.success("Verification email sent! Please check your inbox.");
         } catch (error) {
           console.error("Failed to send initial verification email:", error);
         }

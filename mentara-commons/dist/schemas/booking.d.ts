@@ -11,14 +11,14 @@ export declare const MeetingDurationSchema: z.ZodObject<{
     id: string;
     sortOrder: number;
     name: string;
-    isActive: boolean;
     duration: number;
+    isActive: boolean;
 }, {
     id: string;
     sortOrder: number;
     name: string;
-    isActive: boolean;
     duration: number;
+    isActive: boolean;
 }>;
 export declare const AvailableSlotSchema: z.ZodObject<{
     startTime: z.ZodString;
@@ -32,14 +32,14 @@ export declare const AvailableSlotSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }, {
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     startTime: string;
@@ -47,8 +47,8 @@ export declare const AvailableSlotSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }[];
 }, {
     startTime: string;
@@ -56,8 +56,8 @@ export declare const AvailableSlotSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }[];
 }>;
 export declare const MeetingClientSchema: z.ZodObject<{
@@ -180,14 +180,14 @@ export declare const MeetingSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }, {
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }>>;
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
@@ -195,11 +195,11 @@ export declare const MeetingSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     therapistId: string;
     clientId: string;
-    startTime: string;
     duration: number;
+    startTime: string;
     client?: {
         user: {
             email: string | null;
@@ -217,25 +217,25 @@ export declare const MeetingSchema: z.ZodObject<{
     } | undefined;
     title?: string | undefined;
     description?: string | undefined;
-    notes?: string | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    notes?: string | undefined;
     durationConfig?: {
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     } | undefined;
 }, {
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     therapistId: string;
     clientId: string;
-    startTime: string;
     duration: number;
+    startTime: string;
     client?: {
         user: {
             email: string | null;
@@ -253,15 +253,15 @@ export declare const MeetingSchema: z.ZodObject<{
     } | undefined;
     title?: string | undefined;
     description?: string | undefined;
-    notes?: string | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    notes?: string | undefined;
     durationConfig?: {
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     } | undefined;
 }>;
 export declare const CreateMeetingRequestSchema: z.ZodObject<{
@@ -273,18 +273,18 @@ export declare const CreateMeetingRequestSchema: z.ZodObject<{
     meetingType: z.ZodDefault<z.ZodOptional<z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>>>;
 }, "strip", z.ZodTypeAny, {
     therapistId: string;
-    startTime: string;
     duration: number;
-    meetingType: "audio" | "video" | "phone" | "chat" | "in-person";
+    startTime: string;
+    meetingType: "video" | "audio" | "phone" | "chat" | "in-person";
     title?: string | undefined;
     description?: string | undefined;
 }, {
     therapistId: string;
-    startTime: string;
     duration: number;
+    startTime: string;
     title?: string | undefined;
     description?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
 }>;
 export declare const UpdateMeetingRequestSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>>;
@@ -296,23 +296,23 @@ export declare const UpdateMeetingRequestSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     meetingType: z.ZodOptional<z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed" | undefined;
+    status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     title?: string | undefined;
     description?: string | undefined;
-    startTime?: string | undefined;
     duration?: number | undefined;
-    notes?: string | undefined;
+    startTime?: string | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    notes?: string | undefined;
 }, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed" | undefined;
+    status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     title?: string | undefined;
     description?: string | undefined;
-    startTime?: string | undefined;
     duration?: number | undefined;
-    notes?: string | undefined;
+    startTime?: string | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    notes?: string | undefined;
 }>;
 export declare const BookingFormDataSchema: z.ZodObject<{
     date: z.ZodString;
@@ -328,14 +328,14 @@ export declare const BookingFormDataSchema: z.ZodObject<{
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }, {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         startTime: string;
@@ -343,8 +343,8 @@ export declare const BookingFormDataSchema: z.ZodObject<{
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }[];
     }, {
         startTime: string;
@@ -352,8 +352,8 @@ export declare const BookingFormDataSchema: z.ZodObject<{
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }[];
     }>;
     duration: z.ZodObject<{
@@ -366,14 +366,14 @@ export declare const BookingFormDataSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }, {
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     }>;
     meetingType: z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>;
     title: z.ZodString;
@@ -386,18 +386,18 @@ export declare const BookingFormDataSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     };
-    meetingType: "audio" | "video" | "phone" | "chat" | "in-person";
+    meetingType: "video" | "audio" | "phone" | "chat" | "in-person";
     timeSlot: {
         startTime: string;
         availableDurations: {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }[];
     };
 }, {
@@ -408,18 +408,18 @@ export declare const BookingFormDataSchema: z.ZodObject<{
         id: string;
         sortOrder: number;
         name: string;
-        isActive: boolean;
         duration: number;
+        isActive: boolean;
     };
-    meetingType: "audio" | "video" | "phone" | "chat" | "in-person";
+    meetingType: "video" | "audio" | "phone" | "chat" | "in-person";
     timeSlot: {
         startTime: string;
         availableDurations: {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }[];
     };
 }>;
@@ -434,7 +434,7 @@ export declare const MeetingListParamsSchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["startTime", "status", "createdAt"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed" | undefined;
+    status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
     page?: number | undefined;
@@ -444,7 +444,7 @@ export declare const MeetingListParamsSchema: z.ZodObject<{
     startDate?: string | undefined;
     endDate?: string | undefined;
 }, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed" | undefined;
+    status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
     page?: number | undefined;
@@ -526,14 +526,14 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }, {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         }>>;
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
@@ -541,11 +541,11 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         therapistId: string;
         clientId: string;
-        startTime: string;
         duration: number;
+        startTime: string;
         client?: {
             user: {
                 email: string | null;
@@ -563,25 +563,25 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         } | undefined;
         title?: string | undefined;
         description?: string | undefined;
-        notes?: string | undefined;
+        meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
         meetingUrl?: string | undefined;
-        meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+        notes?: string | undefined;
         durationConfig?: {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         } | undefined;
     }, {
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         therapistId: string;
         clientId: string;
-        startTime: string;
         duration: number;
+        startTime: string;
         client?: {
             user: {
                 email: string | null;
@@ -599,15 +599,15 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         } | undefined;
         title?: string | undefined;
         description?: string | undefined;
-        notes?: string | undefined;
+        meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
         meetingUrl?: string | undefined;
-        meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+        notes?: string | undefined;
         durationConfig?: {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         } | undefined;
     }>, "many">;
     totalCount: z.ZodNumber;
@@ -623,11 +623,11 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         therapistId: string;
         clientId: string;
-        startTime: string;
         duration: number;
+        startTime: string;
         client?: {
             user: {
                 email: string | null;
@@ -645,15 +645,15 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         } | undefined;
         title?: string | undefined;
         description?: string | undefined;
-        notes?: string | undefined;
+        meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
         meetingUrl?: string | undefined;
-        meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+        notes?: string | undefined;
         durationConfig?: {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         } | undefined;
     }[];
 }, {
@@ -665,11 +665,11 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         therapistId: string;
         clientId: string;
-        startTime: string;
         duration: number;
+        startTime: string;
         client?: {
             user: {
                 email: string | null;
@@ -687,15 +687,15 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         } | undefined;
         title?: string | undefined;
         description?: string | undefined;
-        notes?: string | undefined;
+        meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
         meetingUrl?: string | undefined;
-        meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+        notes?: string | undefined;
         durationConfig?: {
             id: string;
             sortOrder: number;
             name: string;
-            isActive: boolean;
             duration: number;
+            isActive: boolean;
         } | undefined;
     }[];
 }>;
@@ -732,15 +732,15 @@ export declare const ConflictResultSchema: z.ZodObject<{
         status: z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
-        startTime: string;
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         duration: number;
+        startTime: string;
         title?: string | undefined;
     }, {
         id: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
-        startTime: string;
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         duration: number;
+        startTime: string;
         title?: string | undefined;
     }>, "many">;
     message: z.ZodOptional<z.ZodString>;
@@ -748,9 +748,9 @@ export declare const ConflictResultSchema: z.ZodObject<{
     hasConflict: boolean;
     conflictingMeetings: {
         id: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
-        startTime: string;
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         duration: number;
+        startTime: string;
         title?: string | undefined;
     }[];
     message?: string | undefined;
@@ -758,9 +758,9 @@ export declare const ConflictResultSchema: z.ZodObject<{
     hasConflict: boolean;
     conflictingMeetings: {
         id: string;
-        status: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed";
-        startTime: string;
+        status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         duration: number;
+        startTime: string;
         title?: string | undefined;
     }[];
     message?: string | undefined;
@@ -864,11 +864,11 @@ export declare const BookingStatsSchema: z.ZodObject<{
         count: number;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    averageDuration: number;
     totalBookings: number;
     completedBookings: number;
     cancelledBookings: number;
     noShowBookings: number;
+    averageDuration: number;
     mostPopularTimeSlots: {
         count: number;
         hour: number;
@@ -878,11 +878,11 @@ export declare const BookingStatsSchema: z.ZodObject<{
         count: number;
     }[];
 }, {
-    averageDuration: number;
     totalBookings: number;
     completedBookings: number;
     cancelledBookings: number;
     noShowBookings: number;
+    averageDuration: number;
     mostPopularTimeSlots: {
         count: number;
         hour: number;
@@ -920,18 +920,18 @@ export declare const MeetingCreateDtoSchema: z.ZodObject<{
     meetingType: z.ZodDefault<z.ZodOptional<z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>>>;
 }, "strip", z.ZodTypeAny, {
     therapistId: string;
-    startTime: string;
     duration: number;
-    meetingType: "audio" | "video" | "phone" | "chat" | "in-person";
+    startTime: string;
+    meetingType: "video" | "audio" | "phone" | "chat" | "in-person";
     title?: string | undefined;
     description?: string | undefined;
 }, {
     therapistId: string;
-    startTime: string;
     duration: number;
+    startTime: string;
     title?: string | undefined;
     description?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
 }>;
 export declare const MeetingUpdateDtoSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>>;
@@ -943,23 +943,23 @@ export declare const MeetingUpdateDtoSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     meetingType: z.ZodOptional<z.ZodEnum<["video", "audio", "phone", "chat", "in-person"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed" | undefined;
+    status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     title?: string | undefined;
     description?: string | undefined;
-    startTime?: string | undefined;
     duration?: number | undefined;
-    notes?: string | undefined;
+    startTime?: string | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    notes?: string | undefined;
 }, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | "confirmed" | undefined;
+    status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     title?: string | undefined;
     description?: string | undefined;
-    startTime?: string | undefined;
     duration?: number | undefined;
-    notes?: string | undefined;
+    startTime?: string | undefined;
+    meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    meetingType?: "audio" | "video" | "phone" | "chat" | "in-person" | undefined;
+    notes?: string | undefined;
 }>;
 export declare const BookingMeetingParamsDtoSchema: z.ZodObject<{
     id: z.ZodString;
@@ -1003,15 +1003,15 @@ export declare const TherapistAvailabilityUpdateDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     timezone?: string | undefined;
     startTime?: string | undefined;
-    endTime?: string | undefined;
     notes?: string | undefined;
+    endTime?: string | undefined;
     isAvailable?: boolean | undefined;
     dayOfWeek?: number | undefined;
 }, {
     timezone?: string | undefined;
     startTime?: string | undefined;
-    endTime?: string | undefined;
     notes?: string | undefined;
+    endTime?: string | undefined;
     isAvailable?: boolean | undefined;
     dayOfWeek?: number | undefined;
 }>;

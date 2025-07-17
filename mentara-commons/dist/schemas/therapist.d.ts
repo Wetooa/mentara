@@ -830,7 +830,7 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         id: string;
         type: string;
-        status: "completed" | "cancelled" | "scheduled" | "confirmed";
+        status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
         time: string;
         patientId: string;
@@ -838,7 +838,7 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
     }, {
         id: string;
         type: string;
-        status: "completed" | "cancelled" | "scheduled" | "confirmed";
+        status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
         time: string;
         patientId: string;
@@ -868,7 +868,7 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
     upcomingAppointments: {
         id: string;
         type: string;
-        status: "completed" | "cancelled" | "scheduled" | "confirmed";
+        status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
         time: string;
         patientId: string;
@@ -898,7 +898,7 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
     upcomingAppointments: {
         id: string;
         type: string;
-        status: "completed" | "cancelled" | "scheduled" | "confirmed";
+        status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
         time: string;
         patientId: string;
@@ -927,14 +927,14 @@ export declare const PatientDataSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
-        status: "completed" | "cancelled" | "scheduled" | "no-show";
+        status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
         duration: number;
         notes: string;
     }, {
         id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
-        status: "completed" | "cancelled" | "scheduled" | "no-show";
+        status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
         duration: number;
         notes: string;
@@ -942,18 +942,18 @@ export declare const PatientDataSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     email: string;
+    phone: string;
     name: string;
     avatar: string;
     sessions: {
         id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
-        status: "completed" | "cancelled" | "scheduled" | "no-show";
+        status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
         duration: number;
         notes: string;
     }[];
     totalSessions: number;
-    phone: string;
     fullName: string;
     age: number;
     diagnosis: string;
@@ -962,18 +962,18 @@ export declare const PatientDataSchema: z.ZodObject<{
 }, {
     id: string;
     email: string;
+    phone: string;
     name: string;
     avatar: string;
     sessions: {
         id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
-        status: "completed" | "cancelled" | "scheduled" | "no-show";
+        status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
         duration: number;
         notes: string;
     }[];
     totalSessions: number;
-    phone: string;
     fullName: string;
     age: number;
     diagnosis: string;
@@ -2602,23 +2602,23 @@ export declare const TherapistWorksheetAssignmentSchema: z.ZodObject<{
     feedback: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    status: "completed" | "in_progress" | "assigned" | "overdue";
+    status: "in_progress" | "completed" | "assigned" | "overdue";
     therapistId: string;
     worksheetId: string;
     assignedAt: string;
     patientId: string;
-    feedback?: string | undefined;
     dueDate?: string | undefined;
+    feedback?: string | undefined;
     instructions?: string | undefined;
 }, {
     id: string;
-    status: "completed" | "in_progress" | "assigned" | "overdue";
+    status: "in_progress" | "completed" | "assigned" | "overdue";
     therapistId: string;
     worksheetId: string;
     assignedAt: string;
     patientId: string;
-    feedback?: string | undefined;
     dueDate?: string | undefined;
+    feedback?: string | undefined;
     instructions?: string | undefined;
 }>;
 export declare const TherapistCredentialsSchema: z.ZodObject<{
@@ -4052,10 +4052,10 @@ export declare const TherapistWorksheetQueryDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     offset: number;
-    status?: "completed" | "in_progress" | "assigned" | "overdue" | undefined;
+    status?: "in_progress" | "completed" | "assigned" | "overdue" | undefined;
     clientId?: string | undefined;
 }, {
-    status?: "completed" | "in_progress" | "assigned" | "overdue" | undefined;
+    status?: "in_progress" | "completed" | "assigned" | "overdue" | undefined;
     clientId?: string | undefined;
     limit?: number | undefined;
     offset?: number | undefined;
@@ -4067,9 +4067,9 @@ export declare const TherapistMeetingQueryDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     offset: number;
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | undefined;
+    status?: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
 }, {
-    status?: "completed" | "cancelled" | "scheduled" | "in_progress" | "no_show" | undefined;
+    status?: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     limit?: number | undefined;
     offset?: number | undefined;
 }>;
@@ -4086,15 +4086,15 @@ export declare const TherapistClientRequestQueryDtoSchema: z.ZodObject<{
     offset: number;
     status?: "pending" | "accepted" | "declined" | "expired" | undefined;
     sortBy?: "priority" | "newest" | "oldest" | "match_score" | undefined;
-    priority?: "low" | "medium" | "high" | undefined;
+    priority?: "high" | "medium" | "low" | undefined;
     search?: string | undefined;
     dateRange?: "month" | "week" | "today" | "all" | undefined;
 }, {
     status?: "pending" | "accepted" | "declined" | "expired" | undefined;
     limit?: number | undefined;
     sortBy?: "priority" | "newest" | "oldest" | "match_score" | undefined;
+    priority?: "high" | "medium" | "low" | undefined;
     offset?: number | undefined;
-    priority?: "low" | "medium" | "high" | undefined;
     search?: string | undefined;
     dateRange?: "month" | "week" | "today" | "all" | undefined;
 }>;

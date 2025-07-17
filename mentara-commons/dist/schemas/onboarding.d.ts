@@ -34,19 +34,19 @@ export declare const OnboardingProgressSchema: z.ZodObject<{
     completedAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     userId: string;
+    startedAt: string;
     isCompleted: boolean;
     currentStep: number;
     totalSteps: number;
     completedSteps: string[];
-    startedAt: string;
     completedAt?: string | undefined;
 }, {
     userId: string;
+    startedAt: string;
     isCompleted: boolean;
     currentStep: number;
     totalSteps: number;
     completedSteps: string[];
-    startedAt: string;
     completedAt?: string | undefined;
 }>;
 export declare const CompleteStepDtoSchema: z.ZodObject<{
@@ -114,12 +114,12 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
         specialties: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         availability: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
         therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
     }, {
-        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
         therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
@@ -145,7 +145,7 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
         birthDate?: string | undefined;
     };
     preferences: {
-        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
         therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
@@ -163,7 +163,7 @@ export declare const ClientOnboardingDtoSchema: z.ZodObject<{
         birthDate?: string | undefined;
     };
     preferences: {
-        sessionType?: "audio" | "video" | "text" | "no_preference" | undefined;
+        sessionType?: "video" | "audio" | "text" | "no_preference" | undefined;
         therapistGender?: "male" | "female" | "no_preference" | undefined;
         specialties?: string[] | undefined;
         availability?: string[] | undefined;
@@ -202,29 +202,29 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
             startTime: z.ZodString;
             endTime: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }, {
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }>, "many">;
     }, "strip", z.ZodTypeAny, {
         timezone: string;
         hourlyRate: number;
         weeklyAvailability: {
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
     }, {
         timezone: string;
         hourlyRate: number;
         weeklyAvailability: {
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
     }>;
     verificationInfo: z.ZodOptional<z.ZodObject<{
@@ -252,9 +252,9 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
         timezone: string;
         hourlyRate: number;
         weeklyAvailability: {
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
     };
     verificationInfo?: {
@@ -274,9 +274,9 @@ export declare const TherapistOnboardingDtoSchema: z.ZodObject<{
         timezone: string;
         hourlyRate: number;
         weeklyAvailability: {
-            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
             startTime: string;
             endTime: string;
+            day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
         }[];
     };
     verificationInfo?: {

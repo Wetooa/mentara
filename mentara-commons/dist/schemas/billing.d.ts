@@ -261,16 +261,16 @@ export declare const CreateInvoiceDtoSchema: z.ZodObject<{
     dueDate: z.ZodString;
     billingAddress: z.ZodOptional<z.ZodAny>;
 }, "strip", z.ZodTypeAny, {
+    dueDate: string;
     subscriptionId: string;
     subtotal: number;
-    dueDate: string;
     taxAmount?: number | undefined;
     discountAmount?: number | undefined;
     billingAddress?: any;
 }, {
+    dueDate: string;
     subscriptionId: string;
     subtotal: number;
-    dueDate: string;
     taxAmount?: number | undefined;
     discountAmount?: number | undefined;
     billingAddress?: any;
@@ -996,8 +996,8 @@ export declare const CreatePaymentMethodRequestSchema: z.ZodObject<{
             postal_code?: string | undefined;
             country?: string | undefined;
         } | undefined;
-        name?: string | undefined;
         phone?: string | undefined;
+        name?: string | undefined;
     }, {
         email?: string | undefined;
         address?: {
@@ -1008,8 +1008,8 @@ export declare const CreatePaymentMethodRequestSchema: z.ZodObject<{
             postal_code?: string | undefined;
             country?: string | undefined;
         } | undefined;
-        name?: string | undefined;
         phone?: string | undefined;
+        name?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     type: "card" | "bank_account";
@@ -1034,8 +1034,8 @@ export declare const CreatePaymentMethodRequestSchema: z.ZodObject<{
             postal_code?: string | undefined;
             country?: string | undefined;
         } | undefined;
-        name?: string | undefined;
         phone?: string | undefined;
+        name?: string | undefined;
     } | undefined;
 }, {
     type: "card" | "bank_account";
@@ -1060,8 +1060,8 @@ export declare const CreatePaymentMethodRequestSchema: z.ZodObject<{
             postal_code?: string | undefined;
             country?: string | undefined;
         } | undefined;
-        name?: string | undefined;
         phone?: string | undefined;
+        name?: string | undefined;
     } | undefined;
 }>;
 export declare const CreateSubscriptionRequestSchema: z.ZodObject<{

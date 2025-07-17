@@ -13,7 +13,8 @@ export { default as PHOBIA_SPECIFIC } from './phobia';
 export { default as DEPRESSION_PHQ9 } from './phq-9';
 export { default as PTSD_PCL5 } from './ptsd';
 export { default as SOCIAL_PHOBIA_SPIN } from './social-phobia';
-export * from './questionnaire-mapping';
+export { LIST_OF_QUESTIONNAIRES, type ListOfQuestionnaires, QUESTIONNAIRE_MAP as QUESTIONNAIRE_MAPPING, QUESTIONNAIRE_ID_TO_NAME_MAP, getQuestionnaireByName, getAllQuestionnaireNames, getQuestionnaireById, isValidQuestionnaireName } from './questionnaire-mapping';
+export type QuestionnaireMapping = typeof import('./questionnaire-mapping').QUESTIONNAIRE_MAP;
 export declare const QUESTIONNAIRE_TO_COMMUNITY_MAP: {
     readonly adhd: "ADHD Support";
     readonly alcohol: "Substance Use Recovery";

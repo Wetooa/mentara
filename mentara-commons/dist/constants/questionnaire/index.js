@@ -1,25 +1,11 @@
 "use strict";
 // Mental Health Questionnaire Constants
 // Centralized source of truth for all mental health assessment questionnaires
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.COMMUNITY_RECOMMENDATION_THRESHOLDS = exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = exports.SOCIAL_PHOBIA_SPIN = exports.PTSD_PCL5 = exports.DEPRESSION_PHQ9 = exports.PHOBIA_SPECIFIC = exports.STRESS_PSS = exports.PANIC_DISORDER_PDSS = exports.OCD_OCI_R = exports.MOOD_DISORDER_MDQ = exports.INSOMNIA_ISI = exports.ANXIETY_GAD7 = exports.DRUG_ABUSE_DAST = exports.BURNOUT_MBI = exports.BINGE_EATING_BES = exports.ALCOHOL_AUDIT = exports.ADHD_ASRS = void 0;
+exports.COMMUNITY_RECOMMENDATION_THRESHOLDS = exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = exports.isValidQuestionnaireName = exports.getQuestionnaireById = exports.getAllQuestionnaireNames = exports.getQuestionnaireByName = exports.QUESTIONNAIRE_ID_TO_NAME_MAP = exports.QUESTIONNAIRE_MAPPING = exports.LIST_OF_QUESTIONNAIRES = exports.SOCIAL_PHOBIA_SPIN = exports.PTSD_PCL5 = exports.DEPRESSION_PHQ9 = exports.PHOBIA_SPECIFIC = exports.STRESS_PSS = exports.PANIC_DISORDER_PDSS = exports.OCD_OCI_R = exports.MOOD_DISORDER_MDQ = exports.INSOMNIA_ISI = exports.ANXIETY_GAD7 = exports.DRUG_ABUSE_DAST = exports.BURNOUT_MBI = exports.BINGE_EATING_BES = exports.ALCOHOL_AUDIT = exports.ADHD_ASRS = void 0;
 var adhd_1 = require("./adhd");
 Object.defineProperty(exports, "ADHD_ASRS", { enumerable: true, get: function () { return __importDefault(adhd_1).default; } });
 var alcohol_1 = require("./alcohol");
@@ -51,7 +37,14 @@ Object.defineProperty(exports, "PTSD_PCL5", { enumerable: true, get: function ()
 var social_phobia_1 = require("./social-phobia");
 Object.defineProperty(exports, "SOCIAL_PHOBIA_SPIN", { enumerable: true, get: function () { return __importDefault(social_phobia_1).default; } });
 // Questionnaire mapping and utilities
-__exportStar(require("./questionnaire-mapping"), exports);
+var questionnaire_mapping_1 = require("./questionnaire-mapping");
+Object.defineProperty(exports, "LIST_OF_QUESTIONNAIRES", { enumerable: true, get: function () { return questionnaire_mapping_1.LIST_OF_QUESTIONNAIRES; } });
+Object.defineProperty(exports, "QUESTIONNAIRE_MAPPING", { enumerable: true, get: function () { return questionnaire_mapping_1.QUESTIONNAIRE_MAP; } });
+Object.defineProperty(exports, "QUESTIONNAIRE_ID_TO_NAME_MAP", { enumerable: true, get: function () { return questionnaire_mapping_1.QUESTIONNAIRE_ID_TO_NAME_MAP; } });
+Object.defineProperty(exports, "getQuestionnaireByName", { enumerable: true, get: function () { return questionnaire_mapping_1.getQuestionnaireByName; } });
+Object.defineProperty(exports, "getAllQuestionnaireNames", { enumerable: true, get: function () { return questionnaire_mapping_1.getAllQuestionnaireNames; } });
+Object.defineProperty(exports, "getQuestionnaireById", { enumerable: true, get: function () { return questionnaire_mapping_1.getQuestionnaireById; } });
+Object.defineProperty(exports, "isValidQuestionnaireName", { enumerable: true, get: function () { return questionnaire_mapping_1.isValidQuestionnaireName; } });
 // Community mapping based on questionnaire results
 exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = {
     'adhd': 'ADHD Support',

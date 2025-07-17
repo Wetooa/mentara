@@ -9,13 +9,13 @@ export declare const AnalyticsQuerySchema: z.ZodObject<{
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     userRole?: "client" | "therapist" | "moderator" | "admin" | undefined;
-    metric?: "users" | "sessions" | "bookings" | "revenue" | "engagement" | undefined;
+    metric?: "engagement" | "users" | "sessions" | "bookings" | "revenue" | undefined;
     groupBy?: "month" | "week" | "year" | "day" | undefined;
 }, {
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     userRole?: "client" | "therapist" | "moderator" | "admin" | undefined;
-    metric?: "users" | "sessions" | "bookings" | "revenue" | "engagement" | undefined;
+    metric?: "engagement" | "users" | "sessions" | "bookings" | "revenue" | undefined;
     groupBy?: "month" | "week" | "year" | "day" | undefined;
 }>;
 export declare const AnalyticsResponseDtoSchema: z.ZodObject<{
@@ -99,12 +99,12 @@ export declare const PlatformAnalyticsQueryDtoSchema: z.ZodObject<{
     timeframe: "month" | "week" | "quarter" | "year" | "day";
     includeComparisons: boolean;
     includeBreakdown: boolean;
-    metrics?: ("users" | "sessions" | "revenue" | "engagement" | "retention")[] | undefined;
+    metrics?: ("engagement" | "users" | "sessions" | "revenue" | "retention")[] | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
     timeframe?: "month" | "week" | "quarter" | "year" | "day" | undefined;
-    metrics?: ("users" | "sessions" | "revenue" | "engagement" | "retention")[] | undefined;
+    metrics?: ("engagement" | "users" | "sessions" | "revenue" | "retention")[] | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     includeComparisons?: boolean | undefined;
@@ -148,13 +148,13 @@ export declare const ClientAnalyticsQueryDtoSchema: z.ZodObject<{
     includeTherapistFeedback: boolean;
     includeGoalProgress: boolean;
     clientId?: string | undefined;
-    metrics?: ("sessions" | "engagement" | "progress" | "wellness")[] | undefined;
+    metrics?: ("engagement" | "sessions" | "progress" | "wellness")[] | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
     clientId?: string | undefined;
     timeframe?: "month" | "week" | "quarter" | "year" | undefined;
-    metrics?: ("sessions" | "engagement" | "progress" | "wellness")[] | undefined;
+    metrics?: ("engagement" | "sessions" | "progress" | "wellness")[] | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     includeTherapistFeedback?: boolean | undefined;
@@ -199,7 +199,7 @@ export declare const SessionAnalyticsQueryDtoSchema: z.ZodObject<{
     includeComparisons: boolean;
     therapistId?: string | undefined;
     clientId?: string | undefined;
-    metrics?: ("count" | "ratings" | "duration" | "completion" | "outcomes")[] | undefined;
+    metrics?: ("count" | "duration" | "outcomes" | "ratings" | "completion")[] | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     sessionType?: "individual" | "group" | "family" | undefined;
@@ -207,7 +207,7 @@ export declare const SessionAnalyticsQueryDtoSchema: z.ZodObject<{
     therapistId?: string | undefined;
     clientId?: string | undefined;
     timeframe?: "month" | "week" | "quarter" | "year" | undefined;
-    metrics?: ("count" | "ratings" | "duration" | "completion" | "outcomes")[] | undefined;
+    metrics?: ("count" | "duration" | "outcomes" | "ratings" | "completion")[] | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     includeComparisons?: boolean | undefined;
@@ -346,13 +346,13 @@ export declare const AnalyticsTimeRangeSchema: z.ZodObject<{
     endDate: z.ZodString;
     period: z.ZodEnum<["day", "week", "month", "quarter", "year"]>;
 }, "strip", z.ZodTypeAny, {
-    period: "month" | "week" | "quarter" | "year" | "day";
     startDate: string;
     endDate: string;
+    period: "month" | "week" | "quarter" | "year" | "day";
 }, {
-    period: "month" | "week" | "quarter" | "year" | "day";
     startDate: string;
     endDate: string;
+    period: "month" | "week" | "quarter" | "year" | "day";
 }>;
 export declare const UserAnalyticsSchema: z.ZodObject<{
     totalUsers: z.ZodNumber;
@@ -527,6 +527,7 @@ export declare const ClientAnalyticsSchema: z.ZodObject<{
         satisfaction: number;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    completionRate: number;
     totalSessions: number;
     timeSeriesData: {
         date: string;
@@ -538,12 +539,12 @@ export declare const ClientAnalyticsSchema: z.ZodObject<{
     activeClients: number;
     newClients: number;
     clientGrowth: number;
-    completionRate: number;
     satisfactionScore: number;
     retentionRate: number;
     averageSessionsPerClient: number;
     conditionDistribution: Record<string, number>;
 }, {
+    completionRate: number;
     totalSessions: number;
     timeSeriesData: {
         date: string;
@@ -555,7 +556,6 @@ export declare const ClientAnalyticsSchema: z.ZodObject<{
     activeClients: number;
     newClients: number;
     clientGrowth: number;
-    completionRate: number;
     satisfactionScore: number;
     retentionRate: number;
     averageSessionsPerClient: number;
@@ -670,48 +670,48 @@ export declare const SessionAnalyticsSchema: z.ZodObject<{
         revenue: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         date: string;
-        sessions: number;
-        revenue: number;
         completed: number;
         cancelled: number;
+        sessions: number;
+        revenue: number;
     }, {
         date: string;
-        sessions: number;
-        revenue: number;
         completed: number;
         cancelled: number;
+        sessions: number;
+        revenue: number;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    averageDuration: number;
+    completionRate: number;
     totalSessions: number;
     totalRevenue: number;
     timeSeriesData: {
         date: string;
-        sessions: number;
-        revenue: number;
         completed: number;
         cancelled: number;
+        sessions: number;
+        revenue: number;
     }[];
-    completionRate: number;
     completedSessions: number;
     cancelledSessions: number;
-    averageDuration: number;
     averageRevenue: number;
     sessionsByType: Record<string, number>;
     sessionsByStatus: Record<string, number>;
 }, {
+    averageDuration: number;
+    completionRate: number;
     totalSessions: number;
     totalRevenue: number;
     timeSeriesData: {
         date: string;
-        sessions: number;
-        revenue: number;
         completed: number;
         cancelled: number;
+        sessions: number;
+        revenue: number;
     }[];
-    completionRate: number;
     completedSessions: number;
     cancelledSessions: number;
-    averageDuration: number;
     averageRevenue: number;
     sessionsByType: Record<string, number>;
     sessionsByStatus: Record<string, number>;
@@ -966,13 +966,13 @@ export declare const CustomAnalyticsReportSchema: z.ZodObject<{
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         userRole?: "client" | "therapist" | "moderator" | "admin" | undefined;
-        metric?: "users" | "sessions" | "bookings" | "revenue" | "engagement" | undefined;
+        metric?: "engagement" | "users" | "sessions" | "bookings" | "revenue" | undefined;
         groupBy?: "month" | "week" | "year" | "day" | undefined;
     }, {
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         userRole?: "client" | "therapist" | "moderator" | "admin" | undefined;
-        metric?: "users" | "sessions" | "bookings" | "revenue" | "engagement" | undefined;
+        metric?: "engagement" | "users" | "sessions" | "bookings" | "revenue" | undefined;
         groupBy?: "month" | "week" | "year" | "day" | undefined;
     }>;
     schedule: z.ZodOptional<z.ZodObject<{
@@ -1000,7 +1000,7 @@ export declare const CustomAnalyticsReportSchema: z.ZodObject<{
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         userRole?: "client" | "therapist" | "moderator" | "admin" | undefined;
-        metric?: "users" | "sessions" | "bookings" | "revenue" | "engagement" | undefined;
+        metric?: "engagement" | "users" | "sessions" | "bookings" | "revenue" | undefined;
         groupBy?: "month" | "week" | "year" | "day" | undefined;
     };
     createdBy: string;
@@ -1020,7 +1020,7 @@ export declare const CustomAnalyticsReportSchema: z.ZodObject<{
         dateFrom?: string | undefined;
         dateTo?: string | undefined;
         userRole?: "client" | "therapist" | "moderator" | "admin" | undefined;
-        metric?: "users" | "sessions" | "bookings" | "revenue" | "engagement" | undefined;
+        metric?: "engagement" | "users" | "sessions" | "bookings" | "revenue" | undefined;
         groupBy?: "month" | "week" | "year" | "day" | undefined;
     };
     createdBy: string;

@@ -526,7 +526,7 @@ export declare const SearchPostsQueryDtoSchema: z.ZodObject<{
     sortBy: "date" | "comments" | "relevance" | "popularity";
     query: string;
     includeComments: boolean;
-    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
     communityId?: string | undefined;
@@ -534,7 +534,7 @@ export declare const SearchPostsQueryDtoSchema: z.ZodObject<{
     authorId?: string | undefined;
 }, {
     query: string;
-    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
+    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "date" | "comments" | "relevance" | "popularity" | undefined;
@@ -593,8 +593,8 @@ export declare const SearchUsersQueryDtoSchema: z.ZodObject<{
     page: number;
     limit: number;
     sortBy: "name" | "activity" | "relevance" | "joined";
-    query: string;
     isActive: boolean;
+    query: string;
     includeProfile: boolean;
     role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     location?: string | undefined;
@@ -729,22 +729,22 @@ export declare const PostSearchParamsSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     q: string;
     limit?: number | undefined;
-    offset?: number | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
+    roomId?: string | undefined;
+    offset?: number | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     authorId?: string | undefined;
 }, {
     q: string;
     limit?: number | undefined;
-    offset?: number | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
+    roomId?: string | undefined;
+    offset?: number | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    roomId?: string | undefined;
     authorId?: string | undefined;
 }>;
 export declare const UserSearchParamsSchema: z.ZodObject<{
@@ -923,8 +923,8 @@ export declare const UserSearchResultSchema: z.ZodObject<{
     firstName: string;
     lastName: string;
     role: string;
-    joinedAt: string;
     isActive: boolean;
+    joinedAt: string;
     email?: string | undefined;
     profileImage?: string | undefined;
 }, {
@@ -932,8 +932,8 @@ export declare const UserSearchResultSchema: z.ZodObject<{
     firstName: string;
     lastName: string;
     role: string;
-    joinedAt: string;
     isActive: boolean;
+    joinedAt: string;
     email?: string | undefined;
     profileImage?: string | undefined;
 }>;
