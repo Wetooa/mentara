@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Clock, Trash, DollarSign, UserPlus } from "lucide-react";
+import { Clock, Trash, DollarSign, UserPlus } from "lucide-react";
 
 interface DashboardStatsProps {
   stats: {

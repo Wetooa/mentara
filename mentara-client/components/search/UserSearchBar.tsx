@@ -69,6 +69,11 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   const { searchUsers } = useUserSearch();
   const { addRecentSearch } = useRecentSearches();
 
+  // Update role filter when prop changes
+  React.useEffect(() => {
+    setCurrentRoleFilter(roleFilter);
+  }, [roleFilter]);
+
   const debouncedSearch = useCallback(
     async (searchQuery: string) => {
       if (searchTimeoutRef.current) {
@@ -148,7 +153,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     </div>
   );
 
-  const renderSuggestionsContainer = ({ containerProps, children }: any) => (
+  const renderSuggestionsContainer = ({ containerProps, children }: { containerProps: React.HTMLProps<HTMLDivElement>; children: React.ReactNode }) => (
     <div
       {...containerProps}
       className={cn(
@@ -169,7 +174,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       
       {!isLoading && query.length >= 2 && suggestions.length === 0 && (
         <div className="p-4 text-center text-sm text-muted-foreground" role="status" aria-live="polite">
-          No users found for "{query}"
+          No users found for &quot;{query}&quot;
         </div>
       )}
       
@@ -216,7 +221,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   };
 
   const handleSuggestionSelected = (
-    event: React.FormEvent<any>,
+    event: React.FormEvent<HTMLFormElement>,
     { suggestion }: { suggestion: User }
   ) => {
     // Add to recent searches
@@ -292,6 +297,28 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
             onUserSelect={handleRecentUserSelect}
             maxItems={5}
           />
+        </div>
+      )}
+
+      {/* Role Filter */}
+      {showRoleFilter && (
+        <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-background border border-border rounded-md shadow-lg z-40">
+          <div className="flex flex-wrap gap-2">
+            {(['all', 'client', 'therapist', 'moderator'] as const).map((role) => (
+              <button
+                key={role}
+                onClick={() => setCurrentRoleFilter(role)}
+                className={cn(
+                  'px-3 py-1 text-xs rounded-full transition-colors',
+                  currentRoleFilter === role
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                )}
+              >
+                {role === 'all' ? 'All' : role.charAt(0).toUpperCase() + role.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

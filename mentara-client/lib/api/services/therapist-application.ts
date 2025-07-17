@@ -1,6 +1,5 @@
 import { AxiosInstance } from 'axios';
 import {
-  TherapistApplicationDto,
   TherapistApplication,
   ApplicationStatusUpdateDto,
   ApplicationListParams,

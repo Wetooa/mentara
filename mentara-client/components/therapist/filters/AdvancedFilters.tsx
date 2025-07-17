@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Filter, RotateCcw, ChevronDown } from "lucide-react";
+import { Filter, RotateCcw, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -23,25 +23,32 @@ import {
   Check, 
   X, 
   MessageSquare, 
-  Calendar, 
-  Clock, 
-  User,
-  Heart,
-  Star,
-  AlertCircle,
   Info,
   Send,
   Plus,
   Trash2,
-  Eye
+  Eye,
+  Star
 } from 'lucide-react';
+
+interface ClientRequest {
+  id: string;
+  clientName: string;
+  clientEmail: string;
+  clientAvatar?: string;
+  message?: string;
+  concerns?: string[];
+  preferredSessionType?: string;
+  urgency?: string;
+  status: string;
+}
 
 interface RequestResponseDialogProps {
   requestId: string;
-  request: any;
+  request: ClientRequest;
   open: boolean;
   onClose: () => void;
-  onRespond: (requestId: string, response: any) => void;
+  onRespond: (requestId: string, response: Record<string, unknown>) => void;
   isLoading?: boolean;
 }
 
@@ -154,7 +161,7 @@ export function RequestResponseDialog({
             Respond to Client Request
           </DialogTitle>
           <DialogDescription>
-            Choose how you'd like to respond to {request?.client?.firstName}'s request.
+            Choose how you&apos;d like to respond to {request?.client?.firstName}&apos;s request.
           </DialogDescription>
         </DialogHeader>
 
@@ -184,7 +191,7 @@ export function RequestResponseDialog({
             {request?.message && (
               <CardContent className="pt-0">
                 <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-sm italic">"{request.message}"</p>
+                  <p className="text-sm italic">&quot;{request.message}&quot;</p>
                 </div>
               </CardContent>
             )}
@@ -249,7 +256,7 @@ export function RequestResponseDialog({
                 responseType === 'accept' 
                   ? "Welcome the client and explain what they can expect..."
                   : responseType === 'decline' 
-                  ? "Politely explain why you can't take on this client..."
+                  ? "Politely explain why you can&apos;t take on this client..."
                   : "Introduce yourself and explain why you need more information..."
               }
               value={message}

@@ -7,9 +7,7 @@ import {
   ChevronRight,
   MessageCircle,
   Sort,
-  ArrowUp,
   ArrowDown,
-  MoreHorizontal
 } from 'lucide-react';
 import {
   Select,
@@ -49,7 +47,7 @@ export interface Comment {
 
 interface CommentTreeProps {
   comments: Comment[];
-  postId: string;
+  postId?: string;
   maxDepth?: number;
   defaultSort?: 'best' | 'new' | 'old' | 'controversial';
   onVote?: (commentId: string, voteType: 'up' | 'down' | null) => void;
@@ -62,7 +60,6 @@ interface CommentTreeProps {
 
 export function CommentTree({
   comments,
-  postId,
   maxDepth = 10,
   defaultSort = 'best',
   onVote,

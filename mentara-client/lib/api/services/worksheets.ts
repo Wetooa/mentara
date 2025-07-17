@@ -3,20 +3,8 @@ import {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
   Worksheet,
-  WorksheetQuery,
   WorksheetSubmissionCreateInputDto,
   WorksheetSubmission,
-  CreateSubmissionDto,
-  ReviewSubmissionDto,
-  WorksheetAssignment,
-  CreateAssignmentDto,
-  UpdateAssignmentDto,
-  WorksheetIdParam,
-  AssignmentIdParam,
-  SubmissionIdParam,
-  WorksheetParamsDto,
-  WorksheetsQueryDto,
-  SubmissionParamsDto,
 } from 'mentara-commons';
 
 // Extended interfaces for UI-specific data structures
@@ -38,7 +26,7 @@ export interface WorksheetListResponse {
 }
 
 export interface SubmitWorksheetRequest {
-  responses: Record<string, any>;
+  responses: Record<string, string | number | boolean | string[]>;
   attachments?: string[];
   notes?: string;
   timeSpent?: number;

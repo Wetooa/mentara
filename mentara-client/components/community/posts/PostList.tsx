@@ -1,20 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   TrendingUp, 
   Clock, 
   Star, 
   MessageCircle,
   RefreshCw,
-  Filter,
   Search,
   Plus,
   AlertCircle
@@ -180,7 +179,7 @@ export function PostList({
     try {
       await refetch();
       toast.success('Posts refreshed');
-    } catch (error) {
+    } catch {
       toast.error('Failed to refresh posts');
     } finally {
       setIsRefreshing(false);
@@ -338,7 +337,7 @@ export function PostList({
         ) : (
           <>
             {/* Posts will be rendered here using PostItem component */}
-            {allPosts.map((post: Post, index: number) => (
+            {allPosts.map((post: Post) => (
               <div key={post.id} className="space-y-4">
                 {/* Placeholder for PostItem component */}
                 <Card className="hover:shadow-md transition-shadow">

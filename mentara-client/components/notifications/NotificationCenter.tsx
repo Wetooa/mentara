@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
@@ -18,23 +17,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { 
   Bell, 
-  BellOff,
   Search,
   Filter,
-  Settings,
   Trash2,
   MoreHorizontal,
   CheckCircle,
@@ -46,7 +32,6 @@ import {
   AlertTriangle,
   Info,
   CheckCircle2,
-  X,
   Wifi,
   WifiOff,
   Smartphone,
@@ -61,6 +46,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/hooks/useNotifications';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
 
 interface NotificationCenterProps {
   className?: string;
@@ -118,8 +104,6 @@ export function NotificationCenter({
     isMarkingAllAsRead,
     isDeleting,
     reconnectWebSocket,
-    getNotificationsByCategory,
-    getUnreadNotifications,
     getHighPriorityNotifications,
     refetch
   } = useNotifications({ 
@@ -130,7 +114,6 @@ export function NotificationCenter({
   // Push notification hooks
   const {
     isSupported: pushSupported,
-    hasPermission: pushPermission,
     isSubscribed: pushSubscribed,
     isLoading: pushLoading,
     error: pushError,
@@ -139,9 +122,21 @@ export function NotificationCenter({
     disablePushNotifications,
     testNotification,
     updateConfig: updatePushConfig,
-    canEnable: canEnablePush,
     needsPermission,
   } = usePushNotifications();
+
+  // Real-time notifications
+  const {
+    // isConnected: rtConnected,
+    // connectionState: rtConnectionState,
+    // markAsRead: rtMarkAsRead,
+    // markAllAsRead: rtMarkAllAsRead,
+    // deleteNotification: rtDeleteNotification,
+    // reconnect: rtReconnect,
+  } = useRealTimeNotifications({
+    userId: "current-user-id", // TODO: Get from auth context
+    enableToasts: false, // Disable toasts in the center to avoid duplicates
+  });
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
@@ -190,7 +185,7 @@ export function NotificationCenter({
   }, [notifications, categoryFilter, readFilter, searchQuery]);
 
   // Handle notification click
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       markAsRead(notification.id);
     }
@@ -230,7 +225,7 @@ export function NotificationCenter({
     return IconComponent;
   };
 
-  const getNotificationIcon = (notification: any) => {
+  const getNotificationIcon = (notification: Notification) => {
     const IconComponent = getCategoryIcon(notification.category || 'system');
     return <IconComponent className="h-4 w-4" />;
   };

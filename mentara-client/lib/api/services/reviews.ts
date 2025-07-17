@@ -1,25 +1,9 @@
 import { AxiosInstance } from 'axios';
 import {
   Review,
-  CreateReviewRequest,
-  UpdateReviewRequest,
-  ReviewListParams,
-  TherapistReviewParams,
   ReviewStats,
-  ReviewListResponse,
-  ModerateReviewRequest,
-  ReviewHelpfulAction,
-  ReviewReport,
-  ReviewResponse,
-  ReviewAnalytics,
   CreateReviewDto,
   UpdateReviewDto,
-  ModerateReviewDto,
-  GetReviewsDto,
-  ReviewStatsDto,
-  ReviewIdParam,
-  ReviewStatus,
-  Rating,
 } from 'mentara-commons';
 
 // Reviews service factory

@@ -9,7 +9,7 @@ import { useRecentSearches, RecentSearch } from './hooks/useRecentSearches';
 
 interface RecentSearchesProps {
   onSearchSelect: (query: string) => void;
-  onUserSelect?: (user: any) => void;
+  onUserSelect?: (user: { id: string; name: string; email: string }) => void;
   className?: string;
   maxItems?: number;
 }

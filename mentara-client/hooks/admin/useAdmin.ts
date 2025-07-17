@@ -52,9 +52,9 @@ export function useAdminDashboard() {
 }
 
 /**
- * Hook for fetching admin users list
+ * Hook for fetching admin users list (basic query only)
  */
-export function useAdminUsers(params: AdminUserListParams = {}) {
+export function useAdminUsersList(params: AdminUserListParams = {}) {
   const api = useApi();
   
   return useQuery({

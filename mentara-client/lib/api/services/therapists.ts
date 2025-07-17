@@ -8,6 +8,9 @@ import {
   PatientData,
   TherapistApplication,
   CreateApplicationRequest,
+  Worksheet,
+  WorksheetCreateInputDto,
+  WorksheetUpdateInputDto,
   UpdateApplicationRequest,
   ApplicationListParams,
   PersonalInfo,
@@ -121,7 +124,16 @@ export const createTherapistService = (client: AxiosInstance) => ({
 
   // Enhanced recommendation endpoints for Module 2
   getPersonalizedRecommendations: (): Promise<{
-    recommendations: any[];
+    recommendations: Array<{
+      id: string;
+      score: number;
+      therapist: {
+        id: string;
+        name: string;
+        specializations: string[];
+        rating: number;
+      };
+    }>;
     averageMatchScore: number;
     totalRecommendations: number;
     matchCriteria: {
@@ -275,15 +287,15 @@ export const createTherapistService = (client: AxiosInstance) => ({
     },
 
     // Get worksheet by ID (corrected path)
-    getById: (worksheetId: string): Promise<any> =>
+    getById: (worksheetId: string): Promise<{ worksheet: Worksheet }> =>
       client.get(`/therapist/worksheets/${worksheetId}`),
 
     // Create new worksheet (corrected path)
-    create: (worksheetData: any): Promise<any> =>
+    create: (worksheetData: WorksheetCreateInputDto): Promise<{ worksheet: Worksheet }> =>
       client.post(`/therapist/worksheets`, worksheetData),
 
     // Update worksheet (corrected path)
-    update: (worksheetId: string, worksheetData: any): Promise<any> =>
+    update: (worksheetId: string, worksheetData: WorksheetUpdateInputDto): Promise<{ worksheet: Worksheet }> =>
       client.put(`/therapist/worksheets/${worksheetId}`, worksheetData),
   },
 
@@ -321,7 +333,13 @@ export const createTherapistService = (client: AxiosInstance) => ({
 
   // Enhanced request management endpoints for Module 2
   getClientRequests: async (params: TherapistClientRequestQueryDto = {}): Promise<{
-    requests: any[];
+    requests: Array<{
+      id: string;
+      clientId: string;
+      status: 'pending' | 'accepted' | 'rejected';
+      message?: string;
+      createdAt: string;
+    }>;
     total: number;
     page: number;
     totalPages: number;

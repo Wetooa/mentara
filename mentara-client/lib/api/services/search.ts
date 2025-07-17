@@ -1,12 +1,7 @@
 import { AxiosInstance } from 'axios';
 import {
-  SearchRequestDto,
   SearchResponseDto,
-  SearchResultItem,
-  TherapistSearchDto,
-  AdvancedSearchDto,
   SearchAutocompleteDto,
-  SearchAnalyticsDto,
   SearchTherapistsQueryDto,
   SearchPostsQueryDto,
   SearchCommunitiesQueryDto,

@@ -48,7 +48,7 @@ export default function FavoritesSection() {
     setSelectedTherapist(null);
   };
 
-  const handleBookingSuccess = (meeting: any) => {
+  const handleBookingSuccess = () => {
     toast.success("Session booked successfully!", {
       description: `Your session with ${selectedTherapist?.name} has been scheduled.`,
     });

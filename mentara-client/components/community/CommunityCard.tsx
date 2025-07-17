@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
@@ -74,7 +74,6 @@ export function CommunityCard({
 }: CommunityCardProps) {
   const api = useApi();
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
 
   const joinMutation = useMutation({
     mutationFn: (communityId: string) => api.communities.join(communityId),
@@ -105,7 +104,7 @@ export function CommunityCard({
       try {
         await api.communities.requestJoin(community.id);
         toast.success('Join request sent!');
-      } catch (error) {
+      } catch {
         toast.error('Failed to send join request.');
       }
     } else {

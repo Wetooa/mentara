@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
   Elements,
   CardElement,
   useStripe,
   useElements,
-  PaymentElement,
 } from '@stripe/react-stripe-js';
+import type { CreatePaymentMethodDto } from 'mentara-commons';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,9 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { 
   CreditCard, 
   Building, 
@@ -61,7 +60,7 @@ type BillingDetailsForm = z.infer<typeof billingDetailsSchema>;
 type BankAccountForm = z.infer<typeof bankAccountSchema>;
 
 interface PaymentMethodFormProps {
-  onSuccess?: (paymentMethod: any) => void;
+  onSuccess?: (paymentMethod: CreatePaymentMethodDto) => void;
   onCancel?: () => void;
   setAsDefault?: boolean;
   allowBankAccount?: boolean;
@@ -160,7 +159,7 @@ function PaymentMethodFormContent({
     },
   });
 
-  const handleCardElementChange = (event: any) => {
+  const handleCardElementChange = (event: { error?: { message: string }; complete: boolean }) => {
     setCardError(event.error ? event.error.message : null);
     setCardComplete(event.complete);
   };
@@ -249,7 +248,7 @@ function PaymentMethodFormContent({
         toast.success('Bank account added successfully!');
       }
 
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Payment method creation error:', error);
       toast.error(error.message || 'Failed to add payment method');
     } finally {

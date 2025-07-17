@@ -52,7 +52,7 @@ export interface SystemMetricsResponse {
     percentage: number;
   };
   cpu: {
-    usage: any;
+    usage: number;
     loadAverage: number[];
     cores: number;
   };
@@ -106,10 +106,10 @@ export interface AdminHealthResponse {
     errorCount: number;
   };
   resources: {
-    memory: any;
-    cpu: any;
-    database: any;
-    storage: any;
+    memory: Record<string, unknown>;
+    cpu: Record<string, unknown>;
+    database: Record<string, unknown>;
+    storage: Record<string, unknown>;
   };
 }
 

@@ -1,6 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useApi } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +23,6 @@ import {
   Eye
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useCommunityDashboard } from '@/hooks/community';
 
 interface Community {
   id: string;
@@ -57,13 +60,13 @@ interface RecentActivity {
   postId?: string;
 }
 
-interface CommunityStats {
-  totalCommunities: number;
-  joinedCommunities: number;
-  totalPosts: number;
-  totalComments: number;
-  weeklyActivity: number;
-}
+// interface CommunityStats {
+//   totalCommunities: number;
+//   joinedCommunities: number;
+//   totalPosts: number;
+//   totalComments: number;
+//   weeklyActivity: number;
+// }
 
 export function CommunityDashboard() {
   const api = useApi();
@@ -106,21 +109,11 @@ export function CommunityDashboard() {
       toast.success('Successfully joined community!');
       // Refresh communities data
       queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
-    } catch (error) {
+    } catch {
       toast.error('Failed to join community. Please try again.');
     }
   };
 
-  const handleLeaveCommunity = async (communityId: string) => {
-    try {
-      await api.communities.leave(communityId);
-      toast.success('Successfully left community');
-      // Refresh communities data
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
-    } catch (error) {
-      toast.error('Failed to leave community. Please try again.');
-    }
-  };
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -223,7 +216,7 @@ export function CommunityDashboard() {
       )}
 
       {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'overview' | 'discover' | 'activity')}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="discover">Discover</TabsTrigger>

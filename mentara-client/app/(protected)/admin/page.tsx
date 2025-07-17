@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -8,74 +9,168 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Activity, AlertTriangle, FileText, Users } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { 
+  Activity, 
+  AlertTriangle, 
+  FileText, 
+  Users, 
+  Calendar,
+  Shield,
+  BarChart3
+} from "lucide-react";
+import { useAdminDashboard, useAdminSystemStats } from "@/hooks/admin";
+import { fadeDown } from "@/lib/animations";
 
 export default function AdminDashboardPage() {
-  // Mock data for the dashboard
-  const stats = [
-    { 
-      title: "Total Users", 
-      value: "5,231", 
-      change: "+12%", 
-      trend: "up", 
+  // Fetch real dashboard data with proper React Query patterns
+  const { 
+    data: dashboardData, 
+    isPending: dashboardPending, 
+    isError: dashboardError
+  } = useAdminDashboard();
+  
+  const { 
+    data: systemStats, 
+    isPending: statsPending,
+    isError: statsError
+  } = useAdminSystemStats();
+
+  // Use isPending instead of isLoading for initial loading state
+  const isLoading = dashboardPending || statsPending;
+  const hasError = dashboardError || statsError;
+  // const error = dashboardErrorData || statsErrorData; // Can be used for error handling
+
+  // Fallback to mock data if backend data is unavailable
+  const mockStats = {
+    totalUsers: 5231,
+    activeUsers: 4876,
+    totalTherapists: 342,
+    totalSessions: 12450,
+    activeReports: 27,
+    contentPublished: 423,
+    activeSessions: 189,
+  };
+
+  const stats = dashboardData || systemStats || mockStats;
+
+  const dashboardMetrics = [
+    {
+      title: "Total Users",
+      value: stats.totalUsers?.toLocaleString() || "0",
+      change: "+12%",
+      trend: "up",
       description: "Compared to last month",
       icon: <Users className="h-5 w-5 text-blue-500" />
     },
-    { 
-      title: "Active Reports", 
-      value: "27", 
-      change: "+5", 
-      trend: "up", 
+    {
+      title: "Active Users",
+      value: stats.activeUsers?.toLocaleString() || "0",
+      change: "+8.5%",
+      trend: "up",
+      description: "Active in last 30 days",
+      icon: <Activity className="h-5 w-5 text-green-500" />
+    },
+    {
+      title: "Total Therapists",
+      value: stats.totalTherapists?.toLocaleString() || "0",
+      change: "+5.2%",
+      trend: "up",
+      description: "Approved therapists",
+      icon: <Shield className="h-5 w-5 text-purple-500" />
+    },
+    {
+      title: "Total Sessions",
+      value: stats.totalSessions?.toLocaleString() || "0",
+      change: "+15.3%",
+      trend: "up",
+      description: "All time sessions",
+      icon: <Calendar className="h-5 w-5 text-orange-500" />
+    },
+    {
+      title: "Active Reports",
+      value: stats.activeReports?.toLocaleString() || "0",
+      change: "+5",
+      trend: "up",
       description: "Unresolved reports",
       icon: <AlertTriangle className="h-5 w-5 text-amber-500" />
     },
-    { 
-      title: "Content Published", 
-      value: "423", 
-      change: "+42", 
-      trend: "up", 
+    {
+      title: "Content Published",
+      value: stats.contentPublished?.toLocaleString() || "0",
+      change: "+42",
+      trend: "up",
       description: "Last 30 days",
       icon: <FileText className="h-5 w-5 text-green-500" />
-    },
-    { 
-      title: "Active Sessions", 
-      value: "189", 
-      change: "+18%", 
-      trend: "up", 
-      description: "Current week",
-      icon: <Activity className="h-5 w-5 text-purple-500" />
     }
   ];
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      variants={fadeDown}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="space-y-6"
+    >
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-sm text-gray-500 mt-1">Welcome to the Mentara admin panel</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">{stat.title}</p>
-                  <div className="flex items-baseline mt-1">
-                    <h3 className="text-2xl font-bold">{stat.value}</h3>
-                    <span className={`ml-2 text-xs font-semibold ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                      {stat.change}
-                    </span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, index) => (
+            <Card key={index}>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-3 w-24" />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+                  <Skeleton className="h-12 w-12 rounded-md" />
                 </div>
-                <div className="p-2 bg-gray-50 rounded-md">{stat.icon}</div>
+              </CardContent>
+            </Card>
+          ))
+        ) : hasError ? (
+          <Card className="col-span-full">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-center text-red-500 space-x-2">
+                <AlertTriangle className="h-5 w-5" />
+                <p>Failed to load dashboard data. Please try again.</p>
               </div>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          dashboardMetrics.map((metric, index) => (
+            <Card key={index}>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">{metric.title}</p>
+                    <div className="flex items-baseline mt-1">
+                      <h3 className="text-2xl font-bold">{metric.value}</h3>
+                      <Badge 
+                        variant="secondary" 
+                        className={`ml-2 ${metric.trend === 'up' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`}
+                      >
+                        {metric.change}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{metric.description}</p>
+                  </div>
+                  <div className="p-2 bg-gray-50 rounded-md">{metric.icon}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -84,25 +179,35 @@ export default function AdminDashboardPage() {
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>Common administrative tasks</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <Button variant="outline" className="justify-start" asChild>
-            <a href="/admin/reports">
-              <AlertTriangle className="mr-2 h-4 w-4 text-amber-600" />
-              View Reports
-            </a>
-          </Button>
-          <Button variant="outline" className="justify-start" asChild>
-            <a href="/admin/users">
-              <Users className="mr-2 h-4 w-4 text-blue-600" />
-              Manage Users
-            </a>
-          </Button>
-          <Button variant="outline" className="justify-start" asChild>
-            <a href="/admin/content/search">
-              <FileText className="mr-2 h-4 w-4 text-green-600" />
-              Content Search
-            </a>
-          </Button>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <Link 
+            href="/admin/users"
+            className={buttonVariants({ variant: "outline", className: "justify-start" })}
+          >
+            <Users className="mr-2 h-4 w-4 text-blue-600" />
+            Manage Users
+          </Link>
+          <Link 
+            href="/admin/therapist-applications"
+            className={buttonVariants({ variant: "outline", className: "justify-start" })}
+          >
+            <Shield className="mr-2 h-4 w-4 text-purple-600" />
+            Therapist Applications
+          </Link>
+          <Link 
+            href="/admin/analytics"
+            className={buttonVariants({ variant: "outline", className: "justify-start" })}
+          >
+            <BarChart3 className="mr-2 h-4 w-4 text-green-600" />
+            Analytics
+          </Link>
+          <Link 
+            href="/admin/audit-logs"
+            className={buttonVariants({ variant: "outline", className: "justify-start" })}
+          >
+            <FileText className="mr-2 h-4 w-4 text-orange-600" />
+            Audit Logs
+          </Link>
         </CardContent>
       </Card>
 
@@ -137,6 +242,6 @@ export default function AdminDashboardPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }

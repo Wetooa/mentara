@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Calendar, 
-  MapPin, 
   Clock, 
   DollarSign, 
   Star, 
@@ -21,8 +20,7 @@ import {
   Heart,
   BookOpen,
   Award,
-  Users,
-  Languages
+  Users
 } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { Card, CardContent } from "@/components/ui/card";

@@ -7,8 +7,6 @@ import {
   Users, 
   Clock, 
   CheckCircle, 
-  XCircle, 
-  AlertCircle,
   TrendingUp,
   TrendingDown,
   Calendar,

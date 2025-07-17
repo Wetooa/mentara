@@ -166,7 +166,7 @@ export function PostItem({
           text: post.excerpt || post.content.substring(0, 100) + '...',
           url: url,
         });
-      } catch (error) {
+      } catch {
         // User cancelled sharing
       }
     } else {
@@ -174,7 +174,7 @@ export function PostItem({
       try {
         await navigator.clipboard.writeText(url);
         toast.success('Link copied to clipboard');
-      } catch (error) {
+      } catch {
         toast.error('Failed to copy link');
       }
     }

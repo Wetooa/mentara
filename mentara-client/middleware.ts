@@ -143,6 +143,26 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(unauthorizedUrl);
   }
 
+  // Handle first-time user onboarding redirection
+  if (payload.role === 'client' && (pathname === '/user' || pathname === '/user/dashboard')) {
+    // Check if user needs onboarding
+    const response = NextResponse.next();
+    response.headers.set('x-user-id', payload.sub);
+    response.headers.set('x-user-role', payload.role);
+    response.headers.set('x-user-email', payload.email || '');
+    response.headers.set('x-check-onboarding', 'true');
+    return response;
+  }
+
+  // Allow onboarding routes for authenticated users
+  if (pathname.startsWith('/onboarding') && payload.role === 'client') {
+    const response = NextResponse.next();
+    response.headers.set('x-user-id', payload.sub);
+    response.headers.set('x-user-role', payload.role);
+    response.headers.set('x-user-email', payload.email || '');
+    return response;
+  }
+
   // Add user info to request headers for downstream use
   const response = NextResponse.next();
   response.headers.set('x-user-id', payload.sub);

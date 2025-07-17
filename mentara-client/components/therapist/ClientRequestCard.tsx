@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
+// import { Separator } from '@/components/ui/separator';
 import { 
   Clock, 
   MapPin, 
@@ -18,9 +18,7 @@ import {
   User,
   Heart,
   TrendingUp,
-  Info,
-  Mail,
-  Phone
+  Info
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -30,8 +28,24 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+interface ClientRequest {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  clientAvatar?: string;
+  status: 'pending' | 'accepted' | 'declined';
+  message?: string;
+  requestDate: string;
+  preferredSessionType?: 'online' | 'in-person' | 'phone';
+  urgency?: 'low' | 'medium' | 'high' | 'urgent';
+  concerns?: string[];
+  location?: string;
+  compatibilityScore?: number;
+}
+
 interface ClientRequestCardProps {
-  request: any;
+  request: ClientRequest;
   onQuickAccept: (requestId: string) => void;
   onQuickDecline: (requestId: string) => void;
   onOpenResponseDialog: (requestId: string) => void;
@@ -201,7 +215,7 @@ export function ClientRequestCard({
               Client Message
             </h4>
             <p className="text-sm text-muted-foreground">
-              "{request.message}"
+              &quot;{request.message}&quot;
             </p>
           </div>
         )}
@@ -252,7 +266,7 @@ export function ClientRequestCard({
           <div className="bg-green-50/50 p-4 rounded-lg">
             <h4 className="font-medium mb-2 flex items-center gap-2 text-green-800">
               <Info className="h-4 w-4" />
-              Why you're a good match
+              Why you&apos;re a good match
             </h4>
             <div className="space-y-1 text-sm text-green-700">
               {request.matchExplanation.reasons?.map((reason, index) => (
@@ -272,7 +286,7 @@ export function ClientRequestCard({
             <div className="text-sm text-muted-foreground">
               <p>Responded {formatDistanceToNow(new Date(request.responseData.respondedAt), { addSuffix: true })}</p>
               {request.responseData.message && (
-                <p className="mt-2 italic">"{request.responseData.message}"</p>
+                <p className="mt-2 italic">&quot;{request.responseData.message}&quot;</p>
               )}
             </div>
           </div>
