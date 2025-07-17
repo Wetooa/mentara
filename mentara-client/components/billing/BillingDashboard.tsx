@@ -132,7 +132,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
   const handleCancelSubscription = async (immediately: boolean = false) => {
     try {
       await cancelSubscriptionMutation.mutateAsync(immediately);
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation
     }
   };
@@ -140,7 +140,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
   const handleReactivateSubscription = async () => {
     try {
       await reactivateSubscriptionMutation.mutateAsync();
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation
     }
   };
@@ -149,7 +149,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
     try {
       const returnUrl = window.location.href;
       await createPortalSessionMutation.mutateAsync(returnUrl);
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation
     }
   };
@@ -157,7 +157,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
   const handleDownloadInvoice = async (invoiceId: string) => {
     try {
       await downloadInvoiceMutation.mutateAsync(invoiceId);
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation
     }
   };
@@ -168,7 +168,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
         invoiceId, 
         paymentMethodId: defaultPaymentMethod?.id 
       });
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation
     }
   };
@@ -232,7 +232,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                 <h3 className="font-medium text-yellow-900">Subscription Ending</h3>
                 <p className="text-sm text-yellow-700 mt-1">
                   Your subscription will end on {subscription?.current_period_end && format(new Date(subscription.current_period_end), 'MMMM d, yyyy')}. 
-                  You'll still have access until then.
+                  You&apos;ll still have access until then.
                 </p>
                 <Button 
                   size="sm" 
@@ -509,7 +509,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                           <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
                           <AlertDialogDescription>
                             You can cancel your subscription at the end of the current billing period or immediately.
-                            If you cancel immediately, you'll lose access right away and won't be refunded for the current period.
+                            If you cancel immediately, you&apos;ll lose access right away and won&apos;t be refunded for the current period.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -551,7 +551,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  You don't have an active subscription. Choose a plan to get started.
+                  You don&apos;t have an active subscription. Choose a plan to get started.
                 </p>
                 <Button>Choose a Plan</Button>
               </CardContent>
