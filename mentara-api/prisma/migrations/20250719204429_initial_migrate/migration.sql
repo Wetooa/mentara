@@ -26,7 +26,7 @@ CREATE TYPE "IndicatorType" AS ENUM ('MOOD_RATING', 'ANXIETY_LEVEL', 'SLEEP_QUAL
 CREATE TYPE "IndicatorSource" AS ENUM ('SELF_REPORT', 'THERAPIST_ASSESSMENT', 'AUTOMATED_TRACKING', 'FAMILY_REPORT', 'MEDICAL_RECORD', 'WEARABLE_DEVICE');
 
 -- CreateEnum
-CREATE TYPE "AuditAction" AS ENUM ('USER_LOGIN', 'USER_LOGOUT', 'USER_REGISTER', 'USER_UPDATE_PROFILE', 'USER_DELETE_ACCOUNT', 'USER_CHANGE_PASSWORD', 'USER_RESET_PASSWORD', 'THERAPIST_APPLICATION_SUBMIT', 'THERAPIST_APPLICATION_APPROVE', 'THERAPIST_APPLICATION_REJECT', 'THERAPIST_PROFILE_UPDATE', 'THERAPIST_AVAILABILITY_UPDATE', 'MEETING_CREATE', 'MEETING_UPDATE', 'MEETING_CANCEL', 'MEETING_COMPLETE', 'MEETING_NO_SHOW', 'WORKSHEET_CREATE', 'WORKSHEET_ASSIGN', 'WORKSHEET_SUBMIT', 'WORKSHEET_GRADE', 'REVIEW_CREATE', 'REVIEW_UPDATE', 'REVIEW_DELETE', 'REVIEW_MODERATE', 'MESSAGE_SEND', 'MESSAGE_EDIT', 'MESSAGE_DELETE', 'MESSAGE_REPORT', 'ADMIN_USER_SUSPEND', 'ADMIN_USER_ACTIVATE', 'ADMIN_CONTENT_MODERATE', 'ADMIN_SYSTEM_CONFIG', 'SYSTEM_BACKUP', 'SYSTEM_MAINTENANCE', 'SYSTEM_ERROR', 'DATA_EXPORT', 'DATA_PURGE');
+CREATE TYPE "AuditAction" AS ENUM ('USER_LOGIN', 'USER_LOGOUT', 'USER_REGISTER', 'USER_UPDATE_PROFILE', 'USER_DELETE_ACCOUNT', 'USER_CHANGE_PASSWORD', 'USER_RESET_PASSWORD', 'THERAPIST_APPLICATION_SUBMIT', 'THERAPIST_APPLICATION_APPROVE', 'THERAPIST_APPLICATION_REJECT', 'THERAPIST_PROFILE_UPDATE', 'THERAPIST_AVAILABILITY_UPDATE', 'UPDATE_THERAPIST_STATUS', 'ACCEPT_CLIENT_REQUEST', 'DECLINE_CLIENT_REQUEST', 'REVIEW_CLIENT_REQUEST', 'SEND_THERAPIST_REQUEST', 'CANCEL_THERAPIST_REQUEST', 'APPROVE_THERAPIST_APPLICATION', 'REJECT_THERAPIST_APPLICATION', 'SUSPEND_USER', 'UNSUSPEND_USER', 'MODERATE_POST', 'MODERATE_COMMENT', 'COMPLETE_ONBOARDING_STEP', 'MEETING_CREATE', 'MEETING_UPDATE', 'MEETING_CANCEL', 'MEETING_COMPLETE', 'MEETING_NO_SHOW', 'WORKSHEET_CREATE', 'WORKSHEET_ASSIGN', 'WORKSHEET_SUBMIT', 'WORKSHEET_GRADE', 'REVIEW_CREATE', 'REVIEW_UPDATE', 'REVIEW_DELETE', 'REVIEW_MODERATE', 'MESSAGE_SEND', 'MESSAGE_EDIT', 'MESSAGE_DELETE', 'MESSAGE_REPORT', 'ADMIN_USER_SUSPEND', 'ADMIN_USER_ACTIVATE', 'ADMIN_CONTENT_MODERATE', 'ADMIN_SYSTEM_CONFIG', 'SYSTEM_BACKUP', 'SYSTEM_MAINTENANCE', 'SYSTEM_ERROR', 'DATA_EXPORT', 'DATA_PURGE');
 
 -- CreateEnum
 CREATE TYPE "SystemEventType" AS ENUM ('HIGH_CPU_USAGE', 'HIGH_MEMORY_USAGE', 'SLOW_QUERY', 'HIGH_ERROR_RATE', 'FAILED_LOGIN_ATTEMPTS', 'SUSPICIOUS_ACTIVITY', 'DATA_BREACH_ATTEMPT', 'UNAUTHORIZED_ACCESS', 'HIGH_USER_LOAD', 'PAYMENT_PROCESSING_ERROR', 'EMAIL_DELIVERY_FAILURE', 'THIRD_PARTY_API_ERROR', 'SERVICE_START', 'SERVICE_STOP', 'DEPLOYMENT', 'CONFIGURATION_CHANGE', 'DATABASE_MIGRATION', 'UNUSUAL_USER_BEHAVIOR', 'MASS_USER_ACTIONS', 'DATA_EXPORT_REQUEST');
@@ -53,7 +53,7 @@ CREATE TYPE "PaymentMethodType" AS ENUM ('CARD', 'BANK_ACCOUNT', 'DIGITAL_WALLET
 CREATE TYPE "PaymentProvider" AS ENUM ('STRIPE', 'PAYPAL', 'SQUARE', 'BANK_TRANSFER');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELED', 'REFUNDED', 'PARTIALLY_REFUNDED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELED', 'REFUNDED', 'PARTIALLY_REFUNDED', 'REQUIRES_ACTION');
 
 -- CreateEnum
 CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'OPEN', 'PAID', 'UNCOLLECTIBLE', 'VOID');
@@ -65,25 +65,16 @@ CREATE TYPE "DiscountType" AS ENUM ('PERCENTAGE', 'FIXED_AMOUNT', 'FREE_TRIAL_EX
 CREATE TYPE "MeetingStatus" AS ENUM ('SCHEDULED', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'NO_SHOW');
 
 -- CreateEnum
-CREATE TYPE "StorageProvider" AS ENUM ('LOCAL', 'AWS_S3', 'SUPABASE', 'CLOUDINARY', 'GOOGLE_CLOUD');
+CREATE TYPE "ClientTherapistStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'PENDING');
 
 -- CreateEnum
-CREATE TYPE "AccessLevel" AS ENUM ('PRIVATE', 'INTERNAL', 'PUBLIC');
+CREATE TYPE "MembershipRole" AS ENUM ('MEMBER', 'MODERATOR', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "FileStatus" AS ENUM ('UPLOADING', 'UPLOADED', 'PROCESSING', 'READY', 'FAILED', 'QUARANTINED', 'ARCHIVED', 'DELETED');
+CREATE TYPE "ReportStatus" AS ENUM ('PENDING', 'REVIEWED', 'DISMISSED');
 
 -- CreateEnum
-CREATE TYPE "ScanStatus" AS ENUM ('PENDING', 'SCANNING', 'CLEAN', 'INFECTED', 'FAILED', 'SKIPPED');
-
--- CreateEnum
-CREATE TYPE "AttachmentEntityType" AS ENUM ('POST', 'COMMENT', 'REPLY', 'MESSAGE', 'WORKSHEET', 'SUBMISSION', 'REVIEW', 'PROFILE', 'THERAPIST_APPLICATION', 'MEETING_NOTES', 'PROGRESS_REPORT');
-
--- CreateEnum
-CREATE TYPE "AttachmentPurpose" AS ENUM ('GENERAL', 'AVATAR', 'COVER', 'DOCUMENT', 'MEDIA', 'AUDIO', 'BACKUP', 'CERTIFICATE', 'LICENSE', 'TRANSCRIPT');
-
--- CreateEnum
-CREATE TYPE "FileShareType" AS ENUM ('LINK', 'EMAIL', 'INTERNAL', 'TEMPORARY');
+CREATE TYPE "Platform" AS ENUM ('IOS', 'ANDROID', 'WEB');
 
 -- CreateEnum
 CREATE TYPE "ConversationType" AS ENUM ('DIRECT', 'GROUP', 'SESSION', 'SUPPORT');
@@ -92,10 +83,10 @@ CREATE TYPE "ConversationType" AS ENUM ('DIRECT', 'GROUP', 'SESSION', 'SUPPORT')
 CREATE TYPE "ParticipantRole" AS ENUM ('MEMBER', 'MODERATOR', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "MessageType" AS ENUM ('TEXT', 'IMAGE', 'FILE', 'VOICE', 'VIDEO', 'SYSTEM', 'LOCATION', 'POLL');
+CREATE TYPE "MessageType" AS ENUM ('TEXT', 'IMAGE', 'AUDIO', 'VIDEO', 'SYSTEM');
 
 -- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('APPOINTMENT_REMINDER', 'APPOINTMENT_CONFIRMED', 'APPOINTMENT_CANCELLED', 'APPOINTMENT_RESCHEDULED', 'MESSAGE_RECEIVED', 'MESSAGE_REACTION', 'WORKSHEET_ASSIGNED', 'WORKSHEET_DUE', 'WORKSHEET_FEEDBACK', 'REVIEW_REQUEST', 'REVIEW_RECEIVED', 'THERAPIST_APPLICATION', 'THERAPIST_APPROVED', 'THERAPIST_REJECTED', 'COMMUNITY_POST', 'COMMUNITY_REPLY', 'SYSTEM_MAINTENANCE', 'SYSTEM_UPDATE', 'SECURITY_ALERT', 'PAYMENT_SUCCESS', 'PAYMENT_FAILED', 'SUBSCRIPTION_EXPIRING');
+CREATE TYPE "NotificationType" AS ENUM ('APPOINTMENT_REMINDER', 'APPOINTMENT_CONFIRMED', 'APPOINTMENT_CANCELLED', 'APPOINTMENT_RESCHEDULED', 'MESSAGE_RECEIVED', 'MESSAGE_REACTION', 'WORKSHEET_ASSIGNED', 'WORKSHEET_DUE', 'WORKSHEET_FEEDBACK', 'REVIEW_REQUEST', 'REVIEW_RECEIVED', 'THERAPIST_APPLICATION', 'THERAPIST_APPROVED', 'THERAPIST_REJECTED', 'THERAPIST_STATUS_UPDATED', 'THERAPIST_REQUEST_ACCEPTED', 'THERAPIST_REQUEST_DECLINED', 'ALTERNATIVE_RECOMMENDATIONS', 'CLIENT_REQUEST_RECEIVED', 'CLIENT_REQUEST_CANCELLED', 'PROFILE_COMPLETION', 'COMMUNITY_POST', 'COMMUNITY_REPLY', 'COMMUNITY_RECOMMENDATION', 'COMMUNITY_JOINED', 'COMMUNITY_WELCOME', 'RECOMMENDATIONS_UPDATED', 'NEW_RECOMMENDATIONS', 'RELATIONSHIP_ESTABLISHED', 'REQUEST_REMINDER', 'SYSTEM_MAINTENANCE', 'SYSTEM_UPDATE', 'SECURITY_ALERT', 'SCHEDULING_INFO', 'PAYMENT_SUCCESS', 'PAYMENT_FAILED', 'SUBSCRIPTION_EXPIRING');
 
 -- CreateEnum
 CREATE TYPE "NotificationPriority" AS ENUM ('LOW', 'NORMAL', 'HIGH', 'URGENT');
@@ -114,6 +105,18 @@ CREATE TYPE "ActivityType" AS ENUM ('SESSION_START', 'SESSION_END', 'SCREEN_SHAR
 
 -- CreateEnum
 CREATE TYPE "UserActionType" AS ENUM ('PAGE_VIEW', 'PAGE_EXIT', 'CLICK', 'SCROLL', 'SEARCH', 'POST_CREATE', 'POST_VIEW', 'POST_LIKE', 'COMMENT_CREATE', 'COMMENT_LIKE', 'THERAPIST_SEARCH', 'THERAPIST_PROFILE_VIEW', 'APPOINTMENT_BOOK', 'APPOINTMENT_CANCEL', 'MESSAGE_SEND', 'WORKSHEET_COMPLETE', 'PROFILE_UPDATE', 'SETTINGS_CHANGE', 'PASSWORD_CHANGE', 'LOGOUT');
+
+-- CreateEnum
+CREATE TYPE "ClientRequestStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'CANCELLED', 'WITHDRAWN');
+
+-- CreateEnum
+CREATE TYPE "RequestPriority" AS ENUM ('LOW', 'NORMAL', 'HIGH', 'URGENT');
+
+-- CreateEnum
+CREATE TYPE "TherapistApplicationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "WorksheetStatus" AS ENUM ('UPCOMING', 'ASSIGNED', 'PAST_DUE', 'COMPLETED');
 
 -- CreateTable
 CREATE TABLE "Assessment" (
@@ -491,10 +494,12 @@ CREATE TABLE "Meeting" (
     "title" TEXT,
     "description" TEXT,
     "startTime" TIMESTAMP(3) NOT NULL,
+    "endTime" TIMESTAMP(3),
     "duration" INTEGER NOT NULL DEFAULT 60,
     "status" "MeetingStatus" NOT NULL DEFAULT 'SCHEDULED',
     "meetingType" TEXT NOT NULL DEFAULT 'video',
     "meetingUrl" TEXT,
+    "notes" TEXT,
     "clientId" TEXT NOT NULL,
     "therapistId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -518,9 +523,10 @@ CREATE TABLE "MeetingNotes" (
 CREATE TABLE "TherapistAvailability" (
     "id" TEXT NOT NULL,
     "therapistId" TEXT NOT NULL,
-    "dayOfWeek" INTEGER NOT NULL,
+    "dayOfWeek" TEXT NOT NULL,
     "startTime" TEXT NOT NULL,
     "endTime" TEXT NOT NULL,
+    "timezone" TEXT NOT NULL DEFAULT 'UTC',
     "isAvailable" BOOLEAN NOT NULL DEFAULT true,
     "notes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -535,7 +541,7 @@ CREATE TABLE "ClientTherapist" (
     "clientId" TEXT NOT NULL,
     "therapistId" TEXT NOT NULL,
     "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "status" TEXT NOT NULL DEFAULT 'active',
+    "status" "ClientTherapistStatus" NOT NULL DEFAULT 'ACTIVE',
     "notes" TEXT,
     "score" INTEGER,
 
@@ -579,9 +585,9 @@ CREATE TABLE "Community" (
 CREATE TABLE "Membership" (
     "id" TEXT NOT NULL,
     "communityId" TEXT NOT NULL,
-    "role" TEXT NOT NULL DEFAULT 'member',
+    "role" "MembershipRole" NOT NULL DEFAULT 'MEMBER',
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Membership_pkey" PRIMARY KEY ("id")
 );
@@ -611,6 +617,7 @@ CREATE TABLE "Room" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "order" INTEGER NOT NULL,
+    "postingRole" TEXT NOT NULL DEFAULT 'member',
     "roomGroupId" TEXT NOT NULL,
 
     CONSTRAINT "Room_pkey" PRIMARY KEY ("id")
@@ -623,8 +630,11 @@ CREATE TABLE "Post" (
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "userId" TEXT,
+    "userId" TEXT NOT NULL,
     "roomId" TEXT,
+    "attachmentUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentSizes" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
 );
@@ -635,8 +645,12 @@ CREATE TABLE "Comment" (
     "postId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
+    "parentId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "attachmentUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentSizes" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
 
     CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
 );
@@ -646,7 +660,7 @@ CREATE TABLE "CommentHeart" (
     "id" TEXT NOT NULL,
     "commentId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "CommentHeart_pkey" PRIMARY KEY ("id")
 );
@@ -656,132 +670,171 @@ CREATE TABLE "PostHeart" (
     "id" TEXT NOT NULL,
     "postId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "PostHeart_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Reply" (
+CREATE TABLE "Report" (
     "id" TEXT NOT NULL,
-    "commentId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "content" TEXT,
+    "status" "ReportStatus" NOT NULL DEFAULT 'PENDING',
+    "postId" TEXT,
+    "commentId" TEXT,
+    "reporterId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Reply_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Report_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "ReplyHeart" (
+CREATE TABLE "DeviceToken" (
     "id" TEXT NOT NULL,
-    "replyId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "ReplyHeart_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "File" (
-    "id" TEXT NOT NULL,
-    "filename" TEXT NOT NULL,
-    "displayName" TEXT,
-    "mimeType" TEXT NOT NULL,
-    "size" INTEGER NOT NULL,
-    "hash" TEXT,
-    "storageProvider" "StorageProvider" NOT NULL DEFAULT 'LOCAL',
-    "storagePath" TEXT NOT NULL,
-    "storageUrl" TEXT,
-    "bucketName" TEXT,
-    "width" INTEGER,
-    "height" INTEGER,
-    "duration" INTEGER,
-    "encoding" TEXT,
-    "compression" TEXT,
-    "isPublic" BOOLEAN NOT NULL DEFAULT false,
-    "isEncrypted" BOOLEAN NOT NULL DEFAULT false,
-    "accessLevel" "AccessLevel" NOT NULL DEFAULT 'PRIVATE',
-    "status" "FileStatus" NOT NULL DEFAULT 'UPLOADING',
-    "uploadedBy" TEXT NOT NULL,
-    "scanStatus" "ScanStatus" NOT NULL DEFAULT 'PENDING',
-    "scanResult" TEXT,
-    "scannedAt" TIMESTAMP(3),
-    "expiresAt" TIMESTAMP(3),
-    "archivedAt" TIMESTAMP(3),
-    "deletedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "File_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "FileAttachment" (
-    "id" TEXT NOT NULL,
-    "fileId" TEXT NOT NULL,
-    "entityType" "AttachmentEntityType" NOT NULL,
-    "entityId" TEXT NOT NULL,
-    "purpose" "AttachmentPurpose" NOT NULL DEFAULT 'GENERAL',
-    "order" INTEGER,
-    "caption" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "FileAttachment_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "FileVersion" (
-    "id" TEXT NOT NULL,
-    "fileId" TEXT NOT NULL,
-    "version" INTEGER NOT NULL DEFAULT 1,
-    "description" TEXT,
-    "filename" TEXT NOT NULL,
-    "size" INTEGER NOT NULL,
-    "mimeType" TEXT NOT NULL,
-    "storagePath" TEXT NOT NULL,
-    "hash" TEXT,
-    "createdBy" TEXT NOT NULL,
-    "isActive" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "FileVersion_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "FileShare" (
-    "id" TEXT NOT NULL,
-    "fileId" TEXT NOT NULL,
-    "shareToken" TEXT NOT NULL,
-    "shareType" "FileShareType" NOT NULL DEFAULT 'LINK',
-    "password" TEXT,
-    "maxDownloads" INTEGER,
-    "currentDownloads" INTEGER NOT NULL DEFAULT 0,
-    "expiresAt" TIMESTAMP(3),
+    "token" TEXT NOT NULL,
+    "platform" "Platform" NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "sharedBy" TEXT NOT NULL,
-    "sharedWith" TEXT[],
-    "message" TEXT,
+    "lastUsedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deviceInfo" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "FileShare_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "DeviceToken_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "FileDownload" (
+CREATE TABLE "ScheduledNotification" (
     "id" TEXT NOT NULL,
-    "fileId" TEXT NOT NULL,
-    "shareId" TEXT,
-    "downloadedBy" TEXT,
-    "ipAddress" TEXT NOT NULL,
-    "userAgent" TEXT,
-    "size" INTEGER NOT NULL,
-    "completed" BOOLEAN NOT NULL DEFAULT false,
+    "userId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "body" TEXT NOT NULL,
+    "type" "NotificationType" NOT NULL,
+    "priority" "NotificationPriority" NOT NULL DEFAULT 'NORMAL',
+    "data" JSONB,
+    "actionUrl" TEXT,
+    "notificationChannel" TEXT NOT NULL DEFAULT 'push',
+    "scheduledFor" TIMESTAMP(3) NOT NULL,
+    "sentAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "FileDownload_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ScheduledNotification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "MatchingWeight" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "weight" DOUBLE PRECISION NOT NULL,
+    "description" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "MatchingWeight_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "MatchHistory" (
+    "id" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "therapistId" TEXT NOT NULL,
+    "totalScore" INTEGER NOT NULL,
+    "conditionScore" INTEGER NOT NULL,
+    "approachScore" INTEGER NOT NULL,
+    "experienceScore" INTEGER NOT NULL,
+    "reviewScore" INTEGER NOT NULL,
+    "logisticsScore" INTEGER NOT NULL,
+    "compatibilityScore" INTEGER,
+    "primaryMatches" TEXT[],
+    "secondaryMatches" TEXT[],
+    "approachMatches" TEXT[],
+    "recommendationRank" INTEGER NOT NULL,
+    "totalRecommendations" INTEGER NOT NULL,
+    "wasViewed" BOOLEAN NOT NULL DEFAULT false,
+    "wasContacted" BOOLEAN NOT NULL DEFAULT false,
+    "becameClient" BOOLEAN NOT NULL DEFAULT false,
+    "sessionCount" INTEGER NOT NULL DEFAULT 0,
+    "clientSatisfactionScore" INTEGER,
+    "recommendationAlgorithm" TEXT NOT NULL DEFAULT 'advanced',
+    "userAgent" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "MatchHistory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ClientCompatibility" (
+    "id" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "therapistId" TEXT NOT NULL,
+    "personalityCompatibility" INTEGER NOT NULL,
+    "sessionCompatibility" INTEGER NOT NULL,
+    "demographicCompatibility" INTEGER NOT NULL,
+    "overallCompatibility" INTEGER NOT NULL,
+    "communicationStyleScore" INTEGER NOT NULL,
+    "personalityMatchScore" INTEGER NOT NULL,
+    "culturalCompatibilityScore" INTEGER NOT NULL,
+    "formatMatchScore" INTEGER NOT NULL,
+    "durationMatchScore" INTEGER NOT NULL,
+    "frequencyMatchScore" INTEGER NOT NULL,
+    "schedulingCompatibilityScore" INTEGER NOT NULL,
+    "ageCompatibilityScore" INTEGER NOT NULL,
+    "genderCompatibilityScore" INTEGER NOT NULL,
+    "languageCompatibilityScore" INTEGER NOT NULL,
+    "strengths" TEXT[],
+    "concerns" TEXT[],
+    "recommendations" TEXT[],
+    "analysisVersion" TEXT NOT NULL DEFAULT '1.0',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ClientCompatibility_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RecommendationFeedback" (
+    "id" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "therapistId" TEXT NOT NULL,
+    "matchHistoryId" TEXT,
+    "relevanceScore" INTEGER NOT NULL,
+    "accuracyScore" INTEGER NOT NULL,
+    "helpfulnessScore" INTEGER NOT NULL,
+    "feedbackText" TEXT,
+    "selectedTherapist" BOOLEAN NOT NULL DEFAULT false,
+    "reasonNotSelected" TEXT,
+    "hadInitialSession" BOOLEAN NOT NULL DEFAULT false,
+    "continuedTherapy" BOOLEAN NOT NULL DEFAULT false,
+    "overallSatisfaction" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RecommendationFeedback_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AlgorithmPerformance" (
+    "id" TEXT NOT NULL,
+    "algorithmName" TEXT NOT NULL,
+    "version" TEXT NOT NULL DEFAULT '1.0',
+    "totalRecommendations" INTEGER NOT NULL,
+    "successfulMatches" INTEGER NOT NULL,
+    "averageMatchScore" DOUBLE PRECISION NOT NULL,
+    "averageSatisfactionScore" DOUBLE PRECISION,
+    "periodStart" TIMESTAMP(3) NOT NULL,
+    "periodEnd" TIMESTAMP(3) NOT NULL,
+    "clickThroughRate" DOUBLE PRECISION NOT NULL,
+    "conversionRate" DOUBLE PRECISION NOT NULL,
+    "retentionRate" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AlgorithmPerformance_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -821,10 +874,17 @@ CREATE TABLE "Message" (
     "attachmentUrl" TEXT,
     "attachmentName" TEXT,
     "attachmentSize" INTEGER,
+    "attachmentUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentSizes" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     "replyToId" TEXT,
     "isEdited" BOOLEAN NOT NULL DEFAULT false,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "editedAt" TIMESTAMP(3),
+    "isEncrypted" BOOLEAN NOT NULL DEFAULT false,
+    "encryptionIv" TEXT,
+    "encryptionAuthTag" TEXT,
+    "encryptionKeyId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -936,6 +996,23 @@ CREATE TABLE "PreAssessment" (
 );
 
 -- CreateTable
+CREATE TABLE "RefreshToken" (
+    "id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "revokedAt" TIMESTAMP(3),
+    "ipAddress" TEXT,
+    "userAgent" TEXT,
+    "location" TEXT,
+    "deviceName" TEXT,
+    "lastActivity" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "RefreshToken_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Review" (
     "id" TEXT NOT NULL,
     "rating" INTEGER NOT NULL,
@@ -1043,11 +1120,51 @@ CREATE TABLE "TherapyProgress" (
 );
 
 -- CreateTable
+CREATE TABLE "StripeWebhookEvent" (
+    "id" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
+    "eventType" TEXT NOT NULL,
+    "eventData" JSONB NOT NULL,
+    "livemode" BOOLEAN NOT NULL,
+    "apiVersion" TEXT,
+    "created" TIMESTAMP(3) NOT NULL,
+    "received" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "processed" BOOLEAN NOT NULL DEFAULT false,
+    "processedAt" TIMESTAMP(3),
+    "success" BOOLEAN,
+    "errorMessage" TEXT,
+    "retryCount" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "StripeWebhookEvent_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ClientTherapistRequest" (
+    "id" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+    "therapistId" TEXT NOT NULL,
+    "status" "ClientRequestStatus" NOT NULL DEFAULT 'PENDING',
+    "priority" "RequestPriority" NOT NULL DEFAULT 'NORMAL',
+    "requestedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "respondedAt" TIMESTAMP(3),
+    "expiresAt" TIMESTAMP(3),
+    "clientMessage" TEXT,
+    "therapistResponse" TEXT,
+    "recommendationRank" INTEGER,
+    "matchScore" DOUBLE PRECISION,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ClientTherapistRequest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Therapist" (
     "userId" TEXT NOT NULL,
     "mobile" TEXT NOT NULL,
     "province" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'pending',
+    "timezone" TEXT NOT NULL DEFAULT 'UTC',
+    "status" "TherapistApplicationStatus" NOT NULL DEFAULT 'PENDING',
     "submissionDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "processingDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "processedByAdminId" TEXT,
@@ -1061,6 +1178,12 @@ CREATE TABLE "Therapist" (
     "licenseVerifiedAt" TIMESTAMP(3),
     "licenseVerifiedBy" TEXT,
     "certifications" JSONB,
+    "certificateUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "certificateNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "licenseUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "licenseNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "documentUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "documentNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "yearsOfExperience" INTEGER,
     "educationBackground" TEXT,
     "specialCertifications" TEXT[],
@@ -1094,17 +1217,6 @@ CREATE TABLE "Therapist" (
 );
 
 -- CreateTable
-CREATE TABLE "TherapistFiles" (
-    "id" TEXT NOT NULL,
-    "therapistId" TEXT NOT NULL,
-    "fileUrl" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "TherapistFiles_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -1113,26 +1225,30 @@ CREATE TABLE "User" (
     "lastName" TEXT NOT NULL,
     "birthDate" TIMESTAMP(3),
     "address" TEXT,
-    "avatarUrl" TEXT,
     "role" TEXT NOT NULL DEFAULT 'client',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "bio" TEXT,
-    "coverImageUrl" TEXT,
+    "password" TEXT,
+    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "emailVerifyToken" TEXT,
+    "emailVerifyTokenExp" TIMESTAMP(3),
+    "resetToken" TEXT,
+    "resetTokenExpiry" TIMESTAMP(3),
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
-    "phoneNumber" TEXT,
-    "phoneVerified" BOOLEAN NOT NULL DEFAULT false,
-    "timezone" TEXT DEFAULT 'UTC',
-    "language" TEXT DEFAULT 'en',
-    "theme" TEXT DEFAULT 'light',
-    "profileVisibility" TEXT NOT NULL DEFAULT 'private',
-    "allowMessagesFrom" TEXT NOT NULL DEFAULT 'therapists',
-    "lastLoginAt" TIMESTAMP(3),
-    "lastActiveAt" TIMESTAMP(3),
+    "failedLoginCount" INTEGER NOT NULL DEFAULT 0,
+    "avatarUrl" TEXT,
+    "coverImageUrl" TEXT,
+    "bio" TEXT,
     "suspendedAt" TIMESTAMP(3),
     "suspendedBy" TEXT,
     "suspensionReason" TEXT,
+    "deactivatedAt" TIMESTAMP(3),
+    "deactivatedBy" TEXT,
+    "deactivationReason" TEXT,
+    "lastLoginAt" TIMESTAMP(3),
+    "lockoutUntil" TIMESTAMP(3),
+    "stripeCustomerId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -1172,42 +1288,23 @@ CREATE TABLE "Worksheet" (
     "instructions" TEXT,
     "description" TEXT,
     "dueDate" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'upcoming',
+    "status" "WorksheetStatus" NOT NULL DEFAULT 'UPCOMING',
     "isCompleted" BOOLEAN NOT NULL DEFAULT false,
     "submittedAt" TIMESTAMP(3),
     "feedback" TEXT,
+    "materialUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "materialNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "materialSizes" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "submissionUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "submissionNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "submissionSizes" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "attachmentUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentNames" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "attachmentSizes" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Worksheet_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "WorksheetMaterial" (
-    "id" TEXT NOT NULL,
-    "worksheetId" TEXT NOT NULL,
-    "filename" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "fileSize" INTEGER,
-    "fileType" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "WorksheetMaterial_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "WorksheetSubmission" (
-    "id" TEXT NOT NULL,
-    "worksheetId" TEXT NOT NULL,
-    "clientId" TEXT NOT NULL,
-    "filename" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "fileSize" INTEGER,
-    "fileType" TEXT,
-    "content" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "WorksheetSubmission_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -1451,10 +1548,19 @@ CREATE INDEX "Meeting_therapistId_idx" ON "Meeting"("therapistId");
 CREATE INDEX "Meeting_startTime_idx" ON "Meeting"("startTime");
 
 -- CreateIndex
+CREATE INDEX "Meeting_endTime_idx" ON "Meeting"("endTime");
+
+-- CreateIndex
 CREATE INDEX "Meeting_status_idx" ON "Meeting"("status");
 
 -- CreateIndex
-CREATE INDEX "Meeting_therapistId_startTime_idx" ON "Meeting"("therapistId", "startTime");
+CREATE INDEX "Meeting_therapistId_startTime_status_idx" ON "Meeting"("therapistId", "startTime", "status");
+
+-- CreateIndex
+CREATE INDEX "Meeting_therapistId_startTime_endTime_idx" ON "Meeting"("therapistId", "startTime", "endTime");
+
+-- CreateIndex
+CREATE INDEX "Meeting_clientId_startTime_endTime_idx" ON "Meeting"("clientId", "startTime", "endTime");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "MeetingNotes_id_key" ON "MeetingNotes"("id");
@@ -1529,6 +1635,12 @@ CREATE INDEX "Comment_postId_idx" ON "Comment"("postId");
 CREATE INDEX "Comment_userId_idx" ON "Comment"("userId");
 
 -- CreateIndex
+CREATE INDEX "Comment_parentId_idx" ON "Comment"("parentId");
+
+-- CreateIndex
+CREATE INDEX "Comment_postId_parentId_idx" ON "Comment"("postId", "parentId");
+
+-- CreateIndex
 CREATE INDEX "CommentHeart_commentId_idx" ON "CommentHeart"("commentId");
 
 -- CreateIndex
@@ -1547,97 +1659,109 @@ CREATE INDEX "PostHeart_userId_idx" ON "PostHeart"("userId");
 CREATE UNIQUE INDEX "PostHeart_postId_userId_key" ON "PostHeart"("postId", "userId");
 
 -- CreateIndex
-CREATE INDEX "Reply_commentId_idx" ON "Reply"("commentId");
+CREATE INDEX "Report_reporterId_idx" ON "Report"("reporterId");
 
 -- CreateIndex
-CREATE INDEX "Reply_userId_idx" ON "Reply"("userId");
+CREATE INDEX "Report_postId_idx" ON "Report"("postId");
 
 -- CreateIndex
-CREATE INDEX "ReplyHeart_replyId_idx" ON "ReplyHeart"("replyId");
+CREATE INDEX "Report_commentId_idx" ON "Report"("commentId");
 
 -- CreateIndex
-CREATE INDEX "ReplyHeart_userId_idx" ON "ReplyHeart"("userId");
+CREATE UNIQUE INDEX "DeviceToken_token_key" ON "DeviceToken"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ReplyHeart_replyId_userId_key" ON "ReplyHeart"("replyId", "userId");
+CREATE INDEX "DeviceToken_userId_isActive_idx" ON "DeviceToken"("userId", "isActive");
 
 -- CreateIndex
-CREATE INDEX "File_uploadedBy_idx" ON "File"("uploadedBy");
+CREATE INDEX "DeviceToken_token_idx" ON "DeviceToken"("token");
 
 -- CreateIndex
-CREATE INDEX "File_mimeType_idx" ON "File"("mimeType");
+CREATE INDEX "DeviceToken_platform_isActive_idx" ON "DeviceToken"("platform", "isActive");
 
 -- CreateIndex
-CREATE INDEX "File_status_idx" ON "File"("status");
+CREATE INDEX "DeviceToken_lastUsedAt_idx" ON "DeviceToken"("lastUsedAt");
 
 -- CreateIndex
-CREATE INDEX "File_scanStatus_idx" ON "File"("scanStatus");
+CREATE INDEX "ScheduledNotification_userId_scheduledFor_idx" ON "ScheduledNotification"("userId", "scheduledFor");
 
 -- CreateIndex
-CREATE INDEX "File_hash_idx" ON "File"("hash");
+CREATE INDEX "ScheduledNotification_scheduledFor_sentAt_idx" ON "ScheduledNotification"("scheduledFor", "sentAt");
 
 -- CreateIndex
-CREATE INDEX "File_createdAt_idx" ON "File"("createdAt");
+CREATE INDEX "ScheduledNotification_notificationChannel_scheduledFor_idx" ON "ScheduledNotification"("notificationChannel", "scheduledFor");
 
 -- CreateIndex
-CREATE INDEX "File_expiresAt_idx" ON "File"("expiresAt");
+CREATE INDEX "ScheduledNotification_type_scheduledFor_idx" ON "ScheduledNotification"("type", "scheduledFor");
 
 -- CreateIndex
-CREATE INDEX "File_deletedAt_idx" ON "File"("deletedAt");
+CREATE UNIQUE INDEX "MatchingWeight_name_key" ON "MatchingWeight"("name");
 
 -- CreateIndex
-CREATE INDEX "FileAttachment_fileId_idx" ON "FileAttachment"("fileId");
+CREATE INDEX "MatchingWeight_name_idx" ON "MatchingWeight"("name");
 
 -- CreateIndex
-CREATE INDEX "FileAttachment_entityType_entityId_idx" ON "FileAttachment"("entityType", "entityId");
+CREATE INDEX "MatchingWeight_isActive_idx" ON "MatchingWeight"("isActive");
 
 -- CreateIndex
-CREATE INDEX "FileAttachment_purpose_idx" ON "FileAttachment"("purpose");
+CREATE INDEX "MatchHistory_clientId_idx" ON "MatchHistory"("clientId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "FileAttachment_entityType_entityId_fileId_key" ON "FileAttachment"("entityType", "entityId", "fileId");
+CREATE INDEX "MatchHistory_therapistId_idx" ON "MatchHistory"("therapistId");
 
 -- CreateIndex
-CREATE INDEX "FileVersion_fileId_idx" ON "FileVersion"("fileId");
+CREATE INDEX "MatchHistory_totalScore_idx" ON "MatchHistory"("totalScore");
 
 -- CreateIndex
-CREATE INDEX "FileVersion_isActive_idx" ON "FileVersion"("isActive");
+CREATE INDEX "MatchHistory_recommendationRank_idx" ON "MatchHistory"("recommendationRank");
 
 -- CreateIndex
-CREATE INDEX "FileVersion_createdBy_idx" ON "FileVersion"("createdBy");
+CREATE INDEX "MatchHistory_becameClient_idx" ON "MatchHistory"("becameClient");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "FileVersion_fileId_version_key" ON "FileVersion"("fileId", "version");
+CREATE INDEX "MatchHistory_createdAt_idx" ON "MatchHistory"("createdAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "FileShare_shareToken_key" ON "FileShare"("shareToken");
+CREATE UNIQUE INDEX "MatchHistory_clientId_therapistId_createdAt_key" ON "MatchHistory"("clientId", "therapistId", "createdAt");
 
 -- CreateIndex
-CREATE INDEX "FileShare_fileId_idx" ON "FileShare"("fileId");
+CREATE INDEX "ClientCompatibility_clientId_idx" ON "ClientCompatibility"("clientId");
 
 -- CreateIndex
-CREATE INDEX "FileShare_shareToken_idx" ON "FileShare"("shareToken");
+CREATE INDEX "ClientCompatibility_therapistId_idx" ON "ClientCompatibility"("therapistId");
 
 -- CreateIndex
-CREATE INDEX "FileShare_sharedBy_idx" ON "FileShare"("sharedBy");
+CREATE INDEX "ClientCompatibility_overallCompatibility_idx" ON "ClientCompatibility"("overallCompatibility");
 
 -- CreateIndex
-CREATE INDEX "FileShare_expiresAt_idx" ON "FileShare"("expiresAt");
+CREATE INDEX "ClientCompatibility_createdAt_idx" ON "ClientCompatibility"("createdAt");
 
 -- CreateIndex
-CREATE INDEX "FileShare_isActive_idx" ON "FileShare"("isActive");
+CREATE UNIQUE INDEX "ClientCompatibility_clientId_therapistId_key" ON "ClientCompatibility"("clientId", "therapistId");
 
 -- CreateIndex
-CREATE INDEX "FileDownload_fileId_idx" ON "FileDownload"("fileId");
+CREATE INDEX "RecommendationFeedback_clientId_idx" ON "RecommendationFeedback"("clientId");
 
 -- CreateIndex
-CREATE INDEX "FileDownload_shareId_idx" ON "FileDownload"("shareId");
+CREATE INDEX "RecommendationFeedback_therapistId_idx" ON "RecommendationFeedback"("therapistId");
 
 -- CreateIndex
-CREATE INDEX "FileDownload_downloadedBy_idx" ON "FileDownload"("downloadedBy");
+CREATE INDEX "RecommendationFeedback_selectedTherapist_idx" ON "RecommendationFeedback"("selectedTherapist");
 
 -- CreateIndex
-CREATE INDEX "FileDownload_createdAt_idx" ON "FileDownload"("createdAt");
+CREATE INDEX "RecommendationFeedback_createdAt_idx" ON "RecommendationFeedback"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "AlgorithmPerformance_algorithmName_idx" ON "AlgorithmPerformance"("algorithmName");
+
+-- CreateIndex
+CREATE INDEX "AlgorithmPerformance_version_idx" ON "AlgorithmPerformance"("version");
+
+-- CreateIndex
+CREATE INDEX "AlgorithmPerformance_periodStart_periodEnd_idx" ON "AlgorithmPerformance"("periodStart", "periodEnd");
+
+-- CreateIndex
+CREATE INDEX "AlgorithmPerformance_createdAt_idx" ON "AlgorithmPerformance"("createdAt");
 
 -- CreateIndex
 CREATE INDEX "Conversation_lastMessageAt_idx" ON "Conversation"("lastMessageAt");
@@ -1661,7 +1785,7 @@ CREATE INDEX "ConversationParticipant_isActive_idx" ON "ConversationParticipant"
 CREATE UNIQUE INDEX "ConversationParticipant_conversationId_userId_key" ON "ConversationParticipant"("conversationId", "userId");
 
 -- CreateIndex
-CREATE INDEX "Message_conversationId_createdAt_idx" ON "Message"("conversationId", "createdAt");
+CREATE INDEX "Message_conversationId_createdAt_isDeleted_idx" ON "Message"("conversationId", "createdAt", "isDeleted");
 
 -- CreateIndex
 CREATE INDEX "Message_senderId_idx" ON "Message"("senderId");
@@ -1671,6 +1795,12 @@ CREATE INDEX "Message_messageType_idx" ON "Message"("messageType");
 
 -- CreateIndex
 CREATE INDEX "Message_isDeleted_idx" ON "Message"("isDeleted");
+
+-- CreateIndex
+CREATE INDEX "Message_isEncrypted_idx" ON "Message"("isEncrypted");
+
+-- CreateIndex
+CREATE INDEX "Message_encryptionKeyId_idx" ON "Message"("encryptionKeyId");
 
 -- CreateIndex
 CREATE INDEX "MessageReadReceipt_messageId_idx" ON "MessageReadReceipt"("messageId");
@@ -1727,6 +1857,9 @@ CREATE INDEX "Notification_scheduledFor_idx" ON "Notification"("scheduledFor");
 CREATE INDEX "Notification_createdAt_idx" ON "Notification"("createdAt");
 
 -- CreateIndex
+CREATE INDEX "Notification_userId_isRead_createdAt_idx" ON "Notification"("userId", "isRead", "createdAt" DESC);
+
+-- CreateIndex
 CREATE UNIQUE INDEX "NotificationSettings_userId_key" ON "NotificationSettings"("userId");
 
 -- CreateIndex
@@ -1737,6 +1870,21 @@ CREATE UNIQUE INDEX "PreAssessment_clientId_key" ON "PreAssessment"("clientId");
 
 -- CreateIndex
 CREATE INDEX "PreAssessment_clientId_idx" ON "PreAssessment"("clientId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RefreshToken_token_key" ON "RefreshToken"("token");
+
+-- CreateIndex
+CREATE INDEX "RefreshToken_userId_idx" ON "RefreshToken"("userId");
+
+-- CreateIndex
+CREATE INDEX "RefreshToken_token_idx" ON "RefreshToken"("token");
+
+-- CreateIndex
+CREATE INDEX "RefreshToken_expiresAt_idx" ON "RefreshToken"("expiresAt");
+
+-- CreateIndex
+CREATE INDEX "RefreshToken_userId_revokedAt_idx" ON "RefreshToken"("userId", "revokedAt");
 
 -- CreateIndex
 CREATE INDEX "Review_therapistId_idx" ON "Review"("therapistId");
@@ -1817,6 +1965,42 @@ CREATE INDEX "TherapyProgress_assessmentDate_idx" ON "TherapyProgress"("assessme
 CREATE INDEX "TherapyProgress_progressScore_idx" ON "TherapyProgress"("progressScore");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "StripeWebhookEvent_eventId_key" ON "StripeWebhookEvent"("eventId");
+
+-- CreateIndex
+CREATE INDEX "StripeWebhookEvent_eventId_idx" ON "StripeWebhookEvent"("eventId");
+
+-- CreateIndex
+CREATE INDEX "StripeWebhookEvent_eventType_idx" ON "StripeWebhookEvent"("eventType");
+
+-- CreateIndex
+CREATE INDEX "StripeWebhookEvent_processed_success_idx" ON "StripeWebhookEvent"("processed", "success");
+
+-- CreateIndex
+CREATE INDEX "StripeWebhookEvent_created_idx" ON "StripeWebhookEvent"("created");
+
+-- CreateIndex
+CREATE INDEX "StripeWebhookEvent_livemode_idx" ON "StripeWebhookEvent"("livemode");
+
+-- CreateIndex
+CREATE INDEX "ClientTherapistRequest_status_idx" ON "ClientTherapistRequest"("status");
+
+-- CreateIndex
+CREATE INDEX "ClientTherapistRequest_requestedAt_idx" ON "ClientTherapistRequest"("requestedAt");
+
+-- CreateIndex
+CREATE INDEX "ClientTherapistRequest_expiresAt_idx" ON "ClientTherapistRequest"("expiresAt");
+
+-- CreateIndex
+CREATE INDEX "ClientTherapistRequest_clientId_idx" ON "ClientTherapistRequest"("clientId");
+
+-- CreateIndex
+CREATE INDEX "ClientTherapistRequest_therapistId_idx" ON "ClientTherapistRequest"("therapistId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ClientTherapistRequest_clientId_therapistId_key" ON "ClientTherapistRequest"("clientId", "therapistId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Therapist_userId_key" ON "Therapist"("userId");
 
 -- CreateIndex
@@ -1826,16 +2010,22 @@ CREATE INDEX "Therapist_userId_idx" ON "Therapist"("userId");
 CREATE INDEX "Therapist_status_idx" ON "Therapist"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "TherapistFiles_id_key" ON "TherapistFiles"("id");
-
--- CreateIndex
-CREATE INDEX "TherapistFiles_therapistId_idx" ON "TherapistFiles"("therapistId");
+CREATE INDEX "Therapist_timezone_idx" ON "Therapist"("timezone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_emailVerifyToken_key" ON "User"("emailVerifyToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_resetToken_key" ON "User"("resetToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_stripeCustomerId_key" ON "User"("stripeCustomerId");
 
 -- CreateIndex
 CREATE INDEX "User_email_idx" ON "User"("email");
@@ -1872,15 +2062,6 @@ CREATE INDEX "Worksheet_status_idx" ON "Worksheet"("status");
 
 -- CreateIndex
 CREATE INDEX "Worksheet_isCompleted_idx" ON "Worksheet"("isCompleted");
-
--- CreateIndex
-CREATE INDEX "WorksheetMaterial_worksheetId_idx" ON "WorksheetMaterial"("worksheetId");
-
--- CreateIndex
-CREATE INDEX "WorksheetSubmission_worksheetId_idx" ON "WorksheetSubmission"("worksheetId");
-
--- CreateIndex
-CREATE INDEX "WorksheetSubmission_clientId_idx" ON "WorksheetSubmission"("clientId");
 
 -- AddForeignKey
 ALTER TABLE "Assessment" ADD CONSTRAINT "Assessment_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1955,16 +2136,16 @@ ALTER TABLE "DiscountRedemption" ADD CONSTRAINT "DiscountRedemption_discountId_f
 ALTER TABLE "DiscountRedemption" ADD CONSTRAINT "DiscountRedemption_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MeetingNotes" ADD CONSTRAINT "MeetingNotes_meetingId_fkey" FOREIGN KEY ("meetingId") REFERENCES "Meeting"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MeetingNotes" ADD CONSTRAINT "MeetingNotes_meetingId_fkey" FOREIGN KEY ("meetingId") REFERENCES "Meeting"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TherapistAvailability" ADD CONSTRAINT "TherapistAvailability_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "TherapistAvailability" ADD CONSTRAINT "TherapistAvailability_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClientTherapist" ADD CONSTRAINT "ClientTherapist_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1979,10 +2160,10 @@ ALTER TABLE "ClientMedicalHistory" ADD CONSTRAINT "ClientMedicalHistory_clientId
 ALTER TABLE "ClientPreference" ADD CONSTRAINT "ClientPreference_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Membership" ADD CONSTRAINT "Membership_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Membership" ADD CONSTRAINT "Membership_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ModeratorCommunity" ADD CONSTRAINT "ModeratorCommunity_moderatorId_fkey" FOREIGN KEY ("moderatorId") REFERENCES "Moderator"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1991,73 +2172,73 @@ ALTER TABLE "ModeratorCommunity" ADD CONSTRAINT "ModeratorCommunity_moderatorId_
 ALTER TABLE "ModeratorCommunity" ADD CONSTRAINT "ModeratorCommunity_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RoomGroup" ADD CONSTRAINT "RoomGroup_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RoomGroup" ADD CONSTRAINT "RoomGroup_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Room" ADD CONSTRAINT "Room_roomGroupId_fkey" FOREIGN KEY ("roomGroupId") REFERENCES "RoomGroup"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Room" ADD CONSTRAINT "Room_roomGroupId_fkey" FOREIGN KEY ("roomGroupId") REFERENCES "RoomGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "Room"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CommentHeart" ADD CONSTRAINT "CommentHeart_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Comment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CommentHeart" ADD CONSTRAINT "CommentHeart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "CommentHeart" ADD CONSTRAINT "CommentHeart_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PostHeart" ADD CONSTRAINT "PostHeart_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CommentHeart" ADD CONSTRAINT "CommentHeart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PostHeart" ADD CONSTRAINT "PostHeart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "PostHeart" ADD CONSTRAINT "PostHeart_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Reply" ADD CONSTRAINT "Reply_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PostHeart" ADD CONSTRAINT "PostHeart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Reply" ADD CONSTRAINT "Reply_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_reporterId_fkey" FOREIGN KEY ("reporterId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ReplyHeart" ADD CONSTRAINT "ReplyHeart_replyId_fkey" FOREIGN KEY ("replyId") REFERENCES "Reply"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ReplyHeart" ADD CONSTRAINT "ReplyHeart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "File" ADD CONSTRAINT "File_uploadedBy_fkey" FOREIGN KEY ("uploadedBy") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DeviceToken" ADD CONSTRAINT "DeviceToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileAttachment" ADD CONSTRAINT "FileAttachment_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ScheduledNotification" ADD CONSTRAINT "ScheduledNotification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileVersion" ADD CONSTRAINT "FileVersion_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MatchHistory" ADD CONSTRAINT "MatchHistory_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileVersion" ADD CONSTRAINT "FileVersion_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MatchHistory" ADD CONSTRAINT "MatchHistory_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileShare" ADD CONSTRAINT "FileShare_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ClientCompatibility" ADD CONSTRAINT "ClientCompatibility_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileShare" ADD CONSTRAINT "FileShare_sharedBy_fkey" FOREIGN KEY ("sharedBy") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ClientCompatibility" ADD CONSTRAINT "ClientCompatibility_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileDownload" ADD CONSTRAINT "FileDownload_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RecommendationFeedback" ADD CONSTRAINT "RecommendationFeedback_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileDownload" ADD CONSTRAINT "FileDownload_shareId_fkey" FOREIGN KEY ("shareId") REFERENCES "FileShare"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "RecommendationFeedback" ADD CONSTRAINT "RecommendationFeedback_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FileDownload" ADD CONSTRAINT "FileDownload_downloadedBy_fkey" FOREIGN KEY ("downloadedBy") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "RecommendationFeedback" ADD CONSTRAINT "RecommendationFeedback_matchHistoryId_fkey" FOREIGN KEY ("matchHistoryId") REFERENCES "MatchHistory"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ConversationParticipant" ADD CONSTRAINT "ConversationParticipant_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2099,7 +2280,10 @@ ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY
 ALTER TABLE "NotificationSettings" ADD CONSTRAINT "NotificationSettings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PreAssessment" ADD CONSTRAINT "PreAssessment_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PreAssessment" ADD CONSTRAINT "PreAssessment_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Review" ADD CONSTRAINT "Review_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2138,13 +2322,16 @@ ALTER TABLE "TherapyProgress" ADD CONSTRAINT "TherapyProgress_clientId_fkey" FOR
 ALTER TABLE "TherapyProgress" ADD CONSTRAINT "TherapyProgress_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ClientTherapistRequest" ADD CONSTRAINT "ClientTherapistRequest_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ClientTherapistRequest" ADD CONSTRAINT "ClientTherapistRequest_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Therapist" ADD CONSTRAINT "Therapist_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Therapist" ADD CONSTRAINT "Therapist_processedByAdminId_fkey" FOREIGN KEY ("processedByAdminId") REFERENCES "Admin"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "TherapistFiles" ADD CONSTRAINT "TherapistFiles_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Client" ADD CONSTRAINT "Client_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2156,16 +2343,7 @@ ALTER TABLE "Moderator" ADD CONSTRAINT "Moderator_userId_fkey" FOREIGN KEY ("use
 ALTER TABLE "Admin" ADD CONSTRAINT "Admin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Worksheet" ADD CONSTRAINT "Worksheet_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Worksheet" ADD CONSTRAINT "Worksheet_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Worksheet" ADD CONSTRAINT "Worksheet_therapistId_fkey" FOREIGN KEY ("therapistId") REFERENCES "Therapist"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "WorksheetMaterial" ADD CONSTRAINT "WorksheetMaterial_worksheetId_fkey" FOREIGN KEY ("worksheetId") REFERENCES "Worksheet"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "WorksheetSubmission" ADD CONSTRAINT "WorksheetSubmission_worksheetId_fkey" FOREIGN KEY ("worksheetId") REFERENCES "Worksheet"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "WorksheetSubmission" ADD CONSTRAINT "WorksheetSubmission_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
