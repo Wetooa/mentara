@@ -1,3 +1,9 @@
+enum MembershipRole {
+    MEMBER
+    MODERATOR
+    ADMIN
+}
+
 model Community {
     id                   String               @id @default(uuid())
     name                 String               @unique
@@ -19,11 +25,11 @@ model Community {
 model Membership {
     id          String    @id @default(uuid())
     communityId String
-    role        String    @default("member") // member, moderator, admin
+    role        MembershipRole @default(MEMBER)
     joinedAt    DateTime  @default(now())
-    community   Community @relation(fields: [communityId], references: [id])
-    user        User?     @relation(fields: [userId], references: [id])
-    userId      String?
+    community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
 
     @@unique([userId, communityId])
     @@index([userId])
@@ -49,7 +55,7 @@ model RoomGroup {
     name        String
     order       Int // for UI ordering
     communityId String
-    community   Community @relation(fields: [communityId], references: [id])
+    community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
     rooms       Room[]
 }
 
@@ -58,7 +64,7 @@ model Room {
     name        String
     order       Int
     postingRole String    @default("member") // member, moderator, admin - minimum role required to post
-    roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id])
+    roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id], onDelete: Cascade)
     roomGroupId String
     posts       Post[]
 }

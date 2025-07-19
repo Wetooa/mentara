@@ -71,7 +71,7 @@ export class TherapistAuthService {
           prcLicenseNumber: '',
           expirationDateOfLicense: new Date(),
           practiceStartDate: new Date(),
-          sessionLength: '',
+          sessionLength: '60 minutes', // Default
           hourlyRate: 0,
           providedOnlineTherapyBefore: false,
           comfortableUsingVideoConferencing: false,

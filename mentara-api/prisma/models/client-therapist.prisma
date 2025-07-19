@@ -1,10 +1,16 @@
+enum ClientTherapistStatus {
+    ACTIVE
+    INACTIVE
+    PENDING
+}
+
 // Many-to-many relationship between clients and therapists
 model ClientTherapist {
     id          String   @id @default(uuid())
     clientId    String
     therapistId String
     assignedAt  DateTime @default(now())
-    status      String   @default("active") // active, inactive, pending
+    status      ClientTherapistStatus @default(ACTIVE)
     notes       String? // Optional notes about the relationship
 
     score Int? // Optional score for the therapist by the client

@@ -25,7 +25,7 @@ import {
 import {
   AdminAnalyticsQuerySchema,
   type AdminAnalyticsQuery,
-} from '@mentara/commons';
+} from 'mentara-commons';
 
 @ApiTags('admin-analytics')
 @ApiBearerAuth('JWT-auth')
@@ -37,36 +37,17 @@ export class AdminAnalyticsController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('overview')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get platform overview',
 
-
-    description: 'Retrieve get platform overview' 
-
-
+    description: 'Retrieve get platform overview',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async getPlatformOverview(@CurrentUserId() currentUserId: string) {
     try {
@@ -82,36 +63,17 @@ export class AdminAnalyticsController {
   }
 
   @Get('matching-performance')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get matching performance',
 
-
-    description: 'Retrieve get matching performance' 
-
-
+    description: 'Retrieve get matching performance',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async getMatchingPerformance(
     @CurrentUserId() currentUserId: string,

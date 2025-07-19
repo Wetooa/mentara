@@ -7,8 +7,6 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
-  ValidationPipe,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -126,7 +124,6 @@ class SimilarCommunitiesDto {
 @Controller('communities/enhanced')
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
 @ApiBearerAuth()
-@UsePipes(new ValidationPipe({ transform: true }))
 export class EnhancedCommunityController {
   constructor(
     private readonly enhancedCommunityService: EnhancedCommunityService,
@@ -365,8 +362,8 @@ export class EnhancedCommunityController {
     try {
       const trendingCommunities =
         await this.enhancedCommunityService.getTrendingCommunities(
-          dto.limit,
-          dto.timeframe,
+          dto.limit || 10,
+          dto.timeframe || 'week',
         );
 
       return {
@@ -416,8 +413,8 @@ export class EnhancedCommunityController {
       const similarCommunities =
         await this.enhancedCommunityService.getSimilarCommunities(communityId, {
           userId: user.id,
-          excludeJoined: dto.excludeJoined,
-          maxResults: dto.maxResults,
+          excludeJoined: dto.excludeJoined ?? true,
+          maxResults: dto.maxResults ?? 5,
         });
 
       return {

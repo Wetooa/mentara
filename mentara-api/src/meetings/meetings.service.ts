@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
 import {
@@ -47,6 +48,7 @@ export class MeetingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
+    private readonly jwtService: JwtService,
   ) {}
 
   /**
@@ -92,8 +94,6 @@ export class MeetingsService {
 
     return meeting;
   }
-
-
 
   /**
    * Get user's upcoming meetings
@@ -149,7 +149,7 @@ export class MeetingsService {
     // - Agora
 
     const roomUrl = `${process.env.FRONTEND_URL}/meeting/${meetingId}`;
-    const roomToken = this.generateRoomToken(meetingId, userId);
+    const roomToken = this.generateRoomToken(meetingId, userId, 'host');
 
     // Update meeting with room URL
     await this.prisma.meeting.update({
@@ -236,18 +236,55 @@ export class MeetingsService {
   }
 
   /**
-   * Generate a simple room token (in production, use proper JWT or similar)
+   * Generate secure room access token using JWT
    */
-  private generateRoomToken(meetingId: string, userId: string): string {
-    // This is a simplified token generation
-    // In production, use proper JWT with expiration and signatures
-    const tokenData = {
+  private generateRoomToken(
+    meetingId: string,
+    userId: string,
+    role?: string,
+  ): string {
+    const payload = {
+      sub: userId,
       meetingId,
-      userId,
-      timestamp: Date.now(),
+      role: role || 'participant',
+      type: 'meeting_access',
+      iat: Math.floor(Date.now() / 1000),
     };
 
-    return Buffer.from(JSON.stringify(tokenData)).toString('base64');
+    // Generate JWT with 24-hour expiration for meeting tokens
+    return this.jwtService.sign(payload, {
+      expiresIn: '24h',
+      issuer: 'mentara-meetings',
+      subject: userId,
+    });
+  }
+
+  /**
+   * Validate and decode room access token
+   */
+  private validateRoomToken(
+    token: string,
+  ): { userId: string; meetingId: string; role: string } | null {
+    try {
+      const decoded = this.jwtService.verify(token, {
+        issuer: 'mentara-meetings',
+      });
+
+      if (decoded.type !== 'meeting_access') {
+        return null;
+      }
+
+      return {
+        userId: decoded.sub,
+        meetingId: decoded.meetingId,
+        role: decoded.role,
+      };
+    } catch (error) {
+      this.logger.warn(
+        `Invalid room token: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return null;
+    }
   }
 
   /**
@@ -303,9 +340,11 @@ export class MeetingsService {
   ): Promise<VideoRoomResponse> {
     // Validate meeting access
     const meeting = await this.getMeetingById(meetingId, userId);
-    
+
     if (meeting.status !== 'SCHEDULED' && meeting.status !== 'CONFIRMED') {
-      throw new BadRequestException('Meeting must be scheduled or confirmed to create video room');
+      throw new BadRequestException(
+        'Meeting must be scheduled or confirmed to create video room',
+      );
     }
 
     // Update meeting status to IN_PROGRESS
@@ -316,8 +355,12 @@ export class MeetingsService {
 
     // Generate video room data (in production, integrate with actual video service like Twilio/Zoom)
     const roomId = `room_${meetingId}_${Date.now()}`;
-    const accessToken = this.generateRoomToken(meetingId, userId);
-    const participantToken = this.generateRoomToken(meetingId, `${userId}_participant`);
+    const accessToken = this.generateRoomToken(meetingId, userId, 'host');
+    const participantToken = this.generateRoomToken(
+      meetingId,
+      userId,
+      'participant',
+    );
 
     const videoRoomResponse: VideoRoomResponse = {
       roomId,
@@ -361,15 +404,25 @@ export class MeetingsService {
   ): Promise<VideoRoomResponse> {
     // Validate meeting access
     const meeting = await this.getMeetingById(meetingId, userId);
-    
+
     if (meeting.status !== 'IN_PROGRESS') {
-      throw new BadRequestException('Meeting must be in progress to join video room');
+      throw new BadRequestException(
+        'Meeting must be in progress to join video room',
+      );
     }
 
     // Generate participant credentials
     const roomId = `room_${meetingId}_${Date.now()}`;
-    const accessToken = this.generateRoomToken(meetingId, userId);
-    const participantToken = this.generateRoomToken(meetingId, `${userId}_${joinRoomDto.role}`);
+    const accessToken = this.generateRoomToken(
+      meetingId,
+      userId,
+      joinRoomDto.role,
+    );
+    const participantToken = this.generateRoomToken(
+      meetingId,
+      userId,
+      joinRoomDto.role,
+    );
 
     const videoRoomResponse: VideoRoomResponse = {
       roomId,
@@ -387,7 +440,9 @@ export class MeetingsService {
       status: 'active',
     };
 
-    this.logger.log(`User ${userId} joined video room for meeting ${meetingId}`);
+    this.logger.log(
+      `User ${userId} joined video room for meeting ${meetingId}`,
+    );
     return videoRoomResponse;
   }
 
@@ -423,7 +478,12 @@ export class MeetingsService {
         },
       ],
       startedAt: meeting.startTime.toISOString(),
-      endedAt: meeting.status === 'COMPLETED' ? new Date(meeting.startTime.getTime() + meeting.duration * 60000).toISOString() : undefined,
+      endedAt:
+        meeting.status === 'COMPLETED'
+          ? new Date(
+              meeting.startTime.getTime() + meeting.duration * 60000,
+            ).toISOString()
+          : undefined,
       duration: meeting.status === 'COMPLETED' ? meeting.duration : undefined,
     };
 
@@ -444,7 +504,7 @@ export class MeetingsService {
     // Update meeting status to completed
     await this.prisma.meeting.update({
       where: { id: meetingId },
-      data: { 
+      data: {
         status: 'COMPLETED',
       },
     });
@@ -484,7 +544,9 @@ export class MeetingsService {
       }),
     );
 
-    this.logger.log(`Video call ended for meeting ${meetingId}: ${endCallDto.endReason}`);
+    this.logger.log(
+      `Video call ended for meeting ${meetingId}: ${endCallDto.endReason}`,
+    );
   }
 
   /**
@@ -533,7 +595,9 @@ export class MeetingsService {
         break;
     }
 
-    this.logger.log(`Meeting ${meetingId} status updated to ${updateStatusDto.status}`);
+    this.logger.log(
+      `Meeting ${meetingId} status updated to ${updateStatusDto.status}`,
+    );
     return updatedMeeting;
   }
 

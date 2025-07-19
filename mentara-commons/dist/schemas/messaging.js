@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageReactionSchema = exports.SearchMessagesResponseSchema = exports.BlockedUserSchema = exports.MessagesListParamsSchema = exports.MessageNotificationPreferencesSchema = exports.MessageAnalyticsSchema = exports.ConversationListParamsSchema = exports.MessageSearchResultSchema = exports.BackendConversationSchema = exports.ConversationParticipantSchema = exports.TypingIndicatorDtoSchema = exports.LeaveConversationDtoSchema = exports.JoinConversationDtoSchema = exports.SearchMessagesDtoSchema = exports.BlockUserDtoSchema = exports.AddReactionDtoSchema = exports.UpdateMessageDtoSchema = exports.SendMessageDtoSchema = exports.CreateConversationDtoSchema = exports.MessagesStateSchema = exports.MessageGroupSchema = exports.ConversationSchema = exports.ContactSchema = exports.BackendMessageSchema = exports.MessageSchema = exports.ReadReceiptSchema = exports.ReactionSchema = exports.AttachmentSchema = exports.ConversationTypeSchema = exports.MessageTypeSchema = exports.MessageStatusSchema = exports.UserStatusSchema = void 0;
+exports.MessageReactionSchema = exports.SearchMessagesResponseSchema = exports.BlockedUserSchema = exports.MessagesListParamsSchema = exports.MessageNotificationPreferencesSchema = exports.MessageAnalyticsSchema = exports.ConversationListParamsSchema = exports.MessageSearchResultSchema = exports.BackendConversationSchema = exports.ConversationParticipantSchema = exports.WorksheetCompletedEventSchema = exports.WorksheetAssignedEventSchema = exports.MeetingEndedEventSchema = exports.MeetingStartedEventSchema = exports.NotificationDeletedEventSchema = exports.NotificationUpdatedEventSchema = exports.NotificationCreatedEventSchema = exports.MessageReactionEventSchema = exports.MessageDeletedEventSchema = exports.MessageUpdatedEventSchema = exports.MessageSentEventSchema = exports.TypingIndicatorDtoSchema = exports.LeaveConversationDtoSchema = exports.JoinConversationDtoSchema = exports.SearchMessagesDtoSchema = exports.BlockUserDtoSchema = exports.AddReactionDtoSchema = exports.UpdateMessageDtoSchema = exports.SendMessageDtoSchema = exports.CreateConversationDtoSchema = exports.MessagesStateSchema = exports.MessageGroupSchema = exports.ConversationSchema = exports.ContactSchema = exports.BackendMessageSchema = exports.MessageSchema = exports.ReadReceiptSchema = exports.ReactionSchema = exports.AttachmentSchema = exports.ConversationTypeSchema = exports.MessageTypeSchema = exports.MessageStatusSchema = exports.UserStatusSchema = void 0;
 const zod_1 = require("zod");
 // User Status Schema
 exports.UserStatusSchema = zod_1.z.enum([
@@ -166,6 +166,63 @@ exports.LeaveConversationDtoSchema = zod_1.z.object({
 exports.TypingIndicatorDtoSchema = zod_1.z.object({
     conversationId: zod_1.z.string().uuid('Invalid conversation ID format'),
     isTyping: zod_1.z.boolean().optional().default(true)
+});
+// Real-time WebSocket Event Schemas
+exports.MessageSentEventSchema = zod_1.z.object({
+    conversationId: zod_1.z.string().uuid('Invalid conversation ID format'),
+    message: exports.BackendMessageSchema
+});
+exports.MessageUpdatedEventSchema = zod_1.z.object({
+    conversationId: zod_1.z.string().uuid('Invalid conversation ID format'),
+    messageId: zod_1.z.string().uuid('Invalid message ID format'),
+    message: exports.BackendMessageSchema
+});
+exports.MessageDeletedEventSchema = zod_1.z.object({
+    conversationId: zod_1.z.string().uuid('Invalid conversation ID format'),
+    messageId: zod_1.z.string().uuid('Invalid message ID format')
+});
+exports.MessageReactionEventSchema = zod_1.z.object({
+    conversationId: zod_1.z.string().uuid('Invalid conversation ID format'),
+    messageId: zod_1.z.string().uuid('Invalid message ID format'),
+    emoji: zod_1.z.string().min(1, 'Emoji is required'),
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    action: zod_1.z.enum(['add', 'remove'])
+});
+exports.NotificationCreatedEventSchema = zod_1.z.object({
+    notificationId: zod_1.z.string().uuid('Invalid notification ID format'),
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    title: zod_1.z.string().min(1, 'Notification title is required'),
+    message: zod_1.z.string().min(1, 'Notification message is required'),
+    type: zod_1.z.string().min(1, 'Notification type is required'),
+    data: zod_1.z.record(zod_1.z.unknown()).optional()
+});
+exports.NotificationUpdatedEventSchema = zod_1.z.object({
+    notificationId: zod_1.z.string().uuid('Invalid notification ID format'),
+    isRead: zod_1.z.boolean()
+});
+exports.NotificationDeletedEventSchema = zod_1.z.object({
+    notificationId: zod_1.z.string().uuid('Invalid notification ID format')
+});
+exports.MeetingStartedEventSchema = zod_1.z.object({
+    meetingId: zod_1.z.string().uuid('Invalid meeting ID format'),
+    participants: zod_1.z.array(zod_1.z.string().uuid()),
+    meetingUrl: zod_1.z.string().url('Invalid meeting URL').optional()
+});
+exports.MeetingEndedEventSchema = zod_1.z.object({
+    meetingId: zod_1.z.string().uuid('Invalid meeting ID format'),
+    duration: zod_1.z.number().positive('Meeting duration must be positive').optional()
+});
+exports.WorksheetAssignedEventSchema = zod_1.z.object({
+    worksheetId: zod_1.z.string().uuid('Invalid worksheet ID format'),
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    therapistId: zod_1.z.string().uuid('Invalid therapist ID format'),
+    title: zod_1.z.string().min(1, 'Worksheet title is required'),
+    dueDate: zod_1.z.string().datetime('Invalid due date').optional()
+});
+exports.WorksheetCompletedEventSchema = zod_1.z.object({
+    worksheetId: zod_1.z.string().uuid('Invalid worksheet ID format'),
+    userId: zod_1.z.string().uuid('Invalid user ID format'),
+    completedAt: zod_1.z.string().datetime('Invalid completion timestamp')
 });
 // Conversation Participant Schema
 exports.ConversationParticipantSchema = zod_1.z.object({

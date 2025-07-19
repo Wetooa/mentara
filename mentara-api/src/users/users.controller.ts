@@ -58,12 +58,12 @@ export class UsersController {
   @Get()
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get all users',
-    description: 'Retrieve all users in the system. Admin access required.'
+    description: 'Retrieve all users in the system. Admin access required.',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Users retrieved successfully',
     schema: {
       type: 'array',
@@ -75,18 +75,18 @@ export class UsersController {
           firstName: { type: 'string' },
           lastName: { type: 'string' },
           role: { type: 'string' },
-          createdAt: { type: 'string', format: 'date-time' }
-        }
-      }
-    }
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Unauthorized - Invalid or missing JWT token' 
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
   })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Admin access required' 
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
   })
   async findAll(@CurrentUserId() currentUserId: string): Promise<User[]> {
     try {

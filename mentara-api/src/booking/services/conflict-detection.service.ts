@@ -189,24 +189,30 @@ export class ConflictDetectionService {
   }): Promise<any[]> {
     const whereConditions: any[] = [];
 
+    // Build more efficient query conditions using the new endTime field
+    const overlapCondition = {
+      startTime: { lt: timeRange.endTime },
+      OR: [
+        { endTime: { gt: timeRange.startTime } }, // Meeting ends after our start
+        {
+          // Fallback for meetings without endTime (legacy data)
+          AND: [
+            { endTime: null },
+            {
+              // Calculate endTime on the fly for legacy meetings
+              startTime: { gte: timeRange.startTime },
+            },
+          ],
+        },
+      ],
+      status: { in: statuses },
+    };
+
     // Add therapist condition
     if (therapistId) {
       whereConditions.push({
         therapistId,
-        startTime: { lt: timeRange.endTime },
-        // Use a computed endTime for proper overlap detection
-        OR: [
-          {
-            // Meeting starts before our end time and hasn't ended yet
-            startTime: { gte: timeRange.startTime },
-          },
-          {
-            // Meeting started before our start time but extends into our time
-            startTime: { lt: timeRange.startTime },
-            // This is a bit complex in Prisma - we need to use raw SQL or compute endTime
-          },
-        ],
-        status: { in: statuses },
+        ...overlapCondition,
       });
     }
 
@@ -214,12 +220,7 @@ export class ConflictDetectionService {
     if (clientId) {
       whereConditions.push({
         clientId,
-        startTime: { lt: timeRange.endTime },
-        OR: [
-          { startTime: { gte: timeRange.startTime } },
-          { startTime: { lt: timeRange.startTime } },
-        ],
-        status: { in: statuses },
+        ...overlapCondition,
       });
     }
 
@@ -250,11 +251,11 @@ export class ConflictDetectionService {
       },
     });
 
-    // Filter meetings that actually overlap (since Prisma doesn't handle computed endTime well)
+    // Additional filtering for meetings without endTime (legacy data)
     return meetings.filter((meeting) => {
-      const meetingEndTime = new Date(
-        meeting.startTime.getTime() + meeting.duration * 60 * 1000,
-      );
+      const meetingEndTime =
+        meeting.endTime ||
+        new Date(meeting.startTime.getTime() + meeting.duration * 60 * 1000);
       return this.hasTimeOverlap(
         timeRange.startTime,
         timeRange.endTime,

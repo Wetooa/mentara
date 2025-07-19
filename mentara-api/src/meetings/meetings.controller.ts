@@ -47,36 +47,17 @@ export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get meeting',
 
-
-    description: 'Retrieve get meeting' 
-
-
+    description: 'Retrieve get meeting',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getMeeting(
     @Param('id') meetingId: string,
     @CurrentUserId() userId: string,
@@ -85,36 +66,17 @@ export class MeetingsController {
   }
 
   @Put(':id/status')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update meeting status',
 
-
-    description: 'Update update meeting status' 
-
-
+    description: 'Update update meeting status',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async updateMeetingStatus(
     @Param('id') meetingId: string,
@@ -132,36 +94,17 @@ export class MeetingsController {
   // ===== VIDEO CALL INTEGRATION ENDPOINTS =====
 
   @Post(':id/video-room')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create create video room',
 
-
-    description: 'Create create video room' 
-
-
+    description: 'Create create video room',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.CREATED)
   async createVideoRoom(
     @Param('id') meetingId: string,
@@ -169,40 +112,25 @@ export class MeetingsController {
     @Body(new ZodValidationPipe(CreateVideoRoomDtoSchema))
     createRoomDto: CreateVideoRoomDto,
   ): Promise<VideoRoomResponse> {
-    return this.meetingsService.createVideoRoom(meetingId, userId, createRoomDto);
+    return this.meetingsService.createVideoRoom(
+      meetingId,
+      userId,
+      createRoomDto,
+    );
   }
 
   @Post(':id/join-video')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create join video room',
 
-
-    description: 'Create join video room' 
-
-
+    description: 'Create join video room',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async joinVideoRoom(
     @Param('id') meetingId: string,
@@ -214,36 +142,17 @@ export class MeetingsController {
   }
 
   @Get(':id/video-status')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get video call status',
 
-
-    description: 'Retrieve get video call status' 
-
-
+    description: 'Retrieve get video call status',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getVideoCallStatus(
     @Param('id') meetingId: string,
@@ -253,36 +162,17 @@ export class MeetingsController {
   }
 
   @Delete(':id/video-room')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete end video call',
 
-
-    description: 'Delete end video call' 
-
-
+    description: 'Delete end video call',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.NO_CONTENT)
   async endVideoCall(
     @Param('id') meetingId: string,
@@ -295,26 +185,17 @@ export class MeetingsController {
 
   // Legacy endpoint for backward compatibility
   @Post(':id/room')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create generate meeting room',
 
-    description: 'Create generate meeting room' 
-
+    description: 'Create generate meeting room',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   async generateMeetingRoom(
     @Param('id') meetingId: string,
     @CurrentUserId() userId: string,
@@ -327,40 +208,25 @@ export class MeetingsController {
       enableRecording: false,
       enableChat: true,
     };
-    return this.meetingsService.createVideoRoom(meetingId, userId, defaultCreateDto);
+    return this.meetingsService.createVideoRoom(
+      meetingId,
+      userId,
+      defaultCreateDto,
+    );
   }
 
   @Get('upcoming')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get upcoming meetings',
 
-
-    description: 'Retrieve get upcoming meetings' 
-
-
+    description: 'Retrieve get upcoming meetings',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getUpcomingMeetings(
     @CurrentUserId() userId: string,
     @Query('limit') limit?: number,
@@ -369,36 +235,17 @@ export class MeetingsController {
   }
 
   @Post(':id/session')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create save meeting session',
 
-
-    description: 'Create save meeting session' 
-
-
+    description: 'Create save meeting session',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.CREATED)
   async saveMeetingSession(
     @Param('id') meetingId: string,
@@ -409,40 +256,25 @@ export class MeetingsController {
     // Validate user has access to this meeting
     await this.meetingsService.getMeetingById(meetingId, userId);
 
-    return this.meetingsService.saveMeetingSession(meetingId, userId, sessionData);
+    return this.meetingsService.saveMeetingSession(
+      meetingId,
+      userId,
+      sessionData,
+    );
   }
 
   @Get('analytics/therapist')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get therapist meeting analytics',
 
-
-    description: 'Retrieve get therapist meeting analytics' 
-
-
+    description: 'Retrieve get therapist meeting analytics',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getTherapistMeetingAnalytics(
     @CurrentUserId() userId: string,
     @Query('startDate') startDate?: string,
@@ -460,36 +292,17 @@ export class MeetingsController {
   }
 
   @Post(':id/emergency-terminate')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create emergency terminate',
 
-
-    description: 'Create emergency terminate' 
-
-
+    description: 'Create emergency terminate',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async emergencyTerminate(
     @Param('id') meetingId: string,
     @CurrentUserId() userId: string,

@@ -17,13 +17,13 @@ export declare const SubscribeRequestDtoSchema: z.ZodObject<{
         platform: z.ZodOptional<z.ZodString>;
         device: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        platform?: string | undefined;
-        userAgent?: string | undefined;
         device?: string | undefined;
+        userAgent?: string | undefined;
+        platform?: string | undefined;
     }, {
-        platform?: string | undefined;
-        userAgent?: string | undefined;
         device?: string | undefined;
+        userAgent?: string | undefined;
+        platform?: string | undefined;
     }>>;
     preferences: z.ZodOptional<z.ZodObject<{
         sessionReminders: z.ZodDefault<z.ZodBoolean>;
@@ -59,9 +59,9 @@ export declare const SubscribeRequestDtoSchema: z.ZodObject<{
         communityActivity: boolean;
     } | undefined;
     deviceInfo?: {
-        platform?: string | undefined;
-        userAgent?: string | undefined;
         device?: string | undefined;
+        userAgent?: string | undefined;
+        platform?: string | undefined;
     } | undefined;
 }, {
     keys: {
@@ -78,9 +78,9 @@ export declare const SubscribeRequestDtoSchema: z.ZodObject<{
         communityActivity?: boolean | undefined;
     } | undefined;
     deviceInfo?: {
-        platform?: string | undefined;
-        userAgent?: string | undefined;
         device?: string | undefined;
+        userAgent?: string | undefined;
+        platform?: string | undefined;
     } | undefined;
 }>;
 export declare const UnsubscribeRequestDtoSchema: z.ZodObject<{

@@ -31,36 +31,17 @@ export class TherapistProfileController {
   ) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get therapist profile',
 
-
-    description: 'Retrieve get therapist profile' 
-
-
+    description: 'Retrieve get therapist profile',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getTherapistProfile(
     @CurrentUserId() therapistId: string,
@@ -69,36 +50,17 @@ export class TherapistProfileController {
   }
 
   @Put()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update therapist profile',
 
-
-    description: 'Update update therapist profile' 
-
-
+    description: 'Update update therapist profile',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async updateTherapistProfile(
     @CurrentUserId() therapistId: string,
@@ -111,36 +73,17 @@ export class TherapistProfileController {
   }
 
   @Put('specializations')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update therapist specializations',
 
-
-    description: 'Update update therapist specializations' 
-
-
+    description: 'Update update therapist specializations',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async updateTherapistSpecializations(
     @CurrentUserId() therapistId: string,

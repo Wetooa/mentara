@@ -36,11 +36,9 @@ model User {
 
     // Essential content relations
     posts         Post[]
-    comments      Comment[]
-    replies       Reply[]       @relation("UserReplies")
+    comments      Comment[] // Supports nested comments through parentId
     postHearts    PostHeart[]
-    commentHearts CommentHeart[]
-    replyHearts   ReplyHeart[]  @relation("UserReplyHearts")
+    commentHearts CommentHeart[] // Supports hearts on all comment levels
 
     // Reports (instead of reddit-like features)
     reports Report[] @relation("UserReports")
@@ -97,7 +95,6 @@ model Client {
     // Patient-specific relations
     worksheets             Worksheet[]
     preAssessment          PreAssessment?
-    worksheetSubmissions   WorksheetSubmission[]
     clientMedicalHistory   ClientMedicalHistory[]
     clientPreferences      ClientPreference[]
     assignedTherapists     ClientTherapist[]

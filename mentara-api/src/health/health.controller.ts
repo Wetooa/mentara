@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpStatus,
-  HttpException,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, HttpException } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -22,7 +17,8 @@ export class HealthController {
   @Get()
   @ApiOperation({
     summary: 'Basic health check',
-    description: 'Basic health check endpoint that returns the API status and timestamp',
+    description:
+      'Basic health check endpoint that returns the API status and timestamp',
   })
   @ApiResponse({
     status: 200,
@@ -45,7 +41,8 @@ export class HealthController {
   @Get('detailed')
   @ApiOperation({
     summary: 'Detailed health check',
-    description: 'Comprehensive health check including database, external services, and system metrics',
+    description:
+      'Comprehensive health check including database, external services, and system metrics',
   })
   @ApiResponse({
     status: 200,
@@ -110,11 +107,11 @@ export class HealthController {
   })
   async getDetailedHealth() {
     const health = await this.healthService.getDetailedHealth();
-    
+
     if (health.status === 'error') {
       throw new HttpException(health, HttpStatus.SERVICE_UNAVAILABLE);
     }
-    
+
     return health;
   }
 
@@ -131,7 +128,10 @@ export class HealthController {
       type: 'object',
       properties: {
         status: { type: 'string', example: 'connected' },
-        responseTime: { type: 'number', description: 'Response time in milliseconds' },
+        responseTime: {
+          type: 'number',
+          description: 'Response time in milliseconds',
+        },
         connections: {
           type: 'object',
           properties: {
@@ -166,11 +166,11 @@ export class HealthController {
   })
   async getDatabaseHealth() {
     const dbHealth = await this.healthService.getDatabaseHealth();
-    
+
     if (dbHealth.status === 'disconnected') {
       throw new HttpException(dbHealth, HttpStatus.SERVICE_UNAVAILABLE);
     }
-    
+
     return dbHealth;
   }
 
@@ -178,7 +178,8 @@ export class HealthController {
   @Get('services')
   @ApiOperation({
     summary: 'External services health check',
-    description: 'Check the status of external services (Supabase, Stripe, Email, etc.)',
+    description:
+      'Check the status of external services (Supabase, Stripe, Email, etc.)',
   })
   @ApiResponse({
     status: 200,
@@ -234,7 +235,8 @@ export class HealthController {
   @Get('system')
   @ApiOperation({
     summary: 'System metrics',
-    description: 'Get system performance metrics including memory, CPU, and disk usage',
+    description:
+      'Get system performance metrics including memory, CPU, and disk usage',
   })
   @ApiResponse({
     status: 200,
@@ -248,7 +250,10 @@ export class HealthController {
             used: { type: 'number', description: 'Used memory in bytes' },
             free: { type: 'number', description: 'Free memory in bytes' },
             total: { type: 'number', description: 'Total memory in bytes' },
-            percentage: { type: 'number', description: 'Memory usage percentage' },
+            percentage: {
+              type: 'number',
+              description: 'Memory usage percentage',
+            },
           },
         },
         cpu: {
@@ -296,7 +301,8 @@ export class HealthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Admin health dashboard',
-    description: 'Comprehensive health information for admin users including sensitive metrics',
+    description:
+      'Comprehensive health information for admin users including sensitive metrics',
   })
   @ApiResponse({
     status: 200,
@@ -318,7 +324,10 @@ export class HealthController {
           items: {
             type: 'object',
             properties: {
-              severity: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+              severity: {
+                type: 'string',
+                enum: ['low', 'medium', 'high', 'critical'],
+              },
               message: { type: 'string' },
               timestamp: { type: 'string', format: 'date-time' },
               resolved: { type: 'boolean' },

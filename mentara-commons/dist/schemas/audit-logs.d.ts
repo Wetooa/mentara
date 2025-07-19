@@ -127,23 +127,23 @@ export declare const CreateAuditLogDtoSchema: z.ZodObject<{
     action: "USER_LOGIN" | "USER_LOGOUT" | "USER_REGISTER" | "USER_UPDATE_PROFILE" | "USER_DELETE_ACCOUNT" | "USER_CHANGE_PASSWORD" | "USER_RESET_PASSWORD" | "THERAPIST_APPLICATION_SUBMIT" | "THERAPIST_APPLICATION_APPROVE" | "THERAPIST_APPLICATION_REJECT" | "THERAPIST_PROFILE_UPDATE" | "THERAPIST_AVAILABILITY_UPDATE" | "UPDATE_THERAPIST_STATUS" | "ACCEPT_CLIENT_REQUEST" | "DECLINE_CLIENT_REQUEST" | "REVIEW_CLIENT_REQUEST" | "SEND_THERAPIST_REQUEST" | "CANCEL_THERAPIST_REQUEST" | "APPROVE_THERAPIST_APPLICATION" | "REJECT_THERAPIST_APPLICATION" | "SUSPEND_USER" | "UNSUSPEND_USER" | "MODERATE_POST" | "MODERATE_COMMENT" | "COMPLETE_ONBOARDING_STEP" | "MEETING_CREATE" | "MEETING_UPDATE" | "MEETING_CANCEL" | "MEETING_COMPLETE" | "MEETING_NO_SHOW" | "WORKSHEET_CREATE" | "WORKSHEET_ASSIGN" | "WORKSHEET_SUBMIT" | "WORKSHEET_GRADE" | "REVIEW_CREATE" | "REVIEW_UPDATE" | "REVIEW_DELETE" | "REVIEW_MODERATE" | "MESSAGE_SEND" | "MESSAGE_EDIT" | "MESSAGE_DELETE" | "MESSAGE_REPORT" | "ADMIN_USER_SUSPEND" | "ADMIN_USER_ACTIVATE" | "ADMIN_CONTENT_MODERATE" | "ADMIN_SYSTEM_CONFIG" | "SYSTEM_BACKUP" | "SYSTEM_MAINTENANCE" | "SYSTEM_ERROR" | "DATA_EXPORT" | "DATA_PURGE";
     entity: string;
     entityId: string;
+    ipAddress?: string | undefined;
+    userAgent?: string | undefined;
     description?: string | undefined;
     oldValues?: any;
     newValues?: any;
     metadata?: any;
-    ipAddress?: string | undefined;
-    userAgent?: string | undefined;
     requestId?: string | undefined;
 }, {
     action: "USER_LOGIN" | "USER_LOGOUT" | "USER_REGISTER" | "USER_UPDATE_PROFILE" | "USER_DELETE_ACCOUNT" | "USER_CHANGE_PASSWORD" | "USER_RESET_PASSWORD" | "THERAPIST_APPLICATION_SUBMIT" | "THERAPIST_APPLICATION_APPROVE" | "THERAPIST_APPLICATION_REJECT" | "THERAPIST_PROFILE_UPDATE" | "THERAPIST_AVAILABILITY_UPDATE" | "UPDATE_THERAPIST_STATUS" | "ACCEPT_CLIENT_REQUEST" | "DECLINE_CLIENT_REQUEST" | "REVIEW_CLIENT_REQUEST" | "SEND_THERAPIST_REQUEST" | "CANCEL_THERAPIST_REQUEST" | "APPROVE_THERAPIST_APPLICATION" | "REJECT_THERAPIST_APPLICATION" | "SUSPEND_USER" | "UNSUSPEND_USER" | "MODERATE_POST" | "MODERATE_COMMENT" | "COMPLETE_ONBOARDING_STEP" | "MEETING_CREATE" | "MEETING_UPDATE" | "MEETING_CANCEL" | "MEETING_COMPLETE" | "MEETING_NO_SHOW" | "WORKSHEET_CREATE" | "WORKSHEET_ASSIGN" | "WORKSHEET_SUBMIT" | "WORKSHEET_GRADE" | "REVIEW_CREATE" | "REVIEW_UPDATE" | "REVIEW_DELETE" | "REVIEW_MODERATE" | "MESSAGE_SEND" | "MESSAGE_EDIT" | "MESSAGE_DELETE" | "MESSAGE_REPORT" | "ADMIN_USER_SUSPEND" | "ADMIN_USER_ACTIVATE" | "ADMIN_CONTENT_MODERATE" | "ADMIN_SYSTEM_CONFIG" | "SYSTEM_BACKUP" | "SYSTEM_MAINTENANCE" | "SYSTEM_ERROR" | "DATA_EXPORT" | "DATA_PURGE";
     entity: string;
     entityId: string;
+    ipAddress?: string | undefined;
+    userAgent?: string | undefined;
     description?: string | undefined;
     oldValues?: any;
     newValues?: any;
     metadata?: any;
-    ipAddress?: string | undefined;
-    userAgent?: string | undefined;
     requestId?: string | undefined;
 }>;
 export declare const CreateSystemEventDtoSchema: z.ZodObject<{
@@ -235,15 +235,15 @@ export declare const LogProfileUpdateDtoSchema: z.ZodObject<{
     ipAddress: z.ZodOptional<z.ZodString>;
     userAgent: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    oldValues?: any;
-    newValues?: any;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
+    oldValues?: any;
+    newValues?: any;
 }, {
-    oldValues?: any;
-    newValues?: any;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
+    oldValues?: any;
+    newValues?: any;
 }>;
 export declare const LogSystemErrorDtoSchema: z.ZodObject<{
     component: z.ZodString;
@@ -316,32 +316,32 @@ export declare const AuditLogSchema: z.ZodObject<{
     details: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    ipAddress: string;
+    userAgent: string;
+    success: boolean;
     userId: string;
     action: string;
     severity: string;
     metadata: Record<string, any>;
-    ipAddress: string;
-    userAgent: string;
     userEmail: string;
     resource: string;
     resourceId: string;
     category: string;
-    success: boolean;
     timestamp: string;
     details: string;
 }, {
     id: string;
+    ipAddress: string;
+    userAgent: string;
+    success: boolean;
     userId: string;
     action: string;
     severity: string;
     metadata: Record<string, any>;
-    ipAddress: string;
-    userAgent: string;
     userEmail: string;
     resource: string;
     resourceId: string;
     category: string;
-    success: boolean;
     timestamp: string;
     details: string;
 }>;
@@ -363,32 +363,32 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
         details: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         id: string;
+        ipAddress: string;
+        userAgent: string;
+        success: boolean;
         userId: string;
         action: string;
         severity: string;
         metadata: Record<string, any>;
-        ipAddress: string;
-        userAgent: string;
         userEmail: string;
         resource: string;
         resourceId: string;
         category: string;
-        success: boolean;
         timestamp: string;
         details: string;
     }, {
         id: string;
+        ipAddress: string;
+        userAgent: string;
+        success: boolean;
         userId: string;
         action: string;
         severity: string;
         metadata: Record<string, any>;
-        ipAddress: string;
-        userAgent: string;
         userEmail: string;
         resource: string;
         resourceId: string;
         category: string;
-        success: boolean;
         timestamp: string;
         details: string;
     }>, "many">;
@@ -402,17 +402,17 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
     hasMore: boolean;
     logs: {
         id: string;
+        ipAddress: string;
+        userAgent: string;
+        success: boolean;
         userId: string;
         action: string;
         severity: string;
         metadata: Record<string, any>;
-        ipAddress: string;
-        userAgent: string;
         userEmail: string;
         resource: string;
         resourceId: string;
         category: string;
-        success: boolean;
         timestamp: string;
         details: string;
     }[];
@@ -423,17 +423,17 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
     hasMore: boolean;
     logs: {
         id: string;
+        ipAddress: string;
+        userAgent: string;
+        success: boolean;
         userId: string;
         action: string;
         severity: string;
         metadata: Record<string, any>;
-        ipAddress: string;
-        userAgent: string;
         userEmail: string;
         resource: string;
         resourceId: string;
         category: string;
-        success: boolean;
         timestamp: string;
         details: string;
     }[];
@@ -525,13 +525,13 @@ export declare const SecurityEventSchema: z.ZodObject<{
     metadata: z.ZodRecord<z.ZodString, z.ZodAny>;
     timestamp: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: string;
+    id: string;
+    ipAddress: string;
+    userAgent: string;
     description: string;
     severity: string;
     metadata: Record<string, any>;
-    ipAddress: string;
-    userAgent: string;
     timestamp: string;
     resolved: boolean;
     userId?: string | undefined;
@@ -539,13 +539,13 @@ export declare const SecurityEventSchema: z.ZodObject<{
     resolvedBy?: string | undefined;
     resolvedAt?: string | undefined;
 }, {
-    id: string;
     type: string;
+    id: string;
+    ipAddress: string;
+    userAgent: string;
     description: string;
     severity: string;
     metadata: Record<string, any>;
-    ipAddress: string;
-    userAgent: string;
     timestamp: string;
     resolved: boolean;
     userId?: string | undefined;
@@ -567,6 +567,7 @@ export declare const SecurityEventQuerySchema: z.ZodObject<{
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     type?: string | undefined;
+    ipAddress?: string | undefined;
     userId?: string | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;
@@ -575,10 +576,10 @@ export declare const SecurityEventQuerySchema: z.ZodObject<{
     endDate?: string | undefined;
     offset?: number | undefined;
     severity?: string | undefined;
-    ipAddress?: string | undefined;
     resolved?: boolean | undefined;
 }, {
     type?: string | undefined;
+    ipAddress?: string | undefined;
     userId?: string | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;
@@ -587,7 +588,6 @@ export declare const SecurityEventQuerySchema: z.ZodObject<{
     endDate?: string | undefined;
     offset?: number | undefined;
     severity?: string | undefined;
-    ipAddress?: string | undefined;
     resolved?: boolean | undefined;
 }>;
 export declare const ComplianceReportSchema: z.ZodObject<{
@@ -613,10 +613,10 @@ export declare const ComplianceReportSchema: z.ZodObject<{
     fileUrl: z.ZodOptional<z.ZodString>;
     error: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    createdAt: string;
     type: string;
     status: "pending" | "completed" | "processing" | "failed";
+    id: string;
+    createdAt: string;
     title: string;
     description: string;
     period: {
@@ -629,10 +629,10 @@ export declare const ComplianceReportSchema: z.ZodObject<{
     reportData?: Record<string, any> | undefined;
     fileUrl?: string | undefined;
 }, {
-    id: string;
-    createdAt: string;
     type: string;
     status: "pending" | "completed" | "processing" | "failed";
+    id: string;
+    createdAt: string;
     title: string;
     description: string;
     period: {
@@ -662,24 +662,24 @@ export declare const AuditLogCreateDtoSchema: z.ZodObject<{
     action: string;
     resource: string;
     resourceId: string;
-    severity?: string | undefined;
-    metadata?: Record<string, any> | undefined;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
-    category?: string | undefined;
     success?: boolean | undefined;
+    severity?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    category?: string | undefined;
     details?: string | undefined;
 }, {
     userId: string;
     action: string;
     resource: string;
     resourceId: string;
-    severity?: string | undefined;
-    metadata?: Record<string, any> | undefined;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
-    category?: string | undefined;
     success?: boolean | undefined;
+    severity?: string | undefined;
+    metadata?: Record<string, any> | undefined;
+    category?: string | undefined;
     details?: string | undefined;
 }>;
 export declare const AuditLogQuerySchema: z.ZodObject<{
@@ -698,6 +698,8 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodString>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
+    ipAddress?: string | undefined;
+    success?: boolean | undefined;
     userId?: string | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;
@@ -707,12 +709,12 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     action?: string | undefined;
     offset?: number | undefined;
     severity?: string | undefined;
-    ipAddress?: string | undefined;
     resource?: string | undefined;
     resourceId?: string | undefined;
     category?: string | undefined;
-    success?: boolean | undefined;
 }, {
+    ipAddress?: string | undefined;
+    success?: boolean | undefined;
     userId?: string | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;
@@ -722,11 +724,9 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     action?: string | undefined;
     offset?: number | undefined;
     severity?: string | undefined;
-    ipAddress?: string | undefined;
     resource?: string | undefined;
     resourceId?: string | undefined;
     category?: string | undefined;
-    success?: boolean | undefined;
 }>;
 export type AuditLog = z.infer<typeof AuditLogSchema>;
 export type AuditLogListResponse = z.infer<typeof AuditLogListResponseSchema>;

@@ -47,26 +47,17 @@ export class BookingController {
 
   // Meeting endpoints
   @Post('meetings')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create create meeting',
 
-    description: 'Create create meeting' 
-
+    description: 'Create create meeting',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   async createMeeting(
     @Body() createMeetingDto: MeetingCreateDto,
     @CurrentUserId() userId: string,
@@ -80,36 +71,17 @@ export class BookingController {
   }
 
   @Get('meetings')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get meetings',
 
-
-    description: 'Retrieve get meetings' 
-
-
+    description: 'Retrieve get meetings',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getMeetings(
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
@@ -118,36 +90,17 @@ export class BookingController {
   }
 
   @Get('meetings/:id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get meeting',
 
-
-    description: 'Retrieve get meeting' 
-
-
+    description: 'Retrieve get meeting',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -158,36 +111,17 @@ export class BookingController {
   }
 
   @Put('meetings/:id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update meeting',
 
-
-    description: 'Update update meeting' 
-
-
+    description: 'Update update meeting',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async updateMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -204,36 +138,17 @@ export class BookingController {
   }
 
   @Delete('meetings/:id/cancel')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete cancel meeting',
 
-
-    description: 'Delete cancel meeting' 
-
-
+    description: 'Delete cancel meeting',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async cancelMeeting(
     @Param(new ZodValidationPipe(BookingMeetingParamsDtoSchema))
     params: BookingMeetingParamsDto,
@@ -245,26 +160,17 @@ export class BookingController {
 
   // Availability endpoints (therapist only)
   @Post('availability')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create create availability',
 
-    description: 'Create create availability' 
-
+    description: 'Create create availability',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   async createAvailability(
     @Body() createAvailabilityDto: TherapistAvailabilityCreateDto,
     @CurrentUserId() therapistId: string,
@@ -282,36 +188,17 @@ export class BookingController {
   }
 
   @Get('availability')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get availability',
 
-
-    description: 'Retrieve get availability' 
-
-
+    description: 'Retrieve get availability',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getAvailability(
     @CurrentUserId() therapistId: string,
     @CurrentUserRole() role: string,
@@ -325,36 +212,17 @@ export class BookingController {
   }
 
   @Put('availability/:id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update availability',
 
-
-    description: 'Update update availability' 
-
-
+    description: 'Update update availability',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async updateAvailability(
     @Param(new ZodValidationPipe(AvailabilityParamsDtoSchema))
     params: AvailabilityParamsDto,
@@ -375,36 +243,17 @@ export class BookingController {
   }
 
   @Delete('availability/:id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete delete availability',
 
-
-    description: 'Delete delete availability' 
-
-
+    description: 'Delete delete availability',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async deleteAvailability(
     @Param(new ZodValidationPipe(AvailabilityParamsDtoSchema))
     params: AvailabilityParamsDto,
@@ -421,26 +270,17 @@ export class BookingController {
 
   // Duration endpoints (public)
   @Get('durations')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Retrieve get available slots',
 
-    description: 'Retrieve get available slots' 
-
+    description: 'Retrieve get available slots',
   })
+  @ApiResponse({
+    status: 200,
 
-  @ApiResponse({ 
-
-    status: 200, 
-
-    description: 'Retrieved successfully' 
-
+    description: 'Retrieved successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   getDurations() {
     return this.bookingService.getDurations();
   }

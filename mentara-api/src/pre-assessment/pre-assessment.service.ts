@@ -13,6 +13,9 @@ import {
 import { PreAssessment } from '@prisma/client';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { AiServiceClient } from './services/ai-service.client';
+import { ClinicalInsightsService } from './analysis/clinical-insights.service';
+import { TherapeuticRecommendationsService } from './analysis/therapeutic-recommendations.service';
+import { QuestionnaireScores } from './pre-assessment.utils';
 
 @Injectable()
 export class PreAssessmentService {
@@ -21,6 +24,8 @@ export class PreAssessmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiServiceClient: AiServiceClient,
+    private readonly clinicalInsightsService: ClinicalInsightsService,
+    private readonly therapeuticRecommendationsService: TherapeuticRecommendationsService,
   ) {}
 
   private async getAiEstimate(
@@ -285,7 +290,44 @@ export class PreAssessmentService {
         },
       });
 
-      this.logger.log(`Pre-assessment created successfully for user ${userId}`);
+      this.logger.log(`Pre-assessment completed for user ${userId}`);
+
+      // Generate comprehensive clinical analysis in background
+      // This provides detailed insights for therapist matching and treatment planning
+      try {
+        // Convert scores to QuestionnaireScores format for analysis
+        const questionnaireScores: QuestionnaireScores = {};
+        const severityLevelsForAnalysis = severityLevels;
+        
+        data.questionnaires.forEach(questionnaire => {
+          if (scores[questionnaire] !== undefined) {
+            questionnaireScores[questionnaire] = {
+              score: scores[questionnaire],
+              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown'
+            };
+          }
+        });
+
+        const analysis = await this.generateClinicalAnalysis(
+          preAssessment,
+          data.questionnaires,
+          questionnaireScores,
+        );
+
+        this.logger.log(
+          `Clinical analysis generated: ${analysis.clinicalProfile.primaryConditions.length} primary conditions, ` +
+            `risk level: ${analysis.clinicalProfile.overallRiskLevel}`,
+        );
+      } catch (analysisError) {
+        this.logger.warn(
+          'Advanced clinical analysis failed but core assessment succeeded:',
+          analysisError instanceof Error
+            ? analysisError.message
+            : analysisError,
+        );
+        // Don't fail the entire process - basic scoring is still available
+      }
+
       return preAssessment;
     } catch (error) {
       if (
@@ -441,6 +483,139 @@ export class PreAssessmentService {
       return null;
     } catch (error: unknown) {
       this.handleError(error, 'Error deleting pre-assessment');
+    }
+  }
+
+  /**
+   * Generate comprehensive clinical analysis from pre-assessment data
+   * This method orchestrates the clinical insights and therapeutic recommendations
+   */
+  async generateClinicalAnalysis(
+    preAssessment: PreAssessment,
+    questionnaires: string[],
+    scores: QuestionnaireScores,
+  ) {
+    try {
+      this.logger.log('Generating comprehensive clinical analysis');
+
+      // Generate clinical profile with insights
+      const clinicalProfile =
+        await this.clinicalInsightsService.generateClinicalProfile(
+          preAssessment,
+          questionnaires,
+          scores,
+        );
+
+      // Generate personalized treatment plan
+      const treatmentPlan =
+        await this.therapeuticRecommendationsService.generatePersonalizedTreatmentPlan(
+          clinicalProfile,
+        );
+
+      // Extract risk assessment
+      const riskAssessment = {
+        overallRisk: clinicalProfile.overallRiskLevel,
+        riskFactors: clinicalProfile.riskFactors,
+        immediateInterventionNeeded:
+          clinicalProfile.overallRiskLevel === 'critical',
+        crisisRisk: clinicalProfile.riskFactors.some(
+          (rf) => rf.type === 'suicide' && rf.level === 'critical',
+        ),
+      };
+
+      return {
+        clinicalProfile,
+        treatmentPlan,
+        riskAssessment,
+        analysisTimestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      this.logger.error('Error generating clinical analysis:', error);
+      throw new InternalServerErrorException(
+        'Failed to generate clinical analysis',
+      );
+    }
+  }
+
+  /**
+   * Get comprehensive clinical analysis for a user
+   * Returns cached analysis if available, otherwise generates new one
+   */
+  async getComprehensiveClinicalAnalysis(userId: string) {
+    try {
+      // Get user's pre-assessment
+      const preAssessment = await this.getPreAssessmentByUserId(userId);
+
+      if (!preAssessment) {
+        throw new NotFoundException('Pre-assessment not found for user');
+      }
+
+      // Extract questionnaires and scores
+      const questionnaires = preAssessment.questionnaires as string[];
+      const scores = preAssessment.scores as Record<string, number>;
+
+      // Convert scores to QuestionnaireScores format
+      const questionnaireScores: QuestionnaireScores = {};
+      const severityLevels = preAssessment.severityLevels as Record<
+        string,
+        string
+      >;
+
+      questionnaires.forEach((questionnaire) => {
+        if (scores[questionnaire] !== undefined) {
+          questionnaireScores[questionnaire] = {
+            score: scores[questionnaire],
+            severity: severityLevels[questionnaire] || 'Unknown',
+          };
+        }
+      });
+
+      // Generate comprehensive analysis
+      return await this.generateClinicalAnalysis(
+        preAssessment,
+        questionnaires,
+        questionnaireScores,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error getting clinical analysis for user ${userId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Get crisis assessment for a user
+   * Returns immediate risk factors and intervention needs
+   */
+  async getCrisisAssessment(userId: string) {
+    try {
+      const analysis = await this.getComprehensiveClinicalAnalysis(userId);
+
+      return {
+        overallRisk: analysis.riskAssessment.overallRisk,
+        immediateInterventionNeeded:
+          analysis.riskAssessment.immediateInterventionNeeded,
+        crisisRisk: analysis.riskAssessment.crisisRisk,
+        riskFactors: analysis.riskAssessment.riskFactors,
+        primaryConcerns: analysis.clinicalProfile.primaryConditions.map(
+          (pc) => ({
+            condition: pc.condition,
+            riskLevel: pc.riskLevel,
+            priority: pc.priority,
+          }),
+        ),
+        emergencyContacts:
+          analysis.treatmentPlan.contingencyPlan.crisisContacts,
+        safetyPlan: analysis.treatmentPlan.contingencyPlan.emergencySteps,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error getting crisis assessment for user ${userId}:`,
+        error,
+      );
+      throw error;
     }
   }
 }

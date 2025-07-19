@@ -28,7 +28,8 @@ export class DashboardController {
   @Get('user')
   @ApiOperation({
     summary: 'Get user dashboard data',
-    description: 'Retrieve dashboard data for client users including session history, progress, and upcoming appointments',
+    description:
+      'Retrieve dashboard data for client users including session history, progress, and upcoming appointments',
   })
   @ApiResponse({
     status: 200,
@@ -115,7 +116,8 @@ export class DashboardController {
   @Get('therapist')
   @ApiOperation({
     summary: 'Get therapist dashboard data',
-    description: 'Retrieve dashboard data for therapist users including client overview, session schedule, and practice analytics',
+    description:
+      'Retrieve dashboard data for therapist users including client overview, session schedule, and practice analytics',
   })
   @ApiResponse({
     status: 200,
@@ -147,7 +149,11 @@ export class DashboardController {
                   id: { type: 'string' },
                   firstName: { type: 'string' },
                   lastName: { type: 'string' },
-                  lastSession: { type: 'string', format: 'date-time', nullable: true },
+                  lastSession: {
+                    type: 'string',
+                    format: 'date-time',
+                    nullable: true,
+                  },
                   progress: { type: 'string' },
                 },
               },
@@ -208,7 +214,8 @@ export class DashboardController {
   @Get('admin')
   @ApiOperation({
     summary: 'Get admin dashboard data',
-    description: 'Retrieve comprehensive dashboard data for admin users including platform statistics, user management, and system health',
+    description:
+      'Retrieve comprehensive dashboard data for admin users including platform statistics, user management, and system health',
   })
   @ApiResponse({
     status: 200,

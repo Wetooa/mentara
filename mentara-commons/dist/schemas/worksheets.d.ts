@@ -15,10 +15,10 @@ export declare const WorksheetSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
     content: string;
     description: string;
@@ -30,10 +30,10 @@ export declare const WorksheetSchema: z.ZodObject<{
     estimatedTime: number;
     isTemplate: boolean;
 }, {
+    type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring";
     title: string;
     content: string;
     description: string;
@@ -125,8 +125,8 @@ export declare const WorksheetAssignmentSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;
     priority: z.ZodDefault<z.ZodEnum<["low", "medium", "high"]>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "in_progress" | "completed" | "assigned" | "overdue";
+    id: string;
     therapistId: string;
     clientId: string;
     priority: "high" | "medium" | "low";
@@ -136,8 +136,8 @@ export declare const WorksheetAssignmentSchema: z.ZodObject<{
     dueDate?: string | undefined;
     completedAt?: string | undefined;
 }, {
-    id: string;
     status: "in_progress" | "completed" | "assigned" | "overdue";
+    id: string;
     therapistId: string;
     clientId: string;
     worksheetId: string;
@@ -498,8 +498,8 @@ export declare const WorksheetSubmissionCreateInputDtoSchema: z.ZodObject<{
     timeSpent: z.ZodOptional<z.ZodNumber>;
     isCompleted: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    isCompleted: boolean;
     worksheetId: string;
+    isCompleted: boolean;
     responses: Record<string, any>;
     notes?: string | undefined;
     attachments?: string[] | undefined;

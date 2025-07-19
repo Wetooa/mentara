@@ -37,36 +37,17 @@ export class AdminUserController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get all users',
 
-
-    description: 'Retrieve get all users' 
-
-
+    description: 'Retrieve get all users',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async getAllUsers(
     @CurrentUserId() currentUserId: string,
@@ -94,36 +75,17 @@ export class AdminUserController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get user',
 
-
-    description: 'Retrieve get user' 
-
-
+    description: 'Retrieve get user',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async getUser(
     @CurrentUserId() currentUserId: string,
@@ -151,36 +113,17 @@ export class AdminUserController {
   }
 
   @Put(':id/suspend')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update suspend user',
 
-
-    description: 'Update suspend user' 
-
-
+    description: 'Update suspend user',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async suspendUser(
     @CurrentUserId() currentUserId: string,
@@ -205,36 +148,17 @@ export class AdminUserController {
   }
 
   @Put(':id/unsuspend')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update unsuspend user',
 
-
-    description: 'Update unsuspend user' 
-
-
+    description: 'Update unsuspend user',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async unsuspendUser(
     @CurrentUserId() currentUserId: string,

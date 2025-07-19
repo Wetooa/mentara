@@ -35,9 +35,9 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     applicationData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
     weeklyAvailability: string;
     province: string;
     providerType: string;
@@ -69,9 +69,9 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     applicationData?: Record<string, any> | undefined;
 }, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
     weeklyAvailability: string;
     province: string;
     providerType: string;
@@ -396,9 +396,9 @@ export declare const TherapistRecommendationSchema: z.ZodObject<{
     }>>;
     matchScore: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     firstName: string;
     lastName: string;
+    id: string;
     title: string;
     isActive: boolean;
     hourlyRate: number;
@@ -426,9 +426,9 @@ export declare const TherapistRecommendationSchema: z.ZodObject<{
         }[] | undefined;
     } | undefined;
 }, {
-    id: string;
     firstName: string;
     lastName: string;
+    id: string;
     title: string;
     isActive: boolean;
     hourlyRate: number;
@@ -580,9 +580,9 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
         }>>;
         matchScore: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -610,9 +610,9 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
             }[] | undefined;
         } | undefined;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -662,9 +662,9 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
     totalCount: number;
     pageSize: number;
     therapists: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -703,9 +703,9 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
     totalCount: number;
     pageSize: number;
     therapists: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -828,18 +828,18 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
         type: z.ZodString;
         status: z.ZodEnum<["scheduled", "confirmed", "cancelled", "completed"]>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         type: string;
         status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
+        id: string;
         time: string;
         patientId: string;
         patientName: string;
     }, {
-        id: string;
         type: string;
         status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
+        id: string;
         time: string;
         patientId: string;
         patientName: string;
@@ -866,10 +866,10 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
         };
     };
     upcomingAppointments: {
-        id: string;
         type: string;
         status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
+        id: string;
         time: string;
         patientId: string;
         patientName: string;
@@ -896,10 +896,10 @@ export declare const TherapistDashboardDataSchema: z.ZodObject<{
         };
     };
     upcomingAppointments: {
-        id: string;
         type: string;
         status: "scheduled" | "confirmed" | "completed" | "cancelled";
         date: string;
+        id: string;
         time: string;
         patientId: string;
         patientName: string;
@@ -925,34 +925,34 @@ export declare const PatientDataSchema: z.ZodObject<{
         type: z.ZodEnum<["initial", "follow-up", "crisis", "final"]>;
         status: z.ZodEnum<["scheduled", "completed", "cancelled", "no-show"]>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
         status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
+        id: string;
         duration: number;
         notes: string;
     }, {
-        id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
         status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
+        id: string;
         duration: number;
         notes: string;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     email: string;
-    phone: string;
-    name: string;
-    avatar: string;
+    id: string;
     sessions: {
-        id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
         status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
+        id: string;
         duration: number;
         notes: string;
     }[];
+    phone: string;
+    name: string;
+    avatar: string;
     totalSessions: number;
     fullName: string;
     age: number;
@@ -960,19 +960,19 @@ export declare const PatientDataSchema: z.ZodObject<{
     treatmentPlan: string;
     currentSession: number;
 }, {
-    id: string;
     email: string;
-    phone: string;
-    name: string;
-    avatar: string;
+    id: string;
     sessions: {
-        id: string;
         type: "initial" | "follow-up" | "crisis" | "final";
         status: "scheduled" | "completed" | "cancelled" | "no-show";
         date: string;
+        id: string;
         duration: number;
         notes: string;
     }[];
+    phone: string;
+    name: string;
+    avatar: string;
     totalSessions: number;
     fullName: string;
     age: number;
@@ -1542,15 +1542,15 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         lastName: z.ZodString;
         email: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         email: string;
         firstName: string;
         lastName: string;
+        id: string;
     }, {
-        id: string;
         email: string;
         firstName: string;
         lastName: string;
+        id: string;
     }>;
     personalInfo: z.ZodObject<{
         firstName: z.ZodString;
@@ -1757,13 +1757,13 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         firstName: z.ZodString;
         lastName: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
     }>>;
     adminNotes: z.ZodOptional<z.ZodString>;
     rejectionReason: z.ZodOptional<z.ZodString>;
@@ -1792,10 +1792,10 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
     personalInfo: {
         email: string;
         firstName: string;
@@ -1850,10 +1850,10 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
     };
     applicantId: string;
     applicant: {
-        id: string;
         email: string;
         firstName: string;
         lastName: string;
+        id: string;
     };
     documents: {
         id: string;
@@ -1865,17 +1865,17 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
     }[];
     reviewedAt?: string | undefined;
     reviewedBy?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
     } | undefined;
     rejectionReason?: string | undefined;
     adminNotes?: string | undefined;
 }, {
+    status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
     personalInfo: {
         email: string;
         firstName: string;
@@ -1930,10 +1930,10 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
     };
     applicantId: string;
     applicant: {
-        id: string;
         email: string;
         firstName: string;
         lastName: string;
+        id: string;
     };
     documents: {
         id: string;
@@ -1945,9 +1945,9 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
     }[];
     reviewedAt?: string | undefined;
     reviewedBy?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
     } | undefined;
     rejectionReason?: string | undefined;
     adminNotes?: string | undefined;
@@ -2581,13 +2581,13 @@ export declare const ApplicationListParamsSchema: z.ZodObject<{
     status?: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "lastName" | "status" | "submittedAt" | undefined;
+    sortBy?: "status" | "lastName" | "submittedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }, {
     status?: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "lastName" | "status" | "submittedAt" | undefined;
+    sortBy?: "status" | "lastName" | "submittedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }>;
 export declare const TherapistWorksheetAssignmentSchema: z.ZodObject<{
@@ -2601,8 +2601,8 @@ export declare const TherapistWorksheetAssignmentSchema: z.ZodObject<{
     instructions: z.ZodOptional<z.ZodString>;
     feedback: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "in_progress" | "completed" | "assigned" | "overdue";
+    id: string;
     therapistId: string;
     worksheetId: string;
     assignedAt: string;
@@ -2611,8 +2611,8 @@ export declare const TherapistWorksheetAssignmentSchema: z.ZodObject<{
     feedback?: string | undefined;
     instructions?: string | undefined;
 }, {
-    id: string;
     status: "in_progress" | "completed" | "assigned" | "overdue";
+    id: string;
     therapistId: string;
     worksheetId: string;
     assignedAt: string;
@@ -2635,6 +2635,7 @@ export declare const TherapistCredentialsSchema: z.ZodObject<{
     verifiedBy: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    isVerified: boolean;
     therapistId: string;
     isActive: boolean;
     licenseNumber: string;
@@ -2642,11 +2643,11 @@ export declare const TherapistCredentialsSchema: z.ZodObject<{
     issueDate: string;
     expirationDate: string;
     issuingState: string;
-    isVerified: boolean;
     verifiedAt?: string | undefined;
     verifiedBy?: string | undefined;
 }, {
     id: string;
+    isVerified: boolean;
     therapistId: string;
     isActive: boolean;
     licenseNumber: string;
@@ -2654,7 +2655,6 @@ export declare const TherapistCredentialsSchema: z.ZodObject<{
     issueDate: string;
     expirationDate: string;
     issuingState: string;
-    isVerified: boolean;
     verifiedAt?: string | undefined;
     verifiedBy?: string | undefined;
 }>;
@@ -2774,9 +2774,9 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
         }>>;
         matchScore: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -2804,9 +2804,9 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
             }[] | undefined;
         } | undefined;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -2856,9 +2856,9 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
     totalCount: number;
     pageSize: number;
     therapists: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -2897,9 +2897,9 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
     totalCount: number;
     pageSize: number;
     therapists: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         title: string;
         isActive: boolean;
         hourlyRate: number;
@@ -2984,15 +2984,15 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             lastName: z.ZodString;
             email: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            id: string;
             email: string;
             firstName: string;
             lastName: string;
+            id: string;
         }, {
-            id: string;
             email: string;
             firstName: string;
             lastName: string;
+            id: string;
         }>;
         personalInfo: z.ZodObject<{
             firstName: z.ZodString;
@@ -3199,13 +3199,13 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             firstName: z.ZodString;
             lastName: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            id: string;
             firstName: string;
             lastName: string;
+            id: string;
         }, {
-            id: string;
             firstName: string;
             lastName: string;
+            id: string;
         }>>;
         adminNotes: z.ZodOptional<z.ZodString>;
         rejectionReason: z.ZodOptional<z.ZodString>;
@@ -3234,10 +3234,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         createdAt: z.ZodString;
         updatedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
+        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         personalInfo: {
             email: string;
             firstName: string;
@@ -3292,10 +3292,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         };
         applicantId: string;
         applicant: {
-            id: string;
             email: string;
             firstName: string;
             lastName: string;
+            id: string;
         };
         documents: {
             id: string;
@@ -3307,17 +3307,17 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         }[];
         reviewedAt?: string | undefined;
         reviewedBy?: {
-            id: string;
             firstName: string;
             lastName: string;
+            id: string;
         } | undefined;
         rejectionReason?: string | undefined;
         adminNotes?: string | undefined;
     }, {
+        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         personalInfo: {
             email: string;
             firstName: string;
@@ -3372,10 +3372,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         };
         applicantId: string;
         applicant: {
-            id: string;
             email: string;
             firstName: string;
             lastName: string;
+            id: string;
         };
         documents: {
             id: string;
@@ -3387,9 +3387,9 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         }[];
         reviewedAt?: string | undefined;
         reviewedBy?: {
-            id: string;
             firstName: string;
             lastName: string;
+            id: string;
         } | undefined;
         rejectionReason?: string | undefined;
         adminNotes?: string | undefined;
@@ -3404,10 +3404,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
     hasMore: boolean;
     total: number;
     applications: {
+        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         personalInfo: {
             email: string;
             firstName: string;
@@ -3462,10 +3462,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         };
         applicantId: string;
         applicant: {
-            id: string;
             email: string;
             firstName: string;
             lastName: string;
+            id: string;
         };
         documents: {
             id: string;
@@ -3477,9 +3477,9 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         }[];
         reviewedAt?: string | undefined;
         reviewedBy?: {
-            id: string;
             firstName: string;
             lastName: string;
+            id: string;
         } | undefined;
         rejectionReason?: string | undefined;
         adminNotes?: string | undefined;
@@ -3490,10 +3490,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
     hasMore: boolean;
     total: number;
     applications: {
+        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         personalInfo: {
             email: string;
             firstName: string;
@@ -3548,10 +3548,10 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         };
         applicantId: string;
         applicant: {
-            id: string;
             email: string;
             firstName: string;
             lastName: string;
+            id: string;
         };
         documents: {
             id: string;
@@ -3563,9 +3563,9 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
         }[];
         reviewedAt?: string | undefined;
         reviewedBy?: {
-            id: string;
             firstName: string;
             lastName: string;
+            id: string;
         } | undefined;
         rejectionReason?: string | undefined;
         adminNotes?: string | undefined;
@@ -3997,14 +3997,14 @@ export declare const SubmitApplicationResponseSchema: z.ZodObject<{
     message: z.ZodOptional<z.ZodString>;
     nextSteps: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "approved" | "rejected" | "pending" | "under_review";
+    id: string;
     submittedAt: string;
     message?: string | undefined;
     nextSteps?: string[] | undefined;
 }, {
-    id: string;
     status: "approved" | "rejected" | "pending" | "under_review";
+    id: string;
     submittedAt: string;
     message?: string | undefined;
     nextSteps?: string[] | undefined;
@@ -4017,16 +4017,16 @@ export declare const ApplicationStatusUpdateResponseSchema: z.ZodObject<{
     adminNotes: z.ZodOptional<z.ZodString>;
     notificationSent: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    status: "approved" | "rejected" | "pending" | "under_review";
     id: string;
     updatedAt: string;
-    status: "approved" | "rejected" | "pending" | "under_review";
     updatedBy: string;
     notificationSent: boolean;
     adminNotes?: string | undefined;
 }, {
+    status: "approved" | "rejected" | "pending" | "under_review";
     id: string;
     updatedAt: string;
-    status: "approved" | "rejected" | "pending" | "under_review";
     updatedBy: string;
     adminNotes?: string | undefined;
     notificationSent?: boolean | undefined;
@@ -4108,12 +4108,12 @@ export declare const TherapistApplicationListDtoSchema: z.ZodObject<{
     limit: number;
     offset: number;
     status?: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required" | undefined;
-    sortBy?: "lastName" | "status" | "submittedAt" | undefined;
+    sortBy?: "status" | "lastName" | "submittedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }, {
     status?: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required" | undefined;
     limit?: number | undefined;
-    sortBy?: "lastName" | "status" | "submittedAt" | undefined;
+    sortBy?: "status" | "lastName" | "submittedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     offset?: number | undefined;
 }>;

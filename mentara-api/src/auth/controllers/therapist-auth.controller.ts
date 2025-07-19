@@ -70,7 +70,8 @@ export class TherapistAuthController {
   @Public()
   @ApiOperation({
     summary: 'Register new therapist account',
-    description: 'Create a new therapist account. Initial registration before application approval.',
+    description:
+      'Create a new therapist account. Initial registration before application approval.',
   })
   @ApiBody({
     type: 'object',
@@ -79,7 +80,11 @@ export class TherapistAuthController {
       type: 'object',
       required: ['email', 'password', 'firstName', 'lastName'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'therapist@example.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'therapist@example.com',
+        },
         password: { type: 'string', minLength: 8, example: 'SecurePass123!' },
         firstName: { type: 'string', example: 'Dr. Sarah' },
         lastName: { type: 'string', example: 'Johnson' },
@@ -110,7 +115,9 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiBadRequestResponse({ description: 'Invalid registration data or email already exists' })
+  @ApiBadRequestResponse({
+    description: 'Invalid registration data or email already exists',
+  })
   @ApiTooManyRequestsResponse({ description: 'Too many registration attempts' })
   @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 therapist registrations per 10 minutes
   @Post('register')
@@ -154,7 +161,11 @@ export class TherapistAuthController {
       type: 'object',
       required: ['email', 'password'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'therapist@example.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'therapist@example.com',
+        },
         password: { type: 'string', example: 'SecurePass123!' },
       },
     },
@@ -219,7 +230,8 @@ export class TherapistAuthController {
   @Public()
   @ApiOperation({
     summary: 'Submit therapist application with documents',
-    description: 'Submit a complete therapist application including required documents and certifications. Supports multiple file uploads.',
+    description:
+      'Submit a complete therapist application including required documents and certifications. Supports multiple file uploads.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -279,8 +291,12 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiBadRequestResponse({ description: 'Invalid application data or file format' })
-  @ApiInternalServerErrorResponse({ description: 'Failed to process application' })
+  @ApiBadRequestResponse({
+    description: 'Invalid application data or file format',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to process application',
+  })
   @Post('apply-with-documents')
   @UseInterceptors(
     FilesInterceptor('files', 10, {
@@ -413,7 +429,8 @@ export class TherapistAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get therapist profile',
-    description: 'Retrieve the authenticated therapist user profile information',
+    description:
+      'Retrieve the authenticated therapist user profile information',
   })
   @ApiResponse({
     status: 200,
@@ -434,7 +451,9 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('profile')
   async getProfile(@CurrentUserId() userId: string) {
     return this.therapistAuthService.getTherapistProfile(userId);
@@ -444,11 +463,24 @@ export class TherapistAuthController {
   @Get('applications')
   @ApiOperation({
     summary: 'Get all therapist applications (Admin only)',
-    description: 'Retrieve all therapist applications with optional filtering and pagination. Admin access required.',
+    description:
+      'Retrieve all therapist applications with optional filtering and pagination. Admin access required.',
   })
-  @ApiQuery({ name: 'status', required: false, description: 'Filter by application status' })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number for pagination' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filter by application status',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of items per page',
+  })
   @ApiResponse({
     status: 200,
     description: 'Applications retrieved successfully',
@@ -475,9 +507,13 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @ApiForbiddenResponse({ description: 'Admin access required' })
-  @ApiInternalServerErrorResponse({ description: 'Failed to fetch applications' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch applications',
+  })
   @UseGuards(JwtAuthGuard)
   async getAllApplications(
     @CurrentUserRole() role: string,
@@ -513,7 +549,8 @@ export class TherapistAuthController {
   @Get('applications/:id')
   @ApiOperation({
     summary: 'Get therapist application by ID (Admin only)',
-    description: 'Retrieve detailed information about a specific therapist application. Admin access required.',
+    description:
+      'Retrieve detailed information about a specific therapist application. Admin access required.',
   })
   @ApiParam({ name: 'id', description: 'Application ID' })
   @ApiResponse({
@@ -536,10 +573,14 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @ApiForbiddenResponse({ description: 'Admin access required' })
   @ApiNotFoundResponse({ description: 'Application not found' })
-  @ApiInternalServerErrorResponse({ description: 'Failed to fetch application' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch application',
+  })
   @UseGuards(JwtAuthGuard)
   async getApplicationById(
     @CurrentUserRole() role: string,
@@ -569,7 +610,8 @@ export class TherapistAuthController {
   @Put('applications/:id/status')
   @ApiOperation({
     summary: 'Update therapist application status (Admin only)',
-    description: 'Update the status of a therapist application (approve, reject, etc.). Admin access required.',
+    description:
+      'Update the status of a therapist application (approve, reject, etc.). Admin access required.',
   })
   @ApiParam({ name: 'id', description: 'Application ID' })
   @ApiBody({
@@ -578,9 +620,19 @@ export class TherapistAuthController {
       type: 'object',
       required: ['status'],
       properties: {
-        status: { type: 'string', enum: ['approved', 'rejected', 'pending'], example: 'approved' },
-        notes: { type: 'string', description: 'Optional notes about the decision' },
-        reviewerComments: { type: 'string', description: 'Comments from the reviewing admin' },
+        status: {
+          type: 'string',
+          enum: ['approved', 'rejected', 'pending'],
+          example: 'approved',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional notes about the decision',
+        },
+        reviewerComments: {
+          type: 'string',
+          description: 'Comments from the reviewing admin',
+        },
       },
     },
   })
@@ -603,10 +655,14 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @ApiForbiddenResponse({ description: 'Admin access required' })
   @ApiNotFoundResponse({ description: 'Application not found' })
-  @ApiInternalServerErrorResponse({ description: 'Failed to update application status' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to update application status',
+  })
   @UseGuards(JwtAuthGuard)
   async updateApplicationStatus(
     @CurrentUserRole() role: string,
@@ -641,7 +697,8 @@ export class TherapistAuthController {
   @Get('applications/:id/files')
   @ApiOperation({
     summary: 'Get therapist application files (Admin only)',
-    description: 'Retrieve all uploaded files for a specific therapist application. Admin access required.',
+    description:
+      'Retrieve all uploaded files for a specific therapist application. Admin access required.',
   })
   @ApiParam({ name: 'id', description: 'Application ID' })
   @ApiResponse({
@@ -660,10 +717,14 @@ export class TherapistAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @ApiForbiddenResponse({ description: 'Admin access required' })
   @ApiNotFoundResponse({ description: 'Application or files not found' })
-  @ApiInternalServerErrorResponse({ description: 'Failed to fetch application files' })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch application files',
+  })
   @UseGuards(JwtAuthGuard)
   async getApplicationFiles(
     @CurrentUserRole() role: string,

@@ -69,10 +69,22 @@ export class SessionsController {
       type: 'object',
       required: ['sessionType', 'status'],
       properties: {
-        clientId: { type: 'string', description: 'Client ID (auto-filled for client users)' },
-        therapistId: { type: 'string', description: 'Therapist ID (auto-filled for therapist users)' },
-        sessionType: { type: 'string', enum: ['video', 'audio', 'chat', 'in_person'] },
-        status: { type: 'string', enum: ['scheduled', 'active', 'completed', 'cancelled'] },
+        clientId: {
+          type: 'string',
+          description: 'Client ID (auto-filled for client users)',
+        },
+        therapistId: {
+          type: 'string',
+          description: 'Therapist ID (auto-filled for therapist users)',
+        },
+        sessionType: {
+          type: 'string',
+          enum: ['video', 'audio', 'chat', 'in_person'],
+        },
+        status: {
+          type: 'string',
+          enum: ['scheduled', 'active', 'completed', 'cancelled'],
+        },
         startTime: { type: 'string', format: 'date-time' },
         endTime: { type: 'string', format: 'date-time' },
         notes: { type: 'string' },
@@ -118,12 +130,29 @@ export class SessionsController {
   @Get('logs')
   @ApiOperation({
     summary: 'Get session logs',
-    description: 'Retrieve session logs with optional filtering. Results are automatically filtered by user role.',
+    description:
+      'Retrieve session logs with optional filtering. Results are automatically filtered by user role.',
   })
-  @ApiQuery({ name: 'clientId', required: false, description: 'Filter by client ID (admin/therapist only)' })
-  @ApiQuery({ name: 'therapistId', required: false, description: 'Filter by therapist ID (admin/client only)' })
-  @ApiQuery({ name: 'status', required: false, description: 'Filter by session status' })
-  @ApiQuery({ name: 'sessionType', required: false, description: 'Filter by session type' })
+  @ApiQuery({
+    name: 'clientId',
+    required: false,
+    description: 'Filter by client ID (admin/therapist only)',
+  })
+  @ApiQuery({
+    name: 'therapistId',
+    required: false,
+    description: 'Filter by therapist ID (admin/client only)',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filter by session status',
+  })
+  @ApiQuery({
+    name: 'sessionType',
+    required: false,
+    description: 'Filter by session type',
+  })
   @ApiResponse({
     status: 200,
     description: 'Session logs retrieved successfully',
@@ -212,7 +241,10 @@ export class SessionsController {
     schema: {
       type: 'object',
       properties: {
-        status: { type: 'string', enum: ['scheduled', 'active', 'completed', 'cancelled'] },
+        status: {
+          type: 'string',
+          enum: ['scheduled', 'active', 'completed', 'cancelled'],
+        },
         endTime: { type: 'string', format: 'date-time' },
         notes: { type: 'string' },
         rating: { type: 'number', minimum: 1, maximum: 5 },
@@ -245,7 +277,8 @@ export class SessionsController {
   @Post('logs/:id/end')
   @ApiOperation({
     summary: 'End session',
-    description: 'Mark a session as completed and add final notes and quality rating',
+    description:
+      'Mark a session as completed and add final notes and quality rating',
   })
   @ApiParam({ name: 'id', description: 'Session log ID' })
   @ApiBody({
@@ -254,7 +287,12 @@ export class SessionsController {
       type: 'object',
       properties: {
         notes: { type: 'string', description: 'Final session notes' },
-        quality: { type: 'number', minimum: 1, maximum: 5, description: 'Session quality rating' },
+        quality: {
+          type: 'number',
+          minimum: 1,
+          maximum: 5,
+          description: 'Session quality rating',
+        },
       },
     },
   })
@@ -283,7 +321,8 @@ export class SessionsController {
   @Post('logs/:id/activities')
   @ApiOperation({
     summary: 'Add session activity',
-    description: 'Add an activity or event to a session log for detailed tracking',
+    description:
+      'Add an activity or event to a session log for detailed tracking',
   })
   @ApiParam({ name: 'id', description: 'Session log ID' })
   @ApiBody({
@@ -292,10 +331,16 @@ export class SessionsController {
       type: 'object',
       required: ['activityType'],
       properties: {
-        activityType: { type: 'string', enum: ['discussion', 'exercise', 'assessment', 'break', 'other'] },
+        activityType: {
+          type: 'string',
+          enum: ['discussion', 'exercise', 'assessment', 'break', 'other'],
+        },
         description: { type: 'string' },
         duration: { type: 'number', description: 'Duration in minutes' },
-        metadata: { type: 'object', description: 'Additional activity metadata' },
+        metadata: {
+          type: 'object',
+          description: 'Additional activity metadata',
+        },
       },
     },
   })
@@ -363,7 +408,8 @@ export class SessionsController {
   @Post('user-activities')
   @ApiOperation({
     summary: 'Log user activity',
-    description: 'Log user interactions and activities for analytics and session tracking',
+    description:
+      'Log user interactions and activities for analytics and session tracking',
   })
   @ApiBody({
     description: 'User activity data',
@@ -371,12 +417,28 @@ export class SessionsController {
       type: 'object',
       required: ['action'],
       properties: {
-        action: { type: 'string', enum: ['click', 'view', 'scroll', 'form_submit', 'navigation', 'other'] },
-        page: { type: 'string', description: 'Page or route where action occurred' },
+        action: {
+          type: 'string',
+          enum: [
+            'click',
+            'view',
+            'scroll',
+            'form_submit',
+            'navigation',
+            'other',
+          ],
+        },
+        page: {
+          type: 'string',
+          description: 'Page or route where action occurred',
+        },
         component: { type: 'string', description: 'UI component involved' },
         metadata: { type: 'object', description: 'Additional action metadata' },
         sessionId: { type: 'string', description: 'Associated session ID' },
-        deviceInfo: { type: 'object', description: 'Device and browser information' },
+        deviceInfo: {
+          type: 'object',
+          description: 'Device and browser information',
+        },
       },
     },
   })
@@ -413,11 +475,24 @@ export class SessionsController {
   @Get('user-activities')
   @ApiOperation({
     summary: 'Get user activities',
-    description: 'Retrieve user activity logs with optional filtering by action type and date range',
+    description:
+      'Retrieve user activity logs with optional filtering by action type and date range',
   })
-  @ApiQuery({ name: 'action', required: false, description: 'Filter by action type' })
-  @ApiQuery({ name: 'startDate', required: false, description: 'Start date for filtering (ISO string)' })
-  @ApiQuery({ name: 'endDate', required: false, description: 'End date for filtering (ISO string)' })
+  @ApiQuery({
+    name: 'action',
+    required: false,
+    description: 'Filter by action type',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Start date for filtering (ISO string)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'End date for filtering (ISO string)',
+  })
   @ApiResponse({
     status: 200,
     description: 'User activities retrieved successfully',
@@ -454,7 +529,8 @@ export class SessionsController {
   @Post('therapy-progress')
   @ApiOperation({
     summary: 'Create therapy progress entry',
-    description: 'Create a therapy progress entry to track client improvements and milestones',
+    description:
+      'Create a therapy progress entry to track client improvements and milestones',
   })
   @ApiBody({
     description: 'Therapy progress data',
@@ -463,9 +539,15 @@ export class SessionsController {
       required: ['clientId', 'progressNotes'],
       properties: {
         clientId: { type: 'string' },
-        therapistId: { type: 'string', description: 'Auto-filled for therapist users' },
+        therapistId: {
+          type: 'string',
+          description: 'Auto-filled for therapist users',
+        },
         sessionId: { type: 'string', description: 'Associated session ID' },
-        progressNotes: { type: 'string', description: 'Detailed progress notes' },
+        progressNotes: {
+          type: 'string',
+          description: 'Detailed progress notes',
+        },
         goalsAchieved: { type: 'array', items: { type: 'string' } },
         newGoals: { type: 'array', items: { type: 'string' } },
         moodRating: { type: 'number', minimum: 1, maximum: 10 },
@@ -507,12 +589,29 @@ export class SessionsController {
   @Get('therapy-progress')
   @ApiOperation({
     summary: 'Get therapy progress',
-    description: 'Retrieve therapy progress entries with optional filtering. Results are automatically filtered by user role.',
+    description:
+      'Retrieve therapy progress entries with optional filtering. Results are automatically filtered by user role.',
   })
-  @ApiQuery({ name: 'clientId', required: false, description: 'Filter by client ID (therapist/admin only)' })
-  @ApiQuery({ name: 'therapistId', required: false, description: 'Filter by therapist ID (client/admin only)' })
-  @ApiQuery({ name: 'startDate', required: false, description: 'Start date for filtering (ISO string)' })
-  @ApiQuery({ name: 'endDate', required: false, description: 'End date for filtering (ISO string)' })
+  @ApiQuery({
+    name: 'clientId',
+    required: false,
+    description: 'Filter by client ID (therapist/admin only)',
+  })
+  @ApiQuery({
+    name: 'therapistId',
+    required: false,
+    description: 'Filter by therapist ID (client/admin only)',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Start date for filtering (ISO string)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'End date for filtering (ISO string)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Therapy progress entries retrieved successfully',
@@ -561,10 +660,19 @@ export class SessionsController {
   @Get('statistics')
   @ApiOperation({
     summary: 'Get session statistics',
-    description: 'Retrieve session statistics and analytics. Results are automatically filtered by user role.',
+    description:
+      'Retrieve session statistics and analytics. Results are automatically filtered by user role.',
   })
-  @ApiQuery({ name: 'clientId', required: false, description: 'Filter by client ID (therapist/admin only)' })
-  @ApiQuery({ name: 'therapistId', required: false, description: 'Filter by therapist ID (client/admin only)' })
+  @ApiQuery({
+    name: 'clientId',
+    required: false,
+    description: 'Filter by client ID (therapist/admin only)',
+  })
+  @ApiQuery({
+    name: 'therapistId',
+    required: false,
+    description: 'Filter by therapist ID (client/admin only)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Session statistics retrieved successfully',

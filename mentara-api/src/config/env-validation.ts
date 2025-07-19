@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 export interface RequiredEnvVars {
   DATABASE_URL: string;
   JWT_SECRET: string;
+  MESSAGE_ENCRYPTION_KEY: string;
   NODE_ENV: 'development' | 'production' | 'test';
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
@@ -29,6 +30,11 @@ export interface OptionalEnvVars {
   SMTP_PORT?: string;
   SMTP_USER?: string;
   SMTP_PASS?: string;
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  CLERK_SECRET_KEY?: string;
+  ALLOWED_ORIGINS?: string;
+  TEST_DATABASE_URL?: string;
 }
 
 const logger = new Logger('EnvironmentValidation');
@@ -37,6 +43,7 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
   const requiredVars: (keyof RequiredEnvVars)[] = [
     'DATABASE_URL',
     'JWT_SECRET',
+    'MESSAGE_ENCRYPTION_KEY',
     'NODE_ENV',
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
@@ -113,6 +120,15 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
     );
   }
 
+  if (
+    process.env.MESSAGE_ENCRYPTION_KEY &&
+    process.env.MESSAGE_ENCRYPTION_KEY.length < 32
+  ) {
+    invalidVars.push(
+      'MESSAGE_ENCRYPTION_KEY (must be at least 32 characters for security)',
+    );
+  }
+
   // Validate Supabase configuration
   if (
     process.env.SUPABASE_URL &&
@@ -167,6 +183,7 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
   return {
     DATABASE_URL: process.env.DATABASE_URL!,
     JWT_SECRET: process.env.JWT_SECRET!,
+    MESSAGE_ENCRYPTION_KEY: process.env.MESSAGE_ENCRYPTION_KEY!,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
     MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID!,
@@ -193,6 +210,9 @@ export function logEnvironmentInfo(): void {
   );
   logger.log(
     `🔑 JWT Authentication: ${process.env.JWT_SECRET ? 'Configured' : 'Not configured'}`,
+  );
+  logger.log(
+    `🔐 Message Encryption: ${process.env.MESSAGE_ENCRYPTION_KEY ? 'Configured' : 'Not configured'}`,
   );
   logger.log(
     `🔐 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not configured'}`,

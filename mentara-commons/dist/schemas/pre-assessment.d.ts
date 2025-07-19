@@ -34,8 +34,8 @@ export declare const AssessmentQuestionSchema: z.ZodObject<{
     isRequired: z.ZodBoolean;
     category: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: "text" | "likert" | "yes_no" | "multiple_choice";
+    id: string;
     text: string;
     order: number;
     isRequired: boolean;
@@ -43,8 +43,8 @@ export declare const AssessmentQuestionSchema: z.ZodObject<{
     options?: string[] | undefined;
     category?: string | undefined;
 }, {
-    id: string;
     type: "text" | "likert" | "yes_no" | "multiple_choice";
+    id: string;
     text: string;
     order: number;
     isRequired: boolean;

@@ -123,33 +123,45 @@ export class MessagingGateway
   }
 
   async handleDisconnect(client: AuthenticatedSocket) {
-    if (client.userId) {
-      const userSockets = this.userSockets.get(client.userId);
-      if (userSockets) {
-        userSockets.delete(client.id);
+    try {
+      if (client.userId) {
+        const userSockets = this.userSockets.get(client.userId);
+        if (userSockets) {
+          userSockets.delete(client.id);
 
-        // If no more sockets for this user, remove from tracking
-        if (userSockets.size === 0) {
-          this.userSockets.delete(client.userId);
+          // If no more sockets for this user, remove from tracking
+          if (userSockets.size === 0) {
+            this.userSockets.delete(client.userId);
 
-          // Clean up conversation participants tracking
-          for (const [
-            conversationId,
-            participants,
-          ] of this.conversationParticipants.entries()) {
-            participants.delete(client.userId);
-            // Remove empty conversation sets
-            if (participants.size === 0) {
-              this.conversationParticipants.delete(conversationId);
+            // Clean up conversation participants tracking
+            for (const [
+              conversationId,
+              participants,
+            ] of this.conversationParticipants.entries()) {
+              participants.delete(client.userId);
+              // Remove empty conversation sets
+              if (participants.size === 0) {
+                this.conversationParticipants.delete(conversationId);
+              }
             }
-          }
 
-          // Broadcast user offline status to their contacts
-          await this.broadcastUserStatus(client.userId, 'offline');
+            // Broadcast user offline status to their contacts
+            await this.broadcastUserStatus(client.userId, 'offline');
+          }
         }
+
+        this.logger.log(
+          `User ${client.userId} disconnected socket ${client.id}`,
+        );
       }
 
-      this.logger.log(`User ${client.userId} disconnected socket ${client.id}`);
+      // Clean up authentication tracking
+      this.webSocketAuth.cleanupConnection(client.id);
+    } catch (error) {
+      this.logger.error(
+        `Error during disconnect cleanup for socket ${client.id}:`,
+        error,
+      );
     }
   }
 

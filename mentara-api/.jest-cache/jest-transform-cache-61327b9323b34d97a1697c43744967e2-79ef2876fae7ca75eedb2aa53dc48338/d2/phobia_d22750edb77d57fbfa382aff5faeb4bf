@@ -1,0 +1,242 @@
+d5f5328bf4ade3cb31543c7517b0f3de
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const scoring_1 = require("../scoring");
+// interface PHQScale {
+//   items: number[];
+//   label: string;
+// }
+//
+// interface PHQScoring {
+//   scoreOptions: Record<number, number>;
+//   scales: {
+//     totalPhobiaScore: PHQScale;
+//     agoraphobiaScore: PHQScale;
+//     bloodInjuryPhobiaScore: PHQScale;
+//     socialPhobiaScore: PHQScale;
+//   };
+//   getScaleScore: (
+//     answers: number[],
+//     scale: keyof PHQScoring["scales"]
+//   ) => number;
+//   getSeverity: (score: number) => string;
+// }
+//
+// interface PHQType {
+//   description: string;
+//   questions: Question[];
+//   scoring: PHQScoring;
+//   disclaimer: string;
+// }
+const PHQ = {
+    title: "Phobia Questionnaire (PHQ)",
+    description: "The PHQ is a self-administered questionnaire used to assess the extent to which individuals avoid specific situations due to fear or other unpleasant feelings. It is commonly used for diagnosing and monitoring phobic symptoms.",
+    questions: [
+        {
+            prefix: "",
+            question: "Injections or minor surgery",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Eating or drinking with other people",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Hospitals",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Traveling alone on public transportation (e.g., bus or train)",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Walking alone in busy streets",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Being watched or stared at",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Going in to crowded shops",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Talking to people in authority",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Sight of blood",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Being criticized",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Going alone far from home",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Thought of injury or illness",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Speaking or acting to an audience",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Large open spaces",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Going to the dentist",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+    ],
+    scoring: {
+        ...scoring_1.QUESTIONNAIRE_SCORING,
+        scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8 },
+        severityLevels: {
+            minimal: { range: [0, 12], label: "Minimal Phobia" },
+            mild: { range: [13, 24], label: "Mild Phobia" },
+            moderate: { range: [25, 36], label: "Moderate Phobia" },
+            severe: { range: [37, Infinity], label: "Severe Phobia" },
+        },
+        // FIX: The scoring logic is not implemented yet
+        // scales: {
+        //   totalPhobiaScore: {
+        //     items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        //     label: "Total Phobia Score (PHQ_TOT)",
+        //   },
+        //   agoraphobiaScore: {
+        //     items: [3, 4, 6, 10, 13],
+        //     label: "Agoraphobia Score (PHQ_AGO)",
+        //   },
+        //   bloodInjuryPhobiaScore: {
+        //     items: [0, 2, 8, 11, 14],
+        //     label: "Blood-Injury Phobia Score (PHQ_BLD)",
+        //   },
+        //   socialPhobiaScore: {
+        //     items: [1, 5, 7, 9, 12],
+        //     label: "Social Phobia Score (PHQ_SOC)",
+        //   },
+        // },
+        // getScaleScore: (answers, scale) => {
+        //   const scaleItems = PHQ.scoring.scales[scale]?.items;
+        //   if (!scaleItems) return 0;
+        //
+        //   return scaleItems.reduce(
+        //     (total, index) => total + (answers[index] || 0),
+        //     0
+        //   );
+        // },
+    },
+    disclaimer: "This questionnaire is a screening tool to assess the severity of phobic symptoms. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your mental health, please consult a healthcare professional.",
+};
+exports.default = PHQ;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvcGhvYmlhLmpzIiwibWFwcGluZ3MiOiJBQUFBLFlBQVksQ0FBQztBQUNiLE1BQU0sQ0FBQyxjQUFjLENBQUMsT0FBTyxFQUFFLFlBQVksRUFBRSxFQUFFLEtBQUssRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO0FBQzlELE1BQU0sU0FBUyxHQUFHLE9BQU8sQ0FBQyxZQUFZLENBQUMsQ0FBQztBQUN4Qyx1QkFBdUI7QUFDdkIscUJBQXFCO0FBQ3JCLG1CQUFtQjtBQUNuQixJQUFJO0FBQ0osRUFBRTtBQUNGLHlCQUF5QjtBQUN6QiwwQ0FBMEM7QUFDMUMsY0FBYztBQUNkLGtDQUFrQztBQUNsQyxrQ0FBa0M7QUFDbEMsd0NBQXdDO0FBQ3hDLG1DQUFtQztBQUNuQyxPQUFPO0FBQ1AscUJBQXFCO0FBQ3JCLHlCQUF5QjtBQUN6Qix3Q0FBd0M7QUFDeEMsaUJBQWlCO0FBQ2pCLDRDQUE0QztBQUM1QyxJQUFJO0FBQ0osRUFBRTtBQUNGLHNCQUFzQjtBQUN0Qix5QkFBeUI7QUFDekIsMkJBQTJCO0FBQzNCLHlCQUF5QjtBQUN6Qix3QkFBd0I7QUFDeEIsSUFBSTtBQUNKLE1BQU0sR0FBRyxHQUFHO0lBQ1IsS0FBSyxFQUFFLDRCQUE0QjtJQUNuQyxXQUFXLEVBQUUsb09BQW9PO0lBQ2pQLFNBQVMsRUFBRTtRQUNQO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsNkJBQTZCO1lBQ3ZDLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSxzQ0FBc0M7WUFDaEQsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JB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cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWNvbW1vbnMvZGlzdC9jb25zdGFudHMvcXVlc3Rpb25uYWlyZS9waG9iaWEuanMiXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2Ugc3RyaWN0XCI7XG5PYmplY3QuZGVmaW5lUHJvcGVydHkoZXhwb3J0cywgXCJfX2VzTW9kdWxlXCIsIHsgdmFsdWU6IHRydWUgfSk7XG5jb25zdCBzY29yaW5nXzEgPSByZXF1aXJlKFwiLi4vc2NvcmluZ1wiKTtcbi8vIGludGVyZmFjZSBQSFFTY2FsZSB7XG4vLyAgIGl0ZW1zOiBudW1iZXJbXTtcbi8vICAgbGFiZWw6IHN0cmluZztcbi8vIH1cbi8vXG4vLyBpbnRlcmZhY2UgUEhRU2NvcmluZyB7XG4vLyAgIHNjb3JlT3B0aW9uczogUmVjb3JkPG51bWJlciwgbnVtYmVyPjtcbi8vICAgc2NhbGVzOiB7XG4vLyAgICAgdG90YWxQaG9iaWFTY29yZTogUEhRU2NhbGU7XG4vLyAgICAgYWdvcmFwaG9iaWFTY29yZTogUEhRU2NhbGU7XG4vLyAgICAgYmxvb2RJbmp1cnlQaG9iaWFTY29yZTogUEhRU2NhbGU7XG4vLyAgICAgc29jaWFsUGhvYmlhU2NvcmU6IFBIUVNjYWxlO1xuLy8gICB9O1xuLy8gICBnZXRTY2FsZVNjb3JlOiAoXG4vLyAgICAgYW5zd2VyczogbnVtYmVyW10sXG4vLyAgICAgc2NhbGU6IGtleW9mIFBIUVNjb3JpbmdbXCJzY2FsZXNcIl1cbi8vICAgKSA9PiBudW1iZXI7XG4vLyAgIGdldFNldmVyaXR5OiAoc2NvcmU6IG51bWJlcikgPT4gc3RyaW5nO1xuLy8gfVxuLy9cbi8vIGludGVyZmFjZSBQSFFUeXBlIHtcbi8vICAgZGVzY3JpcHRpb246IHN0cmluZztcbi8vICAgcXVlc3Rpb25zOiBRdWVzdGlvbltdO1xuLy8gICBzY29yaW5nOiBQSFFTY29yaW5nO1xuLy8gICBkaXNjbGFpbWVyOiBzdHJpbmc7XG4vLyB9XG5jb25zdCBQSFEgPSB7XG4gICAgdGl0bGU6IFwiUGhvYmlhIFF1ZXN0aW9ubmFpcmUgKFBIUSlcIixcbiAgICBkZXNjcmlwdGlvbjogXCJUaGUgUEhRIGlzIGEgc2VsZi1hZG1pbmlzdGVyZWQgcXVlc3Rpb25uYWlyZSB1c2VkIHRvIGFzc2VzcyB0aGUgZXh0ZW50IHRvIHdoaWNoIGluZGl2aWR1YWxzIGF2b2lkIHNwZWNpZmljIHNpdHVhdGlvbnMgZHVlIHRvIGZlYXIgb3Igb3RoZXIgdW5wbGVhc2FudCBmZWVsaW5ncy4gSXQgaXMgY29tbW9ubHkgdXNlZCBmb3IgZGlhZ25vc2luZyBhbmQgbW9uaXRvcmluZyBwaG9iaWMgc3ltcHRvbXMuXCIsXG4gICAgcXVlc3Rpb25zOiBbXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkluamVjdGlvbnMgb3IgbWlub3Igc3VyZ2VyeVwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkVhdGluZyBvciBkcmlua2luZyB3aXRoIG90aGVyIHBlb3BsZVwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkhvc3BpdGFsc1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIlRyYXZlbGluZyBhbG9uZSBvbiBwdWJsaWMgdHJhbnNwb3J0YXRpb24gKGUuZy4sIGJ1cyBvciB0cmFpbilcIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJXYWxraW5nIGFsb25lIGluIGJ1c3kgc3RyZWV0c1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkJlaW5nIHdhdGNoZWQgb3Igc3RhcmVkIGF0XCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiR29pbmcgaW4gdG8gY3Jvd2RlZCBzaG9wc1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIlRhbGtpbmcgdG8gcGVvcGxlIGluIGF1dGhvcml0eVwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIlNpZ2h0IG9mIGJsb29kXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiQmVpbmcgY3JpdGljaXplZFwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkdvaW5nIGFsb25lIGZhciBmcm9tIGhvbWVcIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJUaG91Z2h0IG9mIGluanVyeSBvciBpbGxuZXNzXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiU3BlYWtpbmcgb3IgYWN0aW5nIHRvIGFuIGF1ZGllbmNlXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiTGFyZ2Ugb3BlbiBzcGFjZXNcIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJHb2luZyB0byB0aGUgZGVudGlzdFwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgXSxcbiAgICBzY29yaW5nOiB7XG4gICAgICAgIC4uLnNjb3JpbmdfMS5RVUVTVElPTk5BSVJFX1NDT1JJTkcsXG4gICAgICAgIHNjb3JlTWFwcGluZzogeyAwOiAwLCAxOiAxLCAyOiAyLCAzOiAzLCA0OiA0LCA1OiA1LCA2OiA2LCA3OiA3LCA4OiA4IH0sXG4gICAgICAgIHNldmVyaXR5TGV2ZWxzOiB7XG4gICAgICAgICAgICBtaW5pbWFsOiB7IHJhbmdlOiBbMCwgMTJdLCBsYWJlbDogXCJNaW5pbWFsIFBob2JpYVwiIH0sXG4gICAgICAgICAgICBtaWxkOiB7IHJhbmdlOiBbMTMsIDI0XSwgbGFiZWw6IFwiTWlsZCBQaG9iaWFcIiB9LFxuICAgICAgICAgICAgbW9kZXJhdGU6IHsgcmFuZ2U6IFsyNSwgMzZdLCBsYWJlbDogXCJNb2RlcmF0ZSBQaG9iaWFcIiB9LFxuICAgICAgICAgICAgc2V2ZXJlOiB7IHJhbmdlOiBbMzcsIEluZmluaXR5XSwgbGFiZWw6IFwiU2V2ZXJlIFBob2JpYVwiIH0sXG4gICAgICAgIH0sXG4gICAgICAgIC8vIEZJWDogVGhlIHNjb3JpbmcgbG9naWMgaXMgbm90IGltcGxlbWVudGVkIHlldFxuICAgICAgICAvLyBzY2FsZXM6IHtcbiAgICAgICAgLy8gICB0b3RhbFBob2JpYVNjb3JlOiB7XG4gICAgICAgIC8vICAgICBpdGVtczogWzAsIDEsIDIsIDMsIDQsIDUsIDYsIDcsIDgsIDksIDEwLCAxMSwgMTIsIDEzLCAxNF0sXG4gICAgICAgIC8vICAgICBsYWJlbDogXCJUb3RhbCBQaG9iaWEgU2NvcmUgKFBIUV9UT1QpXCIsXG4gICAgICAgIC8vICAgfSxcbiAgICAgICAgLy8gICBhZ29yYXBob2JpYVNjb3JlOiB7XG4gICAgICAgIC8vICAgICBpdGVtczogWzMsIDQsIDYsIDEwLCAxM10sXG4gICAgICAgIC8vICAgICBsYWJlbDogXCJBZ29yYXBob2JpYSBTY29yZSAoUEhRX0FHTylcIixcbiAgICAgICAgLy8gICB9LFxuICAgICAgICAvLyAgIGJsb29kSW5qdXJ5UGhvYmlhU2NvcmU6IHtcbiAgICAgICAgLy8gICAgIGl0ZW1zOiBbMCwgMiwgOCwgMTEsIDE0XSxcbiAgICAgICAgLy8gICAgIGxhYmVsOiBcIkJsb29kLUluanVyeSBQaG9iaWEgU2NvcmUgKFBIUV9CTEQpXCIsXG4gICAgICAgIC8vICAgfSxcbiAgICAgICAgLy8gICBzb2NpYWxQaG9iaWFTY29yZToge1xuICAgICAgICAvLyAgICAgaXRlbXM6IFsxLCA1LCA3LCA5LCAxMl0sXG4gICAgICAgIC8vICAgICBsYWJlbDogXCJTb2NpYWwgUGhvYmlhIFNjb3JlIChQSFFfU09DKVwiLFxuICAgICAgICAvLyAgIH0sXG4gICAgICAgIC8vIH0sXG4gICAgICAgIC8vIGdldFNjYWxlU2NvcmU6IChhbnN3ZXJzLCBzY2FsZSkgPT4ge1xuICAgICAgICAvLyAgIGNvbnN0IHNjYWxlSXRlbXMgPSBQSFEuc2NvcmluZy5zY2FsZXNbc2NhbGVdPy5pdGVtcztcbiAgICAgICAgLy8gICBpZiAoIXNjYWxlSXRlbXMpIHJldHVybiAwO1xuICAgICAgICAvL1xuICAgICAgICAvLyAgIHJldHVybiBzY2FsZUl0ZW1zLnJlZHVjZShcbiAgICAgICAgLy8gICAgICh0b3RhbCwgaW5kZXgpID0+IHRvdGFsICsgKGFuc3dlcnNbaW5kZXhdIHx8IDApLFxuICAgICAgICAvLyAgICAgMFxuICAgICAgICAvLyAgICk7XG4gICAgICAgIC8vIH0sXG4gICAgfSxcbiAgICBkaXNjbGFpbWVyOiBcIlRoaXMgcXVlc3Rpb25uYWlyZSBpcyBhIHNjcmVlbmluZyB0b29sIHRvIGFzc2VzcyB0aGUgc2V2ZXJpdHkgb2YgcGhvYmljIHN5bXB0b21zLiBJdCBkb2VzIG5vdCBzZXJ2ZSBhcyBhIGRpYWdub3N0aWMgdG9vbCBhbmQgc2hvdWxkIGJlIGZvbGxvd2VkIGJ5IGEgY2xpbmljYWwgZXZhbHVhdGlvbi4gSWYgeW91IGhhdmUgY29uY2VybnMgYWJvdXQgeW91ciBtZW50YWwgaGVhbHRoLCBwbGVhc2UgY29uc3VsdCBhIGhlYWx0aGNhcmUgcHJvZmVzc2lvbmFsLlwiLFxufTtcbmV4cG9ydHMuZGVmYXVsdCA9IFBIUTtcbi8vIyBzb3VyY2VNYXBwaW5nVVJMPXBob2JpYS5qcy5tYXAiXSwidmVyc2lvbiI6M30=

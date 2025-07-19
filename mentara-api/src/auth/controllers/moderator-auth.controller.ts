@@ -43,7 +43,8 @@ export class ModeratorAuthController {
   @Post('create-account')
   @ApiOperation({
     summary: 'Create new moderator account',
-    description: 'Create a new moderator account. Only admins can create moderator accounts.',
+    description:
+      'Create a new moderator account. Only admins can create moderator accounts.',
   })
   @ApiBody({
     type: 'object',
@@ -52,12 +53,24 @@ export class ModeratorAuthController {
       type: 'object',
       required: ['email', 'password', 'firstName', 'lastName'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'moderator@mentara.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'moderator@mentara.com',
+        },
         password: { type: 'string', minLength: 8, example: 'SecurePass123!' },
         firstName: { type: 'string', example: 'Jane' },
         lastName: { type: 'string', example: 'Smith' },
-        permissions: { type: 'array', items: { type: 'string' }, example: ['moderate_posts', 'ban_users'] },
-        assignedCommunities: { type: 'array', items: { type: 'string' }, example: ['community1', 'community2'] },
+        permissions: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['moderate_posts', 'ban_users'],
+        },
+        assignedCommunities: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['community1', 'community2'],
+        },
       },
     },
   })
@@ -82,9 +95,15 @@ export class ModeratorAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
-  @ApiForbiddenResponse({ description: 'Only admins can create moderator accounts' })
-  @ApiTooManyRequestsResponse({ description: 'Too many moderator creation attempts' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
+  @ApiForbiddenResponse({
+    description: 'Only admins can create moderator accounts',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too many moderator creation attempts',
+  })
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 5, ttl: 600000 } }) // 5 moderator creations per 10 minutes
   @HttpCode(HttpStatus.CREATED)
@@ -132,7 +151,11 @@ export class ModeratorAuthController {
       type: 'object',
       required: ['email', 'password'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'moderator@mentara.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'moderator@mentara.com',
+        },
         password: { type: 'string', example: 'SecurePass123!' },
       },
     },
@@ -197,7 +220,8 @@ export class ModeratorAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get moderator profile',
-    description: 'Retrieve the authenticated moderator user profile information',
+    description:
+      'Retrieve the authenticated moderator user profile information',
   })
   @ApiResponse({
     status: 200,
@@ -217,7 +241,9 @@ export class ModeratorAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('profile')
   async getProfile(@CurrentUserId() userId: string) {
     return this.moderatorAuthService.getModeratorProfile(userId);
@@ -226,7 +252,8 @@ export class ModeratorAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get moderator permissions',
-    description: 'Retrieve the permissions for the authenticated moderator user',
+    description:
+      'Retrieve the permissions for the authenticated moderator user',
   })
   @ApiResponse({
     status: 200,
@@ -242,7 +269,9 @@ export class ModeratorAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('permissions')
   async getPermissions(@CurrentUserId() userId: string) {
     return this.moderatorAuthService.getModeratorPermissions(userId);
@@ -251,7 +280,8 @@ export class ModeratorAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get assigned communities',
-    description: 'Retrieve the communities assigned to the authenticated moderator',
+    description:
+      'Retrieve the communities assigned to the authenticated moderator',
   })
   @ApiResponse({
     status: 200,
@@ -275,7 +305,9 @@ export class ModeratorAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('assigned-communities')
   async getAssignedCommunities(@CurrentUserId() userId: string) {
     return this.moderatorAuthService.getAssignedCommunities(userId);
@@ -284,7 +316,8 @@ export class ModeratorAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get moderator dashboard statistics',
-    description: 'Retrieve dashboard statistics and metrics for the moderator panel',
+    description:
+      'Retrieve dashboard statistics and metrics for the moderator panel',
   })
   @ApiResponse({
     status: 200,
@@ -310,7 +343,9 @@ export class ModeratorAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('dashboard-stats')
   async getDashboardStats(@CurrentUserId() userId: string) {
     return this.moderatorAuthService.getModeratorDashboardStats(userId);

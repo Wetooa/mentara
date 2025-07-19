@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckHeartedResponseSchema = exports.HeartPostResponseSchema = exports.PostListResponseSchema = exports.PostWithDetailsSchema = exports.PostCommentSchema = exports.CommentHeartSchema = exports.PostHeartSchema = exports.PostByRoomParamsDtoSchema = exports.PostByUserParamsDtoSchema = exports.PostListParamsDtoSchema = exports.ReportContentDtoSchema = exports.CreateNestedCommentDtoSchema = exports.GiveAwardDtoSchema = exports.VoteContentDtoSchema = exports.PostRoomParamsDtoSchema = exports.PostUpdateInputDtoSchema = exports.PostCreateInputDtoSchema = exports.PostParamsDtoSchema = exports.PostReactionParamSchema = exports.PostIdParamSchema = exports.ModeratePostDtoSchema = exports.PostQuerySchema = exports.PollVoteDtoSchema = exports.ReportPostDtoSchema = exports.CreatePostReactionDtoSchema = exports.PostReactionSchema = exports.UpdatePostDtoSchema = exports.CreatePostDtoSchema = exports.PostSchema = void 0;
+exports.CheckHeartedResponseSchema = exports.HeartPostResponseSchema = exports.PostListResponseSchema = exports.PostWithDetailsSchema = exports.PostCommentSchema = exports.PostHeartSchema = exports.PostByRoomParamsDtoSchema = exports.PostByUserParamsDtoSchema = exports.PostListParamsDtoSchema = exports.ReportContentDtoSchema = exports.CreateNestedCommentDtoSchema = exports.GiveAwardDtoSchema = exports.VoteContentDtoSchema = exports.PostRoomParamsDtoSchema = exports.PostUpdateInputDtoSchema = exports.PostCreateInputDtoSchema = exports.PostParamsDtoSchema = exports.PostReactionParamSchema = exports.PostIdParamSchema = exports.ModeratePostDtoSchema = exports.PostQuerySchema = exports.PollVoteDtoSchema = exports.ReportPostDtoSchema = exports.CreatePostReactionDtoSchema = exports.PostReactionSchema = exports.UpdatePostDtoSchema = exports.CreatePostDtoSchema = exports.PostSchema = void 0;
 const zod_1 = require("zod");
+// Import CommentHeartSchema from comments.ts to avoid duplication
+const comments_1 = require("./comments");
 // Post Schema
 exports.PostSchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
@@ -191,18 +193,6 @@ exports.PostHeartSchema = zod_1.z.object({
     }),
     createdAt: zod_1.z.string().datetime()
 });
-exports.CommentHeartSchema = zod_1.z.object({
-    id: zod_1.z.string().uuid(),
-    commentId: zod_1.z.string().uuid(),
-    userId: zod_1.z.string().uuid(),
-    user: zod_1.z.object({
-        id: zod_1.z.string().uuid(),
-        firstName: zod_1.z.string().min(1),
-        lastName: zod_1.z.string().min(1),
-        avatarUrl: zod_1.z.string().url()
-    }),
-    createdAt: zod_1.z.string().datetime()
-});
 exports.PostCommentSchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
     content: zod_1.z.string().min(1),
@@ -216,7 +206,7 @@ exports.PostCommentSchema = zod_1.z.object({
     }),
     parentId: zod_1.z.string().uuid().optional(),
     replies: zod_1.z.array(zod_1.z.lazy(() => exports.PostCommentSchema)).optional(),
-    hearts: zod_1.z.array(exports.CommentHeartSchema),
+    hearts: zod_1.z.array(comments_1.CommentHeartSchema),
     heartCount: zod_1.z.number().min(0),
     isHearted: zod_1.z.boolean().optional(),
     createdAt: zod_1.z.string().datetime(),

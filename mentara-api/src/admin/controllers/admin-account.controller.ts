@@ -44,36 +44,17 @@ export class AdminAccountController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create create',
 
-
-    description: 'Create create' 
-
-
+    description: 'Create create',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async create(
     @ValidatedBody(CreateAdminDtoSchema) createAdminDto: CreateAdminDto,
@@ -94,36 +75,17 @@ export class AdminAccountController {
   }
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find all',
 
-
-    description: 'Retrieve find all' 
-
-
+    description: 'Retrieve find all',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async findAll(
     @CurrentUserId() currentUserId: string,
@@ -141,36 +103,17 @@ export class AdminAccountController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find one',
 
-
-    description: 'Retrieve find one' 
-
-
+    description: 'Retrieve find one',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async findOne(
     @Param('id') id: string,
@@ -198,36 +141,17 @@ export class AdminAccountController {
   }
 
   @Patch(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Partially update update',
 
-
-    description: 'Partially update update' 
-
-
+    description: 'Partially update update',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async update(
     @Param('id') id: string,
@@ -247,36 +171,17 @@ export class AdminAccountController {
   }
 
   @Delete(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete remove',
 
-
-    description: 'Delete remove' 
-
-
+    description: 'Delete remove',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @AdminOnly()
   async remove(
     @Param('id') id: string,

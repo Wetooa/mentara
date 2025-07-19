@@ -11,10 +11,10 @@ import {
 } from '@nestjs/common';
 import { AuditLogsService } from './audit-logs.service';
 import { AuditLoggingService } from '../common/services/audit-logging.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
-import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   ApiTags,
   ApiOperation,
@@ -53,7 +53,7 @@ import {
   type LogProfileUpdateDto,
   type LogSystemErrorDto,
   type CleanupAuditLogsDto,
-} from '@mentara/commons';
+} from 'mentara-commons';
 import {
   AuditAction,
   EventSeverity,
@@ -101,7 +101,10 @@ export class AuditLogsController {
   @ApiQuery({ name: 'action', required: false })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
-  @ApiResponse({ status: 200, description: 'Audit logs retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Audit logs retrieved successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAuditLogs(
     @CurrentUserRole() userRole: string,
@@ -153,7 +156,10 @@ export class AuditLogsController {
   })
   @ApiQuery({ name: 'severity', required: false })
   @ApiQuery({ name: 'category', required: false })
-  @ApiResponse({ status: 200, description: 'System events retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'System events retrieved successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findSystemEvents(
     @CurrentUserRole() userRole: string,
@@ -183,7 +189,10 @@ export class AuditLogsController {
   })
   @ApiParam({ name: 'id', description: 'System event ID' })
   @ApiBody({ description: 'Resolution data' })
-  @ApiResponse({ status: 200, description: 'System event resolved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'System event resolved successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'System event not found' })
   resolveSystemEvent(
@@ -206,7 +215,10 @@ export class AuditLogsController {
   }
 
   @Post('data-changes')
-  @ApiOperation({ summary: 'Log data change', description: 'Log a data change event' })
+  @ApiOperation({
+    summary: 'Log data change',
+    description: 'Log a data change event',
+  })
   @ApiResponse({ status: 201, description: 'Data change logged successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   createDataChangeLog(

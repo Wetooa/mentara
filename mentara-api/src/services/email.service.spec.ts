@@ -1,12 +1,43 @@
+/*
+ * Ultra-Comprehensive Test Suite for EmailService
+ * 
+ * This test suite provides extensive coverage for the EmailService class, which handles:
+ * - Therapist application status notifications (approval/rejection)
+ * - Email content generation with dynamic templates
+ * - Generic email sending functionality
+ * - Email delivery simulation and error handling
+ * - Service configuration testing
+ * - Welcome and rejection email workflows
+ * 
+ * Test Coverage Areas:
+ * 1. Core Email Notification Methods (sendTherapistApplicationNotification)
+ * 2. Email Content Generation (generateEmailContent) - approval/rejection scenarios
+ * 3. Email Delivery Simulation (sendEmail) - success/failure scenarios
+ * 4. Specialized Email Methods (welcome, rejection emails)
+ * 5. Generic Email Functionality (sendGenericEmail)
+ * 6. Service Configuration Testing (testConfiguration)
+ * 7. Error Handling and Edge Cases
+ * 8. Email Template Validation
+ * 9. Performance and Memory Management
+ * 10. Integration Workflows and Real-world Scenarios
+ * 
+ * Testing Approach:
+ * - Comprehensive method coverage with multiple scenarios per method
+ * - Detailed validation of email content generation
+ * - Error simulation and recovery testing
+ * - Performance testing with batch operations
+ * - Memory leak prevention testing
+ * - Edge case handling (invalid inputs, network failures, etc.)
+ */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService, EmailNotificationData } from './email.service';
 
-describe('EmailService', () => {
+describe('EmailService - Ultra-Comprehensive Test Suite', () => {
   let service: EmailService;
-
-  // Mock console methods to avoid cluttering test output
   let consoleSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
+  let mathRandomSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,985 +45,1072 @@ describe('EmailService', () => {
     }).compile();
 
     service = module.get<EmailService>(EmailService);
-
-    // Mock console methods
-    consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    
+    // Setup console spies to capture logs
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    // Mock Math.random for predictable test outcomes
+    mathRandomSpy = jest.spyOn(Math, 'random');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    consoleSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('Core Service Initialization', () => {
+    it('should be defined', () => {
+      expect(service).toBeDefined();
+    });
+
+    it('should be an instance of EmailService', () => {
+      expect(service).toBeInstanceOf(EmailService);
+    });
+
+    it('should have all required methods', () => {
+      expect(typeof service.sendTherapistApplicationNotification).toBe('function');
+      expect(typeof service.sendTherapistWelcomeEmail).toBe('function');
+      expect(typeof service.sendTherapistRejectionEmail).toBe('function');
+      expect(typeof service.testConfiguration).toBe('function');
+      expect(typeof service.sendGenericEmail).toBe('function');
+    });
   });
 
-  describe('sendTherapistApplicationNotification', () => {
-    const baseEmailData: EmailNotificationData = {
-      to: 'therapist@example.com',
-      name: 'Dr. John Doe',
-      status: 'approved',
-    };
-
-    it('should send approved notification successfully', async () => {
-      const emailData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'approved',
-        credentials: {
-          email: 'therapist@example.com',
-          password: 'temp123456',
-        },
-      };
-
-      const result =
-        await service.sendTherapistApplicationNotification(emailData);
-
-      expect(result).toEqual({
-        success: true,
-        message: 'Email notification queued for therapist@example.com',
+  describe('sendTherapistApplicationNotification - Comprehensive Testing', () => {
+    describe('Successful Approval Notifications', () => {
+      beforeEach(() => {
+        // Mock successful email delivery (> 0.1 for success)
+        mathRandomSpy.mockReturnValue(0.2);
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
-        recipient: 'therapist@example.com',
-        status: 'approved',
-        hasCredentials: true,
+      it('should send successful approval notification with credentials', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. John Smith',
+          status: 'approved',
+          credentials: {
+            email: 'therapist@example.com',
+            password: 'tempPassword123'
+          }
+        };
+
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to therapist@example.com');
+        expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
+          recipient: 'therapist@example.com',
+          status: 'approved',
+          hasCredentials: true,
+        });
+        expect(consoleSpy).toHaveBeenCalledWith('✅ Email sent successfully to therapist@example.com');
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          subject: 'Mentara Therapist Application Approved',
-          greeting: 'Dear Dr. John Doe,',
-          body: expect.stringContaining(
-            'Congratulations! Your therapist application has been approved.',
-          ),
-        }),
-      );
-    });
+      it('should send successful approval notification without credentials', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Jane Doe',
+          status: 'approved'
+        };
 
-    it('should send rejected notification successfully', async () => {
-      const emailData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'rejected',
-        adminNotes: 'Insufficient experience in required specializations.',
-      };
+        const result = service.sendTherapistApplicationNotification(emailData);
 
-      const result =
-        await service.sendTherapistApplicationNotification(emailData);
-
-      expect(result).toEqual({
-        success: true,
-        message: 'Email notification queued for therapist@example.com',
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to therapist@example.com');
+        expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
+          recipient: 'therapist@example.com',
+          status: 'approved',
+          hasCredentials: false,
+        });
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
-        recipient: 'therapist@example.com',
-        status: 'rejected',
-        hasCredentials: false,
+      it('should send approval notification with admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Sarah Wilson',
+          status: 'approved',
+          adminNotes: 'Excellent credentials and experience. Welcome to the team!'
+        };
+
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to therapist@example.com');
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          subject: 'Mentara Therapist Application Update',
-          greeting: 'Dear Dr. John Doe,',
-          body: expect.stringContaining(
-            'we have decided not to approve your application',
-          ),
-        }),
-      );
-    });
+      it('should send approval notification with both credentials and admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Michael Brown',
+          status: 'approved',
+          credentials: {
+            email: 'therapist@example.com',
+            password: 'secure123'
+          },
+          adminNotes: 'Welcome! Please complete your profile setup within 7 days.'
+        };
 
-    it('should handle approved notification without credentials', async () => {
-      const emailData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'approved',
-      };
+        const result = service.sendTherapistApplicationNotification(emailData);
 
-      const result =
-        await service.sendTherapistApplicationNotification(emailData);
-
-      expect(result).toEqual({
-        success: true,
-        message: 'Email notification queued for therapist@example.com',
-      });
-
-      expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
-        recipient: 'therapist@example.com',
-        status: 'approved',
-        hasCredentials: false,
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to therapist@example.com');
       });
     });
 
-    it('should handle approved notification with admin notes', async () => {
-      const emailData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'approved',
-        adminNotes: 'Welcome to our premium therapist network!',
-        credentials: {
-          email: 'therapist@example.com',
-          password: 'temp123456',
-        },
-      };
-
-      const result =
-        await service.sendTherapistApplicationNotification(emailData);
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.stringContaining(
-            'Welcome to our premium therapist network!',
-          ),
-        }),
-      );
-    });
-
-    it('should handle rejected notification without admin notes', async () => {
-      const emailData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'rejected',
-      };
-
-      const result =
-        await service.sendTherapistApplicationNotification(emailData);
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.not.stringContaining('Feedback from our review team:'),
-        }),
-      );
-    });
-
-    it('should handle errors gracefully', async () => {
-      // Mock generateEmailContent to throw an error
-      const originalGenerateEmailContent = service['generateEmailContent'];
-      service['generateEmailContent'] = jest.fn().mockImplementation(() => {
-        throw new Error('Email template generation failed');
+    describe('Successful Rejection Notifications', () => {
+      beforeEach(() => {
+        mathRandomSpy.mockReturnValue(0.2);
       });
 
-      const result =
-        await service.sendTherapistApplicationNotification(baseEmailData);
+      it('should send successful rejection notification', () => {
+        const emailData: EmailNotificationData = {
+          to: 'applicant@example.com',
+          name: 'Dr. Alice Johnson',
+          status: 'rejected'
+        };
 
-      expect(result).toEqual({
-        success: false,
-        message: 'Email template generation failed',
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to applicant@example.com');
+        expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
+          recipient: 'applicant@example.com',
+          status: 'rejected',
+          hasCredentials: false,
+        });
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to send email notification:',
-        expect.any(Error),
-      );
+      it('should send rejection notification with admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'applicant@example.com',
+          name: 'Dr. Robert Taylor',
+          status: 'rejected',
+          adminNotes: 'Please provide additional documentation for your license verification.'
+        };
 
-      // Restore original method
-      service['generateEmailContent'] = originalGenerateEmailContent;
-    });
+        const result = service.sendTherapistApplicationNotification(emailData);
 
-    it('should handle non-Error exceptions', async () => {
-      // Mock generateEmailContent to throw a non-Error
-      const originalGenerateEmailContent = service['generateEmailContent'];
-      service['generateEmailContent'] = jest.fn().mockImplementation(() => {
-        throw new Error('Non-error exception');
-      });
-
-      const result =
-        await service.sendTherapistApplicationNotification(baseEmailData);
-
-      expect(result).toEqual({
-        success: false,
-        message: 'Non-error exception',
-      });
-
-      // Restore original method
-      service['generateEmailContent'] = originalGenerateEmailContent;
-    });
-
-    it('should handle empty email data', async () => {
-      const emptyEmailData: EmailNotificationData = {
-        to: '',
-        name: '',
-        status: 'approved',
-      };
-
-      const result =
-        await service.sendTherapistApplicationNotification(emptyEmailData);
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
-        recipient: '',
-        status: 'approved',
-        hasCredentials: false,
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to applicant@example.com');
       });
     });
 
-    it('should handle special characters in name and email', async () => {
-      const specialCharEmailData: EmailNotificationData = {
-        to: 'therapist+test@example.com',
-        name: 'Dr. José María García-López',
-        status: 'approved',
-      };
+    describe('Email Delivery Failures', () => {
+      it('should handle email service unavailable (5% failure rate)', () => {
+        mathRandomSpy.mockReturnValue(0.03); // Less than 0.05
 
-      const result =
-        await service.sendTherapistApplicationNotification(
-          specialCharEmailData,
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Test',
+          status: 'approved'
+        };
+
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(false);
+        expect(result.message).toBe('Failed to send email: Email service temporarily unavailable');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          '❌ Failed to send email to therapist@example.com: Email service temporarily unavailable'
         );
+      });
 
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          greeting: 'Dear Dr. José María García-López,',
-        }),
-      );
+      it('should handle invalid email address (5% invalid email simulation)', () => {
+        mathRandomSpy.mockReturnValue(0.08); // Between 0.05 and 0.1
+
+        const emailData: EmailNotificationData = {
+          to: 'invalid-email',
+          name: 'Dr. Test',
+          status: 'approved'
+        };
+
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(false);
+        expect(result.message).toBe('Failed to send email: Invalid email address format');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          '❌ Failed to send email to invalid-email: Invalid email address format'
+        );
+      });
     });
 
-    it('should handle very long admin notes', async () => {
-      const longNotes = 'A'.repeat(5000);
-      const emailData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'rejected',
-        adminNotes: longNotes,
-      };
+    describe('Error Handling and Edge Cases', () => {
+      it('should handle exceptions during email sending', () => {
+        // Mock an exception in the private sendEmail method by causing Math.random to throw
+        mathRandomSpy.mockImplementation(() => {
+          throw new Error('Random generator failed');
+        });
 
-      const result =
-        await service.sendTherapistApplicationNotification(emailData);
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Test',
+          status: 'approved'
+        };
 
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.stringContaining(longNotes),
-        }),
-      );
-    });
+        const result = service.sendTherapistApplicationNotification(emailData);
 
-    it('should handle null and undefined values gracefully', async () => {
-      const emailDataWithNulls: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. John Doe',
-        status: 'approved' as const,
-        adminNotes: undefined,
-        credentials: undefined,
-      };
+        expect(result.success).toBe(false);
+        expect(result.message).toBe('Random generator failed');
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Failed to send email notification:',
+          expect.any(Error)
+        );
+      });
 
-      const result =
-        await service.sendTherapistApplicationNotification(emailDataWithNulls);
+      it('should handle non-Error exceptions', () => {
+        mathRandomSpy.mockImplementation(() => {
+          throw 'String error';
+        });
 
-      expect(result.success).toBe(true);
-    });
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Test',
+          status: 'approved'
+        };
 
-    it('should handle both approved and rejected status in same session', async () => {
-      const approvedData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'approved',
-      };
+        const result = service.sendTherapistApplicationNotification(emailData);
 
-      const rejectedData: EmailNotificationData = {
-        ...baseEmailData,
-        status: 'rejected',
-      };
+        expect(result.success).toBe(false);
+        expect(result.message).toBe('Failed to send notification');
+      });
 
-      const approvedResult =
-        await service.sendTherapistApplicationNotification(approvedData);
-      const rejectedResult =
-        await service.sendTherapistApplicationNotification(rejectedData);
+      it('should handle empty email address', () => {
+        mathRandomSpy.mockReturnValue(0.2);
 
-      expect(approvedResult.success).toBe(true);
-      expect(rejectedResult.success).toBe(true);
+        const emailData: EmailNotificationData = {
+          to: '',
+          name: 'Dr. Test',
+          status: 'approved'
+        };
 
-      expect(consoleSpy).toHaveBeenCalledTimes(4); // 2 calls for each notification
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(true); // Service doesn't validate email format
+        expect(result.message).toBe('Email notification sent to ');
+      });
+
+      it('should handle empty name', () => {
+        mathRandomSpy.mockReturnValue(0.2);
+
+        const emailData: EmailNotificationData = {
+          to: 'test@example.com',
+          name: '',
+          status: 'approved'
+        };
+
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to test@example.com');
+      });
+
+      it('should handle special characters in name and email', () => {
+        mathRandomSpy.mockReturnValue(0.2);
+
+        const emailData: EmailNotificationData = {
+          to: 'test+tag@example.co.uk',
+          name: 'Dr. María José Ñoño-Smith',
+          status: 'approved'
+        };
+
+        const result = service.sendTherapistApplicationNotification(emailData);
+
+        expect(result.success).toBe(true);
+        expect(result.message).toBe('Email notification sent to test+tag@example.co.uk');
+      });
     });
   });
 
-  describe('generateEmailContent', () => {
-    it('should generate approved email content with credentials', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Sarah Wilson',
-        status: 'approved',
-        credentials: {
-          email: 'therapist@example.com',
-          password: 'temp987654',
-        },
-      };
+  describe('Email Content Generation - Comprehensive Testing', () => {
+    describe('Approval Email Content', () => {
+      it('should generate correct approval email content with credentials', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. John Smith',
+          status: 'approved',
+          credentials: {
+            email: 'therapist@example.com',
+            password: 'tempPassword123'
+          }
+        };
 
-      const content = service['generateEmailContent'](emailData);
+        // Access private method through service instance
+        const content = (service as any).generateEmailContent(emailData);
 
-      expect(content).toEqual({
-        subject: 'Mentara Therapist Application Approved',
-        greeting: 'Dear Dr. Sarah Wilson,',
-        companySignature:
-          'Best regards,\nThe Mentara Team\nsupport@mentara.com',
-        body: expect.stringContaining(
-          'Congratulations! Your therapist application has been approved.',
-        ),
+        expect(content.subject).toBe('Mentara Therapist Application Approved');
+        expect(content.greeting).toBe('Dear Dr. John Smith,');
+        expect(content.companySignature).toBe('Best regards,\nThe Mentara Team\nsupport@mentara.com');
+        expect(content.body).toContain('Congratulations! Your therapist application has been approved.');
+        expect(content.body).toContain('Your account credentials:');
+        expect(content.body).toContain('Email: therapist@example.com');
+        expect(content.body).toContain('Temporary Password: tempPassword123');
+        expect(content.body).toContain('Please log in and change your password immediately.');
+        expect(content.body).toContain('You can access your therapist dashboard at: https://mentara.com/therapist');
+        expect(content.body).toContain('Welcome to the Mentara therapist network!');
       });
 
-      expect(content.body).toContain('Your account credentials:');
-      expect(content.body).toContain('Email: therapist@example.com');
-      expect(content.body).toContain('Temporary Password: temp987654');
-      expect(content.body).toContain(
-        'Please log in and change your password immediately.',
-      );
-      expect(content.body).toContain('https://mentara.com/therapist');
-      expect(content.body).toContain(
-        'Welcome to the Mentara therapist network!',
-      );
-    });
+      it('should generate correct approval email content without credentials', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Jane Doe',
+          status: 'approved'
+        };
 
-    it('should generate approved email content without credentials', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Michael Johnson',
-        status: 'approved',
-      };
+        const content = (service as any).generateEmailContent(emailData);
 
-      const content = service['generateEmailContent'](emailData);
-
-      expect(content.body).not.toContain('Your account credentials:');
-      expect(content.body).not.toContain('Temporary Password:');
-      expect(content.body).toContain(
-        'Congratulations! Your therapist application has been approved.',
-      );
-      expect(content.body).toContain(
-        'Welcome to the Mentara therapist network!',
-      );
-    });
-
-    it('should generate approved email content with admin notes', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Emma Brown',
-        status: 'approved',
-        adminNotes: 'We are particularly excited about your expertise in CBT.',
-      };
-
-      const content = service['generateEmailContent'](emailData);
-
-      expect(content.body).toContain('Additional notes from our team:');
-      expect(content.body).toContain(
-        'We are particularly excited about your expertise in CBT.',
-      );
-    });
-
-    it('should generate rejected email content with admin notes', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Alex Taylor',
-        status: 'rejected',
-        adminNotes:
-          'Please obtain additional certification in trauma therapy and reapply.',
-      };
-
-      const content = service['generateEmailContent'](emailData);
-
-      expect(content).toEqual({
-        subject: 'Mentara Therapist Application Update',
-        greeting: 'Dear Dr. Alex Taylor,',
-        companySignature:
-          'Best regards,\nThe Mentara Team\nsupport@mentara.com',
-        body: expect.stringContaining(
-          'we have decided not to approve your application at this time',
-        ),
+        expect(content.subject).toBe('Mentara Therapist Application Approved');
+        expect(content.greeting).toBe('Dear Dr. Jane Doe,');
+        expect(content.body).toContain('Congratulations! Your therapist application has been approved.');
+        expect(content.body).not.toContain('Your account credentials:');
+        expect(content.body).not.toContain('Email:');
+        expect(content.body).not.toContain('Temporary Password:');
+        expect(content.body).toContain('Welcome to the Mentara therapist network!');
       });
 
-      expect(content.body).toContain('Feedback from our review team:');
-      expect(content.body).toContain(
-        'Please obtain additional certification in trauma therapy and reapply.',
-      );
-      expect(content.body).toContain(
-        'We encourage you to address any concerns mentioned above',
-      );
-      expect(content.body).toContain(
-        "If you have any questions, please don't hesitate to contact our support team.",
-      );
+      it('should generate approval email content with admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Sarah Wilson',
+          status: 'approved',
+          adminNotes: 'Excellent credentials and experience. Welcome to the team!'
+        };
+
+        const content = (service as any).generateEmailContent(emailData);
+
+        expect(content.body).toContain('Additional notes from our team:');
+        expect(content.body).toContain('Excellent credentials and experience. Welcome to the team!');
+      });
+
+      it('should generate approval email content with both credentials and admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'therapist@example.com',
+          name: 'Dr. Michael Brown',
+          status: 'approved',
+          credentials: {
+            email: 'therapist@example.com',
+            password: 'secure123'
+          },
+          adminNotes: 'Welcome! Please complete your profile setup within 7 days.'
+        };
+
+        const content = (service as any).generateEmailContent(emailData);
+
+        expect(content.body).toContain('Your account credentials:');
+        expect(content.body).toContain('Email: therapist@example.com');
+        expect(content.body).toContain('Temporary Password: secure123');
+        expect(content.body).toContain('Additional notes from our team:');
+        expect(content.body).toContain('Welcome! Please complete your profile setup within 7 days.');
+      });
     });
 
-    it('should generate rejected email content without admin notes', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Chris Lee',
-        status: 'rejected',
-      };
+    describe('Rejection Email Content', () => {
+      it('should generate correct rejection email content without admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'applicant@example.com',
+          name: 'Dr. Alice Johnson',
+          status: 'rejected'
+        };
 
-      const content = service['generateEmailContent'](emailData);
+        const content = (service as any).generateEmailContent(emailData);
 
-      expect(content.body).not.toContain('Feedback from our review team:');
-      expect(content.body).toContain(
-        'Thank you for your interest in joining the Mentara therapist network.',
-      );
-      expect(content.body).toContain(
-        'we have decided not to approve your application at this time',
-      );
-      expect(content.body).toContain(
-        'We encourage you to address any concerns mentioned above',
-      );
+        expect(content.subject).toBe('Mentara Therapist Application Update');
+        expect(content.greeting).toBe('Dear Dr. Alice Johnson,');
+        expect(content.companySignature).toBe('Best regards,\nThe Mentara Team\nsupport@mentara.com');
+        expect(content.body).toContain('Thank you for your interest in joining the Mentara therapist network.');
+        expect(content.body).toContain('After careful review, we have decided not to approve your application at this time.');
+        expect(content.body).toContain('We encourage you to address any concerns mentioned above and reapply in the future.');
+        expect(content.body).toContain("If you have any questions, please don't hesitate to contact our support team.");
+        expect(content.body).not.toContain('Feedback from our review team:');
+      });
+
+      it('should generate rejection email content with admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'applicant@example.com',
+          name: 'Dr. Robert Taylor',
+          status: 'rejected',
+          adminNotes: 'Please provide additional documentation for your license verification.'
+        };
+
+        const content = (service as any).generateEmailContent(emailData);
+
+        expect(content.body).toContain('Feedback from our review team:');
+        expect(content.body).toContain('Please provide additional documentation for your license verification.');
+      });
+
+      it('should generate rejection email content with long admin notes', () => {
+        const longNotes = 'We appreciate your application. However, we need the following items: 1) Updated license documentation, 2) Three professional references, 3) Proof of malpractice insurance, 4) Completed background check form. Please resubmit when you have all required documents.';
+        
+        const emailData: EmailNotificationData = {
+          to: 'applicant@example.com',
+          name: 'Dr. Test User',
+          status: 'rejected',
+          adminNotes: longNotes
+        };
+
+        const content = (service as any).generateEmailContent(emailData);
+
+        expect(content.body).toContain('Feedback from our review team:');
+        expect(content.body).toContain(longNotes);
+      });
     });
 
-    it('should handle empty name gracefully', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: '',
-        status: 'approved',
-      };
+    describe('Email Content Edge Cases', () => {
+      it('should handle special characters in name', () => {
+        const emailData: EmailNotificationData = {
+          to: 'test@example.com',
+          name: 'Dr. María José Ñoño-Smith',
+          status: 'approved'
+        };
 
-      const content = service['generateEmailContent'](emailData);
+        const content = (service as any).generateEmailContent(emailData);
 
-      expect(content.greeting).toBe('Dear ,');
-      expect(content.body).toContain(
-        'Congratulations! Your therapist application has been approved.',
-      );
-    });
+        expect(content.greeting).toBe('Dear Dr. María José Ñoño-Smith,');
+      });
 
-    it('should handle whitespace-only name', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: '   ',
-        status: 'approved',
-      };
+      it('should handle empty admin notes', () => {
+        const emailData: EmailNotificationData = {
+          to: 'test@example.com',
+          name: 'Dr. Test',
+          status: 'approved',
+          adminNotes: ''
+        };
 
-      const content = service['generateEmailContent'](emailData);
+        const content = (service as any).generateEmailContent(emailData);
 
-      expect(content.greeting).toBe('Dear    ,');
-    });
+        expect(content.body).not.toContain('Additional notes from our team:');
+      });
 
-    it('should handle multiline admin notes', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Jordan Smith',
-        status: 'rejected',
-        adminNotes: 'Line 1\nLine 2\nLine 3',
-      };
+      it('should handle undefined credentials properties', () => {
+        const emailData: EmailNotificationData = {
+          to: 'test@example.com',
+          name: 'Dr. Test',
+          status: 'approved',
+          credentials: {
+            email: '',
+            password: ''
+          }
+        };
 
-      const content = service['generateEmailContent'](emailData);
+        const content = (service as any).generateEmailContent(emailData);
 
-      expect(content.body).toContain('Line 1\nLine 2\nLine 3');
-    });
-
-    it('should handle credentials with special characters', () => {
-      const emailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Riley Parker',
-        status: 'approved',
-        credentials: {
-          email: 'therapist+test@example.com',
-          password: 'P@ssw0rd!2024',
-        },
-      };
-
-      const content = service['generateEmailContent'](emailData);
-
-      expect(content.body).toContain('Email: therapist+test@example.com');
-      expect(content.body).toContain('Temporary Password: P@ssw0rd!2024');
-    });
-
-    it('should maintain consistent email structure', () => {
-      const approvedData: EmailNotificationData = {
-        to: 'therapist1@example.com',
-        name: 'Dr. One',
-        status: 'approved',
-      };
-
-      const rejectedData: EmailNotificationData = {
-        to: 'therapist2@example.com',
-        name: 'Dr. Two',
-        status: 'rejected',
-      };
-
-      const approvedContent = service['generateEmailContent'](approvedData);
-      const rejectedContent = service['generateEmailContent'](rejectedData);
-
-      // Both should have consistent structure
-      expect(approvedContent).toHaveProperty('subject');
-      expect(approvedContent).toHaveProperty('greeting');
-      expect(approvedContent).toHaveProperty('body');
-      expect(approvedContent).toHaveProperty('companySignature');
-
-      expect(rejectedContent).toHaveProperty('subject');
-      expect(rejectedContent).toHaveProperty('greeting');
-      expect(rejectedContent).toHaveProperty('body');
-      expect(rejectedContent).toHaveProperty('companySignature');
-
-      // Company signature should be the same
-      expect(approvedContent.companySignature).toBe(
-        rejectedContent.companySignature,
-      );
+        expect(content.body).toContain('Your account credentials:');
+        expect(content.body).toContain('Email: ');
+        expect(content.body).toContain('Temporary Password: ');
+      });
     });
   });
 
-  describe('sendTherapistWelcomeEmail', () => {
+  describe('sendTherapistWelcomeEmail - Comprehensive Testing', () => {
+    beforeEach(() => {
+      mathRandomSpy.mockReturnValue(0.2); // Ensure success
+    });
+
     it('should send welcome email successfully', async () => {
       const credentials = {
-        email: 'newtherapist@example.com',
-        password: 'welcome123',
+        email: 'therapist@example.com',
+        password: 'tempPassword123'
       };
 
       const result = await service.sendTherapistWelcomeEmail(
-        'newtherapist@example.com',
-        'Dr. Welcome User',
-        credentials,
+        'therapist@example.com',
+        'Dr. John Smith',
+        credentials
       );
 
-      expect(result).toEqual({
-        success: true,
-        message: 'Email notification queued for newtherapist@example.com',
-      });
-
-      expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
-        recipient: 'newtherapist@example.com',
-        status: 'approved',
-        hasCredentials: true,
-      });
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Email notification sent to therapist@example.com');
     });
 
-    it('should handle empty credentials', async () => {
+    it('should handle welcome email delivery failure', async () => {
+      mathRandomSpy.mockReturnValue(0.03); // Trigger failure
+
       const credentials = {
-        email: '',
-        password: '',
+        email: 'therapist@example.com',
+        password: 'tempPassword123'
+      };
+
+      const result = await service.sendTherapistWelcomeEmail(
+        'therapist@example.com',
+        'Dr. Jane Doe',
+        credentials
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Failed to send email: Email service temporarily unavailable');
+    });
+
+    it('should handle special characters in therapist name and email', async () => {
+      const credentials = {
+        email: 'test+tag@example.co.uk',
+        password: 'secure123'
+      };
+
+      const result = await service.sendTherapistWelcomeEmail(
+        'test+tag@example.co.uk',
+        'Dr. José María Rodríguez',
+        credentials
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Email notification sent to test+tag@example.co.uk');
+    });
+
+    it('should handle empty password in credentials', async () => {
+      const credentials = {
+        email: 'therapist@example.com',
+        password: ''
       };
 
       const result = await service.sendTherapistWelcomeEmail(
         'therapist@example.com',
         'Dr. Test',
-        credentials,
+        credentials
       );
 
       expect(result.success).toBe(true);
-    });
-
-    it('should handle special characters in therapist name', async () => {
-      const credentials = {
-        email: 'therapist@example.com',
-        password: 'temp123',
-      };
-
-      const result = await service.sendTherapistWelcomeEmail(
-        'therapist@example.com',
-        "Dr. François O'Connor-Smith",
-        credentials,
-      );
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          greeting: "Dear Dr. François O'Connor-Smith,",
-        }),
-      );
-    });
-
-    it('should handle very long email addresses', async () => {
-      const longEmail =
-        'very.long.therapist.email.address.that.is.extremely.long@example.com';
-      const credentials = {
-        email: longEmail,
-        password: 'temp123',
-      };
-
-      const result = await service.sendTherapistWelcomeEmail(
-        longEmail,
-        'Dr. Long Email',
-        credentials,
-      );
-
-      expect(result.success).toBe(true);
-    });
-
-    it('should handle invalid email format gracefully', async () => {
-      const invalidEmail = 'not-an-email';
-      const credentials = {
-        email: invalidEmail,
-        password: 'temp123',
-      };
-
-      const result = await service.sendTherapistWelcomeEmail(
-        invalidEmail,
-        'Dr. Invalid Email',
-        credentials,
-      );
-
-      expect(result.success).toBe(true);
+      expect(result.message).toBe('Email notification sent to therapist@example.com');
     });
   });
 
-  describe('sendTherapistRejectionEmail', () => {
-    it('should send rejection email with reason', async () => {
-      const reason = 'Insufficient experience in required therapy modalities.';
-
-      const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. Rejected User',
-        reason,
-      );
-
-      expect(result).toEqual({
-        success: true,
-        message: 'Email notification queued for rejected@example.com',
-      });
-
-      expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
-        recipient: 'rejected@example.com',
-        status: 'rejected',
-        hasCredentials: false,
-      });
+  describe('sendTherapistRejectionEmail - Comprehensive Testing', () => {
+    beforeEach(() => {
+      mathRandomSpy.mockReturnValue(0.2); // Ensure success
     });
 
-    it('should send rejection email without reason', async () => {
+    it('should send rejection email successfully without reason', async () => {
       const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. Rejected User',
+        'applicant@example.com',
+        'Dr. Alice Johnson'
       );
 
       expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.not.stringContaining('Feedback from our review team:'),
-        }),
-      );
+      expect(result.message).toBe('Email notification sent to applicant@example.com');
     });
 
-    it('should handle empty reason', async () => {
+    it('should send rejection email successfully with reason', async () => {
+      const reason = 'Please provide additional documentation for your license verification.';
+
       const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. Rejected User',
-        '',
+        'applicant@example.com',
+        'Dr. Robert Taylor',
+        reason
       );
 
       expect(result.success).toBe(true);
+      expect(result.message).toBe('Email notification sent to applicant@example.com');
     });
 
-    it('should handle undefined reason', async () => {
+    it('should handle rejection email delivery failure', async () => {
+      mathRandomSpy.mockReturnValue(0.08); // Trigger invalid email failure
+
       const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. Rejected User',
-        undefined,
+        'invalid-email',
+        'Dr. Test'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Failed to send email: Invalid email address format');
+    });
+
+    it('should handle empty reason parameter', async () => {
+      const result = await service.sendTherapistRejectionEmail(
+        'applicant@example.com',
+        'Dr. Test',
+        ''
       );
 
       expect(result.success).toBe(true);
+      expect(result.message).toBe('Email notification sent to applicant@example.com');
     });
 
     it('should handle very long rejection reason', async () => {
-      const longReason =
-        'Unfortunately, '.repeat(100) +
-        'we cannot approve your application at this time.';
+      const longReason = 'We have carefully reviewed your application and found several areas that need attention: ' +
+        '1. Your license documentation appears to be expired, ' +
+        '2. We need three professional references from licensed practitioners, ' +
+        '3. Your malpractice insurance certificate is missing, ' +
+        '4. The background check form needs to be completed and notarized, ' +
+        '5. Additional continuing education credits are required. ' +
+        'Please address all these items and resubmit your application. ' +
+        'We encourage you to contact our support team if you have any questions about these requirements.';
 
       const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. Long Reason',
-        longReason,
+        'applicant@example.com',
+        'Dr. Complex Case',
+        longReason
       );
 
       expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.stringContaining(longReason),
-        }),
-      );
-    });
-
-    it('should handle rejection reason with HTML characters', async () => {
-      const reasonWithHtml =
-        'Missing certifications: <strong>CBT</strong> & <em>EMDR</em>';
-
-      const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. HTML Test',
-        reasonWithHtml,
-      );
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.stringContaining(reasonWithHtml),
-        }),
-      );
-    });
-
-    it('should handle rejection reason with newlines and special characters', async () => {
-      const reasonWithSpecialChars =
-        'Reasons:\n1. License not verified\n2. Missing references\n3. Application incomplete';
-
-      const result = await service.sendTherapistRejectionEmail(
-        'rejected@example.com',
-        'Dr. Special Chars',
-        reasonWithSpecialChars,
-      );
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Generated email content:',
-        expect.objectContaining({
-          body: expect.stringContaining(reasonWithSpecialChars),
-        }),
-      );
+      expect(result.message).toBe('Email notification sent to applicant@example.com');
     });
   });
 
-  describe('testConfiguration', () => {
-    it('should pass configuration test', async () => {
-      const result = await service.testConfiguration();
+  describe('sendGenericEmail - Comprehensive Testing', () => {
+    beforeEach(() => {
+      mathRandomSpy.mockReturnValue(0.2); // Ensure success
+    });
 
-      expect(result).toEqual({
-        success: true,
-        message: 'Email service configuration test passed',
+    it('should send generic email successfully', async () => {
+      const emailData = {
+        to: 'user@example.com',
+        subject: 'Welcome to Mentara',
+        template: 'welcome',
+        data: {
+          firstName: 'John',
+          lastName: 'Doe'
+        }
+      };
+
+      await expect(service.sendGenericEmail(emailData)).resolves.toBeUndefined();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Sending email:', {
+        to: 'user@example.com',
+        subject: 'Welcome to Mentara',
+        template: 'welcome',
       });
+    });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Testing email service configuration...',
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Test email content generated successfully:',
-        expect.objectContaining({
-          subject: 'Mentara Therapist Application Approved',
-          greeting: 'Dear Test Therapist,',
-          body: expect.stringContaining(
-            'Congratulations! Your therapist application has been approved.',
-          ),
-        }),
+    it('should handle generic email delivery failure', async () => {
+      mathRandomSpy.mockReturnValue(0.03); // Trigger failure
+
+      const emailData = {
+        to: 'user@example.com',
+        subject: 'Test Email',
+        template: 'test',
+        data: {}
+      };
+
+      await expect(service.sendGenericEmail(emailData)).rejects.toThrow('Email service temporarily unavailable');
+      
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to send email:',
+        expect.any(Error)
       );
     });
 
-    it('should handle test failure gracefully', async () => {
-      // Mock generateEmailContent to throw an error during test
-      const originalGenerateEmailContent = service['generateEmailContent'];
-      service['generateEmailContent'] = jest.fn().mockImplementation(() => {
-        throw new Error('Test configuration failed');
+    it('should handle complex email data', async () => {
+      const emailData = {
+        to: 'user@example.com',
+        subject: 'Complex Email Test',
+        template: 'complex',
+        data: {
+          user: {
+            firstName: 'Jane',
+            lastName: 'Smith',
+            preferences: {
+              language: 'en',
+              timezone: 'UTC'
+            }
+          },
+          content: {
+            title: 'Welcome Message',
+            body: 'This is a complex email with nested data structures.',
+            links: [
+              { text: 'Dashboard', url: 'https://mentara.com/dashboard' },
+              { text: 'Profile', url: 'https://mentara.com/profile' }
+            ]
+          }
+        }
+      };
+
+      await expect(service.sendGenericEmail(emailData)).resolves.toBeUndefined();
+    });
+
+    it('should handle empty email data', async () => {
+      const emailData = {
+        to: 'user@example.com',
+        subject: 'Empty Data Test',
+        template: 'empty',
+        data: {}
+      };
+
+      await expect(service.sendGenericEmail(emailData)).resolves.toBeUndefined();
+    });
+
+    it('should handle email delivery error from sendEmail method', async () => {
+      mathRandomSpy.mockImplementation(() => {
+        throw new Error('Network connection failed');
       });
 
-      const result = await service.testConfiguration();
+      const emailData = {
+        to: 'user@example.com',
+        subject: 'Error Test',
+        template: 'error',
+        data: {}
+      };
 
-      expect(result).toEqual({
-        success: false,
-        message: 'Test configuration failed',
+      await expect(service.sendGenericEmail(emailData)).rejects.toThrow('Network connection failed');
+    });
+  });
+
+  describe('testConfiguration - Comprehensive Testing', () => {
+    it('should test configuration successfully', () => {
+      const result = service.testConfiguration();
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Email service configuration test passed');
+      expect(consoleSpy).toHaveBeenCalledWith('Testing email service configuration...');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Test email content generated successfully:',
+        expect.any(Object)
+      );
+    });
+
+    it('should handle configuration test failure', () => {
+      // Mock an error in the generateEmailContent method by overriding the private method
+      const originalGenerateEmailContent = (service as any).generateEmailContent;
+      (service as any).generateEmailContent = jest.fn().mockImplementation(() => {
+        throw new Error('Email template not found');
       });
 
+      const result = service.testConfiguration();
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Email template not found');
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Email service test failed:',
-        expect.any(Error),
+        expect.any(Error)
       );
 
       // Restore original method
-      service['generateEmailContent'] = originalGenerateEmailContent;
+      (service as any).generateEmailContent = originalGenerateEmailContent;
     });
 
-    it('should handle non-Error exceptions in test', async () => {
-      // Mock generateEmailContent to throw a non-Error during test
-      const originalGenerateEmailContent = service['generateEmailContent'];
-      service['generateEmailContent'] = jest.fn().mockImplementation(() => {
-        throw new Error('Non-error test failure');
+    it('should handle non-Error exceptions in configuration test', () => {
+      const originalGenerateEmailContent = (service as any).generateEmailContent;
+      (service as any).generateEmailContent = jest.fn().mockImplementation(() => {
+        throw 'String error';
       });
 
-      const result = await service.testConfiguration();
+      const result = service.testConfiguration();
 
-      expect(result).toEqual({
-        success: false,
-        message: 'Non-error test failure',
-      });
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Test failed');
 
       // Restore original method
-      service['generateEmailContent'] = originalGenerateEmailContent;
+      (service as any).generateEmailContent = originalGenerateEmailContent;
     });
 
-    it('should use predefined test data', async () => {
-      await service.testConfiguration();
+    it('should verify test email data structure', () => {
+      const result = service.testConfiguration();
 
+      expect(result.success).toBe(true);
+      // Verify that the test was called with expected data structure
       expect(consoleSpy).toHaveBeenCalledWith(
         'Test email content generated successfully:',
         expect.objectContaining({
+          subject: expect.stringContaining('Mentara Therapist Application'),
           greeting: 'Dear Test Therapist,',
-          body: expect.stringMatching(
-            /Email: test@example\.com.*Temporary Password: temp123/s,
-          ),
-        }),
-      );
-    });
-
-    it('should test both email generation and logging', async () => {
-      const result = await service.testConfiguration();
-
-      expect(result.success).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledTimes(2);
-      expect(consoleSpy).toHaveBeenNthCalledWith(
-        1,
-        'Testing email service configuration...',
-      );
-      expect(consoleSpy).toHaveBeenNthCalledWith(
-        2,
-        'Test email content generated successfully:',
-        expect.any(Object),
+          body: expect.stringContaining('Congratulations!'),
+          companySignature: 'Best regards,\nThe Mentara Team\nsupport@mentara.com'
+        })
       );
     });
   });
 
-  describe('Error handling and edge cases', () => {
+  describe('Performance and Memory Management', () => {
+    beforeEach(() => {
+      mathRandomSpy.mockReturnValue(0.2); // Ensure success
+    });
+
+    it('should handle batch email operations efficiently', async () => {
+      const startTime = Date.now();
+      const batchSize = 50;
+      const promises: Promise<any>[] = [];
+
+      for (let i = 0; i < batchSize; i++) {
+        const promise = service.sendTherapistWelcomeEmail(
+          `therapist${i}@example.com`,
+          `Dr. Test ${i}`,
+          { email: `therapist${i}@example.com`, password: 'temp123' }
+        );
+        promises.push(promise);
+      }
+
+      const results = await Promise.all(promises);
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
+      expect(results).toHaveLength(batchSize);
+      expect(results.every(result => result.success)).toBe(true);
+      expect(duration).toBeLessThan(1000); // Should complete within 1 second
+    });
+
     it('should handle concurrent email operations', async () => {
-      const operations = [
-        service.sendTherapistWelcomeEmail('user1@example.com', 'User 1', {
-          email: 'user1@example.com',
-          password: 'pass1',
-        }),
-        service.sendTherapistRejectionEmail(
-          'user2@example.com',
-          'User 2',
-          'Reason 2',
-        ),
-        service.testConfiguration(),
-        service.sendTherapistApplicationNotification({
-          to: 'user3@example.com',
-          name: 'User 3',
-          status: 'approved',
-        }),
+      const concurrentOperations = [
+        service.sendTherapistWelcomeEmail('user1@example.com', 'Dr. User 1', { email: 'user1@example.com', password: 'pass1' }),
+        service.sendTherapistRejectionEmail('user2@example.com', 'Dr. User 2', 'Reason 2'),
+        service.sendGenericEmail({ to: 'user3@example.com', subject: 'Test', template: 'test', data: {} }),
+        service.testConfiguration()
       ];
 
-      const results = await Promise.all(operations);
+      const results = await Promise.all(concurrentOperations);
 
-      expect(results.every((result) => result.success)).toBe(true);
+      expect(results[0].success).toBe(true); // welcome email
+      expect(results[1].success).toBe(true); // rejection email
+      expect(results[3].success).toBe(true); // test configuration
+      // sendGenericEmail resolves to undefined on success
     });
 
-    it('should handle memory-intensive operations', async () => {
-      const largeEmailData: EmailNotificationData = {
-        to: 'therapist@example.com',
-        name: 'Dr. Large Data',
-        status: 'approved',
-        adminNotes: 'A'.repeat(100000), // 100KB of text
-        credentials: {
-          email: 'therapist@example.com',
-          password: 'temp123',
-        },
-      };
+    it('should not have memory leaks with repeated operations', async () => {
+      const iterations = 100;
+      const initialMemory = process.memoryUsage().heapUsed;
 
-      const result =
-        await service.sendTherapistApplicationNotification(largeEmailData);
+      for (let i = 0; i < iterations; i++) {
+        await service.sendTherapistWelcomeEmail(
+          `test${i}@example.com`,
+          `Dr. Test ${i}`,
+          { email: `test${i}@example.com`, password: 'temp' }
+        );
+      }
 
-      expect(result.success).toBe(true);
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
+      }
+
+      const finalMemory = process.memoryUsage().heapUsed;
+      const memoryIncrease = finalMemory - initialMemory;
+
+      // Memory increase should be reasonable (less than 10MB for 100 operations)
+      expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024);
+    });
+  });
+
+  describe('Integration Workflows and Real-world Scenarios', () => {
+    beforeEach(() => {
+      mathRandomSpy.mockReturnValue(0.2);
     });
 
-    it('should handle rapid successive operations', async () => {
-      const rapidOperations = Array(20)
-        .fill(null)
-        .map((_, i) =>
-          service.sendTherapistApplicationNotification({
-            to: `therapist${i}@example.com`,
-            name: `Dr. Test ${i}`,
-            status: i % 2 === 0 ? 'approved' : 'rejected',
-          }),
+    describe('Therapist Approval Workflow', () => {
+      it('should handle complete therapist approval workflow', async () => {
+        // Simulate therapist application approval process
+        const therapistData = {
+          email: 'newtherapist@example.com',
+          name: 'Dr. Sarah Johnson',
+          credentials: {
+            email: 'newtherapist@example.com',
+            password: 'initialPassword123'
+          },
+          adminNotes: 'Excellent credentials. Welcome to the team!'
+        };
+
+        // Step 1: Send approval notification
+        const approvalResult = service.sendTherapistApplicationNotification({
+          to: therapistData.email,
+          name: therapistData.name,
+          status: 'approved',
+          credentials: therapistData.credentials,
+          adminNotes: therapistData.adminNotes
+        });
+
+        expect(approvalResult.success).toBe(true);
+
+        // Step 2: Send welcome email
+        const welcomeResult = await service.sendTherapistWelcomeEmail(
+          therapistData.email,
+          therapistData.name,
+          therapistData.credentials
         );
 
-      const results = await Promise.all(rapidOperations);
+        expect(welcomeResult.success).toBe(true);
 
-      expect(results.every((result) => result.success)).toBe(true);
-      expect(results).toHaveLength(20);
+        // Verify console logs show both operations
+        expect(consoleSpy).toHaveBeenCalledWith('Email notification requested:', {
+          recipient: therapistData.email,
+          status: 'approved',
+          hasCredentials: true,
+        });
+      });
     });
 
-    it('should handle Unicode characters in all fields', async () => {
-      const unicodeEmailData: EmailNotificationData = {
-        to: 'tëst@ëxämplë.cöm',
-        name: 'Dr. José María García-López 中文 русский العربية',
-        status: 'approved',
-        adminNotes: 'Notes with Unicode: 中文测试 русский тест اختبار عربي',
-        credentials: {
-          email: 'tëst@ëxämplë.cöm',
-          password: 'pässwörd123',
-        },
-      };
+    describe('Therapist Rejection Workflow', () => {
+      it('should handle complete therapist rejection workflow', async () => {
+        const applicantData = {
+          email: 'applicant@example.com',
+          name: 'Dr. John Applicant',
+          rejectionReason: 'Please provide updated license documentation and three professional references.'
+        };
 
-      const result =
-        await service.sendTherapistApplicationNotification(unicodeEmailData);
+        // Step 1: Send rejection notification
+        const rejectionResult = service.sendTherapistApplicationNotification({
+          to: applicantData.email,
+          name: applicantData.name,
+          status: 'rejected',
+          adminNotes: applicantData.rejectionReason
+        });
 
-      expect(result.success).toBe(true);
+        expect(rejectionResult.success).toBe(true);
+
+        // Step 2: Send formal rejection email
+        const formalRejectionResult = await service.sendTherapistRejectionEmail(
+          applicantData.email,
+          applicantData.name,
+          applicantData.rejectionReason
+        );
+
+        expect(formalRejectionResult.success).toBe(true);
+      });
     });
 
-    it('should handle extremely long input data', async () => {
-      const longEmailData: EmailNotificationData = {
-        to: 'a'.repeat(320) + '@example.com', // Very long email
-        name: 'Dr. ' + 'X'.repeat(1000), // Very long name
-        status: 'rejected',
-        adminNotes: 'B'.repeat(50000), // Very long admin notes
-      };
+    describe('Bulk Email Operations', () => {
+      it('should handle bulk approval notifications', async () => {
+        const approvedTherapists = [
+          { email: 'therapist1@example.com', name: 'Dr. Alice Smith' },
+          { email: 'therapist2@example.com', name: 'Dr. Bob Johnson' },
+          { email: 'therapist3@example.com', name: 'Dr. Carol Wilson' }
+        ];
 
-      const result =
-        await service.sendTherapistApplicationNotification(longEmailData);
+        const results = [];
+        for (const therapist of approvedTherapists) {
+          const result = await service.sendTherapistWelcomeEmail(
+            therapist.email,
+            therapist.name,
+            { email: therapist.email, password: 'temp123' }
+          );
+          results.push(result);
+        }
 
-      expect(result.success).toBe(true);
-    });
-
-    it('should maintain performance with complex data structures', async () => {
-      const complexEmailData: EmailNotificationData = {
-        to: 'complex@example.com',
-        name: 'Dr. Complex Data',
-        status: 'approved',
-        adminNotes: JSON.stringify({
-          reviewedBy: 'Admin Team',
-          scores: { technical: 9, experience: 8, communication: 10 },
-          recommendations: ['Excellent candidate', 'Strong background'],
-          metadata: { timestamp: new Date().toISOString(), version: '1.0' },
-        }),
-        credentials: {
-          email: 'complex@example.com',
-          password: 'complex_p@ssw0rd_2024',
-        },
-      };
-
-      const startTime = Date.now();
-      const result =
-        await service.sendTherapistApplicationNotification(complexEmailData);
-      const endTime = Date.now();
-
-      expect(result.success).toBe(true);
-      expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
-    });
-
-    it('should handle null prototype objects', async () => {
-      const nullProtoData = Object.create(null);
-      nullProtoData.to = 'test@example.com';
-      nullProtoData.name = 'Dr. Test';
-      nullProtoData.status = 'approved';
-
-      const result =
-        await service.sendTherapistApplicationNotification(nullProtoData);
-
-      expect(result.success).toBe(true);
-    });
-
-    it('should handle frozen objects', async () => {
-      const frozenData: EmailNotificationData = Object.freeze({
-        to: 'frozen@example.com',
-        name: 'Dr. Frozen',
-        status: 'approved',
+        expect(results).toHaveLength(3);
+        expect(results.every(result => result.success)).toBe(true);
       });
 
-      const result =
-        await service.sendTherapistApplicationNotification(frozenData);
+      it('should handle bulk rejection notifications', async () => {
+        const rejectedApplicants = [
+          { email: 'rejected1@example.com', name: 'Dr. John Doe', reason: 'License verification required' },
+          { email: 'rejected2@example.com', name: 'Dr. Jane Smith', reason: 'Additional experience needed' },
+          { email: 'rejected3@example.com', name: 'Dr. Mike Brown', reason: 'Incomplete application' }
+        ];
 
-      expect(result.success).toBe(true);
+        const results = [];
+        for (const applicant of rejectedApplicants) {
+          const result = await service.sendTherapistRejectionEmail(
+            applicant.email,
+            applicant.name,
+            applicant.reason
+          );
+          results.push(result);
+        }
+
+        expect(results).toHaveLength(3);
+        expect(results.every(result => result.success)).toBe(true);
+      });
     });
 
-    it('should maintain consistent behavior across different execution contexts', async () => {
-      // Test in setTimeout to simulate different execution context
-      const asyncResult = await new Promise<{
-        success: boolean;
-        message: string;
-      }>((resolve) => {
-        setTimeout(() => {
-          const result = service.sendTherapistApplicationNotification({
-            to: 'async@example.com',
-            name: 'Dr. Async',
-            status: 'approved',
-          });
-          resolve(result);
-        }, 0);
+    describe('Error Recovery Scenarios', () => {
+      it('should handle mixed success/failure scenarios in batch operations', async () => {
+        // Setup alternating success/failure pattern
+        let callCount = 0;
+        mathRandomSpy.mockImplementation(() => {
+          callCount++;
+          return callCount % 2 === 0 ? 0.03 : 0.2; // Alternate between failure and success
+        });
+
+        const therapists = [
+          { email: 'therapist1@example.com', name: 'Dr. Test 1' },
+          { email: 'therapist2@example.com', name: 'Dr. Test 2' },
+          { email: 'therapist3@example.com', name: 'Dr. Test 3' },
+          { email: 'therapist4@example.com', name: 'Dr. Test 4' }
+        ];
+
+        const results = [];
+        for (const therapist of therapists) {
+          const result = await service.sendTherapistWelcomeEmail(
+            therapist.email,
+            therapist.name,
+            { email: therapist.email, password: 'temp' }
+          );
+          results.push(result);
+        }
+
+        // Should have alternating success/failure
+        expect(results[0].success).toBe(true);  // First call (callCount=1, return 0.2)
+        expect(results[1].success).toBe(false); // Second call (callCount=2, return 0.03)
+        expect(results[2].success).toBe(true);  // Third call (callCount=3, return 0.2)
+        expect(results[3].success).toBe(false); // Fourth call (callCount=4, return 0.03)
       });
 
-      expect(asyncResult.success).toBe(true);
+      it('should handle service configuration failure during email operations', () => {
+        // Mock configuration test failure
+        const originalTestConfig = service.testConfiguration;
+        service.testConfiguration = jest.fn().mockReturnValue({
+          success: false,
+          message: 'Email service misconfigured'
+        });
+
+        const configResult = service.testConfiguration();
+        expect(configResult.success).toBe(false);
+
+        // Email operations should still work independently
+        mathRandomSpy.mockReturnValue(0.2);
+        const emailResult = service.sendTherapistApplicationNotification({
+          to: 'test@example.com',
+          name: 'Dr. Test',
+          status: 'approved'
+        });
+
+        expect(emailResult.success).toBe(true);
+
+        // Restore original method
+        service.testConfiguration = originalTestConfig;
+      });
+    });
+  });
+
+  describe('Email Content Security and Validation', () => {
+    beforeEach(() => {
+      mathRandomSpy.mockReturnValue(0.2);
+    });
+
+    it('should handle HTML injection attempts in email content', () => {
+      const maliciousData: EmailNotificationData = {
+        to: 'test@example.com',
+        name: 'Dr. <script>alert("xss")</script>Test',
+        status: 'approved',
+        adminNotes: '<img src="x" onerror="alert(1)">'
+      };
+
+      const content = (service as any).generateEmailContent(maliciousData);
+
+      // Content should contain the raw text (service doesn't sanitize, assumes template engine will)
+      expect(content.greeting).toContain('<script>');
+      expect(content.body).toContain('<img src=');
+      // In production, template engine should handle HTML escaping
+    });
+
+    it('should handle extremely long email content', () => {
+      const longName = 'Dr. ' + 'A'.repeat(1000);
+      const longNotes = 'B'.repeat(5000);
+
+      const emailData: EmailNotificationData = {
+        to: 'test@example.com',
+        name: longName,
+        status: 'approved',
+        adminNotes: longNotes
+      };
+
+      const result = service.sendTherapistApplicationNotification(emailData);
+      expect(result.success).toBe(true);
+
+      const content = (service as any).generateEmailContent(emailData);
+      expect(content.greeting).toContain(longName);
+      expect(content.body).toContain(longNotes);
+    });
+
+    it('should handle unicode and emoji characters in email content', () => {
+      const emailData: EmailNotificationData = {
+        to: 'test@example.com',
+        name: 'Dr. 🎯 José María Ñiño-García 🎓',
+        status: 'approved',
+        adminNotes: '🎉 Welcome! Your application was excellent. 👏 We look forward to working with you! 🚀'
+      };
+
+      const result = service.sendTherapistApplicationNotification(emailData);
+      expect(result.success).toBe(true);
+
+      const content = (service as any).generateEmailContent(emailData);
+      expect(content.greeting).toContain('🎯 José María Ñiño-García 🎓');
+      expect(content.body).toContain('🎉 Welcome!');
+      expect(content.body).toContain('👏 We look forward');
+      expect(content.body).toContain('🚀');
     });
   });
 });

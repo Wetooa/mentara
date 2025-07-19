@@ -1,0 +1,151 @@
+ebeef6aee5cd64e4d956bf625134652a
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ModerationController = void 0;
+const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
+const role_based_access_guard_1 = require("../../auth/guards/role-based-access.guard");
+const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const get_user_decorator_1 = require("../../../decorators/get-user.decorator");
+// JoinRequestService removed - join requests feature disabled
+// This controller now provides stub responses for API compatibility
+let ModerationController = class ModerationController {
+    constructor() {
+        // JoinRequestService removed - join requests feature disabled
+    }
+    async createJoinRequest(dto) {
+        throw new common_1.BadRequestException('Join requests feature has been disabled');
+    }
+    async getJoinRequests(query) {
+        return {
+            requests: [],
+            pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
+            filters: {},
+        };
+    }
+    async getUserJoinRequests(userId) {
+        return [];
+    }
+    async getPendingRequests(user) {
+        return [];
+    }
+    async processJoinRequest(requestId, dto, user) {
+        throw new common_1.BadRequestException('Join requests feature has been disabled');
+    }
+    async cancelJoinRequest(requestId, user) {
+        throw new common_1.BadRequestException('Join requests feature has been disabled');
+    }
+    async getJoinRequestStats(query) {
+        return {
+            totalRequests: 0,
+            pendingRequests: 0,
+            approvedRequests: 0,
+            rejectedRequests: 0,
+            avgProcessingTime: 0,
+            requestsByStatus: {},
+            recentActivity: [],
+        };
+    }
+    async bulkProcessJoinRequests(dto, user) {
+        throw new common_1.BadRequestException('Join requests feature has been disabled');
+    }
+};
+exports.ModerationController = ModerationController;
+__decorate([
+    (0, common_1.Post)('join-requests'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create join request (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Feature disabled' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "createJoinRequest", null);
+__decorate([
+    (0, common_1.Get)('join-requests'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get join requests (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empty list - feature disabled' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "getJoinRequests", null);
+__decorate([
+    (0, common_1.Get)('join-requests/user/:userId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get user join requests (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empty list - feature disabled' }),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "getUserJoinRequests", null);
+__decorate([
+    (0, common_1.Get)('join-requests/pending'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get pending requests (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empty list - feature disabled' }),
+    __param(0, (0, get_user_decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "getPendingRequests", null);
+__decorate([
+    (0, common_1.Put)('join-requests/:requestId/process'),
+    (0, swagger_1.ApiOperation)({ summary: 'Process join request (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Feature disabled' }),
+    __param(0, (0, common_1.Param)('requestId', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, get_user_decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "processJoinRequest", null);
+__decorate([
+    (0, common_1.Delete)('join-requests/:requestId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cancel join request (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Feature disabled' }),
+    __param(0, (0, common_1.Param)('requestId', common_1.ParseUUIDPipe)),
+    __param(1, (0, get_user_decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "cancelJoinRequest", null);
+__decorate([
+    (0, common_1.Get)('stats/join-requests'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get join request stats (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empty stats - feature disabled' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "getJoinRequestStats", null);
+__decorate([
+    (0, common_1.Post)('join-requests/bulk-process'),
+    (0, swagger_1.ApiOperation)({ summary: 'Bulk process join requests (disabled)' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Feature disabled' }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, get_user_decorator_1.GetUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ModerationController.prototype, "bulkProcessJoinRequests", null);
+exports.ModerationController = ModerationController = __decorate([
+    (0, common_1.Controller)('communities/moderation'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, role_based_access_guard_1.RoleBasedAccessGuard),
+    (0, roles_decorator_1.Roles)('moderator', 'admin'),
+    (0, swagger_1.ApiTags)('Community Moderation'),
+    (0, swagger_1.ApiBearerAuth)(),
+    __metadata("design:paramtypes", [])
+], ModerationController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2NvbW11bml0aWVzL2NvbnRyb2xsZXJzL21vZGVyYXRpb24uY29udHJvbGxlci50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7QUFBQSwyQ0Fjd0I7QUFDeEIsNkNBT3lCO0FBQ3pCLHFFQUFnRTtBQUNoRSx1RkFBaUY7QUFDakYsMkVBQThEO0FBQzlELCtFQUFpRTtBQUVqRSw4REFBOEQ7QUFDOUQsb0VBQW9FO0FBTzdELElBQU0sb0JBQW9CLEdBQTFCLE1BQU0sb0JBQW9CO0lBQy9CO1FBQ0UsOERBQThEO0lBQ2hFLENBQUM7SUFLSyxBQUFOLEtBQUssQ0FBQyxpQkFBaUIsQ0FBUyxHQUFRO1FBQ3RDLE1BQU0sSUFBSSw0QkFBbUIsQ0FBQyx5Q0FBeUMsQ0FBQyxDQUFDO0lBQzNFLENBQUM7SUFLSyxBQUFOLEtBQUssQ0FBQyxlQUFlLENBQVUsS0FBVTtRQUN2QyxPQUFPO1lBQ0wsUUFBUSxFQUFFLEVBQUU7WUFDWixVQUFVLEVBQUUsRUFBRSxJQUFJLEVBQUUsQ0FBQyxFQUFFLEtBQUssRUFBRSxFQUFFLEVBQUUsS0FBSyxFQUFFLENBQUMsRUFBRSxVQUFVLEVBQUUsQ0FBQyxFQUFFO1lBQzNELE9BQU8sRUFBRSxFQUFFO1NBQ1osQ0FBQztJQUNKLENBQUM7SUFLSyxBQUFOLEtBQUssQ0FBQyxtQkFBbUIsQ0FBa0IsTUFBYztRQUN2RCxPQUFPLEVBQUUsQ0FBQztJQUNaLENBQUM7SUFLSyxBQUFOLEtBQUssQ0FBQyxrQkFBa0IsQ0FBWSxJQUFTO1FBQzNDLE9BQU8sRUFBRSxDQUFDO0lBQ1osQ0FBQztJQUtLLEFBQU4sS0FBSyxDQUFDLGtCQUFrQixDQUNhLFNBQWlCLEVBQzVDLEdBQVEsRUFDTCxJQUFTO1FBRXBCLE1BQU0sSUFBSSw0QkFBbUIsQ0FBQyx5Q0FBeUMsQ0FBQyxDQUFDO0lBQzNFLENBQUM7SUFLSyxBQUFOLEtBQUssQ0FBQyxpQkFBaUIsQ0FDYyxT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QUtLO0lBSEwsSUFBQSxZQUFHLEVBQUMscUJBQXFCLENBQUM7SUFDMUIsSUFBQSxzQkFBWSxFQUFDLEVBQUUsT0FBTyxFQUFFLG1DQUFtQyxFQUFFLENBQUM7SUFDOUQsSUFBQSxxQkFBVyxFQUFDLEVBQUUsTUFBTSxFQUFFLEdBQUcsRUFBRSxXQUFXLEVBQUUsZ0NBQWdDLEVBQUUsQ0FBQztJQUNqRCxXQUFBLElBQUEsY0FBSyxHQUFFLENBQUE7Ozs7K0RBVWpDO0FBS0s7SUFITCxJQUFBLGFBQUksRUFBQyw0QkFBNEIsQ0FBQztJQUNsQyxJQUFBLHNCQUFZLEVBQUMsRUFBRSxPQUFPLEVBQUUsdUNBQXVDLEVBQUUsQ0FBQztJQUNsRSxJQUFBLHFCQUFXLEVBQUMsRUFBRSxNQUFNLEVBQUUsR0FBRyxFQUFFLFdBQVcsRUFBRSxrQkFBa0IsRUFBRSxDQUFDO0lBQy9CLFdBQUEsSUFBQSxhQUFJLEdBQUUsQ0FBQTtJQUFZLFdBQUEsSUFBQSw0QkFBTyxHQUFFLENBQUE7Ozs7bUVBRXpEOytCQTlFVSxvQkFBb0I7SUFMaEMsSUFBQSxtQkFBVSxFQUFDLHdCQUF3QixDQUFDO0lBQ3BDLElBQUEsa0JBQVMsRUFBQyw2QkFBWSxFQUFFLDhDQUFvQixDQUFDO0lBQzdDLElBQUEsdUJBQUssRUFBQyxXQUFXLEVBQUUsT0FBTyxDQUFDO0lBQzNCLElBQUEsaUJBQU8sRUFBQyxzQkFBc0IsQ0FBQztJQUMvQixJQUFBLHVCQUFhLEdBQUU7O0dBQ0gsb0JBQW9CLENBK0VoQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvY29tbXVuaXRpZXMvY29udHJvbGxlcnMvbW9kZXJhdGlvbi5jb250cm9sbGVyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7XG4gIENvbnRyb2xsZXIsXG4gIEdldCxcbiAgUG9zdCxcbiAgUHV0LFxuICBEZWxldGUsXG4gIFBhcmFtLFxuICBCb2R5LFxuICBRdWVyeSxcbiAgVXNlR3VhcmRzLFxuICBIdHRwQ29kZSxcbiAgSHR0cFN0YXR1cyxcbiAgUGFyc2VVVUlEUGlwZSxcbiAgQmFkUmVxdWVzdEV4Y2VwdGlvbixcbn0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHtcbiAgQXBpVGFncyxcbiAgQXBpT3BlcmF0aW9uLFxuICBBcGlSZXNwb25zZSxcbiAgQXBpUGFyYW0sXG4gIEFwaVF1ZXJ5LFxuICBBcGlCZWFyZXJBdXRoLFxufSBmcm9tICdAbmVzdGpzL3N3YWdnZXInO1xuaW1wb3J0IHsgSnd0QXV0aEd1YXJkIH0gZnJvbSAnLi4vLi4vYXV0aC9ndWFyZHMvand0LWF1dGguZ3VhcmQnO1xuaW1wb3J0IHsgUm9sZUJhc2VkQWNjZXNzR3VhcmQgfSBmcm9tICcuLi8uLi9hdXRoL2d1YXJkcy9yb2xlLWJhc2VkLWFjY2Vzcy5ndWFyZCc7XG5pbXBvcnQgeyBSb2xlcyB9IGZyb20gJy4uLy4uL2F1dGgvZGVjb3JhdG9ycy9yb2xlcy5kZWNvcmF0b3InO1xuaW1wb3J0IHsgR2V0VXNlciB9IGZyb20gJy4uLy4uLy4uL2RlY29yYXRvcnMvZ2V0LXVzZXIuZGVjb3JhdG9yJztcblxuLy8gSm9pblJlcXVlc3RTZXJ2aWNlIHJlbW92ZWQgLSBqb2luIHJlcXVlc3RzIGZlYXR1cmUgZGlzYWJsZWRcbi8vIFRoaXMgY29udHJvbGxlciBub3cgcHJvdmlkZXMgc3R1YiByZXNwb25zZXMgZm9yIEFQSSBjb21wYXRpYmlsaXR5XG5cbkBDb250cm9sbGVyKCdjb21tdW5pdGllcy9tb2RlcmF0aW9uJylcbkBVc2VHdWFyZHMoSnd0QXV0aEd1YXJkLCBSb2xlQmFzZWRBY2Nlc3NHdWFyZClcbkBSb2xlcygnbW9kZXJhdG9yJywgJ2FkbWluJylcbkBBcGlUYWdzKCdDb21tdW5pdHkgTW9kZXJhdGlvbicpXG5AQXBpQmVhcmVyQXV0aCgpXG5leHBvcnQgY2xhc3MgTW9kZXJhdGlvbkNvbnRyb2xsZXIge1xuICBjb25zdHJ1Y3RvcigpIHtcbiAgICAvLyBKb2luUmVxdWVzdFNlcnZpY2UgcmVtb3ZlZCAtIGpvaW4gcmVxdWVzdHMgZmVhdHVyZSBkaXNhYmxlZFxuICB9XG5cbiAgQFBvc3QoJ2pvaW4tcmVxdWVzdHMnKVxuICBAQXBpT3BlcmF0aW9uKHsgc3VtbWFyeTogJ0NyZWF0ZSBqb2luIHJlcXVlc3QgKGRpc2FibGVkKScgfSlcbiAgQEFwaVJlc3BvbnNlKHsgc3RhdHVzOiA0MDAsIGRlc2NyaXB0aW9uOiAnRmVhdHVyZSBkaXNhYmxlZCcgfSlcbiAgYXN5bmMgY3JlYXRlSm9pblJlcXVlc3QoQEJvZHkoKSBkdG86IGFueSkge1xuICAgIHRocm93IG5ldyBCYWRSZXF1ZXN0RXhjZXB0aW9uKCdKb2luIHJlcXVlc3RzIGZlYXR1cmUgaGFzIGJlZW4gZGlzYWJsZWQnKTtcbiAgfVxuXG4gIEBHZXQoJ2pvaW4tcmVxdWVzdHMnKVxuICBAQXBpT3BlcmF0aW9uKHsgc3VtbWFyeTogJ0dldCBqb2luIHJlcXVlc3RzIChkaXNhYmxlZCknIH0pXG4gIEBBcGlSZXNwb25zZSh7IHN0YXR1czogMjAwLCBkZXNjcmlwdGlvbjogJ0VtcHR5IGxpc3QgLSBmZWF0dXJlIGRpc2FibGVkJyB9KVxuICBhc3luYyBnZXRKb2luUmVxdWVzdHMoQFF1ZXJ5KCkgcXVlcnk6IGFueSkge1xuICAgIHJldHVybiB7XG4gICAgICByZXF1ZXN0czogW10sXG4gICAgICBwYWdpbmF0aW9uOiB7IHBhZ2U6IDEsIGxpbWl0OiAyMCwgdG90YWw6IDAsIHRvdGFsUGFnZXM6IDAgfSxcbiAgICAgIGZpbHRlcnM6IHt9LFxuICAgIH07XG4gIH1cblxuICBAR2V0KCdqb2luLXJlcXVlc3RzL3VzZXIvOnVzZXJJZCcpXG4gIEBBcGlPcGVyYXRpb24oeyBzdW1tYXJ5OiAnR2V0IHVzZXIgam9pbiByZXF1ZXN0cyAoZGlzYWJsZWQpJyB9KVxuICBAQXBpUmVzcG9uc2UoeyBzdGF0dXM6IDIwMCwgZGVzY3JpcHRpb246ICdFbXB0eSBsaXN0IC0gZmVhdHVyZSBkaXNhYmxlZCcgfSlcbiAgYXN5bmMgZ2V0VXNlckpvaW5SZXF1ZXN0cyhAUGFyYW0oJ3VzZXJJZCcpIHVzZXJJZDogc3RyaW5nKSB7XG4gICAgcmV0dXJuIFtdO1xuICB9XG5cbiAgQEdldCgnam9pbi1yZXF1ZXN0cy9wZW5kaW5nJylcbiAgQEFwaU9wZXJhdGlvbih7IHN1bW1hcnk6ICdHZXQgcGVuZGluZyByZXF1ZXN0cyAoZGlzYWJsZWQpJyB9KVxuICBAQXBpUmVzcG9uc2UoeyBzdGF0dXM6IDIwMCwgZGVzY3JpcHRpb246ICdFbXB0eSBsaXN0IC0gZmVhdHVyZSBkaXNhYmxlZCcgfSlcbiAgYXN5bmMgZ2V0UGVuZGluZ1JlcXVlc3RzKEBHZXRVc2VyKCkgdXNlcjogYW55KSB7XG4gICAgcmV0dXJuIFtdO1xuICB9XG5cbiAgQFB1dCgnam9pbi1yZXF1ZXN0cy86cmVxdWVzdElkL3Byb2Nlc3MnKVxuICBAQXBpT3BlcmF0aW9uKHsgc3VtbWFyeTogJ1Byb2Nlc3Mgam9pbiByZXF1ZXN0IChkaXNhYmxlZCknIH0pXG4gIEBBcGlSZXNwb25zZSh7IHN0YXR1czogNDAwLCBkZXNjcmlwdGlvbjogJ0ZlYXR1cmUgZGlzYWJsZWQnIH0pXG4gIGFzeW5jIHByb2Nlc3NKb2luUmVxdWVzdChcbiAgICBAUGFyYW0oJ3JlcXVlc3RJZCcsIFBhcnNlVVVJRFBpcGUpIHJlcXVlc3RJZDogc3RyaW5nLFxuICAgIEBCb2R5KCkgZHRvOiBhbnksXG4gICAgQEdldFVzZXIoKSB1c2VyOiBhbnksXG4gICkge1xuICAgIHRocm93IG5ldyBCYWRSZXF1ZXN0RXhjZXB0aW9uKCdKb2luIHJlcXVlc3RzIGZlYXR1cmUgaGFzIGJlZW4gZGlzYWJsZWQnKTtcbiAgfVxuXG4gIEBEZWxldGUoJ2pvaW4tcmVxdWVzdHMvOnJlcXVlc3RJZCcpXG4gIEBBcGlPcGVyYXRpb24oeyBzdW1tYXJ5OiAnQ2FuY2VsIGpvaW4gcmVxdWVzdCAoZGlzYWJsZWQpJyB9KVxuICBAQXBpUmVzcG9uc2UoeyBzdGF0dXM6IDQwMCwgZGVzY3JpcHRpb246ICdGZWF0dXJlIGRpc2FibGVkJyB9KVxuICBhc3luYyBjYW5jZWxKb2luUmVxdWVzdChcbiAgICBAUGFyYW0oJ3JlcXVlc3RJZCcsIFBhcnNlVVVJRFBpcGUpIHJlcXVlc3RJZDogc3RyaW5nLFxuICAgIEBHZXRVc2VyKCkgdXNlcjogYW55LFxuICApIHtcbiAgICB0aHJvdyBuZXcgQmFkUmVxdWVzdEV4Y2VwdGlvbignSm9pbiByZXF1ZXN0cyBmZWF0dXJlIGhhcyBiZWVuIGRpc2FibGVkJyk7XG4gIH1cblxuICBAR2V0KCdzdGF0cy9qb2luLXJlcXVlc3RzJylcbiAgQEFwaU9wZXJhdGlvbih7IHN1bW1hcnk6ICdHZXQgam9pbiByZXF1ZXN0IHN0YXRzIChkaXNhYmxlZCknIH0pXG4gIEBBcGlSZXNwb25zZSh7IHN0YXR1czogMjAwLCBkZXNjcmlwdGlvbjogJ0VtcHR5IHN0YXRzIC0gZmVhdHVyZSBkaXNhYmxlZCcgfSlcbiAgYXN5bmMgZ2V0Sm9pblJlcXVlc3RTdGF0cyhAUXVlcnkoKSBxdWVyeTogYW55KSB7XG4gICAgcmV0dXJuIHtcbiAgICAgIHRvdGFsUmVxdWVzdHM6IDAsXG4gICAgICBwZW5kaW5nUmVxdWVzdHM6IDAsXG4gICAgICBhcHByb3ZlZFJlcXVlc3RzOiAwLFxuICAgICAgcmVqZWN0ZWRSZXF1ZXN0czogMCxcbiAgICAgIGF2Z1Byb2Nlc3NpbmdUaW1lOiAwLFxuICAgICAgcmVxdWVzdHNCeVN0YXR1czoge30sXG4gICAgICByZWNlbnRBY3Rpdml0eTogW10sXG4gICAgfTtcbiAgfVxuXG4gIEBQb3N0KCdqb2luLXJlcXVlc3RzL2J1bGstcHJvY2VzcycpXG4gIEBBcGlPcGVyYXRpb24oeyBzdW1tYXJ5OiAnQnVsayBwcm9jZXNzIGpvaW4gcmVxdWVzdHMgKGRpc2FibGVkKScgfSlcbiAgQEFwaVJlc3BvbnNlKHsgc3RhdHVzOiA0MDAsIGRlc2NyaXB0aW9uOiAnRmVhdHVyZSBkaXNhYmxlZCcgfSlcbiAgYXN5bmMgYnVsa1Byb2Nlc3NKb2luUmVxdWVzdHMoQEJvZHkoKSBkdG86IGFueSwgQEdldFVzZXIoKSB1c2VyOiBhbnkpIHtcbiAgICB0aHJvdyBuZXcgQmFkUmVxdWVzdEV4Y2VwdGlvbignSm9pbiByZXF1ZXN0cyBmZWF0dXJlIGhhcyBiZWVuIGRpc2FibGVkJyk7XG4gIH1cbn1cbiJdLCJ2ZXJzaW9uIjozfQ==

@@ -116,7 +116,6 @@ export class DatabaseTestSetup {
       // Assessments and worksheets
       'Assessment',
       'MentalHealthIndicator',
-      'WorksheetSubmission',
       'Worksheet',
       'PreAssessment',
 

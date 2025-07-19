@@ -1,0 +1,83 @@
+d77870f54ab64bac2ba34f94d8ed8f76
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const scoring_1 = require("../scoring");
+const PDSS = {
+    title: "Panic Disorder Severity Scale (PDSS)",
+    description: "The Panic Disorder Severity Scale (PDSS) is a self-administered questionnaire used to assess the severity of panic disorder symptoms, including panic attacks, avoidance behaviors, and the impact on daily functioning.",
+    questions: [
+        {
+            prefix: "During the past week",
+            question: "how many panic and limited symptom attacks did you have?",
+            options: ["None", "1-2", "3-4", "5-6", "7 or more"],
+        },
+        {
+            prefix: "During the past week",
+            question: "if you had any panic attacks, how distressing were they while they were happening?",
+            options: [
+                "Not at all distressing",
+                "Mildly distressing",
+                "Moderately distressing",
+                "Severely distressing",
+                "Extremely distressing",
+            ],
+        },
+        {
+            prefix: "During the past week",
+            question: "how much have you worried or felt anxious about when your next panic attack would occur or about fears related to the attacks?",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "During the past week",
+            question: "were there any places or situations you avoided or felt afraid of due to fear of having a panic attack?",
+            options: ["None", "A few", "Some", "Many", "Almost all"],
+        },
+        {
+            prefix: "During the past week",
+            question: "were there any activities that you avoided or felt afraid of because they might trigger a panic attack?",
+            options: ["None", "A few", "Some", "Many", "Almost all"],
+        },
+        {
+            prefix: "During the past week",
+            question: "how much did the symptoms interfere with your ability to work or carry out responsibilities?",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "During the past week",
+            question: "how much did panic attacks and their consequences interfere with your social life?",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+    ],
+    scoring: {
+        ...scoring_1.QUESTIONNAIRE_SCORING,
+        scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+        severityLevels: {
+            minimal: { range: [0, 1.5], label: "Minimal Panic Disorder" },
+            mild: { range: [1.5, 3.0], label: "Mild Panic Disorder" },
+            moderate: { range: [3.0, 4.5], label: "Moderate Panic Disorder" },
+            severe: { range: [4.5, 6.0], label: "Severe Panic Disorder" },
+            extreme: { range: [6.0, 28], label: "Extreme Panic Disorder" },
+        },
+    },
+    disclaimer: "This questionnaire is a screening tool to assess the severity of panic disorder symptoms. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your mental health, please consult a healthcare professional.",
+};
+exports.default = PDSS;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvcGFuaWMtZGlzb3JkZXIuanMiLCJtYXBwaW5ncyI6IkFBQUEsWUFBWSxDQUFDO0FBQ2IsTUFBTSxDQUFDLGNBQWMsQ0FBQyxPQUFPLEVBQUUsWUFBWSxFQUFFLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7QUFDOUQsTUFBTSxTQUFTLEdBQUcsT0FBTyxDQUFDLFlBQVksQ0FBQyxDQUFDO0FBQ3hDLE1BQU0sSUFBSSxHQUFHO0lBQ1QsS0FBSyxFQUFFLHNDQUFzQztJQUM3QyxXQUFXLEVBQUUsME5BQTBOO0lBQ3ZPLFNBQVMsRUFBRTtRQUNQO1lBQ0ksTUFBTSxFQUFFLHNCQUFzQjtZQUM5QixRQUFRLEVBQUUsMERBQTBEO1lBQ3BFLE9BQU8sRUFBRSxDQUFDLE1BQU0sRUFBRSxLQUFLLEVBQUUsS0FBSyxFQUFFLEtBQUssRUFBRSxXQUFXLENBQUM7U0FDdEQ7UUFDRDtZQUNJLE1BQU0sRUFBRSxzQkFBc0I7WUFDOUIsUUFBUSxFQUFFLG9GQUFvRjtZQUM5RixPQUFPLEVBQUU7Z0JBQ0wsd0JBQXdCO2dCQUN4QixvQkFBb0I7Z0JBQ3BCLHdCQUF3QjtnQkFDeEIsc0JBQXNCO2dCQUN0Qix1QkFBdUI7YUFDMUI7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLHNCQUFzQjtZQUM5QixRQUFRLEVBQUUsZ0lBQWdJO1lBQzFJLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsc0JBQXNCO1lBQzlCLFFBQVEsRUFBRSx5R0FBeUc7WUFDbkgsT0FBTyxFQUFFLENBQUMsTUFBTSxFQUFFLE9BQU8sRUFBRSxNQUFNLEVBQUUsTUFBTSxFQUFFLFlBQVksQ0FBQztTQUMzRDtRQUNEO1lBQ0ksTUFBTSxFQUFFLHNCQUFzQjtZQUM5QixRQUFRLEVBQUUseUdBQXlHO1lBQ25ILE9BQU8sRUFBRSxDQUFDLE1BQU0sRUFBRSxPQUFPLEVBQUUsTUFBTSxFQUFFLE1BQU0sRUFBRSxZQUFZLENBQUM7U0FDM0Q7UUFDRDtZQUNJLE1BQU0sRUFBRSxzQkFBc0I7WUFDOUIsUUFBUSxFQUFFLDhGQUE4RjtZQUN4RyxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLHNCQUFzQjtZQUM5QixRQUFRLEVBQUUsb0ZBQW9GO1lBQzlGLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO0tBQ0o7SUFDRCxPQUFPLEVBQUU7UUFDTCxHQUFHLFNBQVMsQ0FBQyxxQkFBcUI7UUFDbEMsWUFBWSxFQUFFLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFO1FBQzlDLGNBQWMsRUFBRTtZQUNaLE9BQU8sRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLENBQUMsRUFBRSxHQUFHLENBQUMsRUFBRSxLQUFLLEVBQUUsd0JBQXdCLEVBQUU7WUFDN0QsSUFBSSxFQUFFLEVBQUUsS0FBSyxFQUFFLENBQUMsR0FBRyxFQUFFLEdBQUcsQ0FBQyxFQUFFLEtBQUssRUFBRSxxQkFBcUIsRUFBRTtZQUN6RCxRQUFRLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxHQUFHLEVBQUUsR0FBRyxDQUFDLEVBQUUsS0FBSyxFQUFFLHlCQUF5QixFQUFFO1lBQ2pFLE1BQU0sRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLEdBQUcsRUFBRSxHQUFHLENBQUMsRUFBRSxLQUFLLEVBQUUsdUJBQXVCLEVBQUU7WUFDN0QsT0FBTyxFQUFFLEVBQUUsS0FBSyxFQUFFLENBQUMsR0FBRyxFQUFFLEVBQUUsQ0FBQyxFQUFFLEtBQUssRUFBRSx3QkFBd0IsRUFBRTtTQUNqRTtLQUNKO0lBQ0QsVUFBVSxFQUFFLDRRQUE0UTtDQUMzUixDQUFDO0FBQ0YsT0FBTyxDQUFDLE9BQU8sR0FBRyxJQUFJLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvcGFuaWMtZGlzb3JkZXIuanMiXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2Ugc3RyaWN0XCI7XG5PYmplY3QuZGVmaW5lUHJvcGVydHkoZXhwb3J0cywgXCJfX2VzTW9kdWxlXCIsIHsgdmFsdWU6IHRydWUgfSk7XG5jb25zdCBzY29yaW5nXzEgPSByZXF1aXJlKFwiLi4vc2NvcmluZ1wiKTtcbmNvbnN0IFBEU1MgPSB7XG4gICAgdGl0bGU6IFwiUGFuaWMgRGlzb3JkZXIgU2V2ZXJpdHkgU2NhbGUgKFBEU1MpXCIsXG4gICAgZGVzY3JpcHRpb246IFwiVGhlIFBhbmljIERpc29yZGVyIFNldmVyaXR5IFNjYWxlIChQRFNTKSBpcyBhIHNlbGYtYWRtaW5pc3RlcmVkIHF1ZXN0aW9ubmFpcmUgdXNlZCB0byBhc3Nlc3MgdGhlIHNldmVyaXR5IG9mIHBhbmljIGRpc29yZGVyIHN5bXB0b21zLCBpbmNsdWRpbmcgcGFuaWMgYXR0YWNrcywgYXZvaWRhbmNlIGJlaGF2aW9ycywgYW5kIHRoZSBpbXBhY3Qgb24gZGFpbHkgZnVuY3Rpb25pbmcuXCIsXG4gICAgcXVlc3Rpb25zOiBbXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJEdXJpbmcgdGhlIHBhc3Qgd2Vla1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaG93IG1hbnkgcGFuaWMgYW5kIGxpbWl0ZWQgc3ltcHRvbSBhdHRhY2tzIGRpZCB5b3UgaGF2ZT9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5vbmVcIiwgXCIxLTJcIiwgXCIzLTRcIiwgXCI1LTZcIiwgXCI3IG9yIG1vcmVcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJEdXJpbmcgdGhlIHBhc3Qgd2Vla1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaWYgeW91IGhhZCBhbnkgcGFuaWMgYXR0YWNrcywgaG93IGRpc3RyZXNzaW5nIHdlcmUgdGhleSB3aGlsZSB0aGV5IHdlcmUgaGFwcGVuaW5nP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbCBkaXN0cmVzc2luZ1wiLFxuICAgICAgICAgICAgICAgIFwiTWlsZGx5IGRpc3RyZXNzaW5nXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5IGRpc3RyZXNzaW5nXCIsXG4gICAgICAgICAgICAgICAgXCJTZXZlcmVseSBkaXN0cmVzc2luZ1wiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5IGRpc3RyZXNzaW5nXCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRHVyaW5nIHRoZSBwYXN0IHdlZWtcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcImhvdyBtdWNoIGhhdmUgeW91IHdvcnJpZWQgb3IgZmVsdCBhbnhpb3VzIGFib3V0IHdoZW4geW91ciBuZXh0IHBhbmljIGF0dGFjayB3b3VsZCBvY2N1ciBvciBhYm91dCBmZWFycyByZWxhdGVkIHRvIHRoZSBhdHRhY2tzP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJEdXJpbmcgdGhlIHBhc3Qgd2Vla1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwid2VyZSB0aGVyZSBhbnkgcGxhY2VzIG9yIHNpdHVhdGlvbnMgeW91IGF2b2lkZWQgb3IgZmVsdCBhZnJhaWQgb2YgZHVlIHRvIGZlYXIgb2YgaGF2aW5nIGEgcGFuaWMgYXR0YWNrP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTm9uZVwiLCBcIkEgZmV3XCIsIFwiU29tZVwiLCBcIk1hbnlcIiwgXCJBbG1vc3QgYWxsXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRHVyaW5nIHRoZSBwYXN0IHdlZWtcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIndlcmUgdGhlcmUgYW55IGFjdGl2aXRpZXMgdGhhdCB5b3UgYXZvaWRlZCBvciBmZWx0IGFmcmFpZCBvZiBiZWNhdXNlIHRoZXkgbWlnaHQgdHJpZ2dlciBhIHBhbmljIGF0dGFjaz9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5vbmVcIiwgXCJBIGZld1wiLCBcIlNvbWVcIiwgXCJNYW55XCIsIFwiQWxtb3N0IGFsbFwiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkR1cmluZyB0aGUgcGFzdCB3ZWVrXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJob3cgbXVjaCBkaWQgdGhlIHN5bXB0b21zIGludGVyZmVyZSB3aXRoIHlvdXIgYWJpbGl0eSB0byB3b3JrIG9yIGNhcnJ5IG91dCByZXNwb25zaWJpbGl0aWVzP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJEdXJpbmcgdGhlIHBhc3Qgd2Vla1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaG93IG11Y2ggZGlkIHBhbmljIGF0dGFja3MgYW5kIHRoZWlyIGNvbnNlcXVlbmNlcyBpbnRlcmZlcmUgd2l0aCB5b3VyIHNvY2lhbCBsaWZlP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgXSxcbiAgICBzY29yaW5nOiB7XG4gICAgICAgIC4uLnNjb3JpbmdfMS5RVUVTVElPTk5BSVJFX1NDT1JJTkcsXG4gICAgICAgIHNjb3JlTWFwcGluZzogeyAwOiAwLCAxOiAxLCAyOiAyLCAzOiAzLCA0OiA0IH0sXG4gICAgICAgIHNldmVyaXR5TGV2ZWxzOiB7XG4gICAgICAgICAgICBtaW5pbWFsOiB7IHJhbmdlOiBbMCwgMS41XSwgbGFiZWw6IFwiTWluaW1hbCBQYW5pYyBEaXNvcmRlclwiIH0sXG4gICAgICAgICAgICBtaWxkOiB7IHJhbmdlOiBbMS41LCAzLjBdLCBsYWJlbDogXCJNaWxkIFBhbmljIERpc29yZGVyXCIgfSxcbiAgICAgICAgICAgIG1vZGVyYXRlOiB7IHJhbmdlOiBbMy4wLCA0LjVdLCBsYWJlbDogXCJNb2RlcmF0ZSBQYW5pYyBEaXNvcmRlclwiIH0sXG4gICAgICAgICAgICBzZXZlcmU6IHsgcmFuZ2U6IFs0LjUsIDYuMF0sIGxhYmVsOiBcIlNldmVyZSBQYW5pYyBEaXNvcmRlclwiIH0sXG4gICAgICAgICAgICBleHRyZW1lOiB7IHJhbmdlOiBbNi4wLCAyOF0sIGxhYmVsOiBcIkV4dHJlbWUgUGFuaWMgRGlzb3JkZXJcIiB9LFxuICAgICAgICB9LFxuICAgIH0sXG4gICAgZGlzY2xhaW1lcjogXCJUaGlzIHF1ZXN0aW9ubmFpcmUgaXMgYSBzY3JlZW5pbmcgdG9vbCB0byBhc3Nlc3MgdGhlIHNldmVyaXR5IG9mIHBhbmljIGRpc29yZGVyIHN5bXB0b21zLiBJdCBkb2VzIG5vdCBzZXJ2ZSBhcyBhIGRpYWdub3N0aWMgdG9vbCBhbmQgc2hvdWxkIGJlIGZvbGxvd2VkIGJ5IGEgY2xpbmljYWwgZXZhbHVhdGlvbi4gSWYgeW91IGhhdmUgY29uY2VybnMgYWJvdXQgeW91ciBtZW50YWwgaGVhbHRoLCBwbGVhc2UgY29uc3VsdCBhIGhlYWx0aGNhcmUgcHJvZmVzc2lvbmFsLlwiLFxufTtcbmV4cG9ydHMuZGVmYXVsdCA9IFBEU1M7XG4vLyMgc291cmNlTWFwcGluZ1VSTD1wYW5pYy1kaXNvcmRlci5qcy5tYXAiXSwidmVyc2lvbiI6M30=

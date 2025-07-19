@@ -192,6 +192,49 @@ export class AuthService {
     }
   }
 
+  /**
+   * Check if a user exists by email
+   * @param email - User's email address
+   * @returns Object containing user existence status, role, and verification status
+   */
+  async checkUserExists(email: string): Promise<{
+    exists: boolean;
+    role?: string;
+    isVerified?: boolean;
+  }> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          emailVerified: true,
+          isActive: true,
+        },
+      });
+
+      if (!user) {
+        return { exists: false };
+      }
+
+      // Only return user info if account is active
+      if (!user.isActive) {
+        return { exists: false };
+      }
+
+      return {
+        exists: true,
+        role: user.role,
+        isVerified: user.emailVerified,
+      };
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      // Return false for any database errors to prevent information leakage
+      return { exists: false };
+    }
+  }
+
   // Local Authentication Methods
   async registerUserWithEmail(
     email: string,
@@ -259,7 +302,7 @@ export class AuthService {
           prcLicenseNumber: '',
           expirationDateOfLicense: new Date(),
           practiceStartDate: new Date(),
-          sessionLength: '',
+          sessionLength: '60 minutes', // Default
           hourlyRate: 0,
           providedOnlineTherapyBefore: false,
           comfortableUsingVideoConferencing: false,
@@ -412,6 +455,136 @@ export class AuthService {
     });
   }
 
+  /**
+   * Validates a JWT token and returns user information
+   * @param token - The JWT token to validate
+   * @returns Promise with validation result and user data
+   */
+  /**
+   * Validates a JWT token and returns user information
+   * @param token - The JWT token to validate
+   * @returns Promise with validation result and user data
+   */
+  async validateToken(token: string): Promise<{
+    valid: boolean;
+    user?: any;
+    expires?: string;
+    error?: string;
+  }> {
+    try {
+      // Validate token using TokenService
+      const tokenValidation = await this.tokenService.validateToken(token);
+
+      if (!tokenValidation.valid) {
+        return {
+          valid: false,
+          error: tokenValidation.error,
+        };
+      }
+
+      // Get user information from the token payload
+      const payload = tokenValidation.payload;
+      const userId = payload.sub;
+
+      // Fetch user from database to ensure they still exist and are active
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+          deactivatedAt: null, // Ensure user is not deactivated
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          emailVerified: true,
+          client: {
+            select: {
+              userId: true,
+            },
+          },
+          therapist: {
+            select: {
+              userId: true,
+              status: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        return {
+          valid: false,
+          error: 'User not found or deactivated',
+        };
+      }
+
+      // Verify role matches token
+      if (user.role !== payload.role) {
+        return {
+          valid: false,
+          error: 'Role mismatch - token invalid',
+        };
+      }
+
+      // Structure user data based on role
+      let roleSpecificUser;
+
+      if (user.role === 'client') {
+        roleSpecificUser = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          emailVerified: user.emailVerified,
+          isOnboardingComplete: false, // Default for now
+          profile: {
+            userId: user.id,
+            isOnboardingComplete: false, // Default for now
+          },
+        };
+      } else if (user.role === 'therapist') {
+        roleSpecificUser = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          emailVerified: user.emailVerified,
+          status: user.therapist?.status || 'pending',
+          profile: {
+            userId: user.id,
+            status: user.therapist?.status || 'pending',
+          },
+        };
+      } else {
+        // For admin/moderator roles, return basic user info
+        roleSpecificUser = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          emailVerified: user.emailVerified,
+        };
+      }
+
+      return {
+        valid: true,
+        user: roleSpecificUser,
+        expires: tokenValidation.expires,
+      };
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return {
+        valid: false,
+        error: 'Token validation failed',
+      };
+    }
+  }
+
   // Email verification methods
   async verifyEmail(
     token: string,
@@ -541,11 +714,19 @@ export class AuthService {
     };
   }
 
-  async handleOAuthLogin(oauthUser: any, provider: string) {
+  async handleOAuthLogin(
+    oauthUser: any,
+    provider: string,
+    role: string = 'client',
+  ) {
     try {
       // Check if user exists
       const existingUser = await this.prisma.user.findUnique({
         where: { email: oauthUser.email },
+        include: {
+          client: true,
+          therapist: true,
+        },
       });
 
       if (existingUser) {
@@ -571,13 +752,18 @@ export class AuthService {
           message: 'Login successful',
         };
       } else {
+        // Validate role for new user creation
+        const validRole = ['client', 'therapist'].includes(role)
+          ? role
+          : 'client';
+
         // Create new user from OAuth data
         const newUser = await this.prisma.user.create({
           data: {
             email: oauthUser.email,
             firstName: oauthUser.firstName,
             lastName: oauthUser.lastName,
-            role: 'client', // Default role
+            role: validRole,
             emailVerified: true, // OAuth emails are pre-verified
             avatarUrl: oauthUser.picture,
           },
@@ -591,10 +777,34 @@ export class AuthService {
           },
         });
 
-        // Create client record for new user
-        await this.prisma.client.create({
-          data: { userId: newUser.id },
-        });
+        // Create role-specific record for new user
+        if (validRole === 'client') {
+          await this.prisma.client.create({
+            data: { userId: newUser.id },
+          });
+        } else if (validRole === 'therapist') {
+          await this.prisma.therapist.create({
+            data: {
+              userId: newUser.id,
+              status: 'pending',
+              mobile: '',
+              province: '',
+              providerType: '',
+              professionalLicenseType: '',
+              isPRCLicensed: '',
+              prcLicenseNumber: '',
+              expirationDateOfLicense: new Date(),
+              practiceStartDate: new Date(),
+              sessionLength: '60 minutes', // Default
+              hourlyRate: 0,
+              providedOnlineTherapyBefore: false,
+              comfortableUsingVideoConferencing: false,
+              compliesWithDataPrivacyAct: false,
+              willingToAbideByPlatformGuidelines: false,
+              treatmentSuccessRates: {},
+            },
+          });
+        }
 
         const tokens = await this.tokenService.generateTokenPair(
           newUser.id,
@@ -670,6 +880,61 @@ export class AuthService {
       hasSeenRecommendations: updatedClient.hasSeenTherapistRecommendations,
       markedAt: updatedClient.updatedAt,
       message: 'Recommendations marked as seen successfully',
+    };
+  }
+
+  // ===== SESSION MANAGEMENT METHODS =====
+
+  /**
+   * Get current session information
+   */
+  async getSessionInfo(refreshToken: string) {
+    const sessionInfo = await this.tokenService.getSessionInfo(refreshToken);
+
+    if (!sessionInfo) {
+      throw new UnauthorizedException('Session not found or expired');
+    }
+
+    return sessionInfo;
+  }
+
+  /**
+   * Get all active sessions for a user
+   */
+  async getActiveSessions(userId: string, currentRefreshToken?: string) {
+    return await this.tokenService.getActiveSessions(
+      userId,
+      currentRefreshToken,
+    );
+  }
+
+  /**
+   * Terminate a specific session
+   */
+  async terminateSession(sessionId: string, userId: string) {
+    return await this.tokenService.terminateSession(sessionId, userId);
+  }
+
+  /**
+   * Terminate all other sessions except the current one
+   */
+  async terminateOtherSessions(userId: string, currentRefreshToken?: string) {
+    return await this.tokenService.terminateOtherSessions(
+      userId,
+      currentRefreshToken,
+    );
+  }
+
+  /**
+   * Universal logout - clears all sessions for user
+   */
+  async universalLogout(userId: string) {
+    // Revoke all refresh tokens for the user
+    await this.tokenService.revokeAllUserTokens(userId);
+
+    return {
+      success: true,
+      message: 'All sessions terminated successfully',
     };
   }
 }

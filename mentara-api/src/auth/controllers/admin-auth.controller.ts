@@ -43,7 +43,8 @@ export class AdminAuthController {
   @Post('create-account')
   @ApiOperation({
     summary: 'Create new admin account',
-    description: 'Create a new admin account. Only existing admins can create new admin accounts.',
+    description:
+      'Create a new admin account. Only existing admins can create new admin accounts.',
   })
   @ApiBody({
     type: 'object',
@@ -52,12 +53,24 @@ export class AdminAuthController {
       type: 'object',
       required: ['email', 'password', 'firstName', 'lastName'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'admin@mentara.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'admin@mentara.com',
+        },
         password: { type: 'string', minLength: 8, example: 'SecurePass123!' },
         firstName: { type: 'string', example: 'John' },
         lastName: { type: 'string', example: 'Doe' },
-        adminLevel: { type: 'string', enum: ['admin', 'super_admin'], example: 'admin' },
-        permissions: { type: 'array', items: { type: 'string' }, example: ['read', 'write'] },
+        adminLevel: {
+          type: 'string',
+          enum: ['admin', 'super_admin'],
+          example: 'admin',
+        },
+        permissions: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['read', 'write'],
+        },
       },
     },
   })
@@ -82,9 +95,15 @@ export class AdminAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
-  @ApiForbiddenResponse({ description: 'Only admins can create admin accounts' })
-  @ApiTooManyRequestsResponse({ description: 'Too many admin creation attempts' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
+  @ApiForbiddenResponse({
+    description: 'Only admins can create admin accounts',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too many admin creation attempts',
+  })
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 admin creations per 10 minutes
   @HttpCode(HttpStatus.CREATED)
@@ -132,7 +151,11 @@ export class AdminAuthController {
       type: 'object',
       required: ['email', 'password'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'admin@mentara.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'admin@mentara.com',
+        },
         password: { type: 'string', example: 'SecurePass123!' },
       },
     },
@@ -217,7 +240,9 @@ export class AdminAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('profile')
   async getProfile(@CurrentUserId() userId: string) {
     return this.adminAuthService.getAdminProfile(userId);
@@ -242,7 +267,9 @@ export class AdminAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('permissions')
   async getPermissions(@CurrentUserId() userId: string) {
     return this.adminAuthService.getAdminPermissions(userId);
@@ -251,7 +278,8 @@ export class AdminAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get admin dashboard statistics',
-    description: 'Retrieve dashboard statistics and metrics for the admin panel',
+    description:
+      'Retrieve dashboard statistics and metrics for the admin panel',
   })
   @ApiResponse({
     status: 200,
@@ -269,7 +297,9 @@ export class AdminAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('dashboard-stats')
   async getDashboardStats(@CurrentUserId() userId: string) {
     return this.adminAuthService.getAdminDashboardStats(userId);

@@ -1,6 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { PreAssessment, Therapist, Client } from '@prisma/client';
+import {
+  PreAssessment,
+  Therapist,
+  Client,
+  User,
+  Review,
+  ClientPreference,
+} from '@prisma/client';
+
+// Type definitions for matching service
+export type UserForMatching = Pick<
+  User,
+  'firstName' | 'lastName' | 'avatarUrl'
+>;
+
+export type ReviewForMatching = Pick<Review, 'rating' | 'status'>;
+
+export type ClientForMatching = Client & {
+  preAssessment: PreAssessment;
+  clientPreferences: ClientPreference[];
+  user: UserForMatching;
+};
+
+export type TherapistForMatching = Therapist & {
+  user: UserForMatching;
+  reviews: ReviewForMatching[];
+};
 
 export interface MatchingWeights {
   conditionMatch: number; // 40%
@@ -11,7 +37,7 @@ export interface MatchingWeights {
 }
 
 export interface TherapistScore {
-  therapist: Therapist & { user: any };
+  therapist: TherapistForMatching;
   totalScore: number;
   breakdown: {
     conditionScore: number;
@@ -103,10 +129,22 @@ export class AdvancedMatchingService {
   constructor(private readonly prisma: PrismaService) {}
 
   async calculateAdvancedMatch(
-    client: Client & { preAssessment: PreAssessment; clientPreferences: any[] },
-    therapist: Therapist & { user: any; reviews: any[] },
+    client: ClientForMatching,
+    therapist: TherapistForMatching,
     weights: MatchingWeights = this.defaultWeights,
   ): Promise<TherapistScore> {
+    // Input validation to prevent runtime errors
+    if (!client?.preAssessment) {
+      throw new Error('Client must have a valid pre-assessment');
+    }
+
+    if (!client.clientPreferences) {
+      throw new Error('Client preferences are required for matching');
+    }
+
+    if (!therapist?.user) {
+      throw new Error('Therapist must have valid user information');
+    }
     // Build user condition profile
     const userProfile = this.buildUserConditionProfile(client);
 
@@ -160,7 +198,7 @@ export class AdvancedMatchingService {
   }
 
   private buildUserConditionProfile(
-    client: Client & { preAssessment: PreAssessment; clientPreferences: any[] },
+    client: ClientForMatching,
   ): UserConditionProfile {
     const severityLevels = client.preAssessment.severityLevels as Record<
       string,
@@ -216,6 +254,19 @@ export class AdvancedMatchingService {
     };
   }
 
+  /**
+   * Calculates how well a therapist's expertise matches the client's mental health conditions.
+   *
+   * Scoring Logic:
+   * - Primary conditions (severe, clinical): 30 points base, scaled by severity weight (1-5)
+   * - Secondary conditions (moderate): 15 points base, scaled by severity weight
+   * - Expertise depth bonus: 5 points per matched condition, max 20 bonus points
+   * - Total score capped at 100 points
+   *
+   * @param userProfile Client's condition profile with severity weights
+   * @param therapist Therapist with expertise and specialization arrays
+   * @returns Score from 0-100 indicating condition match quality
+   */
   private calculateConditionMatchScore(
     userProfile: UserConditionProfile,
     therapist: Therapist,
@@ -225,30 +276,37 @@ export class AdvancedMatchingService {
     const specializations = therapist.illnessSpecializations || [];
     const allTherapistConditions = [...expertise, ...specializations];
 
-    // Primary conditions scoring (higher weight)
+    // Primary conditions scoring: most critical conditions get highest weight
+    // Base score of 30 points, multiplied by severity ratio (weight/5)
+    // Example: Severe depression (weight=5) = 30 * (5/5) = 30 points
+    // Example: Moderate anxiety (weight=3) = 30 * (3/5) = 18 points
     userProfile.primaryConditions.forEach(({ condition, weight }) => {
       if (allTherapistConditions.includes(condition)) {
-        score += 30 * (weight / 5); // Scale by severity
+        score += 30 * (weight / 5); // Scale by severity (1-5 range)
       }
     });
 
-    // Secondary conditions scoring (lower weight)
+    // Secondary conditions scoring: less critical but still important
+    // Base score of 15 points, also scaled by severity
     userProfile.secondaryConditions.forEach(({ condition, weight }) => {
       if (allTherapistConditions.includes(condition)) {
-        score += 15 * (weight / 5); // Scale by severity
+        score += 15 * (weight / 5); // Scale by severity (1-5 range)
       }
     });
 
-    // Bonus for specialized expertise depth
+    // Expertise depth bonus: reward therapists who match multiple conditions
+    // This indicates broader competency in the client's problem areas
     const matchedConditions = [
       ...userProfile.primaryConditions.map((c) => c.condition),
       ...userProfile.secondaryConditions.map((c) => c.condition),
     ].filter((condition) => allTherapistConditions.includes(condition));
 
+    // 5 points per matched condition, capped at 20 to prevent overweighting
     const expertiseDepthBonus = Math.min(matchedConditions.length * 5, 20);
     score += expertiseDepthBonus;
 
-    return Math.min(score, 100); // Cap at 100
+    // Cap final score at 100 to maintain consistent scoring scale
+    return Math.min(score, 100);
   }
 
   private calculateApproachCompatibilityScore(
@@ -294,29 +352,51 @@ export class AdvancedMatchingService {
     return Math.min(score, 100);
   }
 
+  /**
+   * Calculates therapist experience and success rate score using a diminishing returns curve.
+   *
+   * Experience Scoring (70-90 points):
+   * - Years 0-5: 8 points per year (0-40 points) - new therapist learning curve
+   * - Years 5-10: 6 points per year (40-70 points) - experienced but still growing
+   * - Years 10+: 2 points per year (70-90 points, max 20 bonus) - diminishing returns
+   *
+   * Success Rate Bonus (0-20 points):
+   * - Based on therapist's documented success rates for client's specific conditions
+   * - Averages success rates across all relevant conditions
+   * - Scales linearly: 80% success rate = 16 bonus points
+   *
+   * @param userProfile Client's condition profile
+   * @param therapist Therapist with experience and success rate data
+   * @returns Score from 0-100 indicating experience quality
+   */
   private calculateExperienceAndSuccessScore(
     userProfile: UserConditionProfile,
     therapist: Therapist,
   ): number {
     let score = 0;
 
-    // Years of experience scoring
+    // Calculate total years of experience from multiple sources
     const yearsExperience = this.calculateYearsOfExperience(
       therapist.practiceStartDate,
     );
     const additionalYears = therapist.yearsOfExperience || 0;
     const totalYears = Math.max(yearsExperience, additionalYears);
 
-    // Experience scoring curve: diminishing returns after 10 years
+    // Experience scoring with diminishing returns curve
+    // Reflects that experience gains are most valuable early in career
     if (totalYears <= 5) {
+      // New therapists: high learning curve, significant improvement per year
       score += totalYears * 8; // 0-40 points for 0-5 years
     } else if (totalYears <= 10) {
+      // Experienced therapists: still gaining skills but at slower rate
       score += 40 + (totalYears - 5) * 6; // 40-70 points for 5-10 years
     } else {
+      // Senior therapists: diminishing returns, max practical benefit around 15-20 years
       score += 70 + Math.min((totalYears - 10) * 2, 20); // 70-90 points for 10+ years
     }
 
-    // Treatment success rates scoring
+    // Treatment success rates bonus: reward documented effectiveness
+    // Only considers success rates for conditions relevant to this specific client
     const successRates =
       (therapist.treatmentSuccessRates as Record<string, number>) || {};
     const relevantConditions = [
@@ -327,6 +407,7 @@ export class AdvancedMatchingService {
     let successRateBonus = 0;
     let applicableRates = 0;
 
+    // Calculate average success rate across all relevant conditions
     relevantConditions.forEach((condition) => {
       if (successRates[condition] !== undefined) {
         successRateBonus += successRates[condition];
@@ -336,6 +417,7 @@ export class AdvancedMatchingService {
 
     if (applicableRates > 0) {
       const averageSuccessRate = successRateBonus / applicableRates;
+      // Convert percentage to points: 100% success = 20 points, 50% = 10 points
       score += (averageSuccessRate / 100) * 20; // Up to 20 bonus points
     }
 
@@ -343,7 +425,7 @@ export class AdvancedMatchingService {
   }
 
   private async calculateReviewScore(
-    therapist: Therapist & { reviews: any[] },
+    therapist: TherapistForMatching,
   ): Promise<number> {
     if (!therapist.reviews || therapist.reviews.length === 0) {
       return 50; // Neutral score for new therapists
@@ -431,7 +513,7 @@ export class AdvancedMatchingService {
 
   private buildMatchExplanation(
     userProfile: UserConditionProfile,
-    therapist: Therapist & { reviews: any[] },
+    therapist: TherapistForMatching,
     conditionScore: number,
     approachScore: number,
     experienceScore: number,
@@ -489,8 +571,10 @@ export class AdvancedMatchingService {
     };
   }
 
-  private parseClientPreferences(preferences: any[]): Record<string, any> {
-    const parsed: Record<string, any> = {};
+  private parseClientPreferences(
+    preferences: ClientPreference[],
+  ): Record<string, unknown> {
+    const parsed: Record<string, unknown> = {};
 
     preferences.forEach((pref) => {
       try {
@@ -500,7 +584,9 @@ export class AdvancedMatchingService {
         } else {
           parsed[pref.key] = pref.value;
         }
-      } catch {
+      } catch (error) {
+        // Log parsing errors for debugging but continue with fallback
+        console.warn(`Failed to parse client preference ${pref.key}:`, error);
         parsed[pref.key] = pref.value; // Fallback to raw value
       }
     });

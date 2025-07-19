@@ -3,7 +3,7 @@ model PreAssessment {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     clientId  String   @unique
-    client    Client   @relation(fields: [clientId], references: [userId])
+    client    Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
 
     questionnaires Json // Array of questionnaire objects
     answers        Json // Array of answer objects

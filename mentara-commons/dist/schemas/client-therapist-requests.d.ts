@@ -190,8 +190,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
         specializations?: string[] | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
+    id: string;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
@@ -214,8 +214,8 @@ export declare const ClientRequestResponseSchema: z.ZodObject<{
         specializations?: string[] | undefined;
     } | undefined;
 }, {
-    id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
+    id: string;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
@@ -285,8 +285,8 @@ export declare const TherapistRequestResponseSchema: z.ZodObject<{
         userId: string;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
+    id: string;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
@@ -307,8 +307,8 @@ export declare const TherapistRequestResponseSchema: z.ZodObject<{
         userId: string;
     } | undefined;
 }, {
-    id: string;
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN";
+    id: string;
     therapistId: string;
     clientId: string;
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";

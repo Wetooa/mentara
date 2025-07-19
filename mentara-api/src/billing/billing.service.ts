@@ -289,12 +289,302 @@ export class BillingService {
       if (metadata?.failureCode) updateData.failureCode = metadata.failureCode;
       if (metadata?.failureMessage)
         updateData.failureMessage = metadata.failureMessage;
+
+      // Trigger payment failure recovery
+      setTimeout(() => {
+        this.handlePaymentFailure(id, metadata).catch((error) => {
+          this.logger.error('Payment failure recovery failed:', error);
+        });
+      }, 0);
     }
 
     return this.prisma.payment.update({
       where: { id },
       data: updateData,
     });
+  }
+
+  /**
+   * Comprehensive payment failure recovery system
+   */
+  async handlePaymentFailure(paymentId: string, failureMetadata?: any) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        subscription: {
+          include: {
+            user: true,
+            plan: true,
+          },
+        },
+        paymentMethod: true,
+      },
+    });
+
+    if (!payment) {
+      this.logger.error(`Payment ${paymentId} not found for failure recovery`);
+      return;
+    }
+
+    this.logger.log(
+      `Starting payment failure recovery for payment ${paymentId}`,
+    );
+
+    try {
+      // Step 1: Attempt retry with same payment method (for temporary failures)
+      if (this.shouldRetryPayment(failureMetadata)) {
+        const retryResult = await this.retryFailedPayment(payment);
+        if (retryResult.success) {
+          this.logger.log(`Payment ${paymentId} successfully retried`);
+          return;
+        }
+      }
+
+      // Step 2: Try alternative payment methods
+      const alternativePaymentResult =
+        await this.tryAlternativePaymentMethods(payment);
+      if (alternativePaymentResult.success) {
+        this.logger.log(
+          `Payment ${paymentId} recovered using alternative payment method`,
+        );
+        return;
+      }
+
+      // Step 3: Apply grace period for subscription payments
+      if (payment.subscriptionId) {
+        await this.applyPaymentGracePeriod(payment);
+        this.logger.log(
+          `Grace period applied for subscription payment ${paymentId}`,
+        );
+      }
+
+      // Step 4: Notify user about payment failure
+      await this.notifyPaymentFailure(payment);
+
+      // Step 5: If this is a meeting payment, handle session access
+      if (payment.meetingId) {
+        await this.handleMeetingPaymentFailure(payment);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Payment failure recovery failed for ${paymentId}:`,
+        error,
+      );
+
+      // Last resort: Emit critical payment failure event
+      this.eventEmitter.emit('payment.failure.critical', {
+        paymentId,
+        userId: payment.subscription?.userId,
+        amount: payment.amount,
+        error: error.message,
+      });
+    }
+  }
+
+  private shouldRetryPayment(failureMetadata?: any): boolean {
+    const retryableFailures = [
+      'insufficient_funds',
+      'card_declined',
+      'processing_error',
+      'network_error',
+      'temporary_failure',
+    ];
+
+    return (
+      failureMetadata?.failureCode &&
+      retryableFailures.includes(failureMetadata.failureCode)
+    );
+  }
+
+  private async retryFailedPayment(payment: any) {
+    // Implement exponential backoff retry logic
+    const maxRetries = 3;
+    const baseDelay = 30000; // 30 seconds
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        this.logger.log(`Retry attempt ${attempt} for payment ${payment.id}`);
+
+        // Wait with exponential backoff
+        if (attempt > 1) {
+          const delay = baseDelay * Math.pow(2, attempt - 1);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        // Create new payment attempt
+        const retryPayment = await this.createPayment({
+          amount: payment.amount,
+          currency: payment.currency,
+          paymentMethodId: payment.paymentMethodId,
+          subscriptionId: payment.subscriptionId,
+          meetingId: payment.meetingId,
+          description: `Retry ${attempt} - ${payment.description}`,
+        });
+
+        // Mark original payment as superseded
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: PaymentStatus.FAILED,
+            metadata: {
+              ...payment.metadata,
+              supersededBy: retryPayment.id,
+              retryAttempt: attempt,
+            },
+          },
+        });
+
+        return { success: true, payment: retryPayment };
+      } catch (error) {
+        this.logger.warn(
+          `Retry attempt ${attempt} failed for payment ${payment.id}:`,
+          error,
+        );
+
+        if (attempt === maxRetries) {
+          return { success: false, error };
+        }
+      }
+    }
+
+    return { success: false };
+  }
+
+  private async tryAlternativePaymentMethods(payment: any) {
+    if (!payment.subscription?.userId) {
+      return { success: false, reason: 'No user found' };
+    }
+
+    // Get other payment methods for the user
+    const userPaymentMethods = await this.findUserPaymentMethods(
+      payment.subscription.userId,
+    );
+    const alternativeMethods = userPaymentMethods.filter(
+      (pm) => pm.id !== payment.paymentMethodId && pm.isActive,
+    );
+
+    for (const altMethod of alternativeMethods) {
+      try {
+        this.logger.log(
+          `Trying alternative payment method ${altMethod.id} for payment ${payment.id}`,
+        );
+
+        const altPayment = await this.createPayment({
+          amount: payment.amount,
+          currency: payment.currency,
+          paymentMethodId: altMethod.id,
+          subscriptionId: payment.subscriptionId,
+          meetingId: payment.meetingId,
+          description: `Alternative payment - ${payment.description}`,
+        });
+
+        // Mark original payment as superseded
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: PaymentStatus.FAILED,
+            metadata: {
+              ...payment.metadata,
+              supersededBy: altPayment.id,
+              alternativeMethodUsed: altMethod.id,
+            },
+          },
+        });
+
+        return { success: true, payment: altPayment, method: altMethod };
+      } catch (error) {
+        this.logger.warn(
+          `Alternative payment method ${altMethod.id} failed:`,
+          error,
+        );
+        continue;
+      }
+    }
+
+    return { success: false, reason: 'All alternative payment methods failed' };
+  }
+
+  private async applyPaymentGracePeriod(payment: any) {
+    if (!payment.subscriptionId) return;
+
+    const gracePeriodDays = 7; // 7-day grace period
+    const gracePeriodEnd = new Date();
+    gracePeriodEnd.setDate(gracePeriodEnd.getDate() + gracePeriodDays);
+
+    await this.prisma.subscription.update({
+      where: { id: payment.subscriptionId },
+      data: {
+        status: SubscriptionStatus.PAST_DUE,
+        metadata: {
+          ...payment.subscription.metadata,
+          gracePeriodStart: new Date().toISOString(),
+          gracePeriodEnd: gracePeriodEnd.toISOString(),
+          failedPaymentId: payment.id,
+        },
+      },
+    });
+
+    this.eventEmitter.emit('subscription.grace_period.started', {
+      subscriptionId: payment.subscriptionId,
+      userId: payment.subscription.userId,
+      gracePeriodEnd,
+      failedAmount: payment.amount,
+    });
+  }
+
+  private async notifyPaymentFailure(payment: any) {
+    this.eventEmitter.emit('payment.failure.notification', {
+      userId: payment.subscription?.userId,
+      paymentId: payment.id,
+      amount: payment.amount,
+      currency: payment.currency,
+      failureReason: payment.failureMessage,
+      meetingId: payment.meetingId,
+      subscriptionId: payment.subscriptionId,
+    });
+  }
+
+  private async handleMeetingPaymentFailure(payment: any) {
+    if (!payment.meetingId) return;
+
+    // Find the associated meeting
+    const meeting = await this.prisma.meeting.findUnique({
+      where: { id: payment.meetingId },
+    });
+
+    if (!meeting) return;
+
+    // If meeting is more than 24 hours away, give time to resolve payment
+    const hoursUntilMeeting =
+      (meeting.startTime.getTime() - Date.now()) / (1000 * 60 * 60);
+
+    if (hoursUntilMeeting > 24) {
+      // Schedule payment resolution reminder
+      this.eventEmitter.emit('meeting.payment.reminder.scheduled', {
+        meetingId: payment.meetingId,
+        userId: meeting.clientId,
+        reminderTime: new Date(
+          meeting.startTime.getTime() - 24 * 60 * 60 * 1000,
+        ), // 24h before
+        paymentId: payment.id,
+      });
+    } else if (hoursUntilMeeting > 2) {
+      // Cancel meeting if payment can't be resolved within 2 hours
+      await this.prisma.meeting.update({
+        where: { id: payment.meetingId },
+        data: {
+          status: 'CANCELLED',
+          notes: `Cancelled due to payment failure - Payment ID: ${payment.id}`,
+        },
+      });
+
+      this.eventEmitter.emit('meeting.cancelled.payment_failure', {
+        meetingId: payment.meetingId,
+        clientId: meeting.clientId,
+        therapistId: meeting.therapistId,
+        paymentId: payment.id,
+      });
+    }
   }
 
   async findPayments(

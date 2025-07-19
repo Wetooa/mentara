@@ -47,36 +47,17 @@ export class ClientRequestController {
   constructor(private readonly clientRequestService: ClientRequestService) {}
 
   @Post('therapist/:therapistId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create send therapist request',
 
-
-    description: 'Create send therapist request' 
-
-
+    description: 'Create send therapist request',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.CREATED)
   async sendTherapistRequest(
     @Param('therapistId') therapistId: string,
@@ -101,36 +82,17 @@ export class ClientRequestController {
   }
 
   @Post('therapists/bulk')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create send multiple therapist requests',
 
-
-    description: 'Create send multiple therapist requests' 
-
-
+    description: 'Create send multiple therapist requests',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.CREATED)
   async sendMultipleTherapistRequests(
     @Body(new ZodValidationPipe(SendMultipleTherapistRequestsDtoSchema))
@@ -147,36 +109,17 @@ export class ClientRequestController {
   }
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get my requests',
 
-
-    description: 'Retrieve get my requests' 
-
-
+    description: 'Retrieve get my requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getMyRequests(
     @Query(new ZodValidationPipe(ClientRequestFiltersDtoSchema))
@@ -188,36 +131,17 @@ export class ClientRequestController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get request details',
 
-
-    description: 'Retrieve get request details' 
-
-
+    description: 'Retrieve get request details',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRequestDetails(
     @Param('id') requestId: string,
@@ -257,36 +181,17 @@ export class ClientRequestController {
   }
 
   @Put(':id/cancel')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update cancel request',
 
-
-    description: 'Update cancel request' 
-
-
+    description: 'Update cancel request',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async cancelRequest(
     @Param('id') requestId: string,
@@ -309,36 +214,17 @@ export class ClientRequestController {
   }
 
   @Get('statistics')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get request statistics',
 
-
-    description: 'Retrieve get request statistics' 
-
-
+    description: 'Retrieve get request statistics',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRequestStatistics(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching request statistics`);
@@ -346,36 +232,17 @@ export class ClientRequestController {
   }
 
   @Get('pending/count')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get pending requests count',
 
-
-    description: 'Retrieve get pending requests count' 
-
-
+    description: 'Retrieve get pending requests count',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getPendingRequestsCount(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching pending requests count`);
@@ -391,36 +258,17 @@ export class ClientRequestController {
   }
 
   @Get('recent')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get recent requests',
 
-
-    description: 'Retrieve get recent requests' 
-
-
+    description: 'Retrieve get recent requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRecentRequests(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching recent requests`);
@@ -443,36 +291,17 @@ export class ClientRequestController {
   }
 
   @Put('expire-stale')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update expire stale requests',
 
-
-    description: 'Update expire stale requests' 
-
-
+    description: 'Update expire stale requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async expireStaleRequests(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} triggering stale request expiration`);
@@ -483,36 +312,17 @@ export class ClientRequestController {
   }
 
   @Get('therapist/:therapistId/status')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get request status with therapist',
 
-
-    description: 'Retrieve get request status with therapist' 
-
-
+    description: 'Retrieve get request status with therapist',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRequestStatusWithTherapist(
     @Param('therapistId') therapistId: string,
@@ -561,36 +371,17 @@ export class ClientRequestController {
   }
 
   @Get('filters/options')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get filter options',
 
-
-    description: 'Retrieve get filter options' 
-
-
+    description: 'Retrieve get filter options',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getFilterOptions(@CurrentUserId() clientId: string) {
     this.logger.log(`Client ${clientId} fetching filter options`);

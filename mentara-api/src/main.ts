@@ -105,7 +105,9 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Mentara API')
-      .setDescription('Mental health platform API providing comprehensive services for therapist-client connections, therapy sessions, community support, and mental health assessments')
+      .setDescription(
+        'Mental health platform API providing comprehensive services for therapist-client connections, therapy sessions, community support, and mental health assessments',
+      )
       .setVersion('1.0')
       .addBearerAuth(
         {
@@ -118,7 +120,10 @@ async function bootstrap() {
         },
         'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
       )
-      .addTag('auth', 'Authentication endpoints for users, therapists, moderators, and admins')
+      .addTag(
+        'auth',
+        'Authentication endpoints for users, therapists, moderators, and admins',
+      )
       .addTag('users', 'User management and profile operations')
       .addTag('therapists', 'Therapist profiles, applications, and management')
       .addTag('clients', 'Client-specific functionality and therapist matching')
@@ -132,7 +137,10 @@ async function bootstrap() {
       .addTag('worksheets', 'Therapy assignments and worksheet management')
       .addTag('reviews', 'Therapist reviews and ratings')
       .addTag('pre-assessment', 'Mental health assessments and questionnaires')
-      .addTag('notifications', 'User notifications and push notification management')
+      .addTag(
+        'notifications',
+        'User notifications and push notification management',
+      )
       .addTag('files', 'File upload and management')
       .addTag('billing', 'Payment processing and billing management')
       .addTag('analytics', 'Usage analytics and reporting')
@@ -153,7 +161,9 @@ async function bootstrap() {
       customSiteTitle: 'Mentara API Documentation',
     });
 
-    console.log(`📚 API Documentation available at: ${await app.getUrl()}/api/docs`);
+    console.log(
+      `📚 API Documentation available at: ${await app.getUrl()}/api/docs`,
+    );
   }
 
   await app.listen(process.env.PORT ?? 5000);

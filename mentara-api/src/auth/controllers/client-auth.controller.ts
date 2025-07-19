@@ -41,7 +41,8 @@ export class ClientAuthController {
   @Public()
   @ApiOperation({
     summary: 'Register new client account',
-    description: 'Create a new client account for users seeking therapy services',
+    description:
+      'Create a new client account for users seeking therapy services',
   })
   @ApiBody({
     type: 'object',
@@ -50,7 +51,11 @@ export class ClientAuthController {
       type: 'object',
       required: ['email', 'password', 'firstName', 'lastName'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'client@example.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'client@example.com',
+        },
         password: { type: 'string', minLength: 8, example: 'SecurePass123!' },
         firstName: { type: 'string', example: 'John' },
         lastName: { type: 'string', example: 'Doe' },
@@ -83,7 +88,9 @@ export class ClientAuthController {
       },
     },
   })
-  @ApiBadRequestResponse({ description: 'Invalid registration data or email already exists' })
+  @ApiBadRequestResponse({
+    description: 'Invalid registration data or email already exists',
+  })
   @ApiTooManyRequestsResponse({ description: 'Too many registration attempts' })
   @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registrations per 5 minutes
   @Post('register')
@@ -122,7 +129,11 @@ export class ClientAuthController {
       type: 'object',
       required: ['email', 'password'],
       properties: {
-        email: { type: 'string', format: 'email', example: 'client@example.com' },
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'client@example.com',
+        },
         password: { type: 'string', example: 'SecurePass123!' },
       },
     },
@@ -208,7 +219,9 @@ export class ClientAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('profile')
   async getProfile(@CurrentUserId() userId: string) {
     return this.clientAuthService.getClientProfile(userId);
@@ -217,7 +230,8 @@ export class ClientAuthController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get first sign-in status',
-    description: 'Check if this is the client first time signing in and return onboarding status',
+    description:
+      'Check if this is the client first time signing in and return onboarding status',
   })
   @ApiResponse({
     status: 200,
@@ -232,7 +246,9 @@ export class ClientAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Get('first-sign-in-status')
   @HttpCode(HttpStatus.OK)
   async getFirstSignInStatus(@CurrentUserId() userId: string) {
@@ -255,7 +271,9 @@ export class ClientAuthController {
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @Post('mark-recommendations-seen')
   @HttpCode(HttpStatus.OK)
   async markRecommendationsSeen(@CurrentUserId() userId: string) {

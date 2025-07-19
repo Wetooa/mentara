@@ -9,17 +9,17 @@ export declare const UserSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     email: string;
-    role: "client" | "user" | "therapist" | "moderator" | "admin";
+    role: "client" | "therapist" | "moderator" | "admin" | "user";
+    id: string;
     createdAt: string;
     updatedAt: string;
     firstName?: string | undefined;
     lastName?: string | undefined;
 }, {
-    id: string;
     email: string;
-    role: "client" | "user" | "therapist" | "moderator" | "admin";
+    role: "client" | "therapist" | "moderator" | "admin" | "user";
+    id: string;
     createdAt: string;
     updatedAt: string;
     firstName?: string | undefined;
@@ -34,12 +34,12 @@ export declare const CreateUserRequestSchema: z.ZodObject<{
     email: string;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
 }, {
     email: string;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
 }>;
 export declare const UpdateUserRequestSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
@@ -116,9 +116,9 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     hasSeenTherapistRecommendations: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
     avatarUrl?: string | undefined;
     middleName?: string | undefined;
     birthDate?: string | undefined;
@@ -126,9 +126,9 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     hasSeenTherapistRecommendations?: boolean | undefined;
 }, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
     avatarUrl?: string | undefined;
     middleName?: string | undefined;
     birthDate?: string | undefined;
@@ -206,18 +206,18 @@ export declare const RegisterAdminDtoSchema: z.ZodObject<{
     permissions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }>;
 export declare const RegisterModeratorDtoSchema: z.ZodObject<{
     email: z.ZodString;
@@ -228,16 +228,16 @@ export declare const RegisterModeratorDtoSchema: z.ZodObject<{
     assignedCommunities: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
     permissions?: string[] | undefined;
     assignedCommunities?: string[] | undefined;
 }, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
     permissions?: string[] | undefined;
     assignedCommunities?: string[] | undefined;
 }>;
@@ -276,16 +276,16 @@ export declare const RegisterUserDtoSchema: z.ZodObject<{
     role: z.ZodOptional<z.ZodEnum<["client", "user", "therapist", "moderator", "admin"]>>;
 }, "strip", z.ZodTypeAny, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
-    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
 }, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
-    password: string;
-    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
 }>;
 export declare const LogoutDtoSchema: z.ZodObject<{
     refreshToken: z.ZodString;
@@ -314,12 +314,12 @@ export declare const ResetPasswordDtoSchema: z.ZodObject<{
     confirmPassword: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     newPassword: string;
-    token: string;
     confirmPassword: string;
+    token: string;
 }, {
     newPassword: string;
-    token: string;
     confirmPassword: string;
+    token: string;
 }>;
 export declare const SendVerificationEmailDtoSchema: z.ZodObject<{
     userId: z.ZodString;

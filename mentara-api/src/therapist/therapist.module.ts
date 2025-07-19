@@ -17,8 +17,10 @@ import { EmailService } from '../services/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
+import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
 
 @Module({
+  imports: [PreAssessmentModule],
   controllers: [
     TherapistRecommendationController,
     TherapistManagementController,

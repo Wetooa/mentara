@@ -60,11 +60,11 @@ export declare const ClientProfileSchema: z.ZodObject<{
         } | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     email: string;
     firstName: string;
     lastName: string;
     role: "client" | "therapist" | "moderator" | "admin";
+    id: string;
     createdAt: string;
     updatedAt: string;
     isActive: boolean;
@@ -86,11 +86,11 @@ export declare const ClientProfileSchema: z.ZodObject<{
         } | undefined;
     } | undefined;
 }, {
-    id: string;
     email: string;
     firstName: string;
     lastName: string;
     role: "client" | "therapist" | "moderator" | "admin";
+    id: string;
     createdAt: string;
     updatedAt: string;
     isActive: boolean;
@@ -193,9 +193,9 @@ export declare const AssignedTherapistSchema: z.ZodObject<{
     nextAvailableSlot: z.ZodOptional<z.ZodString>;
     isActive: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     firstName: string;
     lastName: string;
+    id: string;
     bio: string;
     isActive: boolean;
     specialties: string[];
@@ -203,9 +203,9 @@ export declare const AssignedTherapistSchema: z.ZodObject<{
     profileImage?: string | undefined;
     nextAvailableSlot?: string | undefined;
 }, {
-    id: string;
     firstName: string;
     lastName: string;
+    id: string;
     bio: string;
     isActive: boolean;
     specialties: string[];

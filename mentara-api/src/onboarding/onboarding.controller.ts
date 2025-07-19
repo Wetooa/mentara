@@ -33,36 +33,17 @@ export class OnboardingController {
   constructor(private readonly onboardingService: OnboardingService) {}
 
   @Get('status')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get my onboarding status',
 
-
-    description: 'Retrieve get my onboarding status' 
-
-
+    description: 'Retrieve get my onboarding status',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getMyOnboardingStatus(
     @CurrentUserId() userId: string,
   ): Promise<OnboardingStatus> {
@@ -81,36 +62,17 @@ export class OnboardingController {
   }
 
   @Get('status/:userId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get user onboarding status',
 
-
-    description: 'Retrieve get user onboarding status' 
-
-
+    description: 'Retrieve get user onboarding status',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async getUserOnboardingStatus(
@@ -134,36 +96,17 @@ export class OnboardingController {
   }
 
   @Post('complete-step/:stepName')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create complete step',
 
-
-    description: 'Create complete step' 
-
-
+    description: 'Create complete step',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async completeStep(
     @CurrentUserId() userId: string,
     @Param('stepName') stepName: string,
@@ -183,36 +126,17 @@ export class OnboardingController {
   }
 
   @Get('validate')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve validate onboarding',
 
-
-    description: 'Retrieve validate onboarding' 
-
-
+    description: 'Retrieve validate onboarding',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async validateOnboarding(@CurrentUserId() userId: string) {
     try {
       return await this.onboardingService.validateOnboardingCompleteness(
@@ -231,36 +155,17 @@ export class OnboardingController {
   }
 
   @Get('insights')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get onboarding insights',
 
-
-    description: 'Retrieve get onboarding insights' 
-
-
+    description: 'Retrieve get onboarding insights',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async getOnboardingInsights() {

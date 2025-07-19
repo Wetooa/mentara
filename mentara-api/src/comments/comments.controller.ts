@@ -14,6 +14,10 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  CommunityAccessGuard,
+  RequireRoomAccess,
+} from 'src/auth/guards/community-access.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import {
   SupabaseStorageService,
@@ -35,7 +39,7 @@ import {
 @ApiTags('comments')
 @ApiBearerAuth('JWT-auth')
 @Controller('comments')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, CommunityAccessGuard)
 export class CommentsController {
   constructor(
     private readonly commentsService: CommentsService,
@@ -43,36 +47,17 @@ export class CommentsController {
   ) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find all',
 
-
-    description: 'Retrieve find all' 
-
-
+    description: 'Retrieve find all',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findAll(@CurrentUserId() id: string): Promise<Comment[]> {
     try {
       return await this.commentsService.findAll(id);
@@ -85,36 +70,20 @@ export class CommentsController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Retrieve find one',
-
-
-    description: 'Retrieve find one' 
-
-
+    description: 'Retrieve find one',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this comment',
+  })
   async findOne(@Param('id') id: string): Promise<Comment> {
     try {
       const comment = await this.commentsService.findOne(id);
@@ -131,36 +100,20 @@ export class CommentsController {
   }
 
   @Get('post/:postId')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Retrieve find by post id',
-
-
-    description: 'Retrieve find by post id' 
-
-
+    description: 'Retrieve find by post id',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this post',
+  })
   async findByPostId(
     @Param('postId') postId: string,
     @CurrentUserId() userId: string,
@@ -176,36 +129,20 @@ export class CommentsController {
   }
 
   @Post()
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Create create',
-
-
-    description: 'Create create' 
-
-
+    description: 'Create create',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to comment on this post',
+  })
   @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   async create(
     @CurrentUserId() userId: string,
@@ -250,36 +187,20 @@ export class CommentsController {
   }
 
   @Put(':id')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Update update',
-
-
-    description: 'Update update' 
-
-
+    description: 'Update update',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this comment',
+  })
   async update(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
@@ -296,36 +217,20 @@ export class CommentsController {
   }
 
   @Delete(':id')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Delete remove',
-
-
-    description: 'Delete remove' 
-
-
+    description: 'Delete remove',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this comment',
+  })
   async remove(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
@@ -342,26 +247,20 @@ export class CommentsController {
 
   // Heart functionality
   @Post(':id/heart')
-
-  @ApiOperation({ 
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Create heart comment',
-
-    description: 'Create heart comment' 
-
+    description: 'Create heart comment',
   })
-
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this comment',
+  })
   async heartComment(
     @CurrentUserId() userId: string,
     @Param('id') commentId: string,
@@ -377,36 +276,17 @@ export class CommentsController {
   }
 
   @Get(':id/hearted')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve is comment hearted',
 
-
-    description: 'Retrieve is comment hearted' 
-
-
+    description: 'Retrieve is comment hearted',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async isCommentHearted(
     @CurrentUserId() userId: string,
     @Param('id') commentId: string,
@@ -420,6 +300,43 @@ export class CommentsController {
     } catch (error) {
       throw new HttpException(
         `Failed to check comment heart status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post(':id/report')
+  @RequireRoomAccess()
+  @ApiOperation({
+    summary: 'Report a comment',
+    description: 'Submit a report for inappropriate or harmful comment content',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Report submitted successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this comment',
+  })
+  @ApiResponse({ status: 404, description: 'Comment not found' })
+  async reportComment(
+    @CurrentUserId() userId: string,
+    @Param('id') commentId: string,
+    @Body() reportData: { reason: string; content?: string },
+  ): Promise<{ success: boolean; reportId: string }> {
+    try {
+      const reportId = await this.commentsService.reportComment(
+        commentId,
+        userId,
+        reportData.reason,
+        reportData.content,
+      );
+      return { success: true, reportId };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to report comment: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

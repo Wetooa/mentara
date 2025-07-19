@@ -27,9 +27,11 @@ export class HealthService {
         this.getSystemMetrics(),
       ]);
 
-      const hasErrors = 
+      const hasErrors =
         dbHealth.status === 'disconnected' ||
-        Object.values(servicesHealth).some((service: any) => service.status === 'error');
+        Object.values(servicesHealth).some(
+          (service: any) => service.status === 'error',
+        );
 
       return {
         status: hasErrors ? 'error' : 'ok',
@@ -54,10 +56,10 @@ export class HealthService {
   async getDatabaseHealth() {
     try {
       const start = Date.now();
-      
+
       // Test database connectivity with a simple query
       await this.prisma.$queryRaw`SELECT 1`;
-      
+
       const responseTime = Date.now() - start;
 
       // Get database stats (mock data for demonstration)
@@ -106,7 +108,7 @@ export class HealthService {
       const start = Date.now();
       // Mock Supabase health check
       // In a real implementation, you'd ping Supabase API
-      await new Promise(resolve => setTimeout(resolve, 50)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate API call
       const responseTime = Date.now() - start;
 
       return {
@@ -126,7 +128,7 @@ export class HealthService {
     try {
       const start = Date.now();
       // Mock Stripe health check
-      await new Promise(resolve => setTimeout(resolve, 30));
+      await new Promise((resolve) => setTimeout(resolve, 30));
       const responseTime = Date.now() - start;
 
       return {
@@ -146,7 +148,7 @@ export class HealthService {
     try {
       const start = Date.now();
       // Mock email service health check
-      await new Promise(resolve => setTimeout(resolve, 25));
+      await new Promise((resolve) => setTimeout(resolve, 25));
       const responseTime = Date.now() - start;
 
       return {
@@ -167,7 +169,7 @@ export class HealthService {
     try {
       const start = Date.now();
       // Mock AI service health check
-      await new Promise(resolve => setTimeout(resolve, 75));
+      await new Promise((resolve) => setTimeout(resolve, 75));
       const responseTime = Date.now() - start;
 
       return {
@@ -262,7 +264,9 @@ export class HealthService {
       overview: {
         status: detailedHealth.status,
         uptime: detailedHealth.uptime,
-        lastRestart: new Date(Date.now() - (detailedHealth.uptime || 0) * 1000).toISOString(),
+        lastRestart: new Date(
+          Date.now() - (detailedHealth.uptime || 0) * 1000,
+        ).toISOString(),
         errorRate: 0.12, // 0.12%
       },
       alerts,

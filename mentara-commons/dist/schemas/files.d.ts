@@ -12,10 +12,10 @@ export declare const FileSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    path: string;
     id: string;
     createdAt: string;
     updatedAt: string;
-    path: string;
     isPublic: boolean;
     url: string;
     size: number;
@@ -24,10 +24,10 @@ export declare const FileSchema: z.ZodObject<{
     mimeType: string;
     uploadedBy: string;
 }, {
+    path: string;
     id: string;
     createdAt: string;
     updatedAt: string;
-    path: string;
     isPublic: boolean;
     url: string;
     size: number;

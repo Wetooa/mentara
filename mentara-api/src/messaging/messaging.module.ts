@@ -5,6 +5,7 @@ import { MessagingService } from './messaging.service';
 import { MessagingGateway } from './messaging.gateway';
 import { WebSocketAuthService } from './services/websocket-auth.service';
 import { WebSocketEventService } from './services/websocket-event.service';
+import { MessageEncryptionService } from './services/message-encryption.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { EventBusService } from '../common/events/event-bus.service';
 
@@ -23,6 +24,7 @@ import { EventBusService } from '../common/events/event-bus.service';
     MessagingGateway,
     WebSocketAuthService,
     WebSocketEventService,
+    MessageEncryptionService,
     PrismaService,
     EventBusService,
   ],
@@ -31,6 +33,7 @@ import { EventBusService } from '../common/events/event-bus.service';
     MessagingGateway,
     WebSocketAuthService,
     WebSocketEventService,
+    MessageEncryptionService,
   ],
 })
 export class MessagingModule {}

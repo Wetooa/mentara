@@ -71,7 +71,10 @@ export class TokenService {
         parseInt(process.env.JWT_REFRESH_EXPIRES_IN?.replace('d', '') || '7'),
     );
 
-    // Store hashed token in database
+    // Extract device information from userAgent
+    const deviceName = this.extractDeviceInfo(userAgent);
+
+    // Store hashed token in database with enhanced session tracking
     await this.prisma.refreshToken.create({
       data: {
         token: hashedToken,
@@ -79,6 +82,9 @@ export class TokenService {
         expiresAt,
         ipAddress,
         userAgent,
+        deviceName,
+        location: await this.getLocationFromIP(ipAddress),
+        lastActivity: new Date(),
       },
     });
 
@@ -125,6 +131,12 @@ export class TokenService {
     if (storedToken.user.deactivatedAt) {
       throw new UnauthorizedException('User account deactivated');
     }
+
+    // Update session activity before revoking
+    await this.prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { lastActivity: new Date() },
+    });
 
     // Revoke old refresh token
     await this.prisma.refreshToken.update({
@@ -284,5 +296,277 @@ export class TokenService {
         lastLoginAt: new Date(),
       },
     });
+  }
+
+  /**
+   * Validates a JWT token and returns the payload and expiration info
+   * @param token - The JWT token to validate
+   * @returns Promise with validation result
+   */
+  async validateToken(token: string): Promise<{
+    valid: boolean;
+    payload?: any;
+    expires?: string;
+    error?: string;
+  }> {
+    try {
+      // Verify and decode the token
+      const payload = this.jwtService.verify(token);
+
+      // Check if token has expired
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        return {
+          valid: false,
+          error: 'Token has expired',
+        };
+      }
+
+      // Convert expiration timestamp to ISO string
+      const expiresAt = payload.exp
+        ? new Date(payload.exp * 1000).toISOString()
+        : undefined;
+
+      return {
+        valid: true,
+        payload,
+        expires: expiresAt,
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        error: error instanceof Error ? error.message : 'Invalid token',
+      };
+    }
+  }
+
+  // Session Management Methods
+
+  /**
+   * Get current session information based on refresh token
+   */
+  async getSessionInfo(refreshToken: string): Promise<{
+    sessionId: string;
+    createdAt: string;
+    lastActivity: string;
+    device: string;
+    location: string;
+    ipAddress: string;
+    userAgent: string;
+  } | null> {
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
+
+    const session = await this.prisma.refreshToken.findUnique({
+      where: {
+        token: hashedToken,
+        revokedAt: null,
+      },
+    });
+
+    if (!session || session.expiresAt < new Date()) {
+      return null;
+    }
+
+    return {
+      sessionId: session.id,
+      createdAt: session.createdAt.toISOString(),
+      lastActivity: session.lastActivity.toISOString(),
+      device: session.deviceName || 'Unknown Device',
+      location: session.location || 'Unknown Location',
+      ipAddress: session.ipAddress || 'Unknown IP',
+      userAgent: session.userAgent || 'Unknown User Agent',
+    };
+  }
+
+  /**
+   * Get all active sessions for a user
+   */
+  async getActiveSessions(
+    userId: string,
+    currentRefreshToken?: string,
+  ): Promise<{
+    sessions: Array<{
+      id: string;
+      device: string;
+      location: string;
+      lastActivity: string;
+      isCurrent: boolean;
+      ipAddress: string;
+      userAgent: string;
+      createdAt: string;
+    }>;
+  }> {
+    const sessions = await this.prisma.refreshToken.findMany({
+      where: {
+        userId,
+        revokedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: {
+        lastActivity: 'desc',
+      },
+    });
+
+    let currentHashedToken: string | null = null;
+    if (currentRefreshToken) {
+      currentHashedToken = crypto
+        .createHash('sha256')
+        .update(currentRefreshToken)
+        .digest('hex');
+    }
+
+    return {
+      sessions: sessions.map((session) => ({
+        id: session.id,
+        device: session.deviceName || 'Unknown Device',
+        location: session.location || 'Unknown Location',
+        lastActivity: session.lastActivity.toISOString(),
+        isCurrent: currentHashedToken === session.token,
+        ipAddress: session.ipAddress || 'Unknown IP',
+        userAgent: session.userAgent || 'Unknown User Agent',
+        createdAt: session.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  /**
+   * Terminate a specific session by session ID
+   */
+  async terminateSession(
+    sessionId: string,
+    userId: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    const session = await this.prisma.refreshToken.findFirst({
+      where: {
+        id: sessionId,
+        userId,
+        revokedAt: null,
+      },
+    });
+
+    if (!session) {
+      return {
+        success: false,
+        message: 'Session not found or already terminated',
+      };
+    }
+
+    await this.prisma.refreshToken.update({
+      where: { id: sessionId },
+      data: { revokedAt: new Date() },
+    });
+
+    return {
+      success: true,
+      message: 'Session terminated successfully',
+    };
+  }
+
+  /**
+   * Terminate all other sessions except the current one
+   */
+  async terminateOtherSessions(
+    userId: string,
+    currentRefreshToken?: string,
+  ): Promise<{
+    success: boolean;
+    terminatedCount: number;
+    message: string;
+  }> {
+    let currentHashedToken: string | null = null;
+    if (currentRefreshToken) {
+      currentHashedToken = crypto
+        .createHash('sha256')
+        .update(currentRefreshToken)
+        .digest('hex');
+    }
+
+    const whereClause: any = {
+      userId,
+      revokedAt: null,
+    };
+
+    if (currentHashedToken) {
+      whereClause.token = { not: currentHashedToken };
+    }
+
+    const result = await this.prisma.refreshToken.updateMany({
+      where: whereClause,
+      data: { revokedAt: new Date() },
+    });
+
+    return {
+      success: true,
+      terminatedCount: result.count,
+      message: `${result.count} sessions terminated successfully`,
+    };
+  }
+
+  /**
+   * Update session activity (called when tokens are used)
+   */
+  async updateSessionActivity(refreshToken: string): Promise<void> {
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
+
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        token: hashedToken,
+        revokedAt: null,
+      },
+      data: {
+        lastActivity: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Helper method to extract device information from user agent
+   */
+  private extractDeviceInfo(userAgent?: string): string {
+    if (!userAgent) return 'Unknown Device';
+
+    const ua = userAgent.toLowerCase();
+
+    // Mobile devices
+    if (ua.includes('mobile') || ua.includes('android')) {
+      if (ua.includes('android')) return 'Android Device';
+      if (ua.includes('iphone')) return 'iPhone';
+      if (ua.includes('ipad')) return 'iPad';
+      return 'Mobile Device';
+    }
+
+    // Desktop browsers
+    if (ua.includes('windows')) return 'Windows PC';
+    if (ua.includes('macintosh') || ua.includes('mac os')) return 'Mac';
+    if (ua.includes('linux')) return 'Linux PC';
+    if (ua.includes('chrome')) return 'Chrome Browser';
+    if (ua.includes('firefox')) return 'Firefox Browser';
+    if (ua.includes('safari')) return 'Safari Browser';
+    if (ua.includes('edge')) return 'Edge Browser';
+
+    return 'Unknown Device';
+  }
+
+  /**
+   * Helper method to get approximate location from IP address
+   * This is a simple implementation - in production, you might want to use a proper geolocation service
+   */
+  private async getLocationFromIP(ipAddress?: string): Promise<string> {
+    if (!ipAddress || ipAddress === '127.0.0.1' || ipAddress === '::1') {
+      return 'Local';
+    }
+
+    // This is a placeholder - in production, you'd integrate with a geolocation service
+    // like MaxMind GeoIP, IP2Location, or a similar service
+    return 'Unknown Location';
   }
 }

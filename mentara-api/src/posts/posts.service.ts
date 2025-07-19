@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Post, Prisma, User } from '@prisma/client';
@@ -44,7 +45,7 @@ export class PostsService {
                 avatarUrl: true,
               },
             },
-            replies: {
+            children: {
               include: {
                 user: {
                   select: {
@@ -54,6 +55,15 @@ export class PostsService {
                     avatarUrl: true,
                   },
                 },
+                _count: {
+                  select: {
+                    children: true,
+                    hearts: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -109,7 +119,7 @@ export class PostsService {
                 avatarUrl: true,
               },
             },
-            replies: {
+            children: {
               include: {
                 user: {
                   select: {
@@ -119,6 +129,15 @@ export class PostsService {
                     avatarUrl: true,
                   },
                 },
+                _count: {
+                  select: {
+                    children: true,
+                    hearts: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -301,7 +320,7 @@ export class PostsService {
                 avatarUrl: true,
               },
             },
-            replies: {
+            children: {
               include: {
                 user: {
                   select: {
@@ -311,6 +330,15 @@ export class PostsService {
                     avatarUrl: true,
                   },
                 },
+                _count: {
+                  select: {
+                    children: true,
+                    hearts: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -408,5 +436,61 @@ export class PostsService {
   async removePostAttachment(postId: string, fileId: string) {
     // Stub implementation - files system removed
     return { count: 0 };
+  }
+
+  /**
+   * Report a post for inappropriate content
+   */
+  async reportPost(
+    postId: string,
+    reporterId: string,
+    reason: string,
+    content?: string,
+  ): Promise<string> {
+    try {
+      // Verify post exists
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('Post not found');
+      }
+
+      // Check if user already reported this post
+      const existingReport = await this.prisma.report.findFirst({
+        where: {
+          postId,
+          reporterId,
+        },
+      });
+
+      if (existingReport) {
+        throw new ForbiddenException('You have already reported this post');
+      }
+
+      // Create the report
+      const report = await this.prisma.report.create({
+        data: {
+          postId,
+          reporterId,
+          reason,
+          content,
+          status: 'pending',
+        },
+      });
+
+      return report.id;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 }

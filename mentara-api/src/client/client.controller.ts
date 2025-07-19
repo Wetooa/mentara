@@ -35,36 +35,17 @@ export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   @Get('profile')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get profile',
 
-
-    description: 'Retrieve get profile' 
-
-
+    description: 'Retrieve get profile',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getProfile(@CurrentUserId() id: string): Promise<User> {
     try {
       return await this.clientService.getProfile(id);
@@ -77,36 +58,17 @@ export class ClientController {
   }
 
   @Put('profile')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update profile',
 
-
-    description: 'Update update profile' 
-
-
+    description: 'Update update profile',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async updateProfile(
     @CurrentUserId() id: string,
     @Body() data: UpdateClientDto,
@@ -122,36 +84,17 @@ export class ClientController {
   }
 
   @Get('needs-therapist-recommendations')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve needs therapist recommendations',
 
-
-    description: 'Retrieve needs therapist recommendations' 
-
-
+    description: 'Retrieve needs therapist recommendations',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async needsTherapistRecommendations(
     @CurrentUserId() id: string,
   ): Promise<{ needsTherapistRecommendations: boolean }> {
@@ -167,36 +110,17 @@ export class ClientController {
   }
 
   @Put('mark-therapist-recommendations-seen')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update mark therapist recommendations seen',
 
-
-    description: 'Update mark therapist recommendations seen' 
-
-
+    description: 'Update mark therapist recommendations seen',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async markTherapistRecommendationsSeen(
     @CurrentUserId() id: string,
   ): Promise<{ success: boolean }> {
@@ -212,36 +136,17 @@ export class ClientController {
   }
 
   @Get('therapist')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get assigned therapist',
 
-
-    description: 'Retrieve get assigned therapist' 
-
-
+    description: 'Retrieve get assigned therapist',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getAssignedTherapist(
     @CurrentUserId() id: string,
   ): Promise<{ therapist: TherapistRecommendation | null }> {
@@ -257,36 +162,17 @@ export class ClientController {
   }
 
   @Post('therapist')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create assign therapist',
 
-
-    description: 'Create assign therapist' 
-
-
+    description: 'Create assign therapist',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async assignTherapist(
     @CurrentUserId() id: string,
     @Body() data: { therapistId: string },
@@ -308,36 +194,17 @@ export class ClientController {
   }
 
   @Delete('therapist')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete remove therapist',
 
-
-    description: 'Delete remove therapist' 
-
-
+    description: 'Delete remove therapist',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async removeTherapist(
     @CurrentUserId() id: string,
   ): Promise<{ success: boolean }> {

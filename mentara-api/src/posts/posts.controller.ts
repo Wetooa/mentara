@@ -14,6 +14,11 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  CommunityAccessGuard,
+  RequireRoomAccess,
+  RequirePostingRole,
+} from 'src/auth/guards/community-access.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import {
   SupabaseStorageService,
@@ -35,7 +40,7 @@ import {
 @ApiTags('posts')
 @ApiBearerAuth('JWT-auth')
 @Controller('posts')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, CommunityAccessGuard)
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
@@ -43,36 +48,17 @@ export class PostsController {
   ) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find all',
 
-
-    description: 'Retrieve find all' 
-
-
+    description: 'Retrieve find all',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findAll(@CurrentUserId() id: string): Promise<PostEntity[]> {
     try {
       const user = await this.postsService.findUserById(id);
@@ -87,36 +73,20 @@ export class PostsController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Retrieve find one',
-
-
-    description: 'Retrieve find one' 
-
-
+    description: 'Retrieve find one',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this post',
+  })
   async findOne(
     @Param('id') postId: string,
     @CurrentUserId() userId: string,
@@ -137,36 +107,20 @@ export class PostsController {
   }
 
   @Post()
-
-
-  @ApiOperation({ 
-
-
+  @RequirePostingRole()
+  @ApiOperation({
     summary: 'Create create',
-
-
-    description: 'Create create' 
-
-
+    description: 'Create create',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to post in this room',
+  })
   @UseInterceptors(FilesInterceptor('files', 10)) // Support up to 10 files
   async create(
     @CurrentUserId() id: string,
@@ -220,36 +174,20 @@ export class PostsController {
   }
 
   @Put(':id')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Update update',
-
-
-    description: 'Update update' 
-
-
+    description: 'Update update',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this post',
+  })
   async update(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -266,36 +204,20 @@ export class PostsController {
   }
 
   @Delete(':id')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Delete remove',
-
-
-    description: 'Delete remove' 
-
-
+    description: 'Delete remove',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this post',
+  })
   async remove(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -311,36 +233,17 @@ export class PostsController {
   }
 
   @Get('user/:userId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find by user id',
 
-
-    description: 'Retrieve find by user id' 
-
-
+    description: 'Retrieve find by user id',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findByUserId(@Param('userId') userId: string): Promise<PostEntity[]> {
     try {
       return await this.postsService.findByUserId(userId);
@@ -353,36 +256,20 @@ export class PostsController {
   }
 
   @Get('room/:roomId')
-
-
-  @ApiOperation({ 
-
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Retrieve find by room id',
-
-
-    description: 'Retrieve find by room id' 
-
-
+    description: 'Retrieve find by room id',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this room',
+  })
   async findByRoomId(
     @Param('roomId') roomId: string,
     @CurrentUserId() userId: string,
@@ -399,26 +286,20 @@ export class PostsController {
 
   // Heart functionality
   @Post(':id/heart')
-
-  @ApiOperation({ 
-
+  @RequireRoomAccess()
+  @ApiOperation({
     summary: 'Create heart post',
-
-    description: 'Create heart post' 
-
+    description: 'Create heart post',
   })
-
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this post',
+  })
   async heartPost(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -434,36 +315,17 @@ export class PostsController {
   }
 
   @Get(':id/hearted')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve is post hearted',
 
-
-    description: 'Retrieve is post hearted' 
-
-
+    description: 'Retrieve is post hearted',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async isPostHearted(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -477,6 +339,43 @@ export class PostsController {
     } catch (error) {
       throw new HttpException(
         `Failed to check post heart status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post(':id/report')
+  @RequireRoomAccess()
+  @ApiOperation({
+    summary: 'Report a post',
+    description: 'Submit a report for inappropriate or harmful post content',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Report submitted successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Insufficient permissions to access this post',
+  })
+  @ApiResponse({ status: 404, description: 'Post not found' })
+  async reportPost(
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
+    @Body() reportData: { reason: string; content?: string },
+  ): Promise<{ success: boolean; reportId: string }> {
+    try {
+      const reportId = await this.postsService.reportPost(
+        postId,
+        userId,
+        reportData.reason,
+        reportData.content,
+      );
+      return { success: true, reportId };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to report post: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

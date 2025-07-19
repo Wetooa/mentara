@@ -6,6 +6,7 @@ import { EventBusService } from '../common/events/event-bus.service';
 import { SlotGeneratorService } from './services/slot-generator.service';
 import { ConflictDetectionService } from './services/conflict-detection.service';
 import { AvailabilityValidatorService } from './services/availability-validator.service';
+import { BillingService } from '../billing/billing.service';
 
 @Module({
   controllers: [BookingController],
@@ -14,6 +15,7 @@ import { AvailabilityValidatorService } from './services/availability-validator.
     SlotGeneratorService,
     ConflictDetectionService,
     AvailabilityValidatorService,
+    BillingService,
     PrismaService,
     EventBusService,
   ],

@@ -194,7 +194,7 @@ export class ReviewsService {
       status,
       rating,
     } = query;
-    
+
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -246,23 +246,26 @@ export class ReviewsService {
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
-    
+
     // Calculate average rating for the result set
-    const averageRating = reviews.length > 0 
-      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-      : 0;
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) /
+          reviews.length
+        : 0;
 
     // Calculate rating distribution
     const ratingDistribution = reviews.reduce(
       (dist, review) => {
-        dist[review.rating.toString()] = (dist[review.rating.toString()] || 0) + 1;
+        dist[review.rating.toString()] =
+          (dist[review.rating.toString()] || 0) + 1;
         return dist;
       },
-      { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 }
+      { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 },
     );
 
     return {
-      reviews: reviews.map(review => ({
+      reviews: reviews.map((review) => ({
         id: review.id,
         rating: review.rating,
         title: review.title || undefined,
@@ -276,16 +279,20 @@ export class ReviewsService {
         createdAt: review.createdAt.toISOString(),
         updatedAt: review.updatedAt.toISOString(),
         moderationNote: review.moderationNote || undefined,
-        client: review.client ? {
-          id: review.clientId,
-          firstName: review.client.user?.firstName,
-          lastName: review.client.user?.lastName,
-        } : undefined,
-        therapist: review.therapist ? {
-          id: review.therapistId,
-          firstName: review.therapist.user?.firstName || '',
-          lastName: review.therapist.user?.lastName || '',
-        } : undefined,
+        client: review.client
+          ? {
+              id: review.clientId,
+              firstName: review.client.user?.firstName,
+              lastName: review.client.user?.lastName,
+            }
+          : undefined,
+        therapist: review.therapist
+          ? {
+              id: review.therapistId,
+              firstName: review.therapist.user?.firstName || '',
+              lastName: review.therapist.user?.lastName || '',
+            }
+          : undefined,
       })),
       totalCount,
       page,
@@ -340,7 +347,7 @@ export class ReviewsService {
     // Get monthly reviews for the last 12 months
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-    
+
     const monthlyStats = await this.prisma.review.groupBy({
       by: ['createdAt'],
       where: {
@@ -359,21 +366,26 @@ export class ReviewsService {
     });
 
     // Group by month
-    const monthlyReviews = monthlyStats.reduce((acc, stat) => {
-      const month = stat.createdAt.toISOString().substring(0, 7); // YYYY-MM format
-      if (!acc[month]) {
-        acc[month] = { count: 0, totalRating: 0 };
-      }
-      acc[month].count += stat._count.rating;
-      acc[month].totalRating += (stat._avg.rating || 0) * stat._count.rating;
-      return acc;
-    }, {} as Record<string, { count: number; totalRating: number }>);
+    const monthlyReviews = monthlyStats.reduce(
+      (acc, stat) => {
+        const month = stat.createdAt.toISOString().substring(0, 7); // YYYY-MM format
+        if (!acc[month]) {
+          acc[month] = { count: 0, totalRating: 0 };
+        }
+        acc[month].count += stat._count.rating;
+        acc[month].totalRating += (stat._avg.rating || 0) * stat._count.rating;
+        return acc;
+      },
+      {} as Record<string, { count: number; totalRating: number }>,
+    );
 
-    const monthlyReviewsArray = Object.entries(monthlyReviews).map(([month, data]) => ({
-      month,
-      count: data.count,
-      averageRating: data.count > 0 ? data.totalRating / data.count : 0,
-    }));
+    const monthlyReviewsArray = Object.entries(monthlyReviews).map(
+      ([month, data]) => ({
+        month,
+        count: data.count,
+        averageRating: data.count > 0 ? data.totalRating / data.count : 0,
+      }),
+    );
 
     // Get recent reviews
     const recentReviews = await this.prisma.review.findMany({
@@ -405,7 +417,7 @@ export class ReviewsService {
       averageRating: Math.round(averageRating * 100) / 100,
       ratingDistribution,
       monthlyReviews: monthlyReviewsArray,
-      recentReviews: recentReviews.map(review => ({
+      recentReviews: recentReviews.map((review) => ({
         id: review.id,
         rating: review.rating,
         title: review.title || undefined,
@@ -419,11 +431,13 @@ export class ReviewsService {
         createdAt: review.createdAt.toISOString(),
         updatedAt: review.updatedAt.toISOString(),
         moderationNote: review.moderationNote || undefined,
-        client: review.client ? {
-          id: review.clientId,
-          firstName: review.client.user?.firstName,
-          lastName: review.client.user?.lastName,
-        } : undefined,
+        client: review.client
+          ? {
+              id: review.clientId,
+              firstName: review.client.user?.firstName,
+              lastName: review.client.user?.lastName,
+            }
+          : undefined,
         therapist: {
           id: review.therapistId,
           firstName: '',
@@ -505,16 +519,16 @@ export class ReviewsService {
       await this.prisma.reviewHelpful.delete({
         where: { id: existingVote.id },
       });
-      
+
       const review = await this.prisma.review.findUnique({
         where: { id: reviewId },
         include: { helpfulVotes: true },
       });
 
-      return { 
-        helpful: false, 
+      return {
+        helpful: false,
         helpfulCount: review?.helpfulVotes.length || 0,
-        message: 'Review helpfulness removed'
+        message: 'Review helpfulness removed',
       };
     } else {
       // Create new helpful vote
@@ -530,10 +544,10 @@ export class ReviewsService {
         include: { helpfulVotes: true },
       });
 
-      return { 
-        helpful: true, 
+      return {
+        helpful: true,
         helpfulCount: review?.helpfulVotes.length || 0,
-        message: 'Review marked as helpful'
+        message: 'Review marked as helpful',
       };
     }
   }

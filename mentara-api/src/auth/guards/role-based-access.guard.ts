@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { PrismaService } from 'src/providers/prisma-client.provider';
 
 // Define role hierarchy - higher numbers have more permissions
 const ROLE_HIERARCHY = {
@@ -119,9 +120,12 @@ export const AllowResourceOwner = (resourceIdParam: string = 'id') =>
 
 @Injectable()
 export class RoleBasedAccessGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private prisma: PrismaService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const userRole = request.userRole || user?.role;
@@ -183,9 +187,15 @@ export class RoleBasedAccessGuard implements CanActivate {
     if (userRole === 'therapist') {
       const clientId = request.params.clientId || request.body?.clientId;
       if (clientId) {
-        // In a real implementation, you'd check the database for the relationship
-        // For now, we'll assume it's valid if the therapist is accessing client data
-        // This should be replaced with actual database validation
+        const isValidRelationship = await this.validateTherapistClientRelationship(
+          userId,
+          clientId,
+        );
+        if (!isValidRelationship) {
+          throw new ForbiddenException(
+            'Access denied - no active therapist-client relationship',
+          );
+        }
       }
     }
 
@@ -228,10 +238,10 @@ export class RoleBasedAccessGuard implements CanActivate {
     // Check if the resource ID matches the user ID
     if (resourceId === userId) return true;
 
-    // For therapists, allow access to assigned clients (simplified check)
+    // For therapists, deny access here - specific therapist-client validation 
+    // is handled in the main canActivate method above
     if (userRole === 'therapist') {
-      // In a real implementation, check database for therapist-client relationship
-      return true; // Placeholder
+      return false;
     }
 
     // For moderators, allow access to community resources
@@ -247,6 +257,30 @@ export class RoleBasedAccessGuard implements CanActivate {
     }
 
     return false;
+  }
+
+  /**
+   * Validate that a therapist has an active relationship with a client
+   */
+  private async validateTherapistClientRelationship(
+    therapistId: string,
+    clientId: string,
+  ): Promise<boolean> {
+    try {
+      const relationship = await this.prisma.clientTherapist.findFirst({
+        where: {
+          therapistId,
+          clientId,
+          status: 'ACTIVE',
+        },
+      });
+
+      return !!relationship;
+    } catch (error) {
+      // Log error and deny access on database errors for security
+      console.error('Error validating therapist-client relationship:', error);
+      return false;
+    }
   }
 
   // Helper method to get user permissions for debugging

@@ -61,6 +61,12 @@ model Message {
   isEdited       Boolean     @default(false)
   isDeleted      Boolean     @default(false)
   editedAt       DateTime? // When message was last edited
+  
+  // Message encryption fields for HIPAA compliance
+  isEncrypted       Boolean @default(false)
+  encryptionIv      String? // Initialization vector for AES-GCM
+  encryptionAuthTag String? // Authentication tag for AES-GCM
+  encryptionKeyId   String? // Key identifier for key rotation
 
   // Relations
   conversation Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -77,6 +83,8 @@ model Message {
   @@index([senderId])
   @@index([messageType])
   @@index([isDeleted])
+  @@index([isEncrypted]) // For encryption analytics
+  @@index([encryptionKeyId]) // For key rotation
 }
 
 model MessageReadReceipt {

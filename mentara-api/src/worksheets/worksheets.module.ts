@@ -7,13 +7,10 @@ import { PrismaService } from '../providers/prisma-client.provider';
 import { WorksheetUploadsController } from './worksheet-uploads.controller';
 import { EnhancedWorksheetsController } from './controllers/enhanced-worksheets.controller';
 import { WorksheetCollaborationGateway } from './gateways/worksheet-collaboration.gateway';
-import { MulterModule } from '@nestjs/platform-express';
+import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 
 @Module({
   imports: [
-    MulterModule.register({
-      dest: './uploads/worksheets',
-    }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'fallback-secret',
       signOptions: { expiresIn: '1d' },
@@ -29,6 +26,7 @@ import { MulterModule } from '@nestjs/platform-express';
     EnhancedWorksheetsService,
     WorksheetCollaborationGateway,
     PrismaService,
+    SupabaseStorageService,
   ],
   exports: [WorksheetsService, EnhancedWorksheetsService],
 })

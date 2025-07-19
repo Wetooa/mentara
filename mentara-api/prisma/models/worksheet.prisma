@@ -1,3 +1,10 @@
+enum WorksheetStatus {
+    UPCOMING
+    ASSIGNED  
+    PAST_DUE
+    COMPLETED
+}
+
 model Worksheet {
     id           String                @id @default(uuid())
     clientId     String // Use clientId for proper relation with Client model
@@ -6,22 +13,30 @@ model Worksheet {
     instructions String? // Added instructions field
     description  String?
     dueDate      DateTime // Added due date
-    status       String                @default("upcoming") // upcoming, past_due, completed, assigned
+    status       WorksheetStatus       @default(UPCOMING)
     isCompleted  Boolean               @default(false) // Completion status
     submittedAt  DateTime? // When the worksheet was submitted
     feedback     String? // Therapist feedback
     
-    // Additional attachments (beyond materials and submissions)
+    // Materials provided by therapist
+    materialUrls  String[] @default([])
+    materialNames String[] @default([])
+    materialSizes Int[]    @default([])
+    
+    // Submissions from client
+    submissionUrls  String[] @default([])
+    submissionNames String[] @default([])
+    submissionSizes Int[]    @default([])
+    
+    // Additional attachments (general use)
     attachmentUrls  String[] @default([])
     attachmentNames String[] @default([])
     attachmentSizes Int[]    @default([])
     
     createdAt    DateTime              @default(now())
     updatedAt    DateTime              @updatedAt
-    materials    WorksheetMaterial[]
-    submissions  WorksheetSubmission[]
-    client       Client                @relation(fields: [clientId], references: [userId])
-    therapist    Therapist?            @relation(fields: [therapistId], references: [userId])
+    client       Client                @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+    therapist    Therapist?            @relation(fields: [therapistId], references: [userId], onDelete: SetNull)
 
     @@index([clientId])
     @@index([therapistId])
@@ -29,32 +44,6 @@ model Worksheet {
     @@index([isCompleted])
 }
 
-model WorksheetMaterial {
-    id          String    @id @default(uuid())
-    worksheetId String
-    filename    String // Original filename
-    url         String // URL to the file
-    fileSize    Int? // File size in bytes
-    fileType    String? // MIME type
-    createdAt   DateTime  @default(now())
-    worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
-
-    @@index([worksheetId])
-}
-
-model WorksheetSubmission {
-    id          String    @id @default(uuid())
-    worksheetId String
-    clientId    String // Use clientId for proper relation with Client model
-    filename    String // Original filename
-    url         String // URL to the file
-    fileSize    Int? // File size in bytes
-    fileType    String? // MIME type
-    content     String?   @db.Text // Optional text content
-    createdAt   DateTime  @default(now())
-    worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
-    client      Client    @relation(fields: [clientId], references: [userId])
-
-    @@index([worksheetId])
-    @@index([clientId])
-}
+// WorksheetMaterial and WorksheetSubmission tables removed
+// Files are now stored inline in the Worksheet model using arrays
+// This follows the same pattern as Posts and Comments modules

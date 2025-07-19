@@ -228,32 +228,69 @@ export class ClientRequestService {
         totalSent: 0,
       };
 
-      // Send requests sequentially to avoid database conflicts
-      for (const therapistId of therapistIds) {
-        try {
-          const result = await this.sendTherapistRequest(
-            clientId,
-            therapistId,
-            {
-              message,
-              priority: priority as any,
-            },
-          );
+      // Process requests in parallel with controlled concurrency (max 3 concurrent)
+      // This avoids database lock contention while maintaining good performance
+      const concurrencyLimit = 3;
+      const chunks = this.chunkArray(therapistIds, concurrencyLimit);
 
-          results.successful.push({
-            therapistId,
-            requestId: result.request.id,
-            status: 'sent',
-          });
-          results.totalSent++;
-        } catch (error: any) {
-          results.failed.push({
-            therapistId,
-            error: error?.message || 'Unknown error',
-          });
-          this.logger.warn(
-            `Failed to send request to therapist ${therapistId}: ${error?.message || 'Unknown error'}`,
-          );
+      for (const chunk of chunks) {
+        const chunkPromises = chunk.map(async (therapistId) => {
+          try {
+            const result = await this.sendTherapistRequest(
+              clientId,
+              therapistId,
+              {
+                message,
+                priority: priority as 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
+              },
+            );
+
+            return {
+              success: true,
+              therapistId,
+              requestId: result.request.id,
+            };
+          } catch (error) {
+            this.logger.warn(
+              `Failed to send request to therapist ${therapistId}`,
+              {
+                error: error instanceof Error ? error.message : String(error),
+                clientId,
+                therapistId,
+              },
+            );
+
+            return {
+              success: false,
+              therapistId,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            };
+          }
+        });
+
+        // Wait for all requests in this chunk to complete
+        const chunkResults = await Promise.all(chunkPromises);
+
+        // Process results
+        chunkResults.forEach((result) => {
+          if (result.success) {
+            results.successful.push({
+              therapistId: result.therapistId,
+              requestId: result.requestId!,
+              status: 'sent',
+            });
+            results.totalSent++;
+          } else {
+            results.failed.push({
+              therapistId: result.therapistId,
+              error: result.error!,
+            });
+          }
+        });
+
+        // Add small delay between chunks to prevent overwhelming the database
+        if (chunks.indexOf(chunk) < chunks.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
       }
 
@@ -581,5 +618,16 @@ export class ClientRequestService {
       this.logger.error('Failed to expire stale requests:', error);
       throw error;
     }
+  }
+
+  /**
+   * Helper method to split array into chunks for controlled parallel processing
+   */
+  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 }

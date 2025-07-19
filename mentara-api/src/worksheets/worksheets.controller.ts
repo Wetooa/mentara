@@ -45,13 +45,34 @@ export class WorksheetsController {
   @Get()
   @ApiOperation({
     summary: 'Get all worksheets',
-    description: 'Retrieve worksheets with optional filtering by user, therapist, and status',
+    description:
+      'Retrieve worksheets with optional filtering by user, therapist, and status',
   })
-  @ApiQuery({ name: 'userId', required: false, description: 'Filter by user ID' })
-  @ApiQuery({ name: 'therapistId', required: false, description: 'Filter by therapist ID' })
-  @ApiQuery({ name: 'status', required: false, description: 'Filter by worksheet status' })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number for pagination' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page' })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    description: 'Filter by user ID',
+  })
+  @ApiQuery({
+    name: 'therapistId',
+    required: false,
+    description: 'Filter by therapist ID',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filter by worksheet status',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of items per page',
+  })
   @ApiResponse({
     status: 200,
     description: 'Worksheets retrieved successfully',
@@ -96,7 +117,8 @@ export class WorksheetsController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get worksheet by ID',
-    description: 'Retrieve detailed information about a specific worksheet including submissions and materials',
+    description:
+      'Retrieve detailed information about a specific worksheet including submissions and materials',
   })
   @ApiParam({ name: 'id', description: 'Worksheet ID' })
   @ApiResponse({
@@ -150,7 +172,8 @@ export class WorksheetsController {
   @Post()
   @ApiOperation({
     summary: 'Create new worksheet',
-    description: 'Create a new therapy worksheet with optional file attachments (up to 5 files)',
+    description:
+      'Create a new therapy worksheet with optional file attachments (up to 5 files)',
   })
   @ApiBody({
     description: 'Worksheet creation data with optional files',
@@ -159,11 +182,27 @@ export class WorksheetsController {
       required: ['title', 'clientId', 'therapistId'],
       properties: {
         title: { type: 'string', example: 'Anxiety Management Exercises' },
-        description: { type: 'string', example: 'Weekly exercises for managing anxiety' },
-        content: { type: 'string', example: 'Please complete the following exercises...' },
-        clientId: { type: 'string', description: 'ID of the client this worksheet is for' },
-        therapistId: { type: 'string', description: 'ID of the therapist creating the worksheet' },
-        dueDate: { type: 'string', format: 'date-time', description: 'Optional due date' },
+        description: {
+          type: 'string',
+          example: 'Weekly exercises for managing anxiety',
+        },
+        content: {
+          type: 'string',
+          example: 'Please complete the following exercises...',
+        },
+        clientId: {
+          type: 'string',
+          description: 'ID of the client this worksheet is for',
+        },
+        therapistId: {
+          type: 'string',
+          description: 'ID of the therapist creating the worksheet',
+        },
+        dueDate: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Optional due date',
+        },
         files: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
@@ -202,7 +241,10 @@ export class WorksheetsController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 400, description: 'Invalid worksheet data or file upload error' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid worksheet data or file upload error',
+  })
   @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   create(
     @CurrentUserId() clerkId: string,
@@ -235,7 +277,10 @@ export class WorksheetsController {
         title: { type: 'string' },
         description: { type: 'string' },
         content: { type: 'string' },
-        status: { type: 'string', enum: ['assigned', 'in_progress', 'completed', 'overdue'] },
+        status: {
+          type: 'string',
+          enum: ['assigned', 'in_progress', 'completed', 'overdue'],
+        },
         dueDate: { type: 'string', format: 'date-time' },
       },
     },
@@ -300,9 +345,18 @@ export class WorksheetsController {
       type: 'object',
       required: ['worksheetId', 'content'],
       properties: {
-        worksheetId: { type: 'string', description: 'ID of the worksheet being submitted' },
-        content: { type: 'string', description: 'Submission content or answers' },
-        notes: { type: 'string', description: 'Optional notes from the client' },
+        worksheetId: {
+          type: 'string',
+          description: 'ID of the worksheet being submitted',
+        },
+        content: {
+          type: 'string',
+          description: 'Submission content or answers',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional notes from the client',
+        },
         attachments: {
           type: 'array',
           items: { type: 'string' },
@@ -339,7 +393,8 @@ export class WorksheetsController {
   @Post(':id/submit')
   @ApiOperation({
     summary: 'Submit worksheet',
-    description: 'Submit a completed worksheet with answers and mark it as completed',
+    description:
+      'Submit a completed worksheet with answers and mark it as completed',
   })
   @ApiParam({ name: 'id', description: 'Worksheet ID' })
   @ApiBody({
@@ -348,9 +403,18 @@ export class WorksheetsController {
       type: 'object',
       required: ['content'],
       properties: {
-        content: { type: 'string', description: 'Completed worksheet content or answers' },
-        notes: { type: 'string', description: 'Optional notes from the client' },
-        timeSpent: { type: 'number', description: 'Time spent on worksheet in minutes' },
+        content: {
+          type: 'string',
+          description: 'Completed worksheet content or answers',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional notes from the client',
+        },
+        timeSpent: {
+          type: 'number',
+          description: 'Time spent on worksheet in minutes',
+        },
         attachments: {
           type: 'array',
           items: { type: 'string' },
@@ -375,7 +439,10 @@ export class WorksheetsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Worksheet not found' })
-  @ApiResponse({ status: 400, description: 'Worksheet already submitted or invalid data' })
+  @ApiResponse({
+    status: 400,
+    description: 'Worksheet already submitted or invalid data',
+  })
   submitWorksheet(
     @CurrentUserId() clerkId: string,
     @Param('id') id: string,
@@ -391,7 +458,8 @@ export class WorksheetsController {
   @Delete('submissions/:id')
   @ApiOperation({
     summary: 'Delete worksheet submission',
-    description: 'Delete a worksheet submission. Only the client who created it or the assigned therapist can delete it.',
+    description:
+      'Delete a worksheet submission. Only the client who created it or the assigned therapist can delete it.',
   })
   @ApiParam({ name: 'id', description: 'Submission ID' })
   @ApiResponse({
@@ -407,7 +475,10 @@ export class WorksheetsController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not authorized to delete this submission' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - not authorized to delete this submission',
+  })
   @ApiResponse({ status: 404, description: 'Submission not found' })
   deleteSubmission(@CurrentUserId() clerkId: string, @Param('id') id: string) {
     return this.worksheetsService.deleteSubmission(id);

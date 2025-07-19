@@ -1,3 +1,9 @@
+enum TherapistApplicationStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
 model Therapist {
   // User relation
   userId String @id @unique
@@ -6,9 +12,10 @@ model Therapist {
   // Contact information
   mobile   String
   province String
+  timezone String   @default("UTC") // Therapist's timezone for availability calculations
 
   // Application status
-  status         String   @default("pending") // pending, approved, rejected
+  status         TherapistApplicationStatus @default(PENDING)
   submissionDate DateTime @default(now())
   processingDate DateTime @default(now())
 
@@ -76,8 +83,8 @@ model Therapist {
   treatmentSuccessRates  Json // Record<string, number>
 
   // Session details
-  sessionLength String
-  hourlyRate    Decimal @db.Decimal(10, 2)
+  sessionLength String // Duration description like '60 minutes'
+  hourlyRate      Decimal @db.Decimal(10, 2)
 
   // Relations
   meetings                Meeting[]               @relation("TherapistMeetings")
@@ -100,5 +107,6 @@ model Therapist {
 
   @@index([userId])
   @@index([status])
+  @@index([timezone])
 }
 

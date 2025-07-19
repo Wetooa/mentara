@@ -53,26 +53,17 @@ export class MessagingController {
 
   // Conversation endpoints
   @Post('conversations')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create create conversation',
 
-    description: 'Create create conversation' 
-
+    description: 'Create create conversation',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   @HttpCode(HttpStatus.CREATED)
   async createConversation(
     @CurrentUserId() userId: string,
@@ -85,36 +76,17 @@ export class MessagingController {
   }
 
   @Get('conversations')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get user conversations',
 
-
-    description: 'Retrieve get user conversations' 
-
-
+    description: 'Retrieve get user conversations',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getUserConversations(
     @CurrentUserId() userId: string,
     @Query() params: ConversationListParams,
@@ -127,36 +99,17 @@ export class MessagingController {
   }
 
   @Get('conversations/:conversationId/messages')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get conversation messages',
 
-
-    description: 'Retrieve get conversation messages' 
-
-
+    description: 'Retrieve get conversation messages',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getConversationMessages(
     @CurrentUserId() userId: string,
     @Param('conversationId') conversationId: string,
@@ -174,26 +127,17 @@ export class MessagingController {
 
   // Message endpoints
   @Post('conversations/:conversationId/messages')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create send message',
 
-    description: 'Create send message' 
-
+    description: 'Create send message',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   @UseInterceptors(FilesInterceptor('files', 3)) // Support up to 3 files
   @HttpCode(HttpStatus.CREATED)
   async sendMessage(
@@ -234,36 +178,17 @@ export class MessagingController {
   }
 
   @Put('messages/:messageId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update message',
 
-
-    description: 'Update update message' 
-
-
+    description: 'Update update message',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async updateMessage(
     @CurrentUserId() userId: string,
     @Param('messageId') messageId: string,
@@ -277,36 +202,17 @@ export class MessagingController {
   }
 
   @Delete('messages/:messageId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete delete message',
 
-
-    description: 'Delete delete message' 
-
-
+    description: 'Delete delete message',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteMessage(
     @CurrentUserId() userId: string,
@@ -317,26 +223,17 @@ export class MessagingController {
 
   // Read receipts
   @Post('messages/:messageId/read')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create mark message as read',
 
-    description: 'Create mark message as read' 
-
+    description: 'Create mark message as read',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   @HttpCode(HttpStatus.OK)
   async markMessageAsRead(
     @CurrentUserId() userId: string,
@@ -347,26 +244,17 @@ export class MessagingController {
 
   // Message reactions
   @Post('messages/:messageId/reactions')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create add message reaction',
 
-    description: 'Create add message reaction' 
-
+    description: 'Create add message reaction',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   @HttpCode(HttpStatus.CREATED)
   async addMessageReaction(
     @CurrentUserId() userId: string,
@@ -381,36 +269,17 @@ export class MessagingController {
   }
 
   @Delete('messages/:messageId/reactions/:emoji')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete remove message reaction',
 
-
-    description: 'Delete remove message reaction' 
-
-
+    description: 'Delete remove message reaction',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeMessageReaction(
     @CurrentUserId() userId: string,
@@ -426,26 +295,17 @@ export class MessagingController {
 
   // User blocking
   @Post('block')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create block user',
 
-    description: 'Create block user' 
-
+    description: 'Create block user',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   @HttpCode(HttpStatus.CREATED)
   async blockUser(
     @CurrentUserId() userId: string,
@@ -459,36 +319,17 @@ export class MessagingController {
   }
 
   @Delete('block/:blockedUserId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Delete unblock user',
 
-
-    description: 'Delete unblock user' 
-
-
+    description: 'Delete unblock user',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.NO_CONTENT)
   async unblockUser(
     @CurrentUserId() userId: string,
@@ -499,26 +340,17 @@ export class MessagingController {
 
   // Search messages
   @Get('search')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Retrieve search messages',
 
-    description: 'Retrieve search messages' 
-
+    description: 'Retrieve search messages',
   })
+  @ApiResponse({
+    status: 200,
 
-  @ApiResponse({ 
-
-    status: 200, 
-
-    description: 'Retrieved successfully' 
-
+    description: 'Retrieved successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   async searchMessages(
     @CurrentUserId() userId: string,
     @Query() searchDto: SearchMessagesDto,

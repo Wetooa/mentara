@@ -403,16 +403,16 @@ export declare const PaymentMethodSchema: z.ZodObject<{
     expiryYear: z.ZodOptional<z.ZodNumber>;
     isDefault: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: "card" | "bank_account" | "paypal";
+    id: string;
     isDefault: boolean;
     last4?: string | undefined;
     brand?: string | undefined;
     expiryMonth?: number | undefined;
     expiryYear?: number | undefined;
 }, {
-    id: string;
     type: "card" | "bank_account" | "paypal";
+    id: string;
     isDefault: boolean;
     last4?: string | undefined;
     brand?: string | undefined;
@@ -430,9 +430,9 @@ export declare const InvoiceSchema: z.ZodObject<{
     createdAt: z.ZodString;
     paidAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "pending" | "cancelled" | "failed" | "paid";
     id: string;
     createdAt: string;
-    status: "pending" | "cancelled" | "failed" | "paid";
     userId: string;
     description: string;
     amount: number;
@@ -440,9 +440,9 @@ export declare const InvoiceSchema: z.ZodObject<{
     sessionId?: string | undefined;
     paidAt?: string | undefined;
 }, {
+    status: "pending" | "cancelled" | "failed" | "paid";
     id: string;
     createdAt: string;
-    status: "pending" | "cancelled" | "failed" | "paid";
     userId: string;
     description: string;
     amount: number;
@@ -458,13 +458,13 @@ export declare const CreatePaymentIntentDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     amount: number;
     currency: string;
-    paymentMethodId?: string | undefined;
     sessionId?: string | undefined;
+    paymentMethodId?: string | undefined;
 }, {
     amount: number;
     currency: string;
-    paymentMethodId?: string | undefined;
     sessionId?: string | undefined;
+    paymentMethodId?: string | undefined;
 }>;
 export declare const BillingQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -477,14 +477,14 @@ export declare const BillingQuerySchema: z.ZodObject<{
     status?: "pending" | "cancelled" | "failed" | "paid" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "createdAt" | "status" | "amount" | undefined;
+    sortBy?: "status" | "createdAt" | "amount" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }, {
     status?: "pending" | "cancelled" | "failed" | "paid" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "createdAt" | "status" | "amount" | undefined;
+    sortBy?: "status" | "createdAt" | "amount" | undefined;
     dateFrom?: string | undefined;
     dateTo?: string | undefined;
 }>;
@@ -626,16 +626,16 @@ export declare const SubscriptionSchema: z.ZodObject<{
         expiryYear: z.ZodOptional<z.ZodNumber>;
         isDefault: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
         expiryMonth?: number | undefined;
         expiryYear?: number | undefined;
     }, {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
@@ -653,9 +653,9 @@ export declare const SubscriptionSchema: z.ZodObject<{
         createdAt: z.ZodString;
         paidAt: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        status: "pending" | "cancelled" | "failed" | "paid";
         id: string;
         createdAt: string;
-        status: "pending" | "cancelled" | "failed" | "paid";
         userId: string;
         description: string;
         amount: number;
@@ -663,9 +663,9 @@ export declare const SubscriptionSchema: z.ZodObject<{
         sessionId?: string | undefined;
         paidAt?: string | undefined;
     }, {
+        status: "pending" | "cancelled" | "failed" | "paid";
         id: string;
         createdAt: string;
-        status: "pending" | "cancelled" | "failed" | "paid";
         userId: string;
         description: string;
         amount: number;
@@ -676,8 +676,8 @@ export declare const SubscriptionSchema: z.ZodObject<{
     created_at: z.ZodString;
     updated_at: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid";
+    id: string;
     plan: {
         id: string;
         description: string;
@@ -700,8 +700,8 @@ export declare const SubscriptionSchema: z.ZodObject<{
     trial_end?: string | undefined;
     canceled_at?: string | undefined;
     payment_method?: {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
@@ -709,9 +709,9 @@ export declare const SubscriptionSchema: z.ZodObject<{
         expiryYear?: number | undefined;
     } | undefined;
     latest_invoice?: {
+        status: "pending" | "cancelled" | "failed" | "paid";
         id: string;
         createdAt: string;
-        status: "pending" | "cancelled" | "failed" | "paid";
         userId: string;
         description: string;
         amount: number;
@@ -720,8 +720,8 @@ export declare const SubscriptionSchema: z.ZodObject<{
         paidAt?: string | undefined;
     } | undefined;
 }, {
-    id: string;
     status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid";
+    id: string;
     plan: {
         id: string;
         description: string;
@@ -744,8 +744,8 @@ export declare const SubscriptionSchema: z.ZodObject<{
     trial_end?: string | undefined;
     canceled_at?: string | undefined;
     payment_method?: {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
@@ -753,9 +753,9 @@ export declare const SubscriptionSchema: z.ZodObject<{
         expiryYear?: number | undefined;
     } | undefined;
     latest_invoice?: {
+        status: "pending" | "cancelled" | "failed" | "paid";
         id: string;
         createdAt: string;
-        status: "pending" | "cancelled" | "failed" | "paid";
         userId: string;
         description: string;
         amount: number;
@@ -819,16 +819,16 @@ export declare const PaymentIntentSchema: z.ZodObject<{
         expiryYear: z.ZodOptional<z.ZodNumber>;
         isDefault: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
         expiryMonth?: number | undefined;
         expiryYear?: number | undefined;
     }, {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
@@ -839,8 +839,8 @@ export declare const PaymentIntentSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     created_at: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "processing" | "canceled" | "requires_payment_method" | "requires_confirmation" | "requires_action" | "requires_capture" | "succeeded";
+    id: string;
     amount: number;
     currency: string;
     created_at: string;
@@ -848,8 +848,8 @@ export declare const PaymentIntentSchema: z.ZodObject<{
     description?: string | undefined;
     metadata?: Record<string, any> | undefined;
     payment_method?: {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;
@@ -857,8 +857,8 @@ export declare const PaymentIntentSchema: z.ZodObject<{
         expiryYear?: number | undefined;
     } | undefined;
 }, {
-    id: string;
     status: "processing" | "canceled" | "requires_payment_method" | "requires_confirmation" | "requires_action" | "requires_capture" | "succeeded";
+    id: string;
     amount: number;
     currency: string;
     created_at: string;
@@ -866,8 +866,8 @@ export declare const PaymentIntentSchema: z.ZodObject<{
     description?: string | undefined;
     metadata?: Record<string, any> | undefined;
     payment_method?: {
-        id: string;
         type: "card" | "bank_account" | "paypal";
+        id: string;
         isDefault: boolean;
         last4?: string | undefined;
         brand?: string | undefined;

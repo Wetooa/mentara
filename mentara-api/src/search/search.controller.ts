@@ -34,18 +34,55 @@ export class SearchController {
   @Get('therapists')
   @ApiOperation({
     summary: 'Search therapists',
-    description: 'Search for therapists with advanced filtering options including location, specialties, price range, and more',
+    description:
+      'Search for therapists with advanced filtering options including location, specialties, price range, and more',
   })
-  @ApiQuery({ name: 'query', required: false, description: 'Search query string' })
-  @ApiQuery({ name: 'location', required: false, description: 'Filter by location' })
-  @ApiQuery({ name: 'specialties', required: false, description: 'Filter by specializations (comma-separated)' })
-  @ApiQuery({ name: 'priceRange', required: false, description: 'Price range filter' })
-  @ApiQuery({ name: 'experienceYears', required: false, description: 'Minimum years of experience' })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Search query string',
+  })
+  @ApiQuery({
+    name: 'location',
+    required: false,
+    description: 'Filter by location',
+  })
+  @ApiQuery({
+    name: 'specialties',
+    required: false,
+    description: 'Filter by specializations (comma-separated)',
+  })
+  @ApiQuery({
+    name: 'priceRange',
+    required: false,
+    description: 'Price range filter',
+  })
+  @ApiQuery({
+    name: 'experienceYears',
+    required: false,
+    description: 'Minimum years of experience',
+  })
   @ApiQuery({ name: 'rating', required: false, description: 'Minimum rating' })
-  @ApiQuery({ name: 'gender', required: false, description: 'Filter by gender' })
-  @ApiQuery({ name: 'languages', required: false, description: 'Filter by languages spoken' })
-  @ApiQuery({ name: 'availability', required: false, description: 'Filter by availability' })
-  @ApiQuery({ name: 'verifiedOnly', required: false, description: 'Show only verified therapists' })
+  @ApiQuery({
+    name: 'gender',
+    required: false,
+    description: 'Filter by gender',
+  })
+  @ApiQuery({
+    name: 'languages',
+    required: false,
+    description: 'Filter by languages spoken',
+  })
+  @ApiQuery({
+    name: 'availability',
+    required: false,
+    description: 'Filter by availability',
+  })
+  @ApiQuery({
+    name: 'verifiedOnly',
+    required: false,
+    description: 'Show only verified therapists',
+  })
   @ApiResponse({
     status: 200,
     description: 'Therapists found successfully',
@@ -97,10 +134,19 @@ export class SearchController {
   @Get('posts')
   @ApiOperation({
     summary: 'Search posts',
-    description: 'Search for posts within communities with optional community filtering',
+    description:
+      'Search for posts within communities with optional community filtering',
   })
-  @ApiQuery({ name: 'query', required: true, description: 'Search query string' })
-  @ApiQuery({ name: 'communityId', required: false, description: 'Filter by specific community ID' })
+  @ApiQuery({
+    name: 'query',
+    required: true,
+    description: 'Search query string',
+  })
+  @ApiQuery({
+    name: 'communityId',
+    required: false,
+    description: 'Filter by specific community ID',
+  })
   @ApiResponse({
     status: 200,
     description: 'Posts found successfully',
@@ -140,7 +186,11 @@ export class SearchController {
     summary: 'Search communities',
     description: 'Search for communities by name or description',
   })
-  @ApiQuery({ name: 'query', required: true, description: 'Search query string' })
+  @ApiQuery({
+    name: 'query',
+    required: true,
+    description: 'Search query string',
+  })
   @ApiResponse({
     status: 200,
     description: 'Communities found successfully',
@@ -176,10 +226,19 @@ export class SearchController {
   @Get('users')
   @ApiOperation({
     summary: 'Search users',
-    description: 'Search for users by name or email with optional role filtering',
+    description:
+      'Search for users by name or email with optional role filtering',
   })
-  @ApiQuery({ name: 'query', required: true, description: 'Search query string' })
-  @ApiQuery({ name: 'role', required: false, description: 'Filter by user role (client, therapist, admin, moderator)' })
+  @ApiQuery({
+    name: 'query',
+    required: true,
+    description: 'Search query string',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    description: 'Filter by user role (client, therapist, admin, moderator)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Users found successfully',
@@ -216,10 +275,20 @@ export class SearchController {
   @Get('global')
   @ApiOperation({
     summary: 'Global search',
-    description: 'Search across multiple entity types (users, therapists, posts, communities) in a single query',
+    description:
+      'Search across multiple entity types (users, therapists, posts, communities) in a single query',
   })
-  @ApiQuery({ name: 'query', required: true, description: 'Search query string' })
-  @ApiQuery({ name: 'types', required: false, description: 'Entity types to search (users, therapists, posts, communities)' })
+  @ApiQuery({
+    name: 'query',
+    required: true,
+    description: 'Search query string',
+  })
+  @ApiQuery({
+    name: 'types',
+    required: false,
+    description:
+      'Entity types to search (users, therapists, posts, communities)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Global search results',

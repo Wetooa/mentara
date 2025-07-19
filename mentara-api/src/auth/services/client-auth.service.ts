@@ -39,7 +39,9 @@ export class ClientAuthService {
           firstName: registerDto.firstName,
           lastName: registerDto.lastName,
           middleName: registerDto.middleName || undefined,
-          birthDate: registerDto.birthDate ? new Date(registerDto.birthDate) : undefined,
+          birthDate: registerDto.birthDate
+            ? new Date(registerDto.birthDate)
+            : undefined,
           address: registerDto.address || undefined,
           avatarUrl: registerDto.avatarUrl || undefined,
           role: 'client',
@@ -50,7 +52,8 @@ export class ClientAuthService {
       const client = await tx.client.create({
         data: {
           userId: user.id,
-          hasSeenTherapistRecommendations: registerDto.hasSeenTherapistRecommendations || false,
+          hasSeenTherapistRecommendations:
+            registerDto.hasSeenTherapistRecommendations || false,
         },
       });
 

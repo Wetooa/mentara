@@ -32,7 +32,7 @@ import {
   type TherapistRecommendationResponseDto,
   type TherapistRecommendationQuery,
   type WelcomeRecommendationQuery,
-} from '@mentara/commons';
+} from 'mentara-commons';
 
 @ApiTags('therapist-recommendation')
 @ApiBearerAuth('JWT-auth')
@@ -45,36 +45,17 @@ export class TherapistRecommendationController {
   ) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get recommended therapists',
 
-
-    description: 'Retrieve get recommended therapists' 
-
-
+    description: 'Retrieve get recommended therapists',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRecommendedTherapists(
     @CurrentUserId() clerkId: string,
@@ -111,36 +92,17 @@ export class TherapistRecommendationController {
   }
 
   @Get('compatibility/:therapistId')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get compatibility analysis',
 
-
-    description: 'Retrieve get compatibility analysis' 
-
-
+    description: 'Retrieve get compatibility analysis',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getCompatibilityAnalysis(
     @CurrentUserId() clerkId: string,
@@ -170,36 +132,17 @@ export class TherapistRecommendationController {
   }
 
   @Get('welcome')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get welcome recommendations',
 
-
-    description: 'Retrieve get welcome recommendations' 
-
-
+    description: 'Retrieve get welcome recommendations',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getWelcomeRecommendations(
     @CurrentUserId() userId: string,

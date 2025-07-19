@@ -205,14 +205,14 @@ export declare const SessionMeetingSchema: z.ZodObject<{
         lastName: z.ZodString;
         profileImage: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }>>;
     client: z.ZodOptional<z.ZodObject<{
@@ -221,37 +221,37 @@ export declare const SessionMeetingSchema: z.ZodObject<{
         lastName: z.ZodString;
         profileImage: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
+    type: "video" | "audio" | "chat";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "video" | "audio" | "chat";
-    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     title: string;
     therapistId: string;
     clientId: string;
     startTime: string;
     endTime: string;
     client?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     } | undefined;
     therapist?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     } | undefined;
     description?: string | undefined;
@@ -259,26 +259,26 @@ export declare const SessionMeetingSchema: z.ZodObject<{
     roomUrl?: string | undefined;
     roomToken?: string | undefined;
 }, {
+    type: "video" | "audio" | "chat";
+    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "video" | "audio" | "chat";
-    status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     title: string;
     therapistId: string;
     clientId: string;
     startTime: string;
     endTime: string;
     client?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     } | undefined;
     therapist?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     } | undefined;
     description?: string | undefined;
@@ -630,14 +630,14 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
         joinedAt: z.ZodString;
         connectionStatus: z.ZodEnum<["connected", "connecting", "disconnected"]>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         role: "client" | "therapist";
+        id: string;
         name: string;
         joinedAt: string;
         connectionStatus: "connected" | "connecting" | "disconnected";
     }, {
-        id: string;
         role: "client" | "therapist";
+        id: string;
         name: string;
         joinedAt: string;
         connectionStatus: "connected" | "connecting" | "disconnected";
@@ -650,8 +650,8 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
     meetingId: string;
     roomId: string;
     participants: {
-        id: string;
         role: "client" | "therapist";
+        id: string;
         name: string;
         joinedAt: string;
         connectionStatus: "connected" | "connecting" | "disconnected";
@@ -664,8 +664,8 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
     meetingId: string;
     roomId: string;
     participants: {
-        id: string;
         role: "client" | "therapist";
+        id: string;
         name: string;
         joinedAt: string;
         connectionStatus: "connected" | "connecting" | "disconnected";

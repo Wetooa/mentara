@@ -7,11 +7,15 @@ model RefreshToken {
     createdAt DateTime @default(now())
     revokedAt DateTime? // When the token was revoked (for logout)
     
-    // Additional security fields
+    // Session tracking fields
     ipAddress String? // IP address where token was issued
     userAgent String? // User agent where token was issued
+    location  String? // Approximate location (city, country)
+    deviceName String? // Device name/identifier
+    lastActivity DateTime @default(now()) // Last time this session was used
     
     @@index([userId])
     @@index([token])
     @@index([expiresAt])
+    @@index([userId, revokedAt])
 }

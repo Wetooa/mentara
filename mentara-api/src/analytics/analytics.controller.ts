@@ -38,10 +38,19 @@ export class AnalyticsController {
   @Get('platform')
   @ApiOperation({
     summary: 'Get platform analytics',
-    description: 'Retrieve comprehensive platform analytics data. Admin access required.',
+    description:
+      'Retrieve comprehensive platform analytics data. Admin access required.',
   })
-  @ApiQuery({ name: 'dateFrom', required: false, description: 'Start date for analytics (ISO string)' })
-  @ApiQuery({ name: 'dateTo', required: false, description: 'End date for analytics (ISO string)' })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    description: 'Start date for analytics (ISO string)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    description: 'End date for analytics (ISO string)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Platform analytics retrieved successfully',
@@ -85,7 +94,10 @@ export class AnalyticsController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Access denied: Admin role required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Access denied: Admin role required',
+  })
   getPlatformAnalytics(
     @CurrentUserRole() role: string,
     @Query(new ZodValidationPipe(PlatformAnalyticsQueryDtoSchema))
@@ -104,11 +116,24 @@ export class AnalyticsController {
   @Get('therapist')
   @ApiOperation({
     summary: 'Get therapist analytics',
-    description: 'Retrieve analytics for a specific therapist. Therapists can view their own analytics, admins can view any.',
+    description:
+      'Retrieve analytics for a specific therapist. Therapists can view their own analytics, admins can view any.',
   })
-  @ApiQuery({ name: 'therapistId', required: false, description: 'Therapist ID (defaults to current user for therapists)' })
-  @ApiQuery({ name: 'dateFrom', required: false, description: 'Start date for analytics (ISO string)' })
-  @ApiQuery({ name: 'dateTo', required: false, description: 'End date for analytics (ISO string)' })
+  @ApiQuery({
+    name: 'therapistId',
+    required: false,
+    description: 'Therapist ID (defaults to current user for therapists)',
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    description: 'Start date for analytics (ISO string)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    description: 'End date for analytics (ISO string)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Therapist analytics retrieved successfully',
@@ -153,7 +178,11 @@ export class AnalyticsController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Access denied: Can only view your own analytics or admin access required' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Access denied: Can only view your own analytics or admin access required',
+  })
   getTherapistAnalytics(
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
@@ -188,11 +217,24 @@ export class AnalyticsController {
   @Get('client')
   @ApiOperation({
     summary: 'Get client analytics',
-    description: 'Retrieve analytics for a specific client. Clients can view their own analytics, therapists/admins can view assigned clients.',
+    description:
+      'Retrieve analytics for a specific client. Clients can view their own analytics, therapists/admins can view assigned clients.',
   })
-  @ApiQuery({ name: 'clientId', required: false, description: 'Client ID (defaults to current user for clients)' })
-  @ApiQuery({ name: 'dateFrom', required: false, description: 'Start date for analytics (ISO string)' })
-  @ApiQuery({ name: 'dateTo', required: false, description: 'End date for analytics (ISO string)' })
+  @ApiQuery({
+    name: 'clientId',
+    required: false,
+    description: 'Client ID (defaults to current user for clients)',
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    description: 'Start date for analytics (ISO string)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    description: 'End date for analytics (ISO string)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Client analytics retrieved successfully',
@@ -237,7 +279,11 @@ export class AnalyticsController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Access denied: Can only view your own analytics or authorized access required' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Access denied: Can only view your own analytics or authorized access required',
+  })
   getClientAnalytics(
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,

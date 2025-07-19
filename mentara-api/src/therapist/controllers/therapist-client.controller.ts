@@ -30,36 +30,17 @@ export class TherapistClientController {
   ) {}
 
   @Get('assigned')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get assigned patients',
 
-
-    description: 'Retrieve get assigned patients' 
-
-
+    description: 'Retrieve get assigned patients',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getAssignedPatients(
     @CurrentUserId() therapistId: string,
@@ -68,72 +49,34 @@ export class TherapistClientController {
   }
 
   @Get('all')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get all clients',
 
-
-    description: 'Retrieve get all clients' 
-
-
+    description: 'Retrieve get all clients',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getAllClients(@CurrentUserId() therapistId: string): Promise<any[]> {
     return this.therapistManagementService.getAllClients(therapistId);
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get client by id',
 
-
-    description: 'Retrieve get client by id' 
-
-
+    description: 'Retrieve get client by id',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getClientById(
     @CurrentUserId() therapistId: string,

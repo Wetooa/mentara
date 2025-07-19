@@ -47,36 +47,17 @@ export class TherapistRequestController {
   ) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get client requests',
 
-
-    description: 'Retrieve get client requests' 
-
-
+    description: 'Retrieve get client requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getClientRequests(
     @Query(new ZodValidationPipe(TherapistRequestFiltersDtoSchema))
@@ -91,36 +72,17 @@ export class TherapistRequestController {
   }
 
   @Get('pending')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get pending requests',
 
-
-    description: 'Retrieve get pending requests' 
-
-
+    description: 'Retrieve get pending requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getPendingRequests(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching pending requests`);
@@ -144,36 +106,17 @@ export class TherapistRequestController {
   }
 
   @Get('priority')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get high priority requests',
 
-
-    description: 'Retrieve get high priority requests' 
-
-
+    description: 'Retrieve get high priority requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getHighPriorityRequests(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching high priority requests`);
@@ -210,36 +153,17 @@ export class TherapistRequestController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get request details',
 
-
-    description: 'Retrieve get request details' 
-
-
+    description: 'Retrieve get request details',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRequestDetails(
     @Param('id') requestId: string,
@@ -280,36 +204,17 @@ export class TherapistRequestController {
   }
 
   @Put(':id/accept')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update accept request',
 
-
-    description: 'Update accept request' 
-
-
+    description: 'Update accept request',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async acceptRequest(
     @Param('id') requestId: string,
@@ -332,36 +237,17 @@ export class TherapistRequestController {
   }
 
   @Put(':id/decline')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update decline request',
 
-
-    description: 'Update decline request' 
-
-
+    description: 'Update decline request',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async declineRequest(
     @Param('id') requestId: string,
@@ -384,36 +270,17 @@ export class TherapistRequestController {
   }
 
   @Post('bulk-action')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create perform bulk action',
 
-
-    description: 'Create perform bulk action' 
-
-
+    description: 'Create perform bulk action',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async performBulkAction(
     @Body(new ZodValidationPipe(BulkTherapistActionDtoSchema))
@@ -430,36 +297,17 @@ export class TherapistRequestController {
   }
 
   @Get('statistics')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get request statistics',
 
-
-    description: 'Retrieve get request statistics' 
-
-
+    description: 'Retrieve get request statistics',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRequestStatistics(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching request statistics`);
@@ -469,36 +317,17 @@ export class TherapistRequestController {
   }
 
   @Get('recent')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get recent requests',
 
-
-    description: 'Retrieve get recent requests' 
-
-
+    description: 'Retrieve get recent requests',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getRecentRequests(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching recent requests`);
@@ -521,36 +350,17 @@ export class TherapistRequestController {
   }
 
   @Get('dashboard/summary')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get dashboard summary',
 
-
-    description: 'Retrieve get dashboard summary' 
-
-
+    description: 'Retrieve get dashboard summary',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getDashboardSummary(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching dashboard summary`);
@@ -590,36 +400,17 @@ export class TherapistRequestController {
   }
 
   @Get('client/:clientId/history')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get client request history',
 
-
-    description: 'Retrieve get client request history' 
-
-
+    description: 'Retrieve get client request history',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getClientRequestHistory(
     @Param('clientId') clientId: string,
@@ -656,36 +447,17 @@ export class TherapistRequestController {
   }
 
   @Get('filters/options')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get filter options',
 
-
-    description: 'Retrieve get filter options' 
-
-
+    description: 'Retrieve get filter options',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getFilterOptions(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching filter options`);
@@ -723,36 +495,17 @@ export class TherapistRequestController {
   }
 
   @Get('count/pending')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get pending count',
 
-
-    description: 'Retrieve get pending count' 
-
-
+    description: 'Retrieve get pending count',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getPendingCount(@CurrentUserId() therapistId: string) {
     this.logger.log(`Therapist ${therapistId} fetching pending requests count`);
@@ -771,36 +524,17 @@ export class TherapistRequestController {
   }
 
   @Get('analytics/response-time')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get response time analytics',
 
-
-    description: 'Retrieve get response time analytics' 
-
-
+    description: 'Retrieve get response time analytics',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getResponseTimeAnalytics(@CurrentUserId() therapistId: string) {
     this.logger.log(

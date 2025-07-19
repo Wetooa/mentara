@@ -5,22 +5,22 @@ export declare const CreateAdminDtoSchema: z.ZodObject<{
     adminLevel: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     userId: string;
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }, {
     userId: string;
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }>;
 export declare const UpdateAdminDtoSchema: z.ZodObject<{
     permissions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     adminLevel: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }, {
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }>;
 export declare const AdminResponseDtoSchema: z.ZodObject<{
     userId: z.ZodString;
@@ -32,14 +32,14 @@ export declare const AdminResponseDtoSchema: z.ZodObject<{
     createdAt: Date;
     updatedAt: Date;
     userId: string;
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }, {
     createdAt: Date;
     updatedAt: Date;
     userId: string;
-    adminLevel?: string | undefined;
     permissions?: string[] | undefined;
+    adminLevel?: string | undefined;
 }>;
 export declare const AdminQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -70,12 +70,12 @@ export declare const AdminUserQuerySchema: z.ZodObject<{
     limit: number;
     sortBy: "email" | "firstName" | "lastName" | "role" | "createdAt";
     sortOrder: "asc" | "desc";
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     status?: "active" | "inactive" | "suspended" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     search?: string | undefined;
 }, {
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     status?: "active" | "inactive" | "suspended" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "email" | "firstName" | "lastName" | "role" | "createdAt" | undefined;
@@ -176,12 +176,12 @@ export declare const AdminUserListParamsDtoSchema: z.ZodObject<{
     sortBy: "email" | "firstName" | "lastName" | "role" | "createdAt";
     sortOrder: "asc" | "desc";
     offset: number;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     status?: "active" | "inactive" | "suspended" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     search?: string | undefined;
 }, {
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     status?: "active" | "inactive" | "suspended" | undefined;
+    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     limit?: number | undefined;
     sortBy?: "email" | "firstName" | "lastName" | "role" | "createdAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
@@ -408,26 +408,26 @@ export declare const AdminModerationReportSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    type: string;
+    status: "pending" | "dismissed" | "resolved";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: string;
-    status: "pending" | "dismissed" | "resolved";
     reason: string;
     contentId: string;
-    contentType: "user" | "message" | "post" | "comment";
+    contentType: "message" | "user" | "post" | "comment";
     reportedBy: string;
     description?: string | undefined;
     assignedTo?: string | undefined;
 }, {
+    type: string;
+    status: "pending" | "dismissed" | "resolved";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: string;
-    status: "pending" | "dismissed" | "resolved";
     reason: string;
     contentId: string;
-    contentType: "user" | "message" | "post" | "comment";
+    contentType: "message" | "user" | "post" | "comment";
     reportedBy: string;
     description?: string | undefined;
     assignedTo?: string | undefined;
@@ -542,16 +542,16 @@ export declare const AdminUserCreateRequestSchema: z.ZodObject<{
     password: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
     role: "client" | "therapist" | "moderator" | "admin";
-    password: string;
 }, {
     email: string;
+    password: string;
     firstName: string;
     lastName: string;
     role: "client" | "therapist" | "moderator" | "admin";
-    password: string;
 }>;
 export declare const AdminUserUpdateRequestSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;

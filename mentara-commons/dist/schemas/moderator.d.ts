@@ -10,21 +10,21 @@ export declare const ModeratorSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     lastActiveAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "active" | "inactive" | "suspended";
     id: string;
+    permissions: string[];
     createdAt: string;
     updatedAt: string;
-    status: "active" | "inactive" | "suspended";
-    permissions: string[];
     userId: string;
     moderationLevel: "admin" | "advanced" | "basic";
     assignedCommunities?: string[] | undefined;
     lastActiveAt?: string | undefined;
 }, {
+    status: "active" | "inactive" | "suspended";
     id: string;
+    permissions: string[];
     createdAt: string;
     updatedAt: string;
-    status: "active" | "inactive" | "suspended";
-    permissions: string[];
     userId: string;
     moderationLevel: "admin" | "advanced" | "basic";
     assignedCommunities?: string[] | undefined;
@@ -83,12 +83,12 @@ export declare const UserModerationParamsSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     offset: number;
-    role?: "client" | "therapist" | undefined;
     status?: "active" | "suspended" | "flagged" | undefined;
+    role?: "client" | "therapist" | undefined;
     search?: string | undefined;
 }, {
-    role?: "client" | "therapist" | undefined;
     status?: "active" | "suspended" | "flagged" | undefined;
+    role?: "client" | "therapist" | undefined;
     limit?: number | undefined;
     offset?: number | undefined;
     search?: string | undefined;
@@ -145,11 +145,11 @@ export declare const ModerateContentRequestSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;
     note: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    action: "approve" | "reject" | "remove" | "flag";
+    action: "remove" | "approve" | "reject" | "flag";
     reason?: string | undefined;
     note?: string | undefined;
 }, {
-    action: "approve" | "reject" | "remove" | "flag";
+    action: "remove" | "approve" | "reject" | "flag";
     reason?: string | undefined;
     note?: string | undefined;
 }>;
@@ -183,10 +183,10 @@ export declare const SystemEventSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    message: string;
     id: string;
     createdAt: string;
     updatedAt: string;
-    message: string;
     eventType: string;
     severity: "critical" | "high" | "medium" | "low";
     component: string;
@@ -196,10 +196,10 @@ export declare const SystemEventSchema: z.ZodObject<{
     resolvedBy?: string | undefined;
     resolvedAt?: string | undefined;
 }, {
+    message: string;
     id: string;
     createdAt: string;
     updatedAt: string;
-    message: string;
     eventType: string;
     severity: "critical" | "high" | "medium" | "low";
     component: string;
@@ -224,10 +224,10 @@ export declare const ModerationReportSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     resolvedAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "pending" | "dismissed" | "resolved" | "under_review";
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "pending" | "dismissed" | "resolved" | "under_review";
     reason: string;
     reporterId: string;
     priority: "high" | "medium" | "low" | "urgent";
@@ -238,10 +238,10 @@ export declare const ModerationReportSchema: z.ZodObject<{
     resolvedAt?: string | undefined;
     assignedModerator?: string | undefined;
 }, {
+    status: "pending" | "dismissed" | "resolved" | "under_review";
     id: string;
     createdAt: string;
     updatedAt: string;
-    status: "pending" | "dismissed" | "resolved" | "under_review";
     reason: string;
     reporterId: string;
     priority: "high" | "medium" | "low" | "urgent";
@@ -264,7 +264,7 @@ export declare const ContentModerationActionSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     createdAt: string;
-    action: "approve" | "reject" | "remove" | "flag";
+    action: "remove" | "approve" | "reject" | "flag";
     moderatorId: string;
     contentId: string;
     contentType: "post" | "comment";
@@ -273,7 +273,7 @@ export declare const ContentModerationActionSchema: z.ZodObject<{
 }, {
     id: string;
     createdAt: string;
-    action: "approve" | "reject" | "remove" | "flag";
+    action: "remove" | "approve" | "reject" | "flag";
     moderatorId: string;
     contentId: string;
     contentType: "post" | "comment";
@@ -289,12 +289,12 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         name: z.ZodString;
         email: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         email: string;
+        id: string;
         name: string;
     }, {
-        id: string;
         email: string;
+        id: string;
         name: string;
     }>;
     flagCount: z.ZodNumber;
@@ -313,10 +313,10 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         resolvedAt: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "high" | "medium" | "low" | "urgent";
@@ -327,10 +327,10 @@ export declare const FlaggedContentSchema: z.ZodObject<{
         resolvedAt?: string | undefined;
         assignedModerator?: string | undefined;
     }, {
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "high" | "medium" | "low" | "urgent";
@@ -359,23 +359,23 @@ export declare const FlaggedContentSchema: z.ZodObject<{
     postTitle: z.ZodOptional<z.ZodString>;
     postId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    createdAt: string;
     type: "post" | "comment";
     status: "approved" | "rejected" | "pending" | "removed";
+    id: string;
+    createdAt: string;
     content: string;
     priority: "high" | "medium" | "low" | "urgent";
     author: {
-        id: string;
         email: string;
+        id: string;
         name: string;
     };
     flagCount: number;
     reports: {
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "high" | "medium" | "low" | "urgent";
@@ -395,23 +395,23 @@ export declare const FlaggedContentSchema: z.ZodObject<{
     postId?: string | undefined;
     postTitle?: string | undefined;
 }, {
-    id: string;
-    createdAt: string;
     type: "post" | "comment";
     status: "approved" | "rejected" | "pending" | "removed";
+    id: string;
+    createdAt: string;
     content: string;
     priority: "high" | "medium" | "low" | "urgent";
     author: {
-        id: string;
         email: string;
+        id: string;
         name: string;
     };
     flagCount: number;
     reports: {
+        status: "pending" | "dismissed" | "resolved" | "under_review";
         id: string;
         createdAt: string;
         updatedAt: string;
-        status: "pending" | "dismissed" | "resolved" | "under_review";
         reason: string;
         reporterId: string;
         priority: "high" | "medium" | "low" | "urgent";
@@ -445,7 +445,7 @@ export declare const ModerationActionSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     reason: string;
-    action: "approve" | "reject" | "remove" | "flag" | "suspend" | "warn";
+    action: "remove" | "approve" | "reject" | "flag" | "suspend" | "warn";
     moderatorId: string;
     contentId: string;
     contentType: "user" | "post" | "comment";
@@ -455,7 +455,7 @@ export declare const ModerationActionSchema: z.ZodObject<{
     id: string;
     createdAt: string;
     reason: string;
-    action: "approve" | "reject" | "remove" | "flag" | "suspend" | "warn";
+    action: "remove" | "approve" | "reject" | "flag" | "suspend" | "warn";
     moderatorId: string;
     contentId: string;
     contentType: "user" | "post" | "comment";
@@ -549,12 +549,12 @@ export declare const BulkModerationRequestSchema: z.ZodObject<{
     note: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     reason: string;
-    action: "approve" | "reject" | "remove";
+    action: "remove" | "approve" | "reject";
     contentIds: string[];
     note?: string | undefined;
 }, {
     reason: string;
-    action: "approve" | "reject" | "remove";
+    action: "remove" | "approve" | "reject";
     contentIds: string[];
     note?: string | undefined;
 }>;

@@ -11,15 +11,15 @@ export declare const AttachmentSchema: z.ZodObject<{
     size: z.ZodOptional<z.ZodNumber>;
     previewUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     type: "video" | "audio" | "image" | "document";
+    id: string;
     name: string;
     url: string;
     size?: number | undefined;
     previewUrl?: string | undefined;
 }, {
-    id: string;
     type: "video" | "audio" | "image" | "document";
+    id: string;
     name: string;
     url: string;
     size?: number | undefined;
@@ -62,15 +62,15 @@ export declare const MessageSchema: z.ZodObject<{
         size: z.ZodOptional<z.ZodNumber>;
         previewUrl: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         type: "video" | "audio" | "image" | "document";
+        id: string;
         name: string;
         url: string;
         size?: number | undefined;
         previewUrl?: string | undefined;
     }, {
-        id: string;
         type: "video" | "audio" | "image" | "document";
+        id: string;
         name: string;
         url: string;
         size?: number | undefined;
@@ -99,8 +99,8 @@ export declare const MessageSchema: z.ZodObject<{
     isDeleted: boolean;
     status?: "sent" | "delivered" | "read" | undefined;
     attachments?: {
-        id: string;
         type: "video" | "audio" | "image" | "document";
+        id: string;
         name: string;
         url: string;
         size?: number | undefined;
@@ -119,8 +119,8 @@ export declare const MessageSchema: z.ZodObject<{
     time: string;
     status?: "sent" | "delivered" | "read" | undefined;
     attachments?: {
-        id: string;
         type: "video" | "audio" | "image" | "document";
+        id: string;
         name: string;
         url: string;
         size?: number | undefined;
@@ -245,8 +245,8 @@ export declare const ContactSchema: z.ZodObject<{
     avatar: z.ZodOptional<z.ZodString>;
     isTyping: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     status: "online" | "offline" | "away";
+    id: string;
     name: string;
     time: string;
     lastMessage: string;
@@ -254,8 +254,8 @@ export declare const ContactSchema: z.ZodObject<{
     isTyping: boolean;
     avatar?: string | undefined;
 }, {
-    id: string;
     status: "online" | "offline" | "away";
+    id: string;
     name: string;
     time: string;
     lastMessage?: string | undefined;
@@ -280,15 +280,15 @@ export declare const ConversationSchema: z.ZodObject<{
             size: z.ZodOptional<z.ZodNumber>;
             previewUrl: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }, {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -317,8 +317,8 @@ export declare const ConversationSchema: z.ZodObject<{
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -337,8 +337,8 @@ export declare const ConversationSchema: z.ZodObject<{
         time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -364,8 +364,8 @@ export declare const ConversationSchema: z.ZodObject<{
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -389,8 +389,8 @@ export declare const ConversationSchema: z.ZodObject<{
         time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -422,15 +422,15 @@ export declare const MessageGroupSchema: z.ZodObject<{
             size: z.ZodOptional<z.ZodNumber>;
             previewUrl: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
             previewUrl?: string | undefined;
         }, {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -459,8 +459,8 @@ export declare const MessageGroupSchema: z.ZodObject<{
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -479,8 +479,8 @@ export declare const MessageGroupSchema: z.ZodObject<{
         time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -504,8 +504,8 @@ export declare const MessageGroupSchema: z.ZodObject<{
         isDeleted: boolean;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -527,8 +527,8 @@ export declare const MessageGroupSchema: z.ZodObject<{
         time: string;
         status?: "sent" | "delivered" | "read" | undefined;
         attachments?: {
-            id: string;
             type: "video" | "audio" | "image" | "document";
+            id: string;
             name: string;
             url: string;
             size?: number | undefined;
@@ -554,8 +554,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
         avatar: z.ZodOptional<z.ZodString>;
         isTyping: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         status: "online" | "offline" | "away";
+        id: string;
         name: string;
         time: string;
         lastMessage: string;
@@ -563,8 +563,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
         isTyping: boolean;
         avatar?: string | undefined;
     }, {
-        id: string;
         status: "online" | "offline" | "away";
+        id: string;
         name: string;
         time: string;
         lastMessage?: string | undefined;
@@ -589,15 +589,15 @@ export declare const MessagesStateSchema: z.ZodObject<{
                 size: z.ZodOptional<z.ZodNumber>;
                 previewUrl: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
                 previewUrl?: string | undefined;
             }, {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -626,8 +626,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             isDeleted: boolean;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -646,8 +646,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             time: string;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -673,8 +673,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             isDeleted: boolean;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -698,8 +698,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             time: string;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -721,8 +721,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     error: string | null;
     contacts: {
-        id: string;
         status: "online" | "offline" | "away";
+        id: string;
         name: string;
         time: string;
         lastMessage: string;
@@ -741,8 +741,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             isDeleted: boolean;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -762,8 +762,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
 }, {
     error: string | null;
     contacts: {
-        id: string;
         status: "online" | "offline" | "away";
+        id: string;
         name: string;
         time: string;
         lastMessage?: string | undefined;
@@ -781,8 +781,8 @@ export declare const MessagesStateSchema: z.ZodObject<{
             time: string;
             status?: "sent" | "delivered" | "read" | undefined;
             attachments?: {
-                id: string;
                 type: "video" | "audio" | "image" | "document";
+                id: string;
                 name: string;
                 url: string;
                 size?: number | undefined;
@@ -914,6 +914,456 @@ export declare const TypingIndicatorDtoSchema: z.ZodObject<{
     conversationId: string;
     isTyping?: boolean | undefined;
 }>;
+export declare const MessageSentEventSchema: z.ZodObject<{
+    conversationId: z.ZodString;
+    message: z.ZodObject<{
+        id: z.ZodString;
+        senderId: z.ZodString;
+        content: z.ZodString;
+        createdAt: z.ZodString;
+        isRead: z.ZodDefault<z.ZodBoolean>;
+        messageType: z.ZodDefault<z.ZodEnum<["TEXT", "IMAGE", "AUDIO", "VIDEO", "SYSTEM"]>>;
+        reactions: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            emoji: z.ZodString;
+            userId: z.ZodString;
+            count: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            userId: string;
+            count: number;
+            emoji: string;
+        }, {
+            userId: string;
+            count: number;
+            emoji: string;
+        }>, "many">>;
+        attachment: z.ZodOptional<z.ZodObject<{
+            url: z.ZodString;
+            name: z.ZodString;
+            size: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            url: string;
+            size: number;
+        }, {
+            name: string;
+            url: string;
+            size: number;
+        }>>;
+        attachmentUrl: z.ZodOptional<z.ZodString>;
+        attachmentName: z.ZodOptional<z.ZodString>;
+        attachmentSize: z.ZodOptional<z.ZodNumber>;
+        replyToId: z.ZodOptional<z.ZodString>;
+        isDeleted: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
+        readReceipts: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            userId: z.ZodString;
+            readAt: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            userId: string;
+            readAt: string;
+        }, {
+            userId: string;
+            readAt: string;
+        }>, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        createdAt: string;
+        content: string;
+        isDeleted: boolean;
+        senderId: string;
+        isRead: boolean;
+        messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    }, {
+        id: string;
+        createdAt: string;
+        content: string;
+        senderId: string;
+        isDeleted?: boolean | undefined;
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        isRead?: boolean | undefined;
+        messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    message: {
+        id: string;
+        createdAt: string;
+        content: string;
+        isDeleted: boolean;
+        senderId: string;
+        isRead: boolean;
+        messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    };
+    conversationId: string;
+}, {
+    message: {
+        id: string;
+        createdAt: string;
+        content: string;
+        senderId: string;
+        isDeleted?: boolean | undefined;
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        isRead?: boolean | undefined;
+        messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    };
+    conversationId: string;
+}>;
+export declare const MessageUpdatedEventSchema: z.ZodObject<{
+    conversationId: z.ZodString;
+    messageId: z.ZodString;
+    message: z.ZodObject<{
+        id: z.ZodString;
+        senderId: z.ZodString;
+        content: z.ZodString;
+        createdAt: z.ZodString;
+        isRead: z.ZodDefault<z.ZodBoolean>;
+        messageType: z.ZodDefault<z.ZodEnum<["TEXT", "IMAGE", "AUDIO", "VIDEO", "SYSTEM"]>>;
+        reactions: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            emoji: z.ZodString;
+            userId: z.ZodString;
+            count: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            userId: string;
+            count: number;
+            emoji: string;
+        }, {
+            userId: string;
+            count: number;
+            emoji: string;
+        }>, "many">>;
+        attachment: z.ZodOptional<z.ZodObject<{
+            url: z.ZodString;
+            name: z.ZodString;
+            size: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            url: string;
+            size: number;
+        }, {
+            name: string;
+            url: string;
+            size: number;
+        }>>;
+        attachmentUrl: z.ZodOptional<z.ZodString>;
+        attachmentName: z.ZodOptional<z.ZodString>;
+        attachmentSize: z.ZodOptional<z.ZodNumber>;
+        replyToId: z.ZodOptional<z.ZodString>;
+        isDeleted: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
+        readReceipts: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            userId: z.ZodString;
+            readAt: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            userId: string;
+            readAt: string;
+        }, {
+            userId: string;
+            readAt: string;
+        }>, "many">>;
+    }, "strip", z.ZodTypeAny, {
+        id: string;
+        createdAt: string;
+        content: string;
+        isDeleted: boolean;
+        senderId: string;
+        isRead: boolean;
+        messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    }, {
+        id: string;
+        createdAt: string;
+        content: string;
+        senderId: string;
+        isDeleted?: boolean | undefined;
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        isRead?: boolean | undefined;
+        messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    message: {
+        id: string;
+        createdAt: string;
+        content: string;
+        isDeleted: boolean;
+        senderId: string;
+        isRead: boolean;
+        messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    };
+    conversationId: string;
+    messageId: string;
+}, {
+    message: {
+        id: string;
+        createdAt: string;
+        content: string;
+        senderId: string;
+        isDeleted?: boolean | undefined;
+        reactions?: {
+            userId: string;
+            count: number;
+            emoji: string;
+        }[] | undefined;
+        isRead?: boolean | undefined;
+        messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM" | undefined;
+        attachment?: {
+            name: string;
+            url: string;
+            size: number;
+        } | undefined;
+        attachmentUrl?: string | undefined;
+        attachmentName?: string | undefined;
+        attachmentSize?: number | undefined;
+        replyToId?: string | undefined;
+        readReceipts?: {
+            userId: string;
+            readAt: string;
+        }[] | undefined;
+    };
+    conversationId: string;
+    messageId: string;
+}>;
+export declare const MessageDeletedEventSchema: z.ZodObject<{
+    conversationId: z.ZodString;
+    messageId: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    conversationId: string;
+    messageId: string;
+}, {
+    conversationId: string;
+    messageId: string;
+}>;
+export declare const MessageReactionEventSchema: z.ZodObject<{
+    conversationId: z.ZodString;
+    messageId: z.ZodString;
+    emoji: z.ZodString;
+    userId: z.ZodString;
+    action: z.ZodEnum<["add", "remove"]>;
+}, "strip", z.ZodTypeAny, {
+    userId: string;
+    action: "add" | "remove";
+    emoji: string;
+    conversationId: string;
+    messageId: string;
+}, {
+    userId: string;
+    action: "add" | "remove";
+    emoji: string;
+    conversationId: string;
+    messageId: string;
+}>;
+export declare const NotificationCreatedEventSchema: z.ZodObject<{
+    notificationId: z.ZodString;
+    userId: z.ZodString;
+    title: z.ZodString;
+    message: z.ZodString;
+    type: z.ZodString;
+    data: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+}, "strip", z.ZodTypeAny, {
+    message: string;
+    type: string;
+    userId: string;
+    title: string;
+    notificationId: string;
+    data?: Record<string, unknown> | undefined;
+}, {
+    message: string;
+    type: string;
+    userId: string;
+    title: string;
+    notificationId: string;
+    data?: Record<string, unknown> | undefined;
+}>;
+export declare const NotificationUpdatedEventSchema: z.ZodObject<{
+    notificationId: z.ZodString;
+    isRead: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    isRead: boolean;
+    notificationId: string;
+}, {
+    isRead: boolean;
+    notificationId: string;
+}>;
+export declare const NotificationDeletedEventSchema: z.ZodObject<{
+    notificationId: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    notificationId: string;
+}, {
+    notificationId: string;
+}>;
+export declare const MeetingStartedEventSchema: z.ZodObject<{
+    meetingId: z.ZodString;
+    participants: z.ZodArray<z.ZodString, "many">;
+    meetingUrl: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    meetingId: string;
+    participants: string[];
+    meetingUrl?: string | undefined;
+}, {
+    meetingId: string;
+    participants: string[];
+    meetingUrl?: string | undefined;
+}>;
+export declare const MeetingEndedEventSchema: z.ZodObject<{
+    meetingId: z.ZodString;
+    duration: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    meetingId: string;
+    duration?: number | undefined;
+}, {
+    meetingId: string;
+    duration?: number | undefined;
+}>;
+export declare const WorksheetAssignedEventSchema: z.ZodObject<{
+    worksheetId: z.ZodString;
+    userId: z.ZodString;
+    therapistId: z.ZodString;
+    title: z.ZodString;
+    dueDate: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    userId: string;
+    title: string;
+    therapistId: string;
+    worksheetId: string;
+    dueDate?: string | undefined;
+}, {
+    userId: string;
+    title: string;
+    therapistId: string;
+    worksheetId: string;
+    dueDate?: string | undefined;
+}>;
+export declare const WorksheetCompletedEventSchema: z.ZodObject<{
+    worksheetId: z.ZodString;
+    userId: z.ZodString;
+    completedAt: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    userId: string;
+    worksheetId: string;
+    completedAt: string;
+}, {
+    userId: string;
+    worksheetId: string;
+    completedAt: string;
+}>;
 export declare const ConversationParticipantSchema: z.ZodObject<{
     id: z.ZodString;
     userId: z.ZodString;
@@ -923,8 +1373,8 @@ export declare const ConversationParticipantSchema: z.ZodObject<{
     role: z.ZodDefault<z.ZodEnum<["ADMIN", "MODERATOR", "MEMBER"]>>;
     isActive: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     role: "ADMIN" | "MODERATOR" | "MEMBER";
+    id: string;
     userId: string;
     isActive: boolean;
     joinedAt: string;
@@ -954,8 +1404,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
         role: z.ZodDefault<z.ZodEnum<["ADMIN", "MODERATOR", "MEMBER"]>>;
         isActive: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
+        id: string;
         userId: string;
         isActive: boolean;
         joinedAt: string;
@@ -1074,14 +1524,14 @@ export declare const BackendConversationSchema: z.ZodObject<{
     lastMessageAt: z.ZodOptional<z.ZodString>;
     isActive: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
     isActive: boolean;
     participants: {
-        id: string;
         role: "ADMIN" | "MODERATOR" | "MEMBER";
+        id: string;
         userId: string;
         isActive: boolean;
         joinedAt: string;
@@ -1118,10 +1568,10 @@ export declare const BackendConversationSchema: z.ZodObject<{
     title?: string | undefined;
     lastMessageAt?: string | undefined;
 }, {
+    type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
     id: string;
     createdAt: string;
     updatedAt: string;
-    type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
     participants: {
         id: string;
         userId: string;
@@ -1492,14 +1942,14 @@ export declare const BlockedUserSchema: z.ZodObject<{
         lastName: z.ZodString;
         profileImage: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
@@ -1508,9 +1958,9 @@ export declare const BlockedUserSchema: z.ZodObject<{
     blockedUserId: string;
     blockedBy: string;
     blockedUser: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     };
     reason?: string | undefined;
@@ -1520,9 +1970,9 @@ export declare const BlockedUserSchema: z.ZodObject<{
     blockedUserId: string;
     blockedBy: string;
     blockedUser: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     };
     reason?: string | undefined;
@@ -1644,8 +2094,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
             role: z.ZodDefault<z.ZodEnum<["ADMIN", "MODERATOR", "MEMBER"]>>;
             isActive: z.ZodDefault<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
-            id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
+            id: string;
             userId: string;
             isActive: boolean;
             joinedAt: string;
@@ -1764,14 +2214,14 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         lastMessageAt: z.ZodOptional<z.ZodString>;
         isActive: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
+        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         isActive: boolean;
         participants: {
-            id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
+            id: string;
             userId: string;
             isActive: boolean;
             joinedAt: string;
@@ -1808,10 +2258,10 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         title?: string | undefined;
         lastMessageAt?: string | undefined;
     }, {
+        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         participants: {
             id: string;
             userId: string;
@@ -1889,14 +2339,14 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         }[] | undefined;
     }[];
     conversations: {
+        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         isActive: boolean;
         participants: {
-            id: string;
             role: "ADMIN" | "MODERATOR" | "MEMBER";
+            id: string;
             userId: string;
             isActive: boolean;
             joinedAt: string;
@@ -1967,10 +2417,10 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         }[] | undefined;
     }[];
     conversations: {
+        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         id: string;
         createdAt: string;
         updatedAt: string;
-        type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         participants: {
             id: string;
             userId: string;
@@ -2026,14 +2476,14 @@ export declare const MessageReactionSchema: z.ZodObject<{
         lastName: z.ZodString;
         profileImage: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }, {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -2043,9 +2493,9 @@ export declare const MessageReactionSchema: z.ZodObject<{
     emoji: string;
     messageId: string;
     user?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     } | undefined;
 }, {
@@ -2055,9 +2505,9 @@ export declare const MessageReactionSchema: z.ZodObject<{
     emoji: string;
     messageId: string;
     user?: {
-        id: string;
         firstName: string;
         lastName: string;
+        id: string;
         profileImage?: string | undefined;
     } | undefined;
 }>;
@@ -2083,6 +2533,17 @@ export type SearchMessagesDto = z.infer<typeof SearchMessagesDtoSchema>;
 export type JoinConversationDto = z.infer<typeof JoinConversationDtoSchema>;
 export type LeaveConversationDto = z.infer<typeof LeaveConversationDtoSchema>;
 export type TypingIndicatorDto = z.infer<typeof TypingIndicatorDtoSchema>;
+export type MessageSentEvent = z.infer<typeof MessageSentEventSchema>;
+export type MessageUpdatedEvent = z.infer<typeof MessageUpdatedEventSchema>;
+export type MessageDeletedEvent = z.infer<typeof MessageDeletedEventSchema>;
+export type MessageReactionEvent = z.infer<typeof MessageReactionEventSchema>;
+export type NotificationCreatedEvent = z.infer<typeof NotificationCreatedEventSchema>;
+export type NotificationUpdatedEvent = z.infer<typeof NotificationUpdatedEventSchema>;
+export type NotificationDeletedEvent = z.infer<typeof NotificationDeletedEventSchema>;
+export type MeetingStartedEvent = z.infer<typeof MeetingStartedEventSchema>;
+export type MeetingEndedEvent = z.infer<typeof MeetingEndedEventSchema>;
+export type WorksheetAssignedEvent = z.infer<typeof WorksheetAssignedEventSchema>;
+export type WorksheetCompletedEvent = z.infer<typeof WorksheetCompletedEventSchema>;
 export type ConversationParticipant = z.infer<typeof ConversationParticipantSchema>;
 export type BackendConversation = z.infer<typeof BackendConversationSchema>;
 export type MessageSearchResult = z.infer<typeof MessageSearchResultSchema>;

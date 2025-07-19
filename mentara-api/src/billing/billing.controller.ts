@@ -97,25 +97,36 @@ export class BillingController {
 
   // Subscription endpoints
   @Post('subscriptions')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Create new subscription',
-    description: 'Create a new subscription plan for the authenticated user' 
+    description: 'Create a new subscription plan for the authenticated user',
   })
-  @ApiBody({ 
+  @ApiBody({
     description: 'Subscription creation details',
     schema: {
       type: 'object',
       properties: {
         planId: { type: 'string', description: 'ID of the subscription plan' },
-        paymentMethodId: { type: 'string', description: 'Payment method to use' },
-        trialStart: { type: 'string', format: 'date-time', description: 'Trial start date' },
-        trialEnd: { type: 'string', format: 'date-time', description: 'Trial end date' }
+        paymentMethodId: {
+          type: 'string',
+          description: 'Payment method to use',
+        },
+        trialStart: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Trial start date',
+        },
+        trialEnd: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Trial end date',
+        },
       },
-      required: ['planId', 'paymentMethodId']
-    }
+      required: ['planId', 'paymentMethodId'],
+    },
   })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Subscription created successfully',
     schema: {
       type: 'object',
@@ -123,14 +134,20 @@ export class BillingController {
         id: { type: 'string' },
         userId: { type: 'string' },
         planId: { type: 'string' },
-        status: { type: 'string', enum: ['active', 'trialing', 'past_due', 'canceled'] },
-        createdAt: { type: 'string', format: 'date-time' }
-      }
-    }
+        status: {
+          type: 'string',
+          enum: ['active', 'trialing', 'past_due', 'canceled'],
+        },
+        createdAt: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: 'Invalid subscription data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 409, description: 'User already has an active subscription' })
+  @ApiResponse({
+    status: 409,
+    description: 'User already has an active subscription',
+  })
   createSubscription(
     @Body(new ZodValidationPipe(CreateSubscriptionDtoSchema))
     body: CreateSubscriptionDto,

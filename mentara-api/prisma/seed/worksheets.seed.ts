@@ -136,44 +136,55 @@ export async function seedWorksheets(
         });
         worksheets.push(worksheet);
 
-        // Create worksheet materials (therapist attachments)
+        // Create worksheet materials (therapist attachments) using inline arrays
+        let materialUrls: string[] = [];
+        let materialNames: string[] = [];
+        let materialSizes: number[] = [];
+        
         if (faker.datatype.boolean({ probability: 0.6 })) {
           const materialCount = faker.number.int({ min: 1, max: 3 });
           for (let i = 0; i < materialCount; i++) {
-            const material = await prisma.worksheetMaterial.create({
-              data: {
-                worksheetId: worksheet.id,
-                filename: generateMaterialFilename(template.type),
-                url: faker.internet.url() + '/materials/' + faker.string.uuid() + '.pdf',
-                fileSize: faker.number.int({ min: 100000, max: 2000000 }),
-                fileType: 'application/pdf',
-              },
-            });
-            materials.push(material);
+            const filename = generateMaterialFilename(template.type);
+            const url = faker.internet.url() + '/materials/' + faker.string.uuid() + '.pdf';
+            const fileSize = faker.number.int({ min: 100000, max: 2000000 });
+            
+            materialUrls.push(url);
+            materialNames.push(filename);
+            materialSizes.push(fileSize);
           }
         }
 
-        // Create client submissions for completed/assigned worksheets
+        // Create client submissions for completed/assigned worksheets using inline arrays
+        let submissionUrls: string[] = [];
+        let submissionNames: string[] = [];
+        let submissionSizes: number[] = [];
+        
         if (status === 'completed' || (status === 'assigned' && faker.datatype.boolean({ probability: 0.4 }))) {
           const submissionCount = faker.number.int({ min: 1, max: 2 });
           for (let i = 0; i < submissionCount; i++) {
-            const submission = await prisma.worksheetSubmission.create({
-              data: {
-                worksheetId: worksheet.id,
-                clientId: client.user.id,
-                filename: `${template.title.toLowerCase().replace(/\s+/g, '_')}_submission_${i + 1}.pdf`,
-                url: faker.internet.url() + '/submissions/' + faker.string.uuid() + '.pdf',
-                fileSize: faker.number.int({ min: 50000, max: 1000000 }),
-                fileType: 'application/pdf',
-                content: generateSubmissionContent(template.type),
-                createdAt: faker.date.between({
-                  from: assignedDate,
-                  to: worksheet.submittedAt || new Date(),
-                }),
-              },
-            });
-            submissions.push(submission);
+            const filename = `${template.title.toLowerCase().replace(/\s+/g, '_')}_submission_${i + 1}.pdf`;
+            const url = faker.internet.url() + '/submissions/' + faker.string.uuid() + '.pdf';
+            const fileSize = faker.number.int({ min: 50000, max: 1000000 });
+            
+            submissionUrls.push(url);
+            submissionNames.push(filename);
+            submissionSizes.push(fileSize);
           }
+        }
+        
+        // Update worksheet with file arrays
+        if (materialUrls.length > 0 || submissionUrls.length > 0) {
+          await prisma.worksheet.update({
+            where: { id: worksheet.id },
+            data: {
+              materialUrls,
+              materialNames,
+              materialSizes,
+              submissionUrls,
+              submissionNames,
+              submissionSizes,
+            },
+          });
         }
       }
 

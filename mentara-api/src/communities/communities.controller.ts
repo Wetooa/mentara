@@ -13,6 +13,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
@@ -66,6 +67,7 @@ interface CommunityWithRoomGroupsResponse extends CommunityResponse {
   }>;
 }
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 import {
   ApiTags,
   ApiOperation,
@@ -88,40 +90,23 @@ export class CommunitiesController {
   ) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  // TODO: CONFUSING - Missing @Roles decorator - should this endpoint require authentication only or specific roles?
+  // All authenticated users can currently access this endpoint, verify if this is intended behavior
+  @ApiOperation({
     summary: 'Retrieve find all',
-
-
-    description: 'Retrieve find all' 
-
-
+    description: 'Retrieve find all',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findAll(): Promise<CommunityResponse[]> {
     try {
       return await this.communitiesService.findAll();
     } catch (error) {
+      // TODO: CONFUSING PATTERN - This generic error handling masks specific exceptions
+      // Consider letting service-level exceptions bubble up for better error responses
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
       );
@@ -129,36 +114,17 @@ export class CommunitiesController {
   }
 
   @Get('stats')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get stats',
 
-
-    description: 'Retrieve get stats' 
-
-
+    description: 'Retrieve get stats',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getStats(): Promise<CommunityStatsResponse> {
     try {
       return await this.communitiesService.getStats();
@@ -170,36 +136,17 @@ export class CommunitiesController {
   }
 
   @Get('slug/:slug')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find by slug',
 
-
-    description: 'Retrieve find by slug' 
-
-
+    description: 'Retrieve find by slug',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findBySlug(@Param('slug') slug: string): Promise<CommunityResponse> {
     try {
       const community = await this.communitiesService.findBySlug(slug);
@@ -213,36 +160,17 @@ export class CommunitiesController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve find one',
 
-
-    description: 'Retrieve find one' 
-
-
+    description: 'Retrieve find one',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findOne(@Param('id') id: string): Promise<CommunityResponse> {
     try {
       const community = await this.communitiesService.findOne(id);
@@ -256,36 +184,17 @@ export class CommunitiesController {
   }
 
   @Get(':id/members')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get members',
 
-
-    description: 'Retrieve get members' 
-
-
+    description: 'Retrieve get members',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getMembers(
     @Param('id') id: string,
     @Query('limit') limit?: string,
@@ -315,36 +224,16 @@ export class CommunitiesController {
   }
 
   @Post()
-
-
-  @ApiOperation({ 
-
-
+  @Roles('moderator', 'admin')
+  @ApiOperation({
     summary: 'Create create',
-
-
-    description: 'Create create' 
-
-
+    description: 'Create create',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() communityData: CommunityCreateInputDto,
@@ -359,36 +248,16 @@ export class CommunitiesController {
   }
 
   @Put(':id')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('moderator', 'admin')
+  @ApiOperation({
     summary: 'Update update',
-
-
-    description: 'Update update' 
-
-
+    description: 'Update update',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
@@ -404,36 +273,16 @@ export class CommunitiesController {
   }
 
   @Delete(':id')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('moderator', 'admin')
+  @ApiOperation({
     summary: 'Delete remove',
-
-
-    description: 'Delete remove' 
-
-
+    description: 'Delete remove',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Deleted successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Deleted successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string): Promise<CommunityResponse> {
     try {
@@ -446,36 +295,16 @@ export class CommunitiesController {
   }
 
   @Post(':id/join')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @ApiOperation({
     summary: 'Create join community',
-
-
-    description: 'Create join community' 
-
-
+    description: 'Create join community',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async joinCommunity(
     @Param('id') communityId: string,
@@ -485,43 +314,33 @@ export class CommunitiesController {
       await this.communitiesService.joinCommunity(communityId, userId);
       return { joined: true };
     } catch (error) {
+      // Re-throw known HTTP exceptions to preserve proper error responses
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // Only wrap unknown errors
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Unknown error',
+        error instanceof Error ? error.message : 'Failed to join community',
       );
     }
   }
 
   @Post(':id/leave')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @ApiOperation({
     summary: 'Create leave community',
-
-
-    description: 'Create leave community' 
-
-
+    description: 'Create leave community',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async leaveCommunity(
     @Param('id') communityId: string,
@@ -531,43 +350,34 @@ export class CommunitiesController {
       await this.communitiesService.leaveCommunity(communityId, userId);
       return { left: true };
     } catch (error) {
+      // Re-throw known HTTP exceptions to preserve proper error responses
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // Only wrap unknown errors
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Unknown error',
+        error instanceof Error ? error.message : 'Failed to leave community',
       );
     }
   }
 
   @Get('user/:userId')
-
-
-  @ApiOperation({ 
-
-
+  // TODO: SECURITY CONCERN - Missing @Roles decorator allows any authenticated user to view another user's community memberships
+  // This could be a privacy issue - consider adding role restrictions or user ownership validation
+  @ApiOperation({
     summary: 'Retrieve find by user id',
-
-
-    description: 'Retrieve find by user id' 
-
-
+    description: 'Retrieve find by user id',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async findByUserId(
     @Param('userId') userId: string,
   ): Promise<CommunityResponse[]> {
@@ -581,106 +391,48 @@ export class CommunitiesController {
   }
 
   @Get('with-structure')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get all with structure',
 
-
-    description: 'Retrieve get all with structure' 
-
-
+    description: 'Retrieve get all with structure',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getAllWithStructure(): Promise<CommunityWithRoomGroupsResponse[]> {
     return await this.communitiesService.findAllWithStructure();
   }
 
   @Get(':id/with-structure')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get one with structure',
 
-
-    description: 'Retrieve get one with structure' 
-
-
+    description: 'Retrieve get one with structure',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getOneWithStructure(@Param('id') id: string) {
     return await this.communitiesService.findOneWithStructure(id);
   }
 
   @Post(':id/room-group')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('moderator', 'admin')
+  @ApiOperation({
     summary: 'Create create room group',
-
-
-    description: 'Create create room group' 
-
-
+    description: 'Create create room group',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async createRoomGroup(
     @Param('id') communityId: string,
     @Body() dto: { name: string; order: number },
@@ -693,36 +445,16 @@ export class CommunitiesController {
   }
 
   @Post('room-group/:roomGroupId/room')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('moderator', 'admin')
+  @ApiOperation({
     summary: 'Create create room',
-
-
-    description: 'Create create room' 
-
-
+    description: 'Create create room',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async createRoom(
     @Param('roomGroupId') roomGroupId: string,
     @Body() dto: { name: string; order: number },
@@ -735,62 +467,34 @@ export class CommunitiesController {
   }
 
   @Get('room-group/:roomGroupId/rooms')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get rooms by group',
 
-
-    description: 'Retrieve get rooms by group' 
-
-
+    description: 'Retrieve get rooms by group',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getRoomsByGroup(@Param('roomGroupId') roomGroupId: string) {
     return await this.communitiesService.findRoomsByGroup(roomGroupId);
   }
 
   // Community Assignment Endpoints
   @Post('assign/me')
-
-  @ApiOperation({ 
-
+  @ApiOperation({
     summary: 'Create assign communities to me',
 
-    description: 'Create assign communities to me' 
-
+    description: 'Create assign communities to me',
   })
+  @ApiResponse({
+    status: 201,
 
-  @ApiResponse({ 
-
-    status: 201, 
-
-    description: 'Created successfully' 
-
+    description: 'Created successfully',
   })
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-  
   @HttpCode(HttpStatus.OK)
   async assignCommunitiesToMe(
     @CurrentUserId() userId: string,
@@ -807,36 +511,16 @@ export class CommunitiesController {
   }
 
   @Post('assign/:userId')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('admin')
+  @ApiOperation({
     summary: 'Create assign communities to user',
-
-
-    description: 'Create assign communities to user' 
-
-
+    description: 'Create assign communities to user',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async assignCommunitiesToUser(
     @Param('userId') userId: string,
@@ -853,36 +537,17 @@ export class CommunitiesController {
   }
 
   @Get('recommended/me')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get my recommended communities',
 
-
-    description: 'Retrieve get my recommended communities' 
-
-
+    description: 'Retrieve get my recommended communities',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   async getMyRecommendedCommunities(
     @CurrentUserId() userId: string,
   ): Promise<{ recommendedCommunities: string[] }> {
@@ -898,36 +563,16 @@ export class CommunitiesController {
   }
 
   @Post('assign/bulk')
-
-
-  @ApiOperation({ 
-
-
+  @Roles('admin')
+  @ApiOperation({
     summary: 'Create bulk assign communities',
-
-
-    description: 'Create bulk assign communities' 
-
-
+    description: 'Create bulk assign communities',
   })
-
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+  @ApiResponse({
+    status: 201,
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async bulkAssignCommunities(
     @Body() body: { userIds: string[] },

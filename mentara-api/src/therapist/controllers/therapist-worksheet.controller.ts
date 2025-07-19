@@ -35,36 +35,17 @@ export class TherapistWorksheetController {
   constructor(private readonly worksheetsService: WorksheetsService) {}
 
   @Get()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get therapist worksheets',
 
-
-    description: 'Retrieve get therapist worksheets' 
-
-
+    description: 'Retrieve get therapist worksheets',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getTherapistWorksheets(
     @CurrentUserId() therapistId: string,
@@ -75,36 +56,17 @@ export class TherapistWorksheetController {
   }
 
   @Get(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Retrieve get therapist worksheet by id',
 
-
-    description: 'Retrieve get therapist worksheet by id' 
-
-
+    description: 'Retrieve get therapist worksheet by id',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Retrieved successfully' 
-
-
+    description: 'Retrieved successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async getTherapistWorksheetById(
     @CurrentUserId() therapistId: string,
@@ -114,36 +76,17 @@ export class TherapistWorksheetController {
   }
 
   @Post()
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Create create therapist worksheet',
 
-
-    description: 'Create create therapist worksheet' 
-
-
+    description: 'Create create therapist worksheet',
   })
+  @ApiResponse({
+    status: 201,
 
-
-  @ApiResponse({ 
-
-
-    status: 201, 
-
-
-    description: 'Created successfully' 
-
-
+    description: 'Created successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.CREATED)
   async createTherapistWorksheet(
     @CurrentUserId() therapistId: string,
@@ -157,36 +100,17 @@ export class TherapistWorksheetController {
   }
 
   @Put(':id')
-
-
-  @ApiOperation({ 
-
-
+  @ApiOperation({
     summary: 'Update update therapist worksheet',
 
-
-    description: 'Update update therapist worksheet' 
-
-
+    description: 'Update update therapist worksheet',
   })
+  @ApiResponse({
+    status: 200,
 
-
-  @ApiResponse({ 
-
-
-    status: 200, 
-
-
-    description: 'Updated successfully' 
-
-
+    description: 'Updated successfully',
   })
-
-
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-
-
-  
   @HttpCode(HttpStatus.OK)
   async updateTherapistWorksheet(
     @CurrentUserId() therapistId: string,
