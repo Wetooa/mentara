@@ -216,7 +216,7 @@ export class TherapistRequestService {
 
         if (
           !therapist ||
-          therapist.status !== 'approved' ||
+          therapist.status !== 'APPROVED' ||
           !therapist.user.isActive
         ) {
           throw new BadRequestException(
@@ -229,7 +229,7 @@ export class TherapistRequestService {
           where: {
             clientId: existingRequest.clientId,
             therapistId,
-            status: 'active',
+            status: 'ACTIVE',
           },
         });
 
@@ -254,7 +254,7 @@ export class TherapistRequestService {
           data: {
             clientId: existingRequest.clientId,
             therapistId,
-            status: 'active',
+            status: 'ACTIVE',
             assignedAt: new Date(),
             notes: `Relationship started from accepted request. ${responseDto.schedulingMessage || ''}`,
           },
@@ -606,7 +606,7 @@ export class TherapistRequestService {
         }),
         // Active client relationships
         this.prisma.clientTherapist.count({
-          where: { therapistId, status: 'active' },
+          where: { therapistId, status: 'ACTIVE' },
         }),
       ]);
 

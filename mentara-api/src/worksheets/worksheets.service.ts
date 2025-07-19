@@ -134,7 +134,7 @@ export class WorksheetsService {
         instructions: data.instructions,
         description: data.description,
         dueDate: data.dueDate || new Date(),
-        status: (data as any).status || 'assigned',
+        status: (data as any).status || 'ASSIGNED',
         isCompleted: (data as any).isCompleted || false,
         clientId,
         therapistId,
@@ -219,7 +219,7 @@ export class WorksheetsService {
         feedback: (data as any).notes || null,
         // Mark as completed if specified
         isCompleted: data.isCompleted || false,
-        status: data.isCompleted ? 'completed' : 'assigned',
+        status: data.isCompleted ? 'COMPLETED' : 'ASSIGNED',
         submittedAt: data.isCompleted ? new Date() : null,
       },
     });
@@ -253,7 +253,7 @@ export class WorksheetsService {
       data: {
         feedback: (data as any).notes || null,
         isCompleted: true,
-        status: 'completed',
+        status: 'COMPLETED',
         submittedAt: new Date(),
         // File attachments are handled separately via upload endpoint
       },
@@ -283,7 +283,7 @@ export class WorksheetsService {
       where: { id },
       data: {
         isCompleted: false,
-        status: 'assigned',
+        status: 'ASSIGNED',
         submittedAt: null,
         feedback: null,
         // Clear submission files but keep materials

@@ -112,7 +112,7 @@ export class SlotGeneratorService {
     return this.prisma.therapistAvailability.findMany({
       where: {
         therapistId,
-        dayOfWeek,
+        dayOfWeek: dayOfWeek.toString(),
         isAvailable: true,
       },
       orderBy: { startTime: 'asc' },
@@ -258,7 +258,7 @@ export class SlotGeneratorService {
     const availability = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek,
+        dayOfWeek: dayOfWeek.toString(),
         isAvailable: true,
       },
     });

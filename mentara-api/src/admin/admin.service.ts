@@ -262,7 +262,7 @@ export class AdminService {
         const therapist = await tx.therapist.update({
           where: { userId: applicationId },
           data: {
-            status: 'approved',
+            status: 'APPROVED',
             processedByAdminId: adminId,
             processingDate: new Date(),
           },
@@ -309,7 +309,7 @@ export class AdminService {
         const therapist = await tx.therapist.update({
           where: { userId: applicationId },
           data: {
-            status: 'rejected',
+            status: 'REJECTED',
             processedByAdminId: adminId,
             processingDate: new Date(),
           },
@@ -535,8 +535,8 @@ export class AdminService {
       ] = await Promise.all([
         this.prisma.user.count(),
         this.prisma.client.count(),
-        this.prisma.therapist.count({ where: { status: 'approved' } }),
-        this.prisma.therapist.count({ where: { status: 'pending' } }),
+        this.prisma.therapist.count({ where: { status: 'APPROVED' } }),
+        this.prisma.therapist.count({ where: { status: 'PENDING' } }),
         this.prisma.community.count(),
         this.prisma.post.count(),
         this.prisma.meeting.count(),

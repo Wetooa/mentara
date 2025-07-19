@@ -476,7 +476,7 @@ export class PostsService {
           reporterId,
           reason,
           content,
-          status: 'pending',
+          status: 'PENDING',
         },
       });
 

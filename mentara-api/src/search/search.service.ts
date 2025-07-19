@@ -25,7 +25,7 @@ export class SearchService {
   ) {
     try {
       const where: any = {
-        status: 'approved',
+        status: 'APPROVED',
         OR: [
           {
             user: {

@@ -67,6 +67,7 @@ export async function seedUsers(prisma: PrismaClient) {
       data: {
         userId: user.id,
         ...therapistProfileData,
+        status: 'APPROVED' as const,
       },
     });
     therapists.push({ user, therapist });
@@ -147,6 +148,7 @@ export async function seedUsers(prisma: PrismaClient) {
       data: {
         userId: user.id,
         ...therapistProfileData,
+        status: 'APPROVED' as const,
       },
     });
     therapists.push({ user, therapist });

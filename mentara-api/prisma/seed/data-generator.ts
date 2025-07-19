@@ -165,7 +165,7 @@ export class SeedDataGenerator {
         '90 minutes',
       ]),
       hourlyRate: faker.number.float({ min: 80, max: 250, fractionDigits: 2 }),
-      status: 'approved',
+      status: 'APPROVED',
       submissionDate: faker.date.past(),
       processingDate: faker.date.past(),
     };

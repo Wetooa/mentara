@@ -163,7 +163,7 @@ export class BookingService {
         }
 
         // Calculate session cost based on duration and subscription plan
-        const sessionCostPerMinute = subscription.plan.limits?.sessionCostPerMinute || 2.50; // Default rate
+        const sessionCostPerMinute = (subscription.plan.limits as any)?.sessionCostPerMinute || 2.50; // Default rate
         const sessionCost = duration * sessionCostPerMinute;
 
         // Create payment record for this session
@@ -172,7 +172,7 @@ export class BookingService {
           currency: 'USD',
           subscriptionId: subscription.id,
           meetingId: meeting.id,
-          paymentMethodId: subscription.defaultPaymentMethodId,
+          paymentMethodId: subscription.defaultPaymentMethodId || undefined,
           description: `Therapy session with ${meeting.therapist?.user?.firstName} ${meeting.therapist?.user?.lastName}`,
         });
       } catch (paymentError) {
@@ -482,9 +482,9 @@ export class BookingService {
           await this.billingService.createPayment({
             amount: -meetingPayment.amount, // Negative amount for refund
             currency: meetingPayment.currency,
-            subscriptionId: meetingPayment.subscriptionId,
+            subscriptionId: meetingPayment.subscriptionId || undefined,
             meetingId: meeting.id,
-            paymentMethodId: meetingPayment.paymentMethodId,
+            paymentMethodId: meetingPayment.paymentMethodId || undefined,
             description: `Refund for cancelled session - ${cancellationNotice}h notice`,
           });
         }
@@ -537,7 +537,7 @@ export class BookingService {
       return this.prisma.therapistAvailability.create({
         data: {
           therapistId,
-          dayOfWeek,
+          dayOfWeek: dayOfWeek.toString(),
           startTime,
           endTime,
           notes,
@@ -577,9 +577,18 @@ export class BookingService {
         throw new NotFoundException('Availability slot not found');
       }
 
+      // Convert dayOfWeek to string if present
+      const { dayOfWeek, ...rest } = updateAvailabilityDto;
+      const updateData = {
+        ...rest,
+        ...(dayOfWeek !== undefined && {
+          dayOfWeek: dayOfWeek.toString(),
+        }),
+      };
+
       return this.prisma.therapistAvailability.update({
         where: { id },
-        data: updateAvailabilityDto,
+        data: updateData,
       });
     } catch (error) {
       throw new BadRequestException(

@@ -42,7 +42,7 @@ export class TherapistApplicationService {
     const { status, page, limit } = options;
     const skip = (page - 1) * limit;
 
-    const whereClause = status ? { status } : {};
+    const whereClause = status ? { status: status.toUpperCase() as any } : {};
 
     const [applications, totalCount] = await Promise.all([
       this.prisma.therapist.findMany({
@@ -73,9 +73,9 @@ export class TherapistApplicationService {
             status: app.status,
             submissionDate: app.submissionDate.toISOString(),
             processingDate: app.processingDate?.toISOString(),
-            firstName: app.user.firstName || '',
-            lastName: app.user.lastName || '',
-            email: app.user.email,
+            firstName: (app as any).user?.firstName || '',
+            lastName: (app as any).user?.lastName || '',
+            email: (app as any).user?.email || '',
             mobile: app.mobile,
             province: app.province,
             providerType: app.providerType,
@@ -237,7 +237,7 @@ export class TherapistApplicationService {
       };
 
       // Handle status-specific actions and notifications
-      if (updateData.status === 'approved') {
+      if (updateData.status === 'APPROVED') {
         // Create Clerk account for approved therapist
         const temporaryPassword = this.generateTemporaryPassword();
         let clerkUserId: string | null = null;
@@ -293,7 +293,7 @@ export class TherapistApplicationService {
           console.error('Failed to send approval email notification:', error);
           // Don't fail the entire operation if email fails
         }
-      } else if (updateData.status === 'rejected') {
+      } else if (updateData.status === 'REJECTED') {
         // Send rejection email notification
         try {
           await this.emailService.sendTherapistRejectionEmail(
@@ -508,7 +508,7 @@ export class TherapistApplicationService {
             convertedData.willingToAbideByPlatformGuidelines,
           sessionLength: convertedData.preferredSessionLength,
           hourlyRate: convertedData.hourlyRate,
-          status: 'pending',
+          status: 'PENDING',
           submissionDate: new Date(),
           processingDate: new Date(),
           expirationDateOfLicense: convertedData.expirationDateOfLicense,

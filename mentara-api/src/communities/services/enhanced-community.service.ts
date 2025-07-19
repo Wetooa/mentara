@@ -399,7 +399,7 @@ export class EnhancedCommunityService {
             canPost: true,
             canComment: true,
             canModerate:
-              membership.role === 'moderator' || membership.role === 'admin',
+              membership.role === 'MODERATOR' || membership.role === 'ADMIN',
           };
         } else {
           // Join requests removed - users are automatically assigned communities

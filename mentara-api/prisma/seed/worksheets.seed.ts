@@ -102,15 +102,15 @@ export async function seedWorksheets(
           probability: isOverdue ? 0.7 : 0.4 
         });
 
-        let status: string;
+        let status: 'COMPLETED' | 'PAST_DUE' | 'ASSIGNED' | 'UPCOMING';
         if (isCompleted) {
-          status = 'completed';
+          status = 'COMPLETED';
         } else if (isOverdue) {
-          status = 'past_due';
+          status = 'PAST_DUE';
         } else if (faker.datatype.boolean({ probability: 0.6 })) {
-          status = 'assigned';
+          status = 'ASSIGNED';
         } else {
-          status = 'upcoming';
+          status = 'UPCOMING';
         }
 
         // Create worksheet
@@ -159,7 +159,7 @@ export async function seedWorksheets(
         let submissionNames: string[] = [];
         let submissionSizes: number[] = [];
         
-        if (status === 'completed' || (status === 'assigned' && faker.datatype.boolean({ probability: 0.4 }))) {
+        if (status === 'COMPLETED' || (status === 'ASSIGNED' && faker.datatype.boolean({ probability: 0.4 }))) {
           const submissionCount = faker.number.int({ min: 1, max: 2 });
           for (let i = 0; i < submissionCount; i++) {
             const filename = `${template.title.toLowerCase().replace(/\s+/g, '_')}_submission_${i + 1}.pdf`;

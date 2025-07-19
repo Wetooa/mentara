@@ -235,21 +235,21 @@ export class AdvancedMatchingService {
     return {
       primaryConditions,
       secondaryConditions,
-      preferredApproaches: preferences.approaches || [],
+      preferredApproaches: (preferences.approaches as string[]) || [],
       sessionPreferences: {
-        format: preferences.sessionFormat || ['online', 'in-person'],
-        duration: preferences.sessionDuration || [],
-        frequency: preferences.sessionFrequency || 'weekly',
+        format: (preferences.sessionFormat as string[]) || ['online', 'in-person'],
+        duration: (preferences.sessionDuration as string[]) || [],
+        frequency: (preferences.sessionFrequency as string) || 'weekly',
       },
       demographics: {
-        ageRange: preferences.therapistAge || 'any',
-        genderPreference: preferences.therapistGender,
-        languagePreference: preferences.languages || ['English'],
+        ageRange: (preferences.therapistAge as string) || 'any',
+        genderPreference: preferences.therapistGender as string | undefined,
+        languagePreference: (preferences.languages as string[]) || ['English'],
       },
       logistics: {
-        maxHourlyRate: preferences.maxBudget,
-        province: preferences.location,
-        insuranceTypes: preferences.insurance || [],
+        maxHourlyRate: preferences.maxBudget as number | undefined,
+        province: preferences.location as string | undefined,
+        insuranceTypes: (preferences.insurance as string[]) || [],
       },
     };
   }

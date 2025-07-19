@@ -167,7 +167,7 @@ export class AvailabilityValidatorService {
     const availability = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek,
+        dayOfWeek: dayOfWeek.toString(),
         startTime: { lte: startTimeStr },
         endTime: { gte: endTimeStr },
         isAvailable: true,
@@ -214,7 +214,7 @@ export class AvailabilityValidatorService {
     const therapist = await this.prisma.therapist.findFirst({
       where: {
         userId: therapistId,
-        status: 'approved',
+        status: 'APPROVED',
       },
       include: {
         user: {
@@ -338,7 +338,7 @@ export class AvailabilityValidatorService {
     const overlapping = await this.prisma.therapistAvailability.findFirst({
       where: {
         therapistId,
-        dayOfWeek,
+        dayOfWeek: dayOfWeek.toString(),
         OR: [
           {
             startTime: { lt: endTime },

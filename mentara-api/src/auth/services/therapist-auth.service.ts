@@ -62,7 +62,7 @@ export class TherapistAuthService {
       const therapist = await tx.therapist.create({
         data: {
           userId: user.id,
-          status: 'pending',
+          status: 'PENDING',
           mobile: '',
           province: '',
           providerType: '',

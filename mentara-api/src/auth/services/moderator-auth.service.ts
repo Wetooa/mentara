@@ -244,7 +244,7 @@ export class ModeratorAuthService {
       this.prisma.post.count(),
       this.prisma.report.count({
         where: {
-          status: 'pending',
+          status: 'PENDING',
         },
       }),
     ]);

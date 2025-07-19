@@ -125,7 +125,7 @@ export class CommunityAssignmentService {
           data: {
             userId: userId,
             communityId: community.id,
-            role: 'member',
+            role: 'MEMBER',
             joinedAt: new Date(),
           },
         });
@@ -181,7 +181,7 @@ export class CommunityAssignmentService {
           data: {
             userId: userId,
             communityId: community.id,
-            role: 'member',
+            role: 'MEMBER',
             joinedAt: new Date(),
           },
         });

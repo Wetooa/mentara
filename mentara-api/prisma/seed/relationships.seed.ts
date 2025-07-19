@@ -108,7 +108,7 @@ export async function seedTherapistAvailability(
       const availability = await prisma.therapistAvailability.create({
         data: {
           therapistId: user.id,
-          dayOfWeek,
+          dayOfWeek: dayOfWeek.toString(),
           startTime: faker.helpers.arrayElement(['09:00', '10:00', '11:00']),
           endTime: faker.helpers.arrayElement(['16:00', '17:00', '18:00']),
         },

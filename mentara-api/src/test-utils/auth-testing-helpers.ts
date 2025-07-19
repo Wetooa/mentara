@@ -49,7 +49,7 @@ export const TEST_COMMENT_IDS = {
 /**
  * Security Guard Testing Utilities
  */
-export class SecurityGuardTestUtils {
+class SecurityGuardTestUtils {
   /**
    * Creates a mock ExecutionContext for guard testing
    */
@@ -61,20 +61,21 @@ export class SecurityGuardTestUtils {
     return {
       switchToHttp: () => ({
         getRequest: () => request,
-        getResponse: () => ({}),
-        getNext: () => jest.fn(),
+        getResponse: () => ({} as any),
+        getNext: () => jest.fn() as any,
       }),
       getHandler: () => handler,
       getClass: () => controllerClass,
-      getArgs: () => [request, {}, jest.fn()],
-      getArgByIndex: (index: number) => [request, {}, jest.fn()][index],
+      getArgs: () => [request, {}, jest.fn()] as any,
+      getArgByIndex: (index: number) => [request, {}, jest.fn()][index] as any,
       switchToRpc: () => ({
-        getContext: () => ({}),
-        getData: () => ({}),
+        getContext: () => ({} as any),
+        getData: () => ({} as any),
       }),
       switchToWs: () => ({
-        getClient: () => ({}),
-        getData: () => ({}),
+        getClient: () => ({} as any),
+        getData: () => ({} as any),
+        getPattern: () => ({} as any),
       }),
       getType: () => 'http' as any,
     };
@@ -86,7 +87,7 @@ export class SecurityGuardTestUtils {
   static createMockReflector(metadata: Record<string, any> = {}): Reflector {
     const reflector = new Reflector();
     reflector.getAllAndOverride = jest.fn((key, targets) => {
-      return metadata[key] || false;
+      return metadata[key as string] || false;
     });
     return reflector;
   }
@@ -280,6 +281,14 @@ export class SecurityGuardTestUtils {
    */
   static createMockPrismaWithCommunityData() {
     const prismaService = createMockPrismaService();
+    // Add missing room model to the mock
+    (prismaService as any).room = {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
     const mockData = this.createMockCommunityData();
 
     // Setup community findUnique mock
@@ -291,7 +300,7 @@ export class SecurityGuardTestUtils {
     });
 
     // Setup room findUnique mock
-    prismaService.room.findUnique.mockImplementation(({ where, include }) => {
+    (prismaService as any).room.findUnique.mockImplementation(({ where, include }) => {
       if (where.id === TEST_ROOM_IDS.ANXIETY_CHAT) {
         return Promise.resolve(mockData.room);
       }
@@ -413,7 +422,7 @@ export class SecurityGuardTestUtils {
 /**
  * Role-based Testing Utilities
  */
-export class RoleBasedTestUtils {
+class RoleBasedTestUtils {
   /**
    * Tests a function with different user roles
    */
@@ -483,7 +492,7 @@ export class RoleBasedTestUtils {
 /**
  * Community Access Guard Test Utilities
  */
-export class CommunityAccessGuardTestUtils {
+class CommunityAccessGuardTestUtils {
   /**
    * Creates a comprehensive test suite for the CommunityAccessGuard
    */

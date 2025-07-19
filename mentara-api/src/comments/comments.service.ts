@@ -593,7 +593,7 @@ export class CommentsService {
           reporterId,
           reason,
           content,
-          status: 'pending',
+          status: 'PENDING',
         },
       });
 

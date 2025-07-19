@@ -181,7 +181,7 @@ export class TherapistManagementService {
 
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapist.userId, status: 'active' },
+        where: { therapistId: therapist.userId, status: 'ACTIVE' },
         include: { client: { include: { user: true } } },
       });
 
@@ -205,7 +205,7 @@ export class TherapistManagementService {
     try {
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapistId, status: 'active' },
+        where: { therapistId: therapistId, status: 'ACTIVE' },
         include: { client: { include: { user: true } } },
       });
 

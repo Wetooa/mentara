@@ -122,8 +122,8 @@ export class AdminAuthController {
       registerDto.password,
       registerDto.firstName,
       registerDto.lastName,
-      registerDto.adminLevel || 'admin',
-      registerDto.permissions || [],
+      (registerDto as any).adminLevel || 'admin',
+      (registerDto as any).permissions || [],
     );
 
     return {

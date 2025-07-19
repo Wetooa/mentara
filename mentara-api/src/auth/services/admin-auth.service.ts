@@ -187,7 +187,7 @@ export class AdminAuthService {
       this.prisma.moderator.count(),
       this.prisma.admin.count(),
       this.prisma.therapist.count({
-        where: { status: 'pending' },
+        where: { status: 'PENDING' },
       }),
       this.prisma.community.count(),
       this.prisma.post.count(),

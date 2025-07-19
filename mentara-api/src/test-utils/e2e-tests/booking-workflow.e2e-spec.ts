@@ -96,7 +96,7 @@ describe('Booking Workflow E2E', () => {
         hourlyRate: 160,
         compliesWithDataPrivacyAct: true,
         willingToAbideByPlatformGuidelines: true,
-        status: 'approved',
+        status: 'APPROVED',
         treatmentSuccessRates: {},
       },
     });

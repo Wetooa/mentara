@@ -110,7 +110,7 @@ export class TherapistRecommendationService {
 
       // Enhanced therapist filtering based on clinical insights
       const therapistWhere: any = {
-        status: 'approved',
+        status: 'APPROVED',
         ...(request.province && { province: request.province }),
         ...(request.maxHourlyRate && {
           hourlyRate: { lte: request.maxHourlyRate },

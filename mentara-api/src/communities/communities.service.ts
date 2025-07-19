@@ -210,7 +210,7 @@ export class CommunitiesService {
   async joinCommunity(
     communityId: string,
     userId: string,
-    role: string = 'member',
+    role: string = 'MEMBER',
   ): Promise<void> {
     const existingMembership = await this.prisma.membership.findFirst({
       where: {
@@ -227,7 +227,7 @@ export class CommunitiesService {
       data: {
         userId,
         communityId,
-        role,
+        role: role.toUpperCase() as any,
       },
     });
   }

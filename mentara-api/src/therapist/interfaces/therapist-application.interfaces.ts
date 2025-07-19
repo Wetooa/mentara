@@ -41,7 +41,7 @@ export interface TherapistApplicationResponse {
 }
 
 export interface ApplicationStatusUpdateDto {
-  status: 'approved' | 'rejected' | 'pending';
+  status: 'APPROVED' | 'REJECTED' | 'PENDING';
   adminNotes?: string;
   credentials?: {
     email: string;

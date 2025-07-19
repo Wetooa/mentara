@@ -147,7 +147,7 @@ export class ClientService {
     const assignment = await this.prisma.clientTherapist.findFirst({
       where: {
         clientId: userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
       include: {
         therapist: {
@@ -172,7 +172,7 @@ export class ClientService {
       hourlyRate: Number(therapist.hourlyRate),
       experience: therapist.yearsOfExperience || 0,
       province: therapist.province,
-      isActive: therapist.status === 'approved',
+      isActive: therapist.status === 'APPROVED',
       bio: therapist.user.bio || undefined,
       profileImage: undefined,
     };
@@ -203,9 +203,9 @@ export class ClientService {
     await this.prisma.clientTherapist.updateMany({
       where: {
         clientId: userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
-      data: { status: 'inactive' },
+      data: { status: 'INACTIVE' },
     });
 
     // Create new assignment
@@ -213,7 +213,7 @@ export class ClientService {
       data: {
         clientId: userId,
         therapistId: therapistId,
-        status: 'active',
+        status: 'ACTIVE',
       },
     });
 
@@ -227,7 +227,7 @@ export class ClientService {
       hourlyRate: Number(therapist.hourlyRate),
       experience: therapist.yearsOfExperience || 0,
       province: therapist.province,
-      isActive: therapist.status === 'approved',
+      isActive: therapist.status === 'APPROVED',
       bio: therapist.user.bio || undefined,
       profileImage: undefined,
     };
@@ -246,9 +246,9 @@ export class ClientService {
     await this.prisma.clientTherapist.updateMany({
       where: {
         clientId: userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
-      data: { status: 'inactive' },
+      data: { status: 'INACTIVE' },
     });
   }
 

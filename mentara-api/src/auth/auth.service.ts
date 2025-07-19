@@ -293,7 +293,7 @@ export class AuthService {
       await this.prisma.therapist.create({
         data: {
           userId: user.id,
-          status: 'pending',
+          status: 'PENDING',
           mobile: '',
           province: '',
           providerType: '',
@@ -553,10 +553,10 @@ export class AuthService {
           lastName: user.lastName,
           role: user.role,
           emailVerified: user.emailVerified,
-          status: user.therapist?.status || 'pending',
+          status: user.therapist?.status || 'PENDING',
           profile: {
             userId: user.id,
-            status: user.therapist?.status || 'pending',
+            status: user.therapist?.status || 'PENDING',
           },
         };
       } else {
@@ -786,7 +786,7 @@ export class AuthService {
           await this.prisma.therapist.create({
             data: {
               userId: newUser.id,
-              status: 'pending',
+              status: 'PENDING',
               mobile: '',
               province: '',
               providerType: '',

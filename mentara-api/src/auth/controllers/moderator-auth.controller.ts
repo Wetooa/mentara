@@ -122,8 +122,8 @@ export class ModeratorAuthController {
       registerDto.password,
       registerDto.firstName,
       registerDto.lastName,
-      registerDto.permissions || [],
-      registerDto.assignedCommunities || [],
+      (registerDto as any).permissions || [],
+      (registerDto as any).assignedCommunities || [],
     );
 
     return {

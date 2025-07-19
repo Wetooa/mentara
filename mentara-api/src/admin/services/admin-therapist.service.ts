@@ -30,7 +30,7 @@ export class AdminTherapistService {
   async getPendingApplications(filters: PendingTherapistFiltersDto) {
     try {
       const {
-        status = 'pending',
+        status = 'PENDING',
         province,
         submittedAfter,
         processedBy,
@@ -42,7 +42,8 @@ export class AdminTherapistService {
 
       // Apply status filter
       if (status) {
-        where.status = status;
+        // Convert filter status to uppercase to match enum values
+        where.status = status.toUpperCase() as any;
       }
 
       // Apply province filter
@@ -104,15 +105,15 @@ export class AdminTherapistService {
 
       // Calculate summary statistics
       const totalPending = await this.prisma.therapist.count({
-        where: { status: 'pending' },
+        where: { status: 'PENDING' },
       });
 
       const totalApproved = await this.prisma.therapist.count({
-        where: { status: 'approved' },
+        where: { status: 'APPROVED' },
       });
 
       const totalRejected = await this.prisma.therapist.count({
-        where: { status: 'rejected' },
+        where: { status: 'REJECTED' },
       });
 
       this.logger.log(
@@ -264,7 +265,7 @@ export class AdminTherapistService {
           );
         }
 
-        if (existingTherapist.status !== 'pending') {
+        if (existingTherapist.status !== 'PENDING') {
           throw new ConflictException(
             `Therapist ${therapistId} is not pending approval (current status: ${existingTherapist.status})`,
           );
@@ -274,7 +275,7 @@ export class AdminTherapistService {
         const approvedTherapist = await tx.therapist.update({
           where: { userId: therapistId },
           data: {
-            status: 'approved',
+            status: 'APPROVED',
             processedByAdminId: adminId,
             processingDate: new Date(),
             licenseVerified: approvalData.verifyLicense || false,
@@ -362,7 +363,7 @@ export class AdminTherapistService {
           );
         }
 
-        if (existingTherapist.status === 'approved') {
+        if (existingTherapist.status === 'APPROVED') {
           throw new ForbiddenException(
             `Cannot reject already approved therapist ${therapistId}`,
           );
@@ -372,7 +373,7 @@ export class AdminTherapistService {
         const rejectedTherapist = await tx.therapist.update({
           where: { userId: therapistId },
           data: {
-            status: 'rejected',
+            status: 'REJECTED',
             processedByAdminId: adminId,
             processingDate: new Date(),
           },
@@ -450,9 +451,10 @@ export class AdminTherapistService {
         const validTransitions = this.getValidStatusTransitions(
           existingTherapist.status,
         );
-        if (!validTransitions.includes(statusData.status)) {
+        const upperCaseStatus = statusData.status.toUpperCase();
+        if (!validTransitions.includes(upperCaseStatus)) {
           throw new BadRequestException(
-            `Invalid status transition from ${existingTherapist.status} to ${statusData.status}`,
+            `Invalid status transition from ${existingTherapist.status} to ${upperCaseStatus}`,
           );
         }
 
@@ -460,14 +462,14 @@ export class AdminTherapistService {
         const updatedTherapist = await tx.therapist.update({
           where: { userId: therapistId },
           data: {
-            status: statusData.status,
+            status: upperCaseStatus as any,
             processedByAdminId: adminId,
             processingDate: new Date(),
           },
         });
 
         // 4. Update user status if necessary
-        if (statusData.status === 'suspended') {
+        if (upperCaseStatus === 'SUSPENDED') {
           await tx.user.update({
             where: { id: therapistId },
             data: {
@@ -477,7 +479,7 @@ export class AdminTherapistService {
               suspensionReason: statusData.reason || 'Status updated by admin',
             },
           });
-        } else if (statusData.status === 'approved') {
+        } else if (upperCaseStatus === 'APPROVED') {
           await tx.user.update({
             where: { id: therapistId },
             data: {
@@ -500,7 +502,7 @@ export class AdminTherapistService {
             metadata: {
               therapistId,
               previousStatus: existingTherapist.status,
-              newStatus: statusData.status,
+              newStatus: upperCaseStatus,
               reason: statusData.reason,
               adminId,
               timestamp: new Date().toISOString(),
@@ -510,10 +512,10 @@ export class AdminTherapistService {
 
         // 6. Send status change notification
         const notificationTitle = this.getStatusChangeNotificationTitle(
-          statusData.status,
+          upperCaseStatus.toLowerCase(),
         );
         const notificationMessage = this.getStatusChangeNotificationMessage(
-          statusData.status,
+          upperCaseStatus.toLowerCase(),
           statusData.reason,
         );
 
@@ -522,20 +524,20 @@ export class AdminTherapistService {
           title: notificationTitle,
           message: notificationMessage,
           type: 'THERAPIST_STATUS_UPDATED',
-          priority: statusData.status === 'suspended' ? 'HIGH' : 'NORMAL',
+          priority: upperCaseStatus === 'SUSPENDED' ? 'HIGH' : 'NORMAL',
           actionUrl: '/therapist/dashboard',
         });
 
         this.logger.log(
-          `Admin ${adminId} updated therapist ${therapistId} status from ${existingTherapist.status} to ${statusData.status}`,
+          `Admin ${adminId} updated therapist ${therapistId} status from ${existingTherapist.status} to ${upperCaseStatus}`,
         );
 
         return {
           success: true,
           therapist: updatedTherapist,
           previousStatus: existingTherapist.status,
-          newStatus: statusData.status,
-          message: `Therapist status updated to ${statusData.status}`,
+          newStatus: upperCaseStatus,
+          message: `Therapist status updated to ${upperCaseStatus}`,
         };
       });
     } catch (error) {
@@ -573,21 +575,21 @@ export class AdminTherapistService {
         // Pending applications
         this.prisma.therapist.count({
           where: {
-            status: 'pending',
+            status: 'PENDING',
             submissionDate: { gte: start, lte: end },
           },
         }),
         // Approved applications in period
         this.prisma.therapist.count({
           where: {
-            status: 'approved',
+            status: 'APPROVED',
             processingDate: { gte: start, lte: end },
           },
         }),
         // Rejected applications in period
         this.prisma.therapist.count({
           where: {
-            status: 'rejected',
+            status: 'REJECTED',
             processingDate: { gte: start, lte: end },
           },
         }),
@@ -607,7 +609,7 @@ export class AdminTherapistService {
         this.prisma.therapist.findMany({
           where: {
             processingDate: { gte: start, lte: end },
-            status: { in: ['approved', 'rejected'] },
+            status: { in: ['APPROVED', 'REJECTED'] },
           },
           select: {
             submissionDate: true,
@@ -669,11 +671,11 @@ export class AdminTherapistService {
 
   private getValidStatusTransitions(currentStatus: string): string[] {
     const transitions = {
-      pending: ['approved', 'rejected', 'under_review'],
-      under_review: ['approved', 'rejected', 'pending'],
-      approved: ['suspended', 'under_review'],
-      rejected: ['pending', 'under_review'], // Allow resubmission
-      suspended: ['approved', 'rejected'],
+      PENDING: ['APPROVED', 'REJECTED', 'UNDER_REVIEW'],
+      UNDER_REVIEW: ['APPROVED', 'REJECTED', 'PENDING'],
+      APPROVED: ['SUSPENDED', 'UNDER_REVIEW'],
+      REJECTED: ['PENDING', 'UNDER_REVIEW'], // Allow resubmission
+      SUSPENDED: ['APPROVED', 'REJECTED'],
     };
 
     return transitions[currentStatus] || [];

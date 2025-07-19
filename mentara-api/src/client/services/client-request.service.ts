@@ -59,7 +59,7 @@ export class ClientRequestService {
           );
         }
 
-        if (therapist.status !== 'approved') {
+        if (therapist.status !== 'APPROVED') {
           throw new BadRequestException(
             'Cannot send request to unapproved therapist',
           );
@@ -89,7 +89,7 @@ export class ClientRequestService {
           where: {
             clientId,
             therapistId,
-            status: 'active',
+            status: 'ACTIVE',
           },
         });
 

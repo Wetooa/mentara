@@ -305,7 +305,7 @@ export class CommunityAccessGuard implements CanActivate {
         userId,
         communityId,
         role: {
-          in: ['moderator', 'admin'],
+          in: ['MODERATOR', 'ADMIN'],
         },
       },
     });

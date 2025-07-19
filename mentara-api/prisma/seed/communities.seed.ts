@@ -240,10 +240,10 @@ export async function seedMemberships(
             userId: user.id,
             communityId: community.id,
             role: faker.helpers.arrayElement([
-              'member',
-              'member',
-              'member',
-              'moderator',
+              'MEMBER',
+              'MEMBER',
+              'MEMBER',
+              'MODERATOR',
             ]), // 75% members, 25% moderators
             joinedAt: faker.date.past({ years: 2 }),
           },

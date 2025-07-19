@@ -34,10 +34,10 @@ export class AnalyticsService {
       ] = await Promise.all([
         this.prisma.user.count(),
         this.prisma.user.count({ where: whereDate }),
-        this.prisma.therapist.count({ where: { status: 'approved' } }),
+        this.prisma.therapist.count({ where: { status: 'APPROVED' } }),
         this.prisma.therapist.count({
           where: {
-            status: 'approved',
+            status: 'APPROVED',
             ...whereDate,
           },
         }),
@@ -293,7 +293,7 @@ export class AnalyticsService {
         worksheetsCompleted,
       ] = await Promise.all([
         this.prisma.clientTherapist.count({
-          where: { therapistId, status: 'active' },
+          where: { therapistId, status: 'ACTIVE' },
         }),
         this.prisma.sessionLog.count({
           where: { therapistId, ...whereDate },
