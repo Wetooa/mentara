@@ -58,21 +58,70 @@ export const VerifyEmailDtoSchema = z.object({
   token: z.string().min(1, 'Verification token is required'),
 });
 
-// OTP Verification Schemas (New)
+// OTP Type Enum Schema
+export const OtpTypeSchema = z.enum(['registration', 'password_reset', 'login_verification']);
+
+// OTP Verification Schemas (Updated)
 export const SendOtpDtoSchema = z.object({
   email: z.string().email('Invalid email format'),
-  type: z.enum(['email_verification', 'password_reset', 'login_verification']).default('email_verification'),
+  type: OtpTypeSchema.default('registration'),
 });
 
 export const VerifyOtpDtoSchema = z.object({
   email: z.string().email('Invalid email format'),
-  code: z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
-  type: z.enum(['email_verification', 'password_reset', 'login_verification']).default('email_verification'),
+  otpCode: z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+  type: OtpTypeSchema.default('registration'),
 });
 
 export const ResendOtpDtoSchema = z.object({
   email: z.string().email('Invalid email format'),
-  type: z.enum(['email_verification', 'password_reset', 'login_verification']).default('email_verification'),
+  type: OtpTypeSchema.default('registration'),
+});
+
+// Client Registration OTP Verification Schemas
+export const VerifyRegistrationOtpDtoSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  otpCode: z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+});
+
+export const ResendRegistrationOtpDtoSchema = z.object({
+  email: z.string().email('Invalid email format'),
+});
+
+// Email Service Response Schemas
+export const EmailResponseSchema = z.object({
+  status: z.enum(['success', 'error']),
+  message: z.string(),
+  emailId: z.string().optional(),
+  otp_code: z.string().optional(), // Only in development
+});
+
+export const EmailStatusResponseSchema = z.object({
+  status: z.enum(['success', 'error']),
+  configuration: z.object({
+    isInitialized: z.boolean(),
+    hasServiceId: z.boolean(),
+    hasTemplateId: z.boolean(),
+    hasPublicKey: z.boolean(),
+  }),
+  ready: z.boolean(),
+});
+
+// OTP Email Data Schema
+export const OtpEmailDataSchema = z.object({
+  to_email: z.string().email('Invalid email format'),
+  to_name: z.string().min(1, 'Recipient name is required'),
+  otp_code: z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+  expires_in: z.string().min(1, 'Expiry time is required'),
+  type: OtpTypeSchema,
+});
+
+// Auto OTP Email Request Schema
+export const AutoOtpEmailRequestSchema = z.object({
+  to_email: z.string().email('Invalid email format'),
+  to_name: z.string().min(1, 'Recipient name is required'),
+  type: OtpTypeSchema,
+  expires_in_minutes: z.number().int().min(1).max(60).default(10),
 });
 
 // Registration with OTP Schemas
@@ -190,9 +239,16 @@ export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type SendVerificationEmailDto = z.infer<typeof SendVerificationEmailDtoSchema>;
 export type ResendVerificationEmailDto = z.infer<typeof ResendVerificationEmailDtoSchema>;
 export type VerifyEmailDto = z.infer<typeof VerifyEmailDtoSchema>;
+export type OtpType = z.infer<typeof OtpTypeSchema>;
 export type SendOtpDto = z.infer<typeof SendOtpDtoSchema>;
 export type VerifyOtpDto = z.infer<typeof VerifyOtpDtoSchema>;
 export type ResendOtpDto = z.infer<typeof ResendOtpDtoSchema>;
+export type VerifyRegistrationOtpDto = z.infer<typeof VerifyRegistrationOtpDtoSchema>;
+export type ResendRegistrationOtpDto = z.infer<typeof ResendRegistrationOtpDtoSchema>;
+export type EmailResponse = z.infer<typeof EmailResponseSchema>;
+export type EmailStatusResponse = z.infer<typeof EmailStatusResponseSchema>;
+export type OtpEmailData = z.infer<typeof OtpEmailDataSchema>;
+export type AutoOtpEmailRequest = z.infer<typeof AutoOtpEmailRequestSchema>;
 export type RegisterWithOtpDto = z.infer<typeof RegisterWithOtpDtoSchema>;
 export type UserIdParam = z.infer<typeof UserIdParamSchema>;
 export type RegisterAdminDto = z.infer<typeof RegisterAdminDtoSchema>;

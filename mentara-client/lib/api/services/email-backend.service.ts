@@ -6,21 +6,17 @@
  */
 
 import { apiClient } from '../client';
+import { 
+  type OtpEmailData,
+  type AutoOtpEmailRequest,
+  type EmailResponse,
+  type EmailStatusResponse,
+  type OtpType 
+} from 'mentara-commons';
 
-export interface OtpEmailRequest {
-  to_email: string;
-  to_name: string;
-  otp_code: string;
-  expires_in: string;
-  type: 'registration' | 'password_reset' | 'login_verification';
-}
-
-export interface AutoOtpEmailRequest {
-  to_email: string;
-  to_name: string;
-  type: 'registration' | 'password_reset' | 'login_verification';
-  expires_in_minutes?: number;
-}
+// OtpEmailData and AutoOtpEmailRequest are now imported from mentara-commons
+export interface OtpEmailRequest extends OtpEmailData {}
+export interface AutoOtpEmailRequestLocal extends AutoOtpEmailRequest {}
 
 export interface TherapistNotificationRequest {
   to: string;
@@ -56,23 +52,7 @@ export interface GenericEmailRequest {
   data: any;
 }
 
-export interface EmailResponse {
-  status: 'success' | 'error';
-  message: string;
-  emailId?: string;
-  otp_code?: string; // Only in development
-}
-
-export interface EmailStatusResponse {
-  status: 'success' | 'error';
-  configuration: {
-    isInitialized: boolean;
-    hasServiceId: boolean;
-    hasTemplateId: boolean;
-    hasPublicKey: boolean;
-  };
-  ready: boolean;
-}
+// EmailResponse and EmailStatusResponse are now imported from mentara-commons
 
 export class BackendEmailService {
   /**
@@ -87,7 +67,7 @@ export class BackendEmailService {
    * Send OTP email with auto-generated code
    * This is the recommended method for OTP emails
    */
-  async sendOtpEmailAuto(request: AutoOtpEmailRequest): Promise<EmailResponse> {
+  async sendOtpEmailAuto(request: AutoOtpEmailRequestLocal): Promise<EmailResponse> {
     const response = await apiClient.post('/email/send-otp-auto', request);
     return response.data;
   }

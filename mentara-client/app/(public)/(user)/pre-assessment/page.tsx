@@ -3,7 +3,7 @@
 import Logo from "@/components/Logo";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/checklist";
 import QuestionnaireForm from "@/components/pre-assessment/forms/QuestionnaireForm";
-import PreAssessmentSignUp from "@/components/auth/RegistrationWithVerification";
+import PreAssessmentSignUp from "@/components/auth/ClientRegistration";
 import VerifyAccount from "@/components/auth/VerifyAccount";
 import PreAssessmentProgressBar from "@/components/pre-assessment/ProgressBar";
 import { Button } from "@/components/ui/button";

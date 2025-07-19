@@ -112,38 +112,145 @@ export declare const VerifyEmailDtoSchema: z.ZodObject<{
 }, {
     token: string;
 }>;
+export declare const OtpTypeSchema: z.ZodEnum<["registration", "password_reset", "login_verification"]>;
 export declare const SendOtpDtoSchema: z.ZodObject<{
     email: z.ZodString;
-    type: z.ZodDefault<z.ZodEnum<["email_verification", "password_reset", "login_verification"]>>;
+    type: z.ZodDefault<z.ZodEnum<["registration", "password_reset", "login_verification"]>>;
 }, "strip", z.ZodTypeAny, {
     email: string;
-    type: "email_verification" | "password_reset" | "login_verification";
+    type: "registration" | "password_reset" | "login_verification";
 }, {
     email: string;
-    type?: "email_verification" | "password_reset" | "login_verification" | undefined;
+    type?: "registration" | "password_reset" | "login_verification" | undefined;
 }>;
 export declare const VerifyOtpDtoSchema: z.ZodObject<{
     email: z.ZodString;
-    code: z.ZodString;
-    type: z.ZodDefault<z.ZodEnum<["email_verification", "password_reset", "login_verification"]>>;
+    otpCode: z.ZodString;
+    type: z.ZodDefault<z.ZodEnum<["registration", "password_reset", "login_verification"]>>;
 }, "strip", z.ZodTypeAny, {
     email: string;
-    code: string;
-    type: "email_verification" | "password_reset" | "login_verification";
+    type: "registration" | "password_reset" | "login_verification";
+    otpCode: string;
 }, {
     email: string;
-    code: string;
-    type?: "email_verification" | "password_reset" | "login_verification" | undefined;
+    otpCode: string;
+    type?: "registration" | "password_reset" | "login_verification" | undefined;
 }>;
 export declare const ResendOtpDtoSchema: z.ZodObject<{
     email: z.ZodString;
-    type: z.ZodDefault<z.ZodEnum<["email_verification", "password_reset", "login_verification"]>>;
+    type: z.ZodDefault<z.ZodEnum<["registration", "password_reset", "login_verification"]>>;
 }, "strip", z.ZodTypeAny, {
     email: string;
-    type: "email_verification" | "password_reset" | "login_verification";
+    type: "registration" | "password_reset" | "login_verification";
 }, {
     email: string;
-    type?: "email_verification" | "password_reset" | "login_verification" | undefined;
+    type?: "registration" | "password_reset" | "login_verification" | undefined;
+}>;
+export declare const VerifyRegistrationOtpDtoSchema: z.ZodObject<{
+    email: z.ZodString;
+    otpCode: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    otpCode: string;
+}, {
+    email: string;
+    otpCode: string;
+}>;
+export declare const ResendRegistrationOtpDtoSchema: z.ZodObject<{
+    email: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+}, {
+    email: string;
+}>;
+export declare const EmailResponseSchema: z.ZodObject<{
+    status: z.ZodEnum<["success", "error"]>;
+    message: z.ZodString;
+    emailId: z.ZodOptional<z.ZodString>;
+    otp_code: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    message: string;
+    status: "success" | "error";
+    emailId?: string | undefined;
+    otp_code?: string | undefined;
+}, {
+    message: string;
+    status: "success" | "error";
+    emailId?: string | undefined;
+    otp_code?: string | undefined;
+}>;
+export declare const EmailStatusResponseSchema: z.ZodObject<{
+    status: z.ZodEnum<["success", "error"]>;
+    configuration: z.ZodObject<{
+        isInitialized: z.ZodBoolean;
+        hasServiceId: z.ZodBoolean;
+        hasTemplateId: z.ZodBoolean;
+        hasPublicKey: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        isInitialized: boolean;
+        hasServiceId: boolean;
+        hasTemplateId: boolean;
+        hasPublicKey: boolean;
+    }, {
+        isInitialized: boolean;
+        hasServiceId: boolean;
+        hasTemplateId: boolean;
+        hasPublicKey: boolean;
+    }>;
+    ready: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    status: "success" | "error";
+    configuration: {
+        isInitialized: boolean;
+        hasServiceId: boolean;
+        hasTemplateId: boolean;
+        hasPublicKey: boolean;
+    };
+    ready: boolean;
+}, {
+    status: "success" | "error";
+    configuration: {
+        isInitialized: boolean;
+        hasServiceId: boolean;
+        hasTemplateId: boolean;
+        hasPublicKey: boolean;
+    };
+    ready: boolean;
+}>;
+export declare const OtpEmailDataSchema: z.ZodObject<{
+    to_email: z.ZodString;
+    to_name: z.ZodString;
+    otp_code: z.ZodString;
+    expires_in: z.ZodString;
+    type: z.ZodEnum<["registration", "password_reset", "login_verification"]>;
+}, "strip", z.ZodTypeAny, {
+    type: "registration" | "password_reset" | "login_verification";
+    otp_code: string;
+    to_email: string;
+    to_name: string;
+    expires_in: string;
+}, {
+    type: "registration" | "password_reset" | "login_verification";
+    otp_code: string;
+    to_email: string;
+    to_name: string;
+    expires_in: string;
+}>;
+export declare const AutoOtpEmailRequestSchema: z.ZodObject<{
+    to_email: z.ZodString;
+    to_name: z.ZodString;
+    type: z.ZodEnum<["registration", "password_reset", "login_verification"]>;
+    expires_in_minutes: z.ZodDefault<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    type: "registration" | "password_reset" | "login_verification";
+    to_email: string;
+    to_name: string;
+    expires_in_minutes: number;
+}, {
+    type: "registration" | "password_reset" | "login_verification";
+    to_email: string;
+    to_name: string;
+    expires_in_minutes?: number | undefined;
 }>;
 export declare const RegisterWithOtpDtoSchema: z.ZodObject<{
     email: z.ZodString;
@@ -431,9 +538,16 @@ export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type SendVerificationEmailDto = z.infer<typeof SendVerificationEmailDtoSchema>;
 export type ResendVerificationEmailDto = z.infer<typeof ResendVerificationEmailDtoSchema>;
 export type VerifyEmailDto = z.infer<typeof VerifyEmailDtoSchema>;
+export type OtpType = z.infer<typeof OtpTypeSchema>;
 export type SendOtpDto = z.infer<typeof SendOtpDtoSchema>;
 export type VerifyOtpDto = z.infer<typeof VerifyOtpDtoSchema>;
 export type ResendOtpDto = z.infer<typeof ResendOtpDtoSchema>;
+export type VerifyRegistrationOtpDto = z.infer<typeof VerifyRegistrationOtpDtoSchema>;
+export type ResendRegistrationOtpDto = z.infer<typeof ResendRegistrationOtpDtoSchema>;
+export type EmailResponse = z.infer<typeof EmailResponseSchema>;
+export type EmailStatusResponse = z.infer<typeof EmailStatusResponseSchema>;
+export type OtpEmailData = z.infer<typeof OtpEmailDataSchema>;
+export type AutoOtpEmailRequest = z.infer<typeof AutoOtpEmailRequestSchema>;
 export type RegisterWithOtpDto = z.infer<typeof RegisterWithOtpDtoSchema>;
 export type UserIdParam = z.infer<typeof UserIdParamSchema>;
 export type RegisterAdminDto = z.infer<typeof RegisterAdminDtoSchema>;

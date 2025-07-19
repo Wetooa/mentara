@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import emailjs from '@emailjs/nodejs';
+import { 
+  type OtpEmailData, 
+  type EmailResponse,
+  type OtpType 
+} from 'mentara-commons';
 
 export interface EmailNotificationData {
   to: string;
@@ -12,13 +17,7 @@ export interface EmailNotificationData {
   };
 }
 
-export interface OtpEmailData {
-  to_email: string;
-  to_name: string;
-  otp_code: string;
-  expires_in: string;
-  type: 'registration' | 'password_reset' | 'login_verification';
-}
+// OtpEmailData is now imported from mentara-commons
 
 export interface EmailTemplate {
   subject: string;
@@ -65,7 +64,9 @@ export class EmailService {
         this.isInitialized = true;
         this.logger.log('EmailJS initialized successfully');
       } else {
-        this.logger.warn('EmailJS public key not found in environment variables');
+        this.logger.warn(
+          'EmailJS public key not found in environment variables',
+        );
       }
     } catch (error) {
       this.logger.error('Failed to initialize EmailJS:', error);
@@ -79,26 +80,29 @@ export class EmailService {
    */
   generateOtpEmailTemplate(data: OtpEmailData): EmailTemplate {
     const { to_name, otp_code, expires_in, type } = data;
-    
+
     const typeConfig = {
       registration: {
         title: 'Welcome to Mentara!',
         subtitle: 'Verify your email address to complete registration',
         icon: '🎉',
-        description: 'Thank you for joining Mentara. Please use the verification code below to confirm your email address and complete your account setup.'
+        description:
+          'Thank you for joining Mentara. Please use the verification code below to confirm your email address and complete your account setup.',
       },
       password_reset: {
         title: 'Password Reset Request',
         subtitle: 'Verify your identity to reset your password',
         icon: '🔒',
-        description: 'You requested to reset your password. Please use the verification code below to proceed with resetting your password.'
+        description:
+          'You requested to reset your password. Please use the verification code below to proceed with resetting your password.',
       },
       login_verification: {
         title: 'Login Verification',
         subtitle: 'Secure your account with two-factor authentication',
         icon: '🛡️',
-        description: 'Please use the verification code below to complete your login and secure your account.'
-      }
+        description:
+          'Please use the verification code below to complete your login and secure your account.',
+      },
     };
 
     const config = typeConfig[type];
@@ -394,7 +398,9 @@ export class EmailService {
                     </div>
                 </div>
                 
-                ${type === 'registration' ? `
+                ${
+                  type === 'registration'
+                    ? `
                 <!-- Welcome Features -->
                 <div class="features">
                     <div class="features-title">What you'll get with Mentara:</div>
@@ -421,7 +427,9 @@ export class EmailService {
                         </li>
                     </ul>
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
             </div>
             
             <!-- Footer -->
@@ -464,14 +472,18 @@ Security Notice:
 Never share this code with anyone. Mentara staff will never ask for your verification codes.
 If you didn't request this code, please ignore this email.
 
-${type === 'registration' ? `
+${
+  type === 'registration'
+    ? `
 Welcome to Mentara! Here's what you'll get:
 • Access to licensed mental health professionals
 • Supportive community forums and groups
 • Personalized mental health assessments
 • Interactive worksheets and progress tracking
 • 24/7 crisis support and resources
-` : ''}
+`
+    : ''
+}
 
 Need help? Contact us at support@mentara.com
 
@@ -482,7 +494,7 @@ Making mental health care accessible to everyone.
     return {
       subject: config.title,
       html,
-      text
+      text,
     };
   }
 
@@ -491,17 +503,20 @@ Making mental health care accessible to everyone.
    * @param data OTP email data
    * @returns Promise with operation result
    */
-  async sendOtpEmail(data: OtpEmailData): Promise<{ success: boolean; message: string; emailId?: string }> {
+  async sendOtpEmail(
+    data: OtpEmailData,
+  ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
-        success: false,
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        status: 'error',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
     try {
       const template = this.generateOtpEmailTemplate(data);
-      
+
       const templateParams = {
         to_email: data.to_email,
         to_name: data.to_name,
@@ -512,28 +527,28 @@ Making mental health care accessible to everyone.
         expires_in: data.expires_in,
         company_name: 'Mentara',
         company_email: 'support@mentara.com',
-        company_website: process.env.APP_URL || 'https://mentara.com'
+        company_website: process.env.APP_URL || 'https://mentara.com',
       };
 
       const response = await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
-        templateParams
+        templateParams,
       );
 
       this.logger.log('✅ OTP email sent successfully:', response);
-      
+
       return {
-        success: true,
+        status: 'success',
         message: 'Verification code sent successfully!',
-        emailId: response.text
+        emailId: response.text,
       };
     } catch (error) {
       this.logger.error('❌ Failed to send OTP email:', error);
-      
+
       return {
-        success: false,
-        message: 'Failed to send verification code. Please try again.'
+        status: 'error',
+        message: 'Failed to send verification code. Please try again.',
       };
     }
   }
@@ -543,21 +558,20 @@ Making mental health care accessible to everyone.
    * @param data Email notification data
    * @returns Promise with operation result
    */
-  async sendTherapistApplicationNotification(data: EmailNotificationData): Promise<{
-    success: boolean;
-    message: string;
-    emailId?: string;
-  }> {
+  async sendTherapistApplicationNotification(
+    data: EmailNotificationData,
+  ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
-        success: false,
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        status: 'error',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
     if (!this.config.serviceId || !this.config.templateId) {
       return {
-        success: false,
+        status: 'error',
         message: 'EmailJS service ID or template ID not configured.',
       };
     }
@@ -596,10 +610,13 @@ Making mental health care accessible to everyone.
         templateParams,
       );
 
-      this.logger.log('Therapist notification email sent successfully:', response);
+      this.logger.log(
+        'Therapist notification email sent successfully:',
+        response,
+      );
 
       return {
-        success: true,
+        status: 'success',
         message: 'Notification email sent successfully',
         emailId: response.text,
       };
@@ -607,7 +624,7 @@ Making mental health care accessible to everyone.
       this.logger.error('Failed to send therapist notification email:', error);
 
       return {
-        success: false,
+        status: 'error',
         message:
           error instanceof Error
             ? error.message
@@ -757,7 +774,7 @@ Making mental health care accessible to everyone.
     therapistEmail: string,
     therapistName: string,
     credentials: { email: string; password: string },
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<EmailResponse> {
     const result = await this.sendTherapistApplicationNotification({
       to: therapistEmail,
       name: therapistName,
@@ -765,8 +782,9 @@ Making mental health care accessible to everyone.
       credentials,
     });
     return {
-      success: result.success,
+      status: result.status,
       message: result.message,
+      emailId: result.emailId,
     };
   }
 
@@ -781,7 +799,7 @@ Making mental health care accessible to everyone.
     therapistEmail: string,
     therapistName: string,
     reason?: string,
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<EmailResponse> {
     const result = await this.sendTherapistApplicationNotification({
       to: therapistEmail,
       name: therapistName,
@@ -789,8 +807,9 @@ Making mental health care accessible to everyone.
       adminNotes: reason,
     });
     return {
-      success: result.success,
+      status: result.status,
       message: result.message,
+      emailId: result.emailId,
     };
   }
 
@@ -798,17 +817,17 @@ Making mental health care accessible to everyone.
    * Test email service configuration
    * @returns Promise with test result
    */
-  async testConfiguration(): Promise<{ success: boolean; message: string }> {
+  async testConfiguration(): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
-        success: false,
+        status: 'error',
         message: 'EmailJS not initialized',
       };
     }
 
     if (!this.config.serviceId || !this.config.templateId) {
       return {
-        success: false,
+        status: 'error',
         message: 'Missing EmailJS configuration (service ID or template ID)',
       };
     }
@@ -843,13 +862,13 @@ Making mental health care accessible to everyone.
       this.logger.log('Therapist email content generated successfully');
 
       return {
-        success: true,
+        status: 'success',
         message: 'Email service configuration test passed',
       };
     } catch (error) {
       this.logger.error('Email service test failed:', error);
       return {
-        success: false,
+        status: 'error',
         message: error instanceof Error ? error.message : 'Test failed',
       };
     }
@@ -897,11 +916,11 @@ Making mental health care accessible to everyone.
   generateOtp(length: number = 6): string {
     const digits = '0123456789';
     let otp = '';
-    
+
     for (let i = 0; i < length; i++) {
       otp += digits[Math.floor(Math.random() * digits.length)];
     }
-    
+
     return otp;
   }
 
@@ -914,14 +933,14 @@ Making mental health care accessible to everyone.
     if (minutes < 60) {
       return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
     }
-    
+
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    
+
     if (remainingMinutes === 0) {
       return `${hours} hour${hours !== 1 ? 's' : ''}`;
     }
-    
+
     return `${hours} hour${hours !== 1 ? 's' : ''} and ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
   }
 

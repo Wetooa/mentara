@@ -7,7 +7,6 @@ import { PrismaService } from '../providers/prisma-client.provider';
 import { WorksheetUploadsController } from './worksheet-uploads.controller';
 import { EnhancedWorksheetsController } from './controllers/enhanced-worksheets.controller';
 import { WorksheetCollaborationGateway } from './gateways/worksheet-collaboration.gateway';
-import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 
 @Module({
   imports: [
@@ -26,7 +25,6 @@ import { SupabaseStorageService } from '../common/services/supabase-storage.serv
     EnhancedWorksheetsService,
     WorksheetCollaborationGateway,
     PrismaService,
-    SupabaseStorageService,
   ],
   exports: [WorksheetsService, EnhancedWorksheetsService],
 })

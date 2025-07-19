@@ -111,6 +111,23 @@ export const createClientAuthService = (client: AxiosInstance) => ({
     currentPassword: string;
     newPassword: string;
   }): Promise<{ success: boolean }> => client.post("/auth/client/change-password", data),
+
+  /**
+   * Verify registration OTP code
+   */
+  verifyOtp: (data: {
+    email: string;
+    otpCode: string;
+  }): Promise<{ success: boolean; message: string }> => 
+    client.post("/auth/client/verify-otp", data),
+
+  /**
+   * Resend registration OTP code
+   */
+  resendOtp: (data: {
+    email: string;
+  }): Promise<{ success: boolean; message: string }> => 
+    client.post("/auth/client/resend-otp", data),
 });
 
 export type ClientAuthService = ReturnType<typeof createClientAuthService>;

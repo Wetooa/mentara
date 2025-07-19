@@ -74,6 +74,7 @@ export class StripeService implements OnModuleInit {
   private stripe!: Stripe;
   private isInitialized = false;
   private webhookSecret!: string;
+  private isMockMode = false;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -103,6 +104,16 @@ export class StripeService implements OnModuleInit {
         return;
       }
 
+      // Check if we're using a mock/example API key
+      if (this.isExampleApiKey(stripeSecretKey)) {
+        this.isMockMode = true;
+        this.isInitialized = true;
+        this.logger.warn(
+          '🧪 Stripe running in MOCK MODE - using example API key. No real payments will be processed.',
+        );
+        return;
+      }
+
       this.stripe = new Stripe(stripeSecretKey, {
         typescript: true,
       });
@@ -117,11 +128,34 @@ export class StripeService implements OnModuleInit {
     }
   }
 
+  private isExampleApiKey(apiKey: string): boolean {
+    // Detect common example/fake API key patterns
+    return (
+      apiKey.includes('sk_test_51234567890') ||
+      apiKey.includes('example') ||
+      apiKey.includes('your-') ||
+      apiKey.includes('abcdef') ||
+      apiKey.includes('wxyz') ||
+      apiKey === 'sk_test_51234567890abcdefghijklmnopqrstuvwxyz'
+    );
+  }
+
   /**
    * Check if Stripe is initialized
    */
   private ensureInitialized(): void {
-    if (!this.isInitialized || !this.stripe) {
+    if (!this.isInitialized) {
+      throw new BadRequestException(
+        'Stripe is not configured. Please contact support.',
+      );
+    }
+    
+    if (this.isMockMode) {
+      // In mock mode, we don't need the actual stripe instance
+      return;
+    }
+    
+    if (!this.stripe) {
       throw new BadRequestException(
         'Stripe is not configured. Please contact support.',
       );
@@ -138,6 +172,11 @@ export class StripeService implements OnModuleInit {
     data: StripeCustomerData,
   ): Promise<Stripe.Customer> {
     this.ensureInitialized();
+
+    // Mock mode implementation
+    if (this.isMockMode) {
+      return this.createMockCustomer(userId, data);
+    }
 
     try {
       // Check if customer already exists in our database
@@ -192,6 +231,68 @@ export class StripeService implements OnModuleInit {
       );
       throw error;
     }
+  }
+
+  private async createMockCustomer(
+    userId: string,
+    data: StripeCustomerData,
+  ): Promise<Stripe.Customer> {
+    // Check if customer already exists in our database
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { stripeCustomerId: true },
+    });
+
+    let customerId = user?.stripeCustomerId;
+    
+    if (!customerId) {
+      // Generate a mock customer ID
+      customerId = `cus_mock_${userId.substring(0, 8)}_${Date.now()}`;
+      
+      // Update user with mock Stripe customer ID
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { stripeCustomerId: customerId },
+      });
+    }
+
+    this.logger.log(
+      `🧪 Created mock Stripe customer ${customerId} for user ${userId}`,
+    );
+
+    // Return a mock Stripe customer object
+    return {
+      id: customerId,
+      object: 'customer',
+      address: data.address || null,
+      balance: 0,
+      created: Math.floor(Date.now() / 1000),
+      currency: 'usd',
+      default_source: null,
+      delinquent: false,
+      description: null,
+      discount: null,
+      email: data.email,
+      invoice_prefix: customerId.substring(0, 8),
+      invoice_settings: {
+        custom_fields: null,
+        default_payment_method: null,
+        footer: null,
+        rendering_options: null,
+      },
+      livemode: false,
+      metadata: {
+        userId,
+        ...data.metadata,
+      },
+      name: data.name || null,
+      next_invoice_sequence: 1,
+      phone: data.phone || null,
+      preferred_locales: [],
+      shipping: null,
+      tax_exempt: 'none',
+      test_clock: null,
+    } as Stripe.Customer;
   }
 
   /**
@@ -322,6 +423,11 @@ export class StripeService implements OnModuleInit {
   ): Promise<Stripe.PaymentIntent> {
     this.ensureInitialized();
 
+    // Mock mode implementation
+    if (this.isMockMode) {
+      return this.createMockPaymentIntent(data);
+    }
+
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(data.amount * 100), // Convert to cents
@@ -342,6 +448,61 @@ export class StripeService implements OnModuleInit {
       this.logger.error(`Error creating payment intent:`, error);
       throw error;
     }
+  }
+
+  private createMockPaymentIntent(
+    data: CreatePaymentIntentData,
+  ): Stripe.PaymentIntent {
+    const paymentIntentId = `pi_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    this.logger.log(
+      `🧪 Created mock payment intent ${paymentIntentId} for amount $${data.amount}`,
+    );
+
+    return {
+      id: paymentIntentId,
+      object: 'payment_intent',
+      amount: Math.round(data.amount * 100), // Convert to cents
+      amount_capturable: 0,
+      amount_details: {
+        tip: {},
+      },
+      amount_received: 0,
+      application: null,
+      application_fee_amount: null,
+      automatic_payment_methods: null,
+      canceled_at: null,
+      cancellation_reason: null,
+      capture_method: 'automatic',
+      client_secret: `${paymentIntentId}_secret_mock`,
+      confirmation_method: data.confirmationMethod || 'automatic',
+      created: Math.floor(Date.now() / 1000),
+      currency: data.currency || 'usd',
+      customer: data.customerId || null,
+      description: data.description || null,
+      invoice: null,
+      last_payment_error: null,
+      latest_charge: null,
+      livemode: false,
+      metadata: data.metadata || {},
+      next_action: null,
+      on_behalf_of: null,
+      payment_method: data.paymentMethodId || null,
+      payment_method_options: {},
+      payment_method_types: ['card'],
+      processing: null,
+      receipt_email: null,
+      review: null,
+      setup_future_usage: null,
+      shipping: null,
+      statement_descriptor: null,
+      statement_descriptor_suffix: null,
+      status: 'succeeded', // Mock as successful
+      transfer_data: null,
+      transfer_group: null,
+      payment_method_configuration_details: null,
+      source: null,
+    } as Stripe.PaymentIntent;
   }
 
   /**
@@ -673,6 +834,11 @@ export class StripeService implements OnModuleInit {
   constructWebhookEvent(payload: Buffer, signature: string): Stripe.Event {
     this.ensureInitialized();
 
+    // Mock mode implementation
+    if (this.isMockMode) {
+      return this.createMockWebhookEvent(payload);
+    }
+
     try {
       return this.stripe.webhooks.constructEvent(
         payload,
@@ -685,12 +851,48 @@ export class StripeService implements OnModuleInit {
     }
   }
 
+  private createMockWebhookEvent(payload: Buffer): Stripe.Event {
+    let parsedPayload: any;
+    try {
+      parsedPayload = JSON.parse(payload.toString());
+    } catch {
+      parsedPayload = { type: 'payment_intent.succeeded', data: { object: {} } };
+    }
+
+    this.logger.log(
+      `🧪 Created mock webhook event for type: ${parsedPayload.type || 'unknown'}`,
+    );
+
+    return {
+      id: `evt_mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      object: 'event',
+      api_version: '2020-08-27',
+      created: Math.floor(Date.now() / 1000),
+      data: parsedPayload.data || { object: {} },
+      livemode: false,
+      pending_webhooks: 0,
+      request: {
+        id: null,
+        idempotency_key: null,
+      },
+      type: parsedPayload.type || 'payment_intent.succeeded',
+    } as Stripe.Event;
+  }
+
   /**
    * Handle webhook events
    */
   async handleWebhookEvent(event: Stripe.Event): Promise<void> {
     try {
       this.logger.log(`Handling webhook event: ${event.type}`);
+
+      // Mock mode implementation
+      if (this.isMockMode) {
+        this.logger.log(
+          `🧪 Mock webhook event processed: ${event.type}`,
+        );
+        return;
+      }
 
       switch (event.type) {
         case 'payment_intent.succeeded':

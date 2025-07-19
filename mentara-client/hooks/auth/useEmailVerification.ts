@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSignUpStore } from '@/store/pre-assessment';
+import { sendOtpEmailAuto, formatExpiryTime } from '@/lib/api/services/email-backend.service';
 
 interface UseEmailVerificationReturn {
   isLoading: boolean;
@@ -23,10 +24,20 @@ export function useEmailVerification(): UseEmailVerificationReturn {
       if (isLoaded && details?.email && verificationStatus === 'pending') {
         setIsLoading(true);
         try {
-          // Note: Email verification is now handled by the backend
-          // The verification link should be sent automatically upon registration
-          toast.success("Verification email sent! Please check your inbox.");
-          setVerificationStatus('sent');
+          // Send initial verification email using backend service
+          const result = await sendOtpEmailAuto({
+            to_email: details.email,
+            to_name: details.firstName || "User",
+            type: 'registration',
+            expires_in_minutes: 10
+          });
+
+          if (result.status === 'success') {
+            toast.success("Verification email sent! Please check your inbox.");
+            setVerificationStatus('sent');
+          } else {
+            throw new Error(result.message);
+          }
         } catch (error) {
           console.error("Failed to send initial verification email:", error);
           setVerificationStatus('error');
@@ -49,17 +60,22 @@ export function useEmailVerification(): UseEmailVerificationReturn {
     setIsResending(true);
     
     try {
-      const protocol = window.location.protocol;
-      const host = window.location.host;
-
       toast.loading("Resending verification email...", { id: 'resend-email' });
 
-      // TODO: Replace with proper API call when authentication system is implemented
-      // For now, simulate email sending
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Verification email sent! Please check your inbox.", { id: 'resend-email' });
-      setVerificationStatus('sent');
+      // Use backend email service to send OTP email
+      const result = await sendOtpEmailAuto({
+        to_email: details.email,
+        to_name: details.firstName || "User",
+        type: 'registration',
+        expires_in_minutes: 10
+      });
+
+      if (result.status === 'success') {
+        toast.success("Verification email sent! Please check your inbox.", { id: 'resend-email' });
+        setVerificationStatus('sent');
+      } else {
+        throw new Error(result.message);
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast.error(`Failed to resend verification email. ${errorMessage}`, { id: 'resend-email' });

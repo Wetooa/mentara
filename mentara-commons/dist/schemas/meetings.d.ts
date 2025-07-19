@@ -646,7 +646,7 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
     endedAt: z.ZodOptional<z.ZodString>;
     duration: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    status: "waiting" | "active" | "ended" | "error";
+    status: "error" | "waiting" | "active" | "ended";
     meetingId: string;
     roomId: string;
     participants: {
@@ -660,7 +660,7 @@ export declare const VideoCallStatusSchema: z.ZodObject<{
     startedAt?: string | undefined;
     endedAt?: string | undefined;
 }, {
-    status: "waiting" | "active" | "ended" | "error";
+    status: "error" | "waiting" | "active" | "ended";
     meetingId: string;
     roomId: string;
     participants: {

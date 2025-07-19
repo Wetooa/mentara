@@ -11,10 +11,7 @@ import {
   AlertCircle,
   RefreshCw,
   Shield,
-  Sparkles,
-  ArrowRight,
-  Eye,
-  EyeOff
+  ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,8 +24,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { generateOtp } from "@/lib/emailjs";
-import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 const otpSchema = z.object({
   code: z.string().min(6, "Verification code must be 6 digits").max(6, "Verification code must be 6 digits"),
@@ -42,6 +37,8 @@ interface EmailVerificationFormProps {
   type: 'registration' | 'password_reset' | 'login_verification';
   onVerificationSuccess: (code: string) => void;
   onCancel?: () => void;
+  onResendCode?: () => void;
+  isVerifying?: boolean;
   className?: string;
 }
 
@@ -53,15 +50,14 @@ export function EmailVerificationForm({
   type,
   onVerificationSuccess,
   onCancel,
+  onResendCode,
+  isVerifying = false,
   className
 }: EmailVerificationFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [currentOtp, setCurrentOtp] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState(EXPIRY_MINUTES * 60);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isExpired, setIsExpired] = useState(false);
-  const [showCodeHint, setShowCodeHint] = useState(false);
 
   const form = useForm<OtpForm>({
     resolver: zodResolver(otpSchema),
@@ -70,14 +66,6 @@ export function EmailVerificationForm({
     },
   });
 
-  // Use the email verification hook for proper business logic separation
-  const { resendVerificationEmail } = useEmailVerification();
-
-  // Generate initial OTP on component mount
-  useEffect(() => {
-    const otp = generateOtp(6);
-    setCurrentOtp(otp);
-  }, []);
 
   // Countdown timer
   useEffect(() => {
@@ -112,15 +100,13 @@ export function EmailVerificationForm({
 
 
   const handleResendCode = async () => {
+    if (!onResendCode) return;
+    
     setIsSending(true);
     
     try {
-      // Use the hook's resend functionality
-      await resendVerificationEmail();
-      
-      // Generate new OTP for local validation
-      const newOtp = generateOtp(6);
-      setCurrentOtp(newOtp);
+      // Call the parent component's resend function
+      await onResendCode();
       
       // Reset form and timers
       setTimeLeft(EXPIRY_MINUTES * 60);
@@ -140,25 +126,12 @@ export function EmailVerificationForm({
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Check if the entered code matches the current OTP
-      if (data.code === currentOtp) {
-        toast.success("Email verified successfully!");
-        onVerificationSuccess(data.code);
-      } else {
-        toast.error("Invalid verification code. Please try again.");
-        form.setError("code", { message: "Invalid code" });
-      }
+      // Call the parent component's verification function (backend verification)
+      await onVerificationSuccess(data.code);
     } catch (error) {
-      toast.error("Verification failed. Please try again.");
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+      console.error("Verification error:", error);
+      form.setError("code", { message: "Invalid code" });
     }
   };
 
@@ -242,7 +215,7 @@ export function EmailVerificationForm({
                     maxLength={6}
                     value={form.watch("code")}
                     onChange={(value) => form.setValue("code", value)}
-                    disabled={isLoading || isExpired}
+                    disabled={isVerifying || isExpired}
                   >
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
@@ -277,17 +250,6 @@ export function EmailVerificationForm({
                       {isExpired ? "Expired" : formatTime(timeLeft)}
                     </span>
                   </div>
-                  {process.env.NODE_ENV === 'development' && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowCodeHint(!showCodeHint)}
-                      className="h-auto p-1 text-xs"
-                    >
-                      {showCodeHint ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                    </Button>
-                  )}
                 </div>
                 
                 <Progress 
@@ -298,25 +260,6 @@ export function EmailVerificationForm({
                   )}
                 />
 
-                {/* Development hint */}
-                <AnimatePresence>
-                  {showCodeHint && process.env.NODE_ENV === 'development' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"
-                    >
-                      <div className="flex items-center gap-2 text-yellow-800">
-                        <Sparkles className="h-4 w-4" />
-                        <span className="text-sm font-medium">Dev Mode</span>
-                      </div>
-                      <p className="text-sm text-yellow-700 mt-1">
-                        Code: <code className="font-mono font-bold">{currentOtp}</code>
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
 
               {/* Status Messages */}
@@ -341,10 +284,10 @@ export function EmailVerificationForm({
               <div className="space-y-3">
                 <Button
                   type="submit"
-                  disabled={isLoading || isExpired || form.watch("code").length !== 6}
+                  disabled={isVerifying || isExpired || form.watch("code").length !== 6}
                   className="w-full"
                 >
-                  {isLoading ? (
+                  {isVerifying ? (
                     <>
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -370,7 +313,7 @@ export function EmailVerificationForm({
                     variant="link"
                     size="sm"
                     onClick={handleResendCode}
-                    disabled={isSending || resendCooldown > 0}
+                    disabled={isSending || resendCooldown > 0 || !onResendCode}
                     className="h-auto p-0 text-sm"
                   >
                     {isSending ? (

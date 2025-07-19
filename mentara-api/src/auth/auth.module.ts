@@ -25,8 +25,7 @@ import { TherapistAuthService } from './services/therapist-auth.service';
 import { AdminAuthService } from './services/admin-auth.service';
 import { ModeratorAuthService } from './services/moderator-auth.service';
 
-// External dependencies
-import { SupabaseStorageService } from '../common/services/supabase-storage.service';
+import { TherapistModule } from '../therapist/therapist.module';
 
 @Module({
   imports: [
@@ -38,6 +37,7 @@ import { SupabaseStorageService } from '../common/services/supabase-storage.serv
       },
     }),
     EmailModule,
+    TherapistModule,
   ],
   controllers: [
     AuthController,
@@ -63,8 +63,6 @@ import { SupabaseStorageService } from '../common/services/supabase-storage.serv
     AdminAuthService,
     ModeratorAuthService,
 
-    // External dependencies
-    SupabaseStorageService,
   ],
   exports: [
     AuthService,

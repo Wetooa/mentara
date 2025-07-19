@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckUserExistsResponseSchema = exports.CheckUserExistsDtoSchema = exports.UniversalLogoutResponseSchema = exports.TerminateOtherSessionsResponseSchema = exports.TerminateSessionResponseSchema = exports.ActiveSessionsResponseSchema = exports.SessionInfoResponseSchema = exports.TerminateSessionDtoSchema = exports.RegisterModeratorDtoSchema = exports.RegisterAdminDtoSchema = exports.EmailSchema = exports.UserIdSchema = exports.UserIdParamSchema = exports.RegisterWithOtpDtoSchema = exports.ResendOtpDtoSchema = exports.VerifyOtpDtoSchema = exports.SendOtpDtoSchema = exports.VerifyEmailDtoSchema = exports.ResendVerificationEmailDtoSchema = exports.SendVerificationEmailDtoSchema = exports.ResetPasswordDtoSchema = exports.RequestPasswordResetDtoSchema = exports.ChangePasswordDtoSchema = exports.RegisterUserDtoSchema = exports.LogoutDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = void 0;
+exports.CheckUserExistsResponseSchema = exports.CheckUserExistsDtoSchema = exports.UniversalLogoutResponseSchema = exports.TerminateOtherSessionsResponseSchema = exports.TerminateSessionResponseSchema = exports.ActiveSessionsResponseSchema = exports.SessionInfoResponseSchema = exports.TerminateSessionDtoSchema = exports.RegisterModeratorDtoSchema = exports.RegisterAdminDtoSchema = exports.EmailSchema = exports.UserIdSchema = exports.UserIdParamSchema = exports.RegisterWithOtpDtoSchema = exports.AutoOtpEmailRequestSchema = exports.OtpEmailDataSchema = exports.EmailStatusResponseSchema = exports.EmailResponseSchema = exports.ResendRegistrationOtpDtoSchema = exports.VerifyRegistrationOtpDtoSchema = exports.ResendOtpDtoSchema = exports.VerifyOtpDtoSchema = exports.SendOtpDtoSchema = exports.OtpTypeSchema = exports.VerifyEmailDtoSchema = exports.ResendVerificationEmailDtoSchema = exports.SendVerificationEmailDtoSchema = exports.ResetPasswordDtoSchema = exports.RequestPasswordResetDtoSchema = exports.ChangePasswordDtoSchema = exports.RegisterUserDtoSchema = exports.LogoutDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = void 0;
 const zod_1 = require("zod");
 // Authentication Core Schemas
 exports.LoginDtoSchema = zod_1.z.object({
@@ -50,19 +50,61 @@ exports.ResendVerificationEmailDtoSchema = zod_1.z.object({
 exports.VerifyEmailDtoSchema = zod_1.z.object({
     token: zod_1.z.string().min(1, 'Verification token is required'),
 });
-// OTP Verification Schemas (New)
+// OTP Type Enum Schema
+exports.OtpTypeSchema = zod_1.z.enum(['registration', 'password_reset', 'login_verification']);
+// OTP Verification Schemas (Updated)
 exports.SendOtpDtoSchema = zod_1.z.object({
     email: zod_1.z.string().email('Invalid email format'),
-    type: zod_1.z.enum(['email_verification', 'password_reset', 'login_verification']).default('email_verification'),
+    type: exports.OtpTypeSchema.default('registration'),
 });
 exports.VerifyOtpDtoSchema = zod_1.z.object({
     email: zod_1.z.string().email('Invalid email format'),
-    code: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
-    type: zod_1.z.enum(['email_verification', 'password_reset', 'login_verification']).default('email_verification'),
+    otpCode: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+    type: exports.OtpTypeSchema.default('registration'),
 });
 exports.ResendOtpDtoSchema = zod_1.z.object({
     email: zod_1.z.string().email('Invalid email format'),
-    type: zod_1.z.enum(['email_verification', 'password_reset', 'login_verification']).default('email_verification'),
+    type: exports.OtpTypeSchema.default('registration'),
+});
+// Client Registration OTP Verification Schemas
+exports.VerifyRegistrationOtpDtoSchema = zod_1.z.object({
+    email: zod_1.z.string().email('Invalid email format'),
+    otpCode: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+});
+exports.ResendRegistrationOtpDtoSchema = zod_1.z.object({
+    email: zod_1.z.string().email('Invalid email format'),
+});
+// Email Service Response Schemas
+exports.EmailResponseSchema = zod_1.z.object({
+    status: zod_1.z.enum(['success', 'error']),
+    message: zod_1.z.string(),
+    emailId: zod_1.z.string().optional(),
+    otp_code: zod_1.z.string().optional(), // Only in development
+});
+exports.EmailStatusResponseSchema = zod_1.z.object({
+    status: zod_1.z.enum(['success', 'error']),
+    configuration: zod_1.z.object({
+        isInitialized: zod_1.z.boolean(),
+        hasServiceId: zod_1.z.boolean(),
+        hasTemplateId: zod_1.z.boolean(),
+        hasPublicKey: zod_1.z.boolean(),
+    }),
+    ready: zod_1.z.boolean(),
+});
+// OTP Email Data Schema
+exports.OtpEmailDataSchema = zod_1.z.object({
+    to_email: zod_1.z.string().email('Invalid email format'),
+    to_name: zod_1.z.string().min(1, 'Recipient name is required'),
+    otp_code: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+    expires_in: zod_1.z.string().min(1, 'Expiry time is required'),
+    type: exports.OtpTypeSchema,
+});
+// Auto OTP Email Request Schema
+exports.AutoOtpEmailRequestSchema = zod_1.z.object({
+    to_email: zod_1.z.string().email('Invalid email format'),
+    to_name: zod_1.z.string().min(1, 'Recipient name is required'),
+    type: exports.OtpTypeSchema,
+    expires_in_minutes: zod_1.z.number().int().min(1).max(60).default(10),
 });
 // Registration with OTP Schemas
 exports.RegisterWithOtpDtoSchema = zod_1.z.object({

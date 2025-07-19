@@ -26,8 +26,12 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   RegisterClientDtoSchema,
   LoginDtoSchema,
+  VerifyRegistrationOtpDtoSchema,
+  ResendRegistrationOtpDtoSchema,
   type RegisterClientDto,
   type LoginDto,
+  type VerifyRegistrationOtpDto,
+  type ResendRegistrationOtpDto,
 } from 'mentara-commons';
 import { ClientAuthService } from '../services/client-auth.service';
 import { Request } from 'express';
@@ -278,5 +282,104 @@ export class ClientAuthController {
   @HttpCode(HttpStatus.OK)
   async markRecommendationsSeen(@CurrentUserId() userId: string) {
     return this.clientAuthService.markRecommendationsSeen(userId);
+  }
+
+  @Public()
+  @ApiOperation({
+    summary: 'Verify registration OTP',
+    description: 'Verify the OTP code sent to the client email during registration',
+  })
+  @ApiBody({
+    type: 'object',
+    description: 'OTP verification data',
+    schema: {
+      type: 'object',
+      required: ['email', 'otpCode'],
+      properties: {
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'client@example.com',
+        },
+        otpCode: {
+          type: 'string',
+          minLength: 6,
+          maxLength: 6,
+          example: '123456',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTP verified successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid OTP code or email, or OTP expired',
+  })
+  @ApiTooManyRequestsResponse({ description: 'Too many OTP verification attempts' })
+  @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 attempts per 5 minutes
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(
+    @Body(new ZodValidationPipe(VerifyRegistrationOtpDtoSchema))
+    verifyDto: VerifyRegistrationOtpDto,
+  ) {
+    return this.clientAuthService.verifyRegistrationOtp(
+      verifyDto.email,
+      verifyDto.otpCode,
+    );
+  }
+
+  @Public()
+  @ApiOperation({
+    summary: 'Resend registration OTP',
+    description: 'Resend the OTP code to the client email for registration verification',
+  })
+  @ApiBody({
+    type: 'object',
+    description: 'Email address for OTP resend',
+    schema: {
+      type: 'object',
+      required: ['email'],
+      properties: {
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'client@example.com',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTP resent successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid email or email already verified',
+  })
+  @ApiTooManyRequestsResponse({ description: 'Too many OTP resend attempts' })
+  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 resends per 5 minutes
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  async resendOtp(
+    @Body(new ZodValidationPipe(ResendRegistrationOtpDtoSchema))
+    resendDto: ResendRegistrationOtpDto,
+  ) {
+    return this.clientAuthService.resendRegistrationOtp(resendDto.email);
   }
 }

@@ -315,10 +315,10 @@ export declare const AuditLogSchema: z.ZodObject<{
     timestamp: z.ZodString;
     details: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    success: boolean;
     id: string;
     ipAddress: string;
     userAgent: string;
-    success: boolean;
     userId: string;
     action: string;
     severity: string;
@@ -330,10 +330,10 @@ export declare const AuditLogSchema: z.ZodObject<{
     timestamp: string;
     details: string;
 }, {
+    success: boolean;
     id: string;
     ipAddress: string;
     userAgent: string;
-    success: boolean;
     userId: string;
     action: string;
     severity: string;
@@ -362,10 +362,10 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
         timestamp: z.ZodString;
         details: z.ZodString;
     }, "strip", z.ZodTypeAny, {
+        success: boolean;
         id: string;
         ipAddress: string;
         userAgent: string;
-        success: boolean;
         userId: string;
         action: string;
         severity: string;
@@ -377,10 +377,10 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
         timestamp: string;
         details: string;
     }, {
+        success: boolean;
         id: string;
         ipAddress: string;
         userAgent: string;
-        success: boolean;
         userId: string;
         action: string;
         severity: string;
@@ -401,10 +401,10 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
     totalPages: number;
     hasMore: boolean;
     logs: {
+        success: boolean;
         id: string;
         ipAddress: string;
         userAgent: string;
-        success: boolean;
         userId: string;
         action: string;
         severity: string;
@@ -422,10 +422,10 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
     totalPages: number;
     hasMore: boolean;
     logs: {
+        success: boolean;
         id: string;
         ipAddress: string;
         userAgent: string;
-        success: boolean;
         userId: string;
         action: string;
         severity: string;
@@ -662,9 +662,9 @@ export declare const AuditLogCreateDtoSchema: z.ZodObject<{
     action: string;
     resource: string;
     resourceId: string;
+    success?: boolean | undefined;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
-    success?: boolean | undefined;
     severity?: string | undefined;
     metadata?: Record<string, any> | undefined;
     category?: string | undefined;
@@ -674,9 +674,9 @@ export declare const AuditLogCreateDtoSchema: z.ZodObject<{
     action: string;
     resource: string;
     resourceId: string;
+    success?: boolean | undefined;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
-    success?: boolean | undefined;
     severity?: string | undefined;
     metadata?: Record<string, any> | undefined;
     category?: string | undefined;
@@ -698,8 +698,8 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodString>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    ipAddress?: string | undefined;
     success?: boolean | undefined;
+    ipAddress?: string | undefined;
     userId?: string | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;
@@ -713,8 +713,8 @@ export declare const AuditLogQuerySchema: z.ZodObject<{
     resourceId?: string | undefined;
     category?: string | undefined;
 }, {
-    ipAddress?: string | undefined;
     success?: boolean | undefined;
+    ipAddress?: string | undefined;
     userId?: string | undefined;
     limit?: number | undefined;
     sortBy?: string | undefined;

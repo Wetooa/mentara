@@ -161,13 +161,16 @@ async function bootstrap() {
       customSiteTitle: 'Mentara API Documentation',
     });
 
-    console.log(
-      `📚 API Documentation available at: ${await app.getUrl()}/api/docs`,
-    );
   }
 
   await app.listen(process.env.PORT ?? 5000);
   console.log(`Application is running on: ${await app.getUrl()}`);
+  
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(
+      `📚 API Documentation available at: ${await app.getUrl()}/api/docs`,
+    );
+  }
 }
 
 void bootstrap();

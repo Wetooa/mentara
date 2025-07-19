@@ -8,7 +8,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { IsEmail, IsString, IsIn, IsOptional, IsObject } from 'class-validator';
-import { EmailService, OtpEmailData, EmailNotificationData } from './email.service';
+import { EmailService, EmailNotificationData } from './email.service';
+import { 
+  type OtpEmailData,
+  type EmailResponse,
+  type AutoOtpEmailRequest,
+  type OtpType 
+} from 'mentara-commons';
 
 // DTOs for request validation
 export class SendOtpEmailDto {
@@ -25,7 +31,7 @@ export class SendOtpEmailDto {
   expires_in!: string;
 
   @IsIn(['registration', 'password_reset', 'login_verification'])
-  type!: 'registration' | 'password_reset' | 'login_verification';
+  type!: OtpType;
 }
 
 export class SendTherapistNotificationDto {
@@ -84,7 +90,7 @@ export class EmailController {
 
       const result = await this.emailService.sendOtpEmail(dto);
 
-      if (!result.success) {
+      if (result.status === 'error') {
         throw new HttpException(
           {
             status: 'error',
@@ -151,7 +157,7 @@ export class EmailController {
 
       const result = await this.emailService.sendOtpEmail(otpData);
 
-      if (!result.success) {
+      if (result.status === 'error') {
         throw new HttpException(
           {
             status: 'error',
@@ -199,7 +205,7 @@ export class EmailController {
 
       const result = await this.emailService.sendTherapistApplicationNotification(dto);
 
-      if (!result.success) {
+      if (result.status === 'error') {
         throw new HttpException(
           {
             status: 'error',
@@ -256,7 +262,7 @@ export class EmailController {
         dto.credentials,
       );
 
-      if (!result.success) {
+      if (result.status === 'error') {
         throw new HttpException(
           {
             status: 'error',
@@ -311,7 +317,7 @@ export class EmailController {
         dto.reason,
       );
 
-      if (!result.success) {
+      if (result.status === 'error') {
         throw new HttpException(
           {
             status: 'error',
@@ -386,7 +392,7 @@ export class EmailController {
       const configStatus = this.emailService.getConfigurationStatus();
 
       return {
-        status: result.success ? 'success' : 'error',
+        status: result.status,
         message: result.message,
         configuration: configStatus,
       };
