@@ -29,6 +29,7 @@ import { SearchModule } from './search/search.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { HealthModule } from './health/health.module';
+import { EmailModule } from './email/email.module';
 import { PrismaService } from './providers/prisma-client.provider';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -96,6 +97,7 @@ import { JwtService } from '@nestjs/jwt';
     AnalyticsModule,
     OnboardingModule,
     HealthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

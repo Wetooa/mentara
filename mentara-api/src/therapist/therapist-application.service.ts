@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { EmailService } from '../services/email.service';
+import { EmailService } from '../email/email.service';
 import { TherapistApplicationCreateDto } from 'mentara-commons';
 import {
   ApplicationStatusUpdateDto,

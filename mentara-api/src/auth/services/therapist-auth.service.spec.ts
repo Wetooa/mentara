@@ -3,7 +3,7 @@ import { TherapistAuthService } from './therapist-auth.service';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from './token.service';
 import { EmailVerificationService } from './email-verification.service';
-import { EmailService } from '../../services/email.service';
+import { EmailService } from '../../email/email.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { TherapistApplicationService } from '../../therapist/therapist-application.service';
 import {

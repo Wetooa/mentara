@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PasswordResetService } from './password-reset.service';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { EmailService } from '../../services/email.service';
+import { EmailService } from '../../email/email.service';
 import { TokenService } from './token.service';
 import {
   BadRequestException,

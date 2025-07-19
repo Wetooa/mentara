@@ -11,7 +11,7 @@ import { PasswordResetService } from './services/password-reset.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
-import { EmailService } from '../services/email.service';
+import { EmailModule } from '../email/email.module';
 
 // Role-specific controllers
 import { ClientAuthController } from './controllers/client-auth.controller';
@@ -37,6 +37,7 @@ import { SupabaseStorageService } from '../common/services/supabase-storage.serv
         expiresIn: process.env.JWT_EXPIRES_IN || '1h',
       },
     }),
+    EmailModule,
   ],
   controllers: [
     AuthController,
@@ -52,7 +53,6 @@ import { SupabaseStorageService } from '../common/services/supabase-storage.serv
     TokenService,
     EmailVerificationService,
     PasswordResetService,
-    EmailService,
     JwtStrategy,
     GoogleStrategy,
     MicrosoftStrategy,

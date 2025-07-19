@@ -87,32 +87,32 @@ export const TEST_ACCOUNTS = {
 // Configuration constants
 export const SEED_CONFIG = {
   USERS: {
-    CLIENTS: 50,
-    THERAPISTS: 15,
-    ADMINS: 2,
-    MODERATORS: 3,
+    CLIENTS: 2, // Ultra-minimal for testing
+    THERAPISTS: 1, // Ultra-minimal for testing
+    ADMINS: 1, // Ultra-minimal for testing
+    MODERATORS: 0, // Skip moderators for testing
   },
   COMMUNITIES: {
-    ADDITIONAL: 5, // Additional to illness communities
-    POSTS_PER_COMMUNITY: 8,
-    COMMENTS_PER_POST: 4,
+    ADDITIONAL: 1, // Ultra-minimal - Additional to illness communities
+    POSTS_PER_COMMUNITY: 1, // Ultra-minimal for testing
+    COMMENTS_PER_POST: 1, // Ultra-minimal for testing
   },
   RELATIONSHIPS: {
-    CLIENT_THERAPIST_RATIO: 0.7, // 70% of clients get assigned to therapists
-    MEETINGS_PER_RELATIONSHIP: 3,
+    CLIENT_THERAPIST_RATIO: 0.8, // 80% of clients get assigned to therapists
+    MEETINGS_PER_RELATIONSHIP: 1, // Reduced from 3 for testing
   },
   ASSESSMENTS: {
     COMPLETION_RATE: 0.8, // 80% of clients complete pre-assessments
   },
   MESSAGING: {
     CONVERSATIONS_PER_RELATIONSHIP: 1, // Direct therapy conversations
-    MESSAGES_PER_CONVERSATION: 15, // Average messages in therapy conversations
-    GROUP_CONVERSATIONS: 3, // Number of group support conversations
-    SUPPORT_CONVERSATIONS: 2, // Number of community support conversations
+    MESSAGES_PER_CONVERSATION: 3, // Reduced from 15 for testing
+    GROUP_CONVERSATIONS: 1, // Reduced from 3 for testing
+    SUPPORT_CONVERSATIONS: 1, // Reduced from 2 for testing
   },
   WORKSHEETS: {
-    TEMPLATES: 10, // Number of worksheet templates to create
-    SUBMISSIONS_PER_RELATIONSHIP: 3, // Average submissions per client-therapist pair
+    TEMPLATES: 3, // Reduced from 10 for testing
+    SUBMISSIONS_PER_RELATIONSHIP: 1, // Reduced from 3 for testing
     COMPLETION_RATE: 0.75, // 75% completion rate for assigned worksheets
   },
   REVIEWS: {
@@ -121,13 +121,13 @@ export const SEED_CONFIG = {
     DETAILED_REVIEW_RATE: 0.8, // 80% of reviews include written feedback
   },
   SESSIONS: {
-    SESSIONS_PER_RELATIONSHIP: 5, // Average therapy sessions per relationship
-    ACTIVITIES_PER_SESSION: 3, // Activities tracked per session
-    PROGRESS_TRACKING_RATE: 0.9, // 90% of sessions have progress records
+    SESSIONS_PER_RELATIONSHIP: 1, // Further reduced for testing
+    ACTIVITIES_PER_SESSION: 1, // Further reduced for testing
+    PROGRESS_TRACKING_RATE: 0.5, // Reduced to 50% for testing
   },
   NOTIFICATIONS: {
-    DEVICES_PER_USER: 1.3, // Average devices per user (some have multiple)
-    NOTIFICATIONS_PER_USER: 12, // Average notifications per user
+    DEVICES_PER_USER: 1.0, // Reduced from 1.3 for testing
+    NOTIFICATIONS_PER_USER: 1, // Ultra-minimal for testing
     READ_RATE: 0.7, // 70% of notifications are read
   },
   THERAPIST_REQUESTS: {
@@ -136,102 +136,26 @@ export const SEED_CONFIG = {
     PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.6, low: 0.3 },
   },
   AUDIT_LOGS: {
-    COUNT: 500, // Number of audit log entries to generate
+    COUNT: 5, // Ultra-minimal for testing
     SUCCESS_RATE: 0.95, // 95% of actions are successful
     ADMIN_ACTION_RATE: 0.3, // 30% of logs are admin actions
   },
 };
 
-// Illness communities configuration (using new questionnaire constants)
+// Illness communities configuration - ULTRA-MINIMAL TEST VERSION
 export const ILLNESS_COMMUNITIES = [
   {
     name: 'ADHD Support',
     slug: 'adhd-support',
     description: 'A supportive community for individuals with ADHD to share experiences, coping strategies, and resources.',
   },
-  {
-    name: 'Anxiety Support',
-    slug: 'anxiety-support', 
-    description: 'Connect with others managing anxiety disorders, share coping techniques, and find understanding.',
-  },
-  {
-    name: 'Depression Support',
-    slug: 'depression-support',
-    description: 'A safe space for those dealing with depression to share their journey and support each other.',
-  },
-  {
-    name: 'PTSD & Trauma Recovery',
-    slug: 'ptsd-trauma-recovery',
-    description: 'Support for survivors of trauma and those working through PTSD recovery.',
-  },
-  {
-    name: 'Substance Use Recovery',
-    slug: 'substance-recovery',
-    description: 'Community for individuals in recovery from alcohol and substance use disorders.',
-  },
-  {
-    name: 'Eating Disorder Recovery',
-    slug: 'eating-disorder-recovery',
-    description: 'Support for those recovering from binge eating and other eating disorders.',
-  },
-  {
-    name: 'Burnout & Stress Management',
-    slug: 'burnout-stress-management',
-    description: 'Resources and support for managing workplace burnout and chronic stress.',
-  },
-  {
-    name: 'Sleep Disorders',
-    slug: 'sleep-disorders',
-    description: 'Community for those dealing with insomnia and other sleep-related challenges.',
-  },
-  {
-    name: 'Mood Disorders',
-    slug: 'mood-disorders',
-    description: 'Support for individuals with bipolar disorder and other mood disorders.',
-  },
-  {
-    name: 'OCD Support',
-    slug: 'ocd-support',
-    description: 'Community for those managing obsessive-compulsive disorder and related conditions.',
-  },
-  {
-    name: 'Panic & Anxiety',
-    slug: 'panic-anxiety',
-    description: 'Specific support for panic disorder and severe anxiety management.',
-  },
-  {
-    name: 'Phobia Support',
-    slug: 'phobia-support',
-    description: 'Community for overcoming specific phobias and irrational fears.',
-  },
-  {
-    name: 'Social Anxiety Support',
-    slug: 'social-anxiety-support',
-    description: 'Support for those dealing with social anxiety and social phobias.',
-  },
 ];
 
-// Additional community types for general support
+// Additional community types for general support - ULTRA-MINIMAL TEST VERSION
 export const ADDITIONAL_COMMUNITIES = [
   {
     name: 'Mindfulness & Meditation',
     description: 'A space for sharing mindfulness practices and meditation experiences',
-  },
-  {
-    name: 'Support Circle',
-    description: 'General support for anyone going through difficult times',
-  },
-  {
-    name: 'Wellness Warriors',
-    description: 'Focusing on physical and mental wellness together',
-  },
-  {
-    name: 'Creative Therapy',
-    description: 'Using art, music, and creativity for healing',
-  },
-  {
-    name: 'Family & Relationships',
-    description: 'Navigating family dynamics and relationship challenges',
   },
 ];
 

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { EmailService } from '../../services/email.service';
+import { EmailService } from '../../email/email.service';
 import { TokenService } from './token.service';
 import * as crypto from 'crypto';
 

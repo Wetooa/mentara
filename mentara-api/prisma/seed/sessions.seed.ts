@@ -257,12 +257,15 @@ async function createSelfGuidedActivities(prisma: PrismaClient, sessionLog: any)
 async function createUserActivities(prisma: PrismaClient, allUsers: any[], userActivities: any[]) {
   console.log('👤 Creating user platform activities...');
   
-  // Create activities for subset of users to avoid too much data
-  const activeUsers = faker.helpers.arrayElements(allUsers, Math.min(30, allUsers.length));
+  // DISABLED FOR TESTING - Create activities for subset of users to avoid too much data
+  console.log('⚠️ User activities creation disabled for testing');
+  
+  // Minimal activity creation for testing
+  const activeUsers = allUsers.slice(0, 2); // Only first 2 users
   
   for (const user of activeUsers) {
     try {
-      const activityCount = faker.number.int({ min: 10, max: 50 });
+      const activityCount = 2; // Only 2 activities per user for testing
       
       for (let i = 0; i < activityCount; i++) {
         const action = generateUserAction(user.role);
@@ -281,7 +284,7 @@ async function createUserActivities(prisma: PrismaClient, allUsers: any[], userA
         });
       }
     } catch (error) {
-      // Continue with next user if this one fails
+      console.log(`⚠️ Failed to create activity for user ${user.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

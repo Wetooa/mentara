@@ -13,14 +13,14 @@ import { TherapistRequestService } from './services/therapist-request.service';
 import { AdvancedMatchingService } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
 import { MatchingAnalyticsService } from './services/matching-analytics.service';
-import { EmailService } from '../services/email.service';
+import { EmailModule } from '../email/email.module';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
 import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
 
 @Module({
-  imports: [PreAssessmentModule],
+  imports: [PreAssessmentModule, EmailModule],
   controllers: [
     TherapistRecommendationController,
     TherapistManagementController,
@@ -38,7 +38,6 @@ import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
     AdvancedMatchingService,
     CompatibilityAnalysisService,
     MatchingAnalyticsService,
-    EmailService,
     NotificationsService,
     PrismaService,
     RoleUtils,

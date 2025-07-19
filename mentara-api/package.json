@@ -27,6 +27,7 @@
     "validate-endpoints": "node --max-old-space-size=1024 node_modules/.bin/ts-node scripts/validate-api-endpoints.ts"
   },
   "dependencies": {
+    "@emailjs/nodejs": "^5.0.2",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/class-validator": "^0.13.4",
     "@nestjs/common": "^11.0.1",
