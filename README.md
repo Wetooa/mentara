@@ -17,6 +17,45 @@ Mentara is a comprehensive mental health platform that connects patients with th
 - 📊 Comprehensive analytics and reporting
 - 🏥 HIPAA-compliant data handling
 
+## 🚀 Quick Start (Fresh Clone)
+
+**After cloning this repository for the first time:**
+
+```bash
+# 1. Run the automated setup script
+chmod +x setup-dev.sh && ./setup-dev.sh
+
+# 2. Configure environment variables
+cd mentara-api
+cp .env.example .env
+# Edit .env with your configuration values
+
+# 3. Start the backend
+npm run start:dev
+
+# 4. In a new terminal, start the frontend  
+cd ../mentara-client
+npm run dev
+```
+
+**Manual Setup (if script fails):**
+```bash
+# Install dependencies in order
+npm install                          # Root dependencies
+cd mentara-commons && npm install && npm run build  # Build shared library
+cd ../mentara-api && npm install    # Backend dependencies  
+cd ../mentara-client && npm install # Frontend dependencies
+
+# Then start services
+cd mentara-api && npm run start:dev  # Backend on port 3001
+cd mentara-client && npm run dev     # Frontend on port 3000
+```
+
+**Common Issues:**
+- `Cannot find module 'nest'` → Run `npm install` in mentara-api first
+- `Cannot find module 'mentara-commons'` → Build mentara-commons first
+- Environment validation errors → Configure .env file with required variables
+
 ## 🏗️ Architecture
 
 ### Microservices Structure
