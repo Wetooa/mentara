@@ -15,10 +15,11 @@ Mentara is a full-stack mental health platform connecting patients with therapis
 
 ### Technology Stack
 - **Framework**: NestJS 11.x with TypeScript
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Clerk backend integration
+- **Database**: PostgreSQL via Supabase with Prisma ORM
+- **Authentication**: JWT with OAuth (Google, Microsoft)
 - **Real-time**: Socket.io WebSocket integration
 - **File Storage**: Supabase Storage + AWS S3
+- **Caching**: Redis for session management
 - **Testing**: Jest with comprehensive test coverage
 
 ### Core Components
@@ -65,7 +66,8 @@ Prisma uses a multi-file schema approach in `prisma/models/`:
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL 14+
+- Docker and Docker Compose (for containerized development)
+- Supabase account (for database)
 - npm or bun
 
 ### Installation
@@ -196,6 +198,33 @@ Uses JWT-based local authentication with role-based access control:
 
 ## 🛠️ Development Commands
 
+### Using Make (Recommended)
+```bash
+# Development
+make dev                 # Start with hot reload
+make dev-debug          # Start with debugging
+make build              # Build for production
+make start              # Start production server
+
+# Docker Compose
+make compose-up         # Start services with docker-compose
+make compose-up-d       # Start services in background
+make compose-down       # Stop and remove containers
+make compose-logs       # View container logs
+
+# Code Quality
+make format             # Format with Prettier
+make lint               # Lint and fix TypeScript
+make test               # Run all tests
+
+# Database
+make db-migrate         # Run Prisma migrations
+make db-generate        # Generate Prisma client
+make db-seed            # Seed database
+make db-reset           # Reset and reseed database
+```
+
+### Using npm directly
 ```bash
 # Development
 npm run start:dev        # Start with hot reload
