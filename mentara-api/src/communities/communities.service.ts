@@ -10,8 +10,8 @@ import {
   CommunityUpdateInputDto,
 } from 'mentara-commons';
 
-// Local response interfaces
-interface CommunityResponse {
+// Exported response interfaces
+export interface CommunityResponse {
   id: string;
   name: string;
   description: string;
@@ -23,7 +23,7 @@ interface CommunityResponse {
   updatedAt: Date;
 }
 
-interface CommunityStatsResponse {
+export interface CommunityStatsResponse {
   memberCount?: number;
   postCount?: number;
   activeMembers?: number;
@@ -33,11 +33,11 @@ interface CommunityStatsResponse {
   illnessCommunities?: any[];
 }
 
-interface CommunityWithMembersResponse extends CommunityResponse {
+export interface CommunityWithMembersResponse extends CommunityResponse {
   members: any[];
 }
 
-interface CommunityWithRoomGroupsResponse extends CommunityResponse {
+export interface CommunityWithRoomGroupsResponse extends CommunityResponse {
   roomGroups: Array<{
     id: string;
     name: string;

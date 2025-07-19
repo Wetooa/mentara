@@ -114,6 +114,35 @@ docker-dev: ## Run development Docker container
 	@echo "$(GREEN)Running development Docker container...$(NC)"
 	@docker run -p $(PORT):3000 -v $(PWD):/app -e NODE_ENV=development mentara-client:latest npm run dev
 
+# Docker Compose (Service-specific)
+compose-up: ## Start services with docker-compose
+	@echo "$(GREEN)Starting services with docker-compose...$(NC)"
+	@docker-compose up --build
+
+compose-up-d: ## Start services in background
+	@echo "$(GREEN)Starting services in background...$(NC)"
+	@docker-compose up -d --build
+
+compose-down: ## Stop and remove containers
+	@echo "$(GREEN)Stopping containers...$(NC)"
+	@docker-compose down
+
+compose-logs: ## View container logs
+	@echo "$(GREEN)Viewing container logs...$(NC)"
+	@docker-compose logs -f mentara-client
+
+compose-shell: ## Open shell in running container
+	@echo "$(GREEN)Opening shell in container...$(NC)"
+	@docker-compose exec mentara-client /bin/sh
+
+compose-restart: ## Restart services
+	@echo "$(GREEN)Restarting services...$(NC)"
+	@docker-compose restart
+
+compose-clean: ## Remove containers and volumes
+	@echo "$(RED)Removing containers and volumes...$(NC)"
+	@docker-compose down -v
+
 # Maintenance
 clean: ## Clean build artifacts
 	@echo "$(GREEN)Cleaning build artifacts...$(NC)"
@@ -154,6 +183,12 @@ setup-env: ## Setup environment variables
 	else \
 		echo "$(YELLOW)Environment file already exists$(NC)"; \
 	fi
+
+setup-dev: ## Setup development environment
+	@echo "$(GREEN)Setting up development environment...$(NC)"
+	@$(MAKE) setup-env
+	@$(MAKE) install
+	@echo "$(GREEN)Development environment ready$(NC)"
 
 # Performance
 lighthouse: ## Run Lighthouse audit

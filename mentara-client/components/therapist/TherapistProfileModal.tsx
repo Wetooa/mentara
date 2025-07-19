@@ -39,7 +39,7 @@ interface TherapistProfileModalProps {
   onMessage?: (therapistId: string) => void;
 }
 
-export default function TherapistProfileModal({
+export function TherapistProfileModal({
   therapist,
   isOpen,
   onClose,

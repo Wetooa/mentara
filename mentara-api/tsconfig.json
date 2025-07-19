@@ -25,18 +25,13 @@
       "@mentara/commons": ["../mentara-commons/dist/index"]
     }
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
-    "scripts/**/*",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
     "node_modules",
-    "dist",
-    "../mentara-client/**/*",
-    "../ai-patient-evaluation/**/*",
-    "../node_modules/**/*",
-    "../.*",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "test/**/*",
-    "coverage/**/*",
-    ".nyc_output/**/*"
+    "dist"
   ]
 }

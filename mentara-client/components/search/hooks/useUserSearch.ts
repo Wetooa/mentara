@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { User } from '../UserSearchItem';
+import { User } from '@/components/search/UserSearchItem';
 
 export interface SearchUsersResponse {
   users: User[];

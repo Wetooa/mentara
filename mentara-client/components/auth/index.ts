@@ -1,7 +1,7 @@
 // Legacy exports (some components may have been removed)
 export { default as VerifyAccount } from "./VerifyAccount";
-export { default as ContinueWithGoogle } from "./ContinueWithGoogle";
-export { default as ContinueWithMicrosoft } from "./ContinueWithMicrosoft";
+export { ContinueWithGoogle } from "./ContinueWithGoogle";
+export { ContinueWithMicrosoft } from "./ContinueWithMicrosoft";
 export { withRole } from "./WithRole";
 
 // Enhanced error handling

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { renderWithQueryClient } from '@/__tests__/setup/form-test-utils'
 import { zodTestUtils } from '@/__tests__/setup/zod-test-utils'
 import { bookingMockData } from '@/__tests__/setup/form-mocks'
-import SessionSchedulingModal from '@/components/therapist/patient/SessionSchedulingModal'
+import { SessionSchedulingModal } from '@/components/therapist/patient/SessionSchedulingModal'
 import { z } from 'zod'
 
 // Mock dependencies

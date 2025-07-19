@@ -164,14 +164,66 @@ docker-dev: ## Run development Docker container
 	@echo "$(GREEN)Running development Docker container...$(NC)"
 	@docker run -p $(PORT):5001 -v $(PWD):/app -e FLASK_ENV=development mentara-ai-content-mod:latest
 
+# Docker Compose (Service-specific)
+compose-up: ## Start services with docker-compose
+	@echo "$(GREEN)Starting services with docker-compose...$(NC)"
+	@docker-compose up --build
+
+compose-up-d: ## Start services in background
+	@echo "$(GREEN)Starting services in background...$(NC)"
+	@docker-compose up -d --build
+
+compose-down: ## Stop and remove containers
+	@echo "$(GREEN)Stopping containers...$(NC)"
+	@docker-compose down
+
+compose-logs: ## View container logs
+	@echo "$(GREEN)Viewing container logs...$(NC)"
+	@docker-compose logs -f ai-content-moderation
+
+compose-logs-ollama: ## View Ollama container logs
+	@echo "$(GREEN)Viewing Ollama container logs...$(NC)"
+	@docker-compose logs -f ollama
+
+compose-shell: ## Open shell in running container
+	@echo "$(GREEN)Opening shell in container...$(NC)"
+	@docker-compose exec ai-content-moderation /bin/bash
+
+compose-ollama-shell: ## Open shell in Ollama container
+	@echo "$(GREEN)Opening shell in Ollama container...$(NC)"
+	@docker-compose exec ollama /bin/bash
+
+compose-restart: ## Restart services
+	@echo "$(GREEN)Restarting services...$(NC)"
+	@docker-compose restart
+
+compose-clean: ## Remove containers and volumes
+	@echo "$(RED)Removing containers and volumes...$(NC)"
+	@docker-compose down -v
+
+compose-pull-models: ## Pull Ollama models
+	@echo "$(GREEN)Pulling required Ollama models...$(NC)"
+	@docker-compose run --rm ollama-init
+
 # Setup & Installation
 setup: ## Complete setup process
 	@echo "$(GREEN)Running complete setup...$(NC)"
 	@python setup.py
 	@echo "$(GREEN)Setup completed$(NC)"
 
+# Environment Setup
+setup-env: ## Setup environment variables
+	@echo "$(GREEN)Setting up environment...$(NC)"
+	@if [ ! -f .env ]; then \
+		cp .env.example .env; \
+		echo "$(YELLOW)Please edit .env with your configuration$(NC)"; \
+	else \
+		echo "$(YELLOW)Environment file already exists$(NC)"; \
+	fi
+
 setup-dev: ## Setup development environment
 	@echo "$(GREEN)Setting up development environment...$(NC)"
+	@$(MAKE) setup-env
 	@$(MAKE) setup-venv
 	@echo "$(YELLOW)Please activate virtual environment: source $(VENV_DIR)/bin/activate$(NC)"
 	@echo "$(YELLOW)Then run: make install-dev && make setup$(NC)"

@@ -1,34 +1,128 @@
-# Mental Health AI Prediction Service
+# AI Patient Evaluation Service
 
-## Overview
+A production-ready Python Flask service providing AI-powered mental health assessments using PyTorch neural networks.
 
-This service provides AI-powered mental health assessments using a PyTorch neural network model. It processes 201-item questionnaire responses and predicts 19 different mental health conditions.
+## 🏗️ Project Overview
 
-## Features
+This service processes 201-item mental health questionnaire responses and predicts 19 different mental health conditions using a trained PyTorch neural network model.
 
+## 🚀 Architecture
+
+### Technology Stack
+- **Framework**: Flask with Python 3.11
+- **ML Library**: PyTorch for neural network models
+- **Deployment**: Docker with multi-stage builds
+- **Performance**: Gunicorn WSGI server with worker processes
+- **Monitoring**: Health checks and metrics endpoints
+- **Testing**: Pytest with comprehensive test coverage
+
+### Core Features
 - **Model**: PyTorch MultiLabelNN with 201 inputs → 19 mental health predictions
-- **API**: Flask REST API with `/predict`, `/health`, and service info endpoints  
+- **API**: RESTful Flask API with `/predict`, `/health`, and service info endpoints  
 - **Error Handling**: Graceful handling of missing model files and invalid inputs
-- **Testing**: Comprehensive test suite with unit, integration, and performance tests
-- **Monitoring**: Health checks and service status endpoints
+- **Security**: Input validation, rate limiting, and secure containerization
+- **Performance**: Optimized for low latency and high throughput
+- **Monitoring**: Health checks, metrics, and comprehensive logging
 
-## Quick Start
+## 🔧 Development Setup
 
 ### Prerequisites
+- Python 3.9+
+- Docker and Docker Compose (for containerized development)
+- pip or pipenv
+
+### Installation
+
+1. **Clone and setup environment**:
 ```bash
+git clone <repository-url>
+cd ai-patient-evaluation
+cp .env.example .env
+# Configure environment variables
+```
+
+2. **Setup virtual environment**:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Start the Service
+3. **Ensure ML model file is present**:
 ```bash
-python api.py
+# Place mental_model_config2.pt in the service directory
+# The model will be validated on startup
 ```
 
-The service will start on `http://localhost:5000` by default.
-
-### Health Check
+4. **Start development server**:
 ```bash
-curl http://localhost:5000/health
+python api.py
+# or with Make: make dev
+```
+
+The service will be available at `http://localhost:5000`
+
+## 🧪 Testing
+
+### Unit Tests
+```bash
+make test                # Run all tests
+make test-verbose        # Run tests with verbose output
+make test-coverage       # Run tests with coverage report
+```
+
+### Performance Tests
+```bash
+make test-performance    # Run performance and load tests
+make load-test           # Run load testing
+```
+
+### Integration Tests
+```bash
+make test-integration    # Run backend integration tests
+```
+
+## 🛠️ Development Commands
+
+### Using Make (Recommended)
+```bash
+# Development
+make dev                 # Start development server
+make dev-debug          # Start with debug mode
+make validate-model     # Validate ML model file
+
+# Docker Compose
+make compose-up         # Start services with docker-compose
+make compose-up-d       # Start services in background
+make compose-down       # Stop and remove containers
+make compose-logs       # View container logs
+
+# Code Quality
+make lint               # Run flake8 linting
+make format             # Format code with black
+make type-check         # Run mypy type checking
+make security-scan      # Run security audit
+
+# Environment
+make setup-env          # Setup environment variables
+make setup-dev          # Complete development setup
+```
+
+### Using Python directly
+```bash
+# Development
+python api.py           # Start development server
+FLASK_DEBUG=1 python api.py  # Start with debug mode
+
+# Testing
+python -m pytest       # Run unit tests
+python test_api.py      # Test API endpoints
+python test_performance.py  # Run performance tests
+
+# Code Quality
+flake8 .               # Run linting
+black .                # Format code
+mypy .                 # Type checking
 ```
 
 ## API Endpoints

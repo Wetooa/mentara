@@ -24,6 +24,7 @@ export {
   type QuestionnaireType,
   type CommunityName,
   LIST_OF_QUESTIONNAIRES,
+  QUESTIONNAIRE_MAP,
   QUESTIONNAIRE_MAPPING,
   type QuestionnaireMapping,
 

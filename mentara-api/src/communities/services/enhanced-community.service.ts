@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-interface CommunitySearchFilters {
+export interface CommunitySearchFilters {
   query?: string;
   tags?: string[];
   minMembers?: number;
@@ -19,7 +19,7 @@ interface CommunitySearchFilters {
   membershipRequired?: boolean;
 }
 
-interface CommunitySearchResult {
+export interface CommunitySearchResult {
   id: string;
   name: string;
   slug: string;
@@ -40,7 +40,7 @@ interface CommunitySearchResult {
   tags?: string[];
 }
 
-interface EnhancedCommunityDetails {
+export interface EnhancedCommunityDetails {
   id: string;
   name: string;
   slug: string;
@@ -97,7 +97,7 @@ interface EnhancedCommunityDetails {
   };
 }
 
-interface CommunityTrendingData {
+export interface CommunityTrendingData {
   growthRate: number; // percentage growth in members
   activityScore: number; // based on posts, comments, hearts
   engagementRate: number; // comments per post ratio

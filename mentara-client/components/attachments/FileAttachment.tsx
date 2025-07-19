@@ -143,8 +143,8 @@ export function FileAttachment({
           i === fileIndex
             ? {
                 ...f,
-                id: response.id,
-                url: response.url,
+                id: (response as Record<string, unknown>).id as string,
+                url: (response as Record<string, unknown>).url as string,
                 uploadProgress: 100,
                 isUploaded: true,
                 uploadError: undefined,

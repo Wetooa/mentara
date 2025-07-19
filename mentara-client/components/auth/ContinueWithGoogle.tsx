@@ -53,4 +53,3 @@ export function ContinueWithGoogle() {
   );
 }
 
-export default ContinueWithGoogle;

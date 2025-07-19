@@ -78,7 +78,7 @@ import {
   type RecordUsageDto,
   type GetUsageRecordsQueryDto,
   type GetBillingStatisticsQueryDto,
-} from '@mentara/commons';
+} from 'mentara-commons';
 import {
   BillingCycle,
   SubscriptionTier,

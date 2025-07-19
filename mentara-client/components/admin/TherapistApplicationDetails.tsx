@@ -338,7 +338,7 @@ export function TherapistApplicationDetails({
           </Badge>
         </div>
         <p className="text-sm text-gray-500">
-          Submitted on {formatDate(application.submissionDate)}
+          Submitted on {formatDate(application.createdAt)}
         </p>
       </CardHeader>
       <CardContent>
@@ -368,27 +368,27 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     First Name
                   </h3>
-                  <p className="mt-1">{application.firstName}</p>
+                  <p className="mt-1">{application.personalInfo.firstName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Last Name
                   </h3>
-                  <p className="mt-1">{application.lastName}</p>
+                  <p className="mt-1">{application.personalInfo.lastName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="mt-1">{application.email}</p>
+                  <p className="mt-1">{application.personalInfo.email}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Mobile</h3>
-                  <p className="mt-1">{application.mobile}</p>
+                  <p className="mt-1">{application.personalInfo.phone}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Province
                   </h3>
-                  <p className="mt-1">{application.province}</p>
+                  <p className="mt-1">{application.personalInfo.state}</p>
                 </div>
               </div>
             </TabsContent>
@@ -399,34 +399,34 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     Provider Type
                   </h3>
-                  <p className="mt-1">{application.providerType}</p>
+                  <p className="mt-1">{(application as Record<string, unknown>).providerType as string || 'Not specified'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Professional License Type
                   </h3>
-                  <p className="mt-1">{application.professionalLicenseType}</p>
+                  <p className="mt-1">{(application as Record<string, unknown>).professionalLicenseType as string || 'Not specified'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC Licensed
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.isPRCLicensed)}
+                    {renderYesNo((application as Record<string, unknown>).isPRCLicensed as string)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC License Number
                   </h3>
-                  <p className="mt-1">{application.prcLicenseNumber}</p>
+                  <p className="mt-1">{(application as Record<string, unknown>).prcLicenseNumber as string || 'Not provided'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     License Expiration Date
                   </h3>
                   <p className="mt-1">
-                    {formatDate(application.expirationDateOfLicense)}
+                    {formatDate((application as Record<string, unknown>).expirationDateOfLicense as string)}
                   </p>
                 </div>
                 <div>
@@ -434,14 +434,14 @@ export function TherapistApplicationDetails({
                     License Active
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.isLicenseActive)}
+                    {renderYesNo((application as Record<string, unknown>).isLicenseActive as string)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Years of Experience
                   </h3>
-                  <p className="mt-1">{application.yearsOfExperience}</p>
+                  <p className="mt-1">{application.professionalInfo.yearsOfExperience}</p>
                 </div>
               </div>
 
@@ -451,28 +451,28 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Areas of Expertise
                 </h3>
-                {renderObjectItems(application.areasOfExpertise)}
+                {renderObjectItems(application.professionalInfo.specialties)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Assessment Tools
                 </h3>
-                {renderObjectItems(application.assessmentTools)}
+                {renderObjectItems((application as Record<string, unknown>).assessmentTools as string[])}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Therapeutic Approaches
                 </h3>
-                {renderObjectItems(application.therapeuticApproachesUsedList)}
+                {renderObjectItems((application as Record<string, unknown>).therapeuticApproachesUsedList as string[])}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Languages Offered
                 </h3>
-                {renderObjectItems(application.languagesOffered)}
+                {renderObjectItems(application.professionalInfo.languages)}
               </div>
             </TabsContent>
 
@@ -483,7 +483,7 @@ export function TherapistApplicationDetails({
                     Provided Online Therapy Before
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.providedOnlineTherapyBefore)}
+                    {renderYesNo((application as Record<string, unknown>).providedOnlineTherapyBefore as string)}
                   </p>
                 </div>
                 <div>
@@ -491,20 +491,20 @@ export function TherapistApplicationDetails({
                     Comfortable Using Video Conferencing
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.comfortableUsingVideoConferencing)}
+                    {renderYesNo((application as Record<string, unknown>).comfortableUsingVideoConferencing as string)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Weekly Availability (hours)
                   </h3>
-                  <p className="mt-1">{application.weeklyAvailability}</p>
+                  <p className="mt-1">{(application as Record<string, unknown>).weeklyAvailability as string}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Preferred Session Length (minutes)
                   </h3>
-                  <p className="mt-1">{application.preferredSessionLength}</p>
+                  <p className="mt-1">{(application as Record<string, unknown>).preferredSessionLength as string}</p>
                 </div>
               </div>
 
@@ -514,7 +514,7 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Accepts
                 </h3>
-                {renderObjectItems(application.accepts)}
+                {renderObjectItems((application as Record<string, unknown>).accepts as string[])}
               </div>
             </TabsContent>
 
@@ -525,7 +525,7 @@ export function TherapistApplicationDetails({
                     Has Private Confidential Space
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.privateConfidentialSpace)}
+                    {renderYesNo((application as Record<string, unknown>).privateConfidentialSpace as string)}
                   </p>
                 </div>
                 <div>
@@ -533,7 +533,7 @@ export function TherapistApplicationDetails({
                     Complies With Data Privacy Act
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.compliesWithDataPrivacyAct)}
+                    {renderYesNo((application as Record<string, unknown>).compliesWithDataPrivacyAct as string)}
                   </p>
                 </div>
                 <div>
@@ -541,7 +541,7 @@ export function TherapistApplicationDetails({
                     Professional Liability Insurance
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.professionalLiabilityInsurance)}
+                    {renderYesNo((application as Record<string, unknown>).professionalLiabilityInsurance as string)}
                   </p>
                 </div>
                 <div>
@@ -549,7 +549,7 @@ export function TherapistApplicationDetails({
                     Complaints Or Disciplinary Actions
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.complaintsOrDisciplinaryActions)}
+                    {renderYesNo((application as Record<string, unknown>).complaintsOrDisciplinaryActions as string)}
                   </p>
                 </div>
                 <div>
@@ -558,7 +558,7 @@ export function TherapistApplicationDetails({
                   </h3>
                   <p className="mt-1">
                     {renderYesNo(
-                      application.willingToAbideByPlatformGuidelines
+                      (application as Record<string, unknown>).willingToAbideByPlatformGuidelines as string
                     )}
                   </p>
                 </div>
@@ -616,8 +616,8 @@ export function TherapistApplicationDetails({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "approve"
-                ? `Are you sure you want to approve ${application.firstName} ${application.lastName}'s application? This will allow them to start using the platform as a therapist.`
-                : `Are you sure you want to reject ${application.firstName} ${application.lastName}'s application? They will be notified via email.`}
+                ? `Are you sure you want to approve ${application.personalInfo.firstName} ${application.personalInfo.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.personalInfo.firstName} ${application.personalInfo.lastName}'s application? They will be notified via email.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

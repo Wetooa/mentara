@@ -5,7 +5,7 @@ import { Search, Filter } from "lucide-react";
 import TherapistListing from "@/components/therapist/listing/TherapistListing";
 import MeetingsSection from "@/components/therapist/listing/MeetingsSection";
 import RecommendedSection from "@/components/therapist/listing/RecommendedSection";
-import AdvancedFilters from "@/components/therapist/filters/AdvancedFilters";
+import { AdvancedFilters } from "@/components/therapist/filters/AdvancedFilters";
 import { TherapistListingErrorWrapper } from "@/components/common/TherapistListingErrorBoundary";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

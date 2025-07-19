@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { User } from '../UserSearchItem';
+import { User } from '@/components/search/UserSearchItem';
 
 const RECENT_SEARCHES_KEY = 'mentara_recent_searches';
 const MAX_RECENT_SEARCHES = 10;

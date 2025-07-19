@@ -1,8 +1,8 @@
-import { useCommunities } from '../useCommunities';
-import { useCommunityMembers, useCommunityMemberships } from './useCommunityMembers';
-import { useCommunityRooms } from './useCommunityRooms';
-import { useCommunityStats } from './useCommunityStats';
-import { useCommunityAssignment } from './useCommunityAssignment';
+import { useCommunities } from '@/hooks/useCommunities';
+import { useCommunityMembers, useCommunityMemberships } from '@/hooks/community/useCommunityMembers';
+import { useCommunityRooms } from '@/hooks/community/useCommunityRooms';
+import { useCommunityStats } from '@/hooks/community/useCommunityStats';
+import { useCommunityAssignment } from '@/hooks/community/useCommunityAssignment';
 
 /**
  * Comprehensive hook that provides a complete overview of community functionality

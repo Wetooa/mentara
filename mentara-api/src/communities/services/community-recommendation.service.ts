@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { CommunityMatchingService } from './community-matching.service';
 
-interface CommunityRecommendation {
+export interface CommunityRecommendation {
   id: string;
   name: string;
   slug: string;

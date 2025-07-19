@@ -1,5 +1,5 @@
 import React from "react";
-import { Progress } from "../ui/progress";
+import { Progress } from "@/components/ui/progress";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 import { QUESTIONNAIRE_MAP } from "@/constants/questionnaires";
 

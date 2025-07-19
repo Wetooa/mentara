@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSessionManager } from "../sessions/useSessionManager";
+import { useSessionManager } from "@/hooks/sessions/useSessionManager";
 
 export function useOnboardingRedirect() {
   const router = useRouter();

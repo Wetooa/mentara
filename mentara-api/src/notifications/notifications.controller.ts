@@ -16,7 +16,7 @@ import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
   NotificationQuerySchema,
   type NotificationQuery,
-} from '@mentara/commons';
+} from 'mentara-commons';
 import { NotificationType, NotificationPriority } from '@prisma/client';
 import {
   ApiTags,

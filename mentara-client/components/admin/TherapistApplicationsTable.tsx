@@ -126,14 +126,14 @@ export function TherapistApplicationsTable({
                 </TableCell>
                 <TableCell className="font-medium">
                   <div className="space-y-1">
-                    <div>{application.lastName || 'Unknown'}, {application.firstName || 'Unknown'}</div>
+                    <div>{application.personalInfo.lastName || 'Unknown'}, {application.personalInfo.firstName || 'Unknown'}</div>
                     <div className="lg:hidden text-xs text-gray-500">
-                      {application.providerType || 'Not specified'} • {formatDate(application.submissionDate)}
+                      {(application as Record<string, unknown>).providerType as string || 'Not specified'} • {formatDate(application.createdAt)}
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden lg:table-cell">{application.providerType || 'Not specified'}</TableCell>
-                <TableCell className="hidden lg:table-cell">{formatDate(application.submissionDate)}</TableCell>
+                <TableCell className="hidden lg:table-cell">{(application as Record<string, unknown>).providerType as string || 'Not specified'}</TableCell>
+                <TableCell className="hidden lg:table-cell">{formatDate(application.createdAt)}</TableCell>
                 <TableCell>
                   <Badge
                     className={
@@ -190,13 +190,13 @@ export function TherapistApplicationsTable({
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <h3 className="font-medium text-sm">
-                  {application.lastName || 'Unknown'}, {application.firstName || 'Unknown'}
+                  {application.personalInfo.lastName || 'Unknown'}, {application.personalInfo.firstName || 'Unknown'}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  {application.providerType || 'Not specified'}
+                  {(application as Record<string, unknown>).providerType as string || 'Not specified'}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Submitted: {formatDate(application.submissionDate)}
+                  Submitted: {formatDate(application.createdAt)}
                 </p>
               </div>
               <Badge

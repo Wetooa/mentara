@@ -35,65 +35,17 @@ const schema = z.object({
     .min(1, "Please select your professional license type."),
   professionalLicenseType_specify: z
     .string()
-    .optional()
-    .refine(
-      (val, ctx) => {
-        if (ctx.parent.professionalLicenseType === "other") {
-          return val && val.length > 0;
-        }
-        return true;
-      },
-      {
-        message: "Please specify your license type.",
-        path: ["professionalLicenseType_specify"],
-      }
-    ),
+    .optional(),
   isPRCLicensed: z.string().min(1, "Please indicate if you are PRC-licensed."),
   prcLicenseNumber: z
     .string()
-    .optional()
-    .refine(
-      (val, ctx) => {
-        if (ctx.parent.isPRCLicensed === "yes") {
-          return val && /^[0-9]{7}$/.test(val);
-        }
-        return true;
-      },
-      {
-        message: "Please enter a valid 7-digit PRC license number.",
-        path: ["prcLicenseNumber"],
-      }
-    ),
+    .optional(),
   expirationDateOfLicense: z
     .string()
-    .optional()
-    .refine(
-      (val, ctx) => {
-        if (ctx.parent.isPRCLicensed === "yes") {
-          return val && val.length > 0;
-        }
-        return true;
-      },
-      {
-        message: "Please enter the license expiration date.",
-        path: ["expirationDateOfLicense"],
-      }
-    ),
+    .optional(),
   isLicenseActive: z
     .string()
-    .optional()
-    .refine(
-      (val, ctx) => {
-        if (ctx.parent.isPRCLicensed === "yes") {
-          return val && val.length > 0;
-        }
-        return true;
-      },
-      {
-        message: "Please confirm the status of your license.",
-        path: ["isLicenseActive"],
-      }
-    ),
+    .optional(),
   teletherapyReadiness: z.object({
     providedOnlineTherapyBefore: z
       .string()
@@ -118,26 +70,69 @@ const schema = z.object({
       .min(1, "Please answer regarding complaints history."),
     complaintsOrDisciplinaryActions_specify: z
       .string()
-      .optional()
-      .refine(
-        (val, ctx) => {
-          if (ctx.parent.complaintsOrDisciplinaryActions === "yes") {
-            return val && val.length >= 10;
-          }
-          return true;
-        },
-        {
-          message: "Please provide a brief explanation (min. 10 characters).",
-          path: ["complaintsOrDisciplinaryActions_specify"],
-        }
-      ),
+      .optional(),
     willingToAbideByPlatformGuidelines: z
       .string()
-      .refine((val) => val === "yes", {
-        message:
-          "You must agree to abide by the platform guidelines to proceed.",
-      }),
+      .min(1, "You must agree to abide by the platform guidelines to proceed."),
   }),
+}).superRefine((data, ctx) => {
+  // Validate professionalLicenseType_specify when "other" is selected
+  if (data.professionalLicenseType === "other") {
+    if (!data.professionalLicenseType_specify || data.professionalLicenseType_specify.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please specify your license type.",
+        path: ["professionalLicenseType_specify"],
+      });
+    }
+  }
+
+  // Validate PRC license fields when isPRCLicensed is "yes"
+  if (data.isPRCLicensed === "yes") {
+    if (!data.prcLicenseNumber || !/^[0-9]{7}$/.test(data.prcLicenseNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid 7-digit PRC license number.",
+        path: ["prcLicenseNumber"],
+      });
+    }
+
+    if (!data.expirationDateOfLicense || data.expirationDateOfLicense.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter the license expiration date.",
+        path: ["expirationDateOfLicense"],
+      });
+    }
+
+    if (!data.isLicenseActive || data.isLicenseActive.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please confirm the status of your license.",
+        path: ["isLicenseActive"],
+      });
+    }
+  }
+
+  // Validate complaints explanation when complaintsOrDisciplinaryActions is "yes"
+  if (data.compliance.complaintsOrDisciplinaryActions === "yes") {
+    if (!data.compliance.complaintsOrDisciplinaryActions_specify || data.compliance.complaintsOrDisciplinaryActions_specify.length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please provide a brief explanation (min. 10 characters).",
+        path: ["compliance", "complaintsOrDisciplinaryActions_specify"],
+      });
+    }
+  }
+
+  // Validate that user agrees to platform guidelines
+  if (data.compliance.willingToAbideByPlatformGuidelines !== "yes") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "You must agree to abide by the platform guidelines to proceed.",
+      path: ["compliance", "willingToAbideByPlatformGuidelines"],
+    });
+  }
 });
 
 type TherapistApplicationForm = z.infer<typeof schema>;

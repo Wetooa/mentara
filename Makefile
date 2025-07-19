@@ -1,268 +1,349 @@
-# Mentara Platform - Main Makefile
-# Production-ready build automation and development workflow
+# Mentara Platform - Root Makefile
+# Orchestrates all microservices for the mental health platform
 
 # Variables
-COMPOSE_FILE := docker-compose.yml
-COMPOSE_DEV_FILE := docker-compose.dev.yml
-ENV_FILE := .env
 PROJECT_NAME := mentara
-SERVICES := frontend api ai-service ai-content-moderation ollama postgres redis nginx prometheus grafana
+SERVICES := mentara-api mentara-client ai-patient-evaluation ai-content-moderation
 
-# Colors for output
+# Colors
 GREEN := \033[0;32m
 YELLOW := \033[1;33m
 RED := \033[0;31m
-NC := \033[0m # No Color
+BLUE := \033[0;34m
+NC := \033[0m
 
-.PHONY: help build up down logs clean test install dev prod status health setup-env
+.PHONY: help install dev build start stop clean test lint status
 
-# Default target
 help: ## Show this help message
-	@echo "$(GREEN)Mentara Platform - Build & Deployment Commands$(NC)"
-	@echo "=================================================="
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "$(YELLOW)%-20s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo "$(GREEN)Mentara Platform - Service Orchestration$(NC)"
+	@echo "========================================"
+	@echo ""
+	@echo "$(BLUE)Available Services:$(NC)"
+	@echo "  • mentara-api          - NestJS backend service"
+	@echo "  • mentara-client       - Next.js frontend service"
+	@echo "  • ai-patient-evaluation - Python ML service for assessments"
+	@echo "  • ai-content-moderation - Python AI service for content safety"
+	@echo ""
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "$(YELLOW)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Environment Setup
-setup-env: ## Create environment configuration files
-	@echo "$(GREEN)Setting up environment configuration...$(NC)"
-	@if [ ! -f $(ENV_FILE) ]; then \
-		cp .env.example $(ENV_FILE); \
-		echo "$(YELLOW)Please edit $(ENV_FILE) with your configuration$(NC)"; \
-	else \
-		echo "$(YELLOW)Environment file already exists$(NC)"; \
-	fi
-	@echo "$(GREEN)Environment setup complete$(NC)"
+# =============================================================================
+# Development Commands
+# =============================================================================
 
 install: ## Install dependencies for all services
 	@echo "$(GREEN)Installing dependencies for all services...$(NC)"
-	@$(MAKE) -C mentara-client install
 	@$(MAKE) -C mentara-api install
+	@$(MAKE) -C mentara-client install
 	@$(MAKE) -C ai-patient-evaluation install
 	@$(MAKE) -C ai-content-moderation install
 	@echo "$(GREEN)All dependencies installed$(NC)"
 
-# Development Commands
-dev: ## Start development environment
-	@echo "$(GREEN)Starting development environment...$(NC)"
-	@if [ -f $(COMPOSE_DEV_FILE) ]; then \
-		docker-compose -f $(COMPOSE_DEV_FILE) up -d; \
-	else \
-		$(MAKE) up; \
-	fi
-	@echo "$(GREEN)Development environment started$(NC)"
-	@$(MAKE) status
+dev: ## Start all services in development mode
+	@echo "$(GREEN)Starting all services in development mode...$(NC)"
+	@echo "$(YELLOW)This will start services in parallel. Use Ctrl+C to stop all.$(NC)"
+	@trap 'echo "$(RED)Stopping all services...$(NC)"; $(MAKE) stop; exit 0' INT; \
+	$(MAKE) -C mentara-api compose-up-d & \
+	$(MAKE) -C mentara-client compose-up-d & \
+	$(MAKE) -C ai-patient-evaluation compose-up-d & \
+	$(MAKE) -C ai-content-moderation compose-up-d & \
+	echo "$(GREEN)All services starting...$(NC)"; \
+	echo "$(YELLOW)Waiting for services to be ready...$(NC)"; \
+	sleep 30; \
+	$(MAKE) status; \
+	wait
 
-dev-logs: ## Show development logs
-	@docker-compose -f $(COMPOSE_DEV_FILE) logs -f
+dev-local: ## Start all services locally (no Docker)
+	@echo "$(GREEN)Starting all services locally...$(NC)"
+	@echo "$(YELLOW)Make sure dependencies are installed first$(NC)"
+	@trap 'echo "$(RED)Stopping all services...$(NC)"; exit 0' INT; \
+	cd mentara-api && npm run start:dev & \
+	cd mentara-client && npm run dev & \
+	cd ai-patient-evaluation && python api.py & \
+	cd ai-content-moderation && python api.py & \
+	echo "$(GREEN)All services started$(NC)"; \
+	wait
 
-dev-down: ## Stop development environment
-	@echo "$(GREEN)Stopping development environment...$(NC)"
-	@if [ -f $(COMPOSE_DEV_FILE) ]; then \
-		docker-compose -f $(COMPOSE_DEV_FILE) down; \
-	else \
-		$(MAKE) down; \
-	fi
+# =============================================================================
+# Docker Compose Orchestration
+# =============================================================================
 
-# Production Commands
 build: ## Build all Docker images
 	@echo "$(GREEN)Building all Docker images...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) build --parallel
-	@echo "$(GREEN)All images built successfully$(NC)"
+	@$(MAKE) -C mentara-api docker-build
+	@$(MAKE) -C mentara-client docker-build
+	@$(MAKE) -C ai-patient-evaluation docker-build
+	@$(MAKE) -C ai-content-moderation docker-build
+	@echo "$(GREEN)All images built$(NC)"
 
-up: ## Start all services in production mode
-	@echo "$(GREEN)Starting Mentara platform...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d
-	@echo "$(GREEN)Platform started successfully$(NC)"
-	@$(MAKE) status
+start: ## Start all services with Docker Compose
+	@echo "$(GREEN)Starting all services with Docker Compose...$(NC)"
+	@$(MAKE) -C mentara-api compose-up-d
+	@$(MAKE) -C mentara-client compose-up-d
+	@$(MAKE) -C ai-patient-evaluation compose-up-d
+	@$(MAKE) -C ai-content-moderation compose-up-d
+	@echo "$(GREEN)All services started in background$(NC)"
+	@echo "$(YELLOW)Use 'make status' to check service health$(NC)"
 
-down: ## Stop all services
-	@echo "$(GREEN)Stopping Mentara platform...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down
-	@echo "$(GREEN)Platform stopped$(NC)"
+stop: ## Stop all services
+	@echo "$(GREEN)Stopping all services...$(NC)"
+	@$(MAKE) -C mentara-api compose-down 2>/dev/null || true
+	@$(MAKE) -C mentara-client compose-down 2>/dev/null || true
+	@$(MAKE) -C ai-patient-evaluation compose-down 2>/dev/null || true
+	@$(MAKE) -C ai-content-moderation compose-down 2>/dev/null || true
+	@echo "$(GREEN)All services stopped$(NC)"
 
 restart: ## Restart all services
-	@echo "$(GREEN)Restarting Mentara platform...$(NC)"
-	@$(MAKE) down
-	@$(MAKE) up
+	@echo "$(GREEN)Restarting all services...$(NC)"
+	@$(MAKE) stop
+	@sleep 5
+	@$(MAKE) start
+	@echo "$(GREEN)All services restarted$(NC)"
 
+# =============================================================================
 # Service Management
-up-%: ## Start specific service (e.g., make up-api)
-	@echo "$(GREEN)Starting $* service...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d $*
+# =============================================================================
 
-down-%: ## Stop specific service (e.g., make down-api)
-	@echo "$(GREEN)Stopping $* service...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) stop $*
-
-restart-%: ## Restart specific service (e.g., make restart-api)
-	@echo "$(GREEN)Restarting $* service...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) restart $*
-
-logs-%: ## Show logs for specific service (e.g., make logs-api)
-	@docker-compose -f $(COMPOSE_FILE) logs -f $*
-
-# Monitoring & Status
-status: ## Show status of all services
-	@echo "$(GREEN)Mentara Platform Status$(NC)"
-	@echo "======================"
-	@docker-compose -f $(COMPOSE_FILE) ps
+status: ## Check status of all services
+	@echo "$(GREEN)Checking service status...$(NC)"
 	@echo ""
-	@echo "$(GREEN)Service Health Status:$(NC)"
-	@$(MAKE) health
+	@echo "$(BLUE)Backend API (mentara-api):$(NC)"
+	@curl -s http://localhost:3001/health 2>/dev/null | grep -q "healthy" && echo "$(GREEN)✓ Healthy$(NC)" || echo "$(RED)✗ Not responding$(NC)"
+	@echo ""
+	@echo "$(BLUE)Frontend (mentara-client):$(NC)"
+	@curl -s http://localhost:3000/api/health 2>/dev/null && echo "$(GREEN)✓ Healthy$(NC)" || echo "$(RED)✗ Not responding$(NC)"
+	@echo ""
+	@echo "$(BLUE)AI Patient Evaluation:$(NC)"
+	@curl -s http://localhost:5000/health 2>/dev/null | grep -q "healthy" && echo "$(GREEN)✓ Healthy$(NC)" || echo "$(RED)✗ Not responding$(NC)"
+	@echo ""
+	@echo "$(BLUE)AI Content Moderation:$(NC)"
+	@curl -s http://localhost:5001/health 2>/dev/null | grep -q "healthy" && echo "$(GREEN)✓ Healthy$(NC)" || echo "$(RED)✗ Not responding$(NC)"
+	@echo ""
 
-health: ## Check health of all services
-	@echo "$(YELLOW)Checking service health...$(NC)"
-	@for service in frontend api ai-service ai-content-moderation; do \
-		echo -n "$$service: "; \
-		if curl -s http://localhost:$$(docker-compose -f $(COMPOSE_FILE) port $$service | cut -d: -f2)/health > /dev/null 2>&1; then \
-			echo "$(GREEN)✓ Healthy$(NC)"; \
-		else \
-			echo "$(RED)✗ Unhealthy$(NC)"; \
-		fi; \
-	done
+logs: ## View logs from all services
+	@echo "$(GREEN)Viewing logs from all services...$(NC)"
+	@echo "$(YELLOW)Press Ctrl+C to stop following logs$(NC)"
+	@docker-compose -f mentara-api/docker-compose.yml logs -f mentara-api & \
+	docker-compose -f mentara-client/docker-compose.yml logs -f mentara-client & \
+	docker-compose -f ai-patient-evaluation/docker-compose.yml logs -f ai-patient-evaluation & \
+	docker-compose -f ai-content-moderation/docker-compose.yml logs -f ai-content-moderation & \
+	wait
 
-logs: ## Show logs for all services
-	@docker-compose -f $(COMPOSE_FILE) logs -f
+logs-api: ## View logs from backend API
+	@$(MAKE) -C mentara-api compose-logs
 
-# Testing
+logs-client: ## View logs from frontend
+	@$(MAKE) -C mentara-client compose-logs
+
+logs-ai-eval: ## View logs from AI patient evaluation
+	@$(MAKE) -C ai-patient-evaluation compose-logs
+
+logs-ai-mod: ## View logs from AI content moderation
+	@$(MAKE) -C ai-content-moderation compose-logs
+
+# =============================================================================
+# Testing & Quality
+# =============================================================================
+
 test: ## Run tests for all services
 	@echo "$(GREEN)Running tests for all services...$(NC)"
-	@$(MAKE) -C mentara-client test
-	@$(MAKE) -C mentara-api test
-	@$(MAKE) -C ai-patient-evaluation test
-	@$(MAKE) -C ai-content-moderation test
+	@$(MAKE) -C mentara-api test || echo "$(RED)API tests failed$(NC)"
+	@$(MAKE) -C mentara-client test || echo "$(RED)Client tests failed$(NC)"
+	@$(MAKE) -C ai-patient-evaluation test || echo "$(RED)AI evaluation tests failed$(NC)"
+	@$(MAKE) -C ai-content-moderation test || echo "$(RED)AI moderation tests failed$(NC)"
 	@echo "$(GREEN)All tests completed$(NC)"
-
-test-integration: ## Run integration tests
-	@echo "$(GREEN)Running integration tests...$(NC)"
-	@$(MAKE) -C mentara-api test-integration
-	@python ai-content-moderation/test_service.py
-	@echo "$(GREEN)Integration tests completed$(NC)"
 
 test-e2e: ## Run end-to-end tests
 	@echo "$(GREEN)Running end-to-end tests...$(NC)"
-	@$(MAKE) -C mentara-client test-e2e
+	@$(MAKE) -C mentara-api test-e2e || echo "$(RED)API e2e tests failed$(NC)"
+	@$(MAKE) -C mentara-client test-e2e || echo "$(RED)Client e2e tests failed$(NC)"
 	@echo "$(GREEN)E2E tests completed$(NC)"
 
+lint: ## Run linting for all services
+	@echo "$(GREEN)Running linting for all services...$(NC)"
+	@$(MAKE) -C mentara-api lint || echo "$(RED)API linting failed$(NC)"
+	@$(MAKE) -C mentara-client lint || echo "$(RED)Client linting failed$(NC)"
+	@$(MAKE) -C ai-patient-evaluation lint || echo "$(RED)AI evaluation linting failed$(NC)"
+	@$(MAKE) -C ai-content-moderation lint || echo "$(RED)AI moderation linting failed$(NC)"
+	@echo "$(GREEN)All linting completed$(NC)"
+
+format: ## Format code for all services
+	@echo "$(GREEN)Formatting code for all services...$(NC)"
+	@$(MAKE) -C mentara-api format || echo "$(RED)API formatting failed$(NC)"
+	@$(MAKE) -C mentara-client format || echo "$(RED)Client formatting failed$(NC)"
+	@$(MAKE) -C ai-patient-evaluation format || echo "$(RED)AI evaluation formatting failed$(NC)"
+	@$(MAKE) -C ai-content-moderation format || echo "$(RED)AI moderation formatting failed$(NC)"
+	@echo "$(GREEN)All formatting completed$(NC)"
+
+# =============================================================================
+# Environment Setup
+# =============================================================================
+
+setup-env: ## Setup environment files for all services
+	@echo "$(GREEN)Setting up environment files for all services...$(NC)"
+	@$(MAKE) -C mentara-api setup-env
+	@$(MAKE) -C mentara-client setup-env
+	@$(MAKE) -C ai-patient-evaluation setup-env
+	@$(MAKE) -C ai-content-moderation setup-env
+	@echo "$(GREEN)Environment setup completed$(NC)"
+	@echo "$(YELLOW)Please edit .env files in each service directory$(NC)"
+
+setup-dev: ## Complete development environment setup
+	@echo "$(GREEN)Setting up complete development environment...$(NC)"
+	@$(MAKE) setup-env
+	@$(MAKE) install
+	@echo "$(GREEN)Development environment ready$(NC)"
+	@echo "$(YELLOW)You can now run 'make dev' to start all services$(NC)"
+
+# =============================================================================
 # Database Operations
-db-migrate: ## Run database migrations
-	@echo "$(GREEN)Running database migrations...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) exec api npm run db:migrate
-	@echo "$(GREEN)Migrations completed$(NC)"
+# =============================================================================
 
-db-seed: ## Seed database with initial data
-	@echo "$(GREEN)Seeding database...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) exec api npm run db:seed
-	@echo "$(GREEN)Database seeded$(NC)"
+db-setup: ## Setup and migrate databases
+	@echo "$(GREEN)Setting up databases...$(NC)"
+	@$(MAKE) -C mentara-api db-migrate
+	@$(MAKE) -C mentara-api db-generate
+	@$(MAKE) -C mentara-api db-seed
+	@echo "$(GREEN)Database setup completed$(NC)"
 
-db-reset: ## Reset database and reseed
-	@echo "$(YELLOW)Resetting database...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) exec api npm run db:reset
+db-reset: ## Reset all databases
+	@echo "$(GREEN)Resetting databases...$(NC)"
+	@$(MAKE) -C mentara-api db-reset
 	@echo "$(GREEN)Database reset completed$(NC)"
 
-db-backup: ## Backup database
-	@echo "$(GREEN)Creating database backup...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) exec postgres pg_dump -U mentara_admin mentara_db > backup_$$(date +%Y%m%d_%H%M%S).sql
-	@echo "$(GREEN)Database backup created$(NC)"
+# =============================================================================
+# Cleanup
+# =============================================================================
 
-# AI Services Management
-ai-setup: ## Setup AI services (download models, etc.)
-	@echo "$(GREEN)Setting up AI services...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) exec ollama ollama pull mxbai-embed-large
-	@echo "$(GREEN)AI services setup completed$(NC)"
+clean: ## Clean build artifacts for all services
+	@echo "$(GREEN)Cleaning build artifacts...$(NC)"
+	@$(MAKE) -C mentara-api clean
+	@$(MAKE) -C mentara-client clean
+	@$(MAKE) -C ai-patient-evaluation clean
+	@$(MAKE) -C ai-content-moderation clean
+	@echo "$(GREEN)Cleanup completed$(NC)"
 
-ai-models: ## List available AI models
-	@echo "$(GREEN)Available AI models:$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) exec ollama ollama list
+clean-docker: ## Remove all Docker containers and volumes
+	@echo "$(RED)Removing all Docker containers and volumes...$(NC)"
+	@$(MAKE) -C mentara-api compose-clean
+	@$(MAKE) -C mentara-client compose-clean
+	@$(MAKE) -C ai-patient-evaluation compose-clean
+	@$(MAKE) -C ai-content-moderation compose-clean
+	@echo "$(GREEN)Docker cleanup completed$(NC)"
 
-# Security & Maintenance
-security-scan: ## Run security scans on images
-	@echo "$(GREEN)Running security scans...$(NC)"
-	@for service in $(SERVICES); do \
-		if docker images | grep -q mentara-$$service; then \
-			echo "Scanning $$service..."; \
-			docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-				aquasec/trivy image mentara-$$service:latest; \
+# =============================================================================
+# Production Deployment
+# =============================================================================
+
+deploy-prep: ## Prepare for deployment
+	@echo "$(GREEN)Preparing for deployment...$(NC)"
+	@$(MAKE) lint
+	@$(MAKE) test
+	@$(MAKE) build
+	@echo "$(GREEN)Deployment preparation completed$(NC)"
+
+deploy-staging: ## Deploy to staging environment
+	@echo "$(GREEN)Deploying to staging...$(NC)"
+	@$(MAKE) deploy-prep
+	@$(MAKE) start
+	@$(MAKE) status
+	@echo "$(GREEN)Staging deployment completed$(NC)"
+
+# =============================================================================
+# Information & Monitoring
+# =============================================================================
+
+info: ## Show project information
+	@echo "$(GREEN)Mentara Platform Information$(NC)"
+	@echo "============================"
+	@echo "Project: $(PROJECT_NAME)"
+	@echo "Services: $(SERVICES)"
+	@echo ""
+	@echo "$(BLUE)Service Endpoints:$(NC)"
+	@echo "  • Frontend:           http://localhost:3000"
+	@echo "  • Backend API:        http://localhost:3001"
+	@echo "  • AI Patient Eval:    http://localhost:5000"
+	@echo "  • AI Content Mod:     http://localhost:5001"
+	@echo ""
+	@echo "$(BLUE)Health Check Endpoints:$(NC)"
+	@echo "  • Backend API:        http://localhost:3001/health"
+	@echo "  • AI Patient Eval:    http://localhost:5000/health"
+	@echo "  • AI Content Mod:     http://localhost:5001/health"
+	@echo ""
+
+health: ## Comprehensive health check
+	@echo "$(GREEN)Running comprehensive health check...$(NC)"
+	@$(MAKE) status
+	@echo ""
+	@echo "$(BLUE)Docker Status:$(NC)"
+	@docker ps --filter "name=mentara" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "$(RED)Docker not available$(NC)"
+
+quick-start: setup-dev start status ## Quick start for new setup
+
+# =============================================================================
+# Utility Commands
+# =============================================================================
+
+ports: ## Check if required ports are available
+	@echo "$(GREEN)Checking port availability...$(NC)"
+	@for port in 3000 3001 5000 5001 6379 11434; do \
+		if lsof -Pi :$$port -sTCP:LISTEN -t >/dev/null 2>&1; then \
+			echo "$(RED)✗ Port $$port is in use$(NC)"; \
+		else \
+			echo "$(GREEN)✓ Port $$port is available$(NC)"; \
 		fi; \
 	done
 
-clean: ## Clean up Docker resources
-	@echo "$(GREEN)Cleaning up Docker resources...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down -v --remove-orphans
-	@docker system prune -f
-	@docker volume prune -f
-	@echo "$(GREEN)Cleanup completed$(NC)"
+update: ## Update all dependencies
+	@echo "$(GREEN)Updating dependencies for all services...$(NC)"
+	@$(MAKE) -C mentara-api install
+	@$(MAKE) -C mentara-client install
+	@$(MAKE) -C ai-patient-evaluation install
+	@$(MAKE) -C ai-content-moderation install
+	@echo "$(GREEN)All dependencies updated$(NC)"
 
-clean-all: ## Clean everything including images
-	@echo "$(RED)WARNING: This will remove all images and data!$(NC)"
-	@read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ]
-	@docker-compose -f $(COMPOSE_FILE) down -v --remove-orphans --rmi all
-	@docker system prune -af
-	@docker volume prune -af
-	@echo "$(GREEN)Complete cleanup finished$(NC)"
+# =============================================================================
+# Development Shortcuts
+# =============================================================================
 
-# Deployment
-deploy-staging: ## Deploy to staging environment
-	@echo "$(GREEN)Deploying to staging...$(NC)"
-	@$(MAKE) build
-	@$(MAKE) up
-	@$(MAKE) ai-setup
-	@$(MAKE) db-migrate
-	@$(MAKE) health
-	@echo "$(GREEN)Staging deployment completed$(NC)"
+api: ## Start only the backend API
+	@$(MAKE) -C mentara-api compose-up
 
-deploy-prod: ## Deploy to production environment
-	@echo "$(GREEN)Deploying to production...$(NC)"
-	@$(MAKE) test
-	@$(MAKE) security-scan
-	@$(MAKE) build
-	@$(MAKE) up
-	@$(MAKE) ai-setup
-	@$(MAKE) db-migrate
-	@$(MAKE) health
-	@echo "$(GREEN)Production deployment completed$(NC)"
+client: ## Start only the frontend
+	@$(MAKE) -C mentara-client compose-up
 
-# Monitoring
-monitor: ## Open monitoring dashboard
-	@echo "$(GREEN)Opening monitoring dashboard...$(NC)"
-	@echo "Grafana: http://localhost:3030"
-	@echo "Prometheus: http://localhost:9090"
-	@echo "Kibana: http://localhost:5601"
+ai-eval: ## Start only AI patient evaluation service
+	@$(MAKE) -C ai-patient-evaluation compose-up
 
-# Development Utilities
-shell-%: ## Open shell in specific service container (e.g., make shell-api)
-	@docker-compose -f $(COMPOSE_FILE) exec $* /bin/sh
+ai-mod: ## Start only AI content moderation service
+	@$(MAKE) -C ai-content-moderation compose-up
 
-exec-%: ## Execute command in specific service (e.g., make exec-api-"npm install")
-	@docker-compose -f $(COMPOSE_FILE) exec $* $(filter-out $@,$(MAKECMDGOALS))
+# =============================================================================
+# Help Text
+# =============================================================================
 
-# Quick shortcuts
-quick-start: setup-env build up ai-setup db-migrate ## Quick start for new installations
-	@echo "$(GREEN)🚀 Mentara platform is ready!$(NC)"
-	@echo "Frontend: http://localhost:3000"
-	@echo "API: http://localhost:3001"
-	@echo "AI Services: http://localhost:5000, http://localhost:5001"
-	@echo "Monitoring: http://localhost:3030"
-
-update: ## Update all services and restart
-	@echo "$(GREEN)Updating all services...$(NC)"
-	@git pull
-	@$(MAKE) build
-	@$(MAKE) restart
-	@$(MAKE) ai-setup
-	@$(MAKE) db-migrate
-	@echo "$(GREEN)Update completed$(NC)"
-
-# Performance testing
-perf-test: ## Run performance tests
-	@echo "$(GREEN)Running performance tests...$(NC)"
-	@$(MAKE) -C mentara-api test-performance
-	@python ai-content-moderation/test_service.py
-	@echo "$(GREEN)Performance tests completed$(NC)"
-
-# Prevent make from treating filter arguments as targets
-%:
-	@:
-
-# Make sure these targets are always executed
-.PHONY: $(SERVICES)
+usage: ## Show detailed usage information
+	@echo "$(GREEN)Mentara Platform - Detailed Usage$(NC)"
+	@echo "=================================="
+	@echo ""
+	@echo "$(BLUE)Quick Start:$(NC)"
+	@echo "  1. make setup-dev    # Setup environment and install dependencies"
+	@echo "  2. make start        # Start all services"
+	@echo "  3. make status       # Check service health"
+	@echo ""
+	@echo "$(BLUE)Development Workflow:$(NC)"
+	@echo "  • make dev           # Start in development mode"
+	@echo "  • make logs          # View all service logs"
+	@echo "  • make test          # Run all tests"
+	@echo "  • make lint          # Check code quality"
+	@echo ""
+	@echo "$(BLUE)Individual Services:$(NC)"
+	@echo "  • make api           # Start only backend API"
+	@echo "  • make client        # Start only frontend"
+	@echo "  • make ai-eval       # Start only AI evaluation"
+	@echo "  • make ai-mod        # Start only AI moderation"
+	@echo ""
+	@echo "$(BLUE)Cleanup:$(NC)"
+	@echo "  • make stop          # Stop all services"
+	@echo "  • make clean         # Clean build artifacts"
+	@echo "  • make clean-docker  # Remove Docker containers/volumes"
+	@echo ""

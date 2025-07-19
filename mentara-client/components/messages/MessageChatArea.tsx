@@ -26,7 +26,7 @@ interface MessageChatAreaProps {
   error?: string | null;
 }
 
-export default function MessageChatArea({
+export function MessageChatArea({
   contactId,
   conversation: propConversation,
   onSendMessage,

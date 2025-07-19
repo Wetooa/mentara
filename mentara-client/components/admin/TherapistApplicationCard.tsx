@@ -111,11 +111,11 @@ export function TherapistApplicationCard({
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {therapist.province || 'Not specified'}
+                    {(therapist.province as string) || 'Not specified'}
                   </div>
                   <div className="flex items-center gap-1">
                     <GraduationCap className="h-4 w-4" />
-                    {therapist.providerType || 'Not specified'}
+                    {(therapist.providerType as string) || 'Not specified'}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
@@ -123,7 +123,7 @@ export function TherapistApplicationCard({
                   </div>
                   <div className="flex items-center gap-1">
                     <CalendarDays className="h-4 w-4" />
-                    Applied {formatDistanceToNow(new Date(therapist.submissionDate || therapist.createdAt), { addSuffix: true })}
+                    Applied {formatDistanceToNow(new Date((therapist.submissionDate || therapist.createdAt) as string), { addSuffix: true })}
                   </div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export function TherapistApplicationCard({
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">License:</span>
               </div>
-              <p className="text-muted-foreground">{therapist.prcLicenseNumber || 'Not provided'}</p>
+              <p className="text-muted-foreground">{(therapist.prcLicenseNumber as string) || 'Not provided'}</p>
             </div>
             
             <div>
@@ -180,10 +180,10 @@ export function TherapistApplicationCard({
                 <span className="font-medium">Specializations:</span>
               </div>
               <p className="text-muted-foreground">
-                {therapist.areasOfExpertise?.length > 0 ? (
+                {(therapist.areasOfExpertise as string[])?.length > 0 ? (
                   <>
-                    {therapist.areasOfExpertise.slice(0, 2).join(', ')}
-                    {therapist.areasOfExpertise.length > 2 && ` +${therapist.areasOfExpertise.length - 2} more`}
+                    {(therapist.areasOfExpertise as string[]).slice(0, 2).join(', ')}
+                    {(therapist.areasOfExpertise as string[]).length > 2 && ` +${(therapist.areasOfExpertise as string[]).length - 2} more`}
                   </>
                 ) : (
                   'Not specified'
@@ -197,7 +197,7 @@ export function TherapistApplicationCard({
                 <span className="font-medium">Rate:</span>
               </div>
               <p className="text-muted-foreground">
-                {therapist.hourlyRate ? `₱${therapist.hourlyRate}/hour` : 'Not set'}
+                {(therapist.hourlyRate as number) ? `₱${therapist.hourlyRate}/hour` : 'Not set'}
               </p>
             </div>
             
@@ -207,26 +207,26 @@ export function TherapistApplicationCard({
                 <span className="font-medium">Session Length:</span>
               </div>
               <p className="text-muted-foreground">
-                {therapist.sessionDuration ? `${therapist.sessionDuration} min` : 'Not set'}
+                {(therapist.sessionDuration as number) ? `${therapist.sessionDuration} min` : 'Not set'}
               </p>
             </div>
           </div>
 
           {/* Additional Information */}
-          {(therapist.bio || therapist.education || therapist.yearsOfExperience) && (
+          {((therapist.bio as string) || (therapist.education as string) || (therapist.yearsOfExperience as number)) && (
             <div className="mt-4 pt-4 border-t">
               <div className="grid gap-2">
-                {therapist.bio && (
+                {(therapist.bio as string) && (
                   <div>
                     <span className="font-medium text-sm">Bio:</span>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{therapist.bio}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{therapist.bio as string}</p>
                   </div>
                 )}
                 
-                {therapist.education && (
+                {(therapist.education as string) && (
                   <div>
                     <span className="font-medium text-sm">Education:</span>
-                    <p className="text-sm text-muted-foreground">{therapist.education}</p>
+                    <p className="text-sm text-muted-foreground">{therapist.education as string}</p>
                   </div>
                 )}
               </div>
@@ -234,9 +234,9 @@ export function TherapistApplicationCard({
           )}
 
           {/* Processing Status */}
-          {therapist.processedBy && therapist.processedAt && (
+          {(therapist.processedBy as string) && (therapist.processedAt as string) && (
             <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-              Processed by {therapist.processedBy} {formatDistanceToNow(new Date(therapist.processedAt), { addSuffix: true })}
+              Processed by {therapist.processedBy as string} {formatDistanceToNow(new Date(therapist.processedAt as string), { addSuffix: true })}
             </div>
           )}
         </CardContent>

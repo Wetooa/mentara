@@ -41,4 +41,3 @@ export function ContinueWithMicrosoft() {
   );
 }
 
-export default ContinueWithMicrosoft;

@@ -246,7 +246,7 @@ export function BillingIntegration({
                 <p className="font-medium text-sm">Payment Method</p>
                 <p className="text-xs text-muted-foreground">
                   {defaultPaymentMethod 
-                    ? `****${defaultPaymentMethod.card?.last4 || defaultPaymentMethod.bank_account?.last4}`
+                    ? `****${defaultPaymentMethod.last4}`
                     : "No default method"
                   }
                 </p>
@@ -366,14 +366,14 @@ export function BillingIntegration({
                   className="flex items-center justify-between p-3 border rounded-lg bg-red-50"
                 >
                   <div>
-                    <p className="font-medium">Invoice #{invoice.number}</p>
+                    <p className="font-medium">Invoice #{invoice.id}</p>
                     <p className="text-sm text-muted-foreground">
-                      Due: {invoice.due_date && format(new Date(invoice.due_date), "MMM d, yyyy")}
+                      Due: {invoice.createdAt && format(new Date(invoice.createdAt), "MMM d, yyyy")}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-red-600">
-                      {formatCurrency(invoice.amount_due, invoice.currency)}
+                      {formatCurrency(invoice.amount, invoice.currency)}
                     </span>
                     <Button
                       size="sm"

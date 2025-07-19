@@ -97,7 +97,7 @@ const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
   return [`${hour}:00`, `${hour}:30`];
 }).flat();
 
-export default function AvailabilityManager() {
+export function AvailabilityManager() {
   const api = useApi();
   const queryClient = useQueryClient();
   

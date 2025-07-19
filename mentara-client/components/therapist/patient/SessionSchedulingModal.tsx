@@ -82,7 +82,7 @@ const generateTimeSlots = (): TimeSlot[] => {
   return slots;
 };
 
-export default function SessionSchedulingModal({
+export function SessionSchedulingModal({
   patient,
   isOpen,
   onClose,

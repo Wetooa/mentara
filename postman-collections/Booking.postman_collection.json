@@ -90,7 +90,7 @@
                   "    const responseJson = pm.response.json();",
                   "    pm.expect(responseJson).to.have.property('therapistId');",
                   "    pm.expect(responseJson).to.have.property('clientId');",
-                  "    pm.expect(responseJson).to.have.property('scheduledAt');",
+                  "    pm.expect(responseJson).to.have.property('startTime');",
                   "    pm.expect(responseJson).to.have.property('duration');",
                   "    pm.expect(responseJson).to.have.property('status');",
                   "});"
@@ -109,7 +109,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"scheduledAt\": \"{{$isoTimestamp}}\",\n  \"duration\": 60,\n  \"meetingType\": \"therapy_session\",\n  \"notes\": \"Initial consultation session\",\n  \"isRecurring\": false\n}"
+              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"startTime\": \"{{$isoTimestamp}}\",\n  \"duration\": 60,\n  \"title\": \"Initial Consultation\",\n  \"description\": \"Initial consultation session\",\n  \"meetingType\": \"video\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings",
@@ -230,7 +230,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduledAt\": \"{{$isoTimestamp}}\",\n  \"duration\": 90,\n  \"notes\": \"Extended session - follow-up discussion\",\n  \"status\": \"confirmed\"\n}"
+              "raw": "{\n  \"startTime\": \"{{$isoTimestamp}}\",\n  \"duration\": 90,\n  \"title\": \"Extended Session\",\n  \"description\": \"Extended session - follow-up discussion\",\n  \"notes\": \"Session notes from therapist\",\n  \"status\": \"confirmed\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings/{{meetingId}}",
@@ -263,22 +263,13 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Schedule conflict\",\n  \"notifyParticipants\": true\n}"
-            },
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/booking/meetings/{{meetingId}}/cancel",
               "host": ["{{baseUrl}}"],
               "path": ["booking", "meetings", "{{meetingId}}", "cancel"]
             },
-            "description": "Cancel a meeting with reason"
+            "description": "Cancel a meeting (no request body required)"
           },
           "response": []
         }
@@ -318,7 +309,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dayOfWeek\": \"monday\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:00\",\n  \"isRecurring\": true,\n  \"recurringPattern\": \"weekly\",\n  \"timeZone\": \"America/Toronto\",\n  \"bufferTime\": 15,\n  \"maxConsecutiveSessions\": 6\n}"
+              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"dayOfWeek\": 1,\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:00\",\n  \"isAvailable\": true,\n  \"timezone\": \"America/Toronto\",\n  \"notes\": \"Regular Monday availability\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/availability",
@@ -401,7 +392,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"startTime\": \"10:00\",\n  \"endTime\": \"16:00\",\n  \"bufferTime\": 20,\n  \"maxConsecutiveSessions\": 5\n}"
+              "raw": "{\n  \"dayOfWeek\": 1,\n  \"startTime\": \"10:00\",\n  \"endTime\": \"16:00\",\n  \"isAvailable\": true,\n  \"timezone\": \"America/Toronto\",\n  \"notes\": \"Updated Monday availability - shorter hours\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/availability/{{availabilityId}}",
@@ -607,7 +598,7 @@
                   "",
                   "pm.test('New time reflected', function () {",
                   "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('scheduledAt');",
+                  "    pm.expect(responseJson).to.have.property('startTime');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -624,7 +615,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"scheduledAt\": \"2024-01-16T14:00:00.000Z\",\n  \"status\": \"rescheduled\",\n  \"notes\": \"Rescheduled due to client request\",\n  \"notifyParticipants\": true\n}"
+              "raw": "{\n  \"startTime\": \"2024-01-16T14:00:00.000Z\",\n  \"status\": \"confirmed\",\n  \"notes\": \"Rescheduled due to client request\",\n  \"description\": \"Session moved to accommodate client schedule\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings/{{meetingId}}",
@@ -694,7 +685,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"scheduledAt\": \"2024-01-15T10:00:00.000Z\",\n  \"duration\": 60,\n  \"meetingType\": \"therapy_session\",\n  \"isRecurring\": true,\n  \"recurringPattern\": {\n    \"frequency\": \"weekly\",\n    \"interval\": 1,\n    \"dayOfWeek\": \"monday\",\n    \"endDate\": \"2024-06-15T10:00:00.000Z\",\n    \"occurrences\": 20\n  },\n  \"notes\": \"Weekly therapy sessions\"\n}"
+              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"startTime\": \"2024-01-15T10:00:00.000Z\",\n  \"duration\": 60,\n  \"title\": \"Weekly Therapy Session\",\n  \"description\": \"Regular weekly therapy sessions\",\n  \"meetingType\": \"video\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings",
@@ -741,7 +732,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"duration\": 90,\n  \"recurringPattern\": {\n    \"frequency\": \"weekly\",\n    \"interval\": 2,\n    \"dayOfWeek\": \"tuesday\"\n  },\n  \"updateFutureOccurrences\": true\n}"
+              "raw": "{\n  \"duration\": 90,\n  \"title\": \"Extended Weekly Session\",\n  \"description\": \"Updated to 90-minute sessions\",\n  \"meetingType\": \"video\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings/{{meetingId}}",
@@ -787,7 +778,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"therapistId\": \"invalid-therapist-id\",\n  \"scheduledAt\": \"{{$isoTimestamp}}\",\n  \"duration\": 60\n}"
+              "raw": "{\n  \"therapistId\": \"invalid-therapist-id\",\n  \"startTime\": \"{{$isoTimestamp}}\",\n  \"duration\": 60,\n  \"title\": \"Test Meeting\",\n  \"meetingType\": \"video\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings",
@@ -828,7 +819,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"scheduledAt\": \"2020-01-01T10:00:00.000Z\",\n  \"duration\": 60\n}"
+              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"startTime\": \"2020-01-01T10:00:00.000Z\",\n  \"duration\": 60,\n  \"title\": \"Past Date Test\",\n  \"meetingType\": \"video\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings",
@@ -869,7 +860,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"scheduledAt\": \"{{existingMeetingTime}}\",\n  \"duration\": 60\n}"
+              "raw": "{\n  \"therapistId\": \"{{therapistId}}\",\n  \"startTime\": \"{{existingMeetingTime}}\",\n  \"duration\": 60,\n  \"title\": \"Conflict Test\",\n  \"meetingType\": \"video\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/booking/meetings",

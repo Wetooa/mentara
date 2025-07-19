@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
-import { apiConfig } from "../config/api";
-import { handleApiError, MentaraApiError } from "./errorHandler";
+import { apiConfig } from "@/lib/config/api";
+import { handleApiError, MentaraApiError } from "@/lib/api/errorHandler";
 
 // Token provider function type
 type TokenProvider = () => Promise<string | null>;

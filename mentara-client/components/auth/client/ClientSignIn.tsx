@@ -86,7 +86,9 @@ export function ClientSignIn() {
         
         try {
           await handleRetry(
-            () => login(data),
+            async () => {
+              await login(data);
+            },
             result.retryAfter || 5000,
             3 - retryCount
           );

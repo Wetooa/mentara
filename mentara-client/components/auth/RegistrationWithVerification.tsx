@@ -45,7 +45,7 @@ const registrationSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain uppercase, lowercase, and number"),
   confirmPassword: z.string(),
-  role: z.enum(["client", "therapist"]).default("client"),
+  role: z.enum(["client", "therapist"]),
   termsAccepted: z.boolean().refine(val => val === true, "You must accept the terms and conditions"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -82,7 +82,7 @@ export function RegistrationWithVerification({
       email: "",
       password: "",
       confirmPassword: "",
-      role: defaultRole,
+      role: defaultRole ?? "client",
       termsAccepted: false,
     },
   });

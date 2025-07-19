@@ -1,21 +1,32 @@
-# Mentara AI Content Moderation Service
+# AI Content Moderation Service
 
 🛡️ **Mental Health-Aware Content Safety System**
 
-An AI-powered content moderation service specifically designed for mental health platforms, featuring specialized toxicity detection, crisis intervention capabilities, and therapeutic context awareness.
+A production-ready Python Flask service providing AI-powered content moderation specifically designed for mental health platforms, featuring specialized toxicity detection, crisis intervention capabilities, and therapeutic context awareness.
 
-## 🎯 Overview
+## 🏗️ Project Overview
 
-This Flask-based microservice provides comprehensive content moderation for the Mentara mental health platform, using:
+This Flask-based microservice provides comprehensive content moderation for the Mentara mental health platform, using advanced AI techniques to ensure user safety while maintaining therapeutic context awareness.
 
-- **Ollama** with `mxbai-embed-large` embeddings for semantic analysis
-- **Mental health-aware** toxicity classification
-- **Crisis content detection** for immediate intervention
-- **Therapeutic context** understanding
-- **Real-time moderation** with human review flagging
+## 🚀 Architecture
 
-## 🏗️ Architecture
+### Technology Stack
+- **Framework**: Flask with Python 3.9+
+- **AI Engine**: Ollama with mxbai-embed-large embeddings
+- **Caching**: Redis for performance optimization
+- **Deployment**: Docker with multi-container orchestration
+- **Monitoring**: Health checks, metrics, and comprehensive logging
+- **Testing**: Comprehensive test suite with performance benchmarking
 
+### Core Features
+- **Mental Health-Aware** toxicity classification with therapeutic context understanding
+- **Crisis Content Detection** for immediate intervention and escalation
+- **Semantic Analysis** using state-of-the-art embedding models
+- **Real-time Moderation** with configurable thresholds and human review flagging
+- **Batch Processing** for efficient handling of multiple content items
+- **Performance Optimization** with intelligent caching and rate limiting
+
+### Service Architecture
 ```
 ai-content-moderation/
 ├── api.py                      # Main Flask application
@@ -30,47 +41,148 @@ ai-content-moderation/
 └── data/                      # Training data and samples
 ```
 
-## 🚀 Quick Start
+## 🔧 Development Setup
 
 ### Prerequisites
-
 - Python 3.9+
-- [Ollama](https://ollama.ai/) installed and running
-- Redis (optional, for caching)
-- 4GB+ RAM (for embedding model)
+- Docker and Docker Compose (for containerized development)
+- Ollama (automatically managed in Docker setup)
+- 4GB+ RAM (for embedding models)
 
 ### Installation
 
-1. **Clone and navigate to directory**
-   ```bash
-   cd ai-content-moderation
-   ```
+1. **Clone and setup environment**:
+```bash
+git clone <repository-url>
+cd ai-content-moderation
+cp .env.example .env
+# Configure environment variables
+```
 
-2. **Run automated setup**
-   ```bash
-   python setup.py
-   ```
-   
-   This will:
-   - Install Python dependencies
-   - Check Ollama installation
-   - Download mxbai-embed-large model
-   - Create necessary directories
-   - Set up environment configuration
+2. **Start with Docker Compose (Recommended)**:
+```bash
+docker-compose up --build
+```
+This automatically:
+- Starts Ollama service with required models
+- Sets up Redis for caching
+- Builds and starts the AI service
+- Downloads mxbai-embed-large embedding model
 
-3. **Start the service**
-   ```bash
-   python api.py
-   ```
+3. **Verify installation**:
+```bash
+curl http://localhost:5001/health
+python test_service.py
+```
 
-4. **Verify installation**
-   ```bash
-   python test_service.py
-   ```
+### Manual Setup (Alternative)
 
-## 🔧 Manual Setup
+For local development without Docker:
 
-If you prefer manual setup:
+1. **Setup virtual environment**:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+2. **Install and configure Ollama**:
+```bash
+# Install Ollama (if not already installed)
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Start Ollama service
+ollama serve
+
+# Download embedding model
+ollama pull mxbai-embed-large
+```
+
+3. **Run setup script**:
+```bash
+python setup.py
+```
+
+4. **Start development server**:
+```bash
+python api.py
+# or with Make: make dev
+```
+
+The service will be available at `http://localhost:5001`
+
+## 🧪 Testing
+
+### Unit Tests
+```bash
+make test                # Run all tests
+make test-verbose        # Run tests with verbose output
+make test-coverage       # Run tests with coverage report
+```
+
+### Service Tests
+```bash
+make test-service        # Test service endpoints
+make test-moderation     # Test content moderation functionality
+```
+
+### Performance Tests
+```bash
+make perf-test           # Run performance benchmarks
+make load-test           # Run extended load testing
+```
+
+## 🛠️ Development Commands
+
+### Using Make (Recommended)
+```bash
+# Development
+make dev                 # Start development server
+make dev-debug          # Start with debug mode
+make dev-with-ollama     # Start with Ollama health check
+
+# Docker Compose
+make compose-up          # Start services with docker-compose
+make compose-up-d        # Start services in background
+make compose-down        # Stop and remove containers
+make compose-logs        # View service logs
+make compose-logs-ollama # View Ollama logs
+
+# Ollama Management
+make ollama-check        # Check if Ollama is running
+make ollama-pull         # Pull required embedding model
+make ollama-setup        # Complete Ollama setup
+
+# Code Quality
+make lint                # Run flake8 linting
+make format              # Format code with black
+make type-check          # Run mypy type checking
+make security-scan       # Run security audit
+
+# Environment
+make setup-env           # Setup environment variables
+make setup-dev           # Complete development setup
+```
+
+### Using Python directly
+```bash
+# Development
+python api.py           # Start development server
+FLASK_DEBUG=1 python api.py  # Start with debug mode
+
+# Testing
+python -m pytest       # Run unit tests
+python test_service.py  # Test service endpoints
+
+# Code Quality
+flake8 .               # Run linting
+black .                # Format code
+mypy .                 # Type checking
+```
+
+## 🔧 Manual Setup (Legacy)
+
+If you prefer manual setup without Docker:
 
 ### 1. Install Dependencies
 ```bash

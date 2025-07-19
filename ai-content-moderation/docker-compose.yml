@@ -1,0 +1,248 @@
+# AI Content Moderation Service - Docker Compose Configuration
+# Production-ready Python Flask AI service with Ollama integration
+
+version: '3.8'
+
+services:
+  # Ollama Service for Embeddings
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai-content-mod-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    networks:
+      - ai-content-mod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Main AI Content Moderation Service
+  ai-content-moderation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-content-moderation
+    environment:
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
+      PORT: ${PORT:-5001}
+      OLLAMA_HOST: http://ollama:11434
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-mxbai-embed-large}
+      SECRET_KEY: ${SECRET_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      TOXICITY_THRESHOLD: ${TOXICITY_THRESHOLD:-0.7}
+      CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.8}
+      MENTAL_HEALTH_THRESHOLD: ${MENTAL_HEALTH_THRESHOLD:-0.6}
+      MAX_CONTENT_LENGTH: ${MAX_CONTENT_LENGTH:-10000}
+      BATCH_SIZE_LIMIT: ${BATCH_SIZE_LIMIT:-100}
+      CACHE_TTL: ${CACHE_TTL:-604800}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-30}
+      RATE_LIMIT_PER_HOUR: ${RATE_LIMIT_PER_HOUR:-1000}
+      API_KEY_REQUIRED: ${API_KEY_REQUIRED:-false}
+      API_KEY: ${API_KEY}
+      BACKEND_API_URL: ${BACKEND_API_URL:-http://localhost:3001}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      ENABLE_METRICS: ${ENABLE_METRICS:-true}
+      ENABLE_LOGGING: ${ENABLE_LOGGING:-true}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+    ports:
+      - "${PORT:-5001}:${PORT:-5001}"
+    volumes:
+      # Mount logs directory for persistent logging
+      - logs_data:/app/logs
+      # Mount models directory for ML model files
+      - models_data:/app/models
+      # Mount data directory for training datasets
+      - data_volume:/app/data
+    networks:
+      - ai-content-mod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-5001}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      ollama:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # Redis for caching (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: ai-content-mod-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-defaultpassword} --appendonly yes
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-defaultpassword}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - ai-content-mod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Ollama Model Initialization (runs once to pull models)
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ai-content-mod-ollama-init
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ai-content-mod-network
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: >
+      sh -c "
+        echo 'Pulling embedding model...' &&
+        ollama pull ${EMBEDDING_MODEL:-mxbai-embed-large} &&
+        echo 'Model download completed'
+      "
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
+volumes:
+  # Persistent storage for Ollama models
+  ollama_data:
+    driver: local
+
+  # Persistent storage for logs
+  logs_data:
+    driver: local
+
+  # Persistent storage for ML models
+  models_data:
+    driver: local
+
+  # Persistent storage for training data
+  data_volume:
+    driver: local
+
+  # Persistent storage for Redis data
+  redis_data:
+    driver: local
+
+networks:
+  ai-content-mod-network:
+    driver: bridge
+    name: ai-content-mod-network
+
+# =============================================================================
+# USAGE INSTRUCTIONS
+# =============================================================================
+#
+# Development:
+#   docker-compose up --build
+#
+# Production:
+#   docker-compose -f docker-compose.yml up -d --build
+#
+# View logs:
+#   docker-compose logs -f ai-content-moderation
+#   docker-compose logs -f ollama
+#
+# Stop services:
+#   docker-compose down
+#
+# Remove all data (DESTRUCTIVE):
+#   docker-compose down -v
+#
+# Pull latest models:
+#   docker-compose run --rm ollama-init
+#
+# =============================================================================
+# ENVIRONMENT VARIABLES
+# =============================================================================
+#
+# Required variables (must be set in .env file):
+# - SECRET_KEY: Flask secret key for security
+#
+# Optional variables:
+# - FLASK_ENV: Environment (default: production)
+# - PORT: Service port (default: 5001)
+# - OLLAMA_HOST: Ollama server URL (automatically set to ollama container)
+# - EMBEDDING_MODEL: Ollama embedding model (default: mxbai-embed-large)
+# - TOXICITY_THRESHOLD: Toxicity detection threshold (default: 0.7)
+# - CONFIDENCE_THRESHOLD: Minimum confidence for actions (default: 0.8)
+# - MENTAL_HEALTH_THRESHOLD: Mental health content threshold (default: 0.6)
+# - RATE_LIMIT_PER_MINUTE: Rate limiting (default: 30)
+# - API_KEY_REQUIRED: Require API key authentication (default: false)
+# - REDIS_PASSWORD: Redis password (default: defaultpassword)
+#
+# =============================================================================
+# OLLAMA INTEGRATION
+# =============================================================================
+#
+# This service requires Ollama for embeddings:
+# 1. Ollama container is automatically started with the service
+# 2. Required embedding model is downloaded on first run
+# 3. Models are persisted in ollama_data volume
+# 4. Service waits for Ollama to be healthy before starting
+#
+# Model Requirements:
+# - mxbai-embed-large: Default embedding model (~2GB)
+# - Models are cached and reused across container restarts
+# - Additional models can be pulled using ollama-init service
+#
+# =============================================================================
+# PERFORMANCE CONSIDERATIONS
+# =============================================================================
+#
+# Resource Requirements:
+# - Ollama: 2-4GB RAM for embedding models
+# - AI Service: 1-4GB RAM depending on workload
+# - Redis: 256MB-1GB for caching
+# - Total: 4-8GB RAM recommended for production
+#
+# Scaling:
+# - Multiple AI service instances can share one Ollama instance
+# - Redis can be clustered for high availability
+# - Consider GPU acceleration for production workloads
+#
+# =============================================================================

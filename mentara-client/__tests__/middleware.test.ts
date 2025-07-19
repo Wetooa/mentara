@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import middleware from '../middleware'
+import middleware from '@/middleware'
 
 // Mock Clerk middleware
 jest.mock('@clerk/nextjs/server', () => ({

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { queryConfig } from "../../lib/config/api";
-import { MentaraApiError } from "../../lib/api/errorHandler";
+import { queryConfig } from "@/lib/config/api";
+import { MentaraApiError } from "@/lib/api/errorHandler";
 
 // Enhanced QueryClient configuration with performance monitoring
 const createQueryClient = () => {

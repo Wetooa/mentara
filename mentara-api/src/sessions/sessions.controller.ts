@@ -43,7 +43,7 @@ import {
   type CreateTherapyProgressDto,
   type GetTherapyProgressQueryDto,
   type GetSessionStatisticsQueryDto,
-} from '@mentara/commons';
+} from 'mentara-commons';
 import {
   SessionType,
   SessionStatus,

@@ -7,7 +7,7 @@ import PatientInfoCard from "@/components/therapist/patient/PatientInfoCard";
 import PatientSessionNotes from "@/components/therapist/patient/PatientSessionNotes";
 import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets";
 import PatientProgressDashboard from "@/components/therapist/patient/PatientProgressDashboard";
-import SessionSchedulingModal from "@/components/therapist/patient/SessionSchedulingModal";
+import { SessionSchedulingModal } from "@/components/therapist/patient/SessionSchedulingModal";
 import { usePatientData } from "@/hooks/usePatientsList";
 
 export default function PatientDetailPage(

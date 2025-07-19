@@ -19,25 +19,27 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { PaymentMethodForm } from "./PaymentMethodForm";
 
-interface FailedPayment {
+// Use the actual Invoice type that matches our data structure
+type FailedPayment = {
   id: string;
   amount: number;
   currency: string;
   description: string;
-  failureReason: string;
-  failedAt: string;
-  meetingId?: string;
-  subscriptionId?: string;
-  retryCount: number;
-  canRetry: boolean;
-}
+  status: "pending" | "cancelled" | "failed" | "paid";
+  createdAt: string;
+  userId: string;
+  sessionId?: string;
+  paidAt?: string;
+  canRetry?: boolean;
+  retryCount?: number;
+};
 
 interface PaymentFailureRecoveryProps {
   userId: string;
   onPaymentResolved?: () => void;
 }
 
-export default function PaymentFailureRecovery({
+export function PaymentFailureRecovery({
   userId,
   onPaymentResolved,
 }: PaymentFailureRecoveryProps) {
@@ -47,13 +49,13 @@ export default function PaymentFailureRecovery({
   const api = useApi();
   const queryClient = useQueryClient();
 
-  // Get failed payments
+  // Get failed payments (using invoices with failed status)
   const { data: failedPayments = [], isLoading } = useQuery({
     queryKey: ["failed-payments", userId],
     queryFn: async () => {
-      // This would be implemented in your API
-      const payments = await api.billing.getFailedPayments();
-      return payments.filter((p: { status: string }) => p.status === "failed");
+      // Use the actual invoices API and filter for failed payments
+      const invoices = await api.billing.getInvoices();
+      return invoices.filter((invoice: FailedPayment) => invoice.status === "failed");
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });
@@ -70,7 +72,8 @@ export default function PaymentFailureRecovery({
       paymentId: string; 
       paymentMethodId?: string;
     }) => {
-      return api.billing.retryPayment(paymentId, paymentMethodId);
+      // Use payInvoice instead since retryPayment doesn't exist
+      return api.billing.payInvoice(paymentId, paymentMethodId);
     },
     onMutate: ({ paymentId }) => {
       setRetryingPayments(prev => new Set(prev).add(paymentId));
@@ -84,10 +87,10 @@ export default function PaymentFailureRecovery({
     onError: (error: Error) => {
       toast.error(error.message || "Failed to retry payment");
     },
-    onSettled: ({ paymentId }) => {
+    onSettled: (data, error, variables) => {
       setRetryingPayments(prev => {
         const newSet = new Set(prev);
-        newSet.delete(paymentId);
+        newSet.delete(variables.paymentId);
         return newSet;
       });
     },
@@ -155,7 +158,7 @@ export default function PaymentFailureRecovery({
       </Alert>
 
       {failedPayments.map((payment: FailedPayment) => {
-        const failureReason = getFailureReasonDisplay(payment.failureReason);
+        const failureReason = getFailureReasonDisplay("payment_failed");
         const isRetrying = retryingPayments.has(payment.id);
 
         return (
@@ -182,14 +185,14 @@ export default function PaymentFailureRecovery({
                 <div>
                   <span className="text-muted-foreground">Failed:</span>
                   <div className="font-medium">
-                    {new Date(payment.failedAt).toLocaleString()}
+                    {new Date(payment.createdAt).toLocaleString()}
                   </div>
                 </div>
                 <div className="col-span-2">
                   <span className="text-muted-foreground">Description:</span>
                   <div className="font-medium">{payment.description}</div>
                 </div>
-                {payment.meetingId && (
+                {payment.sessionId && (
                   <div className="col-span-2">
                     <div className="flex items-center gap-2 text-amber-600">
                       <Clock className="h-4 w-4" />
@@ -202,7 +205,7 @@ export default function PaymentFailureRecovery({
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {payment.canRetry && (
+                {(payment.canRetry !== false) && (
                   <Button
                     onClick={() => handleRetryPayment(payment)}
                     disabled={isRetrying}
@@ -225,9 +228,9 @@ export default function PaymentFailureRecovery({
                 {paymentMethods.length > 1 && (
                   <div className="flex gap-2">
                     {paymentMethods
-                      .filter((pm: { isActive: boolean; isDefault: boolean }) => pm.isActive && !pm.isDefault)
+                      .filter((pm) => !pm.isDefault)
                       .slice(0, 2)
-                      .map((pm: { id: string; type: string; last4: string; expiryDate: string; brand: string }) => (
+                      .map((pm) => (
                         <Button
                           key={pm.id}
                           variant="outline"
@@ -235,7 +238,7 @@ export default function PaymentFailureRecovery({
                           onClick={() => handleRetryPayment(payment, pm.id)}
                           disabled={isRetrying}
                         >
-                          Try {pm.cardBrand?.toUpperCase()} ****{pm.cardLast4}
+                          Try {pm.brand?.toUpperCase()} ****{pm.last4}
                         </Button>
                       ))}
                   </div>
@@ -251,7 +254,7 @@ export default function PaymentFailureRecovery({
                 </Button>
               </div>
 
-              {payment.retryCount > 0 && (
+              {(payment.retryCount || 0) > 0 && (
                 <div className="text-sm text-muted-foreground">
                   Previous retry attempts: {payment.retryCount}
                 </div>

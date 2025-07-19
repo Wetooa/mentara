@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import TherapistCard from "./TherapistCard";
-import TherapistProfileModal from "../TherapistProfileModal";
-import BookingModal from "../../booking/BookingModal";
-import Pagination from "../../ui/pagination";
+import TherapistCard from "@/components/therapist/listing/TherapistCard";
+import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
+import BookingModal from "@/components/booking/BookingModal";
+import Pagination from "@/components/ui/pagination";
 import { useFilteredTherapists } from "@/hooks/useTherapists";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";

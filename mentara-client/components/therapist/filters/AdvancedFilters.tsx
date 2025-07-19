@@ -103,7 +103,7 @@ function safeGetFilterValue<T>(obj: unknown, path: string, defaultValue: T): T {
   }
 }
 
-export default function AdvancedFilters({
+export function AdvancedFilters({
   filters,
   onChange,
   onApply,

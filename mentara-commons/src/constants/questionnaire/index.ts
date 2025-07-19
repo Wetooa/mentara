@@ -21,6 +21,7 @@ export { default as SOCIAL_PHOBIA_SPIN } from './social-phobia';
 export {
   LIST_OF_QUESTIONNAIRES,
   type ListOfQuestionnaires,
+  QUESTIONNAIRE_MAP,
   QUESTIONNAIRE_MAP as QUESTIONNAIRE_MAPPING,
   QUESTIONNAIRE_ID_TO_NAME_MAP,
   getQuestionnaireByName,

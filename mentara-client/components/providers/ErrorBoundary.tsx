@@ -3,10 +3,10 @@
 import React from 'react';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { MentaraApiError } from '../../lib/api/errorHandler';
+import { MentaraApiError } from '@/lib/api/errorHandler';
 
 interface ErrorFallbackProps {
   error: Error;

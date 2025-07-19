@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +27,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { generateOtp, sendOtpEmail, formatExpiryTime } from "@/lib/emailjs";
+import { generateOtp } from "@/lib/emailjs";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 const otpSchema = z.object({
   code: z.string().min(6, "Verification code must be 6 digits").max(6, "Verification code must be 6 digits"),
@@ -49,7 +50,6 @@ const RESEND_COOLDOWN = 60; // seconds
 
 export function EmailVerificationForm({
   email,
-  name,
   type,
   onVerificationSuccess,
   onCancel,
@@ -70,10 +70,14 @@ export function EmailVerificationForm({
     },
   });
 
-  // Generate and send initial OTP
+  // Use the email verification hook for proper business logic separation
+  const { resendVerificationEmail } = useEmailVerification();
+
+  // Generate initial OTP on component mount
   useEffect(() => {
-    sendInitialOtp();
-  }, [sendInitialOtp]);
+    const otp = generateOtp(6);
+    setCurrentOtp(otp);
+  }, []);
 
   // Countdown timer
   useEffect(() => {
@@ -106,58 +110,25 @@ export function EmailVerificationForm({
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const sendInitialOtp = useCallback(async () => {
-    const otp = generateOtp(6);
-    setCurrentOtp(otp);
-    
-    try {
-      const result = await sendOtpEmail({
-        to_email: email,
-        to_name: name,
-        otp_code: otp,
-        expires_in: formatExpiryTime(EXPIRY_MINUTES),
-        type
-      });
-
-      if (result.success) {
-        toast.success("Verification code sent to your email!");
-        setTimeLeft(EXPIRY_MINUTES * 60);
-        setIsExpired(false);
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error("Failed to send verification code");
-      console.error(error);
-    }
-  }, [email, name, type]);
 
   const handleResendCode = async () => {
     setIsSending(true);
-    const newOtp = generateOtp(6);
-    setCurrentOtp(newOtp);
-
+    
     try {
-      const result = await sendOtpEmail({
-        to_email: email,
-        to_name: name,
-        otp_code: newOtp,
-        expires_in: formatExpiryTime(EXPIRY_MINUTES),
-        type
-      });
-
-      if (result.success) {
-        toast.success("New verification code sent!");
-        setTimeLeft(EXPIRY_MINUTES * 60);
-        setIsExpired(false);
-        setResendCooldown(RESEND_COOLDOWN);
-        form.reset({ code: "" });
-      } else {
-        toast.error(result.message);
-      }
+      // Use the hook's resend functionality
+      await resendVerificationEmail();
+      
+      // Generate new OTP for local validation
+      const newOtp = generateOtp(6);
+      setCurrentOtp(newOtp);
+      
+      // Reset form and timers
+      setTimeLeft(EXPIRY_MINUTES * 60);
+      setIsExpired(false);
+      setResendCooldown(RESEND_COOLDOWN);
+      form.reset({ code: "" });
     } catch (error) {
-      toast.error("Failed to resend verification code");
-      console.error(error);
+      console.error("Failed to resend verification code:", error);
     } finally {
       setIsSending(false);
     }

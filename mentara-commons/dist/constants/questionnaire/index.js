@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.COMMUNITY_RECOMMENDATION_THRESHOLDS = exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = exports.isValidQuestionnaireName = exports.getQuestionnaireById = exports.getAllQuestionnaireNames = exports.getQuestionnaireByName = exports.QUESTIONNAIRE_ID_TO_NAME_MAP = exports.QUESTIONNAIRE_MAPPING = exports.LIST_OF_QUESTIONNAIRES = exports.SOCIAL_PHOBIA_SPIN = exports.PTSD_PCL5 = exports.DEPRESSION_PHQ9 = exports.PHOBIA_SPECIFIC = exports.STRESS_PSS = exports.PANIC_DISORDER_PDSS = exports.OCD_OCI_R = exports.MOOD_DISORDER_MDQ = exports.INSOMNIA_ISI = exports.ANXIETY_GAD7 = exports.DRUG_ABUSE_DAST = exports.BURNOUT_MBI = exports.BINGE_EATING_BES = exports.ALCOHOL_AUDIT = exports.ADHD_ASRS = void 0;
+exports.COMMUNITY_RECOMMENDATION_THRESHOLDS = exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = exports.isValidQuestionnaireName = exports.getQuestionnaireById = exports.getAllQuestionnaireNames = exports.getQuestionnaireByName = exports.QUESTIONNAIRE_ID_TO_NAME_MAP = exports.QUESTIONNAIRE_MAPPING = exports.QUESTIONNAIRE_MAP = exports.LIST_OF_QUESTIONNAIRES = exports.SOCIAL_PHOBIA_SPIN = exports.PTSD_PCL5 = exports.DEPRESSION_PHQ9 = exports.PHOBIA_SPECIFIC = exports.STRESS_PSS = exports.PANIC_DISORDER_PDSS = exports.OCD_OCI_R = exports.MOOD_DISORDER_MDQ = exports.INSOMNIA_ISI = exports.ANXIETY_GAD7 = exports.DRUG_ABUSE_DAST = exports.BURNOUT_MBI = exports.BINGE_EATING_BES = exports.ALCOHOL_AUDIT = exports.ADHD_ASRS = void 0;
 var adhd_1 = require("./adhd");
 Object.defineProperty(exports, "ADHD_ASRS", { enumerable: true, get: function () { return __importDefault(adhd_1).default; } });
 var alcohol_1 = require("./alcohol");
@@ -39,6 +39,7 @@ Object.defineProperty(exports, "SOCIAL_PHOBIA_SPIN", { enumerable: true, get: fu
 // Questionnaire mapping and utilities
 var questionnaire_mapping_1 = require("./questionnaire-mapping");
 Object.defineProperty(exports, "LIST_OF_QUESTIONNAIRES", { enumerable: true, get: function () { return questionnaire_mapping_1.LIST_OF_QUESTIONNAIRES; } });
+Object.defineProperty(exports, "QUESTIONNAIRE_MAP", { enumerable: true, get: function () { return questionnaire_mapping_1.QUESTIONNAIRE_MAP; } });
 Object.defineProperty(exports, "QUESTIONNAIRE_MAPPING", { enumerable: true, get: function () { return questionnaire_mapping_1.QUESTIONNAIRE_MAP; } });
 Object.defineProperty(exports, "QUESTIONNAIRE_ID_TO_NAME_MAP", { enumerable: true, get: function () { return questionnaire_mapping_1.QUESTIONNAIRE_ID_TO_NAME_MAP; } });
 Object.defineProperty(exports, "getQuestionnaireByName", { enumerable: true, get: function () { return questionnaire_mapping_1.getQuestionnaireByName; } });

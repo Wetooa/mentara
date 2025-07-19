@@ -1,82 +1,118 @@
-# Mentara
+# Mentara Client
 
-Mentara is a mental health application designed to provide therapist matching, user engagement, therapy session completion, scheduling efficiency, moderation, system uptime, security, and mental health tracking. It integrates AI-driven features and a robust backend to deliver a seamless user experience.
+The frontend service for Mentara, a comprehensive mental health platform that connects patients with therapists through modern web technologies.
 
-## Technologies Used
+## 🏗️ Project Overview
 
-- **Frontend:** Next.js 15.2.4, TypeScript, Tailwind CSS 4.x, shadcn/ui components
-- **State Management:** Zustand (client state) + React Query v5 (server state)
-- **Backend:** NestJS 11.x with TypeScript, Prisma ORM, PostgreSQL
-- **AI Services:** 
-  - **Patient Evaluation**: Python Flask + PyTorch neural networks
-  - **Content Moderation**: Python Flask + Ollama mxbai-embed-large embeddings
-- **Database & Storage:** PostgreSQL with Prisma ORM, Supabase Storage, AWS S3
-- **Real-time:** Socket.io WebSockets for messaging and video calls
-- **Video & Audio:** WebRTC (P2P video) with dedicated TURN server
-- **Authentication:** JWT-based local authentication (migrated from Clerk)
-- **Payment:** Stripe API integration
-- **HTTP Client:** Axios with interceptors for auth and error handling
-- **Forms:** React Hook Form with Zod validation
-- **UI Components:** Radix UI primitives with shadcn/ui design system
+Mentara Client is a production-ready Next.js application providing:
+- **Therapy Sessions** - WebRTC video consultations with licensed therapists
+- **Community Support** - Illness-specific support groups with AI moderation
+- **Mental Health Assessments** - AI-powered patient evaluations
+- **Real-time Messaging** - Secure communication platform
+- **Interactive Worksheets** - Therapy assignments and progress tracking
 
-## Getting Started
+## 🚀 Architecture
+
+### Technology Stack
+- **Framework**: Next.js 15.2.4 with App Router and TypeScript
+- **Styling**: Tailwind CSS 4.x with shadcn/ui components
+- **State Management**: Zustand (client state) + React Query v5 (server state)
+- **Authentication**: JWT-based local authentication with role-based access
+- **Real-time Communication**: Socket.io WebSockets + WebRTC for video
+- **File Storage**: Supabase Storage integration
+- **Payment Processing**: Stripe API integration
+- **HTTP Client**: Axios with interceptors for auth and error handling
+- **Forms & Validation**: React Hook Form with Zod schemas
+- **UI Components**: Radix UI primitives with shadcn/ui design system
+- **Testing**: Jest (unit) + Playwright (e2e)
+
+## 🔧 Development Setup
 
 ### Prerequisites
-
-Ensure you have the following installed:
-
-- Node.js (v18+) and npm/bun
-- PostgreSQL 14+ (for database)
-- Python 3.9+ (for AI services)
-- Ollama (for content moderation AI)
+- Node.js 18+
+- Docker and Docker Compose (for containerized development)
+- npm or bun
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone and install dependencies**:
+```bash
+git clone <repository-url>
+cd mentara-client
+npm install
+```
 
-   ```sh
-   git clone https://github.com/your-org/mentara.git
-   cd mentara/mentara-client
-   ```
+2. **Environment setup**:
+```bash
+cp .env.example .env.local
+# Configure API endpoints, authentication keys, and Supabase credentials
+```
 
-2. Install dependencies:
+3. **Start development server**:
+```bash
+npm run dev     # Start with hot reload
+```
 
-   ```sh
-   npm install
-   ```
+The application will be available at `http://localhost:3000`
 
-3. Set up environment variables:
-   ```sh
-   cp .env.example .env.local
-   # Configure API endpoints, authentication, and other environment variables
-   ```
+## 🧪 Testing
 
-4. Start the development server:
+### Unit Tests
+```bash
+npm run test          # Run all unit tests
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run with coverage report
+```
 
-   ```sh
-   npm run dev
-   ```
+### End-to-End Tests
+```bash
+npm run test:e2e      # Run Playwright e2e tests
+npm run test:e2e:ui   # Run e2e tests with UI
+```
 
-   The application will be available at `http://localhost:3000`
+## 🛠️ Development Commands
 
-### Development Commands
-
+### Using Make (Recommended)
 ```bash
 # Development
-npm run dev      # Start Next.js development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint checks
-npm run type-check # Run TypeScript checks
+make dev                 # Start with hot reload
+make dev-turbo          # Start with Turbopack
+make build              # Build for production
+make start              # Start production server
 
-# Testing
-npm run test     # Run Jest unit tests
-npm run test:watch # Run tests in watch mode
-npm run test:e2e # Run Playwright end-to-end tests
+# Docker Compose
+make compose-up         # Start services with docker-compose
+make compose-up-d       # Start services in background
+make compose-down       # Stop and remove containers
+make compose-logs       # View container logs
 
 # Code Quality
-npm run format   # Format code with Prettier
-npm run lint:fix # Fix ESLint issues automatically
+make lint               # Run ESLint checks
+make format             # Format with Prettier
+make type-check         # Run TypeScript checks
+make test               # Run all tests
+
+# Environment
+make setup-env          # Setup environment variables
+make setup-dev          # Complete development setup
+```
+
+### Using npm directly
+```bash
+# Development
+npm run dev              # Start development server
+npm run build            # Build for production
+npm run start            # Start production server
+
+# Testing
+npm run test             # Run unit tests
+npm run test:watch       # Run tests in watch mode
+npm run test:e2e         # Run end-to-end tests
+
+# Code Quality
+npm run lint             # Run ESLint checks
+npm run type-check       # Run TypeScript checks
+npm run format           # Format code with Prettier
 ```
 
 ## 🌟 Key Features

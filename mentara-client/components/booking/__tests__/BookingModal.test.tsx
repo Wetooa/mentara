@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import BookingModal from '../BookingModal';
+import BookingModal from '@/components/booking/BookingModal';
 import { TherapistCardData } from '@/types/therapist';
 
 // Mock the API hook

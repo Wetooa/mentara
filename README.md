@@ -2,24 +2,65 @@
 
 ![Mentara Logo](https://img.shields.io/badge/Mentara-Mental%20Health%20Platform-blue)
 ![Development Status](https://img.shields.io/badge/Status-Active%20Development-green)
-![Team](https://img.shields.io/badge/Team-4%20AI%20Agents-purple)
+![Architecture](https://img.shields.io/badge/Architecture-Microservices-purple)
 
 ## 🎯 Project Overview
 
-Mentara is a comprehensive mental health platform that connects patients with therapists, featuring therapy sessions, community support, interactive worksheets, mental health assessments, and AI-driven patient evaluation. Built with modern technologies and a microservices architecture for scalability and maintainability.
+Mentara is a comprehensive mental health platform that connects patients with therapists, featuring therapy sessions, community support, interactive worksheets, mental health assessments, and AI-driven patient evaluation. Built with modern technologies and a microservices architecture designed for scalability, maintainability, and independent deployment.
 
-**Live Development**: Currently in active development with a coordinated team of 4 AI agents working collaboratively to deliver features on schedule.
+**Key Features:**
+- 🔐 JWT-based authentication with role-based access control
+- 💬 Real-time messaging with WebSocket integration  
+- 📹 WebRTC video consultations
+- 🧠 AI-powered mental health assessments using PyTorch
+- 🛡️ AI content moderation for community safety
+- 📊 Comprehensive analytics and reporting
+- 🏥 HIPAA-compliant data handling
 
 ## 🏗️ Architecture
 
+### Microservices Structure
 ```
 mentara/
-├── mentara-client/          # Next.js 15.2.4 Frontend (TypeScript)
 ├── mentara-api/             # NestJS 11.x Backend (TypeScript)
+│   ├── docker-compose.yml   # Service-specific Docker setup
+│   ├── Dockerfile          # Container build configuration
+│   ├── Makefile           # Service automation commands
+│   └── README.md          # Backend service documentation
+├── mentara-client/          # Next.js 15.2.4 Frontend (TypeScript)
+│   ├── docker-compose.yml   # Service-specific Docker setup
+│   ├── Dockerfile          # Container build configuration
+│   ├── Makefile           # Service automation commands
+│   └── README.md          # Frontend service documentation
 ├── ai-patient-evaluation/   # Flask ML Service (Python/PyTorch)
-├── ai-content-moderation/   # Flask AI Moderation Service (Ollama/mxbai-embed-large)
-└── turn-server/            # WebRTC TURN Server
+│   ├── docker-compose.yml   # Service-specific Docker setup
+│   ├── Dockerfile          # Container build configuration
+│   ├── Makefile           # Service automation commands
+│   └── README.md          # AI evaluation service documentation
+├── ai-content-moderation/   # Flask AI Moderation (Ollama/mxbai-embed-large)
+│   ├── docker-compose.yml   # Service-specific Docker setup
+│   ├── Dockerfile          # Container build configuration
+│   ├── Makefile           # Service automation commands
+│   └── README.md          # AI moderation service documentation
+├── Makefile                # Root orchestration commands
+├── run.sh                  # Service coordination script
+└── README.md              # Project overview and setup guide
 ```
+
+### Independent Service Deployment
+Each service operates independently with:
+- **Individual Docker environments** - Service-specific containers and dependencies
+- **Isolated configuration** - Service-level environment variables and settings  
+- **Independent scaling** - Services can be scaled individually based on demand
+- **Service-specific automation** - Each service has its own Makefile for common tasks
+- **Dedicated documentation** - Complete setup and usage guides per service
+
+### Database & Infrastructure
+- **Database**: Supabase PostgreSQL (Database as a Service)
+- **Caching**: Redis for session management and performance optimization
+- **File Storage**: Supabase Storage for file uploads and asset management
+- **Authentication**: JWT-based local authentication system
+- **Real-time**: WebSocket integration for messaging and live features
 
 ## 🤖 AI Development Team Structure
 
@@ -203,21 +244,46 @@ AI/DevOps Agent (Overflow Support)
 ### Prerequisites
 - Node.js 18+ and npm/bun
 - Python 3.9+ with pip
-- PostgreSQL database
-- Environment variables configured
+- Docker and Docker Compose (recommended)
+- Make utility
+- Supabase account (database as a service)
 
-### Quick Start
+### Quick Start (Recommended)
 ```bash
-# Install dependencies for all services
-cd mentara-client && npm install
-cd ../mentara-api && npm install
-cd ../ai-patient-evaluation && pip install -r requirements.txt
+# First-time setup - installs dependencies and configures environment
+./run.sh setup
 
-# Start development servers
-cd mentara-client && npm run dev      # Port 3000
-cd mentara-api && npm run start:dev   # NestJS default port
-cd ai-patient-evaluation && python api.py  # Flask default port
+# Start all services in development mode
+./run.sh start
+# or with Make: make dev
+
+# Check service health
+./run.sh status
+# or with Make: make status
 ```
+
+### Manual Setup (Alternative)
+```bash
+# Setup each service individually
+make setup-dev
+
+# Start services manually
+make dev-local        # Start without Docker
+# or
+make start            # Start with Docker Compose
+
+# Individual service management
+./run.sh api          # Start only backend API
+./run.sh client       # Start only frontend
+./run.sh ai-eval      # Start only AI evaluation
+./run.sh ai-mod       # Start only AI moderation
+```
+
+### Service Endpoints
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001  
+- **AI Patient Evaluation**: http://localhost:5000
+- **AI Content Moderation**: http://localhost:5001
 
 ## 📚 Documentation
 
@@ -237,33 +303,67 @@ All project documentation has been organized into [`project-docs/`](./project-do
 
 ## 🔧 Development Commands
 
-### Frontend (mentara-client/)
+### Global Service Management
 ```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run lint     # ESLint checking
+# Service orchestration with run.sh
+./run.sh setup       # Complete environment setup
+./run.sh start       # Start all services  
+./run.sh stop        # Stop all services
+./run.sh restart     # Restart all services
+./run.sh status      # Check service health
+./run.sh logs        # View all service logs
+./run.sh test        # Run tests for all services
+
+# Individual services
+./run.sh api         # Start only backend API
+./run.sh client      # Start only frontend
+./run.sh ai-eval     # Start only AI evaluation
+./run.sh ai-mod      # Start only AI moderation
 ```
 
-### Backend (mentara-api/)
+### Global Service Management with Make
 ```bash
-npm run start:dev    # Development server
-npm run test         # Run tests
-npm run db:migrate   # Database migrations
-npm run db:seed      # Seed database
+# Development workflow
+make help            # Show all available commands
+make dev             # Start all services in development mode
+make dev-local       # Start without Docker (faster)
+make start           # Start with Docker Compose
+make stop            # Stop all services
+make status          # Check service health
+make logs            # View logs from all services
+
+# Quality assurance
+make test            # Run tests for all services
+make lint            # Run linting for all services
+make format          # Format code for all services
+
+# Environment setup
+make setup-dev       # Complete development setup
+make install         # Install dependencies for all services
 ```
 
-### AI Service (ai-patient-evaluation/)
-```bash
-python api.py                    # Start Flask server
-pip install -r requirements.txt # Install dependencies
-```
+### Individual Service Commands
+Each service has its own Makefile with service-specific commands:
 
-### AI Content Moderation (ai-content-moderation/)
 ```bash
-python api.py                    # Start moderation API server
-pip install -r requirements.txt # Install dependencies (includes Ollama)
-ollama serve                     # Start Ollama server
-ollama pull mxbai-embed-large    # Download embedding model
+# Backend (mentara-api/)
+cd mentara-api
+make dev             # Start development server
+make test            # Run tests
+make db-migrate      # Database migrations
+make db-seed         # Seed database
+
+# Frontend (mentara-client/)  
+cd mentara-client
+make dev             # Start development server
+make build           # Production build
+make lint            # ESLint checking
+
+# AI Services (ai-patient-evaluation/, ai-content-moderation/)
+cd ai-patient-evaluation  # or ai-content-moderation
+make dev             # Start Flask server
+make test            # Run service tests
+make setup           # Setup models and dependencies
 ```
 
 ## 🎯 Success Metrics

@@ -139,7 +139,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
 
   const handleReactivateSubscription = async () => {
     try {
-      await reactivateSubscriptionMutation.mutateAsync();
+      await reactivateSubscriptionMutation.mutateAsync(undefined);
     } catch {
       // Error handling is done in the mutation
     }
@@ -432,16 +432,16 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                         </Avatar>
                         <div>
                           <p className="text-sm font-medium">
-                            Invoice #{invoice.number}
+                            Invoice #{invoice.id}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(invoice.created_at), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(invoice.createdAt), { addSuffix: true })}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
-                          {formatCurrency(invoice.amount_due, invoice.currency)}
+                          {formatCurrency(invoice.amount, invoice.currency)}
                         </p>
                         <Badge variant={invoice.status === 'paid' ? 'default' : 'destructive'} className="text-xs">
                           {invoice.status}
@@ -658,18 +658,18 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
                               {method.type === 'card' 
-                                ? `**** **** **** ${method.card?.last4}`
-                                : `****${method.bank_account?.last4}`
+                                ? `**** **** **** ${method.last4}`
+                                : `****${method.last4}`
                               }
                             </span>
-                            {method.is_default && (
+                            {method.isDefault && (
                               <Badge variant="secondary">Default</Badge>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">
                             {method.type === 'card' 
-                              ? `${method.card?.brand?.toUpperCase()} • Expires ${method.card?.exp_month}/${method.card?.exp_year}`
-                              : `${method.bank_account?.bank_name} • ${method.bank_account?.account_type}`
+                              ? `${method.brand?.toUpperCase()} • Expires ${method.expiryMonth}/${method.expiryYear}`
+                              : `Bank Account`
                             }
                           </p>
                         </div>
@@ -682,7 +682,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {!method.is_default && (
+                          {!method.isDefault && (
                             <DropdownMenuItem
                               onClick={() => setDefaultPaymentMethodMutation.mutate(method.id)}
                             >
@@ -749,7 +749,7 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">Invoice #{invoice.number}</span>
+                            <span className="font-medium">Invoice #{invoice.id}</span>
                             <Badge 
                               variant={invoice.status === 'paid' ? 'default' : 'destructive'}
                               className="text-xs"
@@ -758,14 +758,14 @@ export function BillingDashboard({ className }: BillingDashboardProps) {
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {format(new Date(invoice.created_at), 'MMMM d, yyyy')} • 
-                            {formatCurrency(invoice.amount_due, invoice.currency)}
+                            {format(new Date(invoice.createdAt), 'MMMM d, yyyy')} • 
+                            {formatCurrency(invoice.amount, invoice.currency)}
                           </p>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        {invoice.status === 'open' && defaultPaymentMethod && (
+                        {invoice.status === 'pending' && defaultPaymentMethod && (
                           <Button
                             size="sm"
                             onClick={() => handlePayInvoice(invoice.id)}

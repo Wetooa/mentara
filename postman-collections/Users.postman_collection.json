@@ -1,9 +1,9 @@
 {
   "info": {
     "name": "Mentara - Users",
-    "description": "Users module endpoints for user management, profile operations, account administration, session management, password management, email verification, search functionality, and privacy controls.",
+    "description": "User management API endpoints. This collection handles basic user CRUD operations, profile management, and admin user management.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "mentara-users"
+    "_postman_id": "users-collection-v2"
   },
   "auth": {
     "type": "bearer",
@@ -21,263 +21,36 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "// Ensure Bearer token is set",
-          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
-          "    pm.request.headers.add({",
-          "        key: 'Authorization',",
-          "        value: 'Bearer ' + pm.environment.get('accessToken')",
-          "    });",
-          "}",
-          "",
-          "// Ensure test environment has valid UUIDs for user IDs",
-          "if (!pm.environment.get('userId') || !pm.environment.get('userId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
-          "    pm.environment.set('userId', '123e4567-e89b-12d3-a456-426614174000');",
-          "    console.log('⚠️ Set default UUID for userId');",
-          "}",
-          "",
-          "if (!pm.environment.get('targetUserId') || !pm.environment.get('targetUserId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
-          "    pm.environment.set('targetUserId', '987fcdeb-51a2-43d1-9c4f-123456789012');",
-          "    console.log('⚠️ Set default UUID for targetUserId');",
-          "}",
-          "",
-          "if (!pm.environment.get('clientId') || !pm.environment.get('clientId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
-          "    pm.environment.set('clientId', '987fcdeb-51a2-43d7-8ace-123456789012');",
-          "    console.log('⚠️ Set default UUID for clientId');",
-          "}",
-          "",
-          "if (!pm.environment.get('therapistId') || !pm.environment.get('therapistId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
-          "    pm.environment.set('therapistId', 'abcd1234-5678-90ef-ghij-klmnopqrstuv');",
-          "    console.log('⚠️ Set default UUID for therapistId');",
-          "}",
-          "",
-          "if (!pm.environment.get('sessionId') || !pm.environment.get('sessionId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
-          "    pm.environment.set('sessionId', '987fcdeb-51a2-43d7-8ace-123456789012');",
-          "    console.log('⚠️ Set default UUID for sessionId');",
-          "}",
-          "",
-          "if (!pm.environment.get('fileId') || !pm.environment.get('fileId').match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {",
-          "    pm.environment.set('fileId', 'file-id-123e-4567-e89b-12d3a456');",
-          "    console.log('⚠️ Set default UUID for fileId');",
-          "}",
-          "",
-          "// Set test email and credentials",
-          "if (!pm.environment.get('testEmail')) {",
-          "    pm.environment.set('testEmail', 'test@example.com');",
-          "    console.log('⚠️ Set default test email');",
-          "}",
-          "",
-          "if (!pm.environment.get('testPassword')) {",
-          "    pm.environment.set('testPassword', 'NewSecurePassword123!');",
-          "    console.log('⚠️ Set default test password');",
-          "}",
-          "",
-          "// Set search query for user discovery",
-          "if (!pm.environment.get('userSearchQuery')) {",
-          "    pm.environment.set('userSearchQuery', 'john');",
-          "    console.log('⚠️ Set default user search query');",
-          "}",
-          "",
-          "// Set default profile values for testing",
-          "if (!pm.environment.get('userFirstName')) {",
-          "    pm.environment.set('userFirstName', 'John');",
-          "    console.log('⚠️ Set default first name');",
-          "}",
-          "",
-          "if (!pm.environment.get('userLastName')) {",
-          "    pm.environment.set('userLastName', 'Doe');",
-          "    console.log('⚠️ Set default last name');",
-          "}",
-          "",
-          "if (!pm.environment.get('userBio')) {",
-          "    pm.environment.set('userBio', 'Mental health advocate and wellness enthusiast.');",
-          "    console.log('⚠️ Set default bio');",
+          "// Set base URL if not already set",
+          "if (!pm.collectionVariables.get('baseUrl')) {",
+          "    pm.collectionVariables.set('baseUrl', pm.environment.get('baseUrl') || 'http://localhost:3001');",
           "}"
         ]
       }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "// Global error handling for all requests",
-          "pm.test('Response time is acceptable', function () {",
-          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
-          "});",
-          "",
-          "// Auto-save user management data from responses",
-          "if (pm.response.code === 200 || pm.response.code === 201) {",
-          "    const responseJson = pm.response.json();",
-          "    ",
-          "    // Save refresh token from authentication responses",
-          "    if (responseJson.refreshToken) {",
-          "        pm.environment.set('refreshToken', responseJson.refreshToken);",
-          "        console.log('\u2705 Refresh token saved');",
-          "    }",
-          "    ",
-          "    // Save access token from refresh responses",
-          "    if (responseJson.accessToken) {",
-          "        pm.environment.set('accessToken', responseJson.accessToken);",
-          "        console.log('\u2705 Access token refreshed and saved');",
-          "    }",
-          "    ",
-          "    // Save password reset token",
-          "    if (responseJson.resetToken) {",
-          "        pm.environment.set('resetToken', responseJson.resetToken);",
-          "        console.log('\u2705 Password reset token saved');",
-          "    }",
-          "    ",
-          "    // Save email verification token",
-          "    if (responseJson.verificationToken) {",
-          "        pm.environment.set('verificationToken', responseJson.verificationToken);",
-          "        console.log('\u2705 Email verification token saved');",
-          "    }",
-          "    ",
-          "    // Save user search results",
-          "    if (responseJson.users && responseJson.users.length > 0) {",
-          "        pm.environment.set('searchResultUserId', responseJson.users[0].id);",
-          "        console.log('\u2705 First search result user ID saved:', responseJson.users[0].id);",
-          "    }",
-          "    ",
-          "    // Save user profile information",
-          "    if (responseJson.id) {",
-          "        pm.environment.set('userId', responseJson.id);",
-          "        console.log('\u2705 User ID saved:', responseJson.id);",
-          "    }",
-          "    ",
-          "    // Save profile photo URLs",
-          "    if (responseJson.avatarUrl) {",
-          "        pm.environment.set('avatarUrl', responseJson.avatarUrl);",
-          "        console.log('\u2705 Avatar URL saved:', responseJson.avatarUrl);",
-          "    }",
-          "    ",
-          "    if (responseJson.coverImageUrl) {",
-          "        pm.environment.set('coverImageUrl', responseJson.coverImageUrl);",
-          "        console.log('\u2705 Cover image URL saved:', responseJson.coverImageUrl);",
-          "    }",
-          "    ",
-          "    // Save file upload information",
-          "    if (responseJson.fileId) {",
-          "        pm.environment.set('fileId', responseJson.fileId);",
-          "        console.log('\u2705 File ID saved:', responseJson.fileId);",
-          "    }",
-          "    ",
-          "    if (responseJson.url) {",
-          "        pm.environment.set('uploadedFileUrl', responseJson.url);",
-          "        console.log('\u2705 Uploaded file URL saved:', responseJson.url);",
-          "    }",
-          "}",
-          "",
-          "// Handle authentication errors",
-          "if (pm.response.code === 401) {",
-          "    console.error('\u274C Authentication failed - check access token or login status');",
-          "}",
-          "",
-          "// Handle rate limiting",
-          "if (pm.response.code === 429) {",
-          "    console.error('\u274C Rate limit exceeded - too many requests');",
-          "}",
-          "",
-          "// Auto-handle Zod validation errors",
-          "if (pm.response.code === 400) {",
-          "    try {",
-          "        const responseJson = pm.response.json();",
-          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
-          "            responseJson.issues.forEach(issue => {",
-          "                console.error(`\u274C Validation Error: ${issue.message} (${issue.path ? issue.path.join('.') : 'general'})`);",
-          "            });",
-          "        }",
-          "    } catch (e) {",
-          "        console.error('\u274C Failed to parse validation error response');",
-          "    }",
-          "}",
-          "",
-          "// Handle not found errors",
-          "if (pm.response.code === 404) {",
-          "    console.error('\u274C Resource not found - check IDs and availability');",
-          "}",
-          "",
-          "// Handle permission errors",
-          "if (pm.response.code === 403) {",
-          "    const responseJson = pm.response.json();",
-          "    if (responseJson.message && responseJson.message.includes('token')) {",
-          "        console.error('\u274C Token expired or invalid - may need to refresh or re-authenticate');",
-          "    } else {",
-          "        console.error('\u274C Insufficient permissions for this operation');",
-          "    }",
-          "}",
-          "",
-          "// Handle file upload errors",
-          "if (pm.response.code === 413) {",
-          "    console.error('\u274C File too large - check file size limits');",
-          "}"
-        ]
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:3001/api",
-      "type": "string"
-    },
-    {
-      "key": "userId",
-      "value": "123e4567-e89b-12d3-a456-426614174000",
-      "type": "string"
-    },
-    {
-      "key": "targetUserId",
-      "value": "987fcdeb-51a2-43d1-9c4f-123456789012",
-      "type": "string"
     }
   ],
   "item": [
     {
       "name": "User Management",
-      "description": "User management operations including listing, searching, and basic user administration",
+      "description": "Core user management endpoints from /users controller",
       "item": [
         {
           "name": "Get All Users",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response is an array', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.be.an('array');",
-                  "});",
-                  "",
-                  "pm.test('Zod validation error format (if 400)', function () {",
-                  "    if (pm.response.code === 400) {",
-                  "        const responseJson = pm.response.json();",
-                  "        pm.expect(responseJson).to.have.property('issues');",
-                  "        pm.expect(responseJson.issues).to.be.an('array');",
-                  "        if (responseJson.issues.length > 0) {",
-                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
-                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
-                  "        }",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/users",
               "host": ["{{baseUrl}}"],
               "path": ["users"]
             },
-            "description": "Get all active users (admin only)"
+            "description": "Retrieve all users in the system. Admin access required."
           },
           "response": []
         },
@@ -285,576 +58,109 @@
           "name": "Get All Users Including Inactive",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/users/all-including-inactive",
               "host": ["{{baseUrl}}"],
               "path": ["users", "all-including-inactive"]
             },
-            "description": "Get all users including inactive accounts (admin only)"
+            "description": "Retrieve all users including inactive ones. Admin access required."
           },
           "response": []
         },
         {
           "name": "Get User by ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has user data', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('id');",
-                  "    pm.expect(responseJson).to.have.property('email');",
-                  "    pm.expect(responseJson).to.have.property('role');",
-                  "});",
-                  "",
-                  "pm.test('Zod validation error format (if 400)', function () {",
-                  "    if (pm.response.code === 400) {",
-                  "        const responseJson = pm.response.json();",
-                  "        pm.expect(responseJson).to.have.property('issues');",
-                  "        pm.expect(responseJson.issues).to.be.an('array');",
-                  "        if (responseJson.issues.length > 0) {",
-                  "            pm.expect(responseJson.issues[0]).to.have.property('path');",
-                  "            pm.expect(responseJson.issues[0]).to.have.property('message');",
-                  "        }",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{userId}}"]
             },
-            "description": "Get specific user by ID (self or admin)"
+            "description": "Get user by ID. Users can only view their own profile unless they're admin."
           },
           "response": []
         },
         {
-          "name": "Get User by ID - Invalid UUID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 400 for invalid UUID', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});",
-                  "",
-                  "pm.test('Zod validation error for invalid UUID', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('issues');",
-                  "    pm.expect(responseJson.issues).to.be.an('array');",
-                  "    const idError = responseJson.issues.find(issue => ",
-                  "        issue.path && issue.path.includes('id'));",
-                  "    pm.expect(idError).to.not.be.undefined;",
-                  "    pm.expect(idError.message).to.equal('Invalid user ID format');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/invalid-user-id",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "invalid-user-id"]
-            },
-            "description": "Test user ID parameter validation with non-UUID (should fail with Zod error)"
-          },
-          "response": []
-        },
-        {
-          "name": "Search Users",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('User search completed successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Search results structure valid', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('users');",
-                  "    pm.expect(responseJson.users).to.be.an('array');",
-                  "    pm.expect(responseJson).to.have.property('totalResults');",
-                  "    pm.expect(responseJson).to.have.property('searchQuery');",
-                  "});",
-                  "",
-                  "pm.test('User results have required fields', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    if (responseJson.users.length > 0) {",
-                  "        const user = responseJson.users[0];",
-                  "        pm.expect(user).to.have.property('id');",
-                  "        pm.expect(user).to.have.property('profile');",
-                  "        pm.expect(user).to.have.property('role');",
-                  "        // Sensitive info should be filtered",
-                  "        pm.expect(user).to.not.have.property('email');",
-                  "    }",
-                  "});",
-                  "",
-                  "pm.test('Search filtering applied correctly', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('appliedFilters');",
-                  "    pm.expect(responseJson).to.have.property('searchTime');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/search/users?q={{userSearchQuery}}&role=client&limit=10&includePublicOnly=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["search", "users"],
-              "query": [
-                {
-                  "key": "q",
-                  "value": "{{userSearchQuery}}"
-                },
-                {
-                  "key": "role",
-                  "value": "client"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                },
-                {
-                  "key": "includePublicOnly",
-                  "value": "true"
-                }
-              ]
-            },
-            "description": "Search for users by name, bio, or other public profile information"
-          },
-          "response": []
-        },
-        {
-          "name": "Search Users by Role",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users?role={{userRole}}&page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"],
-              "query": [
-                {
-                  "key": "role",
-                  "value": "{{userRole}}"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                }
-              ]
-            },
-            "description": "Search users by role with pagination"
-          },
-          "response": []
-        },
-        {
-          "name": "Search Users by Province",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users?province=Ontario&page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"],
-              "query": [
-                {
-                  "key": "province",
-                  "value": "Ontario"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                }
-              ]
-            },
-            "description": "Search users by province"
-          },
-          "response": []
-        },
-        {
-          "name": "Search Users by Status",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users?isActive=true&page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"],
-              "query": [
-                {
-                  "key": "isActive",
-                  "value": "true"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "limit",
-                  "value": "10"
-                }
-              ]
-            },
-            "description": "Search users by active status"
-          },
-          "response": []
-        },
-        {
-          "name": "Search Therapists",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Therapist search completed successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Therapist results include professional info', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    if (responseJson.users.length > 0) {",
-                  "        const therapist = responseJson.users[0];",
-                  "        pm.expect(therapist.role).to.equal('therapist');",
-                  "        pm.expect(therapist).to.have.property('specializations');",
-                  "        pm.expect(therapist).to.have.property('hourlyRate');",
-                  "        pm.expect(therapist).to.have.property('acceptingNewClients');",
-                  "    }",
-                  "});",
-                  "",
-                  "pm.test('Therapist search includes professional filters', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('availableFilters');",
-                  "    pm.expect(responseJson.availableFilters).to.include('specializations');",
-                  "    pm.expect(responseJson.availableFilters).to.include('hourlyRate');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/search/users?q=anxiety&role=therapist&specialization=anxiety&acceptingClients=true&maxRate=250",
-              "host": ["{{baseUrl}}"],
-              "path": ["search", "users"],
-              "query": [
-                {
-                  "key": "q",
-                  "value": "anxiety"
-                },
-                {
-                  "key": "role",
-                  "value": "therapist"
-                },
-                {
-                  "key": "specialization",
-                  "value": "anxiety"
-                },
-                {
-                  "key": "acceptingClients",
-                  "value": "true"
-                },
-                {
-                  "key": "maxRate",
-                  "value": "250"
-                }
-              ]
-            },
-            "description": "Search for therapists with specific specializations and criteria"
-          },
-          "response": []
-        },
-        {
-          "name": "Global Search",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Global search completed successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Global search includes user results', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('results');",
-                  "    pm.expect(responseJson.results).to.be.an('object');",
-                  "    pm.expect(responseJson.results).to.have.property('users');",
-                  "});",
-                  "",
-                  "pm.test('Search categories available', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('categories');",
-                  "    pm.expect(responseJson.categories).to.be.an('array');",
-                  "    pm.expect(responseJson.categories).to.include('users');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/search/global?q={{userSearchQuery}}&type=users&limit=5",
-              "host": ["{{baseUrl}}"],
-              "path": ["search", "global"],
-              "query": [
-                {
-                  "key": "q",
-                  "value": "{{userSearchQuery}}"
-                },
-                {
-                  "key": "type",
-                  "value": "users"
-                },
-                {
-                  "key": "limit",
-                  "value": "5"
-                }
-              ]
-            },
-            "description": "Global search across platform including users and other content"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Current User Info",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Current user info retrieved', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Essential user information included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('id');",
-                  "    pm.expect(responseJson).to.have.property('email');",
-                  "    pm.expect(responseJson).to.have.property('role');",
-                  "    pm.expect(responseJson).to.have.property('emailVerified');",
-                  "});",
-                  "",
-                  "pm.test('Account status information available', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('status');",
-                  "    pm.expect(responseJson).to.have.property('createdAt');",
-                  "    pm.expect(responseJson).to.have.property('lastLoginAt');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "me"]
-            },
-            "description": "Get basic information about currently authenticated user"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Profile Management",
-      "description": "User profile operations including CRUD operations, role-specific profiles, and file uploads",
-      "item": [
-        {
-          "name": "Get Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('User profile retrieved successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Profile has required fields', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('id');",
-                  "    pm.expect(responseJson).to.have.property('email');",
-                  "    pm.expect(responseJson).to.have.property('profile');",
-                  "    pm.expect(responseJson).to.have.property('role');",
-                  "});",
-                  "",
-                  "pm.test('Profile includes personal information', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.profile).to.have.property('firstName');",
-                  "    pm.expect(responseJson.profile).to.have.property('lastName');",
-                  "    pm.expect(responseJson).to.have.property('avatarUrl');",
-                  "    pm.expect(responseJson).to.have.property('bio');",
-                  "});",
-                  "",
-                  "pm.test('Preferences and settings included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('timezone');",
-                  "    pm.expect(responseJson).to.have.property('language');",
-                  "    pm.expect(responseJson).to.have.property('theme');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "profile"]
-            },
-            "description": "Get detailed profile information for currently authenticated user"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Profile updated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Updated profile reflects changes', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('updatedAt');",
-                  "    pm.expect(responseJson).to.have.property('profile');",
-                  "});",
-                  "",
-                  "pm.test('Profile validation passed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.profile).to.have.property('firstName');",
-                  "    pm.expect(responseJson.profile).to.have.property('lastName');",
-                  "    pm.expect(responseJson).to.have.property('bio');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Update User Profile",
           "request": {
             "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
                 "key": "Content-Type",
-                "value": "application/json"
+                "value": "application/json",
+                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"profile\": {\n    \"firstName\": \"{{userFirstName}}\",\n    \"lastName\": \"{{userLastName}}\",\n    \"phoneNumber\": \"+1234567890\",\n    \"address\": {\n      \"street\": \"123 Main Street\",\n      \"city\": \"Toronto\",\n      \"province\": \"Ontario\",\n      \"postalCode\": \"M5V 3A8\",\n      \"country\": \"Canada\"\n    }\n  },\n  \"bio\": \"{{userBio}}\",\n  \"timezone\": \"America/Toronto\",\n  \"language\": \"en\",\n  \"theme\": \"light\",\n  \"profileVisibility\": \"therapists_only\",\n  \"allowMessagesFrom\": \"therapists\"\n}"
+              "raw": "{\n  \"firstName\": \"{{userFirstName}}\",\n  \"lastName\": \"{{userLastName}}\",\n  \"bio\": \"{{userBio}}\",\n  \"phoneNumber\": \"+1234567890\",\n  \"timezone\": \"America/Toronto\",\n  \"language\": \"en\",\n  \"theme\": \"light\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{userId}}"]
             },
-            "description": "Update user profile information including personal details and preferences"
+            "description": "Update user profile. Users can only update their own profile unless they're admin."
           },
           "response": []
         },
         {
           "name": "Update Profile with File Upload",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Profile with files updated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('File uploads processed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    // Avatar or cover image should be updated",
-                  "    const hasAvatar = responseJson.avatarUrl && responseJson.avatarUrl.length > 0;",
-                  "    const hasCover = responseJson.coverImageUrl && responseJson.coverImageUrl.length > 0;",
-                  "    pm.expect(hasAvatar || hasCover).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('File URLs are valid', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    if (responseJson.avatarUrl) {",
-                  "        pm.expect(responseJson.avatarUrl).to.match(/^https?:\\/\\/.+/);",
-                  "    }",
-                  "    if (responseJson.coverImageUrl) {",
-                  "        pm.expect(responseJson.coverImageUrl).to.match(/^https?:\\/\\/.+/);",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "profileData",
-                  "value": "{\n  \"profile\": {\n    \"firstName\": \"{{userFirstName}}\",\n    \"lastName\": \"{{userLastName}}\"\n  },\n  \"bio\": \"Updated bio with new profile photo\",\n  \"timezone\": \"America/Toronto\"\n}",
+                  "key": "firstName",
+                  "value": "{{userFirstName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "{{userLastName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "{{userBio}}",
                   "type": "text"
                 },
                 {
                   "key": "avatar",
                   "type": "file",
-                  "src": []
+                  "src": ""
                 },
                 {
                   "key": "cover",
                   "type": "file",
-                  "src": []
+                  "src": ""
                 }
               ]
             },
@@ -863,1832 +169,198 @@
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{userId}}"]
             },
-            "description": "Update user profile with avatar and cover image uploads (multipart form data)"
+            "description": "Update user profile with file uploads for avatar and cover images."
           },
           "response": []
         },
         {
-          "name": "Upload Profile Photo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('File uploaded successfully', function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "pm.test('Upload response includes file metadata', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('fileId');",
-                  "    pm.expect(responseJson).to.have.property('url');",
-                  "    pm.expect(responseJson).to.have.property('filename');",
-                  "    pm.expect(responseJson).to.have.property('mimeType');",
-                  "});",
-                  "",
-                  "pm.test('File URL is accessible', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.url).to.match(/^https?:\\/\\/.+/);",
-                  "});",
-                  "",
-                  "pm.test('File categorized correctly', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('category');",
-                  "    pm.expect(['USER_PROFILES', 'AVATARS']).to.include(responseJson.category);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
-                },
-                {
-                  "key": "category",
-                  "value": "USER_PROFILES",
-                  "type": "text"
-                },
-                {
-                  "key": "description",
-                  "value": "Profile avatar photo",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/files/upload",
-              "host": ["{{baseUrl}}"],
-              "path": ["files", "upload"]
-            },
-            "description": "Upload profile photo (avatar or cover image) with file validation"
-          },
-          "response": []
-        },
-        {
-          "name": "Serve Profile Photo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('File served successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Correct content type for image', function () {",
-                  "    const contentType = pm.response.headers.get('content-type');",
-                  "    pm.expect(contentType).to.match(/^image\\//);",
-                  "});",
-                  "",
-                  "pm.test('File content received', function () {",
-                  "    pm.expect(pm.response.responseSize).to.be.above(0);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/files/serve/{{fileId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["files", "serve", "{{fileId}}"]
-            },
-            "description": "Serve/download uploaded profile photo by file ID"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Client Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Client profile retrieved successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Client-specific data included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('clientId');",
-                  "    pm.expect(responseJson).to.have.property('clientProfile');",
-                  "});",
-                  "",
-                  "pm.test('Client preferences available', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('preferences');",
-                  "    pm.expect(responseJson).to.have.property('privacySettings');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/client/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "profile"]
-            },
-            "description": "Get client-specific profile data and preferences"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Client Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Client profile updated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Client profile changes reflected', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('updatedAt');",
-                  "    pm.expect(responseJson).to.have.property('clientProfile');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"clientProfile\": {\n    \"mentalHealthGoals\": [\n      \"Reduce anxiety levels\",\n      \"Improve sleep quality\",\n      \"Develop coping strategies\"\n    ],\n    \"preferredTherapyStyle\": \"cognitive_behavioral\",\n    \"availabilityPreferences\": {\n      \"preferredDays\": [\"Monday\", \"Wednesday\", \"Friday\"],\n      \"preferredTimes\": [\"morning\", \"afternoon\"],\n      \"timezone\": \"America/Toronto\"\n    },\n    \"communicationPreferences\": {\n      \"preferredContactMethod\": \"email\",\n      \"reminderFrequency\": \"24_hours_before\"\n    }\n  },\n  \"privacySettings\": {\n    \"shareProgressWithTherapist\": true,\n    \"allowTherapistNotes\": true,\n    \"shareBasicInfoWithCommunity\": false\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "profile"]
-            },
-            "description": "Update client-specific profile information and preferences"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Therapist Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Therapist profile retrieved successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Therapist-specific data included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('therapistId');",
-                  "    pm.expect(responseJson).to.have.property('specializations');",
-                  "    pm.expect(responseJson).to.have.property('qualifications');",
-                  "});",
-                  "",
-                  "pm.test('Professional information available', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('licenseNumber');",
-                  "    pm.expect(responseJson).to.have.property('yearsOfExperience');",
-                  "    pm.expect(responseJson).to.have.property('hourlyRate');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/therapist/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["therapist", "profile"]
-            },
-            "description": "Get therapist-specific profile data and professional information"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Therapist Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Therapist profile updated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Professional information updated', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('updatedAt');",
-                  "    pm.expect(responseJson).to.have.property('specializations');",
-                  "    pm.expect(responseJson).to.have.property('hourlyRate');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bio\": \"Experienced clinical psychologist specializing in anxiety, depression, and trauma recovery. I use evidence-based approaches including CBT and EMDR to help clients achieve their mental health goals.\",\n  \"specializations\": [\n    \"Anxiety Disorders\",\n    \"Depression\",\n    \"PTSD\",\n    \"Trauma Recovery\",\n    \"Cognitive Behavioral Therapy\"\n  ],\n  \"hourlyRate\": 220.00,\n  \"acceptingNewClients\": true,\n  \"preferredClientTypes\": [\"Adults\", \"Young Adults\"],\n  \"workSettings\": [\"Individual Therapy\", \"Group Therapy\"],\n  \"languages\": [\"English\", \"Spanish\"],\n  \"availability\": {\n    \"monday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"tuesday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"wednesday\": { \"start\": \"10:00\", \"end\": \"18:00\" },\n    \"thursday\": { \"start\": \"09:00\", \"end\": \"17:00\" },\n    \"friday\": { \"start\": \"09:00\", \"end\": \"15:00\" }\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/therapist/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["therapist", "profile"]
-            },
-            "description": "Update therapist profile including specializations, rates, and availability"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Therapist Specializations",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Specializations updated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Specializations list updated', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('specializations');",
-                  "    pm.expect(responseJson.specializations).to.be.an('array');",
-                  "    pm.expect(responseJson).to.have.property('updatedAt');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"specializations\": [\n    \"Anxiety Disorders\",\n    \"Depression and Mood Disorders\",\n    \"PTSD and Trauma Recovery\",\n    \"Mindfulness-Based Therapy\",\n    \"Cognitive Behavioral Therapy (CBT)\",\n    \"Dialectical Behavior Therapy (DBT)\",\n    \"Family and Relationship Counseling\"\n  ],\n  \"updateReason\": \"Added new specializations after completing additional training\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/therapist/profile/specializations",
-              "host": ["{{baseUrl}}"],
-              "path": ["therapist", "profile", "specializations"]
-            },
-            "description": "Update therapist specializations list"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Notification Settings",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Notification settings retrieved', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Email notification preferences included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('emailNotifications');",
-                  "    pm.expect(responseJson.emailNotifications).to.have.property('appointments');",
-                  "    pm.expect(responseJson.emailNotifications).to.have.property('messages');",
-                  "    pm.expect(responseJson.emailNotifications).to.have.property('worksheets');",
-                  "});",
-                  "",
-                  "pm.test('Push notification preferences included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('pushNotifications');",
-                  "    pm.expect(responseJson.pushNotifications).to.have.property('appointments');",
-                  "    pm.expect(responseJson.pushNotifications).to.have.property('messages');",
-                  "});",
-                  "",
-                  "pm.test('Quiet hours configuration available', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('quietHours');",
-                  "    pm.expect(responseJson.quietHours).to.have.property('enabled');",
-                  "    pm.expect(responseJson.quietHours).to.have.property('startTime');",
-                  "    pm.expect(responseJson.quietHours).to.have.property('endTime');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/notifications/settings",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications", "settings"]
-            },
-            "description": "Get user notification preferences and settings"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Notification Settings",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Notification settings updated', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Settings update confirmed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('updated');",
-                  "    pm.expect(responseJson.updated).to.be.true;",
-                  "    pm.expect(responseJson).to.have.property('updatedAt');",
-                  "});",
-                  "",
-                  "pm.test('Updated preferences reflected', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('notificationPreferences');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"emailNotifications\": {\n    \"appointments\": true,\n    \"messages\": true,\n    \"worksheets\": true,\n    \"system\": true,\n    \"marketing\": false\n  },\n  \"pushNotifications\": {\n    \"appointments\": true,\n    \"messages\": true,\n    \"worksheets\": false,\n    \"system\": true\n  },\n  \"inAppNotifications\": {\n    \"messages\": true,\n    \"updates\": true\n  },\n  \"quietHours\": {\n    \"enabled\": true,\n    \"startTime\": \"22:00\",\n    \"endTime\": \"07:00\",\n    \"timezone\": \"America/Toronto\"\n  },\n  \"frequency\": {\n    \"digestEmails\": \"weekly\",\n    \"reminderTiming\": \"24_hours_before\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/notifications/settings",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications", "settings"]
-            },
-            "description": "Update user notification preferences including quiet hours and frequency"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Privacy Settings",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Privacy settings updated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Privacy controls reflected in profile', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('profileVisibility');",
-                  "    pm.expect(responseJson).to.have.property('allowMessagesFrom');",
-                  "});",
-                  "",
-                  "pm.test('Privacy update timestamp recorded', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('updatedAt');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"profileVisibility\": \"therapists_only\",\n  \"allowMessagesFrom\": \"therapists\",\n  \"showOnlineStatus\": false,\n  \"shareBasicInfoWithCommunity\": false,\n  \"allowTherapistNotes\": true,\n  \"shareProgressReports\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Update user privacy settings and profile visibility controls"
-          },
-          "response": []
-        },
-        {
-          "name": "Set Profile to Public",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Profile visibility updated to public', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Public visibility confirmed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.profileVisibility).to.equal('public');",
-                  "    pm.expect(responseJson.allowMessagesFrom).to.equal('all');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"profileVisibility\": \"public\",\n  \"allowMessagesFrom\": \"all\",\n  \"showOnlineStatus\": true,\n  \"shareBasicInfoWithCommunity\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Set user profile to public visibility with open messaging"
-          },
-          "response": []
-        },
-        {
-          "name": "Set Profile to Private",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Profile visibility updated to private', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Private visibility confirmed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.profileVisibility).to.equal('private');",
-                  "    pm.expect(responseJson.allowMessagesFrom).to.equal('none');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"profileVisibility\": \"private\",\n  \"allowMessagesFrom\": \"none\",\n  \"showOnlineStatus\": false,\n  \"shareBasicInfoWithCommunity\": false,\n  \"shareProgressReports\": false\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Set user profile to private with restricted access and messaging"
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Account deactivated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Deactivation confirmation received', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('deactivated');",
-                  "});",
-                  "",
-                  "pm.test('Account status updated', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('success');",
-                  "    pm.expect(responseJson.success).to.be.true;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Delete User Profile",
           "request": {
             "method": "DELETE",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"User requested account deactivation\",\n  \"confirmDeactivation\": true\n}"
-            },
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{userId}}"]
             },
-            "description": "Deactivate user account (self-deactivation or admin action)"
+            "description": "Deactivate user account. Users can only deactivate their own account unless they're admin."
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Account Administration",
-      "description": "Administrative account operations including deactivation and reactivation",
+      "name": "Admin User Management",
+      "description": "Admin-only user management operations",
       "item": [
-        {
-          "name": "Deactivate Account",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Account deactivated successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Deactivation confirmation received', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('deactivated');",
-                  "});",
-                  "",
-                  "pm.test('Account status updated', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('success');",
-                  "    pm.expect(responseJson.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Security actions taken', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('sessionsRevoked');",
-                  "    pm.expect(responseJson).to.have.property('dataRetentionInfo');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Personal decision to discontinue mental health services\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Self-service account deactivation (users can only deactivate their own account)"
-          },
-          "response": []
-        },
         {
           "name": "Admin Deactivate User",
           "request": {
             "method": "POST",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
                 "key": "Content-Type",
-                "value": "application/json"
+                "value": "application/json",
+                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Policy violation\",\n  \"notes\": \"Administrative deactivation for terms of service violation\"\n}"
+              "raw": "{\n  \"reason\": \"Violation of terms of service\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/users/{{targetUserId}}/deactivate",
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{targetUserId}}", "deactivate"]
             },
-            "description": "Admin deactivate a user account with reason"
+            "description": "Admin endpoint to deactivate a user account with a reason."
           },
           "response": []
         },
         {
-          "name": "Reactivate Account",
+          "name": "Admin Reactivate User",
           "request": {
             "method": "POST",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"notes\": \"Account reactivated after review\"\n}"
-            },
             "url": {
               "raw": "{{baseUrl}}/users/{{targetUserId}}/reactivate",
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{targetUserId}}", "reactivate"]
             },
-            "description": "Admin reactivate a deactivated user account"
+            "description": "Admin endpoint to reactivate a previously deactivated user account."
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Session Management",
-      "description": "User session operations including token refresh and logout",
+      "name": "Error Handling & Validation",
+      "description": "Test endpoints for validation and error scenarios",
       "item": [
         {
-          "name": "Refresh Access Token",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Token refreshed successfully', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('New access token provided', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('accessToken');",
-                  "    pm.expect(responseJson.accessToken).to.be.a('string');",
-                  "    pm.expect(responseJson.accessToken.length).to.be.above(20);",
-                  "});",
-                  "",
-                  "pm.test('Token metadata included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('expiresIn');",
-                  "    pm.expect(responseJson).to.have.property('tokenType');",
-                  "    pm.expect(responseJson.tokenType).to.equal('Bearer');",
-                  "});",
-                  "",
-                  "pm.test('User information included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('user');",
-                  "    pm.expect(responseJson.user).to.have.property('id');",
-                  "    pm.expect(responseJson.user).to.have.property('role');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/refresh",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "refresh"]
-            },
-            "description": "Refresh access token using refresh token (public endpoint, rate limited)"
-          },
-          "response": []
-        },
-        {
-          "name": "Logout (Single Session)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Logout successful', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Logout confirmation received', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('logged out');",
-                  "});",
-                  "",
-                  "pm.test('Token revocation confirmed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('tokenRevoked');",
-                  "    pm.expect(responseJson.tokenRevoked).to.be.true;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "logout"]
-            },
-            "description": "Logout and revoke refresh token for current session"
-          },
-          "response": []
-        },
-        {
-          "name": "Force Logout (All Sessions)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Force logout successful', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('All sessions terminated', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('all sessions');",
-                  "});",
-                  "",
-                  "pm.test('Token revocation count provided', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('sessionsRevoked');",
-                  "    pm.expect(responseJson.sessionsRevoked).to.be.a('number');",
-                  "    pm.expect(responseJson.sessionsRevoked).to.be.at.least(0);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/force-logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "force-logout"]
-            },
-            "description": "Force logout from all sessions, revoke all user tokens (rate limited)"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Password Management",
-      "description": "Password reset and recovery operations",
-      "item": [
-        {
-          "name": "Request Password Reset",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Password reset request accepted', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Reset email confirmation', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('reset');",
-                  "    pm.expect(responseJson.message).to.include('email');",
-                  "});",
-                  "",
-                  "pm.test('Security information included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('expiresIn');",
-                  "    pm.expect(responseJson).to.have.property('securityNotice');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/request-password-reset",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "request-password-reset"]
-            },
-            "description": "Request password reset email (public endpoint, throttled)"
-          },
-          "response": []
-        },
-        {
-          "name": "Validate Reset Token",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Token validation completed', function () {",
-                  "    // Accept both 200 (valid) and 400 (invalid) as expected responses",
-                  "    pm.expect([200, 400]).to.include(pm.response.code);",
-                  "});",
-                  "",
-                  "pm.test('Validation result provided', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('valid');",
-                  "    pm.expect(responseJson.valid).to.be.a('boolean');",
-                  "});",
-                  "",
-                  "pm.test('Token metadata included for valid tokens', function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const responseJson = pm.response.json();",
-                  "        if (responseJson.valid) {",
-                  "            pm.expect(responseJson).to.have.property('expiresAt');",
-                  "            pm.expect(responseJson).to.have.property('userEmail');",
-                  "        }",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/validate-reset-token?token={{resetToken}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "validate-reset-token"],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "{{resetToken}}"
-                }
-              ]
-            },
-            "description": "Validate password reset token before allowing password change"
-          },
-          "response": []
-        },
-        {
-          "name": "Reset Password",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Password reset successful', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Password change confirmation', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('password');",
-                  "    pm.expect(responseJson.message).to.include('reset');",
-                  "});",
-                  "",
-                  "pm.test('Security actions taken', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('sessionsRevoked');",
-                  "    pm.expect(responseJson).to.have.property('emailNotificationSent');",
-                  "    pm.expect(responseJson.emailNotificationSent).to.be.true;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/reset-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "reset-password"]
-            },
-            "description": "Reset password using valid reset token"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Email Verification",
-      "description": "Email verification and confirmation operations",
-      "item": [
-        {
-          "name": "Send Verification Email",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Verification email sent', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Email sending confirmation', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('verification');",
-                  "    pm.expect(responseJson.message).to.include('email');",
-                  "});",
-                  "",
-                  "pm.test('Verification details provided', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('emailSent');",
-                  "    pm.expect(responseJson.emailSent).to.be.true;",
-                  "    pm.expect(responseJson).to.have.property('expiresIn');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/send-verification-email",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "send-verification-email"]
-            },
-            "description": "Send email verification link to user (authenticated endpoint)"
-          },
-          "response": []
-        },
-        {
-          "name": "Resend Verification Email",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Verification email resent', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Resend confirmation message', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "    pm.expect(responseJson.message).to.include('resent');",
-                  "    pm.expect(responseJson.message).to.include('verification');",
-                  "});",
-                  "",
-                  "pm.test('Rate limiting info included', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('canResendAfter');",
-                  "    pm.expect(responseJson).to.have.property('attemptsRemaining');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/resend-verification-email",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "resend-verification-email"]
-            },
-            "description": "Resend email verification link (public endpoint, throttled)"
-          },
-          "response": []
-        },
-        {
-          "name": "Verify Email",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Email verification completed', function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Verification success confirmation', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('emailVerified');",
-                  "    pm.expect(responseJson.emailVerified).to.be.true;",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "});",
-                  "",
-                  "pm.test('User account status updated', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('userStatus');",
-                  "    pm.expect(responseJson).to.have.property('verifiedAt');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"token\": \"{{verificationToken}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/verify-email",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "verify-email"]
-            },
-            "description": "Verify email address using verification token"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "OAuth Authentication",
-      "description": "Social authentication flows including Google and Microsoft OAuth",
-      "item": [
-        {
-          "name": "Initiate Google OAuth",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('OAuth redirect initiated', function () {",
-                  "    // OAuth should redirect, so accept 302 or 200",
-                  "    pm.expect([200, 302]).to.include(pm.response.code);",
-                  "});",
-                  "",
-                  "pm.test('OAuth URL or redirect provided', function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const responseJson = pm.response.json();",
-                  "        pm.expect(responseJson).to.have.property('authUrl');",
-                  "        pm.expect(responseJson.authUrl).to.include('google');",
-                  "    } else if (pm.response.code === 302) {",
-                  "        const location = pm.response.headers.get('location');",
-                  "        pm.expect(location).to.include('google');",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/google",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "google"]
-            },
-            "description": "Initiate Google OAuth authentication flow (public endpoint)"
-          },
-          "response": []
-        },
-        {
-          "name": "Google OAuth Callback",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('OAuth callback processed', function () {",
-                  "    // Accept various response codes based on OAuth state",
-                  "    pm.expect([200, 302, 400]).to.include(pm.response.code);",
-                  "});",
-                  "",
-                  "pm.test('OAuth result handled appropriately', function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const responseJson = pm.response.json();",
-                  "        // Successful OAuth should provide tokens",
-                  "        pm.expect(responseJson).to.have.property('accessToken');",
-                  "        pm.expect(responseJson).to.have.property('refreshToken');",
-                  "        pm.expect(responseJson).to.have.property('user');",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/google/callback?code=test_oauth_code&state=test_state",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "google", "callback"],
-              "query": [
-                {
-                  "key": "code",
-                  "value": "test_oauth_code"
-                },
-                {
-                  "key": "state",
-                  "value": "test_state"
-                }
-              ]
-            },
-            "description": "Handle Google OAuth callback with authorization code"
-          },
-          "response": []
-        },
-        {
-          "name": "Initiate Microsoft OAuth",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Microsoft OAuth redirect initiated', function () {",
-                  "    pm.expect([200, 302]).to.include(pm.response.code);",
-                  "});",
-                  "",
-                  "pm.test('Microsoft OAuth URL provided', function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const responseJson = pm.response.json();",
-                  "        pm.expect(responseJson).to.have.property('authUrl');",
-                  "        pm.expect(responseJson.authUrl).to.include('microsoft');",
-                  "    } else if (pm.response.code === 302) {",
-                  "        const location = pm.response.headers.get('location');",
-                  "        pm.expect(location).to.include('microsoft');",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/microsoft",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "microsoft"]
-            },
-            "description": "Initiate Microsoft OAuth authentication flow (public endpoint)"
-          },
-          "response": []
-        },
-        {
-          "name": "Microsoft OAuth Callback",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Microsoft OAuth callback processed', function () {",
-                  "    pm.expect([200, 302, 400]).to.include(pm.response.code);",
-                  "});",
-                  "",
-                  "pm.test('Microsoft OAuth result handled', function () {",
-                  "    if (pm.response.code === 200) {",
-                  "        const responseJson = pm.response.json();",
-                  "        pm.expect(responseJson).to.have.property('accessToken');",
-                  "        pm.expect(responseJson).to.have.property('refreshToken');",
-                  "        pm.expect(responseJson).to.have.property('user');",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/microsoft/callback?code=test_ms_oauth_code&state=test_state",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "microsoft", "callback"],
-              "query": [
-                {
-                  "key": "code",
-                  "value": "test_ms_oauth_code"
-                },
-                {
-                  "key": "state",
-                  "value": "test_state"
-                }
-              ]
-            },
-            "description": "Handle Microsoft OAuth callback with authorization code"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Profile Validation & Error Handling",
-      "description": "Validation tests and error handling scenarios",
-      "item": [
-        {
-          "name": "Update Profile - Invalid Email",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 400', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});",
-                  "",
-                  "pm.test('Error message for invalid email', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"invalid-email\",\n  \"firstName\": \"Test\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Test validation with invalid email format"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Profile - Missing Required Fields",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 400', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});",
-                  "",
-                  "pm.test('Error message for missing fields', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson).to.have.property('message');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Test validation with missing required fields"
-          },
-          "response": []
-        },
-        {
-          "name": "Invalid Profile Data Validation",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 400 for invalid profile data', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});",
-                  "",
-                  "pm.test('Validation errors listed', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    if (responseJson.issues && Array.isArray(responseJson.issues)) {",
-                  "        pm.expect(responseJson.issues.length).to.be.above(0);",
-                  "        const emailError = responseJson.issues.find(issue => ",
-                  "            issue.path && issue.path.includes('email'));",
-                  "        pm.expect(emailError).to.not.be.undefined;",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"profile\": {\n    \"firstName\": \"\",\n    \"lastName\": \"\",\n    \"phoneNumber\": \"invalid-phone\"\n  },\n  \"bio\": \"x\".repeat(2001),\n  \"timezone\": \"Invalid/Timezone\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Test validation for invalid profile data (empty names, invalid phone, too long bio)"
-          },
-          "response": []
-        },
-        {
-          "name": "Invalid Privacy Setting Values",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 400 for invalid privacy settings', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});",
-                  "",
-                  "pm.test('Validation error explains invalid enum values', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    if (responseJson.issues && Array.isArray(responseJson.issues)) {",
-                  "        const privacyError = responseJson.issues.find(issue => ",
-                  "            issue.message && issue.message.includes('profileVisibility'));",
-                  "        pm.expect(privacyError).to.not.be.undefined;",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"profileVisibility\": \"invalid_visibility_setting\",\n  \"allowMessagesFrom\": \"invalid_message_setting\",\n  \"theme\": \"invalid_theme\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
-            },
-            "description": "Test validation for invalid privacy setting enum values"
-          },
-          "response": []
-        },
-        {
-          "name": "File Upload Too Large",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 413 for file too large', function () {",
-                  "    pm.response.to.have.status(413);",
-                  "});",
-                  "",
-                  "pm.test('Error message indicates file size limit', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.message).to.include('file');",
-                  "    pm.expect(responseJson.message).to.include('size');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
-                },
-                {
-                  "key": "category",
-                  "value": "USER_PROFILES",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/files/upload",
-              "host": ["{{baseUrl}}"],
-              "path": ["files", "upload"]
-            },
-            "description": "Test file upload with file exceeding 10MB limit"
-          },
-          "response": []
-        },
-        {
-          "name": "Access Another User's Profile Without Permission",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 403 for unauthorized profile access', function () {",
-                  "    pm.response.to.have.status(403);",
-                  "});",
-                  "",
-                  "pm.test('Error message indicates insufficient permissions', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.message).to.include('permission');",
-                  "    pm.expect(responseJson.message).to.include('access');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Get User by ID - Invalid UUID",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer invalid_token_for_different_user"
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/users/{{therapistId}}",
+              "raw": "{{baseUrl}}/users/invalid-user-id",
               "host": ["{{baseUrl}}"],
-              "path": ["users", "{{therapistId}}"]
+              "path": ["users", "invalid-user-id"]
             },
-            "description": "Test access control when trying to view another user's profile"
+            "description": "Test endpoint for invalid UUID format validation."
           },
           "response": []
         },
         {
-          "name": "Invalid Refresh Token",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 401 for invalid refresh token', function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});",
-                  "",
-                  "pm.test('Error message indicates invalid token', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.message).to.include('token');",
-                  "    pm.expect(responseJson.message).to.include('invalid');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Update Profile - Missing Required Fields",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
                 "key": "Content-Type",
-                "value": "application/json"
+                "value": "application/json",
+                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"invalid_refresh_token_here\"\n}"
+              "raw": "{\n  \"bio\": \"Updated bio without required fields\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/auth/refresh",
+              "raw": "{{baseUrl}}/users/{{userId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["auth", "refresh"]
+              "path": ["users", "{{userId}}"]
             },
-            "description": "Test handling of invalid refresh token"
+            "description": "Test validation for missing required fields in profile update."
           },
           "response": []
         },
         {
-          "name": "Rate Limit Exceeded",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 429 for rate limit exceeded', function () {",
-                  "    pm.response.to.have.status(429);",
-                  "});",
-                  "",
-                  "pm.test('Rate limit error message provided', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.message).to.include('rate');",
-                  "    pm.expect(responseJson.message).to.include('limit');",
-                  "});",
-                  "",
-                  "pm.test('Rate limit headers included', function () {",
-                  "    pm.expect(pm.response.headers.has('retry-after')).to.be.true;",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Access Another User's Profile Without Permission",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
-            },
             "url": {
-              "raw": "{{baseUrl}}/auth/request-password-reset",
+              "raw": "{{baseUrl}}/users/{{anotherUserId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["auth", "request-password-reset"]
+              "path": ["users", "{{anotherUserId}}"]
             },
-            "description": "Test rate limiting on password reset requests (simulated)"
-          },
-          "response": []
-        },
-        {
-          "name": "Invalid Email Format",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 400 for invalid email', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});",
-                  "",
-                  "pm.test('Email validation error explained', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    if (responseJson.issues && Array.isArray(responseJson.issues)) {",
-                  "        const emailError = responseJson.issues.find(issue => ",
-                  "            issue.path && issue.path.includes('email'));",
-                  "        pm.expect(emailError).to.not.be.undefined;",
-                  "        pm.expect(emailError.message).to.include('email');",
-                  "    }",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"invalid-email-format\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/request-password-reset",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "request-password-reset"]
-            },
-            "description": "Test validation for invalid email format"
-          },
-          "response": []
-        },
-        {
-          "name": "Access Unauthorized Endpoint",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Returns 401 for unauthorized access', function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});",
-                  "",
-                  "pm.test('Authentication error message provided', function () {",
-                  "    const responseJson = pm.response.json();",
-                  "    pm.expect(responseJson.message).to.include('auth');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/force-logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "force-logout"]
-            },
-            "description": "Test access to authenticated endpoint without proper authentication"
+            "description": "Test unauthorized access to another user's profile (should fail for non-admin users)."
           },
           "response": []
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "targetUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userFirstName",
+      "value": "John",
+      "type": "string"
+    },
+    {
+      "key": "userLastName",
+      "value": "Doe",
+      "type": "string"
+    },
+    {
+      "key": "userBio",
+      "value": "Software developer passionate about mental health technology",
+      "type": "string"
     }
   ]
 }
