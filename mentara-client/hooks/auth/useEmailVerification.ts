@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSignUpStore } from '@/store/pre-assessment';
 
 interface UseEmailVerificationReturn {

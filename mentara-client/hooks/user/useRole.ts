@@ -1,4 +1,4 @@
-import { useAuth } from "../auth/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/lib/auth";
 
 export function useRole() {

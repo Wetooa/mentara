@@ -35,10 +35,49 @@ import {
   MessageSquare,
   User,
 } from "lucide-react";
-import { Post, Comment, Community } from "@/types/api/communities";
+// Import types (not currently used in favor of local SearchableContent types)
+
+// Local types for content search
+interface SearchablePost {
+  id: string;
+  title: string;
+  content: string;
+  authorName: string;
+  authorId: string;
+  community: string;
+  date: string;
+  type: "post";
+  likes: number;
+  comments: number;
+}
+
+interface SearchableComment {
+  id: string;
+  content: string;
+  postTitle: string;
+  postId: string;
+  authorName: string;
+  authorId: string;
+  date: string;
+  type: "comment";
+  likes: number;
+}
+
+interface SearchableUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "user" | "therapist";
+  registeredDate: string;
+  postCount: number;
+  commentCount: number;
+  status: string;
+}
+
+type SearchableContent = SearchablePost | SearchableComment | SearchableUser;
 
 // Mock data for search results
-const mockPosts = [
+const mockPosts: SearchablePost[] = [
   {
     id: "post123",
     title: "Feeling overwhelmed with anxiety",
@@ -80,7 +119,7 @@ const mockPosts = [
   },
 ];
 
-const mockComments = [
+const mockComments: SearchableComment[] = [
   {
     id: "comment456",
     content:
@@ -119,7 +158,7 @@ const mockComments = [
   },
 ];
 
-const mockUsers = [
+const mockUsers: SearchableUser[] = [
   {
     id: "user123",
     name: "John Doe",
@@ -171,26 +210,41 @@ export default function ContentSearchPage() {
   };
 
   // Filter content based on search and filters
-  const filterContent = (items: Array<Post | Comment | Community>, type: string) => {
+  const filterContent = (items: SearchableContent[], type: string): SearchableContent[] => {
     return items.filter((item) => {
       // Search term filter
       const searchLower = searchTerm.toLowerCase();
-      const contentMatches =
-        type === "post"
-          ? item.title?.toLowerCase().includes(searchLower) ||
-            item.content?.toLowerCase().includes(searchLower)
-          : type === "comment"
-            ? item.content?.toLowerCase().includes(searchLower) ||
-              item.postTitle?.toLowerCase().includes(searchLower)
-            : item.name?.toLowerCase().includes(searchLower) ||
-              item.email?.toLowerCase().includes(searchLower);
+      let contentMatches = false;
+      
+      if (type === "post") {
+        const post = item as SearchablePost;
+        contentMatches = 
+          Boolean(post.title && post.title.toLowerCase().includes(searchLower)) ||
+          Boolean(post.content && post.content.toLowerCase().includes(searchLower));
+      } else if (type === "comment") {
+        const comment = item as SearchableComment;
+        contentMatches = 
+          Boolean(comment.content && comment.content.toLowerCase().includes(searchLower)) ||
+          Boolean(comment.postTitle && comment.postTitle.toLowerCase().includes(searchLower));
+      } else {
+        const user = item as SearchableUser;
+        contentMatches = 
+          Boolean(user.name && user.name.toLowerCase().includes(searchLower)) ||
+          Boolean(user.email && user.email.toLowerCase().includes(searchLower));
+      }
 
       if (!contentMatches) return false;
 
       // Time range filter
       if (timeRange !== "all") {
         const now = new Date();
-        const itemDate = new Date(item.date || item.registeredDate);
+        let itemDateString: string;
+        if ('date' in item) {
+          itemDateString = (item as SearchablePost | SearchableComment).date;
+        } else {
+          itemDateString = (item as SearchableUser).registeredDate;
+        }
+        const itemDate = new Date(itemDateString);
         const daysDiff = Math.floor(
           (now.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24)
         );
@@ -202,16 +256,16 @@ export default function ContentSearchPage() {
 
       // Community filter (only for posts and comments)
       if (community !== "all" && type !== "user") {
-        if (item.community !== community) return false;
+        if ('community' in item && (item as SearchablePost).community !== community) return false;
       }
 
       return true;
     });
   };
 
-  const filteredPosts = filterContent(mockPosts, "post");
-  const filteredComments = filterContent(mockComments, "comment");
-  const filteredUsers = filterContent(mockUsers, "user");
+  const filteredPosts = filterContent(mockPosts, "post") as SearchablePost[];
+  const filteredComments = filterContent(mockComments, "comment") as SearchableComment[];
+  const filteredUsers = filterContent(mockUsers, "user") as SearchableUser[];
 
   // Get combined results for "All" tab
   const getFilteredResults = () => {
@@ -347,51 +401,55 @@ export default function ContentSearchPage() {
                 <TableBody>
                   {results.length > 0 ? (
                     results.slice(0, 10).map((item) => (
-                      <TableRow key={`${item.type}-${item.id}`}>
+                      <TableRow key={`${'type' in item ? item.type : 'user'}-${item.id}`}>
                         <TableCell>
-                          {item.type === "post" && (
+                          {'type' in item && item.type === "post" && (
                             <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
                               <FileText className="h-3 w-3 mr-1" />
                               Post
                             </Badge>
                           )}
-                          {item.type === "comment" && (
+                          {'type' in item && item.type === "comment" && (
                             <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
                               <MessageSquare className="h-3 w-3 mr-1" />
                               Comment
                             </Badge>
                           )}
-                          {item.role && (
+                          {'role' in item && (
                             <Badge
                               className={`${
-                                item.role === "therapist"
+                                (item as SearchableUser).role === "therapist"
                                   ? "bg-green-100 text-green-800 hover:bg-green-100"
                                   : "bg-amber-100 text-amber-800 hover:bg-amber-100"
                               }`}
                             >
                               <User className="h-3 w-3 mr-1" />
-                              {item.role === "therapist" ? "Therapist" : "User"}
+                              {(item as SearchableUser).role === "therapist" ? "Therapist" : "User"}
                             </Badge>
                           )}
                         </TableCell>
                         <TableCell className="font-medium max-w-[400px] truncate">
-                          {item.title || item.content || item.name || ""}
-                          {item.postTitle && (
+                          {('title' in item && (item as SearchablePost).title) || 
+                           ('content' in item && (item as SearchablePost | SearchableComment).content) || 
+                           ('name' in item && (item as SearchableUser).name) || ""}
+                          {'postTitle' in item && (
                             <div className="text-xs text-gray-500 mt-1">
-                              On post: {item.postTitle}
+                              On post: {(item as SearchableComment).postTitle}
                             </div>
                           )}
-                          {item.email && (
+                          {'email' in item && (
                             <div className="text-xs text-gray-500 mt-1">
-                              {item.email}
+                              {(item as SearchableUser).email}
                             </div>
                           )}
                         </TableCell>
                         <TableCell>
-                          {item.authorName || item.name || ""}
+                          {('authorName' in item && (item as SearchablePost | SearchableComment).authorName) || 
+                           ('name' in item && (item as SearchableUser).name) || ""}
                         </TableCell>
                         <TableCell>
-                          {formatDate(item.date || item.registeredDate)}
+                          {formatDate(('date' in item && (item as SearchablePost | SearchableComment).date) || 
+                                      ('registeredDate' in item && (item as SearchableUser).registeredDate) || '')}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="outline" size="sm">

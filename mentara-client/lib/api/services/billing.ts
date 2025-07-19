@@ -3,55 +3,29 @@ import {
   // Subscription Management
   CreateSubscriptionDto,
   UpdateSubscriptionDto,
-  CancelSubscriptionDto,
-  ChangeSubscriptionPlanDto,
-  PauseSubscriptionDto,
-  ScheduleSubscriptionCancellationDto,
-  ReactivateSubscriptionDto,
-  ApplyDiscountDto,
-  SubscriptionUsageAnalyticsQueryDto,
   
   // Plans
   GetPlansQueryDto,
-  CreatePlanDto,
-  UpdatePlanDto,
   
   // Payment Methods
   CreatePaymentMethodDto,
-  UpdatePaymentMethodDto,
   PaymentMethod,
   
-  // Payments
-  CreatePaymentDto,
-  GetPaymentsQueryDto,
-  UpdatePaymentStatusDto,
-  
   // Invoices
-  CreateInvoiceDto,
-  GetInvoicesQueryDto,
-  MarkInvoiceAsPaidDto,
   Invoice,
-  
-  // Discounts
-  CreateDiscountDto,
-  ValidateDiscountDto,
-  RedeemDiscountDto,
   
   // Usage
   RecordUsageDto,
-  GetUsageRecordsQueryDto,
   
   // Statistics
   GetBillingStatisticsQueryDto,
   
   // Legacy types for backward compatibility
   CreatePaymentIntentDto,
-  BillingQuery,
   
   // Complex billing data structures
   SubscriptionPlan,
   Subscription,
-  InvoiceLineItem,
   PaymentIntent,
   BillingPortalSession,
   UsageRecord,
@@ -65,6 +39,19 @@ import {
 } from 'mentara-commons';
 
 // All billing types are now imported from mentara-commons
+
+// Additional local types for complex billing structures
+interface CouponDiscount {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed_amount';
+  amount: number;
+  currency?: string;
+  description?: string;
+  validUntil?: string;
+  maxRedemptions?: number;
+  currentRedemptions?: number;
+}
 
 // Re-export commons types for backward compatibility
 export type {
@@ -103,8 +90,9 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
     try {
       const response = await apiClient.get<BillingApiResponse<Subscription>>('/billing/subscription');
       return response.data.data;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 404) {
         return null;
       }
       throw error;
@@ -237,16 +225,16 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
   },
 
   // Coupons and Discounts
-  applyCoupon: async (couponCode: string): Promise<{ valid: boolean; discount?: any }> => {
-    const response = await apiClient.post<BillingApiResponse<{ valid: boolean; discount?: any }>>(
+  applyCoupon: async (couponCode: string): Promise<{ valid: boolean; discount?: CouponDiscount }> => {
+    const response = await apiClient.post<BillingApiResponse<{ valid: boolean; discount?: CouponDiscount }>>(
       '/billing/coupons/apply',
       { code: couponCode }
     );
     return response.data.data;
   },
 
-  validateCoupon: async (couponCode: string): Promise<{ valid: boolean; discount?: any }> => {
-    const response = await apiClient.get<BillingApiResponse<{ valid: boolean; discount?: any }>>(
+  validateCoupon: async (couponCode: string): Promise<{ valid: boolean; discount?: CouponDiscount }> => {
+    const response = await apiClient.get<BillingApiResponse<{ valid: boolean; discount?: CouponDiscount }>>(
       `/billing/coupons/validate/${couponCode}`
     );
     return response.data.data;
@@ -281,6 +269,35 @@ export const createBillingService = (apiClient: AxiosInstance) => ({
       signature
     });
     return response.data.data.valid;
+  },
+
+  // Payment Failure Recovery
+  getFailedPayments: async (): Promise<PaymentMethod[]> => {
+    const response = await apiClient.get<BillingApiResponse<PaymentMethod[]>>('/billing/payments/failed');
+    return response.data.data;
+  },
+
+  retryPayment: async (paymentId: string, paymentMethodId?: string): Promise<PaymentMethod> => {
+    const response = await apiClient.post<BillingApiResponse<PaymentMethod>>(`/billing/payments/${paymentId}/retry`, {
+      payment_method_id: paymentMethodId
+    });
+    return response.data.data;
+  },
+
+  getPaymentStatus: async (paymentId: string): Promise<PaymentMethod> => {
+    const response = await apiClient.get<BillingApiResponse<PaymentMethod>>(`/billing/payments/${paymentId}/status`);
+    return response.data.data;
+  },
+
+  handlePaymentFailure: async (paymentId: string, options?: {
+    sendNotification?: boolean;
+    applyGracePeriod?: boolean;
+  }): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post<BillingApiResponse<{ success: boolean; message: string }>>(
+      `/billing/payments/${paymentId}/handle-failure`,
+      options
+    );
+    return response.data.data;
   }
 });
 

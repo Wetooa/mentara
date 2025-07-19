@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { queryKeys } from "@/lib/queryKeys";
 import { MentaraApiError } from "@/lib/api/errorHandler";
@@ -55,14 +55,25 @@ export function useCommunityPage() {
     mutationFn: (data: { title: string; content: string; roomId: string }) =>
       api.communities.createPost(data),
     onSuccess: () => {
+      // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
       setNewPostTitle("");
       setNewPostContent("");
       setIsCreatePostOpen(false);
       toast.success("Post created successfully!");
     },
     onError: (error: MentaraApiError) => {
-      toast.error("Failed to create post");
+      // Provide specific error messages based on the error type
+      if (error.status === 403) {
+        toast.error("You don't have permission to post in this room");
+      } else if (error.status === 404) {
+        toast.error("Room not found");
+      } else if (error.status === 400) {
+        toast.error("Please check your post content and try again");
+      } else {
+        toast.error(error.message || "Failed to create post");
+      }
     },
   });
 
@@ -108,6 +119,8 @@ export function useCommunityPage() {
   };
 
   const getRoomBreadcrumb = () => {
+    // TODO: CONFUSING - This function returns null when no room is selected, but components using it
+    // may not handle null properly. Consider returning empty object or default values instead
     if (!selectedCommunity || !selectedRoom) return null;
 
     const roomGroup = selectedCommunity.roomGroups.find(group => 
@@ -116,7 +129,7 @@ export function useCommunityPage() {
 
     return {
       communityName: selectedCommunity.name,
-      roomGroupName: roomGroup?.name,
+      roomGroupName: roomGroup?.name, // Could be undefined if room not found in any group
       roomName: selectedRoom.name,
       roomPostingRole: selectedRoom.postingRole,
     };
@@ -127,7 +140,36 @@ export function useCommunityPage() {
   };
 
   const isPostingAllowed = () => {
-    return selectedRoom?.postingRole === "member" || user?.role !== "client";
+    if (!selectedRoom || !user?.role) return false;
+    
+    // Define role hierarchy for posting permissions
+    const roleHierarchy = {
+      'client': 0,
+      'therapist': 1,
+      'moderator': 2,
+      'admin': 3
+    };
+    
+    const userRoleLevel = roleHierarchy[user.role as keyof typeof roleHierarchy];
+    
+    // Check what role is required to post in this room
+    switch (selectedRoom.postingRole) {
+      case 'member':
+        // Any authenticated user can post (all roles >= client)
+        return userRoleLevel >= 0;
+      case 'therapist':
+        // Only therapists and above can post
+        return userRoleLevel >= 1;
+      case 'moderator':
+        // Only moderators and above can post
+        return userRoleLevel >= 2;
+      case 'admin':
+        // Only admins can post
+        return userRoleLevel >= 3;
+      default:
+        // Default to requiring member role for unknown posting roles
+        return userRoleLevel >= 0;
+    }
   };
 
   const isPostHearted = (post: Post) => {

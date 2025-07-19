@@ -22,9 +22,15 @@ import {
 // Constants
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 
+// Types
+import { 
+  TherapistApplicationFormData, 
+  TherapistApplicationWatchedValues 
+} from "@/types/therapist-application";
+
 interface AvailabilityServicesSectionProps {
-  form: UseFormReturn<any>;
-  watchedValues: any;
+  form: UseFormReturn<TherapistApplicationFormData>;
+  watchedValues: TherapistApplicationWatchedValues;
 }
 
 export const AvailabilityServicesSection = memo(function AvailabilityServicesSection({

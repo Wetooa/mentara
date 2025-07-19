@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { normalizeSessionDuration } from '@/lib/utils/session-duration';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -182,7 +183,7 @@ export function TherapistRecommendationCard({
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{therapist.sessionLength || 60} min sessions</span>
+                <span>{normalizeSessionDuration(therapist.sessionDuration)} min sessions</span>
               </div>
             </div>
           </div>

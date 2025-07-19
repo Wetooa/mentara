@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, User, LogOut, ChevronDown } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 
 export default function TherapistLayout({
@@ -15,13 +15,13 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { handleSignOut } = useAuth();
+  const { logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
   const handleLogout = async () => {
     try {
-      await handleSignOut();
+      await logout();
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -310,7 +310,7 @@ export default function TherapistLayout({
                         : "text-gray-600 hover:text-primary"
                     }`}
                   >
-                    {React.cloneElement(item.icon as React.ReactElement, {
+                    {React.cloneElement(item.icon as React.ReactElement<{className?: string}>, {
                       className: "h-5 w-5",
                     })}
                   </div>

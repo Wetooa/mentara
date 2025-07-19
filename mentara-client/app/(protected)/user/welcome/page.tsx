@@ -165,7 +165,7 @@ export default function ClientWelcomePage() {
       </div>
 
       {/* Recommendations */}
-      {recommendations?.recommendations?.length > 0 ? (
+      {(recommendations?.recommendations?.length ?? 0) > 0 ? (
         <div className="space-y-6">
           {/* Match Summary */}
           <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
@@ -178,12 +178,12 @@ export default function ClientWelcomePage() {
                   <div>
                     <h3 className="font-semibold">Personalized Matches</h3>
                     <p className="text-sm text-muted-foreground">
-                      Found {recommendations.recommendations.length} therapists matching your preferences
+                      Found {recommendations?.recommendations?.length || 0} therapists matching your preferences
                     </p>
                   </div>
                 </div>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  {Math.round(recommendations.averageMatchScore || 0)}% Average Match
+                  {Math.round(recommendations?.averageMatchScore || 0)}% Average Match
                 </Badge>
               </div>
               
@@ -206,10 +206,10 @@ export default function ClientWelcomePage() {
 
           {/* Therapist Recommendations */}
           <div className="grid gap-6">
-            {recommendations.recommendations.map((therapist, index) => (
+            {(recommendations?.recommendations || []).map((therapist, index) => (
               <TherapistRecommendationCard
                 key={therapist.id}
-                therapist={therapist}
+                therapist={{...therapist.therapist, matchScore: therapist.score}}
                 rank={index + 1}
                 isSelected={selectedTherapists.includes(therapist.id)}
                 onSelect={(selected) => handleTherapistSelect(therapist.id, selected)}
@@ -226,7 +226,7 @@ export default function ClientWelcomePage() {
           {selectedTherapists.length > 0 && (
             <TherapistSelectionSummary
               selectedTherapists={selectedTherapists}
-              therapists={recommendations.recommendations}
+              therapists={recommendations?.recommendations || []}
               onSendRequests={handleSendRequests}
               onSkipForNow={handleSkipForNow}
               isLoading={sendRequestsMutation.isPending || currentStep === 'sending'}

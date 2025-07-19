@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useMemo } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -33,6 +33,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useSectionCompletion } from "@/hooks/useSectionCompletion";
+import { useApi } from "@/lib/api";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
 const unifiedTherapistSchema = z
@@ -127,7 +128,7 @@ const unifiedTherapistSchema = z
     // Insurance Information (optional - not implemented in UI yet)
     acceptsInsurance: z.boolean().optional(),
     acceptedInsuranceTypes: z.array(z.string()).optional(),
-    sessionLength: z.string().optional(),
+    sessionDuration: z.number().optional(),
 
     // Bio/About
     bio: z.string().optional(),
@@ -377,6 +378,7 @@ const sections: Section[] = [
 export default function SinglePageTherapistApplication() {
   const router = useRouter();
   const { showToast } = useToast();
+  const api = useApi();
   const {
     updateField,
     updateNestedField,
@@ -402,7 +404,7 @@ export default function SinglePageTherapistApplication() {
 
   // Form setup with persisted values
   const form = useForm<UnifiedTherapistForm>({
-    resolver: zodResolver(unifiedTherapistSchema),
+    resolver: zodResolver(unifiedTherapistSchema) as unknown as Resolver<UnifiedTherapistForm>,
     values: {
       firstName: formValues.firstName || "",
       lastName: formValues.lastName || "",
@@ -443,7 +445,7 @@ export default function SinglePageTherapistApplication() {
       hourlyRate: formValues.hourlyRate || undefined,
       acceptsInsurance: formValues.acceptsInsurance || undefined,
       acceptedInsuranceTypes: formValues.acceptedInsuranceTypes || undefined,
-      sessionLength: formValues.sessionLength || undefined,
+      sessionDuration: formValues.sessionDuration || undefined,
       bio: formValues.bio || "",
       professionalLiabilityInsurance:
         formValues.professionalLiabilityInsurance || "",
@@ -701,9 +703,9 @@ export default function SinglePageTherapistApplication() {
         };
 
         // Validate that all required documents are uploaded
-        const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"];
+        const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"] as const;
         const missingDocs = requiredDocs.filter(
-          (doc) => !documents[doc] || documents[doc].length === 0
+          (doc) => !documents[doc as keyof typeof documents] || documents[doc as keyof typeof documents].length === 0
         );
 
         if (missingDocs.length > 0) {
@@ -764,11 +766,11 @@ export default function SinglePageTherapistApplication() {
         showToast("Submitting application with documents...", "info");
 
         // Use consolidated API to submit application and upload documents in one atomic operation
-        const result = await submitApplicationWithDocuments(
-          transformedData,
-          filesToUpload,
-          fileTypeMap
-        );
+        const result = await api.therapistApplication.submitWithDocuments({
+          application: transformedData as unknown as Parameters<typeof api.therapistApplication.submitWithDocuments>[0]['application'],
+          files: filesToUpload,
+          fileTypes: fileTypeMap
+        });
 
         console.log(
           "Application and documents submitted successfully:",
@@ -776,7 +778,7 @@ export default function SinglePageTherapistApplication() {
         );
 
         showToast(
-          `Successfully submitted application with ${result.uploadedFiles.length} document(s)`,
+          "Successfully submitted application with documents",
           "success",
           3000
         );
@@ -786,7 +788,7 @@ export default function SinglePageTherapistApplication() {
         // Navigate to success page after successful submission
         setTimeout(() => {
           router.push(
-            `/therapist-application/success?id=${result.applicationId}`
+            `/therapist-application/success?id=${result.id}`
           );
         }, 1500);
       } catch (error) {
@@ -848,7 +850,7 @@ export default function SinglePageTherapistApplication() {
         setIsSubmitting(false);
       }
     },
-    [autoSave, router, showToast, documents]
+    [autoSave, router, showToast, documents, api]
   );
 
   // Memoized sidebar content props to prevent unnecessary re-renders
@@ -944,11 +946,14 @@ export default function SinglePageTherapistApplication() {
                     isOpen={openSections.has(section.id)}
                     onToggle={() => toggleSection(section.id)}
                     completion={sectionCompletions[section.id]}
-                    form={form}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    form={form as any}
                     watchedValues={watchedValues}
                     documents={documents}
-                    updateDocuments={updateDocuments}
-                    removeDocument={removeDocument}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    updateDocuments={updateDocuments as any}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    removeDocument={removeDocument as any}
                   />
                 ))}
 

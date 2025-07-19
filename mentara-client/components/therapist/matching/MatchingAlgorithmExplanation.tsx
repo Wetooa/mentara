@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { 
   HelpCircle, 
   ChevronDown, 
@@ -32,7 +32,6 @@ interface MatchingFactor {
 
 interface MatchingAlgorithmExplanationProps {
   matchingScore?: number;
-  therapistId?: string;
   className?: string;
   compact?: boolean;
 }
@@ -90,7 +89,6 @@ const matchingFactors: MatchingFactor[] = [
 
 export function MatchingAlgorithmExplanation({ 
   matchingScore, 
-  therapistId, 
   className,
   compact = false 
 }: MatchingAlgorithmExplanationProps) {

@@ -1,6 +1,5 @@
 import { AxiosInstance } from 'axios';
 import {
-  MeetingParamsDto,
   UpdateMeetingStatusDto,
   GetUpcomingMeetingsQueryDto,
   SaveMeetingSessionDto,
@@ -14,16 +13,10 @@ import {
   VideoCallStatus,
   // Complex meeting data structures
   Meeting,
-  MeetingSessionData,
   MeetingAnalytics,
   MeetingRoomResponse,
-  MeetingStatusUpdate,
-  EmergencyTerminationRequest,
   // Zod schemas for validation
   MeetingListParamsSchema,
-  BookingStatsSchema,
-  SlotGenerationConfigSchema,
-  ValidationConfigSchema,
 } from 'mentara-commons';
 
 // All meeting types are now imported from mentara-commons
@@ -31,11 +24,8 @@ import {
 // Re-export commons types for backward compatibility
 export type {
   Meeting,
-  MeetingSessionData,
   MeetingAnalytics,
   MeetingRoomResponse,
-  MeetingStatusUpdate,
-  EmergencyTerminationRequest,
   // Video call types
   CreateVideoRoomDto,
   JoinVideoRoomDto,
@@ -88,7 +78,7 @@ export const createMeetingsService = (api: AxiosInstance) => ({
   saveMeetingSession: async (
     meetingId: string,
     sessionData: SaveMeetingSessionDto
-  ): Promise<any> => {
+  ): Promise<{ success: boolean; sessionId: string; message?: string }> => {
     const { data } = await api.post(`/meetings/${meetingId}/session`, sessionData);
     return data;
   },
@@ -122,7 +112,7 @@ export const createMeetingsService = (api: AxiosInstance) => ({
     try {
       await api.get(`/meetings/${meetingId}`);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },

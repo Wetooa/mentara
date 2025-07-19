@@ -20,6 +20,8 @@ import {
   AdminMatchingPerformanceParamsDto,
   AdminFlaggedContentParamsDto,
   AdminUserListParamsDtoSchema,
+  TherapistCredentials,
+  FlaggedContent,
   AdminUserGrowthParamsDtoSchema,
   AdminEngagementParamsDtoSchema,
   AdminModerationReportParamsDtoSchema,
@@ -85,7 +87,7 @@ export type {
 // All admin types are now imported from mentara-commons
 
 // Service interface for type checking (use factory function instead)
-interface AdminService {
+export interface AdminServiceInterface {
   checkAdmin(): Promise<{ isAdmin: boolean }>;
   
   // Dashboard
@@ -104,7 +106,7 @@ interface AdminService {
   
   // User management
   users: {
-    getList(params?: AdminUserListParams): Promise<{ users: User[]; total: number }>;
+    getList(params?: AdminUserListParamsDto): Promise<{ users: User[]; total: number }>;
     getById(userId: string): Promise<User>;
     create(userData: AdminUserCreateRequest): Promise<User>;
     update(userId: string, userData: AdminUserUpdateRequest): Promise<User>;
@@ -118,7 +120,7 @@ interface AdminService {
   therapistApplications: {
     getList(params?: { status?: string; limit?: number; offset?: number }): Promise<{ applications: TherapistApplication[]; total: number }>;
     getById(applicationId: string): Promise<TherapistApplication>;
-    updateStatus(applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }>;
+    updateStatus(applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: TherapistCredentials }>;
   };
 
   // Enhanced Therapist Management for Module 2
@@ -129,7 +131,7 @@ interface AdminService {
     processedBy?: string;
     providerType?: string;
     limit?: number;
-  }): Promise<{ therapists: any[]; total: number; }>;
+  }): Promise<{ therapists: TherapistApplication[]; total: number; }>;
 
   getTherapistStatistics(): Promise<{
     overview: {
@@ -206,7 +208,7 @@ interface AdminService {
   moderation: {
     getReports(params?: AdminModerationReportParamsDto): Promise<{ reports: ModerationReport[]; total: number }>;
     updateReport(reportId: string, data: UpdateModerationReportRequest): Promise<ModerationReport>;
-    getFlaggedContent(params?: AdminFlaggedContentParamsDto): Promise<{ posts: any[]; comments: any[]; page: number; totalItems: number }>;
+    getFlaggedContent(params?: AdminFlaggedContentParamsDto): Promise<{ posts: FlaggedContent[]; comments: FlaggedContent[]; page: number; totalItems: number }>;
     moderateContent(contentType: string, contentId: string, action: 'approve' | 'remove' | 'flag', reason?: string): Promise<{ success: boolean }>;
   };
 
@@ -284,12 +286,12 @@ export const createAdminService = (client: AxiosInstance) => ({
     getById: (applicationId: string): Promise<TherapistApplication> =>
       client.get(`/admin/therapist-applications/${applicationId}`),
 
-    updateStatus: (applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: any }> =>
+    updateStatus: (applicationId: string, data: { status: string; reviewedBy?: string; notes?: string }): Promise<{ success: boolean; message: string; credentials?: TherapistCredentials }> =>
       client.put(`/admin/therapist-applications/${applicationId}/status`, data),
   },
 
   // Enhanced Therapist Management for Module 2
-  getTherapistApplications: async (filters: AdminTherapistApplicationFiltersDto = {}): Promise<{ therapists: any[]; total: number; }> => {
+  getTherapistApplications: async (filters: AdminTherapistApplicationFiltersDto = {}): Promise<{ therapists: TherapistApplication[]; total: number; }> => {
     const validatedFilters = AdminTherapistApplicationFiltersDtoSchema.parse(filters);
     return client.post('/admin/therapists/applications/list', validatedFilters);
   },
@@ -392,7 +394,7 @@ export const createAdminService = (client: AxiosInstance) => ({
     updateReport: (reportId: string, data: UpdateModerationReportRequest): Promise<ModerationReport> =>
       client.patch(`/admin/moderation/reports/${reportId}`, data),
 
-    getFlaggedContent: async (params: AdminFlaggedContentParamsDto = {}): Promise<{ posts: any[]; comments: any[]; page: number; totalItems: number }> => {
+    getFlaggedContent: async (params: AdminFlaggedContentParamsDto = {}): Promise<{ posts: FlaggedContent[]; comments: FlaggedContent[]; page: number; totalItems: number }> => {
       const validatedParams = AdminFlaggedContentParamsDtoSchema.parse(params);
       return client.post('/admin/flagged-content', validatedParams);
     },

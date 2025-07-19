@@ -24,6 +24,19 @@ interface TherapistFilters {
   limit?: number;
 }
 
+interface TherapistApprovalData {
+  approvalMessage?: string;
+  notifyTherapist?: boolean;
+  sendWelcomeEmail?: boolean;
+}
+
+interface TherapistRejectionData {
+  rejectionReason: string;
+  customMessage?: string;
+  notifyTherapist?: boolean;
+  allowReapplication?: boolean;
+}
+
 export default function AdminTherapistManagementPage() {
   const api = useApi();
   const queryClient = useQueryClient();
@@ -38,7 +51,7 @@ export default function AdminTherapistManagementPage() {
   // Fetch pending applications
   const { data: applications, isLoading, error } = useQuery({
     queryKey: ['admin', 'therapists', 'applications', filters],
-    queryFn: () => api.admin.getTherapistApplications(filters),
+    queryFn: () => api.admin.getTherapistApplications({ ...filters, limit: filters.limit || 50 }),
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
@@ -49,9 +62,16 @@ export default function AdminTherapistManagementPage() {
     refetchInterval: 60000, // Refresh every minute
   });
 
+  // Fetch therapist application details for modal
+  const { data: selectedApplication } = useQuery({
+    queryKey: ['admin', 'therapists', 'application', detailsTherapistId],
+    queryFn: () => api.admin.therapistApplications.getById(detailsTherapistId!),
+    enabled: !!detailsTherapistId,
+  });
+
   // Approve therapist mutation
   const approveMutation = useMutation({
-    mutationFn: ({ therapistId, data }: { therapistId: string; data: Record<string, unknown> }) =>
+    mutationFn: ({ therapistId, data }: { therapistId: string; data: TherapistApprovalData }) =>
       api.admin.approveTherapist(therapistId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'therapists'] });
@@ -64,7 +84,7 @@ export default function AdminTherapistManagementPage() {
 
   // Reject therapist mutation
   const rejectMutation = useMutation({
-    mutationFn: ({ therapistId, data }: { therapistId: string; data: Record<string, unknown> }) =>
+    mutationFn: ({ therapistId, data }: { therapistId: string; data: TherapistRejectionData }) =>
       api.admin.rejectTherapist(therapistId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'therapists'] });
@@ -93,7 +113,7 @@ export default function AdminTherapistManagementPage() {
     for (const therapistId of selectedTherapists) {
       await rejectMutation.mutateAsync({
         therapistId,
-        data: { rejectionReason: 'Bulk rejection processed' },
+        data: { rejectionReason: 'incomplete_documentation' },
       });
     }
     setSelectedTherapists([]);
@@ -133,14 +153,14 @@ export default function AdminTherapistManagementPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Therapist Applications</h1>
-          <p className="text-muted-foreground">Manage therapist applications and approvals</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Therapist Applications</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Manage therapist applications and approvals</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => queryClient.invalidateQueries()}>
+        <div className="flex gap-2 self-start sm:self-auto">
+          <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries()}>
             Refresh
           </Button>
         </div>
@@ -151,13 +171,13 @@ export default function AdminTherapistManagementPage() {
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-lg sm:text-xl">Filters</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Select value={filters.status} onValueChange={handleStatusChange}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9 sm:h-10">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -172,6 +192,7 @@ export default function AdminTherapistManagementPage() {
               placeholder="Province"
               value={filters.province || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, province: e.target.value }))}
+              className="h-9 sm:h-10 text-sm"
             />
 
             <Input
@@ -179,12 +200,14 @@ export default function AdminTherapistManagementPage() {
               placeholder="Submitted After"
               value={filters.submittedAfter || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, submittedAfter: e.target.value }))}
+              className="h-9 sm:h-10 text-sm"
             />
 
             <Input
               placeholder="Provider Type"
               value={filters.providerType || ''}
               onChange={(e) => setFilters(prev => ({ ...prev, providerType: e.target.value }))}
+              className="h-9 sm:h-10 text-sm"
             />
           </div>
         </CardContent>
@@ -202,13 +225,13 @@ export default function AdminTherapistManagementPage() {
       )}
 
       {/* Applications List */}
-      <div className="grid gap-4">
-        {applications?.therapists?.length > 0 ? (
+      <div className="grid gap-3 sm:gap-4">
+        {applications?.therapists?.length ? (
           applications.therapists.map((therapist) => (
             <TherapistApplicationCard
-              key={therapist.userId}
+              key={therapist.id}
               therapist={therapist}
-              isSelected={selectedTherapists.includes(therapist.userId)}
+              isSelected={selectedTherapists.includes(therapist.id)}
               onSelect={(id, selected) => {
                 if (selected) {
                   setSelectedTherapists(prev => [...prev, id]);
@@ -216,17 +239,17 @@ export default function AdminTherapistManagementPage() {
                   setSelectedTherapists(prev => prev.filter(x => x !== id));
                 }
               }}
-              onViewDetails={() => setDetailsTherapistId(therapist.userId)}
-              onApprove={(data) => approveMutation.mutate({ therapistId: therapist.userId, data })}
-              onReject={(data) => rejectMutation.mutate({ therapistId: therapist.userId, data })}
+              onViewDetails={() => setDetailsTherapistId(therapist.id)}
+              onApprove={(data) => approveMutation.mutate({ therapistId: therapist.id, data: data as unknown as TherapistApprovalData })}
+              onReject={(data) => rejectMutation.mutate({ therapistId: therapist.id, data: data as unknown as TherapistRejectionData })}
               isProcessing={approveMutation.isPending || rejectMutation.isPending}
             />
           ))
         ) : (
           <Card>
-            <CardContent className="p-12 text-center">
-              <h3 className="text-lg font-semibold mb-2">No Applications Found</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="p-6 sm:p-12 text-center">
+              <h3 className="text-base sm:text-lg font-semibold mb-2">No Applications Found</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {filters.status === 'pending' 
                   ? 'No pending therapist applications at this time.'
                   : `No ${filters.status} applications found with the current filters.`
@@ -238,16 +261,21 @@ export default function AdminTherapistManagementPage() {
       </div>
 
       {/* Application Details Modal */}
-      {detailsTherapistId && (
+      {detailsTherapistId && selectedApplication && (
         <TherapistApplicationDetails
-          therapistId={detailsTherapistId}
-          onClose={() => setDetailsTherapistId(null)}
-          onApprove={(data) => {
-            approveMutation.mutate({ therapistId: detailsTherapistId, data });
-            setDetailsTherapistId(null);
-          }}
-          onReject={(data) => {
-            rejectMutation.mutate({ therapistId: detailsTherapistId, data });
+          application={selectedApplication}
+          onStatusChange={(id, status) => {
+            if (status === 'approved') {
+              approveMutation.mutate({ 
+                therapistId: id, 
+                data: { approvalMessage: 'Application approved' } 
+              });
+            } else if (status === 'rejected') {
+              rejectMutation.mutate({ 
+                therapistId: id, 
+                data: { rejectionReason: 'incomplete_documentation' } 
+              });
+            }
             setDetailsTherapistId(null);
           }}
         />

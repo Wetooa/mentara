@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/lib/auth';
 
 interface RoleProtectionProps {
@@ -47,13 +47,13 @@ export function RoleProtection({
 }: RoleProtectionProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isLoaded, isSignedIn } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (isLoading) return;
 
-    // If user is not authenticated, let Clerk middleware handle it
-    if (!isSignedIn || !user) return;
+    // If user is not authenticated, let JWT middleware handle it
+    if (!isAuthenticated || !user) return;
 
     const userRole = user.role;
     if (!userRole) return;
@@ -85,10 +85,10 @@ export function RoleProtection({
       return;
     }
 
-  }, [isLoaded, isSignedIn, user, pathname, router, allowedRoles, fallbackPath]);
+  }, [isLoading, isAuthenticated, user, pathname, router, allowedRoles, fallbackPath]);
 
   // Only render children if user is properly authenticated and authorized
-  if (!isLoaded || !isSignedIn || !user) {
+  if (isLoading || !isAuthenticated || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -130,9 +130,9 @@ export function RoleProtection({
  * Hook for role-based conditional rendering
  */
 export function useRoleAccess(requiredRoles: UserRole[]): boolean {
-  const { user, isSignedIn } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
-  if (!isSignedIn || !user) return false;
+  if (!isAuthenticated || !user) return false;
   
   return requiredRoles.includes(user.role);
 }

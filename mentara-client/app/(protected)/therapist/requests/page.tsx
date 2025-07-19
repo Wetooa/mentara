@@ -50,7 +50,9 @@ export default function TherapistRequestsPage() {
     queryKey: ['therapist', 'requests', filters, searchTerm],
     queryFn: () => api.therapists.getClientRequests({ 
       ...filters, 
-      search: searchTerm || undefined 
+      search: searchTerm || undefined,
+      limit: 50,
+      offset: 0
     }),
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
@@ -91,8 +93,20 @@ export default function TherapistRequestsPage() {
     },
   });
 
+  // Define response type interface
+  interface RequestResponse {
+    action: 'accept' | 'decline' | 'request_info';
+    message?: string;
+    availableSlots?: Array<{
+      date: string;
+      time: string;
+      duration: number;
+    }>;
+    questions?: string[];
+  }
+
   const handleRequestResponse = (requestId: string, response: Record<string, unknown>) => {
-    respondToRequestMutation.mutate({ requestId, response });
+    respondToRequestMutation.mutate({ requestId, response: response as unknown as RequestResponse });
   };
 
   const handleQuickAccept = (requestId: string) => {
@@ -119,13 +133,12 @@ export default function TherapistRequestsPage() {
   };
 
   const getTabCounts = () => {
-    if (!requestsData) return { pending: 0, accepted: 0, declined: 0, expired: 0 };
+    if (!requestsData) return { pending: 0, accepted: 0, declined: 0 };
     
     return {
       pending: requestsData.requests?.filter(r => r.status === 'pending').length || 0,
       accepted: requestsData.requests?.filter(r => r.status === 'accepted').length || 0,
-      declined: requestsData.requests?.filter(r => r.status === 'declined').length || 0,
-      expired: requestsData.requests?.filter(r => r.status === 'expired').length || 0,
+      declined: requestsData.requests?.filter(r => r.status === 'rejected').length || 0,
     };
   };
 
@@ -290,25 +303,22 @@ export default function TherapistRequestsPage() {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="expired" className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            Expired
-            {tabCounts.expired > 0 && (
-              <Badge variant="secondary" className="ml-1">
-                {tabCounts.expired}
-              </Badge>
-            )}
-          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={filters.status} className="space-y-4">
+        <TabsContent value={filters.status || 'pending'} className="space-y-4">
           {/* Requests List */}
           <div className="grid gap-4">
-            {requestsData?.requests?.length > 0 ? (
-              requestsData.requests.map((request) => (
+            {(requestsData?.requests?.length ?? 0) > 0 ? (
+              requestsData?.requests?.map((request) => (
                 <ClientRequestCard
                   key={request.id}
-                  request={request}
+                  request={{
+                    ...request,
+                    clientName: `Client ${request.clientId}`,
+                    clientEmail: '',
+                    requestDate: request.createdAt,
+                    status: request.status === 'rejected' ? 'declined' : request.status
+                  }}
                   onQuickAccept={handleQuickAccept}
                   onQuickDecline={handleQuickDecline}
                   onOpenResponseDialog={handleOpenResponseDialog}
@@ -336,19 +346,28 @@ export default function TherapistRequestsPage() {
       </Tabs>
 
       {/* Response Dialog */}
-      {selectedRequestId && (
-        <RequestResponseDialog
-          requestId={selectedRequestId}
-          request={requestsData?.requests?.find(r => r.id === selectedRequestId)}
-          open={responseDialogOpen}
-          onClose={() => {
-            setResponseDialogOpen(false);
-            setSelectedRequestId(null);
-          }}
-          onRespond={handleRequestResponse}
-          isLoading={respondToRequestMutation.isPending}
-        />
-      )}
+      {selectedRequestId && (() => {
+        const foundRequest = requestsData?.requests?.find(r => r.id === selectedRequestId);
+        return foundRequest ? (
+          <RequestResponseDialog
+            requestId={selectedRequestId}
+            request={{
+              id: foundRequest.id,
+              clientName: `Client ${foundRequest.clientId}`,
+              clientEmail: '',
+              message: foundRequest.message || '',
+              status: foundRequest.status === 'rejected' ? 'declined' : foundRequest.status
+            }}
+            open={responseDialogOpen}
+            onClose={() => {
+              setResponseDialogOpen(false);
+              setSelectedRequestId(null);
+            }}
+            onRespond={handleRequestResponse}
+            isLoading={respondToRequestMutation.isPending}
+          />
+        ) : null;
+      })()}
     </div>
   );
 }

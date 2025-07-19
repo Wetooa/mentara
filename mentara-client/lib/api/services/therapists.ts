@@ -1,32 +1,17 @@
 import { AxiosInstance } from "axios";
 import {
   TherapistRecommendation,
-  MatchCriteria,
-  TherapistRecommendationResponse,
-  TherapistSearchParams,
   TherapistDashboardData,
   PatientData,
   TherapistApplication,
-  CreateApplicationRequest,
   Worksheet,
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
-  UpdateApplicationRequest,
-  ApplicationListParams,
-  PersonalInfo,
-  ProfessionalInfo,
-  PracticeInfo,
-  TherapistWorksheetAssignment,
   TherapistCredentials,
   TherapistRecommendationResponseDto,
   TherapistRecommendationQuery,
-  WelcomeRecommendationQuery,
   TherapistApplicationCreateDto,
-  TherapistApplicationIdParam,
   ApplicationStatusUpdateDto,
-  RegisterTherapistDto,
-  UpdateTherapistDto,
-  TherapistIdParam,
   TherapistWorksheetQueryDto,
   TherapistMeetingQueryDto,
   TherapistClientRequestQueryDto,
@@ -42,29 +27,14 @@ import {
 // Re-export commons types for backward compatibility
 export type {
   TherapistRecommendation,
-  MatchCriteria,
-  TherapistRecommendationResponse,
-  TherapistSearchParams,
   TherapistDashboardData,
   PatientData,
   TherapistApplication,
-  CreateApplicationRequest,
-  UpdateApplicationRequest,
-  ApplicationListParams,
-  PersonalInfo,
-  ProfessionalInfo,
-  PracticeInfo,
-  TherapistWorksheetAssignment,
   TherapistCredentials,
   TherapistRecommendationResponseDto,
   TherapistRecommendationQuery,
-  WelcomeRecommendationQuery,
   TherapistApplicationCreateDto,
-  TherapistApplicationIdParam,
   ApplicationStatusUpdateDto,
-  RegisterTherapistDto,
-  UpdateTherapistDto,
-  TherapistIdParam,
   TherapistWorksheetQueryDto,
   TherapistMeetingQueryDto,
   TherapistClientRequestQueryDto,
@@ -139,7 +109,7 @@ export const createTherapistService = (client: AxiosInstance) => ({
     matchCriteria: {
       primaryConditions: string[];
       secondaryConditions: string[];
-      preferences: Record<string, any>;
+      preferences: Record<string, unknown>;
     };
   }> => client.get('/therapists/recommendations/personalized'),
 
@@ -281,13 +251,35 @@ export const createTherapistService = (client: AxiosInstance) => ({
     // Get all worksheets created by the therapist
     getAll: async (
       params: TherapistWorksheetQueryDto = {}
-    ): Promise<any[]> => {
+    ): Promise<Worksheet[]> => {
       const validatedParams = TherapistWorksheetQueryDtoSchema.parse(params);
       return client.get('/therapist/worksheets', { params: validatedParams });
     },
 
-    // Get worksheet by ID (corrected path)
-    getById: (worksheetId: string): Promise<{ worksheet: Worksheet }> =>
+    // Get worksheet by ID with assignment details
+    getById: (worksheetId: string): Promise<{ 
+      worksheet: Worksheet;
+      assignment?: {
+        id: string;
+        clientId: string;
+        clientName: string;
+        clientEmail: string;
+        status: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+        assignedAt: string;
+        dueDate?: string;
+        completedAt?: string;
+        notes?: string;
+        priority: 'low' | 'medium' | 'high';
+      };
+      submission?: {
+        id: string;
+        responses: Record<string, string | number | boolean>;
+        submittedAt: string;
+        feedback?: string;
+        score?: number;
+        reviewedAt?: string;
+      };
+    }> =>
       client.get(`/therapist/worksheets/${worksheetId}`),
 
     // Create new worksheet (corrected path)
@@ -297,6 +289,63 @@ export const createTherapistService = (client: AxiosInstance) => ({
     // Update worksheet (corrected path)
     update: (worksheetId: string, worksheetData: WorksheetUpdateInputDto): Promise<{ worksheet: Worksheet }> =>
       client.put(`/therapist/worksheets/${worksheetId}`, worksheetData),
+
+    // Get worksheet assignments for the therapist
+    getAssignments: async (params: {
+      clientId?: string;
+      status?: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+      page?: number;
+      limit?: number;
+    } = {}): Promise<{
+      assignments: Array<{
+        id: string;
+        worksheetId: string;
+        worksheetTitle: string;
+        clientId: string;
+        clientName: string;
+        status: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+        assignedAt: string;
+        dueDate?: string;
+        completedAt?: string;
+        priority: 'low' | 'medium' | 'high';
+      }>;
+      total: number;
+      page: number;
+      totalPages: number;
+    }> => client.get('/therapist/worksheets/assignments', { params }),
+
+    // Assign worksheet to client
+    assignToClient: (data: {
+      worksheetId: string;
+      clientId: string;
+      dueDate?: string;
+      notes?: string;
+      priority?: 'low' | 'medium' | 'high';
+    }): Promise<{
+      success: boolean;
+      assignmentId: string;
+      message: string;
+    }> => client.post('/therapist/worksheets/assign', data),
+
+    // Update assignment
+    updateAssignment: (assignmentId: string, data: {
+      dueDate?: string;
+      status?: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+      notes?: string;
+      priority?: 'low' | 'medium' | 'high';
+    }): Promise<{
+      success: boolean;
+      message: string;
+    }> => client.put(`/therapist/worksheets/assignments/${assignmentId}`, data),
+
+    // Review submission
+    reviewSubmission: (submissionId: string, data: {
+      feedback?: string;
+      score?: number;
+    }): Promise<{
+      success: boolean;
+      message: string;
+    }> => client.put(`/therapist/worksheets/submissions/${submissionId}/review`, data),
   },
 
   // Meetings and sessions

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+// Import CommentHeartSchema from comments.ts to avoid duplication
+import { CommentHeartSchema } from './comments';
 
 // Post Schema
 export const PostSchema = z.object({
@@ -245,19 +247,6 @@ export const PostHeartSchema = z.object({
   createdAt: z.string().datetime()
 });
 
-export const CommentHeartSchema = z.object({
-  id: z.string().uuid(),
-  commentId: z.string().uuid(),
-  userId: z.string().uuid(),
-  user: z.object({
-    id: z.string().uuid(),
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    avatarUrl: z.string().url()
-  }),
-  createdAt: z.string().datetime()
-});
-
 export const PostCommentSchema: z.ZodType<any> = z.object({
   id: z.string().uuid(),
   content: z.string().min(1),
@@ -314,7 +303,7 @@ export const CheckHeartedResponseSchema = z.object({
 
 // Export type inference helpers for new schemas
 export type PostHeart = z.infer<typeof PostHeartSchema>;
-export type CommentHeart = z.infer<typeof CommentHeartSchema>;
+// CommentHeart type is exported from comments.ts to avoid duplication
 export type PostComment = z.infer<typeof PostCommentSchema>;
 export type PostWithDetails = z.infer<typeof PostWithDetailsSchema>;
 export type PostListResponse = z.infer<typeof PostListResponseSchema>;

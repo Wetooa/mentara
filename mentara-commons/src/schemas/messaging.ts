@@ -190,6 +190,74 @@ export const TypingIndicatorDtoSchema = z.object({
   isTyping: z.boolean().optional().default(true)
 });
 
+// Real-time WebSocket Event Schemas
+export const MessageSentEventSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID format'),
+  message: BackendMessageSchema
+});
+
+export const MessageUpdatedEventSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID format'),
+  messageId: z.string().uuid('Invalid message ID format'),
+  message: BackendMessageSchema
+});
+
+export const MessageDeletedEventSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID format'),
+  messageId: z.string().uuid('Invalid message ID format')
+});
+
+export const MessageReactionEventSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID format'),
+  messageId: z.string().uuid('Invalid message ID format'),
+  emoji: z.string().min(1, 'Emoji is required'),
+  userId: z.string().uuid('Invalid user ID format'),
+  action: z.enum(['add', 'remove'])
+});
+
+export const NotificationCreatedEventSchema = z.object({
+  notificationId: z.string().uuid('Invalid notification ID format'),
+  userId: z.string().uuid('Invalid user ID format'),
+  title: z.string().min(1, 'Notification title is required'),
+  message: z.string().min(1, 'Notification message is required'),
+  type: z.string().min(1, 'Notification type is required'),
+  data: z.record(z.unknown()).optional()
+});
+
+export const NotificationUpdatedEventSchema = z.object({
+  notificationId: z.string().uuid('Invalid notification ID format'),
+  isRead: z.boolean()
+});
+
+export const NotificationDeletedEventSchema = z.object({
+  notificationId: z.string().uuid('Invalid notification ID format')
+});
+
+export const MeetingStartedEventSchema = z.object({
+  meetingId: z.string().uuid('Invalid meeting ID format'),
+  participants: z.array(z.string().uuid()),
+  meetingUrl: z.string().url('Invalid meeting URL').optional()
+});
+
+export const MeetingEndedEventSchema = z.object({
+  meetingId: z.string().uuid('Invalid meeting ID format'),
+  duration: z.number().positive('Meeting duration must be positive').optional()
+});
+
+export const WorksheetAssignedEventSchema = z.object({
+  worksheetId: z.string().uuid('Invalid worksheet ID format'),
+  userId: z.string().uuid('Invalid user ID format'),
+  therapistId: z.string().uuid('Invalid therapist ID format'),
+  title: z.string().min(1, 'Worksheet title is required'),
+  dueDate: z.string().datetime('Invalid due date').optional()
+});
+
+export const WorksheetCompletedEventSchema = z.object({
+  worksheetId: z.string().uuid('Invalid worksheet ID format'),
+  userId: z.string().uuid('Invalid user ID format'),
+  completedAt: z.string().datetime('Invalid completion timestamp')
+});
+
 // Conversation Participant Schema
 export const ConversationParticipantSchema = z.object({
   id: z.string().min(1),
@@ -336,6 +404,19 @@ export type SearchMessagesDto = z.infer<typeof SearchMessagesDtoSchema>;
 export type JoinConversationDto = z.infer<typeof JoinConversationDtoSchema>;
 export type LeaveConversationDto = z.infer<typeof LeaveConversationDtoSchema>;
 export type TypingIndicatorDto = z.infer<typeof TypingIndicatorDtoSchema>;
+
+// WebSocket Event Types
+export type MessageSentEvent = z.infer<typeof MessageSentEventSchema>;
+export type MessageUpdatedEvent = z.infer<typeof MessageUpdatedEventSchema>;
+export type MessageDeletedEvent = z.infer<typeof MessageDeletedEventSchema>;
+export type MessageReactionEvent = z.infer<typeof MessageReactionEventSchema>;
+export type NotificationCreatedEvent = z.infer<typeof NotificationCreatedEventSchema>;
+export type NotificationUpdatedEvent = z.infer<typeof NotificationUpdatedEventSchema>;
+export type NotificationDeletedEvent = z.infer<typeof NotificationDeletedEventSchema>;
+export type MeetingStartedEvent = z.infer<typeof MeetingStartedEventSchema>;
+export type MeetingEndedEvent = z.infer<typeof MeetingEndedEventSchema>;
+export type WorksheetAssignedEvent = z.infer<typeof WorksheetAssignedEventSchema>;
+export type WorksheetCompletedEvent = z.infer<typeof WorksheetCompletedEventSchema>;
 export type ConversationParticipant = z.infer<typeof ConversationParticipantSchema>;
 export type BackendConversation = z.infer<typeof BackendConversationSchema>;
 export type MessageSearchResult = z.infer<typeof MessageSearchResultSchema>;

@@ -9,28 +9,64 @@ const protectedRoutes: Record<string, string[]> = {
   "/admin": ["admin"],
 };
 
+// Define high-security routes that require additional validation
+const highSecurityRoutes = [
+  "/admin",
+  "/moderator",
+];
+
+// Define routes that require specific approval status for therapists
+const therapistApprovalRequiredRoutes = [
+  "/therapist/dashboard",
+  "/therapist/patients",
+  "/therapist/schedule",
+  "/therapist/messages",
+];
+
 // Define public routes that don't require authentication
 const publicRoutes = [
   "/",
   "/landing",
-  "/auth/sign-in",
-  "/auth/sign-up",
-  "/sign-in", // Legacy route support
-  "/sign-up", // Legacy route support
-  "/pre-assessment",
-  "/therapist-application",
   "/about",
   "/community",
   "/for-therapists",
+  "/pre-assessment",
+  "/therapist-application",
+  // Legacy auth routes (will be deprecated)
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/sign-in",
+  "/sign-up",
+  // Role-specific auth routes
+  "/client/sign-in",
+  "/therapist/sign-in",
+  "/admin/sign-in",
+  "/moderator/sign-in",
+  "/client/onboarding",
+  // OAuth and verification routes
+  "/oauth-callback",
+  "/verify-account",
+  "/verify",
+  "/sso-callback",
+  "/reset-password",
 ];
 
 // Define public API routes that don't require authentication
 const publicApiRoutes = [
   "/api/auth/login",
-  "/api/auth/register/client",
-  "/api/auth/register/therapist",
+  "/api/auth/register", 
   "/api/auth/refresh",
-  "/api/therapist/apply",
+  "/api/auth/request-password-reset",
+  "/api/auth/reset-password", 
+  "/api/auth/validate-reset-token",
+  "/api/auth/send-verification-email",
+  "/api/auth/verify-email",
+  "/api/auth/resend-verification-email",
+  "/api/auth/google",
+  "/api/auth/google/callback",
+  "/api/auth/microsoft", 
+  "/api/auth/microsoft/callback",
+  "/api/auth/therapist/apply-with-documents",
   "/api/therapist/upload-public",
 ];
 
@@ -60,7 +96,11 @@ function isTokenExpired(token: string): boolean {
 }
 
 function getTokenFromCookies(req: NextRequest): string | null {
-  return req.cookies.get('mentara_access_token')?.value || null;
+  // Try multiple possible cookie names for backwards compatibility
+  return req.cookies.get('mentara_access_token')?.value || 
+         req.cookies.get('access_token')?.value || 
+         req.cookies.get('accessToken')?.value || 
+         null;
 }
 
 function getTokenFromAuth(req: NextRequest): string | null {
@@ -71,6 +111,57 @@ function getTokenFromAuth(req: NextRequest): string | null {
   return null;
 }
 
+// Helper to check if user is accessing wrong role sign-in page
+function isWrongRoleSignIn(pathname: string, userRole?: string): boolean {
+  if (!userRole) return false;
+  
+  const roleSignInMap = {
+    client: '/client/sign-in',
+    therapist: '/therapist/sign-in', 
+    admin: '/admin/sign-in',
+    moderator: '/moderator/sign-in'
+  };
+  
+  const correctSignIn = roleSignInMap[userRole as keyof typeof roleSignInMap];
+  const isSignInPage = pathname.endsWith('/sign-in');
+  
+  return isSignInPage && pathname !== correctSignIn;
+}
+
+// Helper to check if route requires high security validation
+function isHighSecurityRoute(pathname: string): boolean {
+  return highSecurityRoutes.some(route => pathname.startsWith(route));
+}
+
+// Helper to check if therapist route requires approval
+function requiresTherapistApproval(pathname: string): boolean {
+  return therapistApprovalRequiredRoutes.some(route => pathname.startsWith(route));
+}
+
+// Helper to validate token more strictly for high-security routes
+function validateTokenSecurity(token: string, isHighSecurity: boolean): boolean {
+  const decoded = decodeJWT(token);
+  if (!decoded) return false;
+  
+  // For high-security routes, check additional token properties
+  if (isHighSecurity) {
+    // Check if token was issued recently (within last 24 hours for admin/moderator)
+    const issuedAt = decoded.iat;
+    const twentyFourHoursAgo = (Date.now() / 1000) - (24 * 60 * 60);
+    
+    if (!issuedAt || issuedAt < twentyFourHoursAgo) {
+      return false;
+    }
+    
+    // Check for admin/moderator specific claims
+    if ((decoded.role === 'admin' || decoded.role === 'moderator') && !decoded.permissions) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
 // Helper to get required role for a path
 function getRequiredRole(pathname: string): string | null {
   for (const [route, roles] of Object.entries(protectedRoutes)) {
@@ -79,6 +170,37 @@ function getRequiredRole(pathname: string): string | null {
     }
   }
   return null;
+}
+
+// Helper to get role-specific sign-in URL
+function getRoleSpecificSignInUrl(role?: string, fallbackPath?: string): string {
+  if (role) {
+    switch (role) {
+      case "client": return "/client/sign-in";
+      case "therapist": return "/therapist/sign-in";
+      case "admin": return "/admin/sign-in";
+      case "moderator": return "/moderator/sign-in";
+    }
+  }
+  
+  // Determine role from path if not provided
+  if (fallbackPath) {
+    if (fallbackPath.startsWith("/user") || fallbackPath.startsWith("/client")) {
+      return "/client/sign-in";
+    }
+    if (fallbackPath.startsWith("/therapist")) {
+      return "/therapist/sign-in";
+    }
+    if (fallbackPath.startsWith("/admin")) {
+      return "/admin/sign-in";
+    }
+    if (fallbackPath.startsWith("/moderator")) {
+      return "/moderator/sign-in";
+    }
+  }
+  
+  // Default fallback - redirect to client sign-in
+  return "/client/sign-in";
 }
 
 function getDefaultPathForRole(userRole: string): string {
@@ -109,16 +231,18 @@ export default async function middleware(req: NextRequest) {
   const accessToken = getTokenFromCookies(req) || getTokenFromAuth(req);
   
   if (!accessToken) {
-    // No token found, redirect to sign-in
-    const signInUrl = new URL("/auth/sign-in", req.url);
+    // No token found, redirect to role-specific sign-in
+    const roleSpecificSignIn = getRoleSpecificSignInUrl(undefined, pathname);
+    const signInUrl = new URL(roleSpecificSignIn, req.url);
     signInUrl.searchParams.set("redirect_url", pathname);
     return NextResponse.redirect(signInUrl);
   }
 
   // Verify token is not expired
   if (isTokenExpired(accessToken)) {
-    // Token expired, redirect to sign-in
-    const signInUrl = new URL("/auth/sign-in", req.url);
+    // Token expired, redirect to role-specific sign-in
+    const roleSpecificSignIn = getRoleSpecificSignInUrl(undefined, pathname);
+    const signInUrl = new URL(roleSpecificSignIn, req.url);
     signInUrl.searchParams.set("redirect_url", pathname);
     signInUrl.searchParams.set("error", "Token expired");
     return NextResponse.redirect(signInUrl);
@@ -127,13 +251,34 @@ export default async function middleware(req: NextRequest) {
   // Decode token to get user info
   const payload = decodeJWT(accessToken);
   if (!payload || !payload.sub || !payload.role) {
-    // Invalid token, redirect to sign-in
-    const signInUrl = new URL("/auth/sign-in", req.url);
+    // Invalid token, redirect to role-specific sign-in
+    const roleSpecificSignIn = getRoleSpecificSignInUrl(undefined, pathname);
+    const signInUrl = new URL(roleSpecificSignIn, req.url);
     signInUrl.searchParams.set("redirect_url", pathname);
     signInUrl.searchParams.set("error", "Invalid token");
     return NextResponse.redirect(signInUrl);
   }
 
+  // Check if user is trying to access wrong role's sign-in page while authenticated
+  if (isWrongRoleSignIn(pathname, payload.role)) {
+    // Redirect authenticated user to their correct dashboard
+    const userDashboard = getDefaultPathForRole(payload.role);
+    const dashboardUrl = new URL(userDashboard, req.url);
+    return NextResponse.redirect(dashboardUrl);
+  }
+  
+  // Enhanced security validation for high-security routes
+  if (isHighSecurityRoute(pathname)) {
+    if (!validateTokenSecurity(accessToken, true)) {
+      // Security validation failed, force re-authentication
+      const roleSpecificSignIn = getRoleSpecificSignInUrl(payload.role, pathname);
+      const signInUrl = new URL(roleSpecificSignIn, req.url);
+      signInUrl.searchParams.set("redirect_url", pathname);
+      signInUrl.searchParams.set("error", "Security validation required");
+      return NextResponse.redirect(signInUrl);
+    }
+  }
+  
   // Check role-based access for protected routes
   const requiredRole = getRequiredRole(pathname);
   if (requiredRole && payload.role !== requiredRole) {
@@ -142,24 +287,63 @@ export default async function middleware(req: NextRequest) {
     const unauthorizedUrl = new URL(userDashboard, req.url);
     return NextResponse.redirect(unauthorizedUrl);
   }
-
-  // Handle first-time user onboarding redirection
-  if (payload.role === 'client' && (pathname === '/user' || pathname === '/user/dashboard')) {
-    // Check if user needs onboarding
+  
+  // Special handling for therapist approval-required routes
+  if (payload.role === 'therapist' && requiresTherapistApproval(pathname)) {
+    // Check if therapist is approved (this will be handled by the component)
     const response = NextResponse.next();
     response.headers.set('x-user-id', payload.sub);
     response.headers.set('x-user-role', payload.role);
     response.headers.set('x-user-email', payload.email || '');
-    response.headers.set('x-check-onboarding', 'true');
+    response.headers.set('x-require-approval-check', 'true');
     return response;
   }
 
-  // Allow onboarding routes for authenticated users
-  if (pathname.startsWith('/onboarding') && payload.role === 'client') {
+  // Handle role-specific onboarding and special cases
+  
+  // Client onboarding handling
+  if (payload.role === 'client') {
+    if (pathname === '/user' || pathname === '/user/dashboard') {
+      // Check if user needs onboarding
+      const response = NextResponse.next();
+      response.headers.set('x-user-id', payload.sub);
+      response.headers.set('x-user-role', payload.role);
+      response.headers.set('x-user-email', payload.email || '');
+      response.headers.set('x-check-onboarding', 'true');
+      return response;
+    }
+    
+    // Allow client onboarding routes
+    if (pathname.startsWith('/onboarding') || pathname.startsWith('/client/onboarding')) {
+      const response = NextResponse.next();
+      response.headers.set('x-user-id', payload.sub);
+      response.headers.set('x-user-role', payload.role);
+      response.headers.set('x-user-email', payload.email || '');
+      return response;
+    }
+  }
+  
+  // Therapist application status handling
+  if (payload.role === 'therapist') {
+    // Check if therapist is accessing dashboard but not approved
+    if (pathname.startsWith('/therapist') && !pathname.includes('pending') && !pathname.includes('rejected') && !pathname.includes('suspended')) {
+      // Add approval status check header
+      const response = NextResponse.next();
+      response.headers.set('x-user-id', payload.sub);
+      response.headers.set('x-user-role', payload.role);
+      response.headers.set('x-user-email', payload.email || '');
+      response.headers.set('x-check-approval-status', 'true');
+      return response;
+    }
+  }
+  
+  // Admin and Moderator permission handling
+  if (payload.role === 'admin' || payload.role === 'moderator') {
     const response = NextResponse.next();
     response.headers.set('x-user-id', payload.sub);
     response.headers.set('x-user-role', payload.role);
     response.headers.set('x-user-email', payload.email || '');
+    response.headers.set('x-check-permissions', 'true');
     return response;
   }
 
@@ -173,5 +357,19 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    // Match all routes except static files and Next.js internals
+    "/((?!.+\\.[\\w]+$|_next).*)", 
+    "/",
+    // Include API routes and TRPC
+    "/(api|trpc)(.*)",
+    // Explicitly include role-based auth routes
+    "/client/:path*",
+    "/therapist/:path*", 
+    "/admin/:path*",
+    "/moderator/:path*",
+    // Include protected user routes
+    "/user/:path*",
+    "/onboarding/:path*"
+  ],
 };

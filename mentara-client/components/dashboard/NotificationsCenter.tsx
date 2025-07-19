@@ -9,10 +9,61 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { parseISO, formatDistanceToNow } from "date-fns";
+import { motion } from "framer-motion";
 
 interface NotificationsCenterProps {
   notifications: UserDashboardData["notifications"];
 }
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const headerVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24
+    }
+  }
+};
+
+const notificationVariants = {
+  hidden: { opacity: 0, x: -20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24
+    }
+  }
+};
+
+const pulseVariants = {
+  pulse: {
+    scale: [1, 1.2, 1],
+    opacity: [1, 0.7, 1],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      repeatType: "loop" as const
+    }
+  }
+};
 
 export default function NotificationsCenter({
   notifications,
@@ -44,73 +95,117 @@ export default function NotificationsCenter({
   };
 
   return (
-    <Card className="shadow-sm">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">Notifications</h2>
-          <Button variant="ghost" size="sm" className="text-primary gap-1">
-            View All <ArrowRight size={16} />
-          </Button>
-        </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <Card className="shadow-sm">
+        <CardContent className="p-6">
+          <motion.div 
+            className="flex items-center justify-between mb-6"
+            variants={headerVariants}
+          >
+            <h2 className="text-xl font-bold">Notifications</h2>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button variant="ghost" size="sm" className="text-primary gap-1">
+                View All <ArrowRight size={16} />
+              </Button>
+            </motion.div>
+          </motion.div>
 
-        {sortedNotifications.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No notifications
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sortedNotifications.map((notification) => {
-              // Calculate time ago
-              const timeAgo = formatDistanceToNow(
-                parseISO(notification.dateTime),
-                {
-                  addSuffix: true,
-                }
-              );
+          {sortedNotifications.length === 0 ? (
+            <motion.div 
+              className="text-center py-8 text-muted-foreground"
+              variants={headerVariants}
+            >
+              No notifications
+            </motion.div>
+          ) : (
+            <motion.div 
+              className="space-y-3"
+              variants={containerVariants}
+            >
+              {sortedNotifications.map((notification, index) => {
+                // Calculate time ago
+                const timeAgo = formatDistanceToNow(
+                  parseISO(notification.dateTime),
+                  {
+                    addSuffix: true,
+                  }
+                );
 
-              return (
-                <div
-                  key={notification.id}
-                  className={`p-3 rounded-lg border ${getNotificationBg(notification.read)}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-white rounded-full">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-sm">
-                          {notification.title}
-                        </h4>
-                        {!notification.read && (
-                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {notification.message}
-                      </p>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {timeAgo}
-                      </div>
-                    </div>
-
-                    {notification.actionUrl && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs h-8"
+                return (
+                  <motion.div
+                    key={notification.id}
+                    variants={notificationVariants}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      transition: { duration: 0.2 }
+                    }}
+                    className={`p-3 rounded-lg border ${getNotificationBg(notification.read)}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <motion.div 
+                        className="p-2 bg-white rounded-full"
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ 
+                          delay: 0.1 + index * 0.05, 
+                          type: "spring", 
+                          stiffness: 300 
+                        }}
                       >
-                        Action
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                        {getNotificationIcon(notification.type)}
+                      </motion.div>
+
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-sm">
+                            {notification.title}
+                          </h4>
+                          {!notification.read && (
+                            <motion.span 
+                              className="w-2 h-2 rounded-full bg-blue-500"
+                              variants={pulseVariants}
+                              animate="pulse"
+                            />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {notification.message}
+                        </p>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {timeAgo}
+                        </div>
+                      </div>
+
+                      {notification.actionUrl && (
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-8"
+                          >
+                            Action
+                          </Button>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

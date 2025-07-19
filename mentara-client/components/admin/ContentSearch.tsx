@@ -209,19 +209,36 @@ const mockComments = [
   },
 ];
 
-interface ContentItem {
+interface PostItem {
   id: string;
-  type: string;
   title: string;
   content: string;
   authorName: string;
-  authorAvatar: string;
+  authorId: string;
   authorRole: string;
-  createdAt: string;
-  reportCount: number;
-  status: string;
-  community?: string;
+  authorAvatar: string;
+  datePosted: string;
+  commentCount: number;
+  likeCount: number;
+  isReported: boolean;
+  community: string;
 }
+
+interface CommentItem {
+  id: string;
+  content: string;
+  authorName: string;
+  authorId: string;
+  authorRole: string;
+  authorAvatar: string;
+  datePosted: string;
+  postId: string;
+  postTitle: string;
+  likeCount: number;
+  isReported: boolean;
+}
+
+type ContentItem = PostItem | CommentItem;
 
 export function ContentSearch() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -394,7 +411,14 @@ export function ContentSearch() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredContent.map((post: ContentItem) => (
+                  {filteredContent.map((post) => {
+                    // Type guard to ensure we're working with a post
+                    const isPost = (item: ContentItem): item is PostItem => 
+                      'title' in item;
+                    
+                    if (!isPost(post)) return null;
+                    
+                    return (
                     <TableRow key={post.id}>
                       <TableCell className="font-medium">
                         {post.title}
@@ -453,7 +477,8 @@ export function ContentSearch() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                   {filteredContent.length === 0 && (
                     <TableRow>
                       <TableCell
@@ -480,7 +505,14 @@ export function ContentSearch() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredContent.map((comment: ContentItem) => (
+                  {filteredContent.map((comment: ContentItem) => {
+                    // Type guard to ensure we're working with a comment
+                    const isComment = (item: ContentItem): item is CommentItem => 
+                      'postTitle' in item;
+                    
+                    if (!isComment(comment)) return null;
+                    
+                    return (
                     <TableRow key={comment.id}>
                       <TableCell className="max-w-sm truncate">
                         {comment.content}
@@ -526,7 +558,8 @@ export function ContentSearch() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                   {filteredContent.length === 0 && (
                     <TableRow>
                       <TableCell
@@ -558,7 +591,7 @@ export function ContentSearch() {
 
           {selectedContent && (
             <div className="space-y-4">
-              {contentType === "posts" && (
+              {contentType === "posts" && 'title' in selectedContent && (
                 <>
                   <div className="border-b pb-2">
                     <h2 className="text-lg font-semibold">
@@ -581,7 +614,7 @@ export function ContentSearch() {
                 </>
               )}
 
-              {contentType === "comments" && (
+              {contentType === "comments" && 'postTitle' in selectedContent && (
                 <>
                   <div className="border-b pb-2">
                     <h2 className="text-md font-medium">

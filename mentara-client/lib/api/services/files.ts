@@ -1,25 +1,6 @@
 import { AxiosInstance } from 'axios';
 import {
   File,
-  FileUploadDto,
-  UpdateFileDto,
-  FileQuery,
-  FileIdParam,
-  FileParamsDto,
-  FindFilesQueryDto,
-  EnhancedFileUploadDto,
-  UpdateFileStatusDto,
-  AttachFileToEntityDto,
-  GetAttachmentsParamsDto,
-  CreateFileVersionDto,
-  CreateFileShareDto,
-  ShareTokenParamsDto,
-  DownloadSharedFileDto,
-  BulkFileOperationDto,
-  FileAnalyticsQueryDto,
-  FileDownloadDto,
-  MultipleFileUploadDto,
-  FileUploadProgress,
 } from '@mentara/commons';
 
 // Extended interfaces for complex file data structures

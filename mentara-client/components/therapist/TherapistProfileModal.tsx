@@ -28,7 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
 import ReviewSection from "@/components/reviews/ReviewSection";
-import ReviewForm from "@/components/reviews/ReviewForm";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { useAuth } from "@/hooks/auth";
 
 interface TherapistProfileModalProps {

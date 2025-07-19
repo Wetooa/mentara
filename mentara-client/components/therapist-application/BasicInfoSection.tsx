@@ -21,18 +21,11 @@ import {
 import PROVIDER_TYPE from "@/constants/provider";
 import PHILIPPINE_PROVINCES from "@/constants/provinces";
 
-// Type definition for the basic information form fields
-export interface BasicInfoFormFields {
-  firstName: string;
-  lastName: string;
-  mobile: string;
-  email: string;
-  province: string;
-  providerType: string;
-}
+// Types
+import { TherapistApplicationFormData } from "@/types/therapist-application";
 
 interface BasicInfoSectionProps {
-  control: Control<any>;
+  control: Control<TherapistApplicationFormData>;
 }
 
 export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 // useUser functionality now handled by useAuth
 import { toast } from "sonner";
 
@@ -24,7 +24,10 @@ export default function SSOCallbackPage() {
         
         if (token || code) {
           // Handle OAuth callback with token
-          await handleOAuthCallback(token || code);
+          const callbackToken = token || code;
+          if (callbackToken) {
+            await handleOAuthCallback(callbackToken);
+          }
           
           // Check if user has pre-assessment data (indicates new user from pre-assessment flow)
           const pendingAssessmentData = localStorage.getItem("pendingAssessmentData");

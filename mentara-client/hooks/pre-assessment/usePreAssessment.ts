@@ -1,5 +1,5 @@
 import { usePreAssessmentChecklistStore, useSignUpStore } from "@/store/pre-assessment";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { toast } from "sonner";
 import { answersToAnswerMatrix } from "@/lib/questionnaire";
@@ -8,7 +8,7 @@ export function usePreAssessment() {
   const [isLoading, setIsLoading] = useState(false);
   const { questionnaires, answers } = usePreAssessmentChecklistStore();
   const { setDetails } = useSignUpStore();
-  const { isLoaded, signUpWithEmail, signUpWithOAuth } = useAuth();
+  const { register, isLoading: authLoading } = useAuth();
 
   const storeAssessmentAnswers = () => {
     try {
@@ -21,8 +21,6 @@ export function usePreAssessment() {
   };
 
   const handleSignUp = async (email: string, password: string, nickname: string) => {
-    if (!isLoaded) return;
-    
     setIsLoading(true);
     try {
       storeAssessmentAnswers();
@@ -31,19 +29,25 @@ export function usePreAssessment() {
         email: email,
       });
 
-      // Use local auth with basic registration data
+      // Use JWT-based registration for client role
       const registrationData = {
         email,
         password,
         firstName: nickname, // Use nickname as firstName for compatibility
-        lastName: '',
+        lastName: '', // Empty last name - can be filled during onboarding
+        role: 'client' as const,
       };
 
-      await signUpWithEmail(registrationData, {
-        preAssessmentAnswers: answersToAnswerMatrix(questionnaires, answers),
+      // TODO: We need to extend the backend register endpoint to accept 
+      // pre-assessment data. For now, store it in localStorage to be 
+      // processed during onboarding.
+      localStorage.setItem('pendingPreAssessmentData', JSON.stringify({
+        answers: answersToAnswerMatrix(questionnaires, answers),
         source: "preAssessment",
-        sendEmailVerification: true,
-      });
+        completedAt: new Date().toISOString(),
+      }));
+
+      await register(registrationData);
 
       return true;
     } catch (error: any) {
@@ -55,17 +59,28 @@ export function usePreAssessment() {
   };
 
   const handleOAuthSignUp = async (provider: "oauth_google" | "oauth_microsoft") => {
-    if (!isLoaded) return;
-    
     setIsLoading(true);
     try {
       storeAssessmentAnswers();
       toast.info(`Signing in with ${provider === "oauth_google" ? "Google" : "Microsoft"}...`);
 
-      await signUpWithOAuth(provider, {
-        hasPreAssessmentData: true,
-        redirectPath: "/user/welcome",
-      });
+      // TODO: OAuth signup integration needs to be implemented
+      // The backend supports OAuth endpoints at /auth/google and /auth/microsoft
+      // but the frontend AuthContext doesn't have OAuth methods yet.
+      
+      // Store pre-assessment data for OAuth flow
+      localStorage.setItem('pendingPreAssessmentData', JSON.stringify({
+        answers: answersToAnswerMatrix(questionnaires, answers),
+        source: "preAssessment",
+        completedAt: new Date().toISOString(),
+      }));
+
+      // For now, redirect to OAuth provider directly
+      const oauthUrl = provider === "oauth_google" 
+        ? `${process.env.NEXT_PUBLIC_API_URL}/auth/google`
+        : `${process.env.NEXT_PUBLIC_API_URL}/auth/microsoft`;
+      
+      window.location.href = oauthUrl;
 
       return true;
     } catch (error: any) {
@@ -77,7 +92,7 @@ export function usePreAssessment() {
   };
 
   return {
-    isLoading,
+    isLoading: isLoading || authLoading,
     handleSignUp,
     handleOAuthSignUp,
     storeAssessmentAnswers,

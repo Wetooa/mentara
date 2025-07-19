@@ -40,20 +40,24 @@ import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 
-interface AuditLog {
+// Using AuditLog type from mentara-commons via service
+interface DisplayAuditLog {
   id: string;
   action: string;
   resource: string;
   resourceId?: string;
   userId: string;
-  userEmail: string;
-  userRole: string;
+  userEmail?: string;
+  userRole?: string;
+  role?: string;
   ipAddress: string;
   userAgent: string;
   timestamp: string;
-  status: 'success' | 'failure' | 'pending';
-  details?: Record<string, unknown>;
+  success?: boolean;
+  details?: string | Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  severity?: string;
+  category?: string;
 }
 
 // Action types for audit log filtering (can be uncommented when needed)
@@ -87,7 +91,7 @@ export default function AdminAuditLogsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [resourceFilter, setResourceFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [successFilter, setSuccessFilter] = useState<string>("all");
   const [userFilter] = useState<string>("all"); // setUserFilter can be added when user filtering UI is implemented
   const [dateRange, setDateRange] = useState<string>("7");
 
@@ -106,29 +110,27 @@ export default function AdminAuditLogsPage() {
     // error, // Can be uncommented for error handling if needed
     refetch 
   } = useQuery({
-    queryKey: queryKeys.admin.auditLogs({
+    queryKey: queryKeys.auditLogs.list({
       action: actionFilter === "all" ? undefined : actionFilter,
       resource: resourceFilter === "all" ? undefined : resourceFilter,
-      status: statusFilter === "all" ? undefined : statusFilter,
+      success: successFilter === "all" ? undefined : (successFilter === "success"),
       userId: userFilter === "all" ? undefined : userFilter,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      search: searchQuery || undefined,
     }),
-    queryFn: () => api.admin.auditLogs.getList({
+    queryFn: () => api.auditLogs.getList({
       action: actionFilter === "all" ? undefined : actionFilter,
       resource: resourceFilter === "all" ? undefined : resourceFilter,
-      status: statusFilter === "all" ? undefined : statusFilter,
+      success: successFilter === "all" ? undefined : (successFilter === "success"),
       userId: userFilter === "all" ? undefined : userFilter,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      search: searchQuery || undefined,
     }),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
-  // Mock data for demonstration
-  const mockAuditLogs: AuditLog[] = [
+  // Mock data for demonstration - simplified structure
+  const mockAuditLogs: DisplayAuditLog[] = [
     {
       id: "1",
       action: "login",
@@ -140,7 +142,7 @@ export default function AdminAuditLogsPage() {
       ipAddress: "192.168.1.100",
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       timestamp: new Date().toISOString(),
-      status: "success",
+      success: true,
     },
     {
       id: "2",
@@ -153,7 +155,7 @@ export default function AdminAuditLogsPage() {
       ipAddress: "192.168.1.100",
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       timestamp: new Date(Date.now() - 3600000).toISOString(),
-      status: "success",
+      success: true,
     },
     {
       id: "3",
@@ -166,7 +168,7 @@ export default function AdminAuditLogsPage() {
       ipAddress: "192.168.1.101",
       userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       timestamp: new Date(Date.now() - 7200000).toISOString(),
-      status: "success",
+      success: true,
     },
     {
       id: "4",
@@ -179,7 +181,7 @@ export default function AdminAuditLogsPage() {
       ipAddress: "192.168.1.100",
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       timestamp: new Date(Date.now() - 10800000).toISOString(),
-      status: "success",
+      success: true,
     },
     {
       id: "5",
@@ -192,12 +194,12 @@ export default function AdminAuditLogsPage() {
       ipAddress: "192.168.1.100",
       userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       timestamp: new Date(Date.now() - 14400000).toISOString(),
-      status: "success",
+      success: true,
     },
   ];
 
   // Use real data if available, otherwise use mock data
-  const logs = auditLogs?.data || mockAuditLogs;
+  const logs: DisplayAuditLog[] = auditLogs?.logs || mockAuditLogs;
 
   // Filter logs based on search query
   const filteredLogs = useMemo(() => {
@@ -208,7 +210,7 @@ export default function AdminAuditLogsPage() {
     return logs.filter((log) =>
       log.action.toLowerCase().includes(searchLower) ||
       log.resource.toLowerCase().includes(searchLower) ||
-      log.userEmail.toLowerCase().includes(searchLower) ||
+      (log.userEmail && log.userEmail.toLowerCase().includes(searchLower)) ||
       log.ipAddress.toLowerCase().includes(searchLower)
     );
   }, [logs, searchQuery]);
@@ -344,7 +346,7 @@ export default function AdminAuditLogsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={successFilter} onValueChange={setSuccessFilter}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -352,7 +354,6 @@ export default function AdminAuditLogsPage() {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="success">Success</SelectItem>
                 <SelectItem value="failure">Failure</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
 
@@ -400,7 +401,7 @@ export default function AdminAuditLogsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-500">Success Rate</p>
                   <p className="text-2xl font-bold">
-                    {logs.length > 0 ? Math.round((logs.filter(l => l.status === 'success').length / logs.length) * 100) : 0}%
+                    {logs.length > 0 ? Math.round((logs.filter(l => l.success === true).length / logs.length) * 100) : 0}%
                   </p>
                 </div>
                 <CheckCircle className="h-5 w-5 text-green-500" />
@@ -412,7 +413,7 @@ export default function AdminAuditLogsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Failed Actions</p>
-                  <p className="text-2xl font-bold">{logs.filter(l => l.status === 'failure').length}</p>
+                  <p className="text-2xl font-bold">{logs.filter(l => l.success === false).length}</p>
                 </div>
                 <AlertTriangle className="h-5 w-5 text-red-500" />
               </div>
@@ -487,15 +488,17 @@ export default function AdminAuditLogsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="font-medium">{log.userEmail}</div>
-                          <Badge className={getRoleColor(log.userRole)} variant="secondary">
-                            {log.userRole}
-                          </Badge>
+                          <div className="font-medium">{log.userEmail || 'Unknown User'}</div>
+                          {(log.userRole || log.role) && (
+                            <Badge className={getRoleColor(log.userRole || log.role || 'unknown')} variant="secondary">
+                              {log.userRole || log.role}
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(log.status)}>
-                          {log.status}
+                        <Badge className={getStatusColor(log.success === true ? 'success' : (log.success === false ? 'failure' : 'pending'))}>
+                          {log.success === true ? 'success' : (log.success === false ? 'failure' : 'pending')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -519,7 +522,7 @@ export default function AdminAuditLogsPage() {
 
             {filteredLogs.length === 0 && !isLoading && (
               <div className="p-6 text-center text-gray-500">
-                {searchQuery || actionFilter !== "all" || resourceFilter !== "all" || statusFilter !== "all"
+                {searchQuery || actionFilter !== "all" || resourceFilter !== "all" || successFilter !== "all"
                   ? "No audit logs match your filters."
                   : "No audit logs found."}
               </div>

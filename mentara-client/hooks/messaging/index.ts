@@ -2,7 +2,7 @@
 
 import { useContacts } from './useContacts';
 import { useConversations } from './useConversations';
-import { useWebSocket } from './useWebSocket';
+import { useMessagingWebSocket } from './useWebSocket';
 import { useEffect } from 'react';
 
 /**
@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 export function useMessaging() {
   const contacts = useContacts();
   const conversations = useConversations();
-  const webSocket = useWebSocket();
+  const webSocket = useMessagingWebSocket();
 
   // Set up WebSocket event handlers
   useEffect(() => {
@@ -58,7 +58,9 @@ export function useMessaging() {
     addReaction: conversations.addReaction,
     removeReaction: conversations.removeReaction,
     searchMessages: conversations.searchMessages,
-    sendTyping: webSocket.sendTyping,
+    sendTypingIndicator: webSocket.sendTypingIndicator,
+    joinConversation: webSocket.joinConversation,
+    leaveConversation: webSocket.leaveConversation,
     
     // Connection status
     isConnected: webSocket.isConnected,
@@ -68,4 +70,4 @@ export function useMessaging() {
 // Export individual hooks for specific use cases
 export { useContacts } from './useContacts';
 export { useConversations } from './useConversations';
-export { useWebSocket } from './useWebSocket';
+export { useMessagingWebSocket } from './useWebSocket';

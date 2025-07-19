@@ -19,6 +19,14 @@ export {
   EmailSchema,
   RegisterAdminDtoSchema,
   RegisterModeratorDtoSchema,
+  TerminateSessionDtoSchema,
+  SessionInfoResponseSchema,
+  ActiveSessionsResponseSchema,
+  TerminateSessionResponseSchema,
+  TerminateOtherSessionsResponseSchema,
+  UniversalLogoutResponseSchema,
+  CheckUserExistsDtoSchema,
+  CheckUserExistsResponseSchema,
   type LoginDto,
   type RefreshTokenDto,
   type LogoutDto,
@@ -35,7 +43,15 @@ export {
   type RegisterWithOtpDto,
   type UserIdParam,
   type RegisterAdminDto,
-  type RegisterModeratorDto
+  type RegisterModeratorDto,
+  type TerminateSessionDto,
+  type SessionInfoResponse,
+  type ActiveSessionsResponse,
+  type TerminateSessionResponse,
+  type TerminateOtherSessionsResponse,
+  type UniversalLogoutResponse,
+  type CheckUserExistsDto,
+  type CheckUserExistsResponse
 } from './auth';
 
 // Explicit exports for user and review schemas (verified)

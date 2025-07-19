@@ -111,16 +111,19 @@ export const useSignUpStore = create<SignUpStore>()((set) => ({
   setDetails: (details) => set({ details }),
 }));
 
+// Assessment data interface
+interface AssessmentData {
+  questionnaires: ListOfQuestionnaires[];
+  answers: number[][];
+  step: number;
+  miniStep: number;
+}
+
 // Assessment data store for registration flow
 export interface PreAssessmentStore {
-  assessmentData: {
-    questionnaires: ListOfQuestionnaires[];
-    answers: number[][];
-    step: number;
-    miniStep: number;
-  } | null;
-  setAssessmentData: (data: any) => void;
-  getAssessmentData: () => any;
+  assessmentData: AssessmentData | null;
+  setAssessmentData: (data: AssessmentData) => void;
+  getAssessmentData: () => AssessmentData | null;
   clearAssessmentData: () => void;
 }
 

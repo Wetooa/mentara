@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     // Get the authorization header from the request
     const authHeader = request.headers.get('authorization');
     
@@ -21,7 +23,7 @@ export async function GET(
     // Forward the request to the backend API
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     const backendResponse = await fetch(
-      `${backendUrl}/api/therapist/application/${params.id}`, 
+      `${backendUrl}/api/therapist/application/${id}`, 
       {
         method: 'GET',
         headers: {

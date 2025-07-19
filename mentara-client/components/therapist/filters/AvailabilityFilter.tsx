@@ -3,7 +3,7 @@
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Clock, Sun, Sunset, Moon, Calendar } from "lucide-react";
+import { Clock, Sun, Sunset, Calendar } from "lucide-react";
 
 interface AvailabilityFilterProps {
   value: {

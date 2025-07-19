@@ -1,9 +1,9 @@
 'use client';
 // import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-export default function ContinueWithMicrosoft() {
+export function ContinueWithMicrosoft() {
   // const router = useRouter();
   const { signInWithOAuth, isLoading } = useAuth();
 
@@ -40,3 +40,5 @@ export default function ContinueWithMicrosoft() {
     </Button>
   );
 }
+
+export default ContinueWithMicrosoft;

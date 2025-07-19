@@ -62,7 +62,7 @@ export type {
 // All analytics types are now imported from mentara-commons
 
 // Service interface for type checking (use factory function instead)
-interface AnalyticsService {
+export interface AnalyticsServiceInterface {
   // Platform overview
   getPlatformAnalytics(query?: PlatformAnalyticsQueryDto): Promise<PlatformAnalytics>;
   
@@ -80,7 +80,7 @@ interface AnalyticsService {
   getReport(reportId: string): Promise<CustomAnalyticsReport>;
   updateReport(reportId: string, report: Partial<CustomAnalyticsReport>): Promise<CustomAnalyticsReport>;
   deleteReport(reportId: string): Promise<{ deleted: boolean }>;
-  runReport(reportId: string): Promise<any>;
+  runReport(reportId: string): Promise<CustomAnalyticsReport>;
   
   // Export functionality
   exportData(query: ExportAnalyticsQueryDto): Promise<Blob>;
@@ -143,7 +143,7 @@ export const createAnalyticsService = (client: AxiosInstance) => ({
   deleteReport: (reportId: string): Promise<{ deleted: boolean }> =>
     client.delete(`/analytics/reports/${reportId}`),
 
-  runReport: (reportId: string): Promise<any> =>
+  runReport: (reportId: string): Promise<CustomAnalyticsReport> =>
     client.post(`/analytics/reports/${reportId}/run`),
 
   // Export functionality

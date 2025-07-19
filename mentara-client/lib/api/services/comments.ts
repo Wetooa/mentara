@@ -3,25 +3,18 @@ import {
   CommentCreateInputDto,
   CommentUpdateInputDto,
   Comment,
-  CommentQuery,
-  CommentIdParam,
-  CommentParamsDto,
-  CommentPostParamsDto,
-  CreateCommentDto,
-  UpdateCommentDto,
-  CreateReactionDto,
-  ReportCommentDto,
-  CommentReaction,
+  CommentHeart,
+  HeartToggleResponse,
 } from '@mentara/commons';
 
 // Extended interfaces for UI-specific data structures
 export interface CommentListParams {
   postId?: string;
-  authorId?: string;
-  parentId?: string;
+  userId?: string; // Changed from authorId to match backend
+  parentId?: string; // For fetching nested comments
   limit?: number;
   offset?: number;
-  sortBy?: string;
+  sortBy?: 'best' | 'new' | 'old' | 'hearts'; // Updated sort options
 }
 
 export interface CommentListResponse {
@@ -36,37 +29,40 @@ export interface CommentWithDetails extends Comment {
     firstName: string;
     lastName: string;
     avatarUrl?: string;
+    role?: 'client' | 'therapist' | 'moderator' | 'admin';
   };
-  reactions: CommentReaction[];
-  reactionCount: number;
-  isReacted?: boolean;
-  replies?: CommentWithDetails[];
-  replyCount: number;
-}
-
-export interface HeartCommentResponse {
-  isHearted: boolean;
+  hearts: CommentHeart[];
   heartCount: number;
+  isHearted?: boolean;
+  children?: CommentWithDetails[]; // Unified nested comments via parentId
+  childrenCount: number;
 }
 
-export interface CreateReplyRequest {
-  content: string;
-  parentId: string;
+// Report functionality
+export interface ReportSubmission {
+  reason: string;
+  content?: string;
 }
+
+export interface ReportResponse {
+  success: boolean;
+  reportId: string;
+}
+
+// Use HeartToggleResponse from @mentara/commons instead of local interface
 
 export interface CommentsService {
   getAll(params?: CommentListParams): Promise<CommentListResponse>;
   getById(id: string): Promise<CommentWithDetails>;
-  create(data: CommentCreateInputDto): Promise<CommentWithDetails>;
+  create(data: CommentCreateInputDto): Promise<CommentWithDetails>; // Now supports parentId for replies
   update(id: string, data: CommentUpdateInputDto): Promise<CommentWithDetails>;
   delete(id: string): Promise<void>;
   
-  // Reply functionality
-  createReply(data: CreateReplyRequest): Promise<CommentWithDetails>;
+  // Heart functionality (simplified - single toggle endpoint)
+  heart(id: string): Promise<HeartToggleResponse>;
   
-  // Heart/Like functionality
-  heart(id: string): Promise<HeartCommentResponse>;
-  unheart(id: string): Promise<HeartCommentResponse>;
+  // Report functionality for unified comment structure
+  report(id: string, data: ReportSubmission): Promise<ReportResponse>;
 }
 
 export const createCommentsService = (client: AxiosInstance): CommentsService => ({
@@ -74,7 +70,7 @@ export const createCommentsService = (client: AxiosInstance): CommentsService =>
     const searchParams = new URLSearchParams();
     
     if (params.postId) searchParams.append('postId', params.postId);
-    if (params.authorId) searchParams.append('authorId', params.authorId);
+    if (params.userId) searchParams.append('userId', params.userId);
     if (params.parentId) searchParams.append('parentId', params.parentId);
     if (params.limit) searchParams.append('limit', params.limit.toString());
     if (params.offset) searchParams.append('offset', params.offset.toString());
@@ -96,18 +92,11 @@ export const createCommentsService = (client: AxiosInstance): CommentsService =>
   delete: (id: string): Promise<void> =>
     client.delete(`/comments/${id}`),
 
-  // Reply functionality
-  createReply: (data: CreateReplyRequest): Promise<CommentWithDetails> =>
-    client.post('/comments', {
-      content: data.content,
-      postId: '', // Will be inferred from parent comment
-      parentId: data.parentId,
-    }),
-
-  // Heart/Like functionality
-  heart: (id: string): Promise<HeartCommentResponse> =>
+  // Heart functionality (toggle - backend handles add/remove automatically)
+  heart: (id: string): Promise<HeartToggleResponse> =>
     client.post(`/comments/${id}/heart`),
 
-  unheart: (id: string): Promise<HeartCommentResponse> =>
-    client.delete(`/comments/${id}/heart`),
+  // Report functionality for inappropriate content
+  report: (id: string, data: ReportSubmission): Promise<ReportResponse> =>
+    client.post(`/comments/${id}/report`, data),
 });

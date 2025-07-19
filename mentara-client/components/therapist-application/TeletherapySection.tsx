@@ -14,16 +14,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Clock } from "lucide-react";
 
-// Type definition for the teletherapy readiness form fields
-export interface TeletherapyFormFields {
-  providedOnlineTherapyBefore: string;
-  comfortableUsingVideoConferencing: string;
-  privateConfidentialSpace: string;
-  compliesWithDataPrivacyAct: string;
-}
+// Types
+import { TherapistApplicationFormData } from "@/types/therapist-application";
 
 interface TeletherapySectionProps {
-  control: Control<any>;
+  control: Control<TherapistApplicationFormData>;
 }
 
 export const TeletherapySection: React.FC<TeletherapySectionProps> = ({

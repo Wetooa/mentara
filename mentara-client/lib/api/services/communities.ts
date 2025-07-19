@@ -2,24 +2,9 @@ import { AxiosInstance } from 'axios';
 import {
   Community,
   CommunityMember,
-  CreatePostDto,
   Post,
   PostCreateInputDto,
-  PostRoomParamsDto,
-  PostParamsDto,
   CreateNestedCommentDto,
-  CreateCommunityDto,
-  CreateRoomDto,
-  CreateRoomGroupDto,
-  CommunityQuery,
-  GetCommunityMembersQueryDto,
-  CommunityIdParam,
-  CommunityParamsDto,
-  CommunitySlugParamsDto,
-  RoomGroupParamsDto,
-  RoomParamsDto,
-  UserParamsDto,
-  BulkAssignCommunitiesDto,
 } from '@mentara/commons';
 
 // Local types for extended structures not in commons
@@ -55,6 +40,7 @@ export interface Comment {
   postId: string;
   userId: string;
   content: string;
+  parentId?: string; // For nested comments via unified system
   createdAt: string;
   updatedAt: string;
   user: {
@@ -62,9 +48,13 @@ export interface Comment {
     firstName: string;
     lastName: string;
     avatarUrl?: string;
+    role?: 'client' | 'therapist' | 'moderator' | 'admin';
   };
   hearts: CommentHeart[];
-  replies: Reply[];
+  children?: Comment[]; // Nested comments (replaces replies)
+  heartCount: number;
+  childrenCount: number;
+  isHearted?: boolean;
 }
 
 export interface CommentHeart {
@@ -72,16 +62,7 @@ export interface CommentHeart {
   commentId: string;
   userId: string;
   createdAt: string;
-}
-
-export interface Reply {
-  id: string;
-  commentId: string;
-  userId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
+  user?: {
     id: string;
     firstName: string;
     lastName: string;
@@ -218,15 +199,7 @@ export const createCommunityService = (client: AxiosInstance) => ({
   unheartComment: (commentId: string): Promise<{ unhearted: boolean }> =>
     client.delete(`/comments/${commentId}/heart`),
 
-  // Replies
-  createReply: (data: CreateNestedCommentDto): Promise<Reply> =>
-    client.post('/replies', data),
-
-  updateReply: (replyId: string, content: string): Promise<Reply> =>
-    client.put(`/replies/${replyId}`, { content }),
-
-  deleteReply: (replyId: string): Promise<{ deleted: boolean }> =>
-    client.delete(`/replies/${replyId}`),
+  // Replies are now handled as nested comments via /comments endpoint with parentId
 
   // Community Assignment
   assignCommunitiesToMe: (): Promise<{ assignedCommunities: string[] }> =>

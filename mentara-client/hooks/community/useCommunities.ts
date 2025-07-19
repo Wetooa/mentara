@@ -39,11 +39,23 @@ export function useCommunities() {
   const joinCommunityMutation = useMutation({
     mutationFn: (communityId: string) => api.communities.joinCommunity(communityId),
     onSuccess: () => {
+      // Invalidate all relevant community-related queries
       queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
       toast.success("Successfully joined community");
     },
     onError: (error: MentaraApiError) => {
-      toast.error("Failed to join community");
+      // Provide specific error messages based on the error type
+      if (error.status === 409) {
+        toast.error("You're already a member of this community");
+      } else if (error.status === 404) {
+        toast.error("Community not found");
+      } else if (error.status === 403) {
+        toast.error("You don't have permission to join this community");
+      } else {
+        toast.error(error.message || "Failed to join community");
+      }
     },
   });
 
@@ -51,11 +63,21 @@ export function useCommunities() {
   const leaveCommunityMutation = useMutation({
     mutationFn: (communityId: string) => api.communities.leaveCommunity(communityId),
     onSuccess: () => {
+      // Invalidate all relevant community-related queries
       queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.userMemberships() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
       toast.success("Successfully left community");
     },
     onError: (error: MentaraApiError) => {
-      toast.error("Failed to leave community");
+      // Provide specific error messages based on the error type
+      if (error.status === 404) {
+        toast.error("You're not a member of this community or community not found");
+      } else if (error.status === 403) {
+        toast.error("You don't have permission to leave this community");
+      } else {
+        toast.error(error.message || "Failed to leave community");
+      }
     },
   });
 
@@ -80,6 +102,9 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
   const queryClient = useQueryClient();
 
   // Get posts for a community or room
+  // TODO: CONFUSING/BROKEN - This hook has unclear behavior when used for community-level posts
+  // The fallback to getPostsByRoom('') with empty string suggests missing functionality
+  // Consider implementing proper community-level post fetching or removing this dual-purpose hook
   const {
     data: posts,
     isLoading,
@@ -91,16 +116,18 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
       : queryKeys.communities.posts(communityId || ''),
     queryFn: () => roomId 
       ? api.communities.getPostsByRoom(roomId)
-      : api.communities.getPostsByRoom(''), // Note: No direct community posts endpoint
+      : api.communities.getPostsByRoom(''), // BROKEN: No direct community posts endpoint - this will likely fail
     enabled: !!(communityId || roomId),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
   // Create post mutation
+  // TODO: CONFUSING - This mutation uses roomId || '' which could pass empty string to API
+  // This suggests the same broken pattern as the query above - needs proper room validation
   const createPostMutation = useMutation({
     mutationFn: ({ content, attachments }: { content: string; attachments?: PostAttachment[] }) =>
       api.communities.createPost({ 
-        roomId: roomId || '', 
+        roomId: roomId || '', // CONFUSING: Empty string fallback could cause API errors
         content, 
         attachments 
       }),
@@ -109,7 +136,7 @@ export function useCommunityPosts(communityId?: string, roomId?: string) {
       toast.success("Post created successfully");
     },
     onError: (error: MentaraApiError) => {
-      toast.error("Failed to create post");
+      toast.error("Failed to create post"); // TODO: Could provide more specific error messages
     },
   });
 

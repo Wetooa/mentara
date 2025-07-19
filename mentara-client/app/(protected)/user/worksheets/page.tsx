@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import WorksheetsSidebar from "@/components/worksheets/WorksheetsSidebar";
 import WorksheetsList from "@/components/worksheets/WorksheetsList";
 import { Task } from "@/components/worksheets/types";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
+import { useApi } from "@/lib/api";
 
 
 export default function WorksheetsPage() {
@@ -13,35 +14,46 @@ export default function WorksheetsPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
+  const api = useApi();
   const userId = user?.id;
 
   // Fetch worksheets from API
   useEffect(() => {
     async function fetchWorksheets() {
-      if (!userId || !getToken) return;
+      if (!userId) return;
 
       try {
         setIsLoading(true);
         setError(null);
 
-        // Create authenticated API client
-        const token = await getToken();
-        const worksheetsApi = createWorksheetsApi(() => Promise.resolve(token));
-
         // Convert activeFilter to status filter for API
-        let statusFilter: string | undefined;
-        if (activeFilter !== "everything") {
-          statusFilter = activeFilter;
+        let isCompleted: boolean | undefined;
+        if (activeFilter === "completed") {
+          isCompleted = true;
+        } else if (activeFilter === "pending") {
+          isCompleted = false;
         }
 
         // Call the API to get worksheets
-        const worksheets = await worksheetsApi.getAll(
+        const worksheetsResponse = await api.worksheets.getAll({
           userId,
-          undefined,
-          statusFilter
-        );
-        setTasks(Array.isArray(worksheets) ? worksheets : []);
+          isCompleted,
+          limit: 100
+        });
+        
+        // Transform worksheets to match Task interface
+        const transformedTasks: Task[] = Array.isArray(worksheetsResponse.worksheets) 
+          ? worksheetsResponse.worksheets.map(worksheet => ({
+              ...worksheet,
+              date: worksheet.createdAt,
+              status: 'assigned' as const,
+              isCompleted: false,
+              therapistName: undefined,
+            }))
+          : [];
+        
+        setTasks(transformedTasks);
       } catch (err) {
         console.error("Error fetching worksheets:", err);
         setError("Failed to load worksheets. Please try again.");
@@ -51,7 +63,7 @@ export default function WorksheetsPage() {
     }
 
     fetchWorksheets();
-  }, [userId, getToken, activeFilter]);
+  }, [userId, activeFilter, api.worksheets]);
 
   // Filter tasks based on selected filters
   const getFilteredTasks = () => {

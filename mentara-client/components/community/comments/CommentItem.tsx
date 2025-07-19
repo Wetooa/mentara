@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  ArrowUp, 
-  ArrowDown, 
+  Heart, 
   MessageCircle, 
   Reply,
   Edit3,
@@ -41,14 +40,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import type { Comment } from './CommentTree';
+import type { Comment } from '@/types/api/comments';
 
 interface CommentItemProps {
   comment: Comment;
-  depth: number;
+  depth?: number;
   isCollapsed?: boolean;
   showCollapseButton?: boolean;
-  onVote?: (commentId: string, voteType: 'up' | 'down' | null) => void;
+  onHeart?: (commentId: string) => void;
   onReply?: (commentId: string, content: string, parentId?: string) => void;
   onEdit?: (commentId: string, content: string) => void;
   onDelete?: (commentId: string) => void;
@@ -58,10 +57,10 @@ interface CommentItemProps {
 
 export function CommentItem({
   comment,
-  depth,
+  depth = 0,
   isCollapsed = false,
   showCollapseButton = false,
-  onVote,
+  onHeart,
   onReply,
   onEdit,
   onDelete,
@@ -74,27 +73,25 @@ export function CommentItem({
   const [isEditing, setIsEditing] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [editContent, setEditContent] = useState(comment.content);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
 
-  const voteScore = comment.votes.upvotes - comment.votes.downvotes;
-
-  // Vote mutation
-  const voteMutation = useMutation({
-    mutationFn: ({ commentId, voteType }: { commentId: string; voteType: 'up' | 'down' | null }) =>
-      api.comments.vote(commentId, voteType),
+  // Heart mutation
+  const heartMutation = useMutation({
+    mutationFn: (commentId: string) => api.comments.heart(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.comments.all });
     },
     onError: () => {
-      toast.error('Failed to register vote');
+      toast.error('Failed to heart comment');
     },
   });
 
-  const handleVote = (voteType: 'up' | 'down') => {
-    const newVote = comment.votes.userVote === voteType ? null : voteType;
-    if (onVote) {
-      onVote(comment.id, newVote);
+  const handleHeart = () => {
+    if (onHeart) {
+      onHeart(comment.id);
     } else {
-      voteMutation.mutate({ commentId: comment.id, voteType: newVote });
+      heartMutation.mutate(comment.id);
     }
   };
 
@@ -113,9 +110,20 @@ export function CommentItem({
     }
   };
 
-  const handleReport = () => {
-    // TODO: Implement report functionality
-    toast.info('Report functionality coming soon');
+  // Report mutation
+  const reportMutation = useMutation({
+    mutationFn: (data: { reason: string; content?: string }) => 
+      api.comments.report(comment.id, data),
+    onSuccess: () => {
+      toast.success('Comment reported successfully');
+    },
+    onError: () => {
+      toast.error('Failed to report comment');
+    },
+  });
+
+  const handleReport = (reason: string, content?: string) => {
+    reportMutation.mutate({ reason, content });
   };
 
   const getRoleColor = (role?: string) => {
@@ -186,36 +194,34 @@ export function CommentItem({
 
             {/* Author Avatar */}
             <Avatar className="h-6 w-6">
-              <AvatarImage src={comment.author.avatarUrl} alt={comment.author.name} />
-              <AvatarFallback className="text-xs">{comment.author.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={comment.user.avatarUrl} alt={`${comment.user.firstName} ${comment.user.lastName}`} />
+              <AvatarFallback className="text-xs">
+                {comment.user.firstName?.[0]}{comment.user.lastName?.[0]}
+              </AvatarFallback>
             </Avatar>
 
             {/* Author Info */}
             <div className="flex items-center space-x-2 flex-1 min-w-0">
-              <span className="font-medium text-sm truncate">{comment.author.name}</span>
+              <span className="font-medium text-sm truncate">
+                {comment.user.firstName} {comment.user.lastName}
+              </span>
               
-              {getRoleLabel(comment.author.role) && (
-                <Badge variant="secondary" className={`text-xs ${getRoleColor(comment.author.role)}`}>
-                  {getRoleLabel(comment.author.role)}
+              {getRoleLabel(comment.user.role) && (
+                <Badge variant="secondary" className={`text-xs ${getRoleColor(comment.user.role)}`}>
+                  {getRoleLabel(comment.user.role)}
                 </Badge>
               )}
-              
-              {comment.author.isOP && (
-                <Badge variant="outline" className="text-xs">OP</Badge>
-              )}
 
-              {/* Vote Score */}
+              {/* Heart Count */}
               <div className="flex items-center space-x-1">
                 <span className={`text-xs font-medium ${
-                  voteScore > 0 ? 'text-orange-500' : 
-                  voteScore < 0 ? 'text-blue-500' : 
-                  'text-muted-foreground'
+                  comment.heartCount > 0 ? 'text-red-500' : 'text-muted-foreground'
                 }`}>
-                  {voteScore > 0 ? '+' : ''}{voteScore}
+                  {comment.heartCount} {comment.heartCount === 1 ? 'heart' : 'hearts'}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {comment.votes.upvotes + comment.votes.downvotes > 0 && '•'}
-                </span>
+                {comment.heartCount > 0 && (
+                  <span className="text-xs text-muted-foreground">•</span>
+                )}
               </div>
 
               {/* Timestamp */}
@@ -237,7 +243,8 @@ export function CommentItem({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {comment.isOwner && (
+              {/* TODO: Add isOwner logic based on current user */}
+              {false && (
                 <>
                   <DropdownMenuItem onClick={() => setIsEditing(!isEditing)}>
                     <Edit3 className="h-4 w-4 mr-2" />
@@ -268,10 +275,71 @@ export function CommentItem({
                   <DropdownMenuSeparator />
                 </>
               )}
-              <DropdownMenuItem onClick={handleReport}>
-                <Flag className="h-4 w-4 mr-2" />
-                Report
-              </DropdownMenuItem>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Flag className="h-4 w-4 mr-2" />
+                    Report
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Report Comment</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Help us maintain a safe community by reporting inappropriate content.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Reason for reporting:</label>
+                      <select 
+                        className="w-full p-2 border rounded-md"
+                        onChange={(e) => setReportReason(e.target.value)}
+                        value={reportReason}
+                      >
+                        <option value="">Select a reason</option>
+                        <option value="harassment">Harassment or bullying</option>
+                        <option value="spam">Spam or unwanted content</option>
+                        <option value="inappropriate">Inappropriate content</option>
+                        <option value="misinformation">Misinformation</option>
+                        <option value="hate_speech">Hate speech</option>
+                        <option value="self_harm">Self-harm or suicidal content</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Additional details (optional):</label>
+                      <Textarea
+                        placeholder="Provide more context about why you're reporting this comment..."
+                        value={reportDetails}
+                        onChange={(e) => setReportDetails(e.target.value)}
+                        rows={3}
+                        className="resize-none"
+                      />
+                    </div>
+                  </div>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => {
+                      setReportReason('');
+                      setReportDetails('');
+                    }}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => {
+                        if (reportReason) {
+                          handleReport(reportReason, reportDetails || undefined);
+                          setReportReason('');
+                          setReportDetails('');
+                        }
+                      }}
+                      disabled={!reportReason || reportMutation.isPending}
+                    >
+                      {reportMutation.isPending ? 'Submitting...' : 'Submit Report'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <DropdownMenuItem>
                 <Award className="h-4 w-4 mr-2" />
                 Give Award
@@ -322,25 +390,15 @@ export function CommentItem({
 
         {/* Comment Actions */}
         <div className="flex items-center space-x-1">
-          {/* Vote Buttons */}
+          {/* Heart Button */}
           <Button
             variant="ghost"
             size="sm"
-            className={`h-7 px-2 ${comment.votes.userVote === 'up' ? 'text-orange-500 bg-orange-50' : 'text-muted-foreground'}`}
-            onClick={() => handleVote('up')}
-            disabled={voteMutation.isPending}
+            className={`h-7 px-2 ${comment.isHearted ? 'text-red-500 bg-red-50' : 'text-muted-foreground'}`}
+            onClick={handleHeart}
+            disabled={heartMutation.isPending}
           >
-            <ArrowUp className="h-3 w-3" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`h-7 px-2 ${comment.votes.userVote === 'down' ? 'text-blue-500 bg-blue-50' : 'text-muted-foreground'}`}
-            onClick={() => handleVote('down')}
-            disabled={voteMutation.isPending}
-          >
-            <ArrowDown className="h-3 w-3" />
+            <Heart className={`h-3 w-3 ${comment.isHearted ? 'fill-current' : ''}`} />
           </Button>
 
           {/* Reply Button */}
@@ -354,15 +412,15 @@ export function CommentItem({
             <span className="text-xs">Reply</span>
           </Button>
 
-          {/* Replies Count */}
-          {comment.repliesCount && comment.repliesCount > 0 && (
+          {/* Children Count */}
+          {comment.childrenCount && comment.childrenCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
               className="h-7 px-2 text-muted-foreground hover:text-foreground"
             >
               <MessageCircle className="h-3 w-3 mr-1" />
-              <span className="text-xs">{comment.repliesCount}</span>
+              <span className="text-xs">{comment.childrenCount}</span>
             </Button>
           )}
         </div>

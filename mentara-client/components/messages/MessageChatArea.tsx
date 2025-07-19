@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Paperclip, Smile, Send, X } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
-import { Conversation, Message } from "./types";
+import { Conversation, Message, Attachment } from "./types";
 import {
   fetchConversation,
   sendMessage,
@@ -17,7 +17,7 @@ const Picker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 interface MessageChatAreaProps {
   contactId: string;
   conversation?: Conversation;
-  onSendMessage?: (text: string, attachments?: unknown[]) => Promise<void>;
+  onSendMessage?: (text: string, attachments?: Attachment[]) => Promise<void>;
   onMarkAsRead?: (messageId: string) => void;
   onAddReaction?: (messageId: string, emoji: string) => void;
   onRemoveReaction?: (messageId: string, emoji: string) => void;
@@ -114,15 +114,17 @@ export default function MessageChatArea({
   const handleSend = async () => {
     if (message.trim() || selectedFile) {
       try {
-        const fileAttachments: { name: string; url: string; type: string }[] = [];
+        const fileAttachments: Attachment[] = [];
         if (selectedFile) {
           // In a real app, you'd upload the file first and get a URL
           // For now, simulate file upload by creating a dummy URL
           const fakeUrl = `/files/${selectedFile.name}`;
           fileAttachments.push({
+            id: crypto.randomUUID(),
             name: selectedFile.name,
             url: fakeUrl,
             type: selectedFile.type.startsWith("image/") ? "image" : "document",
+            size: selectedFile.size,
           });
         }
 

@@ -45,7 +45,7 @@ export const createTherapistApplicationService = (client: AxiosInstance): Therap
     // Add file type mappings
     formData.append('fileTypes', JSON.stringify(data.fileTypes));
 
-    return client.post('/therapist/apply-with-documents', formData, {
+    return client.post('/auth/therapist/apply-with-documents', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

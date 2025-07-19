@@ -1,4 +1,5 @@
 import React from "react";
+import { AuthErrorBoundary } from "@/components/auth/AuthErrorBoundary";
 
 export default function AuthLayout({
   children,
@@ -7,7 +8,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className="bg-gradient-to-b from-white to-tertiary/50 w-full h-full flex items-center justify-center">
-      {children}
+      <AuthErrorBoundary>
+        {children}
+      </AuthErrorBoundary>
     </div>
   );
 }

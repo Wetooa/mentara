@@ -140,7 +140,7 @@ const unifiedTherapistSchema = z
     // Insurance Information
     acceptsInsurance: z.boolean().optional(),
     acceptedInsuranceTypes: z.array(z.string()).optional(),
-    sessionLength: z.string().optional(),
+    sessionDuration: z.number().optional(),
 
     // Bio/About
     bio: z.string().optional(),

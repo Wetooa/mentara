@@ -1,6 +1,6 @@
 "use client";
 
-import { useApiAuth } from "@/hooks/useApiAuth";
+import { useApiAuth } from "@/hooks/auth/useApiAuth";
 import { ReactNode } from "react";
 
 interface ApiAuthProviderProps {

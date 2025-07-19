@@ -291,7 +291,6 @@ export default function PatientDetailPage(
         {activeTab === "progress" && (
           <PatientProgressDashboard
             patient={patient}
-            patientId={patientId}
           />
         )}
       </div>

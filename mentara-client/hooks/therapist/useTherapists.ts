@@ -1,3 +1,4 @@
+import React from "react";
 import {
   useQuery,
   useInfiniteQuery,
@@ -96,8 +97,13 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
 }
 
 /**
- * Hook for filtering therapists with advanced client-side filtering and pagination
+ * Hook for filtering therapists with hybrid server/client-side filtering and pagination
  * Used primarily by TherapistListing and FavoritesSection components
+ * 
+ * FIXED: Removed over-fetching pattern and improved filtering efficiency
+ * - Uses server-side filtering for province and price when available
+ * - Implements proper pagination with awareness of client-side filtering
+ * - Fetches larger batches intelligently based on filter complexity
  */
 export function useFilteredTherapists(
   searchQuery: string,
@@ -110,101 +116,150 @@ export function useFilteredTherapists(
 ) {
   const { page = 1, pageSize = 20, advancedFilters, ...searchParams } = params;
   
+  // Build server-side filter parameters from advanced filters
+  const serverSideParams = React.useMemo(() => {
+    const baseParams = { ...searchParams };
+    
+    if (advancedFilters) {
+      // Use server-side province filter if available
+      if (advancedFilters.location) {
+        baseParams.province = advancedFilters.location;
+      }
+      
+      // Use server-side price filter if available  
+      if (advancedFilters.priceRange?.max && advancedFilters.priceRange.max < 1000) {
+        baseParams.maxHourlyRate = advancedFilters.priceRange.max;
+      }
+    }
+    
+    return baseParams;
+  }, [searchParams, advancedFilters]);
+
+  // Determine how much data to fetch based on filter complexity
+  // More complex filters = need more data to ensure we have enough results after filtering
+  const fetchLimit = React.useMemo(() => {
+    const hasClientSideFilters = 
+      searchQuery || 
+      filter !== "All" || 
+      (advancedFilters && (
+        advancedFilters.specialties.length > 0 ||
+        advancedFilters.rating > 0 ||
+        advancedFilters.experienceLevel?.min > 0 ||
+        advancedFilters.languages.length > 0 ||
+        Object.values(advancedFilters.availability || {}).some(Boolean)
+      ));
+    
+    // Fetch larger batches if we need client-side filtering, but not excessively
+    return hasClientSideFilters ? Math.min(pageSize * 2, 50) : pageSize;
+  }, [pageSize, searchQuery, filter, advancedFilters]);
+
   const { therapists, isLoading, error, refetch, totalCount, userConditions, matchCriteria } = useTherapistCards({
-    ...searchParams,
-    limit: pageSize * 3, // Fetch more data to handle client-side filtering
+    ...serverSideParams,
+    limit: fetchLimit,
   });
 
-  // Client-side filtering logic
-  const filteredTherapists = therapists.filter((therapist) => {
-    // Basic search filter
-    const matchesSearch =
-      searchQuery === "" ||
-      therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      therapist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      therapist.specialties.some((specialty) =>
-        specialty.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-    // Basic category filter
-    const matchesFilter =
-      filter === "All" ||
-      therapist.specialties.some((specialty) => specialty === filter);
-
-    // Advanced filters application
-    if (advancedFilters) {
-      // Specialties filter
-      if (advancedFilters.specialties.length > 0) {
-        const hasMatchingSpecialty = advancedFilters.specialties.some(filterSpecialty =>
-          therapist.specialties.some(therapistSpecialty =>
-            therapistSpecialty.toLowerCase().includes(filterSpecialty.toLowerCase())
-          )
+  // Memoized client-side filtering logic to avoid unnecessary recalculations
+  const filteredTherapists = React.useMemo(() => {
+    return therapists.filter((therapist) => {
+      // Basic search filter
+      const matchesSearch =
+        searchQuery === "" ||
+        therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        therapist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        therapist.specialties.some((specialty) =>
+          specialty.toLowerCase().includes(searchQuery.toLowerCase())
         );
-        if (!hasMatchingSpecialty) return false;
-      }
 
-      // Price range filter
-      const therapistPrice = parseFloat(therapist.sessionPrice.replace('$', ''));
-      if (therapistPrice < advancedFilters.priceRange.min || 
-          therapistPrice > advancedFilters.priceRange.max) {
-        return false;
-      }
+      // Basic category filter
+      const matchesFilter =
+        filter === "All" ||
+        therapist.specialties.some((specialty) => specialty === filter);
 
-      // Location filter
-      if (advancedFilters.location && therapist.location) {
-        if (!therapist.location.toLowerCase().includes(advancedFilters.location.toLowerCase())) {
+      // Advanced filters application (only those not handled server-side)
+      if (advancedFilters) {
+        // Specialties filter (client-side)
+        if (advancedFilters.specialties.length > 0) {
+          const hasMatchingSpecialty = advancedFilters.specialties.some(filterSpecialty =>
+            therapist.specialties.some(therapistSpecialty =>
+              therapistSpecialty.toLowerCase().includes(filterSpecialty.toLowerCase())
+            )
+          );
+          if (!hasMatchingSpecialty) return false;
+        }
+
+        // Price range filter (client-side for min price, server handles max)
+        if (advancedFilters.priceRange?.min > 0) {
+          const therapistPrice = parseFloat(therapist.sessionPrice.replace('$', ''));
+          if (therapistPrice < advancedFilters.priceRange.min) {
+            return false;
+          }
+        }
+
+        // Location filter (client-side refinement of server-side filter)
+        if (advancedFilters.location && therapist.location) {
+          if (!therapist.location.toLowerCase().includes(advancedFilters.location.toLowerCase())) {
+            return false;
+          }
+        }
+
+        // Rating filter (client-side)
+        if (advancedFilters.rating > 0 && therapist.rating < advancedFilters.rating) {
           return false;
+        }
+
+        // Experience filter (client-side)
+        if (advancedFilters.experienceLevel) {
+          if (therapist.experience < advancedFilters.experienceLevel.min || 
+              therapist.experience > advancedFilters.experienceLevel.max) {
+            return false;
+          }
+        }
+
+        // Language filter (client-side)
+        if (advancedFilters.languages.length > 0 && therapist.languages) {
+          const hasMatchingLanguage = advancedFilters.languages.some(filterLang =>
+            therapist.languages?.some((therapistLang: string) =>
+              therapistLang.toLowerCase().includes(filterLang.toLowerCase())
+            )
+          );
+          if (!hasMatchingLanguage) return false;
+        }
+
+        // Availability filter (client-side)
+        if (advancedFilters.availability && Object.values(advancedFilters.availability).some(Boolean)) {
+          if (!therapist.isActive) return false;
         }
       }
 
-      // Rating filter
-      if (advancedFilters.rating > 0 && therapist.rating < advancedFilters.rating) {
-        return false;
-      }
+      return matchesSearch && matchesFilter;
+    });
+  }, [therapists, searchQuery, filter, advancedFilters]);
 
-      // Experience filter
-      if (therapist.experience < advancedFilters.experienceLevel.min || 
-          therapist.experience > advancedFilters.experienceLevel.max) {
-        return false;
-      }
-
-      // Language filter
-      if (advancedFilters.languages.length > 0 && therapist.languages) {
-        const hasMatchingLanguage = advancedFilters.languages.some(filterLang =>
-          therapist.languages?.some((therapistLang: string) =>
-            therapistLang.toLowerCase().includes(filterLang.toLowerCase())
-          )
-        );
-        if (!hasMatchingLanguage) return false;
-      }
-
-      // Availability filter
-      if (Object.values(advancedFilters.availability).some(Boolean)) {
-        if (!therapist.isActive) return false;
-      }
-    }
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Client-side pagination
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedTherapists = filteredTherapists.slice(startIndex, endIndex);
-  
-  const totalFilteredCount = filteredTherapists.length;
-  const totalPages = Math.ceil(totalFilteredCount / pageSize);
-  const hasNextPage = page < totalPages;
-  const hasPreviousPage = page > 1;
+  // Client-side pagination with proper bounds checking
+  const paginationData = React.useMemo(() => {
+    const totalFilteredCount = filteredTherapists.length;
+    const totalPages = Math.ceil(totalFilteredCount / pageSize);
+    const safePage = Math.min(Math.max(1, page), Math.max(1, totalPages));
+    
+    const startIndex = (safePage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedTherapists = filteredTherapists.slice(startIndex, endIndex);
+    
+    return {
+      therapists: paginatedTherapists,
+      totalCount: totalFilteredCount,
+      totalPages,
+      currentPage: safePage,
+      hasNextPage: safePage < totalPages,
+      hasPreviousPage: safePage > 1,
+      // Indicate if we might have more results on the server
+      mayHaveMoreResults: filteredTherapists.length >= fetchLimit && totalPages <= 1,
+    };
+  }, [filteredTherapists, page, pageSize, fetchLimit]);
 
   return {
-    therapists: paginatedTherapists,
-    totalCount: totalFilteredCount,
-    totalPages,
-    currentPage: page,
+    ...paginationData,
     pageSize,
-    hasNextPage,
-    hasPreviousPage,
     userConditions,
     matchCriteria,
     isLoading,

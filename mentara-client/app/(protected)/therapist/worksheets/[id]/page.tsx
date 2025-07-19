@@ -5,20 +5,27 @@ import { useRouter } from "next/navigation";
 import TherapistTaskDetailPage from "@/components/worksheets/TherapistTaskDetailPage";
 import { Task } from "@/components/worksheets/types";
 import { useApi } from "@/lib/api";
+import { use } from "react";
 
 interface WorksheetDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function WorksheetDetailPage({
   params,
 }: WorksheetDetailPageProps) {
+  const { id } = use(params);
+  
+  return <WorksheetDetailClient worksheetId={id} />;
+}
+
+function WorksheetDetailClient({ worksheetId }: { worksheetId: string }) {
   const router = useRouter();
   const api = useApi();
   
-  const [task, setTask] = useState<Task | null>(null);
+  const [task, setTask] = useState<Task | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,24 +36,41 @@ export default function WorksheetDetailPage({
         setIsLoading(true);
         setError(null);
 
-        // Call the API to get worksheet details
-        const worksheet = await api.therapists.worksheets.getById(params.id);
+        // Call the API to get worksheet details with assignment and submission data
+        const data = await api.therapists.worksheets.getById(worksheetId);
 
         // Transform API data to match Task interface
         const transformedTask: Task = {
-          id: worksheet.id,
-          title: worksheet.title,
-          patientName: worksheet.client?.user?.firstName && worksheet.client?.user?.lastName 
-            ? `${worksheet.client.user.firstName} ${worksheet.client.user.lastName}`
-            : "Unknown Patient",
-          date: worksheet.createdAt,
-          status: worksheet.status || "assigned",
-          isCompleted: worksheet.status === "completed",
-          instructions: worksheet.instructions || "",
-          materials: worksheet.materials || [],
-          myWork: worksheet.submissions || [],
-          submittedAt: worksheet.submittedAt,
-          feedback: worksheet.feedback || "",
+          id: data.worksheet.id,
+          title: data.worksheet.title,
+          patientName: data.assignment?.clientName || "Unassigned",
+          date: data.assignment?.assignedAt || data.worksheet.createdAt,
+          status: data.assignment?.status || "assigned",
+          isCompleted: data.assignment?.status === "completed" || Boolean(data.submission?.submittedAt),
+          instructions: data.worksheet.description || "",
+          materials: data.worksheet.content ? [
+            {
+              id: `content_${data.worksheet.id}`,
+              type: "content",
+              title: "Worksheet Content",
+              description: data.worksheet.content,
+              url: "",
+            }
+          ] : [],
+          myWork: data.submission ? [
+            {
+              id: data.submission.id,
+              type: "submission",
+              title: "Client Submission",
+              content: JSON.stringify(data.submission.responses, null, 2),
+              submittedAt: data.submission.submittedAt,
+              feedback: data.submission.feedback,
+              score: data.submission.score,
+              url: "",
+            }
+          ] : [],
+          submittedAt: data.submission?.submittedAt,
+          feedback: data.submission?.feedback || "",
         };
 
         setTask(transformedTask);
@@ -59,7 +83,7 @@ export default function WorksheetDetailPage({
     }
 
     fetchWorksheetDetails();
-  }, [params.id, api.therapists.worksheets]);
+  }, [worksheetId, api.therapists.worksheets]);
 
   const handleBack = () => {
     router.push("/therapist/worksheets");

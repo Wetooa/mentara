@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+
 import { FileAttachment, AttachedFile } from "@/components/attachments/FileAttachment";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -166,7 +166,7 @@ export function WorksheetSubmission({
       const allAttachments = Object.values(attachments).flat();
       await onSubmit(responseArray, allAttachments);
       toast.success("Worksheet submitted successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit worksheet");
     } finally {
       setIsSubmitting(false);
@@ -180,7 +180,7 @@ export function WorksheetSubmission({
       const allAttachments = Object.values(attachments).flat();
       await onSaveDraft(responseArray, allAttachments);
       toast.success("Draft saved successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save draft");
     } finally {
       setIsSaving(false);

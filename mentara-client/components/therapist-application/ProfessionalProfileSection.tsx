@@ -6,7 +6,6 @@ import { CheckCircle, Users, Shield } from "lucide-react";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,9 +22,15 @@ import {
 // Constants
 import { therapistProfileFormFields } from "@/constants/therapist_application";
 
+// Types
+import { 
+  TherapistApplicationFormData, 
+  TherapistApplicationWatchedValues 
+} from "@/types/therapist-application";
+
 interface ProfessionalProfileSectionProps {
-  form: UseFormReturn<any>;
-  watchedValues: any;
+  form: UseFormReturn<TherapistApplicationFormData>;
+  watchedValues: TherapistApplicationWatchedValues;
 }
 
 export const ProfessionalProfileSection = memo(function ProfessionalProfileSection({
@@ -488,7 +493,7 @@ export const ProfessionalProfileSection = memo(function ProfessionalProfileSecti
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold">
-                    Are you willing to abide by our platform's ethical
+                    Are you willing to abide by our platform&apos;s ethical
                     guidelines, privacy policies, and patient safety standards?{" "}
                     <span className="text-red-500">*</span>
                   </FormLabel>

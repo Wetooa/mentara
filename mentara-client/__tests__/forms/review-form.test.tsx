@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { renderWithQueryClient } from '@/__tests__/setup/form-test-utils'
 import { zodTestUtils } from '@/__tests__/setup/zod-test-utils'
 import { reviewFormMockData } from '@/__tests__/setup/form-mocks'
-import ReviewForm from '@/components/reviews/ReviewForm'
+import { ReviewForm } from '@/components/reviews/ReviewForm'
 import { z } from 'zod'
 
 // Mock dependencies

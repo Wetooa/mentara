@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { MeetingRoom } from "@/components/meeting/MeetingRoom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,20 @@ import {
 import { useApi } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { use } from "react";
 
-export default function MeetingPage() {
-  const params = useParams();
+interface MeetingPageProps {
+  params: Promise<{ meetingId: string }>;
+}
+
+export default function MeetingPage({ params }: MeetingPageProps) {
+  const { meetingId } = use(params);
+  
+  return <MeetingPageClient meetingId={meetingId} />;
+}
+
+function MeetingPageClient({ meetingId }: { meetingId: string }) {
   const router = useRouter();
-  const meetingId = params.meetingId as string;
   const api = useApi();
 
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -181,7 +190,7 @@ export default function MeetingPage() {
               <div className="text-sm">
                 <strong>Participants:</strong>
                 <div className="mt-1 space-y-1">
-                  <div>• {meeting.therapist?.user.firstName} {meeting.therapist?.user.lastName} (Therapist)</div>
+                  <div>• {meeting.therapist?.firstName} {meeting.therapist?.lastName} (Therapist)</div>
                   <div>• {meeting.client?.user.firstName} {meeting.client?.user.lastName} (Client)</div>
                 </div>
               </div>

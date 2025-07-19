@@ -103,14 +103,14 @@ export default function AdminAnalyticsPage() {
     {
       title: "Total Users",
       value: stats.totalUsers?.toLocaleString() || "0",
-      change: `+${growth.growthRate}%`,
+      change: `+${Array.isArray(growth) ? '0' : growth.growthRate}%`,
       trend: "up",
       icon: <Users className="h-5 w-5 text-blue-500" />,
       description: "All registered users",
     },
     {
       title: "Active Users",
-      value: stats.activeUsers?.toLocaleString() || "0",
+      value: (stats as typeof stats & { activeUsers?: number }).activeUsers?.toLocaleString() || "0",
       change: "+8.2%",
       trend: "up", 
       icon: <UserCheck className="h-5 w-5 text-green-500" />,
@@ -134,7 +134,7 @@ export default function AdminAnalyticsPage() {
     },
     {
       title: "Monthly Revenue",
-      value: `$${stats.totalRevenue?.toLocaleString() || "0"}`,
+      value: `$${(stats as typeof stats & { totalRevenue?: number }).totalRevenue?.toLocaleString() || "0"}`,
       change: "+22.8%",
       trend: "up",
       icon: <DollarSign className="h-5 w-5 text-green-600" />,
@@ -142,7 +142,7 @@ export default function AdminAnalyticsPage() {
     },
     {
       title: "Avg Session Duration",
-      value: `${stats.averageSessionDuration || 0} min`,
+      value: `${(stats as typeof stats & { averageSessionDuration?: number }).averageSessionDuration || 0} min`,
       change: "+3.2%",
       trend: "up",
       icon: <LineChart className="h-5 w-5 text-blue-600" />,
@@ -153,25 +153,25 @@ export default function AdminAnalyticsPage() {
   const engagementMetrics = [
     {
       title: "User Retention Rate",
-      value: `${stats.userRetentionRate || 0}%`,
+      value: `${(stats as typeof stats & { userRetentionRate?: number }).userRetentionRate || 0}%`,
       description: "30-day retention",
       color: "text-green-600",
     },
     {
       title: "Therapist Utilization",
-      value: `${stats.therapistUtilizationRate || 0}%`,
+      value: `${(stats as typeof stats & { therapistUtilizationRate?: number }).therapistUtilizationRate || 0}%`,
       description: "Active therapist ratio",
       color: "text-blue-600",
     },
     {
       title: "Worksheet Completion",
-      value: `${engagementData.worksheetCompletionRate || 0}%`,
+      value: `${(engagementData as typeof engagementData & { worksheetCompletionRate?: number }).worksheetCompletionRate || 0}%`,
       description: "Assignment completion rate",
       color: "text-purple-600",
     },
     {
       title: "Average Rating",
-      value: `${engagementData.averageRating || 0}/5.0`,
+      value: `${(engagementData as typeof engagementData & { averageRating?: number }).averageRating || 0}/5.0`,
       description: "Therapist ratings",
       color: "text-yellow-600",
     },
@@ -277,11 +277,11 @@ export default function AdminAnalyticsPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">New users ({timeRange} days)</span>
-                      <span className="font-semibold">{growth.totalGrowth}</span>
+                      <span className="font-semibold">{(growth as typeof growth & { totalGrowth?: number }).totalGrowth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Growth rate</span>
-                      <Badge className="bg-green-100 text-green-800">+{growth.growthRate}%</Badge>
+                      <Badge className="bg-green-100 text-green-800">+{(growth as typeof growth & { growthRate?: number }).growthRate || 0}%</Badge>
                     </div>
                     <div className="h-24 bg-gray-50 rounded flex items-center justify-center">
                       <BarChart3 className="h-8 w-8 text-gray-400" />
@@ -302,15 +302,15 @@ export default function AdminAnalyticsPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Daily messages</span>
-                      <span className="font-semibold">{engagementData.averageMessagesPerDay}</span>
+                      <span className="font-semibold">{(engagementData as typeof engagementData & { averageMessagesPerDay?: number }).averageMessagesPerDay || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Community posts/day</span>
-                      <span className="font-semibold">{engagementData.communityPostsPerDay}</span>
+                      <span className="font-semibold">{(engagementData as typeof engagementData & { communityPostsPerDay?: number }).communityPostsPerDay || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Avg response time</span>
-                      <Badge variant="outline">{engagementData.responseTime}h</Badge>
+                      <Badge variant="outline">{(engagementData as typeof engagementData & { responseTime?: number }).responseTime || 0}h</Badge>
                     </div>
                     <div className="h-24 bg-gray-50 rounded flex items-center justify-center">
                       <PieChart className="h-8 w-8 text-gray-400" />

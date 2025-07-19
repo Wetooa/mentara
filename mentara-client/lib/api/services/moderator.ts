@@ -7,7 +7,6 @@ import {
   Post,
   Comment,
   ModerationReport,
-  ContentModerationAction,
   ModeratorDashboardStats,
   ContentModerationParams,
   UserModerationParams,
@@ -36,7 +35,7 @@ export interface ModeratorService {
   users: {
     getFlagged(params?: UserModerationParams): Promise<{ users: User[]; total: number }>;
     moderate(userId: string, data: ModerateUserRequest): Promise<{ success: boolean; message: string }>;
-    getHistory(userId: string): Promise<{ actions: any[]; reports: any[] }>;
+    getHistory(userId: string): Promise<{ actions: ModerationAction[]; reports: ModerationReport[] }>;  
   };
   
   // Audit Logs
@@ -116,7 +115,7 @@ export const createModeratorService = (client: AxiosInstance): ModeratorService 
       }
     },
 
-    getHistory: (userId: string): Promise<{ actions: any[]; reports: any[] }> =>
+    getHistory: (userId: string): Promise<{ actions: ModerationAction[]; reports: ModerationReport[] }> =>
       client.get(`/admin/users/${userId}/moderation-history`),
   },
 

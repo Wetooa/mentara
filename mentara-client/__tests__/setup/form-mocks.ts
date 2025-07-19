@@ -52,7 +52,7 @@ export const therapistApplicationMockData = {
     // Insurance Information
     acceptsInsurance: true,
     acceptedInsuranceTypes: ['hmo-a', 'hmo-b'],
-    sessionLength: '50-minutes',
+    sessionDuration: 50,
 
     // Bio/About
     bio: 'Experienced clinical psychologist specializing in anxiety and depression treatment using evidence-based approaches.',

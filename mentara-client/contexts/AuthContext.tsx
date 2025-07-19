@@ -43,6 +43,9 @@ export interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<boolean>;
   clearAuth: () => void;
+  signInWithOAuth: (provider: 'oauth_google' | 'oauth_microsoft') => Promise<void>;
+  handleOAuthCallback: (token: string) => Promise<void>;
+  isLoaded: boolean;
 }
 
 // Secure token storage utilities (exported for use in API client)
@@ -269,7 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Try to refresh the token
         try {
-          const tokenData = await authAPI.refreshToken(refreshToken);
+          const tokenData = await authAPI.refreshToken();
           SecureTokenStorage.setAccessToken(tokenData.accessToken);
           
           // Get updated user data
@@ -327,7 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       // Redirect based on user role
-      const dashboardPath = `/app/${user.role}`;
+      const dashboardPath = user.role === 'client' ? '/user' : `/${user.role}`;
       router.push(dashboardPath);
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -354,7 +357,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       // Redirect to appropriate dashboard
-      const dashboardPath = `/app/${user.role}`;
+      const dashboardPath = user.role === 'client' ? '/user' : `/${user.role}`;
       router.push(dashboardPath);
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -387,7 +390,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authAPI.logout();
 
     clearAuth();
-    router.push('/auth/sign-in');
+    router.push('/client/sign-in');
+  };  const signInWithOAuth = async (provider: 'oauth_google' | 'oauth_microsoft') => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
+      // Get the API URL from environment
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
+      // Determine the OAuth endpoint based on provider
+      const oauthEndpoint = provider === 'oauth_google' ? '/auth/google' : '/auth/microsoft';
+      
+      // Store the current intended role (default to client)
+      // This could be enhanced to support role selection in the future
+      const role = 'client';
+      
+      // Redirect to OAuth provider with state parameter for role
+      const oauthUrl = `${apiUrl}${oauthEndpoint}?state=${role}`;
+      window.location.href = oauthUrl;
+      
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      console.error('OAuth initiation failed:', error);
+      throw error;
+    }
+  };
+
+  const handleOAuthCallback = async (token: string) => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
+      // Decode the token to get user information
+      const decoded = decodeJWT(token);
+      if (!decoded) {
+        throw new Error('Invalid token received from OAuth callback');
+      }
+      
+      // Store the access token
+      SecureTokenStorage.setAccessToken(token);
+      
+      // Get user data from the token or fetch from API
+      const userData = await authAPI.getCurrentUser(token);
+      SecureTokenStorage.setUser(userData);
+      
+      setAuthState({
+        user: userData,
+        accessToken: token,
+        refreshToken: null, // Refresh tokens are handled via HttpOnly cookies
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      
+      // OAuth callback is handled by individual pages, so we don't redirect here
+      
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      console.error('OAuth callback handling failed:', error);
+      throw error;
+    }
   };
 
   const clearAuth = () => {
@@ -408,6 +468,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refreshAccessToken,
     clearAuth,
+    signInWithOAuth,
+    handleOAuthCallback,
+    isLoaded: !authState.isLoading,
   };
 
   return (

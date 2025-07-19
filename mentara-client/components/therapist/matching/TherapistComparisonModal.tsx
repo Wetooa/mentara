@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -19,7 +19,6 @@ import {
   Compare,
   Star,
   MapPin,
-  Clock,
   DollarSign,
   Calendar,
   Video,
@@ -28,7 +27,6 @@ import {
   Award,
   Heart,
   CheckCircle,
-  X,
   ArrowRight,
   MessageCircle
 } from 'lucide-react';
@@ -111,7 +109,7 @@ export function TherapistComparisonModal({
   maxComparisons = 3,
   className
 }: TherapistComparisonModalProps) {
-  const [selectedTherapists, setSelectedTherapists] = useState<string[]>([]);
+  const [selectedTherapists] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('overview');
 
   const limitedTherapists = therapists.slice(0, maxComparisons);

@@ -29,9 +29,31 @@ import {
   UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Post } from "@/types/api/communities";
 import { useCommunityPage } from "@/hooks/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
-import type { Post } from "@/types/api/communities";
+
+
+// Local interface for post data with all required properties
+interface PostData {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+    role?: string;
+  };
+  hearts: Array<{id: string; userId: string}>;
+  comments: Array<{id: string}>;
+  _count: {
+    hearts: number;
+    comments: number;
+  };
+}
 
 export default function TherapistCommunity() {
   const {
@@ -106,7 +128,7 @@ export default function TherapistCommunity() {
                 <div className="bg-white p-3 rounded-lg shadow-sm">
                   <Users className="h-5 w-5 text-indigo-600 mx-auto mb-1" />
                   <p className="font-medium">Therapists Online</p>
-                  <p className="text-neutral-500">{communityStats?.activeTherapists || 0}</p>
+                  <p className="text-neutral-500">{communityStats?.totalMembers || 0}</p>
                 </div>
               </div>
             </div>
@@ -282,7 +304,7 @@ export default function TherapistCommunity() {
                 ) : (
                   // Posts list
                   <div className="space-y-6">
-                    {postsData.posts.map((post: Post) => (
+                    {(postsData.posts as unknown as PostData[]).map((post: PostData) => (
                       <Card key={post.id} className="hover:shadow-md transition-shadow">
                         <CardHeader>
                           <div className="flex items-center gap-3">
@@ -297,7 +319,7 @@ export default function TherapistCommunity() {
                                 <h3 className="font-medium text-neutral-800">
                                   {post.user.firstName} {post.user.lastName}
                                 </h3>
-                                {post.user.role === 'therapist' && (
+                                {post.user?.role === 'therapist' && (
                                   <Badge variant="secondary" className="text-xs">
                                     <Stethoscope className="h-3 w-3 mr-1" />
                                     Therapist
@@ -325,14 +347,14 @@ export default function TherapistCommunity() {
                           
                           <div className="flex items-center gap-6 text-sm mb-4">
                             <button
-                              onClick={() => handleHeartPost(post)}
+                              onClick={() => handleHeartPost(post as unknown as Post)}
                               className={cn(
                                 "flex items-center gap-2 hover:text-red-500 transition-colors",
-                                isPostHearted(post) && "text-red-500"
+                                isPostHearted(post as unknown as Post) && "text-red-500"
                               )}
                               disabled={heartPostMutation.isPending}
                             >
-                              <Heart className={cn("h-4 w-4", isPostHearted(post) && "fill-current")} />
+                              <Heart className={cn("h-4 w-4", isPostHearted(post as unknown as Post) && "fill-current")} />
                               <span>{post._count.hearts}</span>
                             </button>
                             

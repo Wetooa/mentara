@@ -24,7 +24,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
     refetch,
   } = useQuery({
     queryKey: queryKeys.booking.slots(therapistId, date),
-    queryFn: () => api.booking.getAvailableSlots(therapistId, date),
+    queryFn: () => api.booking.availability.getSlots(therapistId, date),
     enabled: !!(therapistId && date),
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
@@ -76,7 +76,7 @@ export function useMultiDateSlots(therapistId: string, dates: string[]) {
 
   const queries = dates.map(date => ({
     queryKey: queryKeys.booking.slots(therapistId, date),
-    queryFn: () => api.booking.getAvailableSlots(therapistId, date),
+    queryFn: () => api.booking.availability.getSlots(therapistId, date),
     enabled: !!(therapistId && date),
     staleTime: 1000 * 60 * 5,
   }));

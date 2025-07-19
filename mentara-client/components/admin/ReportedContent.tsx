@@ -137,13 +137,17 @@ export function ReportedContent() {
   const [selectedReport, setSelectedReport] = useState<{
     id: string;
     type: string;
-    title?: string;
-    content: string;
-    reportedBy: string;
-    reportReason: string;
-    reportDate: string;
+    reportedItemId: string;
+    reporterName: string;
+    reporterId: string;
+    reportedUserName: string;
+    reportedUserId: string;
+    reason: string;
+    description: string;
+    dateReported: string;
     status: string;
-    community?: string;
+    content: string;
+    reportedUserIsTherapist: boolean;
   } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);

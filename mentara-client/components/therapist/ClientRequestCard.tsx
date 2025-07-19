@@ -238,7 +238,7 @@ export function ClientRequestCard({
         )}
 
         {/* Preferred Session Details */}
-        {(request.preferredSchedule || request.sessionType || request.sessionLength) && (
+        {(request.preferredSchedule || request.sessionType || request.sessionDuration) && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-blue-50/50 rounded-lg">
             {request.preferredSchedule && (
               <div className="text-sm">
@@ -252,10 +252,10 @@ export function ClientRequestCard({
                 <p className="text-blue-700">{request.sessionType}</p>
               </div>
             )}
-            {request.sessionLength && (
+            {request.sessionDuration && (
               <div className="text-sm">
-                <span className="font-medium text-blue-800">Session Length:</span>
-                <p className="text-blue-700">{request.sessionLength} minutes</p>
+                <span className="font-medium text-blue-800">Session Duration:</span>
+                <p className="text-blue-700">{request.sessionDuration} min</p>
               </div>
             )}
           </div>

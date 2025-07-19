@@ -1,16 +1,5 @@
 import { AxiosInstance } from "axios";
 import {
-  ClientOnboardingDto,
-  OnboardingProgress,
-  CompleteStepDto,
-  UpdateOnboardingDataDto,
-  UpdateClientDto,
-  User,
-  CreatePreAssessmentDto,
-  ProcessAssessmentDto,
-  SendTherapistRequestDto,
-  ClientRequestResponse,
-  CreateTherapyProgressDto,
   // Client-specific data structures
   ClientProfile,
   ClientProgress,

@@ -28,6 +28,53 @@ export type {
 
 // Using types from mentara-commons for consistency
 
+// Additional local types for availability management
+interface AvailabilitySlot {
+  id: string;
+  therapistId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+  isRecurring: boolean;
+  recurringPattern?: {
+    frequency: 'daily' | 'weekly' | 'monthly';
+    interval: number;
+    endDate?: string;
+  };
+  exceptions?: Array<{
+    date: string;
+    isAvailable: boolean;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AvailabilityCreateRequest {
+  date: string;
+  startTime: string;
+  endTime: string;
+  isRecurring?: boolean;
+  recurringPattern?: {
+    frequency: 'daily' | 'weekly' | 'monthly';
+    interval: number;
+    endDate?: string;
+  };
+}
+
+interface AvailabilityUpdateRequest {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  isAvailable?: boolean;
+  isRecurring?: boolean;
+  recurringPattern?: {
+    frequency: 'daily' | 'weekly' | 'monthly';
+    interval: number;
+    endDate?: string;
+  };
+}
+
 // Booking service factory
 export const createBookingService = (client: AxiosInstance) => ({
   // Meeting management
@@ -41,7 +88,7 @@ export const createBookingService = (client: AxiosInstance) => ({
     // Get meetings list with optional filters
     getList: async (params: MeetingListParams = {}): Promise<MeetingListResponse> => {
       const validatedParams = MeetingListParamsSchema.parse(params);
-      return client.post('/booking/meetings/list', validatedParams);
+      return client.get('/booking/meetings', { params: validatedParams });
     },
 
     // Get all meetings for current user
@@ -68,19 +115,19 @@ export const createBookingService = (client: AxiosInstance) => ({
     // Get available slots for a therapist on a specific date
     getSlots: async (therapistId: string, date: string): Promise<AvailableSlot[]> => {
       const validatedParams = GetAvailableSlotsQueryDtoSchema.parse({ therapistId, date });
-      return client.post('/booking/slots', validatedParams);
+      return client.get('/booking/slots', { params: validatedParams });
     },
 
     // Create availability slot (therapist only)
-    create: (data: any): Promise<any> =>
+    create: (data: AvailabilityCreateRequest): Promise<AvailabilitySlot> =>
       client.post('/booking/availability', data),
 
     // Get therapist's availability
-    get: (): Promise<any[]> =>
+    get: (): Promise<AvailabilitySlot[]> =>
       client.get('/booking/availability'),
 
     // Update availability slot
-    update: (id: string, data: any): Promise<any> =>
+    update: (id: string, data: AvailabilityUpdateRequest): Promise<AvailabilitySlot> =>
       client.put(`/booking/availability/${id}`, data),
 
     // Delete availability slot
@@ -95,7 +142,5 @@ export const createBookingService = (client: AxiosInstance) => ({
       client.get('/booking/durations'),
   },
 });
-
-export type BookingService = ReturnType<typeof createBookingService>;
 
 export type BookingService = ReturnType<typeof createBookingService>;

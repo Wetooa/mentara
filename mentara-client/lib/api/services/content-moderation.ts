@@ -1,8 +1,5 @@
 import { AxiosInstance } from 'axios';
 import {
-  Post,
-  Comment,
-  User,
   ModerationReport,
   FlaggedContent,
   ModerationAction,
@@ -11,6 +8,42 @@ import {
   BulkModerationRequest,
   ReportSubmission,
 } from '@mentara/commons';
+
+// Additional types for content moderation
+interface AutoModerationRule {
+  id: string;
+  type: 'keyword' | 'spam' | 'hate_speech' | 'violence' | 'explicit_content';
+  pattern: string;
+  severity: 'low' | 'medium' | 'high';
+  action: 'flag' | 'remove' | 'quarantine';
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ContentContext {
+  author: {
+    id: string;
+    name: string;
+    role: string;
+    reputation: number;
+  };
+  community?: {
+    id: string;
+    name: string;
+    type: string;
+  };
+  relatedContent?: {
+    replies: number;
+    likes: number;
+    reports: number;
+  };
+  metadata: {
+    createdAt: string;
+    lastModified: string;
+    flaggedAt?: string;
+  };
+}
 
 export interface ContentModerationService {
   // Content Management
@@ -32,11 +65,11 @@ export interface ContentModerationService {
   getModerationHistory(filters?: { moderatorId?: string; limit?: number; offset?: number }): Promise<{ actions: ModerationAction[]; total: number }>;
   
   // Automated Moderation
-  getAutoModerationRules(): Promise<{ rules: any[]; enabled: boolean }>;
-  updateAutoModerationRules(rules: any[]): Promise<{ success: boolean }>;
+  getAutoModerationRules(): Promise<{ rules: AutoModerationRule[]; enabled: boolean }>;
+  updateAutoModerationRules(rules: AutoModerationRule[]): Promise<{ success: boolean }>;
   
   // Content Preview
-  getContentPreview(contentType: 'post' | 'comment', contentId: string): Promise<{ content: FlaggedContent; context: any }>;
+  getContentPreview(contentType: 'post' | 'comment', contentId: string): Promise<{ content: FlaggedContent; context: ContentContext }>;
 }
 
 export const createContentModerationService = (client: AxiosInstance): ContentModerationService => ({
@@ -127,13 +160,13 @@ export const createContentModerationService = (client: AxiosInstance): ContentMo
   },
 
   // Automated Moderation
-  getAutoModerationRules: (): Promise<{ rules: any[]; enabled: boolean }> =>
+  getAutoModerationRules: (): Promise<{ rules: AutoModerationRule[]; enabled: boolean }> =>
     client.get('/admin/moderation/auto-rules'),
 
-  updateAutoModerationRules: (rules: any[]): Promise<{ success: boolean }> =>
+  updateAutoModerationRules: (rules: AutoModerationRule[]): Promise<{ success: boolean }> =>
     client.put('/admin/moderation/auto-rules', { rules }),
 
   // Content Preview
-  getContentPreview: (contentType: 'post' | 'comment', contentId: string): Promise<{ content: FlaggedContent; context: any }> =>
+  getContentPreview: (contentType: 'post' | 'comment', contentId: string): Promise<{ content: FlaggedContent; context: ContentContext }> =>
     client.get(`/admin/moderation/preview/${contentType}/${contentId}`),
 });

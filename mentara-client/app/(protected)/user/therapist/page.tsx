@@ -6,6 +6,7 @@ import TherapistListing from "@/components/therapist/listing/TherapistListing";
 import MeetingsSection from "@/components/therapist/listing/MeetingsSection";
 import RecommendedSection from "@/components/therapist/listing/RecommendedSection";
 import AdvancedFilters from "@/components/therapist/filters/AdvancedFilters";
+import { TherapistListingErrorWrapper } from "@/components/common/TherapistListingErrorBoundary";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,12 +88,20 @@ export default function TherapistPage() {
         />
       </div>
 
-      {/* Therapist Listings */}
-      <TherapistListing 
-        searchQuery={searchQuery} 
-        filter={selectedFilter} 
-        advancedFilters={filters}
-      />
+      {/* Therapist Listings with Error Boundary */}
+      <TherapistListingErrorWrapper
+        onError={(error, errorInfo) => {
+          // Log error to monitoring service
+          console.error('Therapist listing error:', { error, errorInfo, searchQuery, selectedFilter, filters });
+          // Could integrate with error tracking service here
+        }}
+      >
+        <TherapistListing 
+          searchQuery={searchQuery} 
+          filter={selectedFilter} 
+          advancedFilters={filters}
+        />
+      </TherapistListingErrorWrapper>
 
       {/* Meetings and Recommended Sections placed side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px]">

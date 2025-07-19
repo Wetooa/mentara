@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export default function GoalsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<GoalsFormData>({
-    resolver: zodResolver(goalsSchema),
+    resolver: zodResolver(goalsSchema) as unknown as Resolver<GoalsFormData>,
     defaultValues: {
       treatmentGoals: [],
       specificConcerns: "",

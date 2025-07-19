@@ -1,4 +1,4 @@
-import React from "react";
+
 import { CheckCircle, Clock, AlertTriangle, Circle } from "lucide-react";
 import { Task } from "./types";
 
@@ -122,7 +122,7 @@ export default function WorksheetProgress({
       {/* Progress Steps */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-gray-700">Steps</h4>
-        {progressSteps.map((step, index) => (
+        {progressSteps.map((step) => (
           <div key={step.id} className="flex items-center space-x-3">
             <div
               className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${

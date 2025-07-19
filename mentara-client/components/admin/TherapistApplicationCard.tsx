@@ -67,7 +67,7 @@ export function TherapistApplicationCard({
   };
 
   const yearsOfExperience = therapist.practiceStartDate 
-    ? new Date().getFullYear() - new Date(therapist.practiceStartDate).getFullYear()
+    ? new Date().getFullYear() - new Date(therapist.practiceStartDate as string).getFullYear()
     : 0;
 
   return (
@@ -78,30 +78,34 @@ export function TherapistApplicationCard({
             <div className="flex items-start gap-4">
               <Checkbox
                 checked={isSelected}
-                onCheckedChange={(checked) => onSelect(therapist.userId, !!checked)}
+                onCheckedChange={(checked) => onSelect(therapist.userId as string, !!(checked as boolean))}
                 disabled={isProcessing}
               />
               
               <Avatar className="h-12 w-12">
-                <AvatarImage src={therapist.user?.avatarUrl} />
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <AvatarImage src={(therapist.user as any)?.avatarUrl} />
                 <AvatarFallback>
-                  {therapist.user?.firstName?.[0]}{therapist.user?.lastName?.[0]}
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {(therapist.user as any)?.firstName?.[0]}{(therapist.user as any)?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-semibold text-lg">
-                    {therapist.user?.firstName} {therapist.user?.lastName}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(therapist.user as any)?.firstName} {(therapist.user as any)?.lastName}
                   </h3>
-                  <Badge variant={getStatusBadgeVariant(therapist.status)} className={getStatusColor(therapist.status)}>
-                    {therapist.status?.charAt(0).toUpperCase() + therapist.status?.slice(1)}
+                  <Badge variant={getStatusBadgeVariant(therapist.status as string)} className={getStatusColor(therapist.status as string)}>
+                    {(therapist.status as string)?.charAt(0).toUpperCase() + (therapist.status as string)?.slice(1)}
                   </Badge>
                 </div>
                 
                 <div className="flex items-center gap-2 mb-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{therapist.user?.email}</span>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <span className="text-sm text-muted-foreground">{(therapist.user as any)?.email}</span>
                 </div>
                 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -203,7 +207,7 @@ export function TherapistApplicationCard({
                 <span className="font-medium">Session Length:</span>
               </div>
               <p className="text-muted-foreground">
-                {therapist.sessionLength ? `${therapist.sessionLength} min` : 'Not set'}
+                {therapist.sessionDuration ? `${therapist.sessionDuration} min` : 'Not set'}
               </p>
             </div>
           </div>
@@ -242,14 +246,16 @@ export function TherapistApplicationCard({
         open={showApprovalDialog}
         onClose={() => setShowApprovalDialog(false)}
         onApprove={onApprove}
-        therapistName={`${therapist.user?.firstName} ${therapist.user?.lastName}`}
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        therapistName={`${(therapist.user as any)?.firstName} ${(therapist.user as any)?.lastName}`}
       />
 
       <RejectionDialog
         open={showRejectionDialog}
         onClose={() => setShowRejectionDialog(false)}
         onReject={onReject}
-        therapistName={`${therapist.user?.firstName} ${therapist.user?.lastName}`}
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        therapistName={`${(therapist.user as any)?.firstName} ${(therapist.user as any)?.lastName}`}
       />
     </>
   );

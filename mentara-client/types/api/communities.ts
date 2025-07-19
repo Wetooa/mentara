@@ -64,6 +64,7 @@ export interface Comment {
   postId: string;
   userId: string;
   content: string;
+  parentId?: string;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -71,9 +72,14 @@ export interface Comment {
     firstName: string;
     lastName: string;
     avatarUrl?: string;
+    role?: 'client' | 'therapist' | 'moderator' | 'admin';
   };
   hearts: CommentHeart[];
-  replies: Reply[];
+  children?: Comment[];
+  _count?: {
+    hearts: number;
+    children: number;
+  };
 }
 
 export interface CommentHeart {
@@ -83,20 +89,7 @@ export interface CommentHeart {
   createdAt: string;
 }
 
-export interface Reply {
-  id: string;
-  commentId: string;
-  userId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string;
-  };
-}
+// Reply interface removed - replies are now handled as nested comments via parentId
 
 export interface Membership {
   id: string;
@@ -137,12 +130,10 @@ export interface CreatePostRequest {
 export interface CreateCommentRequest {
   content: string;
   postId: string;
+  parentId?: string;
 }
 
-export interface CreateReplyRequest {
-  content: string;
-  commentId: string;
-}
+// CreateReplyRequest removed - use CreateCommentRequest with parentId instead
 
 export interface PostAttachment {
   id?: string;

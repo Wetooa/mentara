@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,13 +38,12 @@ import {
   Compare,
   Clock,
   DollarSign,
-  X,
   CheckCircle,
   Users,
   ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ShortlistedTherapist {
   id: string;
@@ -77,7 +76,7 @@ interface TherapistShortlistProps {
   onViewProfile: (therapistId: string) => void;
   onBookConsultation: (therapistId: string) => void;
   onCompareTherapists: (therapistIds: string[]) => void;
-  onAddNote: (therapistId: string, note: string) => void;
+
   maxShortlistSize?: number;
   className?: string;
 }
@@ -89,7 +88,6 @@ export function TherapistShortlist({
   onViewProfile,
   onBookConsultation,
   onCompareTherapists,
-  onAddNote,
   maxShortlistSize = 5,
   className
 }: TherapistShortlistProps) {

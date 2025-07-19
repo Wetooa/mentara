@@ -15,7 +15,6 @@ import {
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -44,6 +43,66 @@ interface AdvancedFiltersProps {
   className?: string;
 }
 
+// Input validation helper
+function validateFilters(filters: TherapistFilters): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (!filters || typeof filters !== 'object') {
+    errors.push('Filters must be a valid object');
+    return { isValid: false, errors };
+  }
+  
+  // Validate specialties array
+  if (filters.specialties && !Array.isArray(filters.specialties)) {
+    errors.push('Specialties must be an array');
+  }
+  
+  // Validate price range
+  if (filters.priceRange) {
+    if (typeof filters.priceRange.min !== 'number' || typeof filters.priceRange.max !== 'number') {
+      errors.push('Price range min and max must be numbers');
+    }
+    if (filters.priceRange.min < 0 || filters.priceRange.max < 0) {
+      errors.push('Price range values must be non-negative');
+    }
+    if (filters.priceRange.min > filters.priceRange.max) {
+      errors.push('Price range min cannot be greater than max');
+    }
+  }
+  
+  // Validate experience level
+  if (filters.experienceLevel) {
+    if (typeof filters.experienceLevel.min !== 'number' || typeof filters.experienceLevel.max !== 'number') {
+      errors.push('Experience level min and max must be numbers');
+    }
+    if (filters.experienceLevel.min < 0 || filters.experienceLevel.max < 0) {
+      errors.push('Experience level values must be non-negative');
+    }
+  }
+  
+  // Validate rating
+  if (filters.rating && (typeof filters.rating !== 'number' || filters.rating < 0 || filters.rating > 5)) {
+    errors.push('Rating must be a number between 0 and 5');
+  }
+  
+  return { isValid: errors.length === 0, errors };
+}
+
+// Safe filter access helper
+function safeGetFilterValue<T>(obj: unknown, path: string, defaultValue: T): T {
+  try {
+    const keys = path.split('.');
+    let current = obj;
+    for (const key of keys) {
+      if (current?.[key] === undefined) return defaultValue;
+      current = current[key];
+    }
+    return current ?? defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
 export default function AdvancedFilters({
   filters,
   onChange,
@@ -53,71 +112,190 @@ export default function AdvancedFilters({
   onExpandedChange,
   className = "",
 }: AdvancedFiltersProps) {
-  const [localFilters, setLocalFilters] = useState<TherapistFilters>(filters);
+  // All hooks must be called before any conditional returns
+  const [localFilters, setLocalFilters] = useState<TherapistFilters>(() => {
+    try {
+      return filters;
+    } catch (error) {
+      console.error('Error initializing filters:', error);
+      return DEFAULT_FILTERS;
+    }
+  });
+  const [hasError, setHasError] = useState<string | null>(null);
+
+  // Input validation (after hooks)
+  const validation = validateFilters(filters);
+  if (!validation.isValid) {
+    console.error('AdvancedFilters: Invalid filter props:', validation.errors);
+    return (
+      <Card className={className}>
+        <CardContent className="p-6 text-center">
+          <div className="text-red-600 mb-2">⚠️ Filter Configuration Error</div>
+          <div className="text-sm text-gray-600">
+            There was an issue with the filter settings. Please refresh the page.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const updateFilter = <K extends keyof TherapistFilters>(
     key: K,
     value: TherapistFilters[K]
   ) => {
-    const newFilters = { ...localFilters, [key]: value };
-    setLocalFilters(newFilters);
-    onChange(newFilters);
+    try {
+      if (!key || typeof key !== 'string') {
+        console.error('Invalid filter key:', key);
+        return;
+      }
+      
+      const newFilters = { ...localFilters, [key]: value };
+      
+      // Validate the new filter state
+      const validation = validateFilters(newFilters);
+      if (!validation.isValid) {
+        console.warn('Filter update would create invalid state:', validation.errors);
+        // Don't update if it would create invalid state
+        return;
+      }
+      
+      setLocalFilters(newFilters);
+      onChange(newFilters);
+      setHasError(null); // Clear any previous errors
+    } catch (error) {
+      console.error('Error updating filter:', error, { key, value });
+      setHasError(`Failed to update ${String(key)} filter`);
+    }
   };
 
   const handleReset = () => {
-    setLocalFilters(DEFAULT_FILTERS);
-    onChange(DEFAULT_FILTERS);
-    onReset?.();
+    try {
+      setLocalFilters(DEFAULT_FILTERS);
+      onChange(DEFAULT_FILTERS);
+      onReset?.();
+      setHasError(null);
+    } catch (error) {
+      console.error('Error resetting filters:', error);
+      setHasError('Failed to reset filters');
+    }
   };
 
   const handleApply = () => {
-    onApply?.();
+    try {
+      onApply?.();
+    } catch (error) {
+      console.error('Error applying filters:', error);
+      setHasError('Failed to apply filters');
+    }
   };
 
   const getActiveFilterCount = () => {
-    let count = 0;
-    
-    if (localFilters.specialties.length > 0) count++;
-    if (localFilters.priceRange.min !== DEFAULT_FILTERS.priceRange.min || 
-        localFilters.priceRange.max !== DEFAULT_FILTERS.priceRange.max) count++;
-    if (localFilters.location) count++;
-    if (Object.values(localFilters.availability).some(Boolean)) count++;
-    if (localFilters.insurance.length > 0) count++;
-    if (localFilters.languages.length > 0) count++;
-    if (localFilters.experienceLevel.min !== DEFAULT_FILTERS.experienceLevel.min || 
-        localFilters.experienceLevel.max !== DEFAULT_FILTERS.experienceLevel.max) count++;
-    if (localFilters.rating > 0) count++;
-    
-    return count;
+    try {
+      let count = 0;
+      
+      // Safe access to filter properties with fallbacks
+      const specialties = safeGetFilterValue(localFilters, 'specialties', []);
+      if (Array.isArray(specialties) && specialties.length > 0) count++;
+      
+      const priceMin = safeGetFilterValue(localFilters, 'priceRange.min', DEFAULT_FILTERS.priceRange.min);
+      const priceMax = safeGetFilterValue(localFilters, 'priceRange.max', DEFAULT_FILTERS.priceRange.max);
+      if (priceMin !== DEFAULT_FILTERS.priceRange.min || priceMax !== DEFAULT_FILTERS.priceRange.max) count++;
+      
+      const location = safeGetFilterValue(localFilters, 'location', '');
+      if (location) count++;
+      
+      const availability = safeGetFilterValue(localFilters, 'availability', {});
+      if (typeof availability === 'object' && Object.values(availability).some(Boolean)) count++;
+      
+      const insurance = safeGetFilterValue(localFilters, 'insurance', []);
+      if (Array.isArray(insurance) && insurance.length > 0) count++;
+      
+      const languages = safeGetFilterValue(localFilters, 'languages', []);
+      if (Array.isArray(languages) && languages.length > 0) count++;
+      
+      const expMin = safeGetFilterValue(localFilters, 'experienceLevel.min', DEFAULT_FILTERS.experienceLevel.min);
+      const expMax = safeGetFilterValue(localFilters, 'experienceLevel.max', DEFAULT_FILTERS.experienceLevel.max);
+      if (expMin !== DEFAULT_FILTERS.experienceLevel.min || expMax !== DEFAULT_FILTERS.experienceLevel.max) count++;
+      
+      const rating = safeGetFilterValue(localFilters, 'rating', 0);
+      if (rating > 0) count++;
+      
+      return count;
+    } catch (error) {
+      console.error('Error calculating active filter count:', error);
+      return 0;
+    }
   };
 
   const activeFilterCount = getActiveFilterCount();
 
   const renderFilterSummary = () => {
-    const summaryItems = [];
-    
-    if (localFilters.specialties.length > 0) {
-      summaryItems.push(`${localFilters.specialties.length} specialties`);
-    }
-    if (localFilters.location) {
-      const locationLabel = LOCATION_OPTIONS.find(loc => loc.value === localFilters.location)?.label || localFilters.location;
-      summaryItems.push(locationLabel);
-    }
-    if (localFilters.priceRange.min !== DEFAULT_FILTERS.priceRange.min || 
-        localFilters.priceRange.max !== DEFAULT_FILTERS.priceRange.max) {
-      summaryItems.push(`$${localFilters.priceRange.min}-${localFilters.priceRange.max}`);
-    }
-    if (Object.values(localFilters.availability).some(Boolean)) {
-      const availCount = Object.values(localFilters.availability).filter(Boolean).length;
-      summaryItems.push(`${availCount} time slots`);
-    }
-    if (localFilters.rating > 0) {
-      summaryItems.push(`${localFilters.rating}+ stars`);
-    }
+    try {
+      const summaryItems = [];
+      
+      const specialties = safeGetFilterValue(localFilters, 'specialties', []);
+      if (Array.isArray(specialties) && specialties.length > 0) {
+        summaryItems.push(`${specialties.length} specialties`);
+      }
+      
+      const location = safeGetFilterValue(localFilters, 'location', '');
+      if (location) {
+        try {
+          const locationLabel = LOCATION_OPTIONS.find(loc => loc?.value === location)?.label || location;
+          summaryItems.push(locationLabel);
+        } catch {
+          summaryItems.push(location);
+        }
+      }
+      
+      const priceMin = safeGetFilterValue(localFilters, 'priceRange.min', DEFAULT_FILTERS.priceRange.min);
+      const priceMax = safeGetFilterValue(localFilters, 'priceRange.max', DEFAULT_FILTERS.priceRange.max);
+      if (priceMin !== DEFAULT_FILTERS.priceRange.min || priceMax !== DEFAULT_FILTERS.priceRange.max) {
+        summaryItems.push(`$${priceMin}-${priceMax}`);
+      }
+      
+      const availability = safeGetFilterValue(localFilters, 'availability', {});
+      if (typeof availability === 'object' && Object.values(availability).some(Boolean)) {
+        const availCount = Object.values(availability).filter(Boolean).length;
+        summaryItems.push(`${availCount} time slots`);
+      }
+      
+      const rating = safeGetFilterValue(localFilters, 'rating', 0);
+      if (rating > 0) {
+        summaryItems.push(`${rating}+ stars`);
+      }
 
-    return summaryItems;
+      return summaryItems;
+    } catch (error) {
+      console.error('Error rendering filter summary:', error);
+      return ['Error loading filters'];
+    }
   };
 
+  // Component error state
+  if (hasError) {
+    return (
+      <Card className={className}>
+        <CardContent className="p-6 text-center">
+          <div className="text-red-600 mb-2">⚠️ Filter Error</div>
+          <div className="text-sm text-gray-600 mb-4">
+            {hasError}
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              setHasError(null);
+              handleReset();
+            }}
+          >
+            Reset Filters
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
@@ -147,7 +325,13 @@ export default function AdvancedFilters({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onExpandedChange?.(!isExpanded)}
+              onClick={() => {
+                try {
+                  onExpandedChange?.(!isExpanded);
+                } catch (error) {
+                  console.error('Error toggling expanded state:', error);
+                }
+              }}
             >
               <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
             </Button>
@@ -175,7 +359,7 @@ export default function AdvancedFilters({
               <div className="flex gap-2">
                 <Select
                   value={localFilters.sortBy}
-                  onValueChange={(value) => updateFilter('sortBy', value as any)}
+                  onValueChange={(value) => updateFilter('sortBy', value as TherapistFilters['sortBy'])}
                 >
                   <SelectTrigger className="flex-1">
                     <SelectValue />
@@ -191,7 +375,7 @@ export default function AdvancedFilters({
                 
                 <Select
                   value={localFilters.sortOrder}
-                  onValueChange={(value) => updateFilter('sortOrder', value as any)}
+                  onValueChange={(value) => updateFilter('sortOrder', value as TherapistFilters['sortOrder'])}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue />

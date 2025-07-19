@@ -38,7 +38,7 @@ export const OnboardingStepper = ({ steps, currentStep = 0 }: OnboardingStepperP
       {steps.map((step, index) => {
         const isCurrent = index === currentStep;
         const isCompleted = step.completed;
-        const isUpcoming = index > currentStep;
+        // const isUpcoming = index > currentStep; // Unused variable
         
         return (
           <div key={index} className="relative">

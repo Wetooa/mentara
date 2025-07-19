@@ -1,6 +1,14 @@
-export { default as SignUp } from "./SignUp";
+// Legacy exports (some components may have been removed)
 export { default as VerifyAccount } from "./VerifyAccount";
 export { default as ContinueWithGoogle } from "./ContinueWithGoogle";
 export { default as ContinueWithMicrosoft } from "./ContinueWithMicrosoft";
-export { default as SignIn } from "./SignIn";
 export { withRole } from "./WithRole";
+
+// Enhanced error handling
+export { AuthErrorBoundary } from "./AuthErrorBoundary";
+
+// Role-specific auth components
+export { ClientSignIn } from "./client/ClientSignIn";
+export { TherapistSignIn } from "./therapist/TherapistSignIn";
+export { AdminSignIn } from "./admin/AdminSignIn";
+export { ModeratorSignIn } from "./moderator/ModeratorSignIn";

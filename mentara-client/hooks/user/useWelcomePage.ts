@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
 import { TherapistRecommendation, TherapistRecommendationResponse } from "@/lib/api/services/therapists";
 

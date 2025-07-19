@@ -6,6 +6,35 @@ import { useModeratorContentQueue } from "@/hooks/useModeratorContentQueue";
 import { useModeratorContentStore, useModeratorUIStore } from "@/store/moderator";
 import type { Post, Comment } from "@/types/api";
 
+// Local types that match the actual API response structure
+interface ModerationPost {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  type: "link" | "text" | "video" | "image" | "poll";
+  title: string;
+  content: string;
+  isDeleted: boolean;
+  communityId: string;
+  authorId: string;
+  likeCount: number;
+  commentCount: number;
+}
+
+interface ModerationComment {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  content: string;
+  isDeleted: boolean;
+  postId: string;
+  authorId: string;
+  parentId?: string;
+  likeCount: number;
+}
+
+type ModerationContent = ModerationPost | ModerationComment;
+
 export default function ModeratorContentPage() {
   const { 
     filters, 
@@ -32,12 +61,12 @@ export default function ModeratorContentPage() {
     clearSelection();
   };
 
-  const handlePreview = (item: Post | Comment) => {
+  const handlePreview = (item: ModerationContent) => {
     // Handle content preview - could open a modal or navigate to detail view
     console.log('Preview content:', item);
   };
 
-  const handleAction = (item: Post | Comment, action: 'approve' | 'reject' | 'remove') => {
+  const handleAction = (item: ModerationContent, action: 'approve' | 'reject' | 'remove') => {
     setCurrentAction({
       type: 'moderate-content',
       targetId: item.id,
@@ -56,14 +85,14 @@ export default function ModeratorContentPage() {
       </div>
 
       <ModerationQueue
-        content={content}
+        content={content as unknown as (Post | Comment)[]}
         total={total}
         isLoading={isLoading}
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onRefresh={handleRefresh}
-        onPreview={handlePreview}
-        onAction={handleAction}
+        onPreview={handlePreview as unknown as (item: Post | Comment) => void}
+        onAction={handleAction as unknown as (item: Post | Comment, action: 'approve' | 'reject' | 'remove') => void}
       />
 
       {/* Action dialogs would be handled here using the UI store state */}

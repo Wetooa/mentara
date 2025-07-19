@@ -25,6 +25,27 @@ import {
 import { useAdminDashboard, useAdminSystemStats } from "@/hooks/admin";
 import { fadeDown } from "@/lib/animations";
 
+// Local interface for dashboard stats that handles all possible response structures
+interface DashboardStats {
+  totalUsers?: number;
+  activeUsers?: number;
+  totalTherapists?: number;
+  totalSessions?: number;
+  activeReports?: number;
+  contentPublished?: number;
+  activeSessions?: number;
+  // Handle nested overview structure from API
+  overview?: {
+    totalUsers?: number;
+    totalClients?: number;
+    totalTherapists?: number;
+    pendingApplications?: number;
+    totalCommunities?: number;
+    totalPosts?: number;
+    totalSessions?: number;
+  };
+}
+
 export default function AdminDashboardPage() {
   // Fetch real dashboard data with proper React Query patterns
   const { 
@@ -55,12 +76,12 @@ export default function AdminDashboardPage() {
     activeSessions: 189,
   };
 
-  const stats = dashboardData || systemStats || mockStats;
+  const stats: DashboardStats = (dashboardData || systemStats || mockStats) as DashboardStats;
 
   const dashboardMetrics = [
     {
       title: "Total Users",
-      value: stats.totalUsers?.toLocaleString() || "0",
+      value: stats.totalUsers?.toLocaleString() || stats.overview?.totalUsers?.toLocaleString() || "0",
       change: "+12%",
       trend: "up",
       description: "Compared to last month",
@@ -76,7 +97,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: "Total Therapists",
-      value: stats.totalTherapists?.toLocaleString() || "0",
+      value: stats.totalTherapists?.toLocaleString() || stats.overview?.totalTherapists?.toLocaleString() || "0",
       change: "+5.2%",
       trend: "up",
       description: "Approved therapists",
@@ -84,7 +105,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: "Total Sessions",
-      value: stats.totalSessions?.toLocaleString() || "0",
+      value: stats.totalSessions?.toLocaleString() || stats.overview?.totalSessions?.toLocaleString() || "0",
       change: "+15.3%",
       trend: "up",
       description: "All time sessions",

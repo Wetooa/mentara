@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MeetingType } from "@/types/booking";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
@@ -38,7 +39,7 @@ export function useBooking() {
   const getAvailableSlots = (therapistId: string, date: string) => {
     return useQuery({
       queryKey: queryKeys.booking.slots(therapistId, date),
-      queryFn: () => api.booking.getAvailableSlots(therapistId, date),
+      queryFn: () => api.booking.availability.getSlots(therapistId, date),
       enabled: !!(therapistId && date),
       staleTime: 1000 * 60 * 5, // 5 minutes
     });
@@ -50,7 +51,7 @@ export function useBooking() {
     isLoading: isLoadingDurations,
   } = useQuery({
     queryKey: queryKeys.booking.durations(),
-    queryFn: () => api.booking.getDurations(),
+    queryFn: () => api.booking.durations.getAll(),
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
@@ -62,15 +63,15 @@ export function useBooking() {
       duration, 
       title,
       description,
-      meetingType = 'video',
+      meetingType = MeetingType.VIDEO,
     }: { 
       therapistId: string; 
       startTime: string; 
       duration: number; 
       title?: string;
       description?: string;
-      meetingType?: 'video' | 'audio' | 'in_person' | 'chat';
-    }) => api.booking.createMeeting({
+      meetingType?: MeetingType;
+    }) => api.booking.meetings.create({
       therapistId,
       startTime,
       duration,
@@ -90,7 +91,7 @@ export function useBooking() {
 
   // Cancel meeting mutation
   const cancelMeetingMutation = useMutation({
-    mutationFn: (meetingId: string) => api.booking.cancelMeeting(meetingId),
+    mutationFn: (meetingId: string) => api.booking.meetings.cancel(meetingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
@@ -113,10 +114,10 @@ export function useBooking() {
         description?: string;
         startTime?: string;
         duration?: number;
-        meetingType?: 'video' | 'audio' | 'in_person' | 'chat';
+        meetingType?: MeetingType;
         status?: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
       };
-    }) => api.booking.updateMeeting(meetingId, updates),
+    }) => api.booking.meetings.update(meetingId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
@@ -137,7 +138,7 @@ export function useBooking() {
       duration: number;
       title?: string;
       description?: string;
-      meetingType?: 'video' | 'audio' | 'in_person' | 'chat';
+      meetingType?: MeetingType;
     }) => createMeetingMutation.mutate(data),
     cancelMeeting: (meetingId: string) => cancelMeetingMutation.mutate(meetingId),
     updateMeeting: (meetingId: string, updates: any) => 
@@ -180,7 +181,7 @@ export function useMeetings(filters: { status?: string; limit?: number; offset?:
     refetch,
   } = useQuery({
     queryKey: queryKeys.booking.meetings.list(filters),
-    queryFn: () => api.booking.getMeetings(filters),
+    queryFn: () => api.booking.meetings.getList(filters),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 

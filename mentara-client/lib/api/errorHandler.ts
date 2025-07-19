@@ -1,11 +1,11 @@
 import { AxiosError } from "axios";
-import { z } from 'mentara-commons';
+
 
 export interface ApiError {
   message: string;
   status: number;
   code?: string;
-  details?: any;
+  details?: unknown;
   timestamp: Date;
   zodIssues?: Array<{ path: (string | number)[]; message: string; code: string; }>;
 }
@@ -13,7 +13,7 @@ export interface ApiError {
 export class MentaraApiError extends Error {
   public readonly status: number;
   public readonly code?: string;
-  public readonly details?: any;
+  public readonly details?: unknown;
   public readonly timestamp: Date;
   public readonly zodIssues?: Array<{ path: (string | number)[]; message: string; code: string; }>;
 
@@ -64,7 +64,11 @@ export const handleApiError = (error: AxiosError): ApiError => {
 
   // Handle Zod validation errors from backend
   if (error.response?.data && typeof error.response.data === 'object') {
-    const responseData = error.response.data as any;
+    const responseData = error.response.data as {
+      errors?: string[];
+      message?: string;
+      error?: string;
+    };
     
     // Check for Zod validation error format
     if (responseData.errors && Array.isArray(responseData.errors) && error.response.status === 400) {
@@ -124,7 +128,10 @@ export const handleApiError = (error: AxiosError): ApiError => {
     default:
       // Try to extract message from response data
       if (error.response?.data) {
-        const responseData = error.response.data as any;
+        const responseData = error.response.data as {
+          message?: string;
+          error?: string;
+        };
         apiError.message =
           responseData.message || responseData.error || apiError.message;
       } else if (error.message) {
@@ -167,13 +174,14 @@ export const shouldRetryRequest = (
 };
 
 // Helper function to check if error is retryable
-export const isRetryableError = (error: any): boolean => {
+export const isRetryableError = (error: unknown): boolean => {
+  const axiosError = error as { response?: { status?: number } };
   // Network errors (no response)
-  if (!error.response) return true;
+  if (!axiosError.response) return true;
 
   // Server errors (5xx)
-  if (error.response.status >= 500) return true;
+  if (axiosError.response.status && axiosError.response.status >= 500) return true;
 
   // Specific retryable client errors
-  return [408, 429].includes(error.response.status);
+  return axiosError.response.status ? [408, 429].includes(axiosError.response.status) : false;
 };

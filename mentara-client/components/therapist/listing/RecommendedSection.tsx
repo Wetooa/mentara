@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,20 +19,20 @@ export default function RecommendedSection() {
     includeInactive: false 
   });
   
-  const therapists = recommendationsData?.therapists || [];
+  const therapists = useMemo(() => recommendationsData?.therapists || [], [recommendationsData]);
 
-  const checkScrollButtons = () => {
+  const checkScrollButtons = useCallback(() => {
     if (!carouselRef.current) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
-  };
+  }, []);
 
   // Initialize scroll buttons visibility when component mounts and when data changes
   useEffect(() => {
     checkScrollButtons();
-  }, [therapists]);
+  }, [therapists, checkScrollButtons]);
 
   const scroll = (direction: "left" | "right") => {
     if (!carouselRef.current) return;

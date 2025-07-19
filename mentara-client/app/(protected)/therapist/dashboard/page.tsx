@@ -35,20 +35,40 @@ export default function TherapistDashboardPage() {
         <div className="lg:col-span-2">
           <div className="mb-6">
             <h2 className="text-lg font-medium mb-4">Today&apos;s agenda</h2>
-            <DashboardStats stats={stats} />
+            <DashboardStats stats={stats || {
+              activePatients: 0,
+              rescheduled: 0,
+              cancelled: 0,
+              income: 0,
+              patientStats: {
+                total: 0,
+                percentage: 0,
+                months: 0,
+                chartData: [] as Array<{ month: string; value: number }>
+              }
+            }} />
           </div>
 
           <div>
             <h2 className="text-lg font-medium mb-4">
               Today&apos;s upcoming patients ({upcomingAppointments.length})
             </h2>
-            <DashboardPatientList appointments={upcomingAppointments} />
+            <DashboardPatientList appointments={upcomingAppointments.map(apt => ({
+              ...apt,
+              patientAvatar: "/avatar-placeholder.png",
+              condition: "General consultation"
+            }))} />
           </div>
         </div>
 
         <div>
           <h2 className="text-lg font-medium mb-4">Overview</h2>
-          <DashboardOverview patientStats={stats?.patientStats} />
+          <DashboardOverview patientStats={stats?.patientStats || {
+            total: 0,
+            percentage: 0,
+            months: 0,
+            chartData: []
+          }} />
         </div>
       </div>
     </div>

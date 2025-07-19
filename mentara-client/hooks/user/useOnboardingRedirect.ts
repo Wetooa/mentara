@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "../auth/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useSessionManager } from "../sessions/useSessionManager";
 
 export function useOnboardingRedirect() {

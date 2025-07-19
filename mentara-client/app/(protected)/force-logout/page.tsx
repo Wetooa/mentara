@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ForceLogoutPage() {
-  const { handleSignOut, isLoading } = useAuth();
+  const { logout, isLoading } = useAuth();
 
   useEffect(() => {
-    handleSignOut();
-  }, [handleSignOut]);
+    logout();
+  }, [logout]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

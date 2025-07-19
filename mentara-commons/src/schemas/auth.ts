@@ -124,6 +124,61 @@ export const RegisterModeratorDtoSchema = z.object({
   }).optional(),
 });
 
+// Session Management Schemas
+export const TerminateSessionDtoSchema = z.object({
+  sessionId: z.string().min(1, 'Session ID is required'),
+});
+
+export const SessionInfoResponseSchema = z.object({
+  sessionId: z.string(),
+  createdAt: z.string(),
+  lastActivity: z.string(),
+  device: z.string(),
+  location: z.string(),
+  ipAddress: z.string(),
+  userAgent: z.string(),
+});
+
+export const ActiveSessionsResponseSchema = z.object({
+  sessions: z.array(z.object({
+    id: z.string(),
+    device: z.string(),
+    location: z.string(),
+    lastActivity: z.string(),
+    isCurrent: z.boolean(),
+    ipAddress: z.string(),
+    userAgent: z.string(),
+    createdAt: z.string(),
+  })),
+});
+
+export const TerminateSessionResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
+export const TerminateOtherSessionsResponseSchema = z.object({
+  success: z.boolean(),
+  terminatedCount: z.number(),
+  message: z.string(),
+});
+
+export const UniversalLogoutResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
+// Check User Existence Schema
+export const CheckUserExistsDtoSchema = z.object({
+  email: z.string().email('Invalid email format'),
+});
+
+export const CheckUserExistsResponseSchema = z.object({
+  exists: z.boolean(),
+  role: z.enum(['client', 'therapist', 'moderator', 'admin']).optional(),
+  isVerified: z.boolean().optional(),
+});
+
 // Type exports
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RefreshTokenDto = z.infer<typeof RefreshTokenDtoSchema>;
@@ -142,3 +197,11 @@ export type RegisterWithOtpDto = z.infer<typeof RegisterWithOtpDtoSchema>;
 export type UserIdParam = z.infer<typeof UserIdParamSchema>;
 export type RegisterAdminDto = z.infer<typeof RegisterAdminDtoSchema>;
 export type RegisterModeratorDto = z.infer<typeof RegisterModeratorDtoSchema>;
+export type TerminateSessionDto = z.infer<typeof TerminateSessionDtoSchema>;
+export type SessionInfoResponse = z.infer<typeof SessionInfoResponseSchema>;
+export type ActiveSessionsResponse = z.infer<typeof ActiveSessionsResponseSchema>;
+export type TerminateSessionResponse = z.infer<typeof TerminateSessionResponseSchema>;
+export type TerminateOtherSessionsResponse = z.infer<typeof TerminateOtherSessionsResponseSchema>;
+export type UniversalLogoutResponse = z.infer<typeof UniversalLogoutResponseSchema>;
+export type CheckUserExistsDto = z.infer<typeof CheckUserExistsDtoSchema>;
+export type CheckUserExistsResponse = z.infer<typeof CheckUserExistsResponseSchema>;

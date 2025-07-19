@@ -27,8 +27,8 @@ export {
   CommentUpdateInputDto,
   CommentListParams,
   CommentListResponse,
-  HeartCommentResponse,
-  CreateReplyRequest as CommentReplyRequest,
+  // HeartCommentResponse removed - using HeartToggleResponse from @mentara/commons
+  // CreateReplyRequest removed - using CommentCreateInputDto with parentId
 } from './comments';
 
 // Community types (these are the primary ones we use)

@@ -35,7 +35,6 @@ export default function TherapistSchedulePage() {
 
   // Get meetings for the selected date
   const { meetings, isLoading: meetingsLoading } = useMeetings({
-    date: dateString,
     limit: 50,
   });
 
@@ -102,15 +101,18 @@ export default function TherapistSchedulePage() {
     }
   };
 
-  const todaysMeetings = meetings?.filter(meeting => {
+
+  const meetingsArray = Array.isArray(meetings) ? meetings : meetings?.meetings || [];
+  const todaysMeetings = meetingsArray?.filter((meeting) => {
     const meetingDate = new Date(meeting.startTime).toDateString();
     return meetingDate === selectedDate.toDateString();
   }) || [];
 
-  const upcomingMeetings = allMeetings?.filter(meeting => {
+  const allMeetingsArray = Array.isArray(allMeetings) ? allMeetings : allMeetings?.meetings || [];
+  const upcomingMeetings = allMeetingsArray?.filter((meeting) => {
     const meetingDate = new Date(meeting.startTime);
     return meetingDate >= new Date() && 
-           (meeting.status === MeetingStatus.SCHEDULED || meeting.status === MeetingStatus.CONFIRMED);
+           (meeting.status === "scheduled" || meeting.status === "confirmed");
   }) || [];
 
   return (
@@ -210,7 +212,7 @@ export default function TherapistSchedulePage() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                  {getMeetingTypeIcon(meeting.meetingType)}
+                                  {getMeetingTypeIcon(meeting.meetingType as unknown as MeetingType)}
                                   <div>
                                     <h3 className="font-medium">
                                       {meeting.title || "Therapy Session"}
@@ -231,7 +233,7 @@ export default function TherapistSchedulePage() {
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <User className="h-3 w-3" />
-                                    Client ID: {meeting.clientId.slice(-6)}
+                                    Client ID: {meeting.clientId?.slice(-6) || 'N/A'}
                                   </div>
                                 </div>
 
@@ -243,7 +245,7 @@ export default function TherapistSchedulePage() {
                               </div>
 
                               <div className="flex flex-col items-end gap-2">
-                                {getStatusBadge(meeting.status)}
+                                {getStatusBadge(meeting.status as unknown as MeetingStatus)}
                                 
                                 <div className="flex gap-1">
                                   <Button variant="outline" size="sm">
@@ -262,7 +264,7 @@ export default function TherapistSchedulePage() {
                                   </Button>
                                 </div>
 
-                                {meeting.status === MeetingStatus.SCHEDULED && (
+                                {meeting.status === 'scheduled' && (
                                   <Button 
                                     size="sm"
                                     onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.CONFIRMED)}
@@ -272,7 +274,7 @@ export default function TherapistSchedulePage() {
                                   </Button>
                                 )}
 
-                                {meeting.status === MeetingStatus.CONFIRMED && (
+                                {meeting.status === 'confirmed' && (
                                   <Button 
                                     size="sm"
                                     onClick={() => handleUpdateMeetingStatus(meeting.id, MeetingStatus.IN_PROGRESS)}
@@ -336,7 +338,7 @@ export default function TherapistSchedulePage() {
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            {getMeetingTypeIcon(meeting.meetingType)}
+                            {getMeetingTypeIcon(meeting.meetingType as unknown as MeetingType)}
                             <div>
                               <div className="font-medium">
                                 {meeting.title || "Therapy Session"}
@@ -357,7 +359,7 @@ export default function TherapistSchedulePage() {
                                 })}
                               </div>
                             </div>
-                            {getStatusBadge(meeting.status)}
+                            {getStatusBadge(meeting.status as unknown as MeetingStatus)}
                           </div>
                         </div>
                       </CardContent>

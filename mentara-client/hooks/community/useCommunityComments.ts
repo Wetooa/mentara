@@ -3,7 +3,8 @@ import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
-import type { Comment, CreateCommentRequest, CreateReplyRequest } from "@/types/api/communities";
+import type { CreateCommentRequest } from "@/types/api/communities";
+import type { Comment } from "@/types/api/comments";
 
 /**
  * Hook for managing comments on a specific post
@@ -86,42 +87,7 @@ export function useCommunityComments(postId: string) {
     },
   });
 
-  // Create reply mutation
-  const createReplyMutation = useMutation({
-    mutationFn: (data: CreateReplyRequest) => api.communities.createReply(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
-      toast.success("Reply added successfully");
-    },
-    onError: (error: MentaraApiError) => {
-      toast.error("Failed to add reply");
-    },
-  });
-
-  // Update reply mutation
-  const updateReplyMutation = useMutation({
-    mutationFn: ({ replyId, content }: { replyId: string; content: string }) =>
-      api.communities.updateReply(replyId, content),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
-      toast.success("Reply updated successfully");
-    },
-    onError: (error: MentaraApiError) => {
-      toast.error("Failed to update reply");
-    },
-  });
-
-  // Delete reply mutation
-  const deleteReplyMutation = useMutation({
-    mutationFn: (replyId: string) => api.communities.deleteReply(replyId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
-      toast.success("Reply deleted successfully");
-    },
-    onError: (error: MentaraApiError) => {
-      toast.error("Failed to delete reply");
-    },
-  });
+  // Replies are now handled as nested comments using createComment with parentId
 
   return {
     comments: comments || [],
@@ -129,7 +95,7 @@ export function useCommunityComments(postId: string) {
     error,
     refetch,
     
-    // Comment operations
+    // Comment operations (now handles both top-level and nested comments via parentId)
     createComment: (data: CreateCommentRequest) => createCommentMutation.mutate(data),
     updateComment: (commentId: string, content: string) =>
       updateCommentMutation.mutate({ commentId, content }),
@@ -137,20 +103,11 @@ export function useCommunityComments(postId: string) {
     heartComment: (commentId: string) => heartCommentMutation.mutate(commentId),
     unheartComment: (commentId: string) => unheartCommentMutation.mutate(commentId),
     
-    // Reply operations
-    createReply: (data: CreateReplyRequest) => createReplyMutation.mutate(data),
-    updateReply: (replyId: string, content: string) =>
-      updateReplyMutation.mutate({ replyId, content }),
-    deleteReply: (replyId: string) => deleteReplyMutation.mutate(replyId),
-    
     // Loading states
     isCreatingComment: createCommentMutation.isPending,
     isUpdatingComment: updateCommentMutation.isPending,
     isDeletingComment: deleteCommentMutation.isPending,
     isHeartingComment: heartCommentMutation.isPending,
     isUnheartingComment: unheartCommentMutation.isPending,
-    isCreatingReply: createReplyMutation.isPending,
-    isUpdatingReply: updateReplyMutation.isPending,
-    isDeletingReply: deleteReplyMutation.isPending,
   };
 }

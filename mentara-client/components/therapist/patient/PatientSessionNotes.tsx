@@ -43,7 +43,7 @@ export default function PatientSessionNotes({
     setIsTreatmentNotesModalOpen(true);
   };
 
-  const handleSaveTreatmentNotes = (notes: any) => {
+  const handleSaveTreatmentNotes = (notes: unknown) => {
     // In a real implementation, this would save to the backend
     console.log('Saving treatment notes:', notes);
     setIsTreatmentNotesModalOpen(false);

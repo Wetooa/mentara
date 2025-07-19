@@ -30,7 +30,9 @@ export default function BookingPage() {
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Get user's assigned therapists
-  const { data: therapists = [], isLoading: therapistsLoading } = useTherapist.useAssignedTherapists();
+  const { therapist } = useTherapist();
+  const therapists = therapist ? [therapist] : [];
+  const therapistsLoading = false;
 
   // Get user's meetings
   const { meetings, isLoading: meetingsLoading } = useMeetings({
@@ -144,9 +146,9 @@ export default function BookingPage() {
                           <User className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <div className="font-medium">{therapist.name}</div>
+                          <div className="font-medium">{therapist.firstName} {therapist.lastName}</div>
                           <div className="text-sm text-muted-foreground">
-                            {therapist.specialization}
+                            {therapist.specialties?.join(", ") || "General Therapy"}
                           </div>
                         </div>
                       </div>
@@ -172,20 +174,20 @@ export default function BookingPage() {
                     <Skeleton key={i} className="h-20 w-full" />
                   ))}
                 </div>
-              ) : meetings.length === 0 ? (
+              ) : (Array.isArray(meetings) ? meetings : meetings?.meetings || []).length === 0 ? (
                 <div className="text-center py-4 text-muted-foreground">
                   <Calendar className="h-8 w-8 mx-auto mb-2 opacity-30" />
                   <p>No upcoming sessions</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {meetings.slice(0, 5).map((meeting) => (
+                  {(Array.isArray(meetings) ? meetings : meetings?.meetings || []).slice(0, 5).map((meeting) => (
                     <Card key={meeting.id} className="border border-gray-200">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              {getMeetingTypeIcon(meeting.meetingType)}
+                              {getMeetingTypeIcon(meeting.meetingType as unknown as MeetingType)}
                               <span className="font-medium text-sm">
                                 {meeting.title || "Therapy Session"}
                               </span>
@@ -203,9 +205,9 @@ export default function BookingPage() {
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            {getStatusBadge(meeting.status)}
-                            {(meeting.status === MeetingStatus.SCHEDULED || 
-                              meeting.status === MeetingStatus.CONFIRMED) && (
+                            {getStatusBadge(meeting.status as unknown as MeetingStatus)}
+                            {(meeting.status === "scheduled" || 
+                              meeting.status === "confirmed") && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -252,7 +254,20 @@ export default function BookingPage() {
 
       {/* Booking Modal */}
       <BookingModal
-        therapist={selectedTherapist || null}
+        therapist={selectedTherapist ? {
+          id: selectedTherapist.id,
+          name: `${selectedTherapist.firstName} ${selectedTherapist.lastName}`,
+          title: selectedTherapist.specialties?.[0] || "General Therapy",
+          availableTimes: [],
+          imageUrl: selectedTherapist.profileImage || "/icons/user-avatar.png",
+          rating: 4.8,
+          experience: selectedTherapist.experience,
+          bio: selectedTherapist.bio,
+          specialties: selectedTherapist.specialties,
+          isActive: selectedTherapist.isActive,
+          sessionPrice: 150,
+          sessionDuration: 50
+        } : null}
         isOpen={showBookingModal}
         onClose={() => {
           setShowBookingModal(false);

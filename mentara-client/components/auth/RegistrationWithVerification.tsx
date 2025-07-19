@@ -21,9 +21,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -188,217 +195,249 @@ export function RegistrationWithVerification({
               </CardHeader>
 
               <CardContent className="space-y-6">
-                <form onSubmit={form.handleSubmit(handleRegistrationSubmit)} className="space-y-4">
-                  {/* Role Selection */}
-                  <div className="space-y-2">
-                    <Label>I want to join as a</Label>
-                    <Select 
-                      value={form.watch("role")} 
-                      onValueChange={(value: "client" | "therapist") => form.setValue("role", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="client">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <span>Client - Seeking support</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="therapist">
-                          <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4" />
-                            <span>Therapist - Providing care</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Name Fields */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        placeholder="John"
-                        {...form.register("firstName")}
-                        className={form.formState.errors.firstName ? "border-red-500" : ""}
-                      />
-                      {form.formState.errors.firstName && (
-                        <p className="text-sm text-red-500">{form.formState.errors.firstName.message}</p>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleRegistrationSubmit)} className="space-y-4">
+                    {/* Role Selection */}
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>I want to join as a</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="client">
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4" />
+                                  <span>Client - Seeking support</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="therapist">
+                                <div className="flex items-center gap-2">
+                                  <Shield className="h-4 w-4" />
+                                  <span>Therapist - Providing care</span>
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Doe"
-                        {...form.register("lastName")}
-                        className={form.formState.errors.lastName ? "border-red-500" : ""}
-                      />
-                      {form.formState.errors.lastName && (
-                        <p className="text-sm text-red-500">{form.formState.errors.lastName.message}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="john@example.com"
-                        className={cn("pl-10", form.formState.errors.email ? "border-red-500" : "")}
-                        {...form.register("email")}
-                      />
-                    </div>
-                    {form.formState.errors.email && (
-                      <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
-                    )}
-                  </div>
-
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        className={cn("pl-10 pr-10", form.formState.errors.password ? "border-red-500" : "")}
-                        {...form.register("password")}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                    
-                    {/* Password Strength */}
-                    {form.watch("password") && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Password strength:</span>
-                          <Badge variant={passwordStrength >= 3 ? "default" : "secondary"}>
-                            {strengthLabels[passwordStrength]}
-                          </Badge>
-                        </div>
-                        <div className="flex gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className={cn(
-                                "h-1 flex-1 rounded-full",
-                                i < passwordStrength ? strengthColors[passwordStrength] : "bg-muted"
-                              )}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {form.formState.errors.password && (
-                      <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
-                    )}
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        className={cn("pl-10 pr-10", form.formState.errors.confirmPassword ? "border-red-500" : "")}
-                        {...form.register("confirmPassword")}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                    {form.formState.errors.confirmPassword && (
-                      <p className="text-sm text-red-500">{form.formState.errors.confirmPassword.message}</p>
-                    )}
-                  </div>
-
-                  {/* Terms */}
-                  <div className="flex items-start space-x-2">
-                    <Checkbox
-                      id="terms"
-                      checked={form.watch("termsAccepted")}
-                      onCheckedChange={(checked) => form.setValue("termsAccepted", !!checked)}
-                      className="mt-1"
                     />
-                    <Label htmlFor="terms" className="text-sm leading-relaxed">
-                      I agree to the{" "}
-                      <a href="/terms" className="text-primary hover:underline">
-                        Terms of Service
-                      </a>{" "}
-                      and{" "}
-                      <a href="/privacy" className="text-primary hover:underline">
-                        Privacy Policy
-                      </a>
-                    </Label>
-                  </div>
-                  {form.formState.errors.termsAccepted && (
-                    <p className="text-sm text-red-500">{form.formState.errors.termsAccepted.message}</p>
-                  )}
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full"
-                  >
-                    {isLoading ? (
-                      <>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="mr-2"
-                        >
-                          <Sparkles className="h-4 w-4" />
-                        </motion.div>
-                        Creating Account...
-                      </>
-                    ) : (
-                      <>
-                        Continue to Verification
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
+                    {/* Name Fields */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Doe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                  {onCancel && (
+                    {/* Email */}
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                type="email"
+                                placeholder="john@example.com"
+                                className="pl-10"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Password */}
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                className="pl-10 pr-10"
+                                {...field}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          
+                          {/* Password Strength */}
+                          {form.watch("password") && (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">Password strength:</span>
+                                <Badge variant={passwordStrength >= 3 ? "default" : "secondary"}>
+                                  {strengthLabels[passwordStrength]}
+                                </Badge>
+                              </div>
+                              <div className="flex gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className={cn(
+                                      "h-1 flex-1 rounded-full",
+                                      i < passwordStrength ? strengthColors[passwordStrength] : "bg-muted"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Confirm Password */}
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                className="pl-10 pr-10"
+                                {...field}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Terms */}
+                    <FormField
+                      control={form.control}
+                      name="termsAccepted"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="mt-1"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm leading-relaxed">
+                              I agree to the{" "}
+                              <a href="/terms" className="text-primary hover:underline">
+                                Terms of Service
+                              </a>{" "}
+                              and{" "}
+                              <a href="/privacy" className="text-primary hover:underline">
+                                Privacy Policy
+                              </a>
+                            </FormLabel>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Submit Button */}
                     <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onCancel}
+                      type="submit"
+                      disabled={isLoading}
                       className="w-full"
                     >
-                      Cancel
+                      {isLoading ? (
+                        <>
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="mr-2"
+                          >
+                            <Sparkles className="h-4 w-4" />
+                          </motion.div>
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          Continue to Verification
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
                     </Button>
-                  )}
-                </form>
+
+                    {onCancel && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onCancel}
+                        className="w-full"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </motion.div>
@@ -447,3 +486,5 @@ export function RegistrationWithVerification({
     </div>
   );
 }
+
+export default RegistrationWithVerification;

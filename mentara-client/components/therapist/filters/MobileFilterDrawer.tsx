@@ -18,14 +18,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Filter,
-  X,
   MapPin,
   DollarSign,
-  Clock,
   Star,
   Heart,
   Brain,
@@ -34,7 +31,6 @@ import {
   Settings,
   RotateCcw
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface FilterState {
   specialties: string[];

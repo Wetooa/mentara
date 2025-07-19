@@ -1,9 +1,9 @@
 'use client';
 // import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-export default function ContinueWithGoogle() {
+export function ContinueWithGoogle() {
   // const router = useRouter();
   const { signInWithOAuth, isLoading } = useAuth();
 
@@ -52,3 +52,5 @@ export default function ContinueWithGoogle() {
     </Button>
   );
 }
+
+export default ContinueWithGoogle;

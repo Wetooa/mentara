@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRole } from "@/hooks/useRole";
 
 export default function ModeratorLayout({
@@ -40,7 +40,7 @@ export default function ModeratorLayout({
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isModerator } = useRole();
-  const { user, isLoaded, handleSignOut } = useAuth();
+  const { user, isLoaded, logout } = useAuth();
 
   // Moderator data from auth user
   const moderator = {
@@ -84,7 +84,7 @@ export default function ModeratorLayout({
 
   const handleLogout = async () => {
     try {
-      await handleSignOut();
+      await logout();
     } catch (error) {
       console.error("Error during logout:", error);
     }

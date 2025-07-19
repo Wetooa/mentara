@@ -29,7 +29,18 @@ export default function PatientsLayout({
   // Transform and filter patients
   const patients = rawPatients || [];
   
-  const filteredPatients = patients.filter((patient) => {
+  // Local interface for patient data
+  interface Patient {
+    id: string;
+    name: string;
+    diagnosis?: string;
+    email?: string;
+    avatar?: string;
+    currentSession: number;
+    totalSessions: number;
+  }
+
+  const filteredPatients = patients.filter((patient: Patient) => {
     // Search filter
     const matchesSearch = 
       searchQuery === "" ||
@@ -55,17 +66,18 @@ export default function PatientsLayout({
   return (
     <div className="flex h-full">
       {/* Left sidebar for patient list */}
-      <div className="w-72 border-r border-gray-200 bg-white flex flex-col">
+      <div className="w-64 md:w-72 lg:w-80 border-r border-gray-200 bg-white flex flex-col">
         {/* Availability button */}
-        <div className="p-3 border-b border-gray-200">
-          <button className="w-full py-2 px-4 bg-teal-500 hover:bg-teal-600 text-white rounded-md flex justify-between items-center">
+        <div className="p-2 md:p-3 border-b border-gray-200">
+          <button className="w-full py-2 px-3 md:px-4 bg-teal-500 hover:bg-teal-600 text-white rounded-md flex justify-between items-center text-sm md:text-base">
             <span>Availability</span>
             <svg
-              width="18"
-              height="18"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="md:w-[18px] md:h-[18px]"
             >
               <path
                 d="M15.2324 5.23242L5.23242 15.2324M5.23242 5.23242L15.2324 15.2324"
@@ -78,9 +90,9 @@ export default function PatientsLayout({
         </div>
 
         {/* Calendar section */}
-        <div className="p-3 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-medium">Appointments</h3>
+        <div className="p-2 md:p-3 border-b border-gray-200">
+          <div className="flex justify-between items-center mb-2 md:mb-3">
+            <h3 className="font-medium text-sm md:text-base">Appointments</h3>
             <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
               6
             </span>
@@ -93,7 +105,7 @@ export default function PatientsLayout({
           </div>
 
           {/* Calendar header */}
-          <div className="grid grid-cols-7 text-center text-xs text-gray-500 mb-1">
+          <div className="grid grid-cols-7 text-center text-[10px] md:text-xs text-gray-500 mb-1">
             <div>SUN</div>
             <div>MON</div>
             <div>TUE</div>
@@ -104,7 +116,7 @@ export default function PatientsLayout({
           </div>
 
           {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1 text-center text-sm">
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1 text-center text-xs md:text-sm">
             {/* Days numbers with some dates highlighted */}
             {Array.from({ length: 31 }, (_, i) => {
               const day = i + 1;
@@ -113,7 +125,7 @@ export default function PatientsLayout({
                 <div
                   key={day}
                   className={`
-                  h-8 w-8 flex items-center justify-center rounded-full mx-auto 
+                  h-6 w-6 md:h-8 md:w-8 flex items-center justify-center rounded-full mx-auto text-xs md:text-sm
                   ${isActive ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100"}`}
                 >
                   {day}
@@ -124,24 +136,24 @@ export default function PatientsLayout({
         </div>
 
         {/* Patient list section */}
-        <div className="p-3 flex-1 overflow-hidden flex flex-col">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-medium">My Patients</h3>
+        <div className="p-2 md:p-3 flex-1 overflow-hidden flex flex-col">
+          <div className="mb-2 md:mb-3 flex items-center justify-between">
+            <h3 className="font-medium text-sm md:text-base">My Patients</h3>
             <button
               onClick={refreshPatients}
               className="p-1.5 text-gray-500 hover:text-primary rounded-md hover:bg-gray-100"
               title="Refresh patients list"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 md:h-4 md:w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
           {/* Error notification */}
           {error && (
-            <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+            <div className="mb-2 md:mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
               <div className="flex items-center">
-                <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
-                <p className="text-xs text-yellow-800">
+                <AlertCircle className="h-3 w-3 md:h-4 md:w-4 text-yellow-600 mr-2" />
+                <p className="text-[10px] md:text-xs text-yellow-800">
                   {error.message.includes("mock data") 
                     ? "Using offline data - API unavailable"
                     : "Failed to load patients"}
@@ -151,27 +163,27 @@ export default function PatientsLayout({
           )}
 
           {/* Search and filter */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="relative mb-2 md:mb-3">
+            <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search patients..."
               value={searchQuery}
               onChange={(e) => searchPatients(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+              className="w-full pl-7 md:pl-9 pr-4 py-1.5 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary text-xs md:text-sm"
               disabled={isLoading}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
               <button
-                className="text-gray-500 hover:text-gray-700 flex items-center text-xs"
+                className="text-gray-500 hover:text-gray-700 flex items-center text-[10px] md:text-xs"
                 onClick={() => setFilterOpen(!filterOpen)}
                 disabled={isLoading}
               >
                 {filters.status === 'all' ? 'All' : filters.status?.charAt(0).toUpperCase() + filters.status?.slice(1)}{" "}
                 {filterOpen ? (
-                  <ChevronDown size={14} />
+                  <ChevronDown size={12} className="md:w-[14px] md:h-[14px]" />
                 ) : (
-                  <ChevronRight size={14} />
+                  <ChevronRight size={12} className="md:w-[14px] md:h-[14px]" />
                 )}
               </button>
             </div>
@@ -179,14 +191,14 @@ export default function PatientsLayout({
 
           {/* Filter dropdown */}
           {filterOpen && (
-            <div className="mb-3 p-2 bg-gray-50 rounded-md border">
+            <div className="mb-2 md:mb-3 p-2 bg-gray-50 rounded-md border">
               <div className="space-y-2">
                 <div>
-                  <label className="text-xs font-medium text-gray-700">Status</label>
+                  <label className="text-[10px] md:text-xs font-medium text-gray-700">Status</label>
                   <select
                     value={filters.status || 'all'}
                     onChange={(e) => updateFilters({ status: e.target.value as 'active' | 'inactive' | 'completed' | 'all' })}
-                    className="w-full mt-1 text-xs border border-gray-300 rounded px-2 py-1"
+                    className="w-full mt-1 text-[10px] md:text-xs border border-gray-300 rounded px-2 py-1"
                   >
                     <option value="all">All Patients</option>
                     <option value="active">Active</option>
@@ -219,7 +231,7 @@ export default function PatientsLayout({
                 </div>
               </div>
             ) : (
-              filteredPatients.map((patient) => {
+              filteredPatients.map((patient: Patient) => {
                 const isActive = pathname.includes(`/patients/${patient.id}`);
 
                 return (
@@ -228,46 +240,48 @@ export default function PatientsLayout({
                     href={`/therapist/patients/${patient.id}`}
                   >
                     <div
-                      className={`flex items-center p-2 rounded-md mb-2 ${
+                      className={`flex items-center p-1.5 md:p-2 rounded-md mb-1.5 md:mb-2 ${
                         isActive ? "bg-primary/10" : "hover:bg-gray-100"
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-full overflow-hidden mr-3 bg-gray-200">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden mr-2 md:mr-3 bg-gray-200 flex-shrink-0">
                         <Image
                           src={patient.avatar || "/avatar-placeholder.png"}
                           alt={patient.name}
                           width={32}
                           height={32}
+                          className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4
-                          className={`text-sm truncate ${isActive ? "font-medium" : ""}`}
+                          className={`text-xs md:text-sm truncate ${isActive ? "font-medium" : ""}`}
                         >
                           {patient.name}
                         </h4>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-[10px] md:text-xs text-gray-500 truncate">
                           {patient.diagnosis}
                         </p>
-                        <div className="flex items-center mt-1">
+                        <div className="flex items-center mt-0.5 md:mt-1">
                           <div 
-                            className={`w-2 h-2 rounded-full mr-2 ${
+                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full mr-1.5 md:mr-2 ${
                               patient.currentSession >= patient.totalSessions ? 'bg-blue-400' : 'bg-green-400'
                             }`}
                           />
-                          <span className="text-xs text-gray-400">
+                          <span className="text-[9px] md:text-xs text-gray-400">
                             Session {patient.currentSession}/{patient.totalSessions}
                           </span>
                         </div>
                       </div>
-                      <div className="flex space-x-1">
-                        <button className="p-1 text-gray-400 hover:text-gray-600">
+                      <div className="flex space-x-0.5 md:space-x-1 flex-shrink-0">
+                        <button className="p-0.5 md:p-1 text-gray-400 hover:text-gray-600">
                           <svg
-                            width="16"
-                            height="16"
+                            width="12"
+                            height="12"
                             viewBox="0 0 24 24"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
+                            className="md:w-4 md:h-4"
                           >
                             <rect
                               x="4"
@@ -298,13 +312,14 @@ export default function PatientsLayout({
                             />
                           </svg>
                         </button>
-                        <button className="p-1 text-gray-400 hover:text-gray-600">
+                        <button className="p-0.5 md:p-1 text-gray-400 hover:text-gray-600">
                           <svg
-                            width="16"
-                            height="16"
+                            width="12"
+                            height="12"
                             viewBox="0 0 24 24"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
+                            className="md:w-4 md:h-4"
                           >
                             <path
                               d="M12 5V19"

@@ -47,8 +47,8 @@ export default function DashboardPage() {
 
     return transformDashboardData(
       dashboardApiData,
-      notificationsData || [],
-      communicationsData || []
+      Array.isArray(notificationsData) ? notificationsData : [],
+      Array.isArray(communicationsData) ? communicationsData : []
     );
   }, [dashboardApiData, notificationsData, communicationsData]);
 

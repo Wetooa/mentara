@@ -8,7 +8,7 @@ import PreAssessmentSignUp from '@/components/auth/SignUp'
 import { z } from 'zod'
 
 // Mock dependencies
-jest.mock('@/hooks/useAuth', () => ({
+jest.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({
     signUpWithEmail: jest.fn().mockResolvedValue({}),
     signUpWithOAuth: jest.fn().mockResolvedValue({}),
@@ -375,7 +375,7 @@ describe('Sign Up Form', () => {
     it('submits form with valid data', async () => {
       const mockSignUp = jest.fn()
       
-      jest.doMock('@/hooks/useAuth', () => ({
+      jest.doMock('@/contexts/AuthContext', () => ({
         useAuth: () => ({
           signUpWithEmail: mockSignUp,
           signUpWithOAuth: jest.fn(),
@@ -443,7 +443,7 @@ describe('Sign Up Form', () => {
     })
 
     it('shows loading state during submission', async () => {
-      jest.doMock('@/hooks/useAuth', () => ({
+      jest.doMock('@/contexts/AuthContext', () => ({
         useAuth: () => ({
           signUpWithEmail: jest.fn(),
           signUpWithOAuth: jest.fn(),
@@ -465,7 +465,7 @@ describe('Sign Up Form', () => {
     it('handles Google OAuth sign up', async () => {
       const mockOAuth = jest.fn()
       
-      jest.doMock('@/hooks/useAuth', () => ({
+      jest.doMock('@/contexts/AuthContext', () => ({
         useAuth: () => ({
           signUpWithEmail: jest.fn(),
           signUpWithOAuth: mockOAuth,
@@ -487,7 +487,7 @@ describe('Sign Up Form', () => {
     it('handles Microsoft OAuth sign up', async () => {
       const mockOAuth = jest.fn()
       
-      jest.doMock('@/hooks/useAuth', () => ({
+      jest.doMock('@/contexts/AuthContext', () => ({
         useAuth: () => ({
           signUpWithEmail: jest.fn(),
           signUpWithOAuth: mockOAuth,

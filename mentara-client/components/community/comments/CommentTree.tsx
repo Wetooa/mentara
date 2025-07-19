@@ -4,10 +4,8 @@ import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   ChevronDown, 
-  ChevronRight,
   MessageCircle,
   Sort,
-  ArrowDown,
 } from 'lucide-react';
 import {
   Select,
@@ -17,44 +15,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CommentItem } from './CommentItem';
-
-export interface Comment {
-  id: string;
-  content: string;
-  author: {
-    id: string;
-    name: string;
-    avatarUrl?: string;
-    role?: 'client' | 'therapist' | 'moderator' | 'admin';
-    isOP?: boolean;
-  };
-  votes: {
-    upvotes: number;
-    downvotes: number;
-    userVote?: 'up' | 'down' | null;
-  };
-  parentId?: string;
-  depth: number;
-  isCollapsed?: boolean;
-  isOwner?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  children?: Comment[];
-  isDeleted?: boolean;
-  repliesCount?: number;
-  hasMoreReplies?: boolean;
-}
+import type { Comment } from '@/types/api/comments';
 
 interface CommentTreeProps {
   comments: Comment[];
   postId?: string;
   maxDepth?: number;
-  defaultSort?: 'best' | 'new' | 'old' | 'controversial';
-  onVote?: (commentId: string, voteType: 'up' | 'down' | null) => void;
+  defaultSort?: 'best' | 'new' | 'old';
+  onHeart?: (commentId: string) => void;
   onReply?: (commentId: string, content: string, parentId?: string) => void;
   onEdit?: (commentId: string, content: string) => void;
   onDelete?: (commentId: string) => void;
   onLoadMoreReplies?: (commentId: string) => void;
+  currentUserId?: string;
   className?: string;
 }
 
@@ -62,13 +35,16 @@ export function CommentTree({
   comments,
   maxDepth = 10,
   defaultSort = 'best',
-  onVote,
+  onHeart,
   onReply,
   onEdit,
   onDelete,
   onLoadMoreReplies,
+  currentUserId: _,
   className = ''
 }: CommentTreeProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _unusedCurrentUserId = _;
   const [sortBy, setSortBy] = useState(defaultSort);
   const [collapsedComments, setCollapsedComments] = useState<Set<string>>(new Set());
 
@@ -101,22 +77,14 @@ export function CommentTree({
     const sorted = [...comments].sort((a, b) => {
       switch (sortBy) {
         case 'best':
-          // Sort by vote score (upvotes - downvotes)
-          const scoreA = a.votes.upvotes - a.votes.downvotes;
-          const scoreB = b.votes.upvotes - b.votes.downvotes;
-          return scoreB - scoreA;
+          // Sort by heart count
+          return (b.heartCount || 0) - (a.heartCount || 0);
         
         case 'new':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         
         case 'old':
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        
-        case 'controversial':
-          // Sort by controversial score (comments with similar up/down votes)
-          const controversialA = Math.min(a.votes.upvotes, a.votes.downvotes);
-          const controversialB = Math.min(b.votes.upvotes, b.votes.downvotes);
-          return controversialB - controversialA;
         
         default:
           return 0;
@@ -132,7 +100,7 @@ export function CommentTree({
 
   const sortedComments = sortComments(commentTree);
 
-  const toggleCollapse = (commentId: string) => {
+  const toggleCollapse = React.useCallback((commentId: string) => {
     const newCollapsed = new Set(collapsedComments);
     if (newCollapsed.has(commentId)) {
       newCollapsed.delete(commentId);
@@ -140,70 +108,46 @@ export function CommentTree({
       newCollapsed.add(commentId);
     }
     setCollapsedComments(newCollapsed);
-  };
+  }, [collapsedComments]);
 
-  const getVisibleChildrenCount = (comment: Comment): number => {
-    if (!comment.children || comment.children.length === 0) return 0;
-    
-    let count = comment.children.length;
-    comment.children.forEach(child => {
-      if (!collapsedComments.has(child.id)) {
-        count += getVisibleChildrenCount(child);
-      }
-    });
-    return count;
-  };
+  // const getVisibleChildrenCount = (comment: Comment): number => {
+  //   if (!comment.children || comment.children.length === 0) return 0;
+  //   
+  //   let count = comment.children.length;
+  //   comment.children.forEach(child => {
+  //     if (!collapsedComments.has(child.id)) {
+  //       count += getVisibleChildrenCount(child);
+  //     }
+  //   });
+  //   return count;
+  // };
 
-  const renderComment = (comment: Comment, depth: number = 0): React.ReactNode => {
+  // Enhanced recursive comment rendering with infinite nesting support
+  const renderComment = React.useCallback((comment: Comment, depth: number = 0): React.ReactNode => {
     const isCollapsed = collapsedComments.has(comment.id);
     const hasChildren = comment.children && comment.children.length > 0;
-    const childrenCount = getVisibleChildrenCount(comment);
+    const childrenCount = hasChildren ? comment.children!.length : 0;
     const shouldShowIndent = depth > 0;
     const shouldCollapseDeep = depth >= maxDepth;
-
-    if (comment.isDeleted) {
-      return (
-        <div 
-          key={comment.id} 
-          className={`${shouldShowIndent ? 'ml-4 border-l-2 border-muted pl-4' : ''}`}
-        >
-          <div className="py-2 text-sm text-muted-foreground italic">
-            [Comment deleted]
-          </div>
-          {hasChildren && !isCollapsed && (
-            <div className="space-y-2">
-              {comment.children!.map(child => renderComment(child, depth + 1))}
-            </div>
-          )}
-        </div>
-      );
-    }
+    const indentLevel = Math.min(depth, 8); // Cap visual indentation at 8 levels
 
     return (
-      <div key={comment.id} className={`${shouldShowIndent ? 'ml-4 border-l-2 border-muted pl-4' : ''}`}>
-        <div className="space-y-2">
-          {/* Collapse/Expand Button for threads */}
-          {hasChildren && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-              onClick={() => toggleCollapse(comment.id)}
-            >
-              {isCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-
+      <div key={comment.id} className="relative">
+        {/* Visual thread indicators */}
+        {shouldShowIndent && (
+          <div 
+            className="absolute left-0 top-0 bottom-0 w-px bg-border opacity-30"
+            style={{ left: `${indentLevel * 16}px` }}
+          />
+        )}
+        
+        <div className={`relative ${shouldShowIndent ? `ml-${Math.min(indentLevel * 4, 16)} pl-4` : ''}`}>
           {/* Comment Content */}
           <CommentItem
             comment={comment}
             depth={depth}
             isCollapsed={isCollapsed}
-            onVote={onVote}
+            onHeart={onHeart}
             onReply={onReply}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -214,50 +158,53 @@ export function CommentTree({
 
           {/* Collapsed thread indicator */}
           {isCollapsed && hasChildren && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleCollapse(comment.id)}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              <ArrowDown className="h-3 w-3 mr-1" />
-              Show {childrenCount} more {childrenCount === 1 ? 'reply' : 'replies'}
-            </Button>
-          )}
-
-          {/* Child Comments */}
-          {hasChildren && !isCollapsed && (
-            <div className="space-y-2">
-              {shouldCollapseDeep ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onLoadMoreReplies?.(comment.id)}
-                  className="text-xs"
-                >
-                  Continue this thread →
-                </Button>
-              ) : (
-                comment.children!.map(child => renderComment(child, depth + 1))
-              )}
+            <div className="mt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleCollapse(comment.id)}
+                className="text-xs text-blue-600 hover:text-blue-700 h-6"
+              >
+                <ChevronDown className="h-3 w-3 mr-1" />
+                Show {childrenCount} {childrenCount === 1 ? 'reply' : 'replies'}
+              </Button>
             </div>
           )}
 
-          {/* Load More Replies Button */}
-          {comment.hasMoreReplies && !isCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onLoadMoreReplies?.(comment.id)}
-              className="text-xs text-blue-600 hover:text-blue-700"
-            >
-              Load more replies...
-            </Button>
+          {/* Child Comments with infinite nesting */}
+          {hasChildren && !isCollapsed && (
+            <div className="mt-3">
+              {shouldCollapseDeep ? (
+                <div className="py-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onLoadMoreReplies?.(comment.id)}
+                    className="text-xs h-7 text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                  >
+                    <MessageCircle className="h-3 w-3 mr-1" />
+                    Continue this thread ({childrenCount} more)
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {comment.children!.map((child, index) => (
+                    <React.Fragment key={child.id}>
+                      {renderComment(child, depth + 1)}
+                      {/* Add separator between siblings for clarity at deep levels */}
+                      {depth > 3 && index < comment.children!.length - 1 && (
+                        <div className="h-px bg-border opacity-20 mx-4" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
     );
-  };
+  }, [collapsedComments, maxDepth, onHeart, onReply, onEdit, onDelete, onLoadMoreReplies, toggleCollapse]);
 
   if (comments.length === 0) {
     return (
@@ -281,10 +228,9 @@ export function CommentTree({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="best">Best</SelectItem>
+              <SelectItem value="best">Most Hearts</SelectItem>
               <SelectItem value="new">Newest</SelectItem>
               <SelectItem value="old">Oldest</SelectItem>
-              <SelectItem value="controversial">Controversial</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -300,8 +246,20 @@ export function CommentTree({
       </div>
 
       {/* Thread Navigation Help */}
-      <div className="text-xs text-muted-foreground text-center py-4 border-t">
+      <div className="text-xs text-muted-foreground text-center py-4 border-t space-y-1">
         <p>Click the arrows to collapse comment threads</p>
+        <p>Deep threads are automatically collapsed for better performance</p>
+        {maxDepth < 50 && (
+          <p className="text-blue-600">
+            Showing up to {maxDepth} levels deep • 
+            <button 
+              onClick={() => {/* TODO: Implement depth expansion */}}
+              className="hover:underline ml-1"
+            >
+              Show all levels
+            </button>
+          </p>
+        )}
       </div>
     </div>
   );

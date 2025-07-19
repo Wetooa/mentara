@@ -15,10 +15,17 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { 
   CreditCard, 
   Building, 
@@ -286,306 +293,339 @@ function PaymentMethodFormContent({
           </Tabs>
         )}
 
-        <form onSubmit={billingForm.handleSubmit(handleSubmit)} className="space-y-6">
-          {/* Payment Method Input */}
-          <div className="space-y-4">
-            {paymentType === 'card' ? (
-              <div className="space-y-2">
-                <Label htmlFor="card-element">Card Information</Label>
-                <div className={cn(
-                  'border rounded-md p-3 bg-background',
-                  cardError && 'border-destructive',
-                  cardComplete && 'border-green-500'
-                )}>
-                  <CardElement
-                    id="card-element"
-                    options={cardElementOptions}
-                    onChange={handleCardElementChange}
-                  />
-                </div>
-                {cardError && (
-                  <div className="flex items-center gap-2 text-sm text-destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    {cardError}
-                  </div>
-                )}
-                {cardComplete && (
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <CheckCircle className="h-4 w-4" />
-                    Card details are complete
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="routing_number">Routing Number</Label>
-                    <Input
-                      id="routing_number"
-                      placeholder="123456789"
-                      maxLength={9}
-                      {...bankForm.register('routing_number')}
-                    />
-                    {bankForm.formState.errors.routing_number && (
-                      <p className="text-sm text-destructive">
-                        {bankForm.formState.errors.routing_number.message}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="account_type">Account Type</Label>
-                    <Select 
-                      value={bankForm.watch('account_type')} 
-                      onValueChange={(value) => bankForm.setValue('account_type', value as 'checking' | 'savings')}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="checking">Checking</SelectItem>
-                        <SelectItem value="savings">Savings</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="account_number">Account Number</Label>
-                  <Input
-                    id="account_number"
-                    type="password"
-                    placeholder="••••••••••••"
-                    {...bankForm.register('account_number')}
-                  />
-                  {bankForm.formState.errors.account_number && (
-                    <p className="text-sm text-destructive">
-                      {bankForm.formState.errors.account_number.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Billing Details */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Billing Details</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="John Doe"
-                  {...billingForm.register('name')}
-                />
-                {billingForm.formState.errors.name && (
-                  <p className="text-sm text-destructive">
-                    {billingForm.formState.errors.name.message}
-                  </p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  {...billingForm.register('email')}
-                />
-                {billingForm.formState.errors.email && (
-                  <p className="text-sm text-destructive">
-                    {billingForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1 (555) 123-4567"
-                {...billingForm.register('phone')}
-              />
-            </div>
-
-            {/* Address */}
+        <Form {...billingForm}>
+          <form onSubmit={billingForm.handleSubmit(handleSubmit)} className="space-y-6">
+            {/* Payment Method Input */}
             <div className="space-y-4">
-              <h4 className="font-medium">Address</h4>
-              
-              <div className="space-y-2">
-                <Label htmlFor="line1">Address Line 1 *</Label>
-                <Input
-                  id="line1"
-                  placeholder="123 Main Street"
-                  {...billingForm.register('address.line1')}
-                />
-                {billingForm.formState.errors.address?.line1 && (
-                  <p className="text-sm text-destructive">
-                    {billingForm.formState.errors.address.line1.message}
-                  </p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="line2">Address Line 2</Label>
-                <Input
-                  id="line2"
-                  placeholder="Apartment, suite, etc."
-                  {...billingForm.register('address.line2')}
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+              {paymentType === 'card' ? (
                 <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    placeholder="San Francisco"
-                    {...billingForm.register('address.city')}
-                  />
-                  {billingForm.formState.errors.address?.city && (
-                    <p className="text-sm text-destructive">
-                      {billingForm.formState.errors.address.city.message}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="state">State *</Label>
-                  {billingForm.watch('address.country') === 'US' ? (
-                    <Select 
-                      value={billingForm.watch('address.state')} 
-                      onValueChange={(value) => billingForm.setValue('address.state', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {usStates.map((state) => (
-                          <SelectItem key={state} value={state}>
-                            {state}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      id="state"
-                      placeholder="State/Province"
-                      {...billingForm.register('address.state')}
+                  <FormLabel htmlFor="card-element">Card Information</FormLabel>
+                  <div className={cn(
+                    'border rounded-md p-3 bg-background',
+                    cardError && 'border-destructive',
+                    cardComplete && 'border-green-500'
+                  )}>
+                    <CardElement
+                      id="card-element"
+                      options={cardElementOptions}
+                      onChange={handleCardElementChange}
                     />
+                  </div>
+                  {cardError && (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      {cardError}
+                    </div>
                   )}
-                  {billingForm.formState.errors.address?.state && (
-                    <p className="text-sm text-destructive">
-                      {billingForm.formState.errors.address.state.message}
-                    </p>
+                  {cardComplete && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      Card details are complete
+                    </div>
                   )}
                 </div>
-              </div>
+              ) : (
+                <Form {...bankForm}>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={bankForm.control}
+                        name="routing_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Routing Number</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="123456789"
+                                maxLength={9}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={bankForm.control}
+                        name="account_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Account Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="checking">Checking</SelectItem>
+                                <SelectItem value="savings">Savings</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={bankForm.control}
+                      name="account_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Number</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="••••••••••••"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </Form>
+              )}
+            </div>
+
+            {/* Billing Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Billing Details</h3>
               
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="postal_code">Postal Code *</Label>
-                  <Input
-                    id="postal_code"
-                    placeholder="12345"
-                    {...billingForm.register('address.postal_code')}
-                  />
-                  {billingForm.formState.errors.address?.postal_code && (
-                    <p className="text-sm text-destructive">
-                      {billingForm.formState.errors.address.postal_code.message}
-                    </p>
+                <FormField
+                  control={billingForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+                
+                <FormField
+                  control={billingForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={billingForm.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        placeholder="+1 (555) 123-4567"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Address */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Address</h4>
+                
+                <FormField
+                  control={billingForm.control}
+                  name="address.line1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address Line 1 *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="123 Main Street" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={billingForm.control}
+                  name="address.line2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address Line 2</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Apartment, suite, etc." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={billingForm.control}
+                    name="address.city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="San Francisco" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={billingForm.control}
+                    name="address.state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State *</FormLabel>
+                        <FormControl>
+                          {billingForm.watch('address.country') === 'US' ? (
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select state" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {usStates.map((state) => (
+                                  <SelectItem key={state} value={state}>
+                                    {state}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              placeholder="State/Province"
+                              {...field}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country *</Label>
-                  <Select 
-                    value={billingForm.watch('address.country')} 
-                    onValueChange={(value) => billingForm.setValue('address.country', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country.code} value={country.code}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {billingForm.formState.errors.address?.country && (
-                    <p className="text-sm text-destructive">
-                      {billingForm.formState.errors.address.country.message}
-                    </p>
-                  )}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={billingForm.control}
+                    name="address.postal_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Postal Code *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="12345" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={billingForm.control}
+                    name="address.country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {countries.map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Set as Default */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="make-default"
-              checked={makeDefault}
-              onCheckedChange={setMakeDefault}
-            />
-            <Label
-              htmlFor="make-default"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Set as default payment method
-            </Label>
-          </div>
-
-          {/* Security Notice */}
-          <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
-            <Lock className="h-5 w-5 text-muted-foreground mt-0.5" />
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium">Secure Payment Processing</p>
-              <p>Your payment information is encrypted and securely processed by Stripe. We never store your card details on our servers.</p>
+            {/* Set as Default */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="make-default"
+                checked={makeDefault}
+                onCheckedChange={setMakeDefault}
+              />
+              <FormLabel
+                htmlFor="make-default"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Set as default payment method
+              </FormLabel>
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="submit"
-              disabled={
-                isProcessing || 
-                !stripe || 
-                !elements || 
-                (paymentType === 'card' && !cardComplete) ||
-                createPaymentMethodMutation.isPending ||
-                setDefaultMutation.isPending
-              }
-              className="flex-1"
-            >
-              {(isProcessing || createPaymentMethodMutation.isPending || setDefaultMutation.isPending) ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Add Payment Method'
-              )}
-            </Button>
-            
-            {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
+            {/* Security Notice */}
+            <div className="flex items-start gap-3 p-4 bg-muted rounded-lg">
+              <Lock className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium">Secure Payment Processing</p>
+                <p>Your payment information is encrypted and securely processed by Stripe. We never store your card details on our servers.</p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="submit"
+                disabled={
+                  isProcessing || 
+                  !stripe || 
+                  !elements || 
+                  (paymentType === 'card' && !cardComplete) ||
+                  createPaymentMethodMutation.isPending ||
+                  setDefaultMutation.isPending
+                }
+                className="flex-1"
+              >
+                {(isProcessing || createPaymentMethodMutation.isPending || setDefaultMutation.isPending) ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Add Payment Method'
+                )}
               </Button>
-            )}
-          </div>
-        </form>
+              
+              {onCancel && (
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

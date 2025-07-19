@@ -3,7 +3,7 @@
 import Logo from "@/components/Logo";
 import PreAssessmentInitialCheckList from "@/components/pre-assessment/forms/checklist";
 import QuestionnaireForm from "@/components/pre-assessment/forms/QuestionnaireForm";
-import PreAssessmentSignUp from "@/components/auth/SignUp";
+import PreAssessmentSignUp from "@/components/auth/RegistrationWithVerification";
 import VerifyAccount from "@/components/auth/VerifyAccount";
 import PreAssessmentProgressBar from "@/components/pre-assessment/ProgressBar";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function PreAssessmentPage() {
     );
   } else if (step === questionnaires.length + 1) {
     form = (
-      <PreAssessmentSignUp handleNextButtonOnClick={handleNextButtonOnClick} />
+      <PreAssessmentSignUp />
     );
   } else {
     form = <VerifyAccount />;

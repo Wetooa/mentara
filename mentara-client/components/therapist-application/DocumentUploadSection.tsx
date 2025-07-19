@@ -8,8 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+// Types
+import { DocumentUpload } from "@/types/therapist-application";
+
 interface DocumentUploadSectionProps {
-  documents: Record<string, File[]>;
+  documents: DocumentUpload;
   onFileChange: (docType: string, files: FileList | null) => void;
   onRemoveFile: (docType: string, index: number) => void;
 }

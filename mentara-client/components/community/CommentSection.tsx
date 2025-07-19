@@ -23,8 +23,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCommunityComments } from "@/hooks/community";
-import { useAuth } from "@/hooks/useAuth";
-import type { Comment } from "@/types/api/communities";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Comment } from "@/types/api/comments";
 
 interface CommentSectionProps {
   postId: string;
@@ -33,7 +33,7 @@ interface CommentSectionProps {
 
 interface CommentItemProps {
   comment: Comment;
-  onReply: (commentId: string, content: string) => void;
+  onCreateNestedComment: (parentId: string, content: string) => void;
   onEdit: (commentId: string, content: string) => void;
   onDelete: (commentId: string) => void;
   onHeart: (commentId: string) => void;
@@ -44,7 +44,7 @@ interface CommentItemProps {
 
 function CommentItem({ 
   comment, 
-  onReply, 
+  onCreateNestedComment, 
   onEdit, 
   onDelete, 
   onHeart, 
@@ -63,7 +63,7 @@ function CommentItem({
 
   const handleReply = () => {
     if (replyContent.trim()) {
-      onReply(comment.id, replyContent.trim());
+      onCreateNestedComment(comment.id, replyContent.trim());
       setReplyContent("");
       setIsReplying(false);
     }
@@ -191,13 +191,13 @@ function CommentItem({
               Reply
             </button>
 
-            {comment.replies && comment.replies.length > 0 && (
+            {comment.children && comment.children.length > 0 && (
               <button
                 onClick={() => setShowReplies(!showReplies)}
                 className="flex items-center gap-1 hover:text-neutral-700 transition-colors"
               >
                 {showReplies ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                <span>{comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}</span>
+                <span>{comment.children.length} {comment.children.length === 1 ? 'reply' : 'replies'}</span>
               </button>
             )}
           </div>
@@ -237,35 +237,35 @@ function CommentItem({
       </Card>
 
       {/* Replies */}
-      {showReplies && comment.replies && comment.replies.length > 0 && (
+      {showReplies && comment.children && comment.children.length > 0 && (
         <div className="ml-6 space-y-3 border-l-2 border-neutral-100 pl-4">
-          {comment.replies.map((reply) => (
-            <Card key={reply.id}>
+          {comment.children.map((nestedComment) => (
+            <Card key={nestedComment.id}>
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={reply.user.avatarUrl} />
+                    <AvatarImage src={nestedComment.user.avatarUrl} />
                     <AvatarFallback className="text-xs">
-                      {getUserInitials(reply.user.firstName, reply.user.lastName)}
+                      {getUserInitials(nestedComment.user.firstName, nestedComment.user.lastName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <h5 className="font-medium text-xs">
-                        {reply.user.firstName} {reply.user.lastName}
+                        {nestedComment.user.firstName} {nestedComment.user.lastName}
                       </h5>
-                      {reply.user.role === 'therapist' && (
+                      {nestedComment.user.role === 'therapist' && (
                         <Badge variant="secondary" className="text-xs">
                           <Stethoscope className="h-2 w-2 mr-1" />
                           Therapist
                         </Badge>
                       )}
                       <p className="text-xs text-neutral-500">
-                        {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(nestedComment.createdAt), { addSuffix: true })}
                       </p>
                     </div>
                     <p className="text-xs text-neutral-700 whitespace-pre-wrap">
-                      {reply.content}
+                      {nestedComment.content}
                     </p>
                   </div>
                 </div>
@@ -292,13 +292,11 @@ export default function CommentSection({ postId, className }: CommentSectionProp
     deleteComment,
     heartComment,
     unheartComment,
-    createReply,
     isCreatingComment,
     isUpdatingComment,
     isDeletingComment,
     isHeartingComment,
     isUnheartingComment,
-    isCreatingReply,
   } = useCommunityComments(postId);
 
   const handleCreateComment = () => {
@@ -308,8 +306,8 @@ export default function CommentSection({ postId, className }: CommentSectionProp
     }
   };
 
-  const handleReply = (commentId: string, content: string) => {
-    createReply({ commentId, content });
+  const handleCreateNestedComment = (parentId: string, content: string) => {
+    createComment({ postId, content, parentId });
   };
 
   const isOperationLoading = 
@@ -317,8 +315,7 @@ export default function CommentSection({ postId, className }: CommentSectionProp
     isUpdatingComment || 
     isDeletingComment || 
     isHeartingComment || 
-    isUnheartingComment || 
-    isCreatingReply;
+    isUnheartingComment;
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -413,7 +410,7 @@ export default function CommentSection({ postId, className }: CommentSectionProp
                 <CommentItem
                   key={comment.id}
                   comment={comment}
-                  onReply={handleReply}
+                  onCreateNestedComment={handleCreateNestedComment}
                   onEdit={updateComment}
                   onDelete={deleteComment}
                   onHeart={heartComment}
