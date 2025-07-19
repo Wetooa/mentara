@@ -13,7 +13,7 @@
   "projects": {},
   "monorepo": false,
   "root": ".",
-  "entryFile": "main",
+  "entryFile": "src/main",
   "generateOptions": {
     "spec": false
   }
