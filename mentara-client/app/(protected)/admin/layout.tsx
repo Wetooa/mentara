@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -40,7 +40,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isLoading, isAuthorized, userRole, userId } = useRoleCheck("admin");
+  const { isLoading, isAuthorized } = useRoleCheck("admin");
 
   // Admin data - simplified since we only need display info
   const admin = {
