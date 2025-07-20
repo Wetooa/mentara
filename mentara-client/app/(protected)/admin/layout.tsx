@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRole } from "@/hooks/useRole";
+import { useRole } from "@/hooks/user/useRole";
 
 export default function AdminLayout({
   children,
@@ -40,8 +40,29 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAdmin } = useRole();
-  const { user, isLoaded, logout } = useAuth();
+  const { isAdmin, canAccess } = useRole();
+  const { user, isLoaded, logout, isAuthenticated } = useAuth();
+
+  // Route protection: only allow admin role access
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/sign-in');
+      return;
+    }
+    
+    if (!canAccess('admin')) {
+      // Redirect to appropriate dashboard based on role
+      if (user?.role === 'client') {
+        router.push('/user');
+      } else if (user?.role === 'moderator') {
+        router.push('/moderator');
+      } else if (user?.role === 'therapist') {
+        router.push('/therapist');
+      } else {
+        router.push('/auth/sign-in');
+      }
+    }
+  }, [isAuthenticated, canAccess, user?.role, router]);
 
   // Admin data from auth user
   const admin = {

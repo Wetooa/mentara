@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
+import { useRole } from "@/hooks/user/useRole";
 
 export default function TherapistLayout({
   children,
@@ -15,8 +16,30 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user, isAuthenticated } = useAuth();
+  const { canAccess } = useRole();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Route protection: only allow therapist role access
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/sign-in');
+      return;
+    }
+    
+    if (!canAccess('therapist')) {
+      // Redirect to appropriate dashboard based on role
+      if (user?.role === 'client') {
+        router.push('/user');
+      } else if (user?.role === 'moderator') {
+        router.push('/moderator');
+      } else if (user?.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/auth/sign-in');
+      }
+    }
+  }, [isAuthenticated, canAccess, user?.role, router]);
 
   // Handle logout
   const handleLogout = async () => {

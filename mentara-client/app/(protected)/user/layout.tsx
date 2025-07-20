@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LogOut } from "lucide-react";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { UserSearchBar, User } from "@/components/search";
+import { useRole } from "@/hooks/user/useRole";
 
 export default function MainLayout({
   children,
@@ -17,8 +18,30 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { canAccess } = useRole();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Route protection: only allow client role access
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/sign-in');
+      return;
+    }
+    
+    if (!canAccess('client')) {
+      // Redirect to appropriate dashboard based on role
+      if (user?.role === 'admin') {
+        router.push('/admin');
+      } else if (user?.role === 'moderator') {
+        router.push('/moderator');
+      } else if (user?.role === 'therapist') {
+        router.push('/therapist');
+      } else {
+        router.push('/auth/sign-in');
+      }
+    }
+  }, [isAuthenticated, canAccess, user?.role, router]);
 
   const handleUserSelect = (user: User) => {
     // Navigate to user profile or handle user selection
