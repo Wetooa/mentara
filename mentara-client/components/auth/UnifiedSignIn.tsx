@@ -22,7 +22,7 @@ import {
 
 import { ContinueWithGoogle } from "@/components/auth/ContinueWithGoogle";
 import { ContinueWithMicrosoft } from "@/components/auth/ContinueWithMicrosoft";
-import { useAuth } from "@/contexts/AuthContext";
+import { useLogin } from "@/hooks/auth/useLogin";
 import { toast } from "sonner";
 
 const signInSchema = z.object({
@@ -35,9 +35,8 @@ type SignInForm = z.infer<typeof signInSchema>;
 export function UnifiedSignIn() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { login: authLogin } = useAuth();
+  const { login, isLoading } = useLogin();
 
   const form = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
@@ -50,22 +49,19 @@ export function UnifiedSignIn() {
   const onSubmit = useCallback(
     async (data: SignInForm) => {
       try {
-        setIsLoading(true);
-
-        // Use the AuthContext's universal login method
-        await authLogin({ email: data.email, password: data.password });
-
-        // AuthContext handles storing tokens, user data, and role-based redirects
+        // Use simple login hook that handles token storage and redirect
+        await login({ email: data.email, password: data.password });
         toast.success("Successfully signed in!");
-        
       } catch (err) {
         console.error("Login error:", err);
-        toast.error(err instanceof Error ? err.message : "Sign in failed. Please try again.");
-      } finally {
-        setIsLoading(false);
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : "Sign in failed. Please try again."
+        );
       }
     },
-    [authLogin]
+    [login]
   );
 
   return (
@@ -79,7 +75,6 @@ export function UnifiedSignIn() {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-
         {/* OAuth Buttons */}
         <div className="space-y-3">
           <ContinueWithGoogle />
@@ -154,11 +149,7 @@ export function UnifiedSignIn() {
               )}
             />
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -83,30 +83,6 @@ export class AuthController {
     return new SuccessMessageDto('Successfully logged out from all devices');
   }
 
-  // Local Authentication Endpoints
-  @Public()
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registration attempts per 5 minutes
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body(new ZodValidationPipe(RegisterUserDtoSchema))
-    registerDto: RegisterUserDto,
-  ): Promise<SuccessMessageResponse> {
-    // Only allow client and therapist roles for general registration
-    const allowedRole =
-      registerDto.role === 'therapist' ? 'therapist' : 'client';
-
-    const result = await this.authService.registerUserWithEmail(
-      registerDto.email,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-      allowedRole,
-    );
-
-    return new SuccessMessageDto(result.message);
-  }
-
   @Public()
   @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
   @Post('login')
@@ -140,7 +116,6 @@ export class AuthController {
   }
 
   // Removed refresh token endpoint - no longer needed with non-expiring tokens
-
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)

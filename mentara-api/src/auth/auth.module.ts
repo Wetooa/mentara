@@ -62,7 +62,6 @@ import { TherapistModule } from '../therapist/therapist.module';
     TherapistAuthService,
     AdminAuthService,
     ModeratorAuthService,
-
   ],
   exports: [
     AuthService,
