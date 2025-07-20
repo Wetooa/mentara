@@ -3,42 +3,35 @@ import {
   EventMetadata,
 } from './interfaces/domain-event.interface';
 
-// Payment & Billing Events
+// ===== PAYMENT EVENTS =====
 
-export interface PaymentProcessedData {
+export interface PaymentSucceededData {
   paymentId: string;
-  userId: string;
+  clientId: string;
+  therapistId: string;
   amount: number;
   currency: string;
-  paymentMethod:
-    | 'credit_card'
-    | 'debit_card'
-    | 'bank_transfer'
-    | 'paypal'
-    | 'insurance';
-  paymentStatus: 'pending' | 'completed' | 'failed' | 'cancelled' | 'refunded';
-  transactionId: string;
-  invoiceId?: string;
-  sessionId?: string;
-  therapistId?: string;
+  platformFee: number;
+  therapistAmount: number;
+  meetingId?: string;
+  paymentMethodId: string;
 }
 
-export class PaymentProcessedEvent extends BaseDomainEvent<PaymentProcessedData> {
-  constructor(data: PaymentProcessedData, metadata?: EventMetadata) {
+export class PaymentSucceededEvent extends BaseDomainEvent<PaymentSucceededData> {
+  constructor(data: PaymentSucceededData, metadata?: EventMetadata) {
     super(data.paymentId, 'Payment', data, metadata);
   }
 }
 
 export interface PaymentFailedData {
   paymentId: string;
-  userId: string;
+  clientId: string;
+  therapistId: string;
   amount: number;
   currency: string;
   failureReason: string;
-  errorCode: string;
-  paymentMethod: string;
-  retryAttempt: number;
-  maxRetries: number;
+  meetingId?: string;
+  paymentMethodId: string;
 }
 
 export class PaymentFailedEvent extends BaseDomainEvent<PaymentFailedData> {
@@ -47,132 +40,120 @@ export class PaymentFailedEvent extends BaseDomainEvent<PaymentFailedData> {
   }
 }
 
-export interface RefundProcessedData {
-  refundId: string;
-  originalPaymentId: string;
-  userId: string;
-  amount: number;
-  currency: string;
-  refundReason: string;
-  processedBy: string;
-  refundMethod: 'original_payment_method' | 'bank_transfer' | 'store_credit';
-}
-
-export class RefundProcessedEvent extends BaseDomainEvent<RefundProcessedData> {
-  constructor(data: RefundProcessedData, metadata?: EventMetadata) {
-    super(data.refundId, 'Refund', data, metadata);
-  }
-}
-
-export interface InvoiceGeneratedData {
-  invoiceId: string;
-  userId: string;
-  therapistId?: string;
-  amount: number;
-  currency: string;
-  dueDate: Date;
-  items: Array<{
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    total: number;
-  }>;
-  taxAmount?: number;
-  discountAmount?: number;
-}
-
-export class InvoiceGeneratedEvent extends BaseDomainEvent<InvoiceGeneratedData> {
-  constructor(data: InvoiceGeneratedData, metadata?: EventMetadata) {
-    super(data.invoiceId, 'Invoice', data, metadata);
-  }
-}
-
-export interface SubscriptionCreatedData {
-  subscriptionId: string;
-  userId: string;
-  planType: 'basic' | 'premium' | 'therapy_plus';
-  billingCycle: 'monthly' | 'quarterly' | 'yearly';
-  amount: number;
-  currency: string;
-  startDate: Date;
-  nextBillingDate: Date;
-  trialPeriod?: number; // in days
-}
-
-export class SubscriptionCreatedEvent extends BaseDomainEvent<SubscriptionCreatedData> {
-  constructor(data: SubscriptionCreatedData, metadata?: EventMetadata) {
-    super(data.subscriptionId, 'Subscription', data, metadata);
-  }
-}
-
-export interface SubscriptionCancelledData {
-  subscriptionId: string;
-  userId: string;
-  cancelledAt: Date;
-  cancellationReason: string;
-  effectiveDate: Date;
-  refundEligible: boolean;
-  subscriptionDuration: number; // in days
-}
-
-export class SubscriptionCancelledEvent extends BaseDomainEvent<SubscriptionCancelledData> {
-  constructor(data: SubscriptionCancelledData, metadata?: EventMetadata) {
-    super(data.subscriptionId, 'Subscription', data, metadata);
-  }
-}
-
-export interface TherapistPayoutData {
-  payoutId: string;
+export interface PaymentInitiatedData {
+  paymentId: string;
+  clientId: string;
   therapistId: string;
   amount: number;
   currency: string;
-  payoutMethod: 'bank_transfer' | 'paypal' | 'stripe';
-  sessionCount: number;
-  periodStart: Date;
-  periodEnd: Date;
-  commissionRate: number;
-  grossAmount: number;
-  platformFee: number;
+  meetingId?: string;
+  paymentMethodId: string;
+  description?: string;
 }
 
-export class TherapistPayoutEvent extends BaseDomainEvent<TherapistPayoutData> {
-  constructor(data: TherapistPayoutData, metadata?: EventMetadata) {
-    super(data.payoutId, 'Payout', data, metadata);
+export class PaymentInitiatedEvent extends BaseDomainEvent<PaymentInitiatedData> {
+  constructor(data: PaymentInitiatedData, metadata?: EventMetadata) {
+    super(data.paymentId, 'Payment', data, metadata);
   }
 }
 
-export interface InsuranceClaimData {
-  claimId: string;
+// ===== PAYMENT METHOD EVENTS =====
+
+export interface PaymentMethodCreatedData {
+  paymentMethodId: string;
   userId: string;
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET';
+  cardLast4?: string;
+  cardBrand?: string;
+  isDefault: boolean;
+}
+
+export class PaymentMethodCreatedEvent extends BaseDomainEvent<PaymentMethodCreatedData> {
+  constructor(data: PaymentMethodCreatedData, metadata?: EventMetadata) {
+    super(data.paymentMethodId, 'PaymentMethod', data, metadata);
+  }
+}
+
+export interface PaymentMethodDeletedData {
+  paymentMethodId: string;
+  userId: string;
+}
+
+export class PaymentMethodDeletedEvent extends BaseDomainEvent<PaymentMethodDeletedData> {
+  constructor(data: PaymentMethodDeletedData, metadata?: EventMetadata) {
+    super(data.paymentMethodId, 'PaymentMethod', data, metadata);
+  }
+}
+
+// ===== THERAPIST PAYOUT EVENTS =====
+
+export interface TherapistPayoutCalculatedData {
   therapistId: string;
-  sessionId: string;
-  insuranceProvider: string;
-  claimAmount: number;
-  currency: string;
-  claimStatus: 'submitted' | 'approved' | 'denied' | 'pending';
-  submittedAt: Date;
-  diagnosisCodes: string[];
-  procedureCodes: string[];
+  period: {
+    startDate: Date;
+    endDate: Date;
+  };
+  totalSessions: number;
+  totalRevenue: number;
+  platformFees: number;
+  netEarnings: number;
+  averageSessionRate: number;
 }
 
-export class InsuranceClaimEvent extends BaseDomainEvent<InsuranceClaimData> {
-  constructor(data: InsuranceClaimData, metadata?: EventMetadata) {
-    super(data.claimId, 'InsuranceClaim', data, metadata);
+export class TherapistPayoutCalculatedEvent extends BaseDomainEvent<TherapistPayoutCalculatedData> {
+  constructor(data: TherapistPayoutCalculatedData, metadata?: EventMetadata) {
+    super(data.therapistId, 'TherapistPayout', data, metadata);
   }
 }
 
-export interface BillingReminderData {
+// ===== ANALYTICS EVENTS =====
+
+export interface PaymentAnalyticsRequestedData {
   userId: string;
-  invoiceId: string;
-  amount: number;
-  currency: string;
-  dueDate: Date;
-  reminderType: 'first' | 'second' | 'final' | 'overdue';
-  daysOverdue?: number;
+  userRole: 'client' | 'therapist' | 'admin';
+  analyticsType: 'therapist' | 'platform';
+  period: {
+    startDate?: Date;
+    endDate?: Date;
+  };
 }
 
-export class BillingReminderEvent extends BaseDomainEvent<BillingReminderData> {
-  constructor(data: BillingReminderData, metadata?: EventMetadata) {
-    super(data.invoiceId, 'Invoice', data, metadata);
+export class PaymentAnalyticsRequestedEvent extends BaseDomainEvent<PaymentAnalyticsRequestedData> {
+  constructor(data: PaymentAnalyticsRequestedData, metadata?: EventMetadata) {
+    super(data.userId, 'Analytics', data, metadata);
+  }
+}
+
+// ===== PLATFORM EVENTS =====
+
+export interface PlatformFeeCollectedData {
+  paymentId: string;
+  therapistId: string;
+  clientId: string;
+  totalAmount: number;
+  feeAmount: number;
+  feePercentage: number;
+  currency: string;
+}
+
+export class PlatformFeeCollectedEvent extends BaseDomainEvent<PlatformFeeCollectedData> {
+  constructor(data: PlatformFeeCollectedData, metadata?: EventMetadata) {
+    super(data.paymentId, 'PlatformFee', data, metadata);
+  }
+}
+
+// ===== EDUCATIONAL EVENTS =====
+
+export interface MockPaymentProcessedData {
+  paymentId: string;
+  scenario: 'success' | 'decline' | 'insufficient_funds' | 'expired_card';
+  testCardLast4?: string;
+  processingTime: number; // milliseconds
+  isEducational: true;
+}
+
+export class MockPaymentProcessedEvent extends BaseDomainEvent<MockPaymentProcessedData> {
+  constructor(data: MockPaymentProcessedData, metadata?: EventMetadata) {
+    super(data.paymentId, 'MockPayment', data, metadata);
   }
 }

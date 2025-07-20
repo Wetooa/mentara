@@ -1001,8 +1001,8 @@ export declare const PersonalInfoSchema: z.ZodObject<{
     phone: string;
     city: string;
     state: string;
-    country: string;
     zipCode: string;
+    country: string;
     middleName?: string | undefined;
 }, {
     email: string;
@@ -1013,8 +1013,8 @@ export declare const PersonalInfoSchema: z.ZodObject<{
     phone: string;
     city: string;
     state: string;
-    country: string;
     zipCode: string;
+    country: string;
     middleName?: string | undefined;
 }>;
 export declare const EducationSchema: z.ZodObject<{
@@ -1229,8 +1229,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }, {
         email: string;
@@ -1241,8 +1241,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }>;
     professionalInfo: z.ZodObject<{
@@ -1415,8 +1415,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     };
     professionalInfo: {
@@ -1467,8 +1467,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     };
     professionalInfo: {
@@ -1573,8 +1573,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }, {
         email: string;
@@ -1585,8 +1585,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }>;
     professionalInfo: z.ZodObject<{
@@ -1805,8 +1805,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     };
     professionalInfo: {
@@ -1885,8 +1885,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     };
     professionalInfo: {
@@ -1987,8 +1987,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }, {
         email: string;
@@ -1999,8 +1999,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }>;
     professionalInfo: z.ZodObject<{
@@ -2173,8 +2173,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     };
     professionalInfo: {
@@ -2225,8 +2225,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     };
     professionalInfo: {
@@ -2290,8 +2290,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }, {
         email: string;
@@ -2302,8 +2302,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     }>>;
     professionalInfo: z.ZodOptional<z.ZodObject<{
@@ -2476,8 +2476,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     } | undefined;
     professionalInfo?: {
@@ -2528,8 +2528,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         phone: string;
         city: string;
         state: string;
-        country: string;
         zipCode: string;
+        country: string;
         middleName?: string | undefined;
     } | undefined;
     professionalInfo?: {
@@ -3015,8 +3015,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         }, {
             email: string;
@@ -3027,8 +3027,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         }>;
         professionalInfo: z.ZodObject<{
@@ -3247,8 +3247,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3327,8 +3327,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3417,8 +3417,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3503,8 +3503,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3594,8 +3594,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         }, {
             email: string;
@@ -3606,8 +3606,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         }>;
         professionalInfo: z.ZodObject<{
@@ -3780,8 +3780,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3832,8 +3832,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3889,8 +3889,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {
@@ -3945,8 +3945,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             phone: string;
             city: string;
             state: string;
-            country: string;
             zipCode: string;
+            country: string;
             middleName?: string | undefined;
         };
         professionalInfo: {

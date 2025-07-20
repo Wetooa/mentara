@@ -293,12 +293,12 @@ export declare const FindSessionsQueryDtoSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "NO_SHOW", "TECHNICAL_ISSUE", "RESCHEDULED"]>>;
     sessionType: z.ZodOptional<z.ZodEnum<["INITIAL_CONSULTATION", "REGULAR_THERAPY", "CRISIS_INTERVENTION", "GROUP_THERAPY", "FAMILY_THERAPY", "FOLLOW_UP", "ASSESSMENT", "SELF_GUIDED"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
+    status?: "COMPLETED" | "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
     sessionType?: "INITIAL_CONSULTATION" | "REGULAR_THERAPY" | "CRISIS_INTERVENTION" | "GROUP_THERAPY" | "FAMILY_THERAPY" | "FOLLOW_UP" | "ASSESSMENT" | "SELF_GUIDED" | undefined;
 }, {
-    status?: "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
+    status?: "COMPLETED" | "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
     therapistId?: string | undefined;
     clientId?: string | undefined;
     sessionType?: "INITIAL_CONSULTATION" | "REGULAR_THERAPY" | "CRISIS_INTERVENTION" | "GROUP_THERAPY" | "FAMILY_THERAPY" | "FOLLOW_UP" | "ASSESSMENT" | "SELF_GUIDED" | undefined;
@@ -317,13 +317,13 @@ export declare const UpdateSessionLogDtoSchema: z.ZodObject<{
     connectionIssues: z.ZodOptional<z.ZodBoolean>;
     recordingUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    status?: "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
+    status?: "COMPLETED" | "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
     notes?: string | undefined;
     quality?: number | undefined;
     recordingUrl?: string | undefined;
     connectionIssues?: boolean | undefined;
 }, {
-    status?: "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
+    status?: "COMPLETED" | "CANCELLED" | "SCHEDULED" | "IN_PROGRESS" | "NO_SHOW" | "TECHNICAL_ISSUE" | "RESCHEDULED" | undefined;
     notes?: string | undefined;
     quality?: number | undefined;
     recordingUrl?: string | undefined;

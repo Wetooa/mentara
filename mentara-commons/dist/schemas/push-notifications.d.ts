@@ -276,7 +276,6 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         enabled?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    subscriptionId: string;
     preferences: {
         sessionReminders?: boolean | undefined;
         messageNotifications?: boolean | undefined;
@@ -284,6 +283,7 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         appointmentUpdates?: boolean | undefined;
         communityActivity?: boolean | undefined;
     };
+    subscriptionId: string;
     quietHours?: {
         enabled: boolean;
         timezone?: string | undefined;
@@ -291,7 +291,6 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         endTime?: string | undefined;
     } | undefined;
 }, {
-    subscriptionId: string;
     preferences: {
         sessionReminders?: boolean | undefined;
         messageNotifications?: boolean | undefined;
@@ -299,6 +298,7 @@ export declare const UpdateSubscriptionPreferencesDtoSchema: z.ZodObject<{
         appointmentUpdates?: boolean | undefined;
         communityActivity?: boolean | undefined;
     };
+    subscriptionId: string;
     quietHours?: {
         timezone?: string | undefined;
         startTime?: string | undefined;

@@ -7,15 +7,23 @@ import {
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
-  SubscriptionStatus,
-  SubscriptionTier,
-  BillingCycle,
   PaymentStatus,
   PaymentMethodType,
-  InvoiceStatus,
-  DiscountType,
 } from '@prisma/client';
 
+/**
+ * Educational Billing Service for Mental Health Platform
+ * 
+ * This service provides a simplified, educational payment processing system
+ * suitable for a school project. It simulates real payment flows without
+ * processing actual money.
+ * 
+ * Features:
+ * - Mock payment processing for therapy sessions
+ * - Payment method management
+ * - Educational payment flows
+ * - Realistic payment failures and retries
+ */
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
@@ -25,179 +33,20 @@ export class BillingService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  // Subscription Management
-  async createSubscription(data: {
-    userId: string;
-    planId: string;
-    billingCycle?: BillingCycle;
-    defaultPaymentMethodId?: string;
-    trialStart?: Date;
-    trialEnd?: Date;
-  }) {
-    const plan = await this.prisma.subscriptionPlan.findUnique({
-      where: { id: data.planId },
-    });
+  // ===== PAYMENT METHODS =====
 
-    if (!plan) {
-      throw new NotFoundException(
-        `Subscription plan with ID ${data.planId} not found`,
-      );
-    }
-
-    const amount =
-      data.billingCycle === BillingCycle.YEARLY
-        ? plan.yearlyPrice || plan.monthlyPrice
-        : plan.monthlyPrice;
-
-    const currentPeriodStart = new Date();
-    const currentPeriodEnd = new Date();
-
-    if (data.billingCycle === BillingCycle.YEARLY) {
-      currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
-    } else {
-      currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
-    }
-
-    return this.prisma.subscription.create({
-      data: {
-        userId: data.userId,
-        planId: data.planId,
-        tier: plan.tier,
-        billingCycle: data.billingCycle || BillingCycle.MONTHLY,
-        amount,
-        currentPeriodStart,
-        currentPeriodEnd,
-        trialStart: data.trialStart,
-        trialEnd: data.trialEnd,
-        defaultPaymentMethodId: data.defaultPaymentMethodId,
-        status: data.trialStart
-          ? SubscriptionStatus.TRIALING
-          : SubscriptionStatus.ACTIVE,
-      },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-      },
-    });
-  }
-
-  async findUserSubscription(userId: string) {
-    return this.prisma.subscription.findUnique({
-      where: { userId },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-        invoices: {
-          orderBy: { createdAt: 'desc' },
-          take: 5,
-        },
-      },
-    });
-  }
-
-  async updateSubscription(
-    userId: string,
-    data: {
-      planId?: string;
-      billingCycle?: BillingCycle;
-      status?: SubscriptionStatus;
-      defaultPaymentMethodId?: string;
-    },
-  ) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    const updateData: any = { ...data };
-
-    // If changing plan, update amount
-    if (data.planId) {
-      const plan = await this.prisma.subscriptionPlan.findUnique({
-        where: { id: data.planId },
-      });
-      if (!plan) {
-        throw new NotFoundException(
-          `Subscription plan with ID ${data.planId} not found`,
-        );
-      }
-
-      updateData.tier = plan.tier;
-      updateData.amount =
-        data.billingCycle === BillingCycle.YEARLY
-          ? plan.yearlyPrice || plan.monthlyPrice
-          : plan.monthlyPrice;
-    }
-
-    return this.prisma.subscription.update({
-      where: { userId },
-      data: updateData,
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-      },
-    });
-  }
-
-  async cancelSubscription(userId: string) {
-    return this.updateSubscription(userId, {
-      status: SubscriptionStatus.CANCELED,
-    });
-  }
-
-  // Subscription Plans
-  async createSubscriptionPlan(data: {
-    name: string;
-    description?: string;
-    tier: SubscriptionTier;
-    monthlyPrice: number;
-    yearlyPrice?: number;
-    features: any;
-    limits: any;
-    trialDays?: number;
-  }) {
-    return this.prisma.subscriptionPlan.create({
-      data,
-    });
-  }
-
-  async findAllPlans(isActive = true) {
-    return this.prisma.subscriptionPlan.findMany({
-      where: { isActive },
-      orderBy: { monthlyPrice: 'asc' },
-    });
-  }
-
-  async updatePlan(
-    id: string,
-    data: Partial<{
-      name: string;
-      description: string;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      features: any;
-      limits: any;
-      trialDays: number;
-      isActive: boolean;
-    }>,
-  ) {
-    return this.prisma.subscriptionPlan.update({
-      where: { id },
-      data,
-    });
-  }
-
-  // Payment Methods
+  /**
+   * Create a new payment method for a user
+   */
   async createPaymentMethod(data: {
     userId: string;
     type: PaymentMethodType;
     cardLast4?: string;
     cardBrand?: string;
-    cardExpMonth?: number;
-    cardExpYear?: number;
-    stripePaymentMethodId?: string;
     isDefault?: boolean;
   }) {
+    this.logger.log(`Creating payment method for user ${data.userId}`);
+
     // If this is set as default, unset other default payment methods
     if (data.isDefault) {
       await this.prisma.paymentMethod.updateMany({
@@ -206,31 +55,48 @@ export class BillingService {
       });
     }
 
-    return this.prisma.paymentMethod.create({
-      data,
+    const paymentMethod = await this.prisma.paymentMethod.create({
+      data: {
+        userId: data.userId,
+        type: data.type,
+        cardLast4: data.cardLast4,
+        cardBrand: data.cardBrand,
+        isDefault: data.isDefault || false,
+      },
     });
+
+    this.eventEmitter.emit('payment_method.created', {
+      userId: data.userId,
+      paymentMethodId: paymentMethod.id,
+      type: data.type,
+    });
+
+    return paymentMethod;
   }
 
-  async findUserPaymentMethods(userId: string) {
+  /**
+   * Get all payment methods for a user
+   */
+  async getUserPaymentMethods(userId: string) {
     return this.prisma.paymentMethod.findMany({
-      where: { userId, isActive: true },
+      where: { userId },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
+  /**
+   * Update payment method settings
+   */
   async updatePaymentMethod(
     id: string,
-    data: Partial<{
-      isDefault: boolean;
-      isActive: boolean;
-    }>,
+    data: { isDefault?: boolean }
   ) {
     const paymentMethod = await this.prisma.paymentMethod.findUnique({
       where: { id },
     });
 
     if (!paymentMethod) {
-      throw new NotFoundException(`Payment method with ID ${id} not found`);
+      throw new NotFoundException(`Payment method ${id} not found`);
     }
 
     // If setting as default, unset other defaults for this user
@@ -247,1223 +113,495 @@ export class BillingService {
     });
   }
 
+  /**
+   * Delete (soft delete) a payment method
+   */
   async deletePaymentMethod(id: string) {
-    return this.prisma.paymentMethod.update({
+    const paymentMethod = await this.prisma.paymentMethod.findUnique({
       where: { id },
-      data: { isActive: false },
     });
-  }
 
-  // Payments
-  async createPayment(data: {
-    amount: number;
-    currency?: string;
-    paymentMethodId?: string;
-    subscriptionId?: string;
-    invoiceId?: string;
-    meetingId?: string;
-    description?: string;
-    providerPaymentId?: string;
-  }) {
-    return this.prisma.payment.create({
-      data: {
-        ...data,
-        status: PaymentStatus.PENDING,
-        currency: data.currency || 'USD',
-      },
-      include: {
-        paymentMethod: true,
-        subscription: true,
-        invoice: true,
-      },
-    });
-  }
-
-  async updatePaymentStatus(id: string, status: PaymentStatus, metadata?: any) {
-    const updateData: any = { status };
-
-    if (status === PaymentStatus.SUCCEEDED) {
-      updateData.processedAt = new Date();
-    } else if (status === PaymentStatus.FAILED) {
-      updateData.failedAt = new Date();
-      if (metadata?.failureCode) updateData.failureCode = metadata.failureCode;
-      if (metadata?.failureMessage)
-        updateData.failureMessage = metadata.failureMessage;
-
-      // Trigger payment failure recovery
-      setTimeout(() => {
-        this.handlePaymentFailure(id, metadata).catch((error) => {
-          this.logger.error('Payment failure recovery failed:', error);
-        });
-      }, 0);
+    if (!paymentMethod) {
+      throw new NotFoundException(`Payment method ${id} not found`);
     }
 
-    return this.prisma.payment.update({
-      where: { id },
-      data: updateData,
+    // Cannot delete the only payment method if user has pending payments
+    const otherMethods = await this.prisma.paymentMethod.count({
+      where: { 
+        userId: paymentMethod.userId,
+        id: { not: id }
+      },
     });
+
+    const pendingPayments = await this.prisma.payment.count({
+      where: {
+        OR: [
+          { clientId: paymentMethod.userId },
+          { therapistId: paymentMethod.userId }
+        ],
+        status: PaymentStatus.PENDING,
+      },
+    });
+
+    if (otherMethods === 0 && pendingPayments > 0) {
+      throw new BadRequestException(
+        'Cannot delete the only payment method with pending payments'
+      );
+    }
+
+    await this.prisma.paymentMethod.delete({
+      where: { id },
+    });
+
+    this.eventEmitter.emit('payment_method.deleted', {
+      userId: paymentMethod.userId,
+      paymentMethodId: id,
+    });
+
+    return { success: true };
+  }
+
+  // ===== PAYMENT PROCESSING =====
+
+  /**
+   * Process a payment for a therapy session
+   */
+  async processSessionPayment(data: {
+    clientId: string;
+    therapistId: string;
+    meetingId?: string;
+    amount: number;
+    currency?: string;
+    paymentMethodId: string;
+    description?: string;
+  }) {
+    this.logger.log(
+      `Processing session payment: ${data.amount} ${data.currency || 'USD'} from client ${data.clientId} to therapist ${data.therapistId}`
+    );
+
+    // Validate payment method belongs to client
+    const paymentMethod = await this.prisma.paymentMethod.findFirst({
+      where: {
+        id: data.paymentMethodId,
+        userId: data.clientId,
+      },
+    });
+
+    if (!paymentMethod) {
+      throw new BadRequestException('Invalid payment method');
+    }
+
+    // Create payment record
+    const payment = await this.prisma.payment.create({
+      data: {
+        amount: data.amount,
+        currency: data.currency || 'USD',
+        status: PaymentStatus.PENDING,
+        clientId: data.clientId,
+        therapistId: data.therapistId,
+        meetingId: data.meetingId,
+        paymentMethodId: data.paymentMethodId,
+        failureReason: null,
+      },
+      include: {
+        client: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        therapist: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        paymentMethod: true,
+      },
+    });
+
+    // Process payment asynchronously
+    this.processPaymentAsync(payment.id).catch((error) => {
+      this.logger.error(`Failed to process payment ${payment.id}:`, error);
+    });
+
+    return payment;
   }
 
   /**
-   * Comprehensive payment failure recovery system
+   * Asynchronously process the payment with mock payment gateway
    */
-  async handlePaymentFailure(paymentId: string, failureMetadata?: any) {
+  private async processPaymentAsync(paymentId: string) {
+    // Simulate payment processing delay
+    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: {
-        subscription: {
-          include: {
-            user: true,
-            plan: true,
-          },
+        client: { 
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        therapist: { 
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
         },
         paymentMethod: true,
       },
     });
 
     if (!payment) {
-      this.logger.error(`Payment ${paymentId} not found for failure recovery`);
+      this.logger.error(`Payment ${paymentId} not found during processing`);
       return;
     }
 
-    this.logger.log(
-      `Starting payment failure recovery for payment ${paymentId}`,
-    );
+    // Mock payment processing with realistic success/failure rates
+    const success = this.mockPaymentGateway(payment);
 
-    try {
-      // Step 1: Attempt retry with same payment method (for temporary failures)
-      if (this.shouldRetryPayment(failureMetadata)) {
-        const retryResult = await this.retryFailedPayment(payment);
-        if (retryResult.success) {
-          this.logger.log(`Payment ${paymentId} successfully retried`);
-          return;
-        }
-      }
-
-      // Step 2: Try alternative payment methods
-      const alternativePaymentResult =
-        await this.tryAlternativePaymentMethods(payment);
-      if (alternativePaymentResult.success) {
-        this.logger.log(
-          `Payment ${paymentId} recovered using alternative payment method`,
-        );
-        return;
-      }
-
-      // Step 3: Apply grace period for subscription payments
-      if (payment.subscriptionId) {
-        await this.applyPaymentGracePeriod(payment);
-        this.logger.log(
-          `Grace period applied for subscription payment ${paymentId}`,
-        );
-      }
-
-      // Step 4: Notify user about payment failure
-      await this.notifyPaymentFailure(payment);
-
-      // Step 5: If this is a meeting payment, handle session access
-      if (payment.meetingId) {
-        await this.handleMeetingPaymentFailure(payment);
-      }
-    } catch (error) {
-      this.logger.error(
-        `Payment failure recovery failed for ${paymentId}:`,
-        error,
-      );
-
-      // Last resort: Emit critical payment failure event
-      this.eventEmitter.emit('payment.failure.critical', {
-        paymentId,
-        userId: payment.subscription?.userId,
-        amount: payment.amount,
-        error: error instanceof Error ? error.message : String(error),
-      });
+    if (success) {
+      await this.handlePaymentSuccess(payment);
+    } else {
+      await this.handlePaymentFailure(payment);
     }
   }
 
-  private shouldRetryPayment(failureMetadata?: any): boolean {
-    const retryableFailures = [
-      'insufficient_funds',
-      'card_declined',
-      'processing_error',
-      'network_error',
-      'temporary_failure',
+  /**
+   * Mock payment gateway simulation
+   * Returns true for success, false for failure
+   */
+  private mockPaymentGateway(payment: any): boolean {
+    // Simulate different failure scenarios based on card details
+    const cardLast4 = payment.paymentMethod?.cardLast4;
+    
+    // Test card numbers for specific scenarios
+    if (cardLast4) {
+      switch (cardLast4) {
+        case '0002': // Always decline
+          return false;
+        case '0004': // Always decline with insufficient funds
+          return false;
+        case '0008': // Always decline with expired card
+          return false;
+        case '0001': // Always succeed
+          return true;
+        default:
+          // Random success/failure (90% success rate)
+          return Math.random() > 0.1;
+      }
+    }
+
+    // Default: 90% success rate
+    return Math.random() > 0.1;
+  }
+
+  /**
+   * Handle successful payment
+   */
+  private async handlePaymentSuccess(payment: any) {
+    this.logger.log(`Payment ${payment.id} processed successfully`);
+
+    const updatedPayment = await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: PaymentStatus.COMPLETED,
+        processedAt: new Date(),
+      },
+    });
+
+    // Calculate platform fee (e.g., 5% platform commission)
+    const platformFeeRate = 0.05;
+    const platformFee = Number(payment.amount) * platformFeeRate;
+    const therapistAmount = Number(payment.amount) - platformFee;
+
+    // Emit payment success event
+    this.eventEmitter.emit('payment.succeeded', {
+      paymentId: payment.id,
+      clientId: payment.clientId,
+      therapistId: payment.therapistId,
+      amount: Number(payment.amount),
+      currency: payment.currency,
+      platformFee,
+      therapistAmount,
+      meetingId: payment.meetingId,
+    });
+
+    return updatedPayment;
+  }
+
+  /**
+   * Handle failed payment
+   */
+  private async handlePaymentFailure(payment: any) {
+    const failureReasons = [
+      'Insufficient funds',
+      'Card declined',
+      'Expired card',
+      'Invalid card number',
+      'Network error',
     ];
 
-    return (
-      failureMetadata?.failureCode &&
-      retryableFailures.includes(failureMetadata.failureCode)
-    );
-  }
+    const failureReason = failureReasons[Math.floor(Math.random() * failureReasons.length)];
+    
+    this.logger.warn(`Payment ${payment.id} failed: ${failureReason}`);
 
-  private async retryFailedPayment(payment: any) {
-    // Implement exponential backoff retry logic
-    const maxRetries = 3;
-    const baseDelay = 30000; // 30 seconds
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        this.logger.log(`Retry attempt ${attempt} for payment ${payment.id}`);
-
-        // Wait with exponential backoff
-        if (attempt > 1) {
-          const delay = baseDelay * Math.pow(2, attempt - 1);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-
-        // Create new payment attempt
-        const retryPayment = await this.createPayment({
-          amount: payment.amount,
-          currency: payment.currency,
-          paymentMethodId: payment.paymentMethodId,
-          subscriptionId: payment.subscriptionId,
-          meetingId: payment.meetingId,
-          description: `Retry ${attempt} - ${payment.description}`,
-        });
-
-        // Mark original payment as superseded
-        await this.prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: PaymentStatus.FAILED,
-            metadata: {
-              ...payment.metadata,
-              supersededBy: retryPayment.id,
-              retryAttempt: attempt,
-            },
-          },
-        });
-
-        return { success: true, payment: retryPayment };
-      } catch (error) {
-        this.logger.warn(
-          `Retry attempt ${attempt} failed for payment ${payment.id}:`,
-          error,
-        );
-
-        if (attempt === maxRetries) {
-          return { success: false, error };
-        }
-      }
-    }
-
-    return { success: false };
-  }
-
-  private async tryAlternativePaymentMethods(payment: any) {
-    if (!payment.subscription?.userId) {
-      return { success: false, reason: 'No user found' };
-    }
-
-    // Get other payment methods for the user
-    const userPaymentMethods = await this.findUserPaymentMethods(
-      payment.subscription.userId,
-    );
-    const alternativeMethods = userPaymentMethods.filter(
-      (pm) => pm.id !== payment.paymentMethodId && pm.isActive,
-    );
-
-    for (const altMethod of alternativeMethods) {
-      try {
-        this.logger.log(
-          `Trying alternative payment method ${altMethod.id} for payment ${payment.id}`,
-        );
-
-        const altPayment = await this.createPayment({
-          amount: payment.amount,
-          currency: payment.currency,
-          paymentMethodId: altMethod.id,
-          subscriptionId: payment.subscriptionId,
-          meetingId: payment.meetingId,
-          description: `Alternative payment - ${payment.description}`,
-        });
-
-        // Mark original payment as superseded
-        await this.prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: PaymentStatus.FAILED,
-            metadata: {
-              ...payment.metadata,
-              supersededBy: altPayment.id,
-              alternativeMethodUsed: altMethod.id,
-            },
-          },
-        });
-
-        return { success: true, payment: altPayment, method: altMethod };
-      } catch (error) {
-        this.logger.warn(
-          `Alternative payment method ${altMethod.id} failed:`,
-          error,
-        );
-        continue;
-      }
-    }
-
-    return { success: false, reason: 'All alternative payment methods failed' };
-  }
-
-  private async applyPaymentGracePeriod(payment: any) {
-    if (!payment.subscriptionId) return;
-
-    const gracePeriodDays = 7; // 7-day grace period
-    const gracePeriodEnd = new Date();
-    gracePeriodEnd.setDate(gracePeriodEnd.getDate() + gracePeriodDays);
-
-    await this.prisma.subscription.update({
-      where: { id: payment.subscriptionId },
+    const updatedPayment = await this.prisma.payment.update({
+      where: { id: payment.id },
       data: {
-        status: SubscriptionStatus.PAST_DUE,
-        metadata: {
-          ...payment.subscription.metadata,
-          gracePeriodStart: new Date().toISOString(),
-          gracePeriodEnd: gracePeriodEnd.toISOString(),
-          failedPaymentId: payment.id,
+        status: PaymentStatus.FAILED,
+        failedAt: new Date(),
+        failureReason,
+      },
+    });
+
+    // Emit payment failure event
+    this.eventEmitter.emit('payment.failed', {
+      paymentId: payment.id,
+      clientId: payment.clientId,
+      therapistId: payment.therapistId,
+      amount: Number(payment.amount),
+      currency: payment.currency,
+      failureReason,
+      meetingId: payment.meetingId,
+    });
+
+    return updatedPayment;
+  }
+
+  // ===== PAYMENT QUERIES =====
+
+  /**
+   * Get payment by ID
+   */
+  async getPayment(id: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      include: {
+        client: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        therapist: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        paymentMethod: true,
+        meeting: {
+          select: { startTime: true, endTime: true, title: true }
         },
       },
     });
 
-    this.eventEmitter.emit('subscription.grace_period.started', {
-      subscriptionId: payment.subscriptionId,
-      userId: payment.subscription.userId,
-      gracePeriodEnd,
-      failedAmount: payment.amount,
-    });
-  }
-
-  private async notifyPaymentFailure(payment: any) {
-    this.eventEmitter.emit('payment.failure.notification', {
-      userId: payment.subscription?.userId,
-      paymentId: payment.id,
-      amount: payment.amount,
-      currency: payment.currency,
-      failureReason: payment.failureMessage,
-      meetingId: payment.meetingId,
-      subscriptionId: payment.subscriptionId,
-    });
-  }
-
-  private async handleMeetingPaymentFailure(payment: any) {
-    if (!payment.meetingId) return;
-
-    // Find the associated meeting
-    const meeting = await this.prisma.meeting.findUnique({
-      where: { id: payment.meetingId },
-    });
-
-    if (!meeting) return;
-
-    // If meeting is more than 24 hours away, give time to resolve payment
-    const hoursUntilMeeting =
-      (meeting.startTime.getTime() - Date.now()) / (1000 * 60 * 60);
-
-    if (hoursUntilMeeting > 24) {
-      // Schedule payment resolution reminder
-      this.eventEmitter.emit('meeting.payment.reminder.scheduled', {
-        meetingId: payment.meetingId,
-        userId: meeting.clientId,
-        reminderTime: new Date(
-          meeting.startTime.getTime() - 24 * 60 * 60 * 1000,
-        ), // 24h before
-        paymentId: payment.id,
-      });
-    } else if (hoursUntilMeeting > 2) {
-      // Cancel meeting if payment can't be resolved within 2 hours
-      await this.prisma.meeting.update({
-        where: { id: payment.meetingId },
-        data: {
-          status: 'CANCELLED',
-          notes: `Cancelled due to payment failure - Payment ID: ${payment.id}`,
-        },
-      });
-
-      this.eventEmitter.emit('meeting.cancelled.payment_failure', {
-        meetingId: payment.meetingId,
-        clientId: meeting.clientId,
-        therapistId: meeting.therapistId,
-        paymentId: payment.id,
-      });
+    if (!payment) {
+      throw new NotFoundException(`Payment ${id} not found`);
     }
+
+    return payment;
   }
 
-  async findPayments(
-    subscriptionId?: string,
-    status?: PaymentStatus,
-    startDate?: Date,
-    endDate?: Date,
+  /**
+   * Get payments for a user (as client or therapist)
+   */
+  async getUserPayments(
+    userId: string,
+    options: {
+      role?: 'client' | 'therapist';
+      status?: PaymentStatus;
+      limit?: number;
+      offset?: number;
+    } = {}
   ) {
     const where: any = {};
 
-    if (subscriptionId) where.subscriptionId = subscriptionId;
-    if (status) where.status = status;
-    if (startDate) where.createdAt = { ...where.createdAt, gte: startDate };
-    if (endDate) where.createdAt = { ...where.createdAt, lte: endDate };
+    if (options.role === 'client') {
+      where.clientId = userId;
+    } else if (options.role === 'therapist') {
+      where.therapistId = userId;
+    } else {
+      where.OR = [
+        { clientId: userId },
+        { therapistId: userId },
+      ];
+    }
+
+    if (options.status) {
+      where.status = options.status;
+    }
 
     return this.prisma.payment.findMany({
       where,
       include: {
+        client: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        therapist: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
         paymentMethod: true,
-        subscription: true,
-        invoice: true,
+        meeting: {
+          select: { startTime: true, endTime: true, title: true }
+        },
       },
       orderBy: { createdAt: 'desc' },
+      take: options.limit || 50,
+      skip: options.offset || 0,
     });
   }
 
-  // Invoices
-  async createInvoice(data: {
-    subscriptionId: string;
-    subtotal: number;
-    taxAmount?: number;
-    discountAmount?: number;
-    dueDate: Date;
-    billingAddress?: any;
-  }) {
-    const total =
-      data.subtotal + (data.taxAmount || 0) - (data.discountAmount || 0);
-    const invoiceNumber = await this.generateInvoiceNumber();
+  /**
+   * Retry a failed payment
+   */
+  async retryPayment(paymentId: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+    });
 
-    return this.prisma.invoice.create({
+    if (!payment) {
+      throw new NotFoundException(`Payment ${paymentId} not found`);
+    }
+
+    if (payment.status !== PaymentStatus.FAILED) {
+      throw new BadRequestException('Can only retry failed payments');
+    }
+
+    // Reset payment to pending and retry
+    await this.prisma.payment.update({
+      where: { id: paymentId },
       data: {
-        ...data,
-        number: invoiceNumber,
-        total,
-        amountDue: total,
-        status: InvoiceStatus.OPEN,
-      },
-      include: {
-        subscription: true,
-        lineItems: true,
-      },
-    });
-  }
-
-  async findInvoices(subscriptionId?: string, status?: InvoiceStatus) {
-    const where: any = {};
-
-    if (subscriptionId) where.subscriptionId = subscriptionId;
-    if (status) where.status = status;
-
-    return this.prisma.invoice.findMany({
-      where,
-      include: {
-        subscription: {
-          include: { user: true },
-        },
-        lineItems: true,
-        payments: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async markInvoiceAsPaid(id: string) {
-    const invoice = await this.prisma.invoice.findUnique({
-      where: { id },
-      include: { payments: true },
-    });
-
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with ID ${id} not found`);
-    }
-
-    const totalPaid = invoice.payments
-      .filter((p) => p.status === PaymentStatus.SUCCEEDED)
-      .reduce((sum, p) => sum + Number(p.amount), 0);
-
-    return this.prisma.invoice.update({
-      where: { id },
-      data: {
-        status:
-          totalPaid >= Number(invoice.total)
-            ? InvoiceStatus.PAID
-            : InvoiceStatus.OPEN,
-        amountPaid: totalPaid,
-        paidAt: totalPaid >= Number(invoice.total) ? new Date() : null,
-      },
-    });
-  }
-
-  // Discounts
-  async createDiscount(data: {
-    code?: string;
-    name: string;
-    description?: string;
-    type: DiscountType;
-    percentOff?: number;
-    amountOff?: number;
-    validFrom?: Date;
-    validUntil?: Date;
-    maxUses?: number;
-    maxUsesPerUser?: number;
-    applicableTiers?: SubscriptionTier[];
-    minAmount?: number;
-  }) {
-    return this.prisma.discount.create({
-      data: {
-        ...data,
-        validFrom: data.validFrom || new Date(),
-      },
-    });
-  }
-
-  async validateDiscount(code: string, userId: string, amount: number) {
-    const discount = await this.prisma.discount.findUnique({
-      where: { code },
-      include: {
-        redemptions: {
-          where: { userId },
-        },
+        status: PaymentStatus.PENDING,
+        failureReason: null,
+        failedAt: null,
       },
     });
 
-    if (!discount || !discount.isActive) {
-      throw new BadRequestException('Invalid discount code');
-    }
-
-    const now = new Date();
-    if (discount.validUntil && discount.validUntil < now) {
-      throw new BadRequestException('Discount code has expired');
-    }
-
-    if (discount.maxUses && discount.currentUses >= discount.maxUses) {
-      throw new BadRequestException('Discount code usage limit reached');
-    }
-
-    if (
-      discount.maxUsesPerUser &&
-      discount.redemptions.length >= discount.maxUsesPerUser
-    ) {
-      throw new BadRequestException('You have already used this discount code');
-    }
-
-    const minAmountNum = Number(discount.minAmount);
-    if (discount.minAmount && !isNaN(minAmountNum) && amount < minAmountNum) {
-      throw new BadRequestException(
-        `Minimum amount of ${String(discount.minAmount)} required`,
-      );
-    }
-
-    return discount;
-  }
-
-  async redeemDiscount(
-    discountId: string,
-    userId: string,
-    amountSaved: number,
-  ) {
-    await this.prisma.$transaction(async (tx) => {
-      // Create redemption record
-      await tx.discountRedemption.create({
-        data: {
-          discountId,
-          userId,
-          amountSaved,
-        },
-      });
-
-      // Update discount usage count
-      await tx.discount.update({
-        where: { id: discountId },
-        data: {
-          currentUses: { increment: 1 },
-        },
-      });
+    // Process payment again
+    this.processPaymentAsync(paymentId).catch((error) => {
+      this.logger.error(`Failed to retry payment ${paymentId}:`, error);
     });
+
+    return { success: true, message: 'Payment retry initiated' };
   }
 
-  // Usage Records
-  async recordUsage(data: {
-    subscriptionId: string;
-    feature: string;
-    quantity: number;
-    unit: string;
-    usageDate?: Date;
-    metadata?: any;
-  }) {
-    return this.prisma.usageRecord.create({
-      data: {
-        ...data,
-        usageDate: data.usageDate || new Date(),
-      },
-    });
-  }
+  // ===== ANALYTICS & REPORTING =====
 
-  async getUsageRecords(
-    subscriptionId: string,
-    feature?: string,
+  /**
+   * Get payment statistics for therapists
+   */
+  async getTherapistPaymentStats(
+    therapistId: string,
     startDate?: Date,
-    endDate?: Date,
+    endDate?: Date
   ) {
-    const where: any = { subscriptionId };
+    const where: any = {
+      therapistId,
+      status: PaymentStatus.COMPLETED,
+    };
 
-    if (feature) where.feature = feature;
-    if (startDate) where.usageDate = { ...where.usageDate, gte: startDate };
-    if (endDate) where.usageDate = { ...where.usageDate, lte: endDate };
-
-    return this.prisma.usageRecord.findMany({
-      where,
-      orderBy: { usageDate: 'desc' },
-    });
-  }
-
-  // Helper methods
-  private async generateInvoiceNumber(): Promise<string> {
-    const year = new Date().getFullYear();
-    const lastInvoice = await this.prisma.invoice.findFirst({
-      where: {
-        number: { startsWith: `INV-${year}-` },
-      },
-      orderBy: { number: 'desc' },
-    });
-
-    let nextNumber = 1;
-    if (lastInvoice) {
-      const parts = lastInvoice.number.split('-');
-      if (parts.length >= 3 && parts[2]) {
-        const lastNumber = parseInt(parts[2], 10);
-        if (!isNaN(lastNumber)) {
-          nextNumber = lastNumber + 1;
-        }
-      }
+    if (startDate) {
+      where.processedAt = { ...where.processedAt, gte: startDate };
+    }
+    if (endDate) {
+      where.processedAt = { ...where.processedAt, lte: endDate };
     }
 
-    return `INV-${year}-${nextNumber.toString().padStart(6, '0')}`;
+    const [totalPayments, stats] = await Promise.all([
+      this.prisma.payment.count({ where }),
+      this.prisma.payment.aggregate({
+        where,
+        _sum: { amount: true },
+        _avg: { amount: true },
+      }),
+    ]);
+
+    const totalRevenue = Number(stats._sum.amount || 0);
+    const averageSessionRate = Number(stats._avg.amount || 0);
+    const platformFeeRate = 0.05;
+    const platformFees = totalRevenue * platformFeeRate;
+    const netEarnings = totalRevenue - platformFees;
+
+    return {
+      totalSessions: totalPayments,
+      totalRevenue,
+      averageSessionRate,
+      platformFees,
+      netEarnings,
+      period: {
+        startDate,
+        endDate,
+      },
+    };
   }
 
-  async getBillingStatistics(startDate?: Date, endDate?: Date) {
+  /**
+   * Get platform billing statistics (admin only)
+   */
+  async getPlatformStats(startDate?: Date, endDate?: Date) {
     const where: any = {};
-    if (startDate) where.createdAt = { ...where.createdAt, gte: startDate };
-    if (endDate) where.createdAt = { ...where.createdAt, lte: endDate };
+
+    if (startDate) {
+      where.createdAt = { ...where.createdAt, gte: startDate };
+    }
+    if (endDate) {
+      where.createdAt = { ...where.createdAt, lte: endDate };
+    }
 
     const [
-      totalRevenue,
-      activeSubscriptions,
-      trialSubscriptions,
-      canceledSubscriptions,
-      subscriptionsByTier,
+      totalPayments,
+      successfulPayments,
+      failedPayments,
+      revenueStats,
     ] = await Promise.all([
+      this.prisma.payment.count({ where }),
+      this.prisma.payment.count({ 
+        where: { ...where, status: PaymentStatus.COMPLETED }
+      }),
+      this.prisma.payment.count({ 
+        where: { ...where, status: PaymentStatus.FAILED }
+      }),
       this.prisma.payment.aggregate({
-        where: { ...where, status: PaymentStatus.SUCCEEDED },
+        where: { ...where, status: PaymentStatus.COMPLETED },
         _sum: { amount: true },
       }),
-      this.prisma.subscription.count({
-        where: { status: SubscriptionStatus.ACTIVE },
-      }),
-      this.prisma.subscription.count({
-        where: { status: SubscriptionStatus.TRIALING },
-      }),
-      this.prisma.subscription.count({
-        where: { status: SubscriptionStatus.CANCELED },
-      }),
-      this.prisma.subscription.groupBy({
-        by: ['tier'],
-        where: { status: SubscriptionStatus.ACTIVE },
-        _count: { tier: true },
-      }),
     ]);
 
-    return {
-      totalRevenue: totalRevenue._sum.amount || 0,
-      activeSubscriptions,
-      trialSubscriptions,
-      canceledSubscriptions,
-      subscriptionsByTier,
-    };
-  }
-
-  // ===== ADVANCED SUBSCRIPTION MANAGEMENT =====
-
-  /**
-   * Upgrade or downgrade subscription with prorated billing
-   */
-  async changeSubscriptionPlan(
-    userId: string,
-    newPlanId: string,
-    options: {
-      billingCycle?: BillingCycle;
-      prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
-      effectiveDate?: Date;
-    } = {},
-  ) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    const newPlan = await this.prisma.subscriptionPlan.findUnique({
-      where: { id: newPlanId },
-    });
-
-    if (!newPlan) {
-      throw new NotFoundException(`Plan ${newPlanId} not found`);
-    }
-
-    const effectiveDate = options.effectiveDate || new Date();
-    const newBillingCycle = options.billingCycle || subscription.billingCycle;
-    const newAmount =
-      newBillingCycle === BillingCycle.YEARLY
-        ? newPlan.yearlyPrice || newPlan.monthlyPrice
-        : newPlan.monthlyPrice;
-
-    // Calculate proration if needed
-    let prorationAmount = 0;
-    if (options.prorationBehavior !== 'none') {
-      prorationAmount = await this.calculateProration(
-        subscription,
-        Number(newAmount),
-        effectiveDate,
-      );
-    }
-
-    return await this.prisma.$transaction(async (tx) => {
-      // Update subscription
-      const updatedSubscription = await tx.subscription.update({
-        where: { userId },
-        data: {
-          planId: newPlanId,
-          tier: newPlan.tier,
-          billingCycle: newBillingCycle,
-          amount: newAmount,
-          metadata: {
-            ...(typeof subscription.metadata === 'object' &&
-            subscription.metadata !== null
-              ? (subscription.metadata as Record<string, any>)
-              : {}),
-            lastPlanChange: effectiveDate.toISOString(),
-            previousPlanId: subscription.planId,
-          },
-        },
-        include: {
-          plan: true,
-          defaultPaymentMethod: true,
-        },
-      });
-
-      // Create proration invoice if needed
-      if (prorationAmount !== 0 && options.prorationBehavior !== 'none') {
-        await this.createProrationInvoice(
-          tx,
-          subscription.id,
-          prorationAmount,
-          effectiveDate,
-        );
-      }
-
-      // Emit event
-      this.eventEmitter.emit('subscription.plan.changed', {
-        userId,
-        subscriptionId: subscription.id,
-        previousPlanId: subscription.planId,
-        newPlanId,
-        prorationAmount,
-        effectiveDate,
-      });
-
-      this.logger.log(
-        `User ${userId} changed subscription plan from ${subscription.planId} to ${newPlanId}`,
-      );
-
-      return updatedSubscription;
-    });
-  }
-
-  /**
-   * Pause subscription (keep it active but stop billing)
-   */
-  async pauseSubscription(
-    userId: string,
-    options: {
-      pauseUntil?: Date;
-      reason?: string;
-    } = {},
-  ) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    if (subscription.status !== SubscriptionStatus.ACTIVE) {
-      throw new BadRequestException('Can only pause active subscriptions');
-    }
-
-    const updatedSubscription = await this.prisma.subscription.update({
-      where: { userId },
-      data: {
-        status: SubscriptionStatus.PAUSED,
-        metadata: {
-          ...(typeof subscription.metadata === 'object' &&
-          subscription.metadata !== null
-            ? (subscription.metadata as Record<string, any>)
-            : {}),
-          pausedAt: new Date().toISOString(),
-          pauseUntil: options.pauseUntil?.toISOString(),
-          pauseReason: options.reason,
-          previousStatus: subscription.status,
-        },
-      },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-      },
-    });
-
-    this.eventEmitter.emit('subscription.paused', {
-      userId,
-      subscriptionId: subscription.id,
-      pauseUntil: options.pauseUntil,
-      reason: options.reason,
-    });
-
-    this.logger.log(
-      `Subscription ${subscription.id} paused for user ${userId}`,
-    );
-
-    return updatedSubscription;
-  }
-
-  /**
-   * Resume paused subscription
-   */
-  async resumeSubscription(userId: string) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    if (subscription.status !== SubscriptionStatus.PAUSED) {
-      throw new BadRequestException('Can only resume paused subscriptions');
-    }
-
-    const metadata = subscription.metadata as any;
-    const previousStatus =
-      metadata?.previousStatus || SubscriptionStatus.ACTIVE;
-
-    const updatedSubscription = await this.prisma.subscription.update({
-      where: { userId },
-      data: {
-        status: previousStatus,
-        metadata: {
-          ...metadata,
-          resumedAt: new Date().toISOString(),
-          pausedAt: undefined,
-          pauseUntil: undefined,
-          pauseReason: undefined,
-          previousStatus: undefined,
-        },
-      },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-      },
-    });
-
-    this.eventEmitter.emit('subscription.resumed', {
-      userId,
-      subscriptionId: subscription.id,
-    });
-
-    this.logger.log(
-      `Subscription ${subscription.id} resumed for user ${userId}`,
-    );
-
-    return updatedSubscription;
-  }
-
-  /**
-   * Schedule subscription cancellation at period end
-   */
-  async scheduleSubscriptionCancellation(
-    userId: string,
-    options: {
-      reason?: string;
-      feedback?: string;
-      cancelAtPeriodEnd?: boolean;
-    } = {},
-  ) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    const cancelAtPeriodEnd = options.cancelAtPeriodEnd ?? true;
-    const cancelDate = cancelAtPeriodEnd
-      ? subscription.currentPeriodEnd
-      : new Date();
-
-    const updatedSubscription = await this.prisma.subscription.update({
-      where: { userId },
-      data: {
-        status: cancelAtPeriodEnd
-          ? subscription.status
-          : SubscriptionStatus.CANCELED,
-        canceledAt: cancelAtPeriodEnd ? null : new Date(),
-        endedAt: cancelAtPeriodEnd ? subscription.currentPeriodEnd : new Date(),
-        cancelReason: options.reason,
-        canceledBy: userId,
-        metadata: {
-          ...(typeof subscription.metadata === 'object' &&
-          subscription.metadata !== null
-            ? (subscription.metadata as Record<string, any>)
-            : {}),
-          scheduledCancellation: cancelAtPeriodEnd,
-          cancellationFeedback: options.feedback,
-          cancellationScheduledAt: new Date().toISOString(),
-        },
-      },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-      },
-    });
-
-    this.eventEmitter.emit('subscription.cancellation.scheduled', {
-      userId,
-      subscriptionId: subscription.id,
-      cancelDate,
-      reason: options.reason,
-      feedback: options.feedback,
-      cancelAtPeriodEnd,
-    });
-
-    this.logger.log(
-      `Subscription cancellation scheduled for user ${userId}, effective ${cancelDate}`,
-    );
-
-    return updatedSubscription;
-  }
-
-  /**
-   * Reactivate a canceled subscription
-   */
-  async reactivateSubscription(userId: string, newPaymentMethodId?: string) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    if (subscription.status !== SubscriptionStatus.CANCELED) {
-      throw new BadRequestException(
-        'Can only reactivate canceled subscriptions',
-      );
-    }
-
-    // Reset period dates
-    const currentPeriodStart = new Date();
-    const currentPeriodEnd = new Date();
-
-    if (subscription.billingCycle === BillingCycle.YEARLY) {
-      currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
-    } else {
-      currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
-    }
-
-    const updatedSubscription = await this.prisma.subscription.update({
-      where: { userId },
-      data: {
-        status: SubscriptionStatus.ACTIVE,
-        currentPeriodStart,
-        currentPeriodEnd,
-        canceledAt: null,
-        endedAt: null,
-        cancelReason: null,
-        defaultPaymentMethodId:
-          newPaymentMethodId || subscription.defaultPaymentMethodId,
-        metadata: {
-          ...(typeof subscription.metadata === 'object' &&
-          subscription.metadata !== null
-            ? (subscription.metadata as Record<string, any>)
-            : {}),
-          reactivatedAt: new Date().toISOString(),
-          scheduledCancellation: false,
-        },
-      },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-      },
-    });
-
-    this.eventEmitter.emit('subscription.reactivated', {
-      userId,
-      subscriptionId: subscription.id,
-    });
-
-    this.logger.log(
-      `Subscription ${subscription.id} reactivated for user ${userId}`,
-    );
-
-    return updatedSubscription;
-  }
-
-  /**
-   * Apply discount to subscription
-   */
-  async applyDiscountToSubscription(userId: string, discountCode: string) {
-    const subscription = await this.findUserSubscription(userId);
-    if (!subscription) {
-      throw new NotFoundException(`Subscription for user ${userId} not found`);
-    }
-
-    const discount = await this.validateDiscount(
-      discountCode,
-      userId,
-      Number(subscription.amount),
-    );
-
-    // Calculate discount amount
-    let discountAmount = 0;
-    if (discount.type === DiscountType.PERCENTAGE && discount.percentOff) {
-      discountAmount =
-        Number(subscription.amount) * (Number(discount.percentOff) / 100);
-    } else if (
-      discount.type === DiscountType.FIXED_AMOUNT &&
-      discount.amountOff
-    ) {
-      discountAmount = Number(discount.amountOff);
-    }
-
-    const newAmount = Math.max(0, Number(subscription.amount) - discountAmount);
-
-    return await this.prisma.$transaction(async (tx) => {
-      // Update subscription amount
-      const updatedSubscription = await tx.subscription.update({
-        where: { userId },
-        data: {
-          amount: newAmount,
-          metadata: {
-            ...(typeof subscription.metadata === 'object' &&
-            subscription.metadata !== null
-              ? (subscription.metadata as Record<string, any>)
-              : {}),
-            appliedDiscounts: [
-              ...((subscription.metadata as any)?.appliedDiscounts || []),
-              {
-                discountId: discount.id,
-                code: discountCode,
-                appliedAt: new Date().toISOString(),
-                originalAmount: subscription.amount,
-                discountAmount,
-                newAmount,
-              },
-            ],
-          },
-        },
-        include: {
-          plan: true,
-          defaultPaymentMethod: true,
-        },
-      });
-
-      // Record discount redemption
-      await this.redeemDiscount(discount.id, userId, discountAmount);
-
-      this.eventEmitter.emit('subscription.discount.applied', {
-        userId,
-        subscriptionId: subscription.id,
-        discountCode,
-        discountAmount,
-        newAmount,
-      });
-
-      return updatedSubscription;
-    });
-  }
-
-  /**
-   * Process subscription renewal
-   */
-  async processSubscriptionRenewal(subscriptionId: string) {
-    const subscription = await this.prisma.subscription.findUnique({
-      where: { id: subscriptionId },
-      include: {
-        plan: true,
-        defaultPaymentMethod: true,
-        user: true,
-      },
-    });
-
-    if (!subscription) {
-      throw new NotFoundException(`Subscription ${subscriptionId} not found`);
-    }
-
-    // Check if renewal is due
-    const now = new Date();
-    if (subscription.currentPeriodEnd > now) {
-      throw new BadRequestException('Subscription renewal not yet due');
-    }
-
-    return await this.prisma.$transaction(async (tx) => {
-      // Create invoice for next period
-      const nextPeriodStart = subscription.currentPeriodEnd;
-      const nextPeriodEnd = new Date(nextPeriodStart);
-
-      if (subscription.billingCycle === BillingCycle.YEARLY) {
-        nextPeriodEnd.setFullYear(nextPeriodEnd.getFullYear() + 1);
-      } else {
-        nextPeriodEnd.setMonth(nextPeriodEnd.getMonth() + 1);
-      }
-
-      const invoice = await this.createInvoice({
-        subscriptionId,
-        subtotal: Number(subscription.amount),
-        dueDate: nextPeriodStart,
-      });
-
-      // Update subscription period
-      const updatedSubscription = await tx.subscription.update({
-        where: { id: subscriptionId },
-        data: {
-          currentPeriodStart: nextPeriodStart,
-          currentPeriodEnd: nextPeriodEnd,
-          metadata: {
-            ...(typeof subscription.metadata === 'object' &&
-            subscription.metadata !== null
-              ? (subscription.metadata as Record<string, any>)
-              : {}),
-            lastRenewal: now.toISOString(),
-          },
-        },
-        include: {
-          plan: true,
-          defaultPaymentMethod: true,
-        },
-      });
-
-      this.eventEmitter.emit('subscription.renewed', {
-        userId: subscription.userId,
-        subscriptionId,
-        invoiceId: invoice.id,
-        nextPeriodStart,
-        nextPeriodEnd,
-      });
-
-      return { subscription: updatedSubscription, invoice };
-    });
-  }
-
-  /**
-   * Get subscription usage analytics
-   */
-  async getSubscriptionUsageAnalytics(
-    subscriptionId: string,
-    startDate?: Date,
-    endDate?: Date,
-  ) {
-    const subscription = await this.prisma.subscription.findUnique({
-      where: { id: subscriptionId },
-      include: { plan: true },
-    });
-
-    if (!subscription) {
-      throw new NotFoundException(`Subscription ${subscriptionId} not found`);
-    }
-
-    const where: any = { subscriptionId };
-    if (startDate) where.usageDate = { ...where.usageDate, gte: startDate };
-    if (endDate) where.usageDate = { ...where.usageDate, lte: endDate };
-
-    const [usageRecords, usageByFeature, totalUsage] = await Promise.all([
-      this.prisma.usageRecord.findMany({
-        where,
-        orderBy: { usageDate: 'desc' },
-        take: 100,
-      }),
-      this.prisma.usageRecord.groupBy({
-        by: ['feature'],
-        where,
-        _sum: { quantity: true },
-        _count: { quantity: true },
-      }),
-      this.prisma.usageRecord.aggregate({
-        where,
-        _sum: { quantity: true },
-        _count: { quantity: true },
-      }),
-    ]);
-
-    const planLimits = subscription.plan.limits as any;
+    const totalRevenue = Number(revenueStats._sum.amount || 0);
+    const platformFeeRate = 0.05;
+    const platformRevenue = totalRevenue * platformFeeRate;
+    const successRate = totalPayments > 0 ? (successfulPayments / totalPayments) * 100 : 0;
 
     return {
-      subscription,
-      usageRecords,
-      usageByFeature: usageByFeature.map((usage) => ({
-        feature: usage.feature,
-        totalQuantity: usage._sum.quantity || 0,
-        recordCount: usage._count.quantity,
-        limit: planLimits?.[usage.feature] || null,
-        utilizationPercentage: planLimits?.[usage.feature]
-          ? ((usage._sum.quantity || 0) / planLimits[usage.feature]) * 100
-          : null,
-      })),
-      totalUsage: {
-        totalQuantity: totalUsage._sum.quantity || 0,
-        totalRecords: totalUsage._count.quantity,
+      totalPayments,
+      successfulPayments,
+      failedPayments,
+      successRate,
+      totalRevenue,
+      platformRevenue,
+      therapistPayouts: totalRevenue - platformRevenue,
+      period: {
+        startDate,
+        endDate,
       },
     };
-  }
-
-  // ===== PRIVATE HELPER METHODS =====
-
-  private async calculateProration(
-    subscription: any,
-    newAmount: number,
-    effectiveDate: Date,
-  ): Promise<number> {
-    const currentAmount = Number(subscription.amount);
-    const periodStart = subscription.currentPeriodStart;
-    const periodEnd = subscription.currentPeriodEnd;
-
-    const totalPeriodDays = Math.ceil(
-      (periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    const remainingDays = Math.ceil(
-      (periodEnd.getTime() - effectiveDate.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (remainingDays <= 0) return 0;
-
-    const dailyCurrentRate = currentAmount / totalPeriodDays;
-    const dailyNewRate = newAmount / totalPeriodDays;
-
-    const prorationAmount = (dailyNewRate - dailyCurrentRate) * remainingDays;
-
-    return Math.round(prorationAmount * 100) / 100; // Round to 2 decimal places
-  }
-
-  private async createProrationInvoice(
-    tx: any,
-    subscriptionId: string,
-    prorationAmount: number,
-    effectiveDate: Date,
-  ) {
-    if (prorationAmount === 0) return;
-
-    const invoiceNumber = await this.generateInvoiceNumber();
-    const description =
-      prorationAmount > 0
-        ? 'Proration charge for plan upgrade'
-        : 'Proration credit for plan downgrade';
-
-    return await tx.invoice.create({
-      data: {
-        subscriptionId,
-        number: invoiceNumber,
-        status: InvoiceStatus.OPEN,
-        subtotal: Math.abs(prorationAmount),
-        total: Math.abs(prorationAmount),
-        amountDue: prorationAmount > 0 ? prorationAmount : 0,
-        dueDate: effectiveDate,
-        lineItems: {
-          create: {
-            description,
-            quantity: 1,
-            unitPrice: prorationAmount,
-            amount: prorationAmount,
-          },
-        },
-      },
-    });
   }
 }

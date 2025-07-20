@@ -384,7 +384,7 @@ export declare const PreAssessmentListParamsSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    sortBy: "completedAt" | "overallScore" | "riskLevel" | "processedAt";
+    sortBy: "completedAt" | "processedAt" | "overallScore" | "riskLevel";
     sortOrder: "asc" | "desc";
     offset: number;
     userId?: string | undefined;
@@ -395,7 +395,7 @@ export declare const PreAssessmentListParamsSchema: z.ZodObject<{
 }, {
     userId?: string | undefined;
     limit?: number | undefined;
-    sortBy?: "completedAt" | "overallScore" | "riskLevel" | "processedAt" | undefined;
+    sortBy?: "completedAt" | "processedAt" | "overallScore" | "riskLevel" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     offset?: number | undefined;
     isProcessed?: boolean | undefined;

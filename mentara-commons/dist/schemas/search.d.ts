@@ -56,7 +56,7 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     type: "sessions" | "users" | "posts" | "therapists" | "communities" | "all" | "worksheets";
-    sortBy: "date" | "rating" | "name" | "price" | "relevance";
+    sortBy: "date" | "rating" | "name" | "relevance" | "price";
     sortOrder: "asc" | "desc";
     query: string;
     filters?: {
@@ -78,7 +78,7 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
 }, {
     query: string;
     type?: "sessions" | "users" | "posts" | "therapists" | "communities" | "all" | "worksheets" | undefined;
-    sortBy?: "date" | "rating" | "name" | "price" | "relevance" | undefined;
+    sortBy?: "date" | "rating" | "name" | "relevance" | "price" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     filters?: {
         location?: string | undefined;
@@ -320,7 +320,7 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
-    sortBy: "rating" | "price" | "experience" | "relevance" | "distance";
+    sortBy: "rating" | "experience" | "relevance" | "price" | "distance";
     location?: string | undefined;
     rating?: number | undefined;
     query?: string | undefined;
@@ -346,7 +346,7 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
     rating?: number | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "rating" | "price" | "experience" | "relevance" | "distance" | undefined;
+    sortBy?: "rating" | "experience" | "relevance" | "price" | "distance" | undefined;
     query?: string | undefined;
     specialties?: string[] | undefined;
     availability?: {
@@ -460,7 +460,7 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
-    sortBy: "rating" | "price" | "experience" | "relevance" | "distance";
+    sortBy: "rating" | "experience" | "relevance" | "price" | "distance";
     sortOrder: "asc" | "desc";
     location?: string | undefined;
     rating?: number | undefined;
@@ -487,7 +487,7 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
     rating?: number | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "rating" | "price" | "experience" | "relevance" | "distance" | undefined;
+    sortBy?: "rating" | "experience" | "relevance" | "price" | "distance" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     query?: string | undefined;
     specialties?: string[] | undefined;

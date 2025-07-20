@@ -9,85 +9,38 @@ import {
   UseGuards,
   Delete,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBody,
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
-  ApiSecurity,
 } from '@nestjs/swagger';
 import { BillingService } from './billing.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
-import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import { PaymentStatus, PaymentMethodType } from '@prisma/client';
 import {
-  CreateSubscriptionDtoSchema,
-  UpdateSubscriptionDtoSchema,
-  CancelSubscriptionDtoSchema,
-  ChangeSubscriptionPlanDtoSchema,
-  PauseSubscriptionDtoSchema,
-  ScheduleSubscriptionCancellationDtoSchema,
-  ReactivateSubscriptionDtoSchema,
-  ApplyDiscountDtoSchema,
-  SubscriptionUsageAnalyticsQueryDtoSchema,
-  GetPlansQueryDtoSchema,
-  CreatePlanDtoSchema,
-  UpdatePlanDtoSchema,
-  CreatePaymentMethodDtoSchema,
-  UpdatePaymentMethodDtoSchema,
-  CreatePaymentDtoSchema,
-  GetPaymentsQueryDtoSchema,
-  UpdatePaymentStatusDtoSchema,
-  CreateInvoiceDtoSchema,
-  GetInvoicesQueryDtoSchema,
-  MarkInvoiceAsPaidDtoSchema,
-  CreateDiscountDtoSchema,
-  ValidateDiscountDtoSchema,
-  RedeemDiscountDtoSchema,
-  RecordUsageDtoSchema,
-  GetUsageRecordsQueryDtoSchema,
-  GetBillingStatisticsQueryDtoSchema,
-  type CreateSubscriptionDto,
-  type UpdateSubscriptionDto,
-  type CancelSubscriptionDto,
-  type ChangeSubscriptionPlanDto,
-  type PauseSubscriptionDto,
-  type ScheduleSubscriptionCancellationDto,
-  type ReactivateSubscriptionDto,
-  type ApplyDiscountDto,
-  type SubscriptionUsageAnalyticsQueryDto,
-  type GetPlansQueryDto,
-  type CreatePlanDto,
-  type UpdatePlanDto,
-  type CreatePaymentMethodDto,
-  type UpdatePaymentMethodDto,
-  type CreatePaymentDto,
-  type GetPaymentsQueryDto,
-  type UpdatePaymentStatusDto,
-  type CreateInvoiceDto,
-  type GetInvoicesQueryDto,
-  type MarkInvoiceAsPaidDto,
-  type CreateDiscountDto,
-  type ValidateDiscountDto,
-  type RedeemDiscountDto,
-  type RecordUsageDto,
-  type GetUsageRecordsQueryDto,
-  type GetBillingStatisticsQueryDto,
+  CreatePaymentMethodDto,
+  UpdatePaymentMethodDto,
+  ProcessSessionPaymentDto,
+  GetPaymentsQueryDto,
 } from 'mentara-commons';
 import {
-  BillingCycle,
-  SubscriptionTier,
-  PaymentMethodType,
-  PaymentStatus,
-  InvoiceStatus,
-  DiscountType,
-} from '@prisma/client';
+  TherapistAnalyticsQueryDto,
+  PlatformAnalyticsQueryDto,
+} from 'mentara-commons';
 
+/**
+ * Educational Billing Controller for Mental Health Platform
+ * 
+ * Simplified payment processing endpoints suitable for a school project.
+ * Focuses on therapy session payments without complex billing features.
+ */
 @ApiTags('billing')
 @ApiBearerAuth('JWT-auth')
 @Controller('billing')
@@ -95,231 +48,17 @@ import {
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
-  // Subscription endpoints
-  @Post('subscriptions')
-  @ApiOperation({
-    summary: 'Create new subscription',
-    description: 'Create a new subscription plan for the authenticated user',
-  })
-  @ApiBody({
-    description: 'Subscription creation details',
-    schema: {
-      type: 'object',
-      properties: {
-        planId: { type: 'string', description: 'ID of the subscription plan' },
-        paymentMethodId: {
-          type: 'string',
-          description: 'Payment method to use',
-        },
-        trialStart: {
-          type: 'string',
-          format: 'date-time',
-          description: 'Trial start date',
-        },
-        trialEnd: {
-          type: 'string',
-          format: 'date-time',
-          description: 'Trial end date',
-        },
-      },
-      required: ['planId', 'paymentMethodId'],
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Subscription created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        userId: { type: 'string' },
-        planId: { type: 'string' },
-        status: {
-          type: 'string',
-          enum: ['active', 'trialing', 'past_due', 'canceled'],
-        },
-        createdAt: { type: 'string', format: 'date-time' },
-      },
-    },
-  })
-  @ApiResponse({ status: 400, description: 'Invalid subscription data' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 409,
-    description: 'User already has an active subscription',
-  })
-  createSubscription(
-    @Body(new ZodValidationPipe(CreateSubscriptionDtoSchema))
-    body: CreateSubscriptionDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.createSubscription({
-      ...body,
-      userId,
-      trialStart: body.trialStart ? new Date(body.trialStart) : undefined,
-      trialEnd: body.trialEnd ? new Date(body.trialEnd) : undefined,
-    });
-  }
+  // ===== PAYMENT METHODS =====
 
-  @Get('subscriptions/me')
-  getMySubscription(@CurrentUserId() userId: string) {
-    return this.billingService.findUserSubscription(userId);
-  }
-
-  @Patch('subscriptions/me')
-  updateMySubscription(
-    @Body(new ZodValidationPipe(UpdateSubscriptionDtoSchema))
-    body: UpdateSubscriptionDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.updateSubscription(userId, body);
-  }
-
-  @Post('subscriptions/me/cancel')
-  cancelMySubscription(
-    @Body(new ZodValidationPipe(CancelSubscriptionDtoSchema))
-    body: CancelSubscriptionDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.cancelSubscription(userId);
-  }
-
-  // ===== ADVANCED SUBSCRIPTION MANAGEMENT =====
-
-  @Post('subscriptions/me/change-plan')
-  changeMySubscriptionPlan(
-    @Body(new ZodValidationPipe(ChangeSubscriptionPlanDtoSchema))
-    body: ChangeSubscriptionPlanDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.changeSubscriptionPlan(userId, body.newPlanId, {
-      billingCycle: body.billingCycle,
-      prorationBehavior: body.prorationBehavior,
-      effectiveDate: body.effectiveDate
-        ? new Date(body.effectiveDate)
-        : undefined,
-    });
-  }
-
-  @Post('subscriptions/me/pause')
-  pauseMySubscription(
-    @Body(new ZodValidationPipe(PauseSubscriptionDtoSchema))
-    body: PauseSubscriptionDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.pauseSubscription(userId, {
-      pauseUntil: body.pauseUntil ? new Date(body.pauseUntil) : undefined,
-      reason: body.reason,
-    });
-  }
-
-  @Post('subscriptions/me/resume')
-  resumeMySubscription(@CurrentUserId() userId: string) {
-    return this.billingService.resumeSubscription(userId);
-  }
-
-  @Post('subscriptions/me/schedule-cancellation')
-  scheduleMySubscriptionCancellation(
-    @Body(new ZodValidationPipe(ScheduleSubscriptionCancellationDtoSchema))
-    body: ScheduleSubscriptionCancellationDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.scheduleSubscriptionCancellation(userId, body);
-  }
-
-  @Post('subscriptions/me/reactivate')
-  reactivateMySubscription(
-    @Body(new ZodValidationPipe(ReactivateSubscriptionDtoSchema))
-    body: ReactivateSubscriptionDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.reactivateSubscription(
-      userId,
-      body.newPaymentMethodId,
-    );
-  }
-
-  @Post('subscriptions/me/apply-discount')
-  applyDiscountToMySubscription(
-    @Body(new ZodValidationPipe(ApplyDiscountDtoSchema)) body: ApplyDiscountDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.applyDiscountToSubscription(
-      userId,
-      body.discountCode,
-    );
-  }
-
-  @Post('subscriptions/:id/renew')
-  processSubscriptionRenewal(
-    @Param('id') subscriptionId: string,
-    @CurrentUserRole() userRole: string,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-    return this.billingService.processSubscriptionRenewal(subscriptionId);
-  }
-
-  @Get('subscriptions/:id/usage-analytics')
-  getSubscriptionUsageAnalytics(
-    @Param('id') subscriptionId: string,
-    @CurrentUserRole() userRole: string,
-    @CurrentUserId() userId: string,
-    @Query(new ZodValidationPipe(SubscriptionUsageAnalyticsQueryDtoSchema))
-    query: SubscriptionUsageAnalyticsQueryDto,
-  ) {
-    // Users can only see their own subscription analytics
-    if (userRole !== 'admin') {
-      // In a real implementation, verify subscriptionId belongs to user
-    }
-
-    return this.billingService.getSubscriptionUsageAnalytics(
-      subscriptionId,
-      query.startDate ? new Date(query.startDate) : undefined,
-      query.endDate ? new Date(query.endDate) : undefined,
-    );
-  }
-
-  // Subscription Plans
-  @Get('plans')
-  getAllPlans(
-    @Query(new ZodValidationPipe(GetPlansQueryDtoSchema))
-    query: GetPlansQueryDto,
-  ) {
-    return this.billingService.findAllPlans(
-      query.isActive !== undefined ? query.isActive : true,
-    );
-  }
-
-  @Post('plans')
-  createPlan(
-    @Body(new ZodValidationPipe(CreatePlanDtoSchema)) body: CreatePlanDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-    return this.billingService.createSubscriptionPlan(body);
-  }
-
-  @Patch('plans/:id')
-  updatePlan(
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdatePlanDtoSchema)) body: UpdatePlanDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-    return this.billingService.updatePlan(id, body);
-  }
-
-  // Payment Methods
   @Post('payment-methods')
-  createPaymentMethod(
-    @Body(new ZodValidationPipe(CreatePaymentMethodDtoSchema))
-    body: CreatePaymentMethodDto,
+  @ApiOperation({
+    summary: 'Add payment method',
+    description: 'Add a new payment method for the authenticated user',
+  })
+  @ApiResponse({ status: 201, description: 'Payment method created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid payment method data' })
+  async createPaymentMethod(
+    @Body() body: CreatePaymentMethodDto,
     @CurrentUserId() userId: string,
   ) {
     return this.billingService.createPaymentMethod({
@@ -329,208 +68,236 @@ export class BillingController {
   }
 
   @Get('payment-methods')
-  getMyPaymentMethods(@CurrentUserId() userId: string) {
-    return this.billingService.findUserPaymentMethods(userId);
+  @ApiOperation({
+    summary: 'Get user payment methods',
+    description: 'Retrieve all payment methods for the authenticated user',
+  })
+  @ApiResponse({ status: 200, description: 'Payment methods retrieved successfully' })
+  getUserPaymentMethods(@CurrentUserId() userId: string) {
+    return this.billingService.getUserPaymentMethods(userId);
   }
 
   @Patch('payment-methods/:id')
+  @ApiOperation({
+    summary: 'Update payment method',
+    description: 'Update payment method settings (e.g., set as default)',
+  })
+  @ApiParam({ name: 'id', description: 'Payment method ID' })
+  @ApiResponse({ status: 200, description: 'Payment method updated successfully' })
+  @ApiResponse({ status: 404, description: 'Payment method not found' })
   updatePaymentMethod(
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdatePaymentMethodDtoSchema))
-    body: UpdatePaymentMethodDto,
+    @Body() body: UpdatePaymentMethodDto,
   ) {
     return this.billingService.updatePaymentMethod(id, body);
   }
 
   @Delete('payment-methods/:id')
+  @ApiOperation({
+    summary: 'Delete payment method',
+    description: 'Remove a payment method from the user account',
+  })
+  @ApiParam({ name: 'id', description: 'Payment method ID' })
+  @ApiResponse({ status: 200, description: 'Payment method deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Payment method not found' })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Cannot delete the only payment method with pending payments' 
+  })
   deletePaymentMethod(@Param('id') id: string) {
     return this.billingService.deletePaymentMethod(id);
   }
 
-  // Payments
-  @Post('payments')
-  createPayment(
-    @Body(new ZodValidationPipe(CreatePaymentDtoSchema)) body: CreatePaymentDto,
+  // ===== PAYMENT PROCESSING =====
+
+  @Post('payments/session')
+  @ApiOperation({
+    summary: 'Process session payment',
+    description: 'Process payment for a therapy session',
+  })
+  @ApiResponse({ status: 201, description: 'Payment initiated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid payment data' })
+  async processSessionPayment(
+    @Body() body: ProcessSessionPaymentDto,
+    @CurrentUserId() clientId: string,
   ) {
-    return this.billingService.createPayment(body);
+    if (body.amount <= 0) {
+      throw new BadRequestException('Payment amount must be greater than 0');
+    }
+
+    return this.billingService.processSessionPayment({
+      ...body,
+      clientId,
+    });
+  }
+
+  @Get('payments/:id')
+  @ApiOperation({
+    summary: 'Get payment details',
+    description: 'Retrieve details of a specific payment',
+  })
+  @ApiParam({ name: 'id', description: 'Payment ID' })
+  @ApiResponse({ status: 200, description: 'Payment details retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
+  getPayment(@Param('id') id: string) {
+    return this.billingService.getPayment(id);
   }
 
   @Get('payments')
-  getPayments(
-    @CurrentUserRole() userRole: string,
-    @Query(new ZodValidationPipe(GetPaymentsQueryDtoSchema))
-    query: GetPaymentsQueryDto,
+  @ApiOperation({
+    summary: 'Get user payments',
+    description: 'Retrieve payment history for the authenticated user',
+  })
+  @ApiQuery({ name: 'role', required: false, enum: ['client', 'therapist'] })
+  @ApiQuery({ name: 'status', required: false, enum: PaymentStatus })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Payment history retrieved successfully' })
+  getUserPayments(
+    @CurrentUserId() userId: string,
+    @Query('role') role?: 'client' | 'therapist',
+    @Query('status') status?: PaymentStatus,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ) {
-    // Only admins can view all payments
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-
-    return this.billingService.findPayments(
-      query.subscriptionId,
-      query.status,
-      query.startDate ? new Date(query.startDate) : undefined,
-      query.endDate ? new Date(query.endDate) : undefined,
-    );
-  }
-
-  @Patch('payments/:id/status')
-  updatePaymentStatus(
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdatePaymentStatusDtoSchema))
-    body: UpdatePaymentStatusDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    // Only admins can update payment status
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-
-    return this.billingService.updatePaymentStatus(
-      id,
-      body.status,
-      body.metadata,
-    );
-  }
-
-  // Invoices
-  @Post('invoices')
-  createInvoice(
-    @Body(new ZodValidationPipe(CreateInvoiceDtoSchema)) body: CreateInvoiceDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-
-    return this.billingService.createInvoice({
-      ...body,
-      dueDate: new Date(body.dueDate),
+    return this.billingService.getUserPayments(userId, {
+      role,
+      status,
+      limit: limit ? Number(limit) : undefined,
+      offset: offset ? Number(offset) : undefined,
     });
   }
 
-  @Get('invoices')
-  getInvoices(
+  @Post('payments/:id/retry')
+  @ApiOperation({
+    summary: 'Retry failed payment',
+    description: 'Retry processing a failed payment',
+  })
+  @ApiParam({ name: 'id', description: 'Payment ID' })
+  @ApiResponse({ status: 200, description: 'Payment retry initiated successfully' })
+  @ApiResponse({ status: 400, description: 'Can only retry failed payments' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
+  retryPayment(@Param('id') paymentId: string) {
+    return this.billingService.retryPayment(paymentId);
+  }
+
+  // ===== ANALYTICS & REPORTING =====
+
+  @Get('analytics/therapist')
+  @ApiOperation({
+    summary: 'Get therapist payment statistics',
+    description: 'Retrieve payment analytics for therapists',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Therapist analytics retrieved successfully' })
+  getTherapistAnalytics(
+    @CurrentUserId() userId: string,
     @CurrentUserRole() userRole: string,
-    @CurrentUserId() userId: string,
-    @Query(new ZodValidationPipe(GetInvoicesQueryDtoSchema))
-    query: GetInvoicesQueryDto,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
-    // Users can only see their own invoices
-    if (userRole !== 'admin') {
-      // Filter by user's subscription
-      // In a real implementation, you'd need to verify subscriptionId belongs to user
+    // Only allow therapists to access their own analytics
+    if (userRole !== 'therapist' && userRole !== 'admin') {
+      throw new UnauthorizedException('Only therapists can access payment analytics');
     }
 
-    return this.billingService.findInvoices(query.subscriptionId, query.status);
-  }
-
-  @Post('invoices/:id/pay')
-  markInvoiceAsPaid(
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(MarkInvoiceAsPaidDtoSchema))
-    body: MarkInvoiceAsPaidDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-
-    return this.billingService.markInvoiceAsPaid(id);
-  }
-
-  // Discounts
-  @Post('discounts')
-  createDiscount(
-    @Body(new ZodValidationPipe(CreateDiscountDtoSchema))
-    body: CreateDiscountDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-
-    return this.billingService.createDiscount({
-      ...body,
-      validFrom: body.validFrom ? new Date(body.validFrom) : undefined,
-      validUntil: body.validUntil ? new Date(body.validUntil) : undefined,
-    });
-  }
-
-  @Post('discounts/validate')
-  validateDiscount(
-    @Body(new ZodValidationPipe(ValidateDiscountDtoSchema))
-    body: ValidateDiscountDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.validateDiscount(body.code, userId, body.amount);
-  }
-
-  @Post('discounts/:id/redeem')
-  redeemDiscount(
-    @Param('id') discountId: string,
-    @Body(new ZodValidationPipe(RedeemDiscountDtoSchema))
-    body: RedeemDiscountDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.billingService.redeemDiscount(
-      discountId,
+    return this.billingService.getTherapistPaymentStats(
       userId,
-      body.amountSaved,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
     );
   }
 
-  // Usage Records
-  @Post('usage')
-  recordUsage(
-    @Body(new ZodValidationPipe(RecordUsageDtoSchema)) body: RecordUsageDto,
-    @CurrentUserRole() userRole?: string,
-  ) {
-    // Only admins or system can record usage
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
-
-    return this.billingService.recordUsage({
-      ...body,
-      usageDate: body.usageDate ? new Date(body.usageDate) : undefined,
-    });
-  }
-
-  @Get('usage/:subscriptionId')
-  getUsageRecords(
-    @Param('subscriptionId') subscriptionId: string,
+  @Get('analytics/platform')
+  @ApiOperation({
+    summary: 'Get platform payment statistics',
+    description: 'Retrieve platform-wide payment analytics (admin only)',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Platform analytics retrieved successfully' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  getPlatformAnalytics(
     @CurrentUserRole() userRole: string,
-    @Query(new ZodValidationPipe(GetUsageRecordsQueryDtoSchema))
-    query: GetUsageRecordsQueryDto,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
-    // Users can only see their own usage
     if (userRole !== 'admin') {
-      // In a real implementation, verify subscriptionId belongs to user
+      throw new UnauthorizedException('Admin access required');
     }
 
-    return this.billingService.getUsageRecords(
-      subscriptionId,
-      query.feature,
-      query.startDate ? new Date(query.startDate) : undefined,
-      query.endDate ? new Date(query.endDate) : undefined,
+    return this.billingService.getPlatformStats(
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
     );
   }
 
-  // Statistics
-  @Get('statistics')
-  getBillingStatistics(
-    @CurrentUserRole() userRole: string,
-    @Query(new ZodValidationPipe(GetBillingStatisticsQueryDtoSchema))
-    query: GetBillingStatisticsQueryDto,
-  ) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Insufficient permissions');
-    }
+  // ===== EDUCATIONAL ENDPOINTS =====
 
-    return this.billingService.getBillingStatistics(
-      query.startDate ? new Date(query.startDate) : undefined,
-      query.endDate ? new Date(query.endDate) : undefined,
-    );
+  @Get('test-cards')
+  @ApiOperation({
+    summary: 'Get test card information',
+    description: 'Educational endpoint showing test card numbers for different scenarios',
+  })
+  @ApiResponse({ status: 200, description: 'Test card information retrieved' })
+  getTestCardInfo() {
+    return {
+      message: 'Educational Payment System - Test Card Numbers',
+      testCards: [
+        {
+          last4: '0001',
+          scenario: 'Always succeeds',
+          description: 'Use this card ending in 0001 for successful payments',
+        },
+        {
+          last4: '0002',
+          scenario: 'Always declines',
+          description: 'Use this card ending in 0002 to test payment failures',
+        },
+        {
+          last4: '0004',
+          scenario: 'Insufficient funds',
+          description: 'Use this card ending in 0004 to test insufficient funds error',
+        },
+        {
+          last4: '0008',
+          scenario: 'Expired card',
+          description: 'Use this card ending in 0008 to test expired card error',
+        },
+      ],
+      notes: [
+        'This is an educational payment system for demonstration purposes',
+        'No real money is processed',
+        'All payments are simulated with realistic delays and responses',
+        'Platform takes a 5% commission on successful payments',
+      ],
+    };
+  }
+
+  @Get('status')
+  @ApiOperation({
+    summary: 'Get billing service status',
+    description: 'Check the health and configuration of the billing service',
+  })
+  @ApiResponse({ status: 200, description: 'Billing service status' })
+  getServiceStatus() {
+    return {
+      service: 'Educational Billing Service',
+      status: 'operational',
+      mode: 'educational',
+      features: [
+        'Mock payment processing',
+        'Payment method management',
+        'Session-based payments',
+        'Analytics and reporting',
+        'Test card scenarios',
+      ],
+      configuration: {
+        platformFeeRate: '5%',
+        successRate: '90%',
+        processingDelay: '2-5 seconds',
+      },
+    };
   }
 }
