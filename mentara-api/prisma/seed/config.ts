@@ -84,18 +84,18 @@ export const TEST_ACCOUNTS = {
   ],
 };
 
-// Configuration constants
+// Configuration constants - ULTRA-FAST DEV SEEDING
 export const SEED_CONFIG = {
   USERS: {
-    CLIENTS: 2, // Ultra-minimal for testing
-    THERAPISTS: 1, // Ultra-minimal for testing
-    ADMINS: 1, // Ultra-minimal for testing
-    MODERATORS: 0, // Skip moderators for testing
+    CLIENTS: 3, // 3 clients for testing
+    THERAPISTS: 3, // 3 therapists for testing
+    ADMINS: 3, // 3 admins for testing
+    MODERATORS: 3, // 3 moderators for testing
   },
   COMMUNITIES: {
-    ADDITIONAL: 1, // Ultra-minimal - Additional to illness communities
-    POSTS_PER_COMMUNITY: 1, // Ultra-minimal for testing
-    COMMENTS_PER_POST: 1, // Ultra-minimal for testing
+    ADDITIONAL: 3, // 3 communities total
+    POSTS_PER_COMMUNITY: 0, // Skip posts for ultra-fast seeding
+    COMMENTS_PER_POST: 0, // Skip comments for ultra-fast seeding
   },
   RELATIONSHIPS: {
     CLIENT_THERAPIST_RATIO: 0.8, // 80% of clients get assigned to therapists
@@ -142,22 +142,27 @@ export const SEED_CONFIG = {
   },
 };
 
-// Illness communities configuration - ULTRA-MINIMAL TEST VERSION
+// Illness communities configuration - ULTRA-FAST DEV VERSION
 export const ILLNESS_COMMUNITIES = [
   {
     name: 'ADHD Support',
     slug: 'adhd-support',
-    description: 'A supportive community for individuals with ADHD to share experiences, coping strategies, and resources.',
+    description: 'A supportive community for individuals with ADHD.',
+  },
+  {
+    name: 'Anxiety Support',
+    slug: 'anxiety-support',
+    description: 'A supportive community for individuals with anxiety.',
+  },
+  {
+    name: 'Depression Support',
+    slug: 'depression-support',
+    description: 'A supportive community for individuals with depression.',
   },
 ];
 
-// Additional community types for general support - ULTRA-MINIMAL TEST VERSION
-export const ADDITIONAL_COMMUNITIES = [
-  {
-    name: 'Mindfulness & Meditation',
-    description: 'A space for sharing mindfulness practices and meditation experiences',
-  },
-];
+// No additional communities needed for ultra-fast seeding
+export const ADDITIONAL_COMMUNITIES = [];
 
 // Worksheet templates for therapy assignments
 export const WORKSHEET_TEMPLATES = [

@@ -1,65 +1,78 @@
 # Task Completion Checklist
 
-## Pre-Commit Requirements
+## Required Steps When Completing Any Task
 
-### Frontend (mentara-client/)
-1. **Linting**: Run `npm run lint` and fix all issues
-2. **Type Checking**: Ensure TypeScript compilation succeeds (automatic with Next.js)
-3. **Testing**: Run relevant tests if modified test files
-4. **Build Check**: Run `npm run build` to ensure production build works
+### 1. Code Quality Checks
+```bash
+# Frontend linting and type checking
+cd mentara-client && npm run lint
 
-### Backend (mentara-api/)  
-1. **Linting**: Run `npm run lint` and fix all issues
-2. **Formatting**: Run `npm run format` to ensure Prettier formatting
-3. **Type Checking**: Ensure TypeScript compilation succeeds
-4. **Testing**: Run `npm run test` for unit tests
-5. **Database**: 
-   - Run `npm run db:generate` if Prisma schema was modified
-   - Run `npm run db:migrate` if database schema changes were made
-6. **Build Check**: Run `npm run build` to ensure production build works
+# Backend linting and type checking  
+cd mentara-api && npm run lint
 
-### AI Service (ai-patient-evaluation/)
-1. **Dependencies**: Ensure `requirements.txt` is up to date
-2. **API Testing**: Test Flask endpoints if modified
+# Format code if needed
+npm run format  # (in respective service directory)
+```
 
-## Code Quality Checks
-1. **No Console.log**: Remove debugging console.log statements (except intentional logging)
-2. **Error Handling**: Ensure proper error handling and user feedback
-3. **Type Safety**: Use TypeScript types, no `any` unless absolutely necessary
-4. **Performance**: Check for potential performance issues
-5. **Security**: No hardcoded secrets, proper validation of inputs
+### 2. Build Dependencies
+```bash
+# ALWAYS build mentara-commons first if modified
+npm run build:commons
 
-## Testing Requirements
-1. **Unit Tests**: Write tests for new business logic
-2. **Integration Tests**: Test API endpoints that were modified
-3. **E2E Tests**: Update or add E2E tests for significant user flow changes
-4. **Manual Testing**: Test the feature manually in development environment
+# Generate Prisma client after schema changes
+cd mentara-api && npm run db:generate
+```
 
-## Documentation Updates
-1. **API Documentation**: Update if API endpoints changed
-2. **README Updates**: Update if setup instructions changed
-3. **Comments**: Add/update code comments for complex logic
-4. **Type Definitions**: Ensure interfaces/types are properly documented
+### 3. Testing Requirements
+```bash
+# Frontend tests
+cd mentara-client && npm run test
 
-## Database-Related Tasks
-1. **Migration Files**: Review generated migration files before applying
-2. **Seed Data**: Update seed scripts if data structure changed
-3. **Backup Consideration**: Consider data migration impact on existing data
+# Backend tests
+cd mentara-api && npm run test
 
-## Branch and Git Workflow
-1. **Current Branch**: Work on `dev` branch (main development)
-2. **Commit Messages**: Use descriptive commit messages
-3. **Branch Naming**: Follow convention (frontend/feature/*, backend/feature/*, etc.)
-4. **Pull Requests**: Target `dev` branch for merges
+# E2E tests (when applicable)
+npm run test:e2e
+```
 
-## Environment Considerations
-1. **Environment Variables**: Ensure all required env vars are documented
-2. **Development Setup**: Verify all three services can run simultaneously
-3. **Port Conflicts**: Frontend (3000), Backend (NestJS default), AI service (Flask default)
+### 4. Database Operations (if schema changed)
+```bash
+cd mentara-api
+npm run db:migrate    # Create and apply migration
+npm run db:generate   # Update Prisma client
+npm run db:seed       # Reseed if needed
+```
 
-## Final Verification
-1. **Functionality**: Feature works as expected
-2. **Edge Cases**: Test error scenarios and edge cases
-3. **Cross-Browser**: Test in different browsers if frontend changes
-4. **Responsive**: Ensure responsive design works if UI changes
-5. **Accessibility**: Basic accessibility checks for UI changes
+### 5. Service Health Verification
+```bash
+# Check all services are running
+make status
+
+# Or manually check endpoints:
+curl http://localhost:3001/health  # Backend
+curl http://localhost:3000/api/health  # Frontend  
+curl http://localhost:5000/health  # AI Evaluation
+```
+
+### 6. Common Error Resolution
+- **Build errors**: Ensure mentara-commons is built first
+- **Cannot find module 'nest'**: Run `npm install` in mentara-api
+- **Cannot find module 'mentara-commons'**: Build commons first
+- **Prisma errors**: Run `npm run db:generate` after schema changes
+- **Port conflicts**: Check `make ports` for availability
+
+### 7. Pre-Commit Verification
+- All linting passes
+- All tests pass
+- Build succeeds
+- No TypeScript errors
+- Services start successfully
+
+## Development Workflow Best Practices
+1. **Always start with building mentara-commons**
+2. **Run linting and tests before committing**
+3. **Update Prisma client after schema changes**
+4. **Use TypeScript strict mode - fix all type errors**
+5. **Follow existing code patterns and conventions**
+6. **Test authentication flows after auth changes**
+7. **Verify WebSocket connections after real-time changes**
