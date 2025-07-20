@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { Room, RoomGroup } from "@/types/api/communities";
@@ -19,9 +19,7 @@ export function useCommunityRooms(communityId?: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: communityId 
-      ? queryKeys.communities.withStructureById(communityId)
-      : queryKeys.communities.withStructure(),
+    queryKey: communityId ? ['communities', 'withStructure', communityId] : ['communities', 'withStructure'],
     queryFn: () => communityId 
       ? api.communities.getCommunityWithStructure(communityId)
       : api.communities.getCommunitiesWithStructure(),
@@ -35,7 +33,7 @@ export function useCommunityRooms(communityId?: string) {
       api.communities.createRoomGroup(communityId!, name, order),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.communities.withStructureById(communityId!) 
+        queryKey: ['communities', 'withStructure', communityId!] 
       });
       toast.success("Room group created successfully");
     },
@@ -50,7 +48,7 @@ export function useCommunityRooms(communityId?: string) {
       api.communities.createRoom(roomGroupId, name, order),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.communities.withStructureById(communityId!) 
+        queryKey: ['communities', 'withStructure', communityId!] 
       });
       toast.success("Room created successfully");
     },
@@ -86,7 +84,7 @@ export function useRoomsByGroup(roomGroupId: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.communities.rooms.byGroup(roomGroupId),
+    queryKey: ['communities', 'rooms', 'byGroup', roomGroupId],
     queryFn: () => api.communities.getRoomsByGroup(roomGroupId),
     enabled: !!roomGroupId,
     staleTime: 1000 * 60 * 5, // 5 minutes
