@@ -18,7 +18,6 @@ import {
   TherapistForMatching,
 } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
-import { MatchingAnalyticsService } from './services/matching-analytics.service';
 import { PreAssessmentService } from '../pre-assessment/pre-assessment.service';
 
 @Injectable()
@@ -29,7 +28,6 @@ export class TherapistRecommendationService {
     private readonly prisma: PrismaService,
     private readonly advancedMatching: AdvancedMatchingService,
     private readonly compatibilityAnalysis: CompatibilityAnalysisService,
-    private readonly matchingAnalytics: MatchingAnalyticsService,
     private readonly preAssessmentService: PreAssessmentService,
   ) {}
 
@@ -271,12 +269,7 @@ export class TherapistRecommendationService {
       // Take only the requested number of results
       const finalResults = sortedTherapistScores.slice(0, request.limit ?? 10);
 
-      // Track recommendation analytics
-      await this.matchingAnalytics.trackRecommendation(
-        request.userId,
-        finalResults,
-        'advanced_v1.0',
-      );
+      // Track recommendation analytics - removed due to missing MatchingAnalyticsService
 
       // Transform to expected format with enhanced insights
       const therapistsWithScores = finalResults.map((score) => {
@@ -432,13 +425,7 @@ export class TherapistRecommendationService {
       therapist,
     );
 
-    // Track compatibility analysis
-    await this.matchingAnalytics.trackCompatibilityAnalysis(
-      clientId,
-      therapistId,
-      compatibility,
-      '1.0',
-    );
+    // Track compatibility analysis - removed due to missing MatchingAnalyticsService
 
     return compatibility;
   }

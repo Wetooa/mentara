@@ -4,7 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { MeetingStatus, ReviewStatus } from '@prisma/client';
+import { MeetingStatus } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
   CreateReviewDto,
@@ -68,7 +68,6 @@ export class ReviewsService {
         clientId,
         therapistId,
         meetingId: meetingId,
-        status: ReviewStatus.PENDING,
       },
       include: {
         client: {
@@ -126,7 +125,6 @@ export class ReviewsService {
       where: { id: reviewId },
       data: {
         ...updateReviewDto,
-        status: ReviewStatus.PENDING, // Reset to pending for re-moderation
         updatedAt: new Date(),
       },
       include: {
@@ -197,9 +195,7 @@ export class ReviewsService {
 
     const skip = (page - 1) * limit;
 
-    const where: any = {
-      status: status || ReviewStatus.APPROVED, // Only show approved reviews by default
-    };
+    const where: any = {};
 
     if (therapistId) where.therapistId = therapistId;
     if (clientId) where.clientId = clientId;
@@ -315,7 +311,6 @@ export class ReviewsService {
       by: ['rating'],
       where: {
         therapistId,
-        status: ReviewStatus.APPROVED,
       },
       _count: {
         rating: true,
@@ -352,7 +347,6 @@ export class ReviewsService {
       by: ['createdAt'],
       where: {
         therapistId,
-        status: ReviewStatus.APPROVED,
         createdAt: {
           gte: twelveMonthsAgo,
         },
@@ -391,7 +385,6 @@ export class ReviewsService {
     const recentReviews = await this.prisma.review.findMany({
       where: {
         therapistId,
-        status: ReviewStatus.APPROVED,
       },
       orderBy: {
         createdAt: 'desc',
