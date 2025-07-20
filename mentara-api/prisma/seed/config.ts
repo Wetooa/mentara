@@ -90,7 +90,7 @@ export const SEED_CONFIG = {
     CLIENTS: 3, // 3 clients for testing
     THERAPISTS: 3, // 3 therapists for testing
     ADMINS: 3, // 3 admins for testing
-    MODERATORS: 0, // Skip moderators for fast seeding
+    MODERATORS: 3, // 3 moderators for testing
   },
   COMMUNITIES: {
     ADDITIONAL: 3, // 3 communities total
