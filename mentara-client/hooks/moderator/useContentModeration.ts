@@ -346,7 +346,7 @@ export function useUpdateAutoModerationRules() {
       
       // Invalidate auto-moderation rules
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.contentModeration.autoRules() 
+        queryKey: ['contentModeration', 'autoRules'] 
       });
     },
     onError: (error: MentaraApiError) => {

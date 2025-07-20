@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { User, UserModerationParams, ModerateUserRequest } from '@/types/api';
@@ -12,7 +11,7 @@ export function useModeratorFlaggedUsers(params: UserModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.users.flagged(params),
+    queryKey: ['moderator', 'users', 'flagged', params],
     queryFn: () => api.moderator.users.getFlagged(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
     retry: (failureCount, error: MentaraApiError) => {
@@ -31,7 +30,7 @@ export function useModeratorUserHistory(userId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.users.history(userId || ''),
+    queryKey: ['moderator', 'users', 'history', userId || ''],
     queryFn: () => api.moderator.users.getHistory(userId!),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -56,12 +55,12 @@ export function useModerateUser() {
     onMutate: async ({ userId, data }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: queryKeys.moderator.users.all() 
+        queryKey: ['moderator', 'users'] 
       });
       
       // Optimistically update user status
       queryClient.setQueriesData(
-        { queryKey: queryKeys.moderator.users.all() },
+        { queryKey: ['moderator', 'users'] },
         (old: any) => {
           if (!old?.users) return old;
           
@@ -88,10 +87,10 @@ export function useModerateUser() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.dashboard() 
+        queryKey: ['moderator', 'dashboard'] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
     },
     onError: (error: MentaraApiError, variables, context) => {
@@ -99,7 +98,7 @@ export function useModerateUser() {
       
       // Revert optimistic update
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.users.all() 
+        queryKey: ['moderator', 'users'] 
       });
     },
   });

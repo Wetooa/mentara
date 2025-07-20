@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { ModeratorDashboardStats } from '@/types/api';
@@ -12,7 +11,7 @@ export function useModeratorDashboard() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.dashboard(),
+    queryKey: ['moderator', 'dashboard'],
     queryFn: () => api.moderator.getDashboardStats(),
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (dashboard data changes frequently)
     retry: (failureCount, error: MentaraApiError) => {
@@ -34,15 +33,15 @@ export function useRefreshModeratorDashboard() {
   return () => {
     // Invalidate all moderator dashboard-related queries
     queryClient.invalidateQueries({ 
-      queryKey: queryKeys.moderator.dashboard() 
+      queryKey: ['moderator', 'dashboard'] 
     });
     
     queryClient.invalidateQueries({ 
-      queryKey: queryKeys.moderator.content.all() 
+      queryKey: ['moderator', 'content'] 
     });
     
     queryClient.invalidateQueries({ 
-      queryKey: queryKeys.moderator.users.all() 
+      queryKey: ['moderator', 'users'] 
     });
     
     toast.success('Dashboard refreshed!');
