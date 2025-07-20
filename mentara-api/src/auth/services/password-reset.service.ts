@@ -274,12 +274,12 @@ export class PasswordResetService {
         </div>
       `;
 
-      await this.emailService.sendGenericEmail({
-        to: email,
-        subject: 'Reset Your Mentara Password',
-        html,
-        text: `Hello ${firstName}, Reset your password by visiting: ${resetUrl} (expires in 1 hour)`
-      });
+      await this.emailService.sendPasswordReset(
+        email,
+        firstName,
+        'Reset Your Mentara Password',
+        resetUrl
+      );
     } catch (error) {
       console.error('Failed to send password reset email:', error);
       throw new BadRequestException('Failed to send password reset email');
@@ -307,12 +307,11 @@ export class PasswordResetService {
         </div>
       `;
 
-      await this.emailService.sendGenericEmail({
-        to: email,
-        subject: 'Password Reset Successful',
-        html,
-        text: `Your password has been successfully reset for your Mentara account. Login at: ${process.env.FRONTEND_URL}/login`
-      });
+      await this.emailService.sendPasswordResetSuccess(
+        email,
+        'User',
+        'Password Reset Successful'
+      );
     } catch (error) {
       console.error('Failed to send password reset confirmation email:', error);
       // Don't throw error here as password reset was successful

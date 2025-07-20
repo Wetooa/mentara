@@ -6,7 +6,6 @@ import {
 import { RegisterClientDto, type EmailResponse } from 'mentara-commons';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from './token.service';
-import { EmailVerificationService } from './email-verification.service';
 import { EmailService } from '../../email/email.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -16,7 +15,6 @@ export class ClientAuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
-    private readonly emailVerificationService: EmailVerificationService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -62,7 +60,10 @@ export class ClientAuthService {
 
       // Create preassessment record if answers are provided
       let preAssessment: any = null;
-      if (registerDto.preassessmentAnswers && registerDto.preassessmentAnswers.length > 0) {
+      if (
+        registerDto.preassessmentAnswers &&
+        registerDto.preassessmentAnswers.length > 0
+      ) {
         preAssessment = await tx.preAssessment.create({
           data: {
             clientId: user.id,
@@ -97,13 +98,13 @@ export class ClientAuthService {
     });
 
     // Send OTP email
-    const emailResult = await this.emailService.sendOtpEmail({
-      to_email: result.user.email,
-      to_name: result.user.firstName,
-      otp_code: otpCode,
-      expires_in: expiryTimeFormatted,
-      type: 'registration',
-    });
+    const emailResult = await this.emailService.sendOTP(
+      result.user.email,
+      result.user.firstName || 'User',
+      'Verify Your Mentara Account',
+      otpCode,
+      expiryTimeFormatted
+    );
 
     if (emailResult.status === 'error') {
       throw new BadRequestException(emailResult.message);
@@ -229,7 +230,8 @@ export class ClientAuthService {
       dateOfBirth: user.birthDate ? user.birthDate.toISOString() : undefined,
       phoneNumber: undefined, // Phone number not stored in User model for clients
       profileComplete: !!(user.firstName && user.lastName && user.birthDate),
-      therapistId: user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
+      therapistId:
+        user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
       createdAt: user.createdAt.toISOString(),
     };
   }
@@ -397,13 +399,13 @@ export class ClientAuthService {
     });
 
     // Send new OTP email
-    const emailResult = await this.emailService.sendOtpEmail({
-      to_email: user.email,
-      to_name: user.firstName,
-      otp_code: otpCode,
-      expires_in: expiryTimeFormatted,
-      type: 'registration',
-    });
+    const emailResult = await this.emailService.sendOTP(
+      user.email,
+      user.firstName || 'User',
+      'New Verification Code for Your Mentara Account',
+      otpCode,
+      expiryTimeFormatted
+    );
 
     if (emailResult.status === 'error') {
       throw new BadRequestException(emailResult.message);
