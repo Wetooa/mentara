@@ -1,30 +1,31 @@
 # Mentara Project Overview
 
-## Project Purpose
-Mentara is a comprehensive mental health platform that connects patients with therapists. The platform includes:
-- Therapy sessions and scheduling
-- Community support features
-- Mental health worksheets and assignments
-- AI-driven patient mental health evaluation
-- Real-time messaging between patients and therapists
-- Administrative and moderator tools
-
-## Architecture
-**Type**: Monorepo with three main components:
-- `mentara-client/` - Next.js 15.2.4 frontend with TypeScript
-- `mentara-api/` - NestJS 11.x backend with Prisma ORM
-- `ai-patient-evaluation/` - Python Flask service with PyTorch ML models
+## Purpose
+Mentara is a comprehensive mental health platform that connects patients with therapists. It features:
+- Therapy sessions and video consultations (WebRTC)
+- Community support and messaging (WebSocket/Socket.io)
+- Interactive worksheets and mental health assessments
+- AI-driven patient evaluation using PyTorch neural networks
+- JWT-based authentication with role-based access control
+- Real-time messaging and notifications
 
 ## Key Features
-- **Authentication**: Clerk-based authentication with role-based access control
-- **Database**: PostgreSQL with Prisma ORM using multi-file schema approach
-- **Real-time Features**: Socket.io WebSocket integration for messaging
-- **AI Integration**: PyTorch neural network for mental health assessments
-- **File Storage**: Supabase Storage and AWS S3 integration
-- **Testing**: Jest for unit testing, Playwright for E2E testing
+- 🔐 JWT-based authentication with role-based access control (client, therapist, moderator, admin)
+- 💬 Real-time messaging with WebSocket integration
+- 📹 WebRTC video consultations
+- 🧠 AI-powered mental health assessments using PyTorch
+- 🛡️ AI content moderation for community safety
+- 📊 Comprehensive analytics and reporting
+- 🏥 HIPAA-compliant data handling considerations
 
 ## User Roles
-- `client` - Patients using the platform
-- `therapist` - Mental health professionals
-- `moderator` - Content moderation
-- `admin` - System administrators
+- **Client**: Patients seeking mental health support
+- **Therapist**: Mental health professionals providing services  
+- **Moderator**: Community content moderators
+- **Admin**: System administrators
+
+## Development Context
+- Built by a coordinated team of 4 AI agents with specialized responsibilities
+- Follows microservices architecture with independent service deployment
+- Uses modern development practices with comprehensive testing
+- Emphasizes security, performance, and maintainability
