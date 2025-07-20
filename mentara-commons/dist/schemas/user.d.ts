@@ -180,6 +180,7 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     language: z.ZodOptional<z.ZodString>;
     theme: z.ZodOptional<z.ZodString>;
     hasSeenTherapistRecommendations: z.ZodOptional<z.ZodBoolean>;
+    preassessmentAnswers: z.ZodOptional<z.ZodArray<z.ZodAny, "many">>;
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
@@ -196,6 +197,7 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     language?: string | undefined;
     theme?: string | undefined;
     hasSeenTherapistRecommendations?: boolean | undefined;
+    preassessmentAnswers?: any[] | undefined;
 }, {
     email: string;
     password: string;
@@ -212,6 +214,7 @@ export declare const RegisterClientDtoSchema: z.ZodObject<{
     language?: string | undefined;
     theme?: string | undefined;
     hasSeenTherapistRecommendations?: boolean | undefined;
+    preassessmentAnswers?: any[] | undefined;
 }>;
 export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
     email: z.ZodOptional<z.ZodString>;
@@ -229,6 +232,7 @@ export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
     language: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     theme: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     hasSeenTherapistRecommendations: z.ZodOptional<z.ZodOptional<z.ZodBoolean>>;
+    preassessmentAnswers: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodAny, "many">>>;
 }, "password">, "strip", z.ZodTypeAny, {
     email?: string | undefined;
     firstName?: string | undefined;
@@ -244,6 +248,7 @@ export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
     language?: string | undefined;
     theme?: string | undefined;
     hasSeenTherapistRecommendations?: boolean | undefined;
+    preassessmentAnswers?: any[] | undefined;
 }, {
     email?: string | undefined;
     firstName?: string | undefined;
@@ -259,6 +264,7 @@ export declare const UpdateClientDtoSchema: z.ZodObject<Omit<{
     language?: string | undefined;
     theme?: string | undefined;
     hasSeenTherapistRecommendations?: boolean | undefined;
+    preassessmentAnswers?: any[] | undefined;
 }>;
 export declare const DeactivateUserDtoSchema: z.ZodObject<{
     reason: z.ZodOptional<z.ZodString>;

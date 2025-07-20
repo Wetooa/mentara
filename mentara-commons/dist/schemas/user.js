@@ -88,7 +88,8 @@ exports.RegisterClientDtoSchema = zod_1.z.object({
     timezone: zod_1.z.string().optional(),
     language: zod_1.z.string().optional(),
     theme: zod_1.z.string().optional(),
-    hasSeenTherapistRecommendations: zod_1.z.boolean().optional()
+    hasSeenTherapistRecommendations: zod_1.z.boolean().optional(),
+    preassessmentAnswers: zod_1.z.array(zod_1.z.any()).optional()
 });
 exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema.partial().omit({
     password: true

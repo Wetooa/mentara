@@ -6,11 +6,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useApi } from "@/lib/api";
-import { 
-  ModeratorLoginDto, 
-  ModeratorUser,
-  ModeratorAuthResponse 
-} from "@/lib/api/services/auth";
+import type { 
+  LoginDto as ModeratorLoginDto, 
+} from "@/lib/api";
+
+// Temporary types - should come from mentara-commons
+interface ModeratorUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'moderator';
+  emailVerified: boolean;
+}
+
+interface ModeratorAuthResponse {
+  user: ModeratorUser;
+  token: string;
+  message?: string;
+}
 
 export interface UseModeratorAuthReturn {
   user: ModeratorUser | null;

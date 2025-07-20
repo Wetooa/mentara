@@ -92,7 +92,8 @@ export const RegisterClientDtoSchema = z.object({
   timezone: z.string().optional(),
   language: z.string().optional(),
   theme: z.string().optional(),
-  hasSeenTherapistRecommendations: z.boolean().optional()
+  hasSeenTherapistRecommendations: z.boolean().optional(),
+  preassessmentAnswers: z.array(z.any()).optional()
 });
 
 export const UpdateClientDtoSchema = RegisterClientDtoSchema.partial().omit({

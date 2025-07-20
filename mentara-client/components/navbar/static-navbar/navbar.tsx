@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Menu, LogIn, UserPlus } from "lucide-react";
+import { Menu, LogIn } from "lucide-react";
 import { useState } from "react";
 
 const navigationItems = [
@@ -52,15 +52,6 @@ export default function Navbar() {
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Log In
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button 
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Sign Up
                 </Button>
               </Link>
             </div>
@@ -119,14 +110,6 @@ export default function Navbar() {
                       >
                         <LogIn className="w-4 h-4 mr-2" />
                         Log In
-                      </Button>
-                    </Link>
-                    <Link href="/sign-up" onClick={() => setIsOpen(false)}>
-                      <Button 
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                      >
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        Sign Up
                       </Button>
                     </Link>
                   </div>

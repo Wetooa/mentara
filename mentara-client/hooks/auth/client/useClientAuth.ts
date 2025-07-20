@@ -6,12 +6,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useApi } from "@/lib/api";
-import { 
-  ClientLoginDto, 
-  ClientRegisterDto, 
-  ClientUser,
-  ClientAuthResponse 
-} from "@/lib/api/services/auth";
+import type { 
+  LoginDto as ClientLoginDto, 
+  RegisterClientDto as ClientRegisterDto, 
+  ClientAuthResponse,
+  ClientUser
+} from "@/lib/api";
 
 export interface UseClientAuthReturn {
   // Auth state

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/lib/api";
+import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
 
 export interface ClientRegistrationData {
   firstName: string;
@@ -48,6 +49,7 @@ export function useClientRegistration(
 ): UseClientRegistrationReturn {
   const api = useApi();
   const router = useRouter();
+  const { answers, questionnaires } = usePreAssessmentChecklistStore();
 
   // Loading states
   const [isLoading, setIsLoading] = useState(false);
@@ -78,6 +80,9 @@ export function useClientRegistration(
     setRegistrationStatus("registering");
 
     try {
+      // Prepare preassessment answers if available
+      const preassessmentAnswers = answers.length > 0 ? answers.flat() : undefined;
+
       // Call real backend registration API - this will automatically send OTP
       const result = await api.clientAuth.register({
         email: data.email,
@@ -85,14 +90,19 @@ export function useClientRegistration(
         firstName: data.firstName,
         lastName: data.lastName,
         dateOfBirth: new Date().toISOString(), // You may want to collect this from the user
+        preassessmentAnswers,
       });
 
       setRegistrationStatus("registered");
       setRegistrationData(data);
       setCurrentStep("verification");
-      toast.success(
-        "Registration successful! Please check your email for the verification code."
-      );
+      
+      // Show appropriate success message based on whether preassessment data was included
+      const successMessage = preassessmentAnswers 
+        ? "Registration and pre-assessment completed! Please check your email for the verification code."
+        : "Registration successful! Please check your email for the verification code.";
+      
+      toast.success(successMessage);
     } catch (error: any) {
       setRegistrationStatus("error");
       const errorMessage =

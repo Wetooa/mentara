@@ -125,7 +125,18 @@ export class AuthController {
       userAgent,
     );
 
-    return new AuthResponseDto(result.user, result.token, 'Login successful');
+    return {
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        firstName: result.user.firstName || '',
+        lastName: result.user.lastName || '',
+        role: result.user.role,
+        emailVerified: result.user.emailVerified,
+      },
+      token: result.token,
+      message: 'Login successful',
+    };
   }
 
   // Removed refresh token endpoint - no longer needed with non-expiring tokens
