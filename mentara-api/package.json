@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk --max-old-space-size=2048 -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "node --max-old-space-size=2048 node_modules/.bin/jest --config ./test/jest-e2e.json",
     "db:seed": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/index-simple.ts",
+    "db:seed:full": "node --max-old-space-size=1024 node_modules/.bin/ts-node prisma/seed/index.ts",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:reset": "prisma migrate reset --force && npm run db:seed",
