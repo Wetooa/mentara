@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-// Enhanced Therapist Registration Schema (from class-validator DTO)
+// Enhanced Therapist Registration Schema (unified with document requirements)
 export const RegisterTherapistDtoSchema = z.object({
+  // Basic registration fields
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters long'),
   firstName: z.string().min(1, 'First name is required'),
@@ -9,30 +10,60 @@ export const RegisterTherapistDtoSchema = z.object({
   mobile: z.string().min(1, 'Mobile is required'),
   province: z.string().min(1, 'Province is required'),
   providerType: z.string().min(1, 'Provider type is required'),
+  
+  // License information
   professionalLicenseType: z.string().min(1, 'Professional license type is required'),
-  isPRCLicensed: z.boolean(),
-  prcLicenseNumber: z.string().min(1, 'PRC license number is required'),
-  expirationDateOfLicense: z.string().datetime().optional(),
-  isLicenseActive: z.boolean(),
-  practiceStartDate: z.string().datetime(),
-  yearsOfExperience: z.string().optional(),
+  professionalLicenseType_specify: z.string().optional(),
+  isPRCLicensed: z.string().min(1, 'PRC license status is required'),
+  prcLicenseNumber: z.string().optional(),
+  expirationDateOfLicense: z.string().optional(),
+  isLicenseActive: z.string().optional(),
+  practiceStartDate: z.string().min(1, 'Practice start date is required'),
+  yearsOfExperience: z.number().min(0).optional(),
+  educationBackground: z.string().optional(),
+  practiceLocation: z.string().optional(),
+  
+  // Professional details
   areasOfExpertise: z.array(z.string()).min(1, 'At least one area of expertise is required'),
   assessmentTools: z.array(z.string()).min(1, 'At least one assessment tool is required'),
   therapeuticApproachesUsedList: z.array(z.string()).min(1, 'At least one therapeutic approach is required'),
+  therapeuticApproachesUsedList_specify: z.string().optional(),
   languagesOffered: z.array(z.string()).min(1, 'At least one language is required'),
-  providedOnlineTherapyBefore: z.boolean(),
-  comfortableUsingVideoConferencing: z.boolean(),
+  languagesOffered_specify: z.string().optional(),
+  
+  // Teletherapy readiness
+  providedOnlineTherapyBefore: z.string().min(1, 'Online therapy experience is required'),
+  comfortableUsingVideoConferencing: z.string().min(1, 'Video conferencing comfort level is required'),
+  privateConfidentialSpace: z.string().min(1, 'Private space availability is required'),
+  compliesWithDataPrivacyAct: z.string().min(1, 'Data privacy compliance status is required'),
+  
+  // Availability and services
   weeklyAvailability: z.string().min(1, 'Weekly availability is required'),
   preferredSessionLength: z.string().min(1, 'Preferred session length is required'),
+  preferredSessionLength_specify: z.string().optional(),
   accepts: z.array(z.string()).min(1, 'Must accept at least one payment method'),
-  privateConfidentialSpace: z.boolean().optional(),
-  compliesWithDataPrivacyAct: z.boolean().optional(),
-  professionalLiabilityInsurance: z.boolean().optional(),
-  complaintsOrDisciplinaryActions: z.boolean().optional(),
-  willingToAbideByPlatformGuidelines: z.boolean().optional(),
-  sessionLength: z.string().optional(),
+  accepts_hmo_specify: z.string().optional(),
   hourlyRate: z.number().min(0, 'Hourly rate must be positive').optional(),
+  acceptsInsurance: z.boolean().optional(),
+  acceptedInsuranceTypes: z.string().optional(),
+  sessionDuration: z.number().optional(),
   bio: z.string().optional(),
+  
+  // Compliance
+  professionalLiabilityInsurance: z.string().min(1, 'Professional liability insurance status is required'),
+  complaintsOrDisciplinaryActions: z.string().min(1, 'Complaints or disciplinary actions status is required'),
+  complaintsOrDisciplinaryActions_specify: z.string().optional(),
+  willingToAbideByPlatformGuidelines: z.string().min(1, 'Platform guidelines agreement is required'),
+  
+  // Document upload tracking
+  documentsUploaded: z.object({
+    prcLicense: z.boolean().default(false),
+    nbiClearance: z.boolean().default(false),
+    resumeCV: z.boolean().default(false),
+  }).optional(),
+  consentChecked: z.boolean().default(false),
+  
+  // Legacy fields for compatibility
   profileImageUrl: z.string().url().optional(),
   applicationData: z.record(z.any()).optional()
 });
@@ -549,3 +580,127 @@ export type TherapistWorksheetQueryDto = z.infer<typeof TherapistWorksheetQueryD
 export type TherapistMeetingQueryDto = z.infer<typeof TherapistMeetingQueryDtoSchema>;
 export type TherapistClientRequestQueryDto = z.infer<typeof TherapistClientRequestQueryDtoSchema>;
 export type TherapistApplicationListDto = z.infer<typeof TherapistApplicationListDtoSchema>;
+
+// =============================================================================
+// DOCUMENT VALIDATION UTILITIES
+// =============================================================================
+
+// Allowed file types for therapist application documents
+export const ALLOWED_DOCUMENT_MIME_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/jpg',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+] as const;
+
+// Maximum file size (10MB)
+export const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+
+// Required document types for therapist registration
+export const REQUIRED_DOCUMENT_TYPES = {
+  prcLicense: 'PRC License',
+  nbiClearance: 'NBI Clearance',
+  resumeCV: 'Resume/CV',
+} as const;
+
+// Optional document types
+export const OPTIONAL_DOCUMENT_TYPES = {
+  liabilityInsurance: 'Professional Liability Insurance',
+  birForm: 'BIR Form',
+} as const;
+
+// Combined document types
+export const ALL_DOCUMENT_TYPES = {
+  ...REQUIRED_DOCUMENT_TYPES,
+  ...OPTIONAL_DOCUMENT_TYPES,
+} as const;
+
+// Document type mapping for backend categories
+export const DOCUMENT_TYPE_MAPPING = {
+  prcLicense: 'license',
+  nbiClearance: 'certificate', 
+  resumeCV: 'resume',
+  liabilityInsurance: 'certificate',
+  birForm: 'document',
+} as const;
+
+// File validation utility function types
+export type DocumentType = keyof typeof ALL_DOCUMENT_TYPES;
+export type RequiredDocumentType = keyof typeof REQUIRED_DOCUMENT_TYPES;
+export type BackendDocumentCategory = typeof DOCUMENT_TYPE_MAPPING[DocumentType];
+
+// Validation schemas for file uploads
+export const FileValidationSchema = z.object({
+  name: z.string().min(1, 'File name is required'),
+  size: z.number().max(MAX_DOCUMENT_SIZE, `File size must be less than ${MAX_DOCUMENT_SIZE / (1024 * 1024)}MB`),
+  type: z.enum(ALLOWED_DOCUMENT_MIME_TYPES, {
+    errorMap: () => ({ message: 'Invalid file type. Only PDF, DOC, DOCX, and image files are allowed.' })
+  }),
+});
+
+// Document upload validation schema
+export const DocumentUploadSchema = z.object({
+  type: z.enum(Object.keys(ALL_DOCUMENT_TYPES) as [DocumentType, ...DocumentType[]], {
+    errorMap: () => ({ message: 'Invalid document type' })
+  }),
+  file: FileValidationSchema,
+});
+
+// Unified registration with documents request schema (for FormData)
+export const RegisterTherapistWithDocumentsRequestSchema = z.object({
+  // Application data as JSON string (for FormData compatibility)
+  applicationDataJson: z.string().min(1, 'Application data is required'),
+  // File types mapping as JSON string
+  fileTypes: z.string().optional(),
+  // Files will be handled by multer middleware
+});
+
+// Utility functions for document validation
+export const DocumentValidationUtils = {
+  /**
+   * Validates if a file type is allowed
+   */
+  isValidFileType: (mimeType: string): boolean => {
+    return ALLOWED_DOCUMENT_MIME_TYPES.includes(mimeType as any);
+  },
+
+  /**
+   * Validates if a file size is within limits  
+   */
+  isValidFileSize: (size: number): boolean => {
+    return size <= MAX_DOCUMENT_SIZE;
+  },
+
+  /**
+   * Gets the backend category for a document type
+   */
+  getBackendCategory: (documentType: DocumentType): BackendDocumentCategory => {
+    return DOCUMENT_TYPE_MAPPING[documentType];
+  },
+
+  /**
+   * Validates that all required documents are present
+   */
+  validateRequiredDocuments: (documentTypes: string[]): { isValid: boolean; missing: string[] } => {
+    const requiredTypes = Object.keys(REQUIRED_DOCUMENT_TYPES);
+    const missing = requiredTypes.filter(type => !documentTypes.includes(type));
+    return {
+      isValid: missing.length === 0,
+      missing: missing.map(type => REQUIRED_DOCUMENT_TYPES[type as RequiredDocumentType])
+    };
+  },
+
+  /**
+   * Gets display name for document type
+   */
+  getDocumentDisplayName: (documentType: DocumentType): string => {
+    return ALL_DOCUMENT_TYPES[documentType];
+  },
+};
+
+// Export types for the new validation utilities
+export type FileValidation = z.infer<typeof FileValidationSchema>;
+export type DocumentUpload = z.infer<typeof DocumentUploadSchema>;
+export type RegisterTherapistWithDocumentsRequest = z.infer<typeof RegisterTherapistWithDocumentsRequestSchema>;

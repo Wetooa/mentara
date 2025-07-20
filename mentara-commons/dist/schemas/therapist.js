@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TherapistApplicationListDtoSchema = exports.TherapistClientRequestQueryDtoSchema = exports.TherapistMeetingQueryDtoSchema = exports.TherapistWorksheetQueryDtoSchema = exports.ApplicationStatusUpdateResponseSchema = exports.SubmitApplicationResponseSchema = exports.SubmitApplicationWithDocumentsRequestSchema = exports.ApplicationListResponseSchema = exports.TherapistRecommendationQuerySchema = exports.WelcomeRecommendationQuerySchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchemaLegacy = exports.TherapistRecommendationRequestSchemaLegacy = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
+exports.RegisterTherapistWithDocumentsRequestSchema = exports.DocumentUploadSchema = exports.FileValidationSchema = exports.DOCUMENT_TYPE_MAPPING = exports.ALL_DOCUMENT_TYPES = exports.OPTIONAL_DOCUMENT_TYPES = exports.REQUIRED_DOCUMENT_TYPES = exports.MAX_DOCUMENT_SIZE = exports.ALLOWED_DOCUMENT_MIME_TYPES = exports.TherapistApplicationListDtoSchema = exports.TherapistClientRequestQueryDtoSchema = exports.TherapistMeetingQueryDtoSchema = exports.TherapistWorksheetQueryDtoSchema = exports.ApplicationStatusUpdateResponseSchema = exports.SubmitApplicationResponseSchema = exports.SubmitApplicationWithDocumentsRequestSchema = exports.ApplicationListResponseSchema = exports.TherapistRecommendationQuerySchema = exports.WelcomeRecommendationQuerySchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchemaLegacy = exports.TherapistRecommendationRequestSchemaLegacy = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
+exports.DocumentValidationUtils = void 0;
 const zod_1 = require("zod");
-// Enhanced Therapist Registration Schema (from class-validator DTO)
+// Enhanced Therapist Registration Schema (unified with document requirements)
 exports.RegisterTherapistDtoSchema = zod_1.z.object({
+    // Basic registration fields
     email: zod_1.z.string().email('Invalid email format'),
     password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
     firstName: zod_1.z.string().min(1, 'First name is required'),
@@ -11,30 +13,53 @@ exports.RegisterTherapistDtoSchema = zod_1.z.object({
     mobile: zod_1.z.string().min(1, 'Mobile is required'),
     province: zod_1.z.string().min(1, 'Province is required'),
     providerType: zod_1.z.string().min(1, 'Provider type is required'),
+    // License information
     professionalLicenseType: zod_1.z.string().min(1, 'Professional license type is required'),
-    isPRCLicensed: zod_1.z.boolean(),
-    prcLicenseNumber: zod_1.z.string().min(1, 'PRC license number is required'),
-    expirationDateOfLicense: zod_1.z.string().datetime().optional(),
-    isLicenseActive: zod_1.z.boolean(),
-    practiceStartDate: zod_1.z.string().datetime(),
-    yearsOfExperience: zod_1.z.string().optional(),
+    professionalLicenseType_specify: zod_1.z.string().optional(),
+    isPRCLicensed: zod_1.z.string().min(1, 'PRC license status is required'),
+    prcLicenseNumber: zod_1.z.string().optional(),
+    expirationDateOfLicense: zod_1.z.string().optional(),
+    isLicenseActive: zod_1.z.string().optional(),
+    practiceStartDate: zod_1.z.string().min(1, 'Practice start date is required'),
+    yearsOfExperience: zod_1.z.number().min(0).optional(),
+    educationBackground: zod_1.z.string().optional(),
+    practiceLocation: zod_1.z.string().optional(),
+    // Professional details
     areasOfExpertise: zod_1.z.array(zod_1.z.string()).min(1, 'At least one area of expertise is required'),
     assessmentTools: zod_1.z.array(zod_1.z.string()).min(1, 'At least one assessment tool is required'),
     therapeuticApproachesUsedList: zod_1.z.array(zod_1.z.string()).min(1, 'At least one therapeutic approach is required'),
+    therapeuticApproachesUsedList_specify: zod_1.z.string().optional(),
     languagesOffered: zod_1.z.array(zod_1.z.string()).min(1, 'At least one language is required'),
-    providedOnlineTherapyBefore: zod_1.z.boolean(),
-    comfortableUsingVideoConferencing: zod_1.z.boolean(),
+    languagesOffered_specify: zod_1.z.string().optional(),
+    // Teletherapy readiness
+    providedOnlineTherapyBefore: zod_1.z.string().min(1, 'Online therapy experience is required'),
+    comfortableUsingVideoConferencing: zod_1.z.string().min(1, 'Video conferencing comfort level is required'),
+    privateConfidentialSpace: zod_1.z.string().min(1, 'Private space availability is required'),
+    compliesWithDataPrivacyAct: zod_1.z.string().min(1, 'Data privacy compliance status is required'),
+    // Availability and services
     weeklyAvailability: zod_1.z.string().min(1, 'Weekly availability is required'),
     preferredSessionLength: zod_1.z.string().min(1, 'Preferred session length is required'),
+    preferredSessionLength_specify: zod_1.z.string().optional(),
     accepts: zod_1.z.array(zod_1.z.string()).min(1, 'Must accept at least one payment method'),
-    privateConfidentialSpace: zod_1.z.boolean().optional(),
-    compliesWithDataPrivacyAct: zod_1.z.boolean().optional(),
-    professionalLiabilityInsurance: zod_1.z.boolean().optional(),
-    complaintsOrDisciplinaryActions: zod_1.z.boolean().optional(),
-    willingToAbideByPlatformGuidelines: zod_1.z.boolean().optional(),
-    sessionLength: zod_1.z.string().optional(),
+    accepts_hmo_specify: zod_1.z.string().optional(),
     hourlyRate: zod_1.z.number().min(0, 'Hourly rate must be positive').optional(),
+    acceptsInsurance: zod_1.z.boolean().optional(),
+    acceptedInsuranceTypes: zod_1.z.string().optional(),
+    sessionDuration: zod_1.z.number().optional(),
     bio: zod_1.z.string().optional(),
+    // Compliance
+    professionalLiabilityInsurance: zod_1.z.string().min(1, 'Professional liability insurance status is required'),
+    complaintsOrDisciplinaryActions: zod_1.z.string().min(1, 'Complaints or disciplinary actions status is required'),
+    complaintsOrDisciplinaryActions_specify: zod_1.z.string().optional(),
+    willingToAbideByPlatformGuidelines: zod_1.z.string().min(1, 'Platform guidelines agreement is required'),
+    // Document upload tracking
+    documentsUploaded: zod_1.z.object({
+        prcLicense: zod_1.z.boolean().default(false),
+        nbiClearance: zod_1.z.boolean().default(false),
+        resumeCV: zod_1.z.boolean().default(false),
+    }).optional(),
+    consentChecked: zod_1.z.boolean().default(false),
+    // Legacy fields for compatibility
     profileImageUrl: zod_1.z.string().url().optional(),
     applicationData: zod_1.z.record(zod_1.z.any()).optional()
 });
@@ -461,4 +486,103 @@ exports.TherapistApplicationListDtoSchema = zod_1.z.object({
     sortBy: zod_1.z.enum(['submittedAt', 'status', 'lastName']).optional(),
     sortOrder: zod_1.z.enum(['asc', 'desc']).optional()
 });
+// =============================================================================
+// DOCUMENT VALIDATION UTILITIES
+// =============================================================================
+// Allowed file types for therapist application documents
+exports.ALLOWED_DOCUMENT_MIME_TYPES = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+// Maximum file size (10MB)
+exports.MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+// Required document types for therapist registration
+exports.REQUIRED_DOCUMENT_TYPES = {
+    prcLicense: 'PRC License',
+    nbiClearance: 'NBI Clearance',
+    resumeCV: 'Resume/CV',
+};
+// Optional document types
+exports.OPTIONAL_DOCUMENT_TYPES = {
+    liabilityInsurance: 'Professional Liability Insurance',
+    birForm: 'BIR Form',
+};
+// Combined document types
+exports.ALL_DOCUMENT_TYPES = {
+    ...exports.REQUIRED_DOCUMENT_TYPES,
+    ...exports.OPTIONAL_DOCUMENT_TYPES,
+};
+// Document type mapping for backend categories
+exports.DOCUMENT_TYPE_MAPPING = {
+    prcLicense: 'license',
+    nbiClearance: 'certificate',
+    resumeCV: 'resume',
+    liabilityInsurance: 'certificate',
+    birForm: 'document',
+};
+// Validation schemas for file uploads
+exports.FileValidationSchema = zod_1.z.object({
+    name: zod_1.z.string().min(1, 'File name is required'),
+    size: zod_1.z.number().max(exports.MAX_DOCUMENT_SIZE, `File size must be less than ${exports.MAX_DOCUMENT_SIZE / (1024 * 1024)}MB`),
+    type: zod_1.z.enum(exports.ALLOWED_DOCUMENT_MIME_TYPES, {
+        errorMap: () => ({ message: 'Invalid file type. Only PDF, DOC, DOCX, and image files are allowed.' })
+    }),
+});
+// Document upload validation schema
+exports.DocumentUploadSchema = zod_1.z.object({
+    type: zod_1.z.enum(Object.keys(exports.ALL_DOCUMENT_TYPES), {
+        errorMap: () => ({ message: 'Invalid document type' })
+    }),
+    file: exports.FileValidationSchema,
+});
+// Unified registration with documents request schema (for FormData)
+exports.RegisterTherapistWithDocumentsRequestSchema = zod_1.z.object({
+    // Application data as JSON string (for FormData compatibility)
+    applicationDataJson: zod_1.z.string().min(1, 'Application data is required'),
+    // File types mapping as JSON string
+    fileTypes: zod_1.z.string().optional(),
+    // Files will be handled by multer middleware
+});
+// Utility functions for document validation
+exports.DocumentValidationUtils = {
+    /**
+     * Validates if a file type is allowed
+     */
+    isValidFileType: (mimeType) => {
+        return exports.ALLOWED_DOCUMENT_MIME_TYPES.includes(mimeType);
+    },
+    /**
+     * Validates if a file size is within limits
+     */
+    isValidFileSize: (size) => {
+        return size <= exports.MAX_DOCUMENT_SIZE;
+    },
+    /**
+     * Gets the backend category for a document type
+     */
+    getBackendCategory: (documentType) => {
+        return exports.DOCUMENT_TYPE_MAPPING[documentType];
+    },
+    /**
+     * Validates that all required documents are present
+     */
+    validateRequiredDocuments: (documentTypes) => {
+        const requiredTypes = Object.keys(exports.REQUIRED_DOCUMENT_TYPES);
+        const missing = requiredTypes.filter(type => !documentTypes.includes(type));
+        return {
+            isValid: missing.length === 0,
+            missing: missing.map(type => exports.REQUIRED_DOCUMENT_TYPES[type])
+        };
+    },
+    /**
+     * Gets display name for document type
+     */
+    getDocumentDisplayName: (documentType) => {
+        return exports.ALL_DOCUMENT_TYPES[documentType];
+    },
+};
 //# sourceMappingURL=therapist.js.map

@@ -66,7 +66,6 @@ const publicApiRoutes = [
   "/api/auth/google/callback",
   "/api/auth/microsoft", 
   "/api/auth/microsoft/callback",
-  "/api/auth/therapist/apply-with-documents",
   "/api/therapist/upload-public",
 ];
 

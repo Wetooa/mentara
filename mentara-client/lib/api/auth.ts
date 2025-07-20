@@ -203,11 +203,16 @@ export function createAuthService(client: AxiosInstance) {
     // ================================
     therapist: {
       /**
-       * Register therapist
+       * Register therapist with documents (unified endpoint)
        * POST /auth/therapist/register
+       * Accepts FormData with applicationDataJson, fileTypes, and files
        */
-      async register(data: any): Promise<TherapistAuthResponse> {
-        const response = await client.post('/auth/therapist/register', data);
+      async register(data: FormData): Promise<TherapistAuthResponse> {
+        const response = await client.post('/auth/therapist/register', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         return response.data;
       },
 
@@ -217,19 +222,6 @@ export function createAuthService(client: AxiosInstance) {
        */
       async login(data: LoginDto): Promise<TherapistAuthResponse> {
         const response = await client.post('/auth/therapist/login', data);
-        return response.data;
-      },
-
-      /**
-       * Apply with documents
-       * POST /auth/therapist/apply-with-documents
-       */
-      async applyWithDocuments(data: FormData): Promise<any> {
-        const response = await client.post('/auth/therapist/apply-with-documents', data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
         return response.data;
       },
 

@@ -8,29 +8,53 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     province: z.ZodString;
     providerType: z.ZodString;
     professionalLicenseType: z.ZodString;
-    isPRCLicensed: z.ZodBoolean;
-    prcLicenseNumber: z.ZodString;
+    professionalLicenseType_specify: z.ZodOptional<z.ZodString>;
+    isPRCLicensed: z.ZodString;
+    prcLicenseNumber: z.ZodOptional<z.ZodString>;
     expirationDateOfLicense: z.ZodOptional<z.ZodString>;
-    isLicenseActive: z.ZodBoolean;
+    isLicenseActive: z.ZodOptional<z.ZodString>;
     practiceStartDate: z.ZodString;
-    yearsOfExperience: z.ZodOptional<z.ZodString>;
+    yearsOfExperience: z.ZodOptional<z.ZodNumber>;
+    educationBackground: z.ZodOptional<z.ZodString>;
+    practiceLocation: z.ZodOptional<z.ZodString>;
     areasOfExpertise: z.ZodArray<z.ZodString, "many">;
     assessmentTools: z.ZodArray<z.ZodString, "many">;
     therapeuticApproachesUsedList: z.ZodArray<z.ZodString, "many">;
+    therapeuticApproachesUsedList_specify: z.ZodOptional<z.ZodString>;
     languagesOffered: z.ZodArray<z.ZodString, "many">;
-    providedOnlineTherapyBefore: z.ZodBoolean;
-    comfortableUsingVideoConferencing: z.ZodBoolean;
+    languagesOffered_specify: z.ZodOptional<z.ZodString>;
+    providedOnlineTherapyBefore: z.ZodString;
+    comfortableUsingVideoConferencing: z.ZodString;
+    privateConfidentialSpace: z.ZodString;
+    compliesWithDataPrivacyAct: z.ZodString;
     weeklyAvailability: z.ZodString;
     preferredSessionLength: z.ZodString;
+    preferredSessionLength_specify: z.ZodOptional<z.ZodString>;
     accepts: z.ZodArray<z.ZodString, "many">;
-    privateConfidentialSpace: z.ZodOptional<z.ZodBoolean>;
-    compliesWithDataPrivacyAct: z.ZodOptional<z.ZodBoolean>;
-    professionalLiabilityInsurance: z.ZodOptional<z.ZodBoolean>;
-    complaintsOrDisciplinaryActions: z.ZodOptional<z.ZodBoolean>;
-    willingToAbideByPlatformGuidelines: z.ZodOptional<z.ZodBoolean>;
-    sessionLength: z.ZodOptional<z.ZodString>;
+    accepts_hmo_specify: z.ZodOptional<z.ZodString>;
     hourlyRate: z.ZodOptional<z.ZodNumber>;
+    acceptsInsurance: z.ZodOptional<z.ZodBoolean>;
+    acceptedInsuranceTypes: z.ZodOptional<z.ZodString>;
+    sessionDuration: z.ZodOptional<z.ZodNumber>;
     bio: z.ZodOptional<z.ZodString>;
+    professionalLiabilityInsurance: z.ZodString;
+    complaintsOrDisciplinaryActions: z.ZodString;
+    complaintsOrDisciplinaryActions_specify: z.ZodOptional<z.ZodString>;
+    willingToAbideByPlatformGuidelines: z.ZodString;
+    documentsUploaded: z.ZodOptional<z.ZodObject<{
+        prcLicense: z.ZodDefault<z.ZodBoolean>;
+        nbiClearance: z.ZodDefault<z.ZodBoolean>;
+        resumeCV: z.ZodDefault<z.ZodBoolean>;
+    }, "strip", z.ZodTypeAny, {
+        prcLicense: boolean;
+        nbiClearance: boolean;
+        resumeCV: boolean;
+    }, {
+        prcLicense?: boolean | undefined;
+        nbiClearance?: boolean | undefined;
+        resumeCV?: boolean | undefined;
+    }>>;
+    consentChecked: z.ZodDefault<z.ZodBoolean>;
     profileImageUrl: z.ZodOptional<z.ZodString>;
     applicationData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
@@ -43,28 +67,44 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     providerType: string;
     mobile: string;
     professionalLicenseType: string;
-    isPRCLicensed: boolean;
-    prcLicenseNumber: string;
-    isLicenseActive: boolean;
+    isPRCLicensed: string;
     practiceStartDate: string;
     areasOfExpertise: string[];
     assessmentTools: string[];
     therapeuticApproachesUsedList: string[];
     languagesOffered: string[];
-    providedOnlineTherapyBefore: boolean;
-    comfortableUsingVideoConferencing: boolean;
+    providedOnlineTherapyBefore: string;
+    comfortableUsingVideoConferencing: string;
+    privateConfidentialSpace: string;
+    compliesWithDataPrivacyAct: string;
     preferredSessionLength: string;
     accepts: string[];
+    professionalLiabilityInsurance: string;
+    complaintsOrDisciplinaryActions: string;
+    willingToAbideByPlatformGuidelines: string;
+    consentChecked: boolean;
     bio?: string | undefined;
     hourlyRate?: number | undefined;
+    sessionDuration?: number | undefined;
+    professionalLicenseType_specify?: string | undefined;
+    prcLicenseNumber?: string | undefined;
     expirationDateOfLicense?: string | undefined;
-    yearsOfExperience?: string | undefined;
-    privateConfidentialSpace?: boolean | undefined;
-    compliesWithDataPrivacyAct?: boolean | undefined;
-    professionalLiabilityInsurance?: boolean | undefined;
-    complaintsOrDisciplinaryActions?: boolean | undefined;
-    willingToAbideByPlatformGuidelines?: boolean | undefined;
-    sessionLength?: string | undefined;
+    isLicenseActive?: string | undefined;
+    yearsOfExperience?: number | undefined;
+    educationBackground?: string | undefined;
+    practiceLocation?: string | undefined;
+    therapeuticApproachesUsedList_specify?: string | undefined;
+    languagesOffered_specify?: string | undefined;
+    preferredSessionLength_specify?: string | undefined;
+    accepts_hmo_specify?: string | undefined;
+    acceptsInsurance?: boolean | undefined;
+    acceptedInsuranceTypes?: string | undefined;
+    complaintsOrDisciplinaryActions_specify?: string | undefined;
+    documentsUploaded?: {
+        prcLicense: boolean;
+        nbiClearance: boolean;
+        resumeCV: boolean;
+    } | undefined;
     profileImageUrl?: string | undefined;
     applicationData?: Record<string, any> | undefined;
 }, {
@@ -77,28 +117,44 @@ export declare const RegisterTherapistDtoSchema: z.ZodObject<{
     providerType: string;
     mobile: string;
     professionalLicenseType: string;
-    isPRCLicensed: boolean;
-    prcLicenseNumber: string;
-    isLicenseActive: boolean;
+    isPRCLicensed: string;
     practiceStartDate: string;
     areasOfExpertise: string[];
     assessmentTools: string[];
     therapeuticApproachesUsedList: string[];
     languagesOffered: string[];
-    providedOnlineTherapyBefore: boolean;
-    comfortableUsingVideoConferencing: boolean;
+    providedOnlineTherapyBefore: string;
+    comfortableUsingVideoConferencing: string;
+    privateConfidentialSpace: string;
+    compliesWithDataPrivacyAct: string;
     preferredSessionLength: string;
     accepts: string[];
+    professionalLiabilityInsurance: string;
+    complaintsOrDisciplinaryActions: string;
+    willingToAbideByPlatformGuidelines: string;
     bio?: string | undefined;
     hourlyRate?: number | undefined;
+    sessionDuration?: number | undefined;
+    professionalLicenseType_specify?: string | undefined;
+    prcLicenseNumber?: string | undefined;
     expirationDateOfLicense?: string | undefined;
-    yearsOfExperience?: string | undefined;
-    privateConfidentialSpace?: boolean | undefined;
-    compliesWithDataPrivacyAct?: boolean | undefined;
-    professionalLiabilityInsurance?: boolean | undefined;
-    complaintsOrDisciplinaryActions?: boolean | undefined;
-    willingToAbideByPlatformGuidelines?: boolean | undefined;
-    sessionLength?: string | undefined;
+    isLicenseActive?: string | undefined;
+    yearsOfExperience?: number | undefined;
+    educationBackground?: string | undefined;
+    practiceLocation?: string | undefined;
+    therapeuticApproachesUsedList_specify?: string | undefined;
+    languagesOffered_specify?: string | undefined;
+    preferredSessionLength_specify?: string | undefined;
+    accepts_hmo_specify?: string | undefined;
+    acceptsInsurance?: boolean | undefined;
+    acceptedInsuranceTypes?: string | undefined;
+    complaintsOrDisciplinaryActions_specify?: string | undefined;
+    documentsUploaded?: {
+        prcLicense?: boolean | undefined;
+        nbiClearance?: boolean | undefined;
+        resumeCV?: boolean | undefined;
+    } | undefined;
+    consentChecked?: boolean | undefined;
     profileImageUrl?: string | undefined;
     applicationData?: Record<string, any> | undefined;
 }>;
@@ -252,10 +308,10 @@ export declare const TherapistApplicationCreateDtoSchema: z.ZodObject<{
     languagesOffered: string[];
     providedOnlineTherapyBefore: boolean;
     comfortableUsingVideoConferencing: boolean;
-    preferredSessionLength: string;
-    accepts: string[];
     privateConfidentialSpace: boolean;
     compliesWithDataPrivacyAct: boolean;
+    preferredSessionLength: string;
+    accepts: string[];
     professionalLiabilityInsurance: string;
     complaintsOrDisciplinaryActions: string;
     willingToAbideByPlatformGuidelines: boolean;
@@ -283,10 +339,10 @@ export declare const TherapistApplicationCreateDtoSchema: z.ZodObject<{
     languagesOffered: string[];
     providedOnlineTherapyBefore: boolean;
     comfortableUsingVideoConferencing: boolean;
-    preferredSessionLength: string;
-    accepts: string[];
     privateConfidentialSpace: boolean;
     compliesWithDataPrivacyAct: boolean;
+    preferredSessionLength: string;
+    accepts: string[];
     professionalLiabilityInsurance: string;
     complaintsOrDisciplinaryActions: string;
     willingToAbideByPlatformGuidelines: boolean;
@@ -1165,13 +1221,13 @@ export declare const PracticeInfoSchema: z.ZodObject<{
         insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         currency: string;
-        sessionFee: number;
         acceptsInsurance: boolean;
+        sessionFee: number;
         insuranceProviders?: string[] | undefined;
     }, {
         currency: string;
-        sessionFee: number;
         acceptsInsurance: boolean;
+        sessionFee: number;
         insuranceProviders?: string[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
@@ -1186,8 +1242,8 @@ export declare const PracticeInfoSchema: z.ZodObject<{
     sessionFormats: ("video" | "phone" | "in-person")[];
     pricing: {
         currency: string;
-        sessionFee: number;
         acceptsInsurance: boolean;
+        sessionFee: number;
         insuranceProviders?: string[] | undefined;
     };
 }, {
@@ -1202,8 +1258,8 @@ export declare const PracticeInfoSchema: z.ZodObject<{
     sessionFormats: ("video" | "phone" | "in-person")[];
     pricing: {
         currency: string;
-        sessionFee: number;
         acceptsInsurance: boolean;
+        sessionFee: number;
         insuranceProviders?: string[] | undefined;
     };
 }>;
@@ -1363,13 +1419,13 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
             insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -1384,8 +1440,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }, {
@@ -1400,8 +1456,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }>;
@@ -1452,8 +1508,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     };
@@ -1504,8 +1560,8 @@ export declare const TherapistApplicationDtoSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     };
@@ -1707,13 +1763,13 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
             insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -1728,8 +1784,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }, {
@@ -1744,8 +1800,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }>;
@@ -1843,8 +1899,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     };
@@ -1923,8 +1979,8 @@ export declare const TherapistApplicationSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     };
@@ -2121,13 +2177,13 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
             insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -2142,8 +2198,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }, {
@@ -2158,8 +2214,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }>;
@@ -2210,8 +2266,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     };
@@ -2262,8 +2318,8 @@ export declare const CreateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     };
@@ -2424,13 +2480,13 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
             insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }, {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -2445,8 +2501,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }, {
@@ -2461,8 +2517,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     }>>;
@@ -2513,8 +2569,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     } | undefined;
@@ -2565,8 +2621,8 @@ export declare const UpdateApplicationRequestSchema: z.ZodObject<{
         sessionFormats: ("video" | "phone" | "in-person")[];
         pricing: {
             currency: string;
-            sessionFee: number;
             acceptsInsurance: boolean;
+            sessionFee: number;
             insuranceProviders?: string[] | undefined;
         };
     } | undefined;
@@ -3149,13 +3205,13 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
                 insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
             }, "strip", z.ZodTypeAny, {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             }, {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
@@ -3170,8 +3226,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         }, {
@@ -3186,8 +3242,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         }>;
@@ -3285,8 +3341,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3365,8 +3421,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3455,8 +3511,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3541,8 +3597,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3728,13 +3784,13 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
                 insuranceProviders: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
             }, "strip", z.ZodTypeAny, {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             }, {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
@@ -3749,8 +3805,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         }, {
@@ -3765,8 +3821,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         }>;
@@ -3817,8 +3873,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3869,8 +3925,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3926,8 +3982,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -3982,8 +4038,8 @@ export declare const SubmitApplicationWithDocumentsRequestSchema: z.ZodObject<{
             sessionFormats: ("video" | "phone" | "in-person")[];
             pricing: {
                 currency: string;
-                sessionFee: number;
                 acceptsInsurance: boolean;
+                sessionFee: number;
                 insuranceProviders?: string[] | undefined;
             };
         };
@@ -4121,4 +4177,113 @@ export type TherapistWorksheetQueryDto = z.infer<typeof TherapistWorksheetQueryD
 export type TherapistMeetingQueryDto = z.infer<typeof TherapistMeetingQueryDtoSchema>;
 export type TherapistClientRequestQueryDto = z.infer<typeof TherapistClientRequestQueryDtoSchema>;
 export type TherapistApplicationListDto = z.infer<typeof TherapistApplicationListDtoSchema>;
+export declare const ALLOWED_DOCUMENT_MIME_TYPES: readonly ["application/pdf", "image/jpeg", "image/png", "image/jpg", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+export declare const MAX_DOCUMENT_SIZE: number;
+export declare const REQUIRED_DOCUMENT_TYPES: {
+    readonly prcLicense: "PRC License";
+    readonly nbiClearance: "NBI Clearance";
+    readonly resumeCV: "Resume/CV";
+};
+export declare const OPTIONAL_DOCUMENT_TYPES: {
+    readonly liabilityInsurance: "Professional Liability Insurance";
+    readonly birForm: "BIR Form";
+};
+export declare const ALL_DOCUMENT_TYPES: {
+    readonly liabilityInsurance: "Professional Liability Insurance";
+    readonly birForm: "BIR Form";
+    readonly prcLicense: "PRC License";
+    readonly nbiClearance: "NBI Clearance";
+    readonly resumeCV: "Resume/CV";
+};
+export declare const DOCUMENT_TYPE_MAPPING: {
+    readonly prcLicense: "license";
+    readonly nbiClearance: "certificate";
+    readonly resumeCV: "resume";
+    readonly liabilityInsurance: "certificate";
+    readonly birForm: "document";
+};
+export type DocumentType = keyof typeof ALL_DOCUMENT_TYPES;
+export type RequiredDocumentType = keyof typeof REQUIRED_DOCUMENT_TYPES;
+export type BackendDocumentCategory = typeof DOCUMENT_TYPE_MAPPING[DocumentType];
+export declare const FileValidationSchema: z.ZodObject<{
+    name: z.ZodString;
+    size: z.ZodNumber;
+    type: z.ZodEnum<["application/pdf", "image/jpeg", "image/png", "image/jpg", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]>;
+}, "strip", z.ZodTypeAny, {
+    type: "application/pdf" | "image/jpeg" | "image/png" | "image/jpg" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    name: string;
+    size: number;
+}, {
+    type: "application/pdf" | "image/jpeg" | "image/png" | "image/jpg" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    name: string;
+    size: number;
+}>;
+export declare const DocumentUploadSchema: z.ZodObject<{
+    type: z.ZodEnum<["prcLicense" | "nbiClearance" | "resumeCV" | "liabilityInsurance" | "birForm", ...("prcLicense" | "nbiClearance" | "resumeCV" | "liabilityInsurance" | "birForm")[]]>;
+    file: z.ZodObject<{
+        name: z.ZodString;
+        size: z.ZodNumber;
+        type: z.ZodEnum<["application/pdf", "image/jpeg", "image/png", "image/jpg", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]>;
+    }, "strip", z.ZodTypeAny, {
+        type: "application/pdf" | "image/jpeg" | "image/png" | "image/jpg" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        name: string;
+        size: number;
+    }, {
+        type: "application/pdf" | "image/jpeg" | "image/png" | "image/jpg" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        name: string;
+        size: number;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    type: "prcLicense" | "nbiClearance" | "resumeCV" | "liabilityInsurance" | "birForm";
+    file: {
+        type: "application/pdf" | "image/jpeg" | "image/png" | "image/jpg" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        name: string;
+        size: number;
+    };
+}, {
+    type: "prcLicense" | "nbiClearance" | "resumeCV" | "liabilityInsurance" | "birForm";
+    file: {
+        type: "application/pdf" | "image/jpeg" | "image/png" | "image/jpg" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        name: string;
+        size: number;
+    };
+}>;
+export declare const RegisterTherapistWithDocumentsRequestSchema: z.ZodObject<{
+    applicationDataJson: z.ZodString;
+    fileTypes: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    applicationDataJson: string;
+    fileTypes?: string | undefined;
+}, {
+    applicationDataJson: string;
+    fileTypes?: string | undefined;
+}>;
+export declare const DocumentValidationUtils: {
+    /**
+     * Validates if a file type is allowed
+     */
+    isValidFileType: (mimeType: string) => boolean;
+    /**
+     * Validates if a file size is within limits
+     */
+    isValidFileSize: (size: number) => boolean;
+    /**
+     * Gets the backend category for a document type
+     */
+    getBackendCategory: (documentType: DocumentType) => BackendDocumentCategory;
+    /**
+     * Validates that all required documents are present
+     */
+    validateRequiredDocuments: (documentTypes: string[]) => {
+        isValid: boolean;
+        missing: string[];
+    };
+    /**
+     * Gets display name for document type
+     */
+    getDocumentDisplayName: (documentType: DocumentType) => string;
+};
+export type FileValidation = z.infer<typeof FileValidationSchema>;
+export type DocumentUpload = z.infer<typeof DocumentUploadSchema>;
+export type RegisterTherapistWithDocumentsRequest = z.infer<typeof RegisterTherapistWithDocumentsRequestSchema>;
 //# sourceMappingURL=therapist.d.ts.map
