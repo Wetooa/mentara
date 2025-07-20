@@ -11,6 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
+import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for token on mount and route changes
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
     setHasToken(!!token);
   }, [pathname]);
 
@@ -127,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
     setHasToken(false);
     router.push("/auth/sign-in");
   };
@@ -147,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Please sign in to continue.",
         variant: "destructive",
       });
-      localStorage.removeItem("token");
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
       setHasToken(false);
       router.push("/auth/sign-in");
       return;
