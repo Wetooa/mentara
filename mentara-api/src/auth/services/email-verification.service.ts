@@ -163,15 +163,30 @@ export class EmailVerificationService {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     try {
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #8B5CF6;">Verify Your Mentara Account</h2>
+          <p>Hello ${firstName},</p>
+          <p>Thank you for signing up for Mentara. Please click the button below to verify your email address and activate your account.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              Verify Email Address
+            </a>
+          </div>
+          <p>If you didn't create an account with Mentara, you can safely ignore this email.</p>
+          <p>If you have any questions, please contact us at ${process.env.SUPPORT_EMAIL || 'support@mentara.com'}</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">
+            This is an automated message from Mentara. Please do not reply to this email.
+          </p>
+        </div>
+      `;
+
       await this.emailService.sendGenericEmail({
         to: email,
         subject: 'Verify Your Mentara Account',
-        template: 'email-verification',
-        data: {
-          firstName,
-          verificationUrl,
-          supportEmail: process.env.SUPPORT_EMAIL || 'support@mentara.com',
-        },
+        html,
+        text: `Hello ${firstName}, Please verify your email address by visiting: ${verificationUrl}`
       });
     } catch (error) {
       console.error('Failed to send verification email:', error);

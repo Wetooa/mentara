@@ -64,10 +64,11 @@ export class SendGenericEmailDto {
   subject!: string;
 
   @IsString()
-  template!: string;
+  html!: string;
 
-  @IsObject()
-  data!: any;
+  @IsOptional()
+  @IsString()
+  text?: string;
 }
 
 @Controller('email')
@@ -203,7 +204,15 @@ export class EmailController {
         status: dto.status,
       });
 
-      const result = await this.emailService.sendTherapistApplicationNotification(dto);
+      // Transform DTO to match TherapistNotificationData interface
+      const therapistNotificationData = {
+        to_name: dto.name,
+        to_email: dto.to,
+        applicationId: 'TEMP_' + Date.now(), // Generate temporary ID
+        submissionDate: new Date().toLocaleDateString(),
+      };
+
+      const result = await this.emailService.sendTherapistApplicationNotification(therapistNotificationData);
 
       if (result.status === 'error') {
         throw new HttpException(

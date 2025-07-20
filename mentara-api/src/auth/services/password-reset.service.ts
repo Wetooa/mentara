@@ -254,16 +254,31 @@ export class PasswordResetService {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
     try {
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #8B5CF6;">Reset Your Mentara Password</h2>
+          <p>Hello ${firstName},</p>
+          <p>We received a request to reset your password for your Mentara account. Click the button below to reset your password.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              Reset Password
+            </a>
+          </div>
+          <p>This link will expire in 1 hour for security reasons.</p>
+          <p>If you didn't request a password reset, you can safely ignore this email. Your password will not be changed.</p>
+          <p>If you have any questions, please contact us at ${process.env.SUPPORT_EMAIL || 'support@mentara.com'}</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">
+            This is an automated message from Mentara. Please do not reply to this email.
+          </p>
+        </div>
+      `;
+
       await this.emailService.sendGenericEmail({
         to: email,
         subject: 'Reset Your Mentara Password',
-        template: 'password-reset',
-        data: {
-          firstName,
-          resetUrl,
-          expiryTime: '1 hour',
-          supportEmail: process.env.SUPPORT_EMAIL || 'support@mentara.com',
-        },
+        html,
+        text: `Hello ${firstName}, Reset your password by visiting: ${resetUrl} (expires in 1 hour)`
       });
     } catch (error) {
       console.error('Failed to send password reset email:', error);
@@ -275,14 +290,28 @@ export class PasswordResetService {
     email: string,
   ): Promise<void> {
     try {
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #10B981;">Password Reset Successful</h2>
+          <p>Your password has been successfully reset for your Mentara account.</p>
+          <p>If you didn't make this change, please contact our support team immediately at ${process.env.SUPPORT_EMAIL || 'support@mentara.com'}.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.FRONTEND_URL}/login" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              Login to Your Account
+            </a>
+          </div>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">
+            This is an automated message from Mentara. Please do not reply to this email.
+          </p>
+        </div>
+      `;
+
       await this.emailService.sendGenericEmail({
         to: email,
         subject: 'Password Reset Successful',
-        template: 'password-reset-confirmation',
-        data: {
-          supportEmail: process.env.SUPPORT_EMAIL || 'support@mentara.com',
-          loginUrl: `${process.env.FRONTEND_URL}/login`,
-        },
+        html,
+        text: `Your password has been successfully reset for your Mentara account. Login at: ${process.env.FRONTEND_URL}/login`
       });
     } catch (error) {
       console.error('Failed to send password reset confirmation email:', error);

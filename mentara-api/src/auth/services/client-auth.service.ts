@@ -61,7 +61,7 @@ export class ClientAuthService {
       });
 
       // Create preassessment record if answers are provided
-      let preAssessment = null;
+      let preAssessment: any = null;
       if (registerDto.preassessmentAnswers && registerDto.preassessmentAnswers.length > 0) {
         preAssessment = await tx.preAssessment.create({
           data: {
