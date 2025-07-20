@@ -43,10 +43,10 @@ export function useInfiniteTherapistRecommendations(
   const api = useApi();
 
   return useInfiniteQuery({
-    queryKey: queryKeys.therapists.recommendations({
+    queryKey: ['therapists', 'recommendations', {
       ...baseParams,
       infinite: true,
-    }),
+    }],
     queryFn: ({ pageParam = 0 }) =>
       api.therapists.getRecommendations({
         ...baseParams,
