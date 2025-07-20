@@ -209,19 +209,11 @@ export class OnboardingService {
         `Marking step ${stepName} as completed for user ${userId}`,
       );
 
-      // Create audit log
-      await this.prisma.auditLog.create({
-        data: {
-          userId,
-          action: 'COMPLETE_ONBOARDING_STEP',
-          entity: 'onboarding',
-          entityId: userId,
-          metadata: {
-            step: stepName,
-            timestamp: new Date().toISOString(),
-          },
-        },
-      });
+      // Log onboarding step completion (alternative to audit log)
+      this.logger.log(
+        `Onboarding step completed - userId: ${userId}, step: ${stepName}, timestamp: ${new Date().toISOString()}`,
+        'OnboardingAudit'
+      );
 
       return await this.getOnboardingStatus(userId);
     } catch (error) {

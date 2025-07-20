@@ -174,7 +174,7 @@ export class EnhancedCommunityService {
           memberships: userId
             ? {
                 where: { userId },
-                select: { role: true },
+                select: { id: true },
               }
             : false,
         },
@@ -320,7 +320,7 @@ export class EnhancedCommunityService {
           memberships: userId
             ? {
                 where: { userId },
-                select: { role: true },
+                select: { id: true },
               }
             : false,
         },
@@ -395,11 +395,14 @@ export class EnhancedCommunityService {
         const membership = community.memberships?.[0];
         if (membership) {
           membershipStatus = 'member';
+
+          // Check if user can moderate based on global role and community moderator assignment
+          const canModerate = await this.checkModerationPermissions(userId, communityId);
+
           userPermissions = {
             canPost: true,
             canComment: true,
-            canModerate:
-              membership.role === 'MODERATOR' || membership.role === 'ADMIN',
+            canModerate,
           };
         } else {
           // Join requests removed - users are automatically assigned communities
@@ -963,6 +966,42 @@ export class EnhancedCommunityService {
         error,
       );
       return [];
+    }
+  }
+
+  /**
+   * Check if user can moderate a specific community
+   */
+  private async checkModerationPermissions(
+    userId: string,
+    communityId: string,
+  ): Promise<boolean> {
+    try {
+      // Check if user is a global admin
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      if (user?.role === 'admin') {
+        return true; // Global admins can moderate all communities
+      }
+
+      // Check if user is assigned as a moderator for this specific community
+      const moderatorCommunity = await this.prisma.moderatorCommunity.findFirst({
+        where: {
+          moderatorId: userId,
+          communityId,
+        },
+      });
+
+      return !!moderatorCommunity;
+    } catch (error) {
+      this.logger.error(
+        `Error checking moderation permissions for user ${userId} in community ${communityId}:`,
+        error,
+      );
+      return false;
     }
   }
 }

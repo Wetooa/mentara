@@ -277,16 +277,18 @@ export class PreAssessmentService {
         // Continue without AI estimate - don't fail the entire assessment
       }
 
-      // Create pre-assessment with validated data
+      // Create pre-assessment with validated data (all data stored in answers JSON field)
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          questionnaires: data.questionnaires,
-          answers: data.answers,
-          answerMatrix: data.answerMatrix as number[][],
-          scores,
-          severityLevels,
-          aiEstimate,
+          answers: {
+            questionnaires: data.questionnaires,
+            rawAnswers: data.answers,
+            answerMatrix: data.answerMatrix,
+            scores,
+            severityLevels,
+            aiEstimate,
+          },
         },
       });
 
@@ -418,13 +420,26 @@ export class PreAssessmentService {
         throw new NotFoundException('Client not found');
       }
 
+      // Get existing pre-assessment to preserve current data
+      const existingAssessment = await this.prisma.preAssessment.findUnique({
+        where: { clientId: userId },
+      });
+      
+      if (!existingAssessment) {
+        throw new NotFoundException('Pre-assessment not found');
+      }
+
+      // Extract current data from answers JSON field
+      const currentAnswers = existingAssessment.answers as any || {};
+      
       let scores: Record<string, number>;
       let severityLevels: Record<string, string>;
+      let aiEstimate: Record<string, boolean> = currentAnswers.aiEstimate || {};
 
       if (data.scores && this.isValidScores(data.scores)) {
         scores = data.scores;
       } else {
-        scores = {};
+        scores = currentAnswers.scores || {};
       }
 
       if (
@@ -433,14 +448,18 @@ export class PreAssessmentService {
       ) {
         severityLevels = data.severityLevels;
       } else {
-        severityLevels = {};
+        severityLevels = currentAnswers.severityLevels || {};
       }
 
+      // Recalculate scores if new questionnaires and answers provided
       if (
         data.questionnaires &&
         data.answers &&
         (!data.scores || !data.severityLevels)
       ) {
+        this.validateQuestionnaires(data.questionnaires);
+        this.validateAnswersStructure(data.answers);
+        
         const calculatedScores = calculateAllScores(
           data.questionnaires,
           data.answers,
@@ -452,22 +471,35 @@ export class PreAssessmentService {
           ]),
         );
         severityLevels = generateSeverityLevels(calculatedScores);
+        
+        // Attempt to get new AI estimate if answers changed
+        try {
+          const flatAnswers = this.flattenAnswers(data.answers);
+          if (flatAnswers.length === 201) {
+            const aiResult = await this.getAiEstimate(flatAnswers);
+            if (aiResult) {
+              aiEstimate = aiResult;
+            }
+          }
+        } catch (aiError) {
+          this.logger.warn('AI prediction failed during update:', aiError);
+        }
       }
 
+      // Update pre-assessment with new data structure
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          questionnaires: data.questionnaires as string[],
-          answers: data.answers as number[][],
-          answerMatrix: data.answerMatrix as number[][],
-          scores,
-          severityLevels,
+          answers: {
+            questionnaires: data.questionnaires || currentAnswers.questionnaires,
+            rawAnswers: data.answers || currentAnswers.rawAnswers,
+            answerMatrix: data.answerMatrix || currentAnswers.answerMatrix,
+            scores,
+            severityLevels,
+            aiEstimate,
+          },
         },
       });
-
-      if (!preAssessment) {
-        throw new NotFoundException('Pre-assessment not found');
-      }
 
       return preAssessment;
     } catch (error: unknown) {
@@ -550,16 +582,21 @@ export class PreAssessmentService {
         throw new NotFoundException('Pre-assessment not found for user');
       }
 
-      // Extract questionnaires and scores
-      const questionnaires = preAssessment.questionnaires as string[];
-      const scores = preAssessment.scores as Record<string, number>;
-
-      // Convert scores to QuestionnaireScores format
-      const questionnaireScores: QuestionnaireScores = {};
-      const severityLevels = preAssessment.severityLevels as Record<
+      // Extract data from the answers JSON field
+      const answers = preAssessment.answers as any;
+      const questionnaires = answers?.questionnaires as string[];
+      const scores = answers?.scores as Record<string, number>;
+      const severityLevels = answers?.severityLevels as Record<
         string,
         string
       >;
+
+      if (!questionnaires || !scores || !severityLevels) {
+        throw new BadRequestException('Invalid pre-assessment data structure');
+      }
+
+      // Convert scores to QuestionnaireScores format
+      const questionnaireScores: QuestionnaireScores = {};
 
       questionnaires.forEach((questionnaire) => {
         if (scores[questionnaire] !== undefined) {

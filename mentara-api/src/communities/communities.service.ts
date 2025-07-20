@@ -227,7 +227,6 @@ export class CommunitiesService {
       data: {
         userId,
         communityId,
-        role: role.toUpperCase() as any,
       },
     });
   }

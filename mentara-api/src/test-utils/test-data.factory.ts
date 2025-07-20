@@ -447,7 +447,6 @@ export class TestDataFactory {
         data: {
           userId: user.id,
           communityId: community.id,
-          role: 'MEMBER',
         },
       });
     }

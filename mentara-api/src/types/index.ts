@@ -64,14 +64,19 @@ export interface PaginationQuery {
 }
 
 // Pre-assessment types
-export interface PreAssessmentResponse {
-  id: string;
-  userId: string;
+export interface PreAssessmentAnswersData {
   questionnaires: string[];
-  answers: number[][];
-  answerMatrix: number[];
+  rawAnswers: number[][];
+  answerMatrix?: number[][];
   scores: Record<string, number>;
   severityLevels: Record<string, string>;
+  aiEstimate?: Record<string, boolean>;
+}
+
+export interface PreAssessmentResponse {
+  id: string;
+  clientId: string;
+  answers: PreAssessmentAnswersData;
   createdAt: Date;
   updatedAt: Date;
 }

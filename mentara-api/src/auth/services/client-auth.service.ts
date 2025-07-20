@@ -183,7 +183,14 @@ export class ClientAuthService {
   async getClientProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        birthDate: true,
+        createdAt: true,
+        role: true,
         client: {
           include: {
             assignedTherapists: {
@@ -212,23 +219,43 @@ export class ClientAuthService {
       throw new UnauthorizedException('Client not found');
     }
 
-    return user;
+    // Return in the expected ClientProfileResponse format
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      role: 'client' as const,
+      dateOfBirth: user.birthDate ? user.birthDate.toISOString() : undefined,
+      phoneNumber: undefined, // Phone number not stored in User model for clients
+      profileComplete: !!(user.firstName && user.lastName && user.birthDate),
+      therapistId: user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
+      createdAt: user.createdAt.toISOString(),
+    };
   }
 
   async getFirstSignInStatus(userId: string) {
-    const client = await this.prisma.client.findUnique({
-      where: { userId },
-      select: {
-        hasSeenTherapistRecommendations: true,
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        client: {
+          select: {
+            hasSeenTherapistRecommendations: true,
+          },
+        },
       },
     });
 
-    if (!client) {
+    if (!user || !user.client) {
       throw new UnauthorizedException('Client not found');
     }
 
+    // Return in the expected OnboardingStatusResponse format
     return {
-      hasSeenTherapistRecommendations: client.hasSeenTherapistRecommendations,
+      isFirstSignIn: !user.lastLoginAt,
+      hasSeenRecommendations: user.client.hasSeenTherapistRecommendations,
+      profileCompleted: !!(user.firstName && user.lastName && user.birthDate),
+      assessmentCompleted: false, // TODO: implement assessment completion check
     };
   }
 
@@ -248,7 +275,9 @@ export class ClientAuthService {
       },
     });
 
+    // Return in the expected SuccessResponse format
     return {
+      success: true,
       message: 'Recommendations marked as seen',
     };
   }

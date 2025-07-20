@@ -427,36 +427,31 @@ describe('NotificationsService', () => {
   });
 
   describe('getNotificationSettings', () => {
-    const mockSettings = {
-      id: 'settings-1',
-      userId: TEST_USER_IDS.CLIENT,
-      emailAppointmentReminders: true,
-      emailNewMessages: true,
-      pushNewMessages: true,
-      quietHoursEnabled: false,
-    };
-
-    it('should return existing notification settings', async () => {
-      prismaService.notificationSettings.findUnique.mockResolvedValue(mockSettings);
-
+    it('should return default notification settings', async () => {
       const result = await service.getNotificationSettings(TEST_USER_IDS.CLIENT);
 
-      expect(result).toEqual(mockSettings);
-      expect(prismaService.notificationSettings.findUnique).toHaveBeenCalledWith({
-        where: { userId: TEST_USER_IDS.CLIENT },
+      // Verify the structure contains expected default values
+      expect(result).toMatchObject({
+        id: `default-${TEST_USER_IDS.CLIENT}`,
+        userId: TEST_USER_IDS.CLIENT,
+        emailAppointmentReminders: true,
+        emailNewMessages: true,
+        emailWorksheetUpdates: true,
+        emailSystemUpdates: false,
+        emailMarketing: false,
+        pushAppointmentReminders: true,
+        pushNewMessages: true,
+        pushWorksheetUpdates: true,
+        pushSystemUpdates: false,
+        inAppMessages: true,
+        inAppUpdates: true,
+        quietHoursEnabled: false,
+        quietHoursStart: '22:00',
+        quietHoursEnd: '08:00',
+        quietHoursTimezone: 'UTC',
       });
-    });
-
-    it('should create default settings when none exist', async () => {
-      prismaService.notificationSettings.findUnique.mockResolvedValue(null);
-      prismaService.notificationSettings.create.mockResolvedValue(mockSettings);
-
-      const result = await service.getNotificationSettings(TEST_USER_IDS.CLIENT);
-
-      expect(result).toEqual(mockSettings);
-      expect(prismaService.notificationSettings.create).toHaveBeenCalledWith({
-        data: { userId: TEST_USER_IDS.CLIENT },
-      });
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
     });
   });
 

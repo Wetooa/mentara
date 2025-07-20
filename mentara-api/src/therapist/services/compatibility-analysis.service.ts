@@ -41,12 +41,11 @@ export class CompatibilityAnalysisService {
   async analyzeCompatibility(
     client: Client & {
       preAssessment: PreAssessment;
-      clientPreferences: any[];
       user: any;
     },
     therapist: Therapist & { user: any },
   ): Promise<CompatibilityAnalysis> {
-    const clientPrefs = this.parseClientPreferences(client.clientPreferences);
+    const clientPrefs = {}; // Client preferences removed - using empty object
     const assessmentData = client.preAssessment;
 
     // Analyze different compatibility dimensions
@@ -138,7 +137,9 @@ export class CompatibilityAnalysisService {
   ): number {
     let score = 70; // Start with neutral score
 
-    const severityLevels = assessment.severityLevels as Record<string, string>;
+    // Access severityLevels from the answers JSON field
+    const answers = assessment.answers as any;
+    const severityLevels = answers?.severityLevels as Record<string, string>;
 
     // Analyze based on mental health conditions and preferred communication style
     const hasAnxiety =
@@ -228,7 +229,9 @@ export class CompatibilityAnalysisService {
   ): number {
     let score = 70; // Start with neutral score
 
-    const severityLevels = assessment.severityLevels as Record<string, string>;
+    // Access severityLevels from the answers JSON field
+    const answers = assessment.answers as any;
+    const severityLevels = answers?.severityLevels as Record<string, string>;
 
     // Analyze introversion/extraversion needs
     const socialAnxiety = severityLevels['social_anxiety']
@@ -607,23 +610,6 @@ export class CompatibilityAnalysisService {
     return { strengths, concerns, recommendations };
   }
 
-  private parseClientPreferences(preferences: any[]): Record<string, any> {
-    const parsed: Record<string, any> = {};
-
-    preferences.forEach((pref) => {
-      try {
-        if (typeof pref.value === 'string' && pref.value.startsWith('[')) {
-          parsed[pref.key] = JSON.parse(pref.value);
-        } else {
-          parsed[pref.key] = pref.value;
-        }
-      } catch {
-        parsed[pref.key] = pref.value;
-      }
-    });
-
-    return parsed;
-  }
 
   private getSeverityWeight(severity: string): number {
     const severityWeights: Record<string, number> = {

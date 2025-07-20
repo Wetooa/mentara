@@ -127,7 +127,9 @@ export class ClinicalInsightsService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     try {
-      const severityLevels = preAssessment.severityLevels as Record<
+      // Access severityLevels from the answers JSON field
+      const answers = preAssessment.answers as any;
+      const severityLevels = answers?.severityLevels as Record<
         string,
         string
       >;
@@ -149,7 +151,9 @@ export class ClinicalInsightsService {
     preAssessment: PreAssessment,
   ): Record<string, boolean> {
     try {
-      const aiEstimate = preAssessment.aiEstimate as Record<string, boolean>;
+      // Access aiEstimate from the answers JSON field
+      const answers = preAssessment.answers as any;
+      const aiEstimate = answers?.aiEstimate as Record<string, boolean>;
       if (!aiEstimate || typeof aiEstimate !== 'object') {
         this.logger.warn('No valid AI predictions available');
         return {};

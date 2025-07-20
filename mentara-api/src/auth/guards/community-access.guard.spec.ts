@@ -211,10 +211,20 @@ describe('CommunityAccessGuard', () => {
       ];
 
       for (const testRole of testRoles) {
-        // Set up membership with specific role
+        // Set up membership (role determined by user's global role and moderator assignment)
         roomWithModeratorPosting.roomGroup.community.memberships = [
-          { userId: testRole.userId, role: testRole.role },
+          { userId: testRole.userId },
         ];
+
+        // Mock user's global role
+        prismaService.user.findUnique = jest.fn().mockResolvedValue({
+          role: testRole.role === 'admin' ? 'admin' : testRole.role === 'moderator' ? 'moderator' : 'client',
+        });
+
+        // Mock moderator assignment if needed
+        prismaService.moderatorCommunity.findFirst = jest.fn().mockResolvedValue(
+          testRole.role === 'moderator' ? { moderatorId: testRole.userId } : null
+        );
 
         prismaService.room.findUnique = jest.fn().mockResolvedValue(roomWithModeratorPosting);
 
@@ -342,9 +352,20 @@ describe('CommunityAccessGuard', () => {
     it('should get user community role correctly', async () => {
       // Arrange
       const mockMembership = {
+        userId: TEST_USER_IDS.THERAPIST,
+        communityId: TEST_COMMUNITY_IDS.ANXIETY_SUPPORT,
+      };
+      const mockUser = {
         role: 'moderator',
       };
+      const mockModeratorCommunity = {
+        moderatorId: TEST_USER_IDS.THERAPIST,
+        communityId: TEST_COMMUNITY_IDS.ANXIETY_SUPPORT,
+      };
+
       prismaService.membership.findFirst = jest.fn().mockResolvedValue(mockMembership);
+      prismaService.user.findUnique = jest.fn().mockResolvedValue(mockUser);
+      prismaService.moderatorCommunity.findFirst = jest.fn().mockResolvedValue(mockModeratorCommunity);
 
       // Act
       const role = await guard.getUserCommunityRole(TEST_USER_IDS.THERAPIST, TEST_COMMUNITY_IDS.ANXIETY_SUPPORT);
@@ -356,15 +377,12 @@ describe('CommunityAccessGuard', () => {
           userId: TEST_USER_IDS.THERAPIST,
           communityId: TEST_COMMUNITY_IDS.ANXIETY_SUPPORT,
         },
-        select: {
-          role: true,
-        },
       });
     });
 
     it('should check moderation capabilities correctly', async () => {
       // Arrange
-      const mockMembership = {
+      const mockUser = {
         role: 'moderator',
       };
       prismaService.membership.findFirst = jest.fn().mockResolvedValue(mockMembership);

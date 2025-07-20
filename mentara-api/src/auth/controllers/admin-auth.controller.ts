@@ -87,8 +87,8 @@ export class AdminAuthController {
       user: {
         id: result.user.id,
         email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
+        firstName: result.user.firstName || '',
+        lastName: result.user.lastName || '',
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },

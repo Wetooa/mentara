@@ -435,12 +435,7 @@ export class MessagingGateway
         include: {
           participants: {
             include: {
-              user: {
-                include: {
-                  notificationSettings: true,
-                  deviceTokens: true,
-                },
-              },
+              user: true,
             },
           },
         },
@@ -461,17 +456,16 @@ export class MessagingGateway
             return false;
           }
 
-          // Check if user has push notifications enabled for messages
-          const settings = participant.user.notificationSettings;
-          if (!settings?.pushNewMessages) {
+          // Use default notification settings since notificationSettings model doesn't exist
+          // Default to true for push notifications for new messages
+          const defaultPushNewMessages = true;
+          if (!defaultPushNewMessages) {
             return false;
           }
 
-          // Check if user has active device tokens for push notifications
-          return (
-            participant.user.deviceTokens &&
-            participant.user.deviceTokens.length > 0
-          );
+          // Note: No device token filtering available (no DeviceToken model)
+          // All participants are considered eligible for alternative notifications
+          return true;
         },
       );
 
@@ -499,40 +493,25 @@ export class MessagingGateway
         },
       };
 
-      // Send push notifications to all eligible participants
-      const pushPromises = eligibleParticipants.flatMap((participant) =>
-        participant.user.deviceTokens.map(async (deviceToken: any) => {
-          try {
-            // Simplified push notification - would implement proper service if available
-            this.logger.log(
-              `Would send push notification to device: ${deviceToken.token}`,
-            );
-
-            this.logger.log(
-              `Push notification sent to user ${participant.userId} for message ${message.id}`,
-            );
-          } catch (error) {
-            const errorMessage =
-              error instanceof Error ? error.message : 'Unknown error';
-            this.logger.error(
-              `Failed to send push notification to user ${participant.userId}: ${errorMessage}`,
-            );
-
-            // If subscription is invalid, remove it
-            if (
-              errorMessage.includes('invalid') ||
-              errorMessage.includes('expired')
-            ) {
-              await this.prisma.deviceToken.delete({
-                where: { id: deviceToken.id },
-              });
-              this.logger.log(
-                `Removed invalid push subscription for user ${participant.userId}`,
-              );
-            }
-          }
-        }),
-      );
+      // Alternative notification approach (no device tokens available)
+      const pushPromises = eligibleParticipants.map(async (participant) => {
+        try {
+          // Log notification attempt (alternative to push notifications)
+          this.logger.log(
+            `Would send push notification to user ${participant.userId} for message ${message.id} (no DeviceToken model available)`,
+          );
+          
+          // Here you could implement WebSocket-based real-time notifications
+          // or other alternative notification methods
+          
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(
+            `Failed to process notification for user ${participant.userId}: ${errorMessage}`,
+          );
+        }
+      });
 
       await Promise.allSettled(pushPromises);
 

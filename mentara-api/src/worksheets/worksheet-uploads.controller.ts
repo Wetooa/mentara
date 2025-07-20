@@ -92,27 +92,42 @@ export class WorksheetUploadsController {
             materialNames: {
               push: file.originalname,
             },
-            materialSizes: {
-              push: file.size,
-            },
+
           },
         });
       } else {
-        // For submissions, add to submission arrays
-        await this.prisma.worksheet.update({
-          where: { id: worksheetId },
-          data: {
-            submissionUrls: {
-              push: uploadResult.url,
-            },
-            submissionNames: {
-              push: file.originalname,
-            },
-            submissionSizes: {
-              push: file.size,
-            },
-          },
+        // For submissions, create or update WorksheetSubmission
+        const existingSubmission = await this.prisma.worksheetSubmission.findUnique({
+          where: { worksheetId },
         });
+
+        if (existingSubmission) {
+          // Update existing submission
+          await this.prisma.worksheetSubmission.update({
+            where: { worksheetId },
+            data: {
+              fileUrls: {
+                push: uploadResult.url,
+              },
+              fileNames: {
+                push: file.originalname,
+              },
+              fileSizes: {
+                push: file.size,
+              },
+            },
+          });
+        } else {
+          // Create new submission
+          await this.prisma.worksheetSubmission.create({
+            data: {
+              worksheetId,
+              fileUrls: [uploadResult.url],
+              fileNames: [file.originalname],
+              fileSizes: [file.size],
+            },
+          });
+        }
       }
 
       // Return the expected response format

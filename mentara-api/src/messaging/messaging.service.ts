@@ -19,10 +19,8 @@ import {
   MessageReadEvent,
   ConversationCreatedEvent,
 } from '../common/events/messaging-events';
-import {
-  MessageEncryptionService,
-  EncryptedMessage,
-} from './services/message-encryption.service';
+// Note: Encryption functionality removed to match Prisma schema
+// The schema doesn't include encryption fields (encryptionIv, encryptionAuthTag, encryptionKeyId, isEncrypted)
 
 @Injectable()
 export class MessagingService {
@@ -31,7 +29,6 @@ export class MessagingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
-    private readonly messageEncryption: MessageEncryptionService,
   ) {}
 
   // Conversation Management
@@ -213,7 +210,7 @@ export class MessagingService {
       attachmentSize,
     } = sendMessageDto;
 
-    // Get conversation details to determine encryption type
+    // Verify conversation exists
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
       include: {
@@ -231,53 +228,20 @@ export class MessagingService {
       throw new NotFoundException('Conversation not found');
     }
 
-    // Determine encryption type based on conversation participants
-    const conversationType = this.messageEncryption.getConversationType(
-      conversation.participants.map((p) => ({ role: p.user.role })),
-    );
-
-    // Encrypt message content for sensitive conversations
-    let finalContent = content;
-    let encryptionData: EncryptedMessage | null = null;
-
-    if (messageType === MessageType.TEXT && content.trim().length > 0) {
-      try {
-        encryptionData = await this.messageEncryption.encryptMessage(
-          content,
-          conversationType,
-        );
-        finalContent = encryptionData.encryptedContent; // Store encrypted content
-      } catch (error) {
-        this.logger.error(
-          'Message encryption failed - refusing to store plaintext:',
-          error,
-        );
-        throw new InternalServerErrorException(
-          'Message encryption failed - cannot proceed for security reasons',
-        );
-      }
-    }
+    // Note: Message encryption functionality removed to match Prisma schema
+    // Messages are stored as plaintext as the schema doesn't support encryption fields
 
     const message = await this.prisma.message.create({
       data: {
         conversationId,
         senderId: userId,
-        content: finalContent, // Store encrypted content
+        content, // Store content as-is (no encryption)
         messageType,
         replyToId,
-        // Keep backward compatibility with single attachment fields
-        attachmentUrl: attachmentUrls[0] || attachmentUrl,
-        attachmentName: attachmentNames[0] || attachmentName,
-        attachmentSize: attachmentSizes[0] || attachmentSize,
-        // Add new multiple attachment fields
-        attachmentUrls,
-        attachmentNames,
-        attachmentSizes,
-        // Store encryption metadata
-        encryptionIv: encryptionData?.iv,
-        encryptionAuthTag: encryptionData?.authTag,
-        encryptionKeyId: encryptionData?.keyId,
-        isEncrypted: !!encryptionData,
+        // Use multiple attachment fields (schema only supports these)
+        attachmentUrls: attachmentUrls.length > 0 ? attachmentUrls : (attachmentUrl ? [attachmentUrl] : []),
+        attachmentNames: attachmentNames.length > 0 ? attachmentNames : (attachmentName ? [attachmentName] : []),
+        attachmentSizes: attachmentSizes.length > 0 ? attachmentSizes : (attachmentSize ? [attachmentSize] : []),
       },
       include: {
         sender: {
@@ -319,12 +283,8 @@ export class MessagingService {
       data: { lastMessageAt: new Date() },
     });
 
-    // For encrypted messages, sanitize content in events for security
-    let eventContent = content;
-    if (message.isEncrypted && encryptionData) {
-      // Events should NOT contain plaintext for encrypted messages
-      eventContent = '[Encrypted Message]';
-    }
+    // Note: No encryption - content is stored and transmitted as plaintext
+    const eventContent = content;
 
     const recipientIds =
       conversation?.participants
@@ -337,7 +297,7 @@ export class MessagingService {
         messageId: message.id,
         conversationId,
         senderId: userId,
-        content: eventContent, // Use sanitized content for events
+        content: eventContent, // Content transmitted as-is
         messageType: message.messageType.toLowerCase() as
           | 'text'
           | 'image'
@@ -349,20 +309,12 @@ export class MessagingService {
         recipientIds,
         replyToMessageId: message.replyToId || undefined,
         fileAttachments:
-          attachmentUrls.length > 0
-            ? attachmentUrls
-            : message.attachmentUrl
-              ? [message.attachmentUrl]
-              : undefined,
-        isEncrypted: message.isEncrypted,
+          message.attachmentUrls.length > 0 ? message.attachmentUrls : undefined,
       }),
     );
 
-    // Return message with sanitized content for security
-    return {
-      ...message,
-      content: eventContent, // Return sanitized content for encrypted messages
-    };
+    // Return message as-is (no encryption)
+    return message;
   }
 
   async getConversationMessages(
@@ -429,45 +381,8 @@ export class MessagingService {
       take: limit,
     });
 
-    // Decrypt messages if they are encrypted
-    const decryptedMessages = await Promise.all(
-      messages.map(async (message) => {
-        if (
-          message.isEncrypted &&
-          message.encryptionIv &&
-          message.encryptionAuthTag &&
-          message.encryptionKeyId
-        ) {
-          try {
-            const encryptedMessage = {
-              encryptedContent: message.content,
-              iv: message.encryptionIv,
-              authTag: message.encryptionAuthTag,
-              keyId: message.encryptionKeyId,
-            };
-
-            const decrypted =
-              await this.messageEncryption.decryptMessage(encryptedMessage);
-            return {
-              ...message,
-              content: decrypted.content,
-            };
-          } catch (error) {
-            this.logger.error(
-              `Failed to decrypt message ${message.id}:`,
-              error,
-            );
-            return {
-              ...message,
-              content: '[Message could not be decrypted]',
-            };
-          }
-        }
-        return message;
-      }),
-    );
-
-    return decryptedMessages.reverse(); // Return in chronological order
+    // Return messages as-is (no decryption needed)
+    return messages.reverse(); // Return in chronological order
   }
 
   async updateMessage(
@@ -747,8 +662,7 @@ export class MessagingService {
   }
 
   // Search Messages
-  // NOTE: This search only works on non-encrypted messages for security reasons.
-  // Encrypted messages cannot be searched by content and are excluded from results.
+  // Search messages by content (no encryption limitations)
   async searchMessages(
     userId: string,
     query: string,
@@ -759,26 +673,12 @@ export class MessagingService {
     const skip = (page - 1) * limit;
 
     const whereClause: any = {
-      // Only search non-encrypted messages for security
       AND: [
         {
-          OR: [
-            {
-              isEncrypted: false,
-              content: {
-                contains: query,
-                mode: 'insensitive',
-              },
-            },
-            {
-              isEncrypted: true,
-              // For encrypted messages, only search in non-sensitive metadata
-              messageType: {
-                contains: query,
-                mode: 'insensitive',
-              },
-            },
-          ],
+          content: {
+            contains: query,
+            mode: 'insensitive',
+          },
         },
         {
           isDeleted: false,
@@ -824,13 +724,13 @@ export class MessagingService {
       take: limit,
     });
 
-    // Return results with metadata about search limitations
+    // Return search results
     return {
       messages,
       searchInfo: {
         query,
         totalResults: messages.length,
-        note: 'Search results only include non-encrypted messages. Encrypted message content cannot be searched for security reasons.',
+        note: 'Search performed on message content.',
       },
     };
   }

@@ -6,7 +6,6 @@ import {
   Client,
   User,
   Review,
-  ClientPreference,
 } from '@prisma/client';
 
 // Type definitions for matching service
@@ -15,11 +14,10 @@ export type UserForMatching = Pick<
   'firstName' | 'lastName' | 'avatarUrl'
 >;
 
-export type ReviewForMatching = Pick<Review, 'rating' | 'status'>;
+export type ReviewForMatching = Pick<Review, 'rating'>;
 
 export type ClientForMatching = Client & {
   preAssessment: PreAssessment;
-  clientPreferences: ClientPreference[];
   user: UserForMatching;
 };
 
@@ -138,9 +136,7 @@ export class AdvancedMatchingService {
       throw new Error('Client must have a valid pre-assessment');
     }
 
-    if (!client.clientPreferences) {
-      throw new Error('Client preferences are required for matching');
-    }
+    // Client preferences functionality removed - not supported in current schema
 
     if (!therapist?.user) {
       throw new Error('Therapist must have valid user information');
@@ -200,11 +196,13 @@ export class AdvancedMatchingService {
   private buildUserConditionProfile(
     client: ClientForMatching,
   ): UserConditionProfile {
-    const severityLevels = client.preAssessment.severityLevels as Record<
+    // Extract data from the answers JSON field
+    const answers = client.preAssessment.answers as any;
+    const severityLevels = answers?.severityLevels as Record<
       string,
       string
     >;
-    const questionnaires = client.preAssessment.questionnaires as string[];
+    const questionnaires = answers?.questionnaires as string[];
 
     // Categorize conditions by severity
     const primaryConditions: Array<{
@@ -218,38 +216,38 @@ export class AdvancedMatchingService {
       weight: number;
     }> = [];
 
-    questionnaires.forEach((condition) => {
-      const severity = severityLevels[condition];
-      const weight = this.severityWeights[severity] || 1;
+    if (questionnaires && severityLevels) {
+      questionnaires.forEach((condition) => {
+        const severity = severityLevels[condition];
+        const weight = this.severityWeights[severity] || 1;
 
-      if (weight >= 4) {
-        primaryConditions.push({ condition, severity, weight });
-      } else if (weight >= 2) {
-        secondaryConditions.push({ condition, severity, weight });
-      }
-    });
+        if (weight >= 4) {
+          primaryConditions.push({ condition, severity, weight });
+        } else if (weight >= 2) {
+          secondaryConditions.push({ condition, severity, weight });
+        }
+      });
+    }
 
-    // Extract preferences from client preferences
-    const preferences = this.parseClientPreferences(client.clientPreferences);
-
+    // Client preferences removed - using defaults
     return {
       primaryConditions,
       secondaryConditions,
-      preferredApproaches: (preferences.approaches as string[]) || [],
+      preferredApproaches: [],
       sessionPreferences: {
-        format: (preferences.sessionFormat as string[]) || ['online', 'in-person'],
-        duration: (preferences.sessionDuration as string[]) || [],
-        frequency: (preferences.sessionFrequency as string) || 'weekly',
+        format: ['online', 'in-person'],
+        duration: [],
+        frequency: 'weekly',
       },
       demographics: {
-        ageRange: (preferences.therapistAge as string) || 'any',
-        genderPreference: preferences.therapistGender as string | undefined,
-        languagePreference: (preferences.languages as string[]) || ['English'],
+        ageRange: 'any',
+        genderPreference: undefined,
+        languagePreference: ['English'],
       },
       logistics: {
-        maxHourlyRate: preferences.maxBudget as number | undefined,
-        province: preferences.location as string | undefined,
-        insuranceTypes: (preferences.insurance as string[]) || [],
+        maxHourlyRate: undefined,
+        province: undefined,
+        insuranceTypes: [],
       },
     };
   }
@@ -431,9 +429,7 @@ export class AdvancedMatchingService {
       return 50; // Neutral score for new therapists
     }
 
-    const approvedReviews = therapist.reviews.filter(
-      (review) => review.status === 'APPROVED',
-    );
+    const approvedReviews = therapist.reviews || [];
 
     if (approvedReviews.length === 0) {
       return 50;
@@ -546,8 +542,7 @@ export class AdvancedMatchingService {
       therapist.practiceStartDate,
     );
 
-    const approvedReviews =
-      therapist.reviews?.filter((r) => r.status === 'APPROVED') || [];
+    const approvedReviews = therapist.reviews || [];
     const averageRating =
       approvedReviews.length > 0
         ? approvedReviews.reduce((sum, r) => sum + r.rating, 0) /
@@ -571,28 +566,6 @@ export class AdvancedMatchingService {
     };
   }
 
-  private parseClientPreferences(
-    preferences: ClientPreference[],
-  ): Record<string, unknown> {
-    const parsed: Record<string, unknown> = {};
-
-    preferences.forEach((pref) => {
-      try {
-        // Handle JSON string values
-        if (typeof pref.value === 'string' && pref.value.startsWith('[')) {
-          parsed[pref.key] = JSON.parse(pref.value);
-        } else {
-          parsed[pref.key] = pref.value;
-        }
-      } catch (error) {
-        // Log parsing errors for debugging but continue with fallback
-        console.warn(`Failed to parse client preference ${pref.key}:`, error);
-        parsed[pref.key] = pref.value; // Fallback to raw value
-      }
-    });
-
-    return parsed;
-  }
 
   private calculateYearsOfExperience(startDate: Date): number {
     const now = new Date();

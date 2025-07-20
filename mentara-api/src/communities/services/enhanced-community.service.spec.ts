@@ -74,7 +74,7 @@ describe('EnhancedCommunityService', () => {
         assignedAt: new Date('2024-01-01'),
       },
     ],
-    memberships: [{ role: 'member' }],
+    memberships: [{ userId: 'user1', communityId: 'community1' }],
   };
 
   const mockCommunities = [
@@ -87,7 +87,7 @@ describe('EnhancedCommunityService', () => {
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
       _count: { memberships: 45 },
-      memberships: [{ role: 'member' }],
+      memberships: [{ userId: 'user1', communityId: 'community1' }],
     },
     {
       id: 'community-456',
@@ -400,7 +400,7 @@ describe('EnhancedCommunityService', () => {
 
     it('should set correct membership status based on user memberships', async () => {
       const communitiesWithMemberships = [
-        { ...mockCommunities[0], memberships: [{ role: 'member' }] },
+        { ...mockCommunities[0], memberships: [{ userId: 'user1', communityId: 'community1' }] },
         { ...mockCommunities[1], memberships: [] },
       ];
       
@@ -495,7 +495,7 @@ describe('EnhancedCommunityService', () => {
     it('should calculate user permissions for moderator', async () => {
       const moderatorCommunity = {
         ...mockCommunityWithDetails,
-        memberships: [{ role: 'moderator' }],
+        memberships: [{ userId: 'moderator1', communityId: 'community1' }],
       };
       
       prismaService.community.findUnique.mockResolvedValue(moderatorCommunity);

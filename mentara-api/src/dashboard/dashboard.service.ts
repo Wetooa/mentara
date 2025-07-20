@@ -33,7 +33,7 @@ export class DashboardService {
             },
           },
           worksheets: {
-            where: { isCompleted: false },
+            where: { status: { in: ['ASSIGNED', 'OVERDUE'] } },
             orderBy: { dueDate: 'asc' },
             take: 5,
             include: {
@@ -62,7 +62,7 @@ export class DashboardService {
       });
 
       const completedWorksheetsCount = await this.prisma.worksheet.count({
-        where: { clientId: userId, isCompleted: true },
+        where: { clientId: userId, status: { in: ['SUBMITTED', 'REVIEWED'] } },
       });
 
       const recentPosts = await this.prisma.post.findMany({
@@ -135,7 +135,7 @@ export class DashboardService {
             },
           },
           worksheets: {
-            where: { isCompleted: false },
+            where: { status: { in: ['ASSIGNED', 'OVERDUE'] } },
             orderBy: { dueDate: 'asc' },
             take: 10,
             include: {
@@ -160,17 +160,24 @@ export class DashboardService {
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({
-        where: { therapistId: userId, isCompleted: false },
+        where: { therapistId: userId, status: { in: ['ASSIGNED', 'OVERDUE'] } },
       });
 
-      // Get recent session logs
-      const recentSessions = await this.prisma.sessionLog.findMany({
-        where: { therapistId: userId },
+      // Get recent completed meetings (replacing session logs)
+      const recentSessions = await this.prisma.meeting.findMany({
+        where: { 
+          therapistId: userId,
+          status: 'COMPLETED'
+        },
         orderBy: { startTime: 'desc' },
         take: 5,
         include: {
           client: {
             include: { user: true },
+          },
+          meetingNotes: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
           },
         },
       });

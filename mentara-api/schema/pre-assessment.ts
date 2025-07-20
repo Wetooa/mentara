@@ -8,9 +8,10 @@ export interface CreatePreAssessmentDto {
 }
 
 export interface UpdatePreAssessmentDto {
+  questionnaires?: string[];
   answers?: number[][];
   answerMatrix?: number[][];
   scores?: Record<string, number>;
   severityLevels?: Record<string, string>;
-  completed?: boolean;
+  aiEstimate?: Record<string, boolean>;
 }
