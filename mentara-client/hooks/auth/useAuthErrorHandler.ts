@@ -17,23 +17,94 @@ import {
   NetworkConnectionError,
 } from "@/lib/api/errors/authErrors";
 
+/**
+ * Context information for authentication error handling
+ */
 export interface AuthErrorContext {
+  /** The component where the error occurred */
   component: string;
+  /** The action being performed when the error occurred */
   action: string;
+  /** Optional user identifier for debugging */
   userId?: string;
+  /** Additional metadata for error context */
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Result of authentication error handling
+ */
 export interface AuthErrorResult {
+  /** Whether the user should be redirected */
   shouldRedirect: boolean;
+  /** URL to redirect to if shouldRedirect is true */
   redirectTo?: string;
+  /** Whether the operation should be retried */
   shouldRetry: boolean;
+  /** Time to wait before retry in milliseconds */
   retryAfter?: number;
+  /** Field-specific error messages for forms */
   fieldErrors?: Record<string, string>;
+  /** General error message to display */
   message?: string;
 }
 
-export function useAuthErrorHandler() {
+/**
+ * Authentication error handler hook return type
+ */
+export interface UseAuthErrorHandlerReturn {
+  /** Main error handling function */
+  handleAuthError: (error: unknown, context: AuthErrorContext) => AuthErrorResult;
+  /** Function to clear authentication state */
+  clearAuthState: () => void;
+  /** Function to handle automatic retries */
+  handleRetry: (
+    originalFunction: () => Promise<void>,
+    retryAfter?: number,
+    maxRetries?: number
+  ) => Promise<void>;
+}
+
+/**
+ * Hook for handling authentication-related errors with comprehensive error categorization,
+ * user-friendly messaging, and automatic retry logic.
+ * 
+ * This hook provides centralized error handling for all authentication operations including
+ * login, logout, token refresh, and other auth-related API calls. It categorizes errors,
+ * provides appropriate user feedback, and handles redirects and retries automatically.
+ * 
+ * @example
+ * ```tsx
+ * function LoginForm() {
+ *   const { handleAuthError } = useAuthErrorHandler();
+ * 
+ *   const handleSubmit = async (data) => {
+ *     try {
+ *       await login(data);
+ *     } catch (error) {
+ *       const result = handleAuthError(error, {
+ *         component: 'LoginForm',
+ *         action: 'login',
+ *         userId: data.email
+ *       });
+ *       
+ *       if (result.shouldRedirect) {
+ *         router.push(result.redirectTo);
+ *       }
+ *     }
+ *   };
+ * }
+ * ```
+ * 
+ * Features:
+ * - Comprehensive error categorization (token expired, invalid credentials, etc.)
+ * - User-friendly error messages and toast notifications
+ * - Automatic token cleanup on authentication failures
+ * - Smart retry logic for transient errors
+ * - Form field error mapping for validation errors
+ * - Centralized redirect handling for expired sessions
+ */
+export function useAuthErrorHandler(): UseAuthErrorHandlerReturn {
   const router = useRouter();
 
   const handleAuthError = useCallback((
@@ -52,20 +123,22 @@ export function useAuthErrorHandler() {
       userEmail: context.userId,
     });
 
-    // Log error with context for monitoring
-    console.error(`Auth Error [${context.component}:${context.action}]:`, {
-      error: authError,
-      originalError: error,
-      context,
-      timestamp: new Date().toISOString(),
-      userAgent: typeof window !== "undefined" ? window.navigator.userAgent : undefined,
-    });
+    // Log error with context for monitoring (development only)
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`Auth Error [${context.component}:${context.action}]:`, {
+        error: authError,
+        originalError: error,
+        context,
+        timestamp: new Date().toISOString(),
+        userAgent: typeof window !== "undefined" ? window.navigator.userAgent : undefined,
+      });
+    }
 
     // Handle specific auth error types
     if (authError instanceof TokenExpiredError) {
       result.message = authError.getUserFriendlyMessage();
       result.shouldRedirect = true;
-      result.redirectTo = getRoleSpecificSignInUrl(context);
+      result.redirectTo = getCentralizedSignInUrl(context);
       toast.error(result.message);
       
       // Clear stored tokens
@@ -116,7 +189,7 @@ export function useAuthErrorHandler() {
         case 401:
           result.message = "Session expired. Please sign in again.";
           result.shouldRedirect = true;
-          result.redirectTo = getRoleSpecificSignInUrl(context);
+          result.redirectTo = getCentralizedSignInUrl(context);
           toast.error(result.message);
           
           // Clear stored tokens
@@ -206,34 +279,81 @@ export function useAuthErrorHandler() {
     return result;
   }, [router]);
 
-  const getRoleSpecificSignInUrl = (context: AuthErrorContext): string => {
-    // Try to determine role from component name or context
-    const component = context.component.toLowerCase();
-    
-    if (component.includes("client")) return "/client/sign-in";
-    if (component.includes("therapist")) return "/therapist/sign-in";
-    if (component.includes("admin")) return "/admin/sign-in";
-    if (component.includes("moderator")) return "/moderator/sign-in";
-    
-    // Default fallback
-    return "/client/sign-in";
+  /**
+   * Get the centralized sign-in URL for redirects
+   * 
+   * Since authentication has been centralized to a single sign-in route,
+   * all authentication redirects now go to the same location regardless of role.
+   * The system will automatically redirect users to their appropriate dashboard
+   * after successful authentication based on their role.
+   * 
+   * @param _context - Auth error context (unused but kept for API compatibility)
+   * @returns The centralized sign-in URL
+   */
+  const getCentralizedSignInUrl = (_context: AuthErrorContext): string => {
+    return "/auth/sign-in";
   };
 
-  const clearAuthState = useCallback(() => {
+  /**
+   * Clear all authentication state from browser storage
+   * 
+   * This function removes all authentication-related data from localStorage
+   * and should be called when the user logs out or when authentication fails.
+   * 
+   * @example
+   * ```tsx
+   * const { clearAuthState } = useAuthErrorHandler();
+   * 
+   * const handleLogout = () => {
+   *   clearAuthState();
+   *   router.push('/auth/sign-in');
+   * };
+   * ```
+   */
+  const clearAuthState = useCallback((): void => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       
-      // Clear Zustand stores
-      // Note: This would need to be implemented based on the store structure
+      // Note: Zustand store clearing should be handled by the AuthContext
+      // when logout() is called, this function focuses on browser storage cleanup
     }
   }, []);
 
+  /**
+   * Handle automatic retry logic for failed operations
+   * 
+   * This function automatically retries a failed operation with exponential backoff
+   * and provides user feedback about retry attempts. It's particularly useful for
+   * handling transient network errors or temporary server issues.
+   * 
+   * @param originalFunction - The async function to retry
+   * @param retryAfter - Time to wait before retry in milliseconds (default: 5000)
+   * @param maxRetries - Maximum number of retry attempts (default: 3)
+   * @returns Promise that resolves when the operation succeeds or rejects after max retries
+   * 
+   * @example
+   * ```tsx
+   * const { handleRetry } = useAuthErrorHandler();
+   * 
+   * const retryLogin = async () => {
+   *   try {
+   *     await handleRetry(
+   *       () => api.auth.login(credentials),
+   *       5000, // 5 second delay
+   *       3     // max 3 retries
+   *     );
+   *   } catch (error) {
+   *     console.error('Login failed after retries:', error);
+   *   }
+   * };
+   * ```
+   */
   const handleRetry = useCallback((
     originalFunction: () => Promise<void>,
     retryAfter: number = 5000,
     maxRetries: number = 3
-  ) => {
+  ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
       let retryCount = 0;
       
