@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import emailjs from '@emailjs/nodejs';
-import {
-  type EmailResponse,
-} from 'mentara-commons';
+import { type EmailResponse } from 'mentara-commons';
 
 @Injectable()
 export class EmailService {
@@ -123,7 +121,7 @@ export class EmailService {
   /**
    * Send OTP email for registration or verification
    * @param email - Recipient email address
-   * @param name - Recipient name  
+   * @param name - Recipient name
    * @param subject - Email subject line
    * @param otpCode - OTP code (optional, will generate if not provided)
    * @param expiresIn - Expiry time (optional, defaults to "10 minutes")
@@ -131,21 +129,22 @@ export class EmailService {
    */
   async sendOTP(
     email: string,
-    name: string, 
+    name: string,
     subject: string,
     otpCode?: string,
-    expiresIn: string = '10 minutes'
+    expiresIn: string = '10 minutes',
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
     try {
       const otp = otpCode || this.generateOtp(6);
-      
+
       const templateParams = {
         email,
         name,
@@ -169,7 +168,8 @@ export class EmailService {
         message: 'OTP email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('❌ Failed to send OTP email:', errorMessage);
 
       return {
@@ -189,12 +189,13 @@ export class EmailService {
   async sendTherapistRegistrationSuccess(
     email: string,
     name: string,
-    subject: string
+    subject: string,
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -213,15 +214,22 @@ export class EmailService {
         templateParams,
       );
 
-      this.logger.log('✅ Therapist registration success email sent:', { email, subject });
+      this.logger.log('✅ Therapist registration success email sent:', {
+        email,
+        subject,
+      });
 
       return {
         status: 'success',
         message: 'Therapist registration success email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('❌ Failed to send therapist registration success email:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        '❌ Failed to send therapist registration success email:',
+        errorMessage,
+      );
 
       return {
         status: 'error',
@@ -240,12 +248,13 @@ export class EmailService {
   async sendTherapistApproved(
     email: string,
     name: string,
-    subject: string
+    subject: string,
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -271,8 +280,12 @@ export class EmailService {
         message: 'Therapist approved email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('❌ Failed to send therapist approved email:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        '❌ Failed to send therapist approved email:',
+        errorMessage,
+      );
 
       return {
         status: 'error',
@@ -291,12 +304,13 @@ export class EmailService {
   async sendTherapistDenied(
     email: string,
     name: string,
-    subject: string
+    subject: string,
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -322,8 +336,12 @@ export class EmailService {
         message: 'Therapist denied email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('❌ Failed to send therapist denied email:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        '❌ Failed to send therapist denied email:',
+        errorMessage,
+      );
 
       return {
         status: 'error',
@@ -344,12 +362,13 @@ export class EmailService {
     email: string,
     name: string,
     subject: string,
-    resetLink: string
+    resetLink: string,
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -390,8 +409,12 @@ export class EmailService {
         message: 'Password reset email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('❌ Failed to send password reset email:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        '❌ Failed to send password reset email:',
+        errorMessage,
+      );
 
       return {
         status: 'error',
@@ -410,12 +433,13 @@ export class EmailService {
   async sendPasswordResetSuccess(
     email: string,
     name: string,
-    subject: string
+    subject: string,
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -451,15 +475,22 @@ export class EmailService {
         templateParams,
       );
 
-      this.logger.log('✅ Password reset success email sent:', { email, subject });
+      this.logger.log('✅ Password reset success email sent:', {
+        email,
+        subject,
+      });
 
       return {
         status: 'success',
         message: 'Password reset success email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('❌ Failed to send password reset success email:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        '❌ Failed to send password reset success email:',
+        errorMessage,
+      );
 
       return {
         status: 'error',
