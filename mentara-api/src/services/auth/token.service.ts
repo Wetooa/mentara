@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { JwtPayload } from '../strategies/jwt.strategy';
+import { JwtPayload } from '../../auth/strategies/jwt.strategy';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
