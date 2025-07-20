@@ -33,7 +33,7 @@ export class DashboardService {
             },
           },
           worksheets: {
-            where: { isCompleted: false },
+            where: { status: { in: ['ASSIGNED', 'OVERDUE'] } },
             orderBy: { dueDate: 'asc' },
             take: 5,
             include: {
@@ -47,7 +47,14 @@ export class DashboardService {
       });
 
       if (!client) {
-        throw new NotFoundException('Client not found');
+        throw new NotFoundException(`Client not found for userId: ${userId}`);
+      }
+
+      // Validate that client has user relationship
+      if (!client.user) {
+        throw new InternalServerErrorException(
+          `Client found but user relationship is missing for userId: ${userId}`,
+        );
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -55,7 +62,7 @@ export class DashboardService {
       });
 
       const completedWorksheetsCount = await this.prisma.worksheet.count({
-        where: { clientId: userId, isCompleted: true },
+        where: { clientId: userId, status: { in: ['SUBMITTED', 'REVIEWED'] } },
       });
 
       const recentPosts = await this.prisma.post.findMany({
@@ -78,7 +85,7 @@ export class DashboardService {
         },
       });
 
-      return {
+      const responseData = {
         client,
         stats: {
           completedMeetings: completedMeetingsCount,
@@ -92,6 +99,8 @@ export class DashboardService {
         recentActivity: recentPosts,
         hasPreAssessment: !!client.preAssessment,
       };
+
+      return responseData;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -126,7 +135,7 @@ export class DashboardService {
             },
           },
           worksheets: {
-            where: { isCompleted: false },
+            where: { status: { in: ['ASSIGNED', 'OVERDUE'] } },
             orderBy: { dueDate: 'asc' },
             take: 10,
             include: {
@@ -147,21 +156,28 @@ export class DashboardService {
       });
 
       const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId, status: 'active' },
+        where: { therapistId: userId, status: 'ACTIVE' },
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({
-        where: { therapistId: userId, isCompleted: false },
+        where: { therapistId: userId, status: { in: ['ASSIGNED', 'OVERDUE'] } },
       });
 
-      // Get recent session logs
-      const recentSessions = await this.prisma.sessionLog.findMany({
-        where: { therapistId: userId },
+      // Get recent completed meetings (replacing session logs)
+      const recentSessions = await this.prisma.meeting.findMany({
+        where: { 
+          therapistId: userId,
+          status: 'COMPLETED'
+        },
         orderBy: { startTime: 'desc' },
         take: 5,
         include: {
           client: {
             include: { user: true },
+          },
+          meetingNotes: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
           },
         },
       });
@@ -195,7 +211,7 @@ export class DashboardService {
       const totalClients = await this.prisma.client.count();
       const totalTherapists = await this.prisma.therapist.count();
       const pendingTherapists = await this.prisma.therapist.count({
-        where: { status: 'pending' },
+        where: { status: 'PENDING' },
       });
       const totalMeetings = await this.prisma.meeting.count();
       const completedMeetings = await this.prisma.meeting.count({
@@ -215,7 +231,7 @@ export class DashboardService {
       });
 
       const recentTherapistApplications = await this.prisma.therapist.findMany({
-        where: { status: 'pending' },
+        where: { status: 'PENDING' },
         orderBy: { createdAt: 'desc' },
         take: 10,
         include: { user: true },

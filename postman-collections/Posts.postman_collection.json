@@ -1,0 +1,887 @@
+{
+  "info": {
+    "name": "Mentara - Posts",
+    "description": "Posts module endpoints for community content creation, management, interactions, and moderation within support communities.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-posts"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error('❌ Validation Error: ' + issue.message + ' (' + issue.path.join('.') + ');',
+          "            });"",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Post Management",
+      "item": [
+        {
+          "name": "Create Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Post created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has post ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('postId', responseJson.id);",
+                  "});",
+                  "",
+                  "pm.test('Post has required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('title');",
+                  "    pm.expect(responseJson).to.have.property('content');",
+                  "    pm.expect(responseJson).to.have.property('authorId');",
+                  "    pm.expect(responseJson).to.have.property('communityId');",
+                  "    pm.expect(responseJson).to.have.property('createdAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sharing my journey with anxiety and what's helped me\",\n  \"content\": \"Hey everyone! I wanted to share what I've learned over the past year dealing with anxiety. I hope this helps someone else who might be going through similar struggles.\\n\\nFirst, finding the right therapist was crucial. It took me a few tries to find someone I really connected with. Don't give up if the first one doesn't feel right.\\n\\nSecond, breathing exercises really do help. I was skeptical at first, but the 4-7-8 technique has become my go-to during panic attacks.\\n\\nThird, journaling has been a game-changer. Writing down my thoughts and feelings helps me process them better.\\n\\nWhat techniques have worked for you? I'd love to hear your experiences!\",\n  \"type\": \"text\",\n  \"communityId\": \"{{communityId}}\",\n  \"tags\": [\"anxiety\", \"coping-strategies\", \"therapy\", \"breathing-exercises\", \"journaling\"],\n  \"isAnonymous\": false,\n  \"allowComments\": true,\n  \"triggerWarning\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Create a new post in a community"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Post with Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My mindfulness corner - thought I'd share\",\n  \"content\": \"I've been setting up a little mindfulness corner in my room and it's been really helpful for my daily meditation practice. Thought I'd share in case it inspires anyone else!\",\n  \"type\": \"media\",\n  \"communityId\": \"{{communityId}}\",\n  \"media\": [\n    {\n      \"fileId\": \"{{fileId}}\",\n      \"type\": \"image\",\n      \"url\": \"https://storage.example.com/posts/mindfulness-corner.jpg\",\n      \"caption\": \"My cozy mindfulness corner with plants and crystals\"\n    }\n  ],\n  \"tags\": [\"mindfulness\", \"meditation\", \"self-care\", \"inspiration\"],\n  \"isAnonymous\": false,\n  \"allowComments\": true,\n  \"triggerWarning\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Create a post with media attachments"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Posts retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has posts array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('posts');",
+                  "    pm.expect(responseJson.posts).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Pagination info included', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('pagination');",
+                  "    pm.expect(responseJson.pagination).to.have.property('page');",
+                  "    pm.expect(responseJson.pagination).to.have.property('totalPages');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts?communityId={{communityId}}&page=1&limit=20&sort=recent&includeAnonymous=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"],
+              "query": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "recent"
+                },
+                {
+                  "key": "includeAnonymous",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get posts with filtering and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Get detailed information about a specific post"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sharing my journey with anxiety and what's helped me - Updated\",\n  \"content\": \"Hey everyone! I wanted to share what I've learned over the past year dealing with anxiety. I hope this helps someone else who might be going through similar struggles.\\n\\n**UPDATE**: I've added a few more techniques that have been helping me lately.\\n\\nFirst, finding the right therapist was crucial. It took me a few tries to find someone I really connected with. Don't give up if the first one doesn't feel right.\\n\\nSecond, breathing exercises really do help. I was skeptical at first, but the 4-7-8 technique has become my go-to during panic attacks.\\n\\nThird, journaling has been a game-changer. Writing down my thoughts and feelings helps me process them better.\\n\\n**NEW**: Progressive muscle relaxation has been amazing for helping me sleep better, which in turn helps with my anxiety during the day.\\n\\nWhat techniques have worked for you? I'd love to hear your experiences!\",\n  \"tags\": [\"anxiety\", \"coping-strategies\", \"therapy\", \"breathing-exercises\", \"journaling\", \"sleep\", \"relaxation\"],\n  \"editReason\": \"Added new technique that's been helping\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Update a post (only by author)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Posted in wrong community\",\n  \"notifyModerators\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Delete a post (author/moderator/admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Post Interactions",
+      "item": [
+        {
+          "name": "Like Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Post liked successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Like details returned', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('postId');",
+                  "    pm.expect(responseJson).to.have.property('userId');",
+                  "    pm.expect(responseJson).to.have.property('likedAt');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reactionType\": \"like\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "reactions"]
+            },
+            "description": "Like a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Unlike Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "reactions"]
+            },
+            "description": "Remove like from a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Share Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shareType\": \"community\",\n  \"targetCommunityId\": \"{{targetCommunityId}}\",\n  \"message\": \"Found this really helpful and wanted to share with this community too!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/share",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "share"]
+            },
+            "description": "Share a post to another community"
+          },
+          "response": []
+        },
+        {
+          "name": "Save Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"collectionName\": \"Helpful Anxiety Tips\",\n  \"notes\": \"Great breathing exercise techniques\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/save",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "save"]
+            },
+            "description": "Save a post to personal collection"
+          },
+          "response": []
+        },
+        {
+          "name": "Unsave Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/save",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "save"]
+            },
+            "description": "Remove post from saved collection"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Reactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/reactions?type=like&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "reactions"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "like"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get users who reacted to a post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Post Search & Discovery",
+      "item": [
+        {
+          "name": "Search Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Search results structure valid', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('results');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson).to.have.property('facets');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/search?q=anxiety coping strategies&communityId={{communityId}}&tags=breathing-exercises&sort=relevance",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety coping strategies"
+                },
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "tags",
+                  "value": "breathing-exercises"
+                },
+                {
+                  "key": "sort",
+                  "value": "relevance"
+                }
+              ]
+            },
+            "description": "Search posts by keywords and filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/trending?timeframe=week&limit=20&communityId={{communityId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "trending"],
+              "query": [
+                {
+                  "key": "timeframe",
+                  "value": "week"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "Get trending posts in a community"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Related Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/related?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "related"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get posts related to a specific post"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts by Tag",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/tags/anxiety?page=1&limit=20&sort=recent",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "tags", "anxiety"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "recent"
+                }
+              ]
+            },
+            "description": "Get all posts with a specific tag"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Post Moderation",
+      "item": [
+        {
+          "name": "Report Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"inappropriate_content\",\n  \"description\": \"This post contains harmful advice that could be dangerous for people with mental health conditions.\",\n  \"category\": \"safety_concern\",\n  \"evidence\": {\n    \"specificContent\": \"The section about stopping medication without consulting a doctor\",\n    \"screenshots\": [\"evidence1.png\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "report"]
+            },
+            "description": "Report a post for violations"
+          },
+          "response": []
+        },
+        {
+          "name": "Hide Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Not relevant to me\",\n  \"hideFromFeed\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/hide",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "hide"]
+            },
+            "description": "Hide a post from personal feed"
+          },
+          "response": []
+        },
+        {
+          "name": "Pin Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Important community announcement\",\n  \"duration\": \"7d\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/pin",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "pin"]
+            },
+            "description": "Pin a post to community (moderator/admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Unpin Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/pin",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "pin"]
+            },
+            "description": "Unpin a post from community (moderator/admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Lock Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Discussion has become unproductive\",\n  \"notifyAuthor\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/lock",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "lock"]
+            },
+            "description": "Lock a post to prevent further comments (moderator/admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Unlock Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/lock",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}", "lock"]
+            },
+            "description": "Unlock a post to allow comments (moderator/admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Post Management",
+      "item": [
+        {
+          "name": "Get User Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/posts?page=1&limit=20&sort=recent&includeAnonymous=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "recent"
+                },
+                {
+                  "key": "includeAnonymous",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get all posts by a specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Saved Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/saved-posts?page=1&limit=20&collection=Helpful Anxiety Tips",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "saved-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "collection",
+                  "value": "Helpful Anxiety Tips"
+                }
+              ]
+            },
+            "description": "Get user's saved posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Liked Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/liked-posts?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "liked-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get posts liked by user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Create Post - Missing Required Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for missing required fields', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('required');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Post\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Test validation for missing required fields"
+          },
+          "response": []
+        },
+        {
+          "name": "Access Deleted Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 404 for deleted post', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions post not found', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('not found');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/deleted-post-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "deleted-post-id"]
+            },
+            "description": "Test access to deleted post"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Post - Unauthorized",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 403 for unauthorized update', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions permissions', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('permission');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Trying to update someone else's post\",\n  \"content\": \"This should not be allowed\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{otherUserPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{otherUserPostId}}"]
+            },
+            "description": "Test unauthorized post update"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

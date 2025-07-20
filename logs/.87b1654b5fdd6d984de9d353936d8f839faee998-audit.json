@@ -6,9 +6,34 @@
     "auditLog": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/.87b1654b5fdd6d984de9d353936d8f839faee998-audit.json",
     "files": [
         {
-            "date": 1751713893265,
-            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-05.log",
-            "hash": "612df85ac7c6cf880d9abbcd847b9dc3221ffee964f919dcb42b7e7e2ab3c859"
+            "date": 1751886125597,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-07.log",
+            "hash": "dceefc934b587dcf21ba143226dd2a7e67c4b8dfac1ef147306e7f965510c9a5"
+        },
+        {
+            "date": 1751971856635,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-08.log",
+            "hash": "b5a7e84b49992b51f9898db96a90bb5b8f5617f0e89a6502e1712edf3ada4ff1"
+        },
+        {
+            "date": 1751991144894,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-09.log",
+            "hash": "72f00786cfcef798c3128d76842df045e167273d756771d954403949a7530c88"
+        },
+        {
+            "date": 1752148383771,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-10.log",
+            "hash": "d42867e0765e06268cf6529f619aeec5c8dd75cd5affd2490637ad69db79b8d2"
+        },
+        {
+            "date": 1752204392138,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-11.log",
+            "hash": "d8bf2e29d739a16b6691ac0de4a7b5e31c64a0b4ccdaaacb3881c180e94e5d4c"
+        },
+        {
+            "date": 1752941994452,
+            "name": "/home/tr-ggr/NerdProjects/nextjs/mentara/logs/mcp-puppeteer-2025-07-20.log",
+            "hash": "dad777c658c10b4109167575eee24bff0806a2b30bdda871d28bc0aaf19baec0"
         }
     ],
     "hashType": "sha256"

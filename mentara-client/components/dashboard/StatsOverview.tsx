@@ -1,10 +1,44 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar, FileCheck, FileClock, Users } from "lucide-react";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import { motion } from "framer-motion";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 
 interface StatsOverviewProps {
   stats: UserDashboardData["stats"];
 }
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0, scale: 0.95 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24
+    }
+  }
+};
+
+const iconVariants = {
+  hover: {
+    scale: 1.1,
+    rotate: 5,
+    transition: { duration: 0.2 }
+  }
+};
 
 export default function StatsOverview({ stats }: StatsOverviewProps) {
   const statItems = [
@@ -41,18 +75,40 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <motion.div 
+      className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {statItems.map((stat, index) => (
-        <Card key={index} className="shadow-sm">
-          <CardContent className="p-4 md:p-6 flex flex-col items-center text-center">
-            <div className={`rounded-full ${stat.color} p-3 mb-3`}>
-              {stat.icon}
-            </div>
-            <h3 className="text-2xl md:text-3xl font-bold">{stat.value}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{stat.title}</p>
-          </CardContent>
-        </Card>
+        <motion.div
+          key={index}
+          variants={itemVariants}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        >
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+            <CardContent className="p-3 sm:p-4 md:p-6 flex flex-col items-center text-center">
+              <motion.div 
+                className={`rounded-full ${stat.color} p-2 sm:p-3 mb-2 sm:mb-3`}
+                variants={iconVariants}
+                whileHover="hover"
+              >
+                {stat.icon}
+              </motion.div>
+              <motion.h3 
+                className="text-xl sm:text-2xl md:text-3xl font-bold"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 + index * 0.1, type: "spring", stiffness: 300 }}
+              >
+                {stat.value}
+              </motion.h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-tight">{stat.title}</p>
+            </CardContent>
+          </Card>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

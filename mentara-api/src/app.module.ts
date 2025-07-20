@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -19,19 +19,25 @@ import { AdminModule } from './admin/admin.module';
 import { ModeratorModule } from './moderator/moderator.module';
 import { ClientModule } from './client/client.module';
 import { MessagingModule } from './messaging/messaging.module';
-import { FilesModule } from './files/files.module';
-import { SessionsModule } from './sessions/sessions.module';
+import { MeetingsModule } from './meetings/meetings.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { BillingModule } from './billing/billing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { SearchModule } from './search/search.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
+import { HealthModule } from './health/health.module';
+import { EmailModule } from './email/email.module';
 import { PrismaService } from './providers/prisma-client.provider';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { EventBusService } from './common/events/event-bus.service';
 import { CommonModule } from './common/common.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { SecurityGuard } from './common/guards/security.guard';
+import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -79,20 +85,22 @@ import { CommonModule } from './common/common.module';
     ModeratorModule,
     ClientModule,
     MessagingModule,
-    FilesModule,
-    SessionsModule,
+    MeetingsModule,
     NotificationsModule,
-    AuditLogsModule,
     BillingModule,
     DashboardModule,
     SearchModule,
     AnalyticsModule,
+    OnboardingModule,
+    HealthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     PrismaService,
     EventBusService,
+    JwtService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
@@ -105,6 +113,20 @@ import { CommonModule } from './common/common.module';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SecurityGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
+
+    consumer.apply(RateLimitMiddleware).forRoutes('*');
+  }
+}

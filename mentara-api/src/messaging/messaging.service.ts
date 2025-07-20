@@ -1,15 +1,17 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
-} from './dto/messaging.dto';
+} from 'mentara-commons';
 import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
 import { EventBusService } from '../common/events/event-bus.service';
 import {
@@ -17,9 +19,13 @@ import {
   MessageReadEvent,
   ConversationCreatedEvent,
 } from '../common/events/messaging-events';
+// Note: Encryption functionality removed to match Prisma schema
+// The schema doesn't include encryption fields (encryptionIv, encryptionAuthTag, encryptionKeyId, isEncrypted)
 
 @Injectable()
 export class MessagingService {
+  private readonly logger = new Logger(MessagingService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
@@ -188,6 +194,9 @@ export class MessagingService {
     userId: string,
     conversationId: string,
     sendMessageDto: SendMessageDto,
+    attachmentUrls: string[] = [],
+    attachmentNames: string[] = [],
+    attachmentSizes: number[] = [],
   ) {
     // Verify user is participant in conversation
     await this.verifyParticipant(userId, conversationId);
@@ -201,16 +210,38 @@ export class MessagingService {
       attachmentSize,
     } = sendMessageDto;
 
+    // Verify conversation exists
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: {
+          include: {
+            user: {
+              select: { role: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    // Note: Message encryption functionality removed to match Prisma schema
+    // Messages are stored as plaintext as the schema doesn't support encryption fields
+
     const message = await this.prisma.message.create({
       data: {
         conversationId,
         senderId: userId,
-        content,
+        content, // Store content as-is (no encryption)
         messageType,
         replyToId,
-        attachmentUrl,
-        attachmentName,
-        attachmentSize,
+        // Use multiple attachment fields (schema only supports these)
+        attachmentUrls: attachmentUrls.length > 0 ? attachmentUrls : (attachmentUrl ? [attachmentUrl] : []),
+        attachmentNames: attachmentNames.length > 0 ? attachmentNames : (attachmentName ? [attachmentName] : []),
+        attachmentSizes: attachmentSizes.length > 0 ? attachmentSizes : (attachmentSize ? [attachmentSize] : []),
       },
       include: {
         sender: {
@@ -252,16 +283,8 @@ export class MessagingService {
       data: { lastMessageAt: new Date() },
     });
 
-    // Get conversation participants for event
-    const conversation = await this.prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: {
-        participants: {
-          where: { isActive: true },
-          select: { userId: true },
-        },
-      },
-    });
+    // Note: No encryption - content is stored and transmitted as plaintext
+    const eventContent = content;
 
     const recipientIds =
       conversation?.participants
@@ -274,7 +297,7 @@ export class MessagingService {
         messageId: message.id,
         conversationId,
         senderId: userId,
-        content: message.content,
+        content: eventContent, // Content transmitted as-is
         messageType: message.messageType.toLowerCase() as
           | 'text'
           | 'image'
@@ -285,12 +308,12 @@ export class MessagingService {
         sentAt: message.createdAt,
         recipientIds,
         replyToMessageId: message.replyToId || undefined,
-        fileAttachments: message.attachmentUrl
-          ? [message.attachmentUrl]
-          : undefined,
+        fileAttachments:
+          message.attachmentUrls.length > 0 ? message.attachmentUrls : undefined,
       }),
     );
 
+    // Return message as-is (no encryption)
     return message;
   }
 
@@ -358,6 +381,7 @@ export class MessagingService {
       take: limit,
     });
 
+    // Return messages as-is (no decryption needed)
     return messages.reverse(); // Return in chronological order
   }
 
@@ -638,6 +662,7 @@ export class MessagingService {
   }
 
   // Search Messages
+  // Search messages by content (no encryption limitations)
   async searchMessages(
     userId: string,
     query: string,
@@ -648,19 +673,27 @@ export class MessagingService {
     const skip = (page - 1) * limit;
 
     const whereClause: any = {
-      content: {
-        contains: query,
-        mode: 'insensitive',
-      },
-      isDeleted: false,
-      conversation: {
-        participants: {
-          some: {
-            userId,
-            isActive: true,
+      AND: [
+        {
+          content: {
+            contains: query,
+            mode: 'insensitive',
           },
         },
-      },
+        {
+          isDeleted: false,
+        },
+        {
+          conversation: {
+            participants: {
+              some: {
+                userId,
+                isActive: true,
+              },
+            },
+          },
+        },
+      ],
     };
 
     if (conversationId) {
@@ -691,6 +724,14 @@ export class MessagingService {
       take: limit,
     });
 
-    return messages;
+    // Return search results
+    return {
+      messages,
+      searchInfo: {
+        query,
+        totalResults: messages.length,
+        note: 'Search performed on message content.',
+      },
+    };
   }
 }

@@ -1,55 +1,59 @@
+// Worksheet Assignment System
+// Therapists create worksheets (assignments) for clients
+// Clients submit files as their response
 
 model Worksheet {
-    id          String                @id @default(uuid())
-    clientId    String                // Use clientId for proper relation with Client model
-    therapistId String?
-    title       String
-    instructions String?              // Added instructions field
-    description String?
-    dueDate     DateTime              // Added due date
-    status      String                @default("upcoming") // upcoming, past_due, completed, assigned
-    isCompleted Boolean               @default(false)      // Completion status
-    submittedAt DateTime?             // When the worksheet was submitted
-    feedback    String?               // Therapist feedback
-    createdAt   DateTime              @default(now())
-    updatedAt   DateTime              @updatedAt
-    materials   WorksheetMaterial[]
-    submissions WorksheetSubmission[]
-    client      Client                @relation(fields: [clientId], references: [userId])
-    therapist   Therapist?            @relation(fields: [therapistId], references: [userId])
-
-    @@index([clientId])
-    @@index([therapistId])
-    @@index([status])
-    @@index([isCompleted])
-}
-
-model WorksheetMaterial {
-    id          String    @id @default(uuid())
-    worksheetId String
-    filename    String    // Original filename
-    url         String    // URL to the file
-    fileSize    Int?      // File size in bytes
-    fileType    String?   // MIME type
-    createdAt   DateTime  @default(now())
-    worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
-
-    @@index([worksheetId])
+  id          String   @id @default(uuid())
+  clientId    String   // Which client this is assigned to
+  therapistId String   // Which therapist created it
+  
+  // Assignment details
+  title        String
+  instructions String   @db.Text // Detailed instructions for the client
+  dueDate      DateTime
+  status       WorksheetStatus @default(ASSIGNED)
+  
+  // Optional materials from therapist (reference files, examples, etc.)
+  materialUrls  String[] @default([])
+  materialNames String[] @default([])
+  
+  // Relations
+  client     Client              @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist  Therapist           @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  submission WorksheetSubmission? // 1-to-1 relationship with submission
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([clientId])
+  @@index([therapistId])
+  @@index([status])
+  @@index([dueDate])
 }
 
 model WorksheetSubmission {
-    id          String    @id @default(uuid())
-    worksheetId String
-    clientId    String    // Use clientId for proper relation with Client model
-    filename    String    // Original filename
-    url         String    // URL to the file
-    fileSize    Int?      // File size in bytes
-    fileType    String?   // MIME type
-    content     String?   @db.Text // Optional text content
-    createdAt   DateTime  @default(now())
-    worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
-    client      Client    @relation(fields: [clientId], references: [userId])
+  id          String @id @default(uuid())
+  worksheetId String @unique // 1-to-1 with worksheet
+  
+  // Submission files (client's response)
+  fileUrls  String[] // URLs to submitted files
+  fileNames String[] // Original file names
+  fileSizes Int[]    // File sizes for reference
+  
+  // Submission metadata
+  submittedAt DateTime @default(now())
+  feedback    String?  @db.Text // Therapist feedback on submission
+  
+  // Relations
+  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  
+  @@index([worksheetId])
+  @@index([submittedAt])
+}
 
-    @@index([worksheetId])
-    @@index([clientId])
+enum WorksheetStatus {
+  ASSIGNED    // Therapist assigned it to client
+  SUBMITTED   // Client submitted files
+  REVIEWED    // Therapist reviewed and gave feedback
+  OVERDUE     // Past due date without submission
 }

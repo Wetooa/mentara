@@ -1,0 +1,138 @@
+# Mentara API Service - Docker Compose Configuration
+# Production-ready NestJS backend service with Supabase integration
+
+version: '3.8'
+
+services:
+  # Main API Service
+  mentara-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mentara-api
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL}
+      DIRECT_URL: ${DIRECT_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_API_KEY: ${SUPABASE_API_KEY}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://localhost:5001}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      REDIS_URL: ${REDIS_URL}
+    ports:
+      - "${PORT:-3001}:${PORT:-3001}"
+    volumes:
+      # Mount uploads directory for file handling
+      - uploads_data:/app/uploads
+      # Mount logs directory for persistent logging
+      - logs_data:/app/logs
+    networks:
+      - mentara-api-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-3001}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: mentara-api-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-defaultpassword} --appendonly yes
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-defaultpassword}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - mentara-api-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+volumes:
+  # Persistent storage for uploads
+  uploads_data:
+    driver: local
+
+  # Persistent storage for logs
+  logs_data:
+    driver: local
+
+  # Persistent storage for Redis data
+  redis_data:
+    driver: local
+
+networks:
+  mentara-api-network:
+    driver: bridge
+    name: mentara-api-network
+
+# =============================================================================
+# USAGE INSTRUCTIONS
+# =============================================================================
+#
+# Development:
+#   docker-compose up --build
+#
+# Production:
+#   docker-compose -f docker-compose.yml up -d --build
+#
+# View logs:
+#   docker-compose logs -f mentara-api
+#
+# Stop services:
+#   docker-compose down
+#
+# Remove all data (DESTRUCTIVE):
+#   docker-compose down -v
+#
+# =============================================================================
+# ENVIRONMENT VARIABLES
+# =============================================================================
+#
+# Required variables (must be set in .env file):
+# - DATABASE_URL: Supabase connection string with pgbouncer
+# - DIRECT_URL: Supabase direct connection string
+# - JWT_SECRET: Strong secret for JWT tokens
+# - GOOGLE_CLIENT_ID: Google OAuth client ID
+# - GOOGLE_CLIENT_SECRET: Google OAuth client secret
+# - MICROSOFT_CLIENT_ID: Microsoft OAuth client ID
+# - MICROSOFT_CLIENT_SECRET: Microsoft OAuth client secret
+#
+# Optional variables:
+# - NODE_ENV: Environment (default: production)
+# - PORT: API server port (default: 3001)
+# - REDIS_PASSWORD: Redis password (default: defaultpassword)
+# - REDIS_PORT: Redis port (default: 6379)
+#
+# =============================================================================

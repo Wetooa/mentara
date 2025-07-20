@@ -1,6 +1,4 @@
-import React from "react";
 import { ArrowLeft, Download, CheckCircle, FileText } from "lucide-react";
-import Link from "next/link";
 import { Task } from "./types";
 
 interface TaskDetailPageProps {

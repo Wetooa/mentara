@@ -1,3 +1,9 @@
+enum ReportStatus {
+    PENDING
+    REVIEWED
+    DISMISSED
+}
+
 model Post {
     id        String      @id @default(uuid())
     title     String
@@ -5,11 +11,19 @@ model Post {
     createdAt DateTime    @default(now())
     updatedAt DateTime    @updatedAt
     comments  Comment[]
-    hearts    PostHeart[]
-    user      User?       @relation(fields: [userId], references: [id])
-    userId    String?
-    room      Room?       @relation(fields: [roomId], references: [id])
+    hearts    PostHeart[] // Hearts instead of votes
+    user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    room      Room?       @relation(fields: [roomId], references: [id], onDelete: SetNull)
     roomId    String?
+
+    // File attachments
+    attachmentUrls  String[] @default([])
+    attachmentNames String[] @default([])
+    attachmentSizes Int[]    @default([])
+
+    // Reports only (no awards, votes)
+    reports Report[]
 
     @@index([userId])
     @@index([roomId])
@@ -19,22 +33,35 @@ model Post {
 // This model is kept for backward compatibility but should be migrated
 
 model Comment {
-    id      String @id @default(uuid())
-    postId  String
-    userId  String
-    content String @db.Text
+    id       String  @id @default(uuid())
+    postId   String
+    userId   String
+    content  String  @db.Text
+    parentId String? // For nested comments - supports infinite nesting depth
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    post Post @relation(fields: [postId], references: [id])
-    user User @relation(fields: [userId], references: [id])
+    post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    parent Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
 
-    hearts  CommentHeart[]
-    replies Reply[]
+    // File attachments
+    attachmentUrls  String[] @default([])
+    attachmentNames String[] @default([])
+    attachmentSizes Int[]    @default([])
+
+    // Hearts instead of votes
+    hearts   CommentHeart[]
+    children Comment[]      @relation("CommentReplies")
+
+    // Reports only
+    reports Report[]
 
     @@index([postId])
     @@index([userId])
+    @@index([parentId])
+    @@index([postId, parentId]) // Composite index for efficient nested queries
 }
 
 // Note: CommentFile is now replaced by FileAttachment with entityType = COMMENT
@@ -44,9 +71,9 @@ model CommentHeart {
     id        String   @id @default(uuid())
     commentId String
     createdAt DateTime @default(now())
-    comment   Comment  @relation(fields: [commentId], references: [id])
-    user      User?    @relation(fields: [userId], references: [id])
-    userId    String?
+    comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
 
     @@unique([commentId, userId])
     @@index([commentId])
@@ -57,42 +84,37 @@ model PostHeart {
     id        String   @id @default(uuid())
     postId    String
     createdAt DateTime @default(now())
-    post      Post     @relation(fields: [postId], references: [id])
-    user      User?    @relation(fields: [userId], references: [id])
-    userId    String?
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
 
     @@unique([postId, userId])
     @@index([postId])
     @@index([userId])
 }
 
-model Reply {
-    id        String       @id @default(uuid())
-    commentId String
-    userId    String
-    content   String       @db.Text
-    createdAt DateTime     @default(now())
-    updatedAt DateTime     @updatedAt
-    comment   Comment      @relation(fields: [commentId], references: [id])
-    user      User         @relation(fields: [userId], references: [id])
-    hearts    ReplyHeart[]
+model Report {
+    id      String       @id @default(uuid())
+    reason  String
+    content String?
+    status  ReportStatus @default(PENDING)
 
-    @@index([commentId])
-    @@index([userId])
-}
+    // What's being reported
+    postId    String?
+    commentId String?
 
-// Note: ReplyFile is now replaced by FileAttachment with entityType = REPLY
-// This model is kept for backward compatibility but should be migrated
+    // Who reported
+    reporterId String
+    reporter   User   @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
 
-model ReplyHeart {
-    id        String   @id @default(uuid())
-    replyId   String
-    userId    String
+    // Relations
+    post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+    comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
     createdAt DateTime @default(now())
-    reply     Reply    @relation(fields: [replyId], references: [id])
-    user      User     @relation(fields: [userId], references: [id])
+    updatedAt DateTime @updatedAt
 
-    @@unique([replyId, userId])
-    @@index([replyId])
-    @@index([userId])
+    @@index([reporterId])
+    @@index([postId])
+    @@index([commentId])
 }

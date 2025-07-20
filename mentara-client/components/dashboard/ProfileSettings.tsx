@@ -24,13 +24,11 @@ import {
   Shield,
   Settings,
   Camera,
-  Mail,
-  Phone,
   Calendar,
   Save,
   X,
 } from "lucide-react";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 
 interface ProfileSettingsProps {
   user: UserDashboardData["user"];
@@ -71,7 +69,7 @@ export default function ProfileSettings({
 
   const handleSave = () => {
     // TODO: Save profile settings to API
-    console.log("Saving profile settings:", { formData, notifications, privacy });
+    // API integration to be implemented
     onClose();
   };
 
@@ -398,7 +396,7 @@ export default function ProfileSettings({
                     <div className="space-y-0.5">
                       <Label>Show Online Status</Label>
                       <p className="text-sm text-gray-500">
-                        Let others see when you're online
+                        Let others see when you&apos;re online
                       </p>
                     </div>
                     <Switch

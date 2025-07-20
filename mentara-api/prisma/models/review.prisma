@@ -14,17 +14,8 @@ model Review {
     therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
     meeting   Meeting?  @relation(fields: [meetingId], references: [id], onDelete: SetNull)
 
-    // Moderation
-    status         ReviewStatus @default(PENDING)
-    moderatedBy    String?
-    moderatedAt    DateTime?
-    moderationNote String?
-
     // Metadata
     isVerified Boolean @default(false) // Verified as from actual client
-
-    // Relations
-    helpfulVotes ReviewHelpful[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -34,28 +25,5 @@ model Review {
     @@index([therapistId])
     @@index([clientId])
     @@index([rating])
-    @@index([status])
     @@index([createdAt])
-}
-
-model ReviewHelpful {
-    id       String @id @default(uuid())
-    reviewId String
-    userId   String
-
-    review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    createdAt DateTime @default(now())
-
-    @@unique([reviewId, userId])
-    @@index([reviewId])
-    @@index([userId])
-}
-
-enum ReviewStatus {
-    PENDING
-    APPROVED
-    REJECTED
-    FLAGGED
 }

@@ -10,6 +10,8 @@ import {
 } from './config/env-validation';
 
 async function bootstrap() {
+  console.log('Memory before app load:', process.memoryUsage());
+
   // Validate environment variables before starting the application
   try {
     validateEnvironmentVariables();

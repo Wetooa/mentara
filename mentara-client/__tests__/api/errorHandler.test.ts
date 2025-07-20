@@ -1,4 +1,4 @@
-import { handleApiError, MentaraApiError, shouldRetryRequest } from '../../lib/api/errorHandler';
+import { handleApiError, MentaraApiError, shouldRetryRequest } from '@/lib/api/errorHandler';
 import { AxiosError } from 'axios';
 
 describe('Error Handler', () => {

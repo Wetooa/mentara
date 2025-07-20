@@ -1,0 +1,76 @@
+c2688a846df69be9f5e55c4e9b6f92ce
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ZodValidationPipe = void 0;
+exports.ZodValidationPipeFactory = ZodValidationPipeFactory;
+exports.ValidateBody = ValidateBody;
+exports.ValidateQuery = ValidateQuery;
+exports.ValidateParam = ValidateParam;
+const common_1 = require("@nestjs/common");
+const zod_1 = require("zod");
+let ZodValidationPipe = class ZodValidationPipe {
+    schema;
+    constructor(schema) {
+        this.schema = schema;
+    }
+    transform(value, metadata) {
+        try {
+            // Validate all types: body, query, param
+            const parsedValue = this.schema.parse(value);
+            return parsedValue;
+        }
+        catch (error) {
+            if (error instanceof zod_1.z.ZodError) {
+                const errorMessages = error.issues.map((err) => {
+                    const path = err.path.length > 0 ? err.path.join('.') : 'root';
+                    return `${path}: ${err.message}`;
+                });
+                throw new common_1.BadRequestException({
+                    message: 'Validation failed',
+                    errors: errorMessages,
+                    statusCode: 400,
+                    type: metadata.type,
+                });
+            }
+            throw new common_1.BadRequestException('Validation failed');
+        }
+    }
+};
+exports.ZodValidationPipe = ZodValidationPipe;
+exports.ZodValidationPipe = ZodValidationPipe = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [Object])
+], ZodValidationPipe);
+// Factory function to create validation pipes
+function ZodValidationPipeFactory(schema) {
+    return new ZodValidationPipe(schema);
+}
+// Decorator for easy parameter validation
+function ValidateBody(schema) {
+    return function (target, propertyKey, parameterIndex) {
+        // This would work with a custom decorator implementation
+        // For now, we'll use the pipe directly in controllers
+    };
+}
+// Decorator for query validation
+function ValidateQuery(schema) {
+    return function (target, propertyKey, parameterIndex) {
+        // This would work with a custom decorator implementation
+    };
+}
+// Decorator for param validation
+function ValidateParam(schema) {
+    return function (target, propertyKey, parameterIndex) {
+        // This would work with a custom decorator implementation
+    };
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2NvbW1vbi9waXBlcy96b2QtdmFsaWRhdGlvbi5waXBlLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OztBQXFDQSw0REFFQztBQUdELG9DQUtDO0FBR0Qsc0NBSUM7QUFHRCxzQ0FJQztBQTdERCwyQ0FLd0I7QUFDeEIsNkJBQXdCO0FBR2pCLElBQU0saUJBQWlCLEdBQXZCLE1BQU0saUJBQWlCO0lBQ1I7SUFBcEIsWUFBb0IsTUFBVztRQUFYLFdBQU0sR0FBTixNQUFNLENBQUs7SUFBRyxDQUFDO0lBRW5DLFNBQVMsQ0FBQyxLQUFVLEVBQUUsUUFBMEI7UUFDOUMsSUFBSSxDQUFDO1lBQ0gseUNBQXlDO1lBQ3pDLE1BQU0sV0FBVyxHQUFHLElBQUksQ0FBQyxNQUFNLENBQUMsS0FBSyxDQUFDLEtBQUssQ0FBQyxDQUFDO1lBQzdDLE9BQU8sV0FBVyxDQUFDO1FBQ3JCLENBQUM7UUFBQyxPQUFPLEtBQUssRUFBRSxDQUFDO1lBQ2YsSUFBSSxLQUFLLFlBQVksT0FBQyxDQUFDLFFBQVEsRUFBRSxDQUFDO2dCQUNoQyxNQUFNLGFBQWEsR0FBRyxLQUFLLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxDQUFDLEdBQUcsRUFBRSxFQUFFO29CQUM3QyxNQUFNLElBQUksR0FBRyxHQUFHLENBQUMsSUFBSSxDQUFDLE1BQU0sR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxDQUFDLENBQUMsQ0FBQyxNQUFNLENBQUM7b0JBQy9ELE9BQU8sR0FBRyxJQUFJLEtBQUssR0FBRyxDQUFDLE9BQU8sRUFBRSxDQUFDO2dCQUNuQyxDQUFDLENBQUMsQ0FBQztnQkFFSCxNQUFNLElBQUksNEJBQW1CLENBQUM7b0JBQzVCLE9BQU8sRUFBRSxtQkFBbUI7b0JBQzVCLE1BQU0sRUFBRSxhQUFhO29CQUNyQixVQUFVLEVBQUUsR0FBRztvQkFDZixJQUFJLEVBQUUsUUFBUSxDQUFDLElBQUk7aUJBQ3BCLENBQUMsQ0FBQztZQUNMLENBQUM7WUFDRCxNQUFNLElBQUksNEJBQW1CLENBQUMsbUJBQW1CLENBQUMsQ0FBQztRQUNyRCxDQUFDO0lBQ0gsQ0FBQztDQUNGLENBQUE7QUF6QlksOENBQWlCOzRCQUFqQixpQkFBaUI7SUFEN0IsSUFBQSxtQkFBVSxHQUFFOztHQUNBLGlCQUFpQixDQXlCN0I7QUFFRCw4Q0FBOEM7QUFDOUMsU0FBZ0Isd0JBQXdCLENBQUMsTUFBVztJQUNsRCxPQUFPLElBQUksaUJBQWlCLENBQUMsTUFBTSxDQUFDLENBQUM7QUFDdkMsQ0FBQztBQUVELDBDQUEwQztBQUMxQyxTQUFnQixZQUFZLENBQUMsTUFBVztJQUN0QyxPQUFPLFVBQVUsTUFBVyxFQUFFLFdBQW1CLEVBQUUsY0FBc0I7UUFDdkUseURBQXlEO1FBQ3pELHNEQUFzRDtJQUN4RCxDQUFDLENBQUM7QUFDSixDQUFDO0FBRUQsaUNBQWlDO0FBQ2pDLFNBQWdCLGFBQWEsQ0FBQyxNQUFXO0lBQ3ZDLE9BQU8sVUFBVSxNQUFXLEVBQUUsV0FBbUIsRUFBRSxjQUFzQjtRQUN2RSx5REFBeUQ7SUFDM0QsQ0FBQyxDQUFDO0FBQ0osQ0FBQztBQUVELGlDQUFpQztBQUNqQyxTQUFnQixhQUFhLENBQUMsTUFBVztJQUN2QyxPQUFPLFVBQVUsTUFBVyxFQUFFLFdBQW1CLEVBQUUsY0FBc0I7UUFDdkUseURBQXlEO0lBQzNELENBQUMsQ0FBQztBQUNKLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2NvbW1vbi9waXBlcy96b2QtdmFsaWRhdGlvbi5waXBlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7XG4gIFBpcGVUcmFuc2Zvcm0sXG4gIEluamVjdGFibGUsXG4gIEFyZ3VtZW50TWV0YWRhdGEsXG4gIEJhZFJlcXVlc3RFeGNlcHRpb24sXG59IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IHogfSBmcm9tICd6b2QnO1xuXG5ASW5qZWN0YWJsZSgpXG5leHBvcnQgY2xhc3MgWm9kVmFsaWRhdGlvblBpcGUgaW1wbGVtZW50cyBQaXBlVHJhbnNmb3JtIHtcbiAgY29uc3RydWN0b3IocHJpdmF0ZSBzY2hlbWE6IGFueSkge31cblxuICB0cmFuc2Zvcm0odmFsdWU6IGFueSwgbWV0YWRhdGE6IEFyZ3VtZW50TWV0YWRhdGEpIHtcbiAgICB0cnkge1xuICAgICAgLy8gVmFsaWRhdGUgYWxsIHR5cGVzOiBib2R5LCBxdWVyeSwgcGFyYW1cbiAgICAgIGNvbnN0IHBhcnNlZFZhbHVlID0gdGhpcy5zY2hlbWEucGFyc2UodmFsdWUpO1xuICAgICAgcmV0dXJuIHBhcnNlZFZhbHVlO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICBpZiAoZXJyb3IgaW5zdGFuY2VvZiB6LlpvZEVycm9yKSB7XG4gICAgICAgIGNvbnN0IGVycm9yTWVzc2FnZXMgPSBlcnJvci5pc3N1ZXMubWFwKChlcnIpID0+IHtcbiAgICAgICAgICBjb25zdCBwYXRoID0gZXJyLnBhdGgubGVuZ3RoID4gMCA/IGVyci5wYXRoLmpvaW4oJy4nKSA6ICdyb290JztcbiAgICAgICAgICByZXR1cm4gYCR7cGF0aH06ICR7ZXJyLm1lc3NhZ2V9YDtcbiAgICAgICAgfSk7XG5cbiAgICAgICAgdGhyb3cgbmV3IEJhZFJlcXVlc3RFeGNlcHRpb24oe1xuICAgICAgICAgIG1lc3NhZ2U6ICdWYWxpZGF0aW9uIGZhaWxlZCcsXG4gICAgICAgICAgZXJyb3JzOiBlcnJvck1lc3NhZ2VzLFxuICAgICAgICAgIHN0YXR1c0NvZGU6IDQwMCxcbiAgICAgICAgICB0eXBlOiBtZXRhZGF0YS50eXBlLFxuICAgICAgICB9KTtcbiAgICAgIH1cbiAgICAgIHRocm93IG5ldyBCYWRSZXF1ZXN0RXhjZXB0aW9uKCdWYWxpZGF0aW9uIGZhaWxlZCcpO1xuICAgIH1cbiAgfVxufVxuXG4vLyBGYWN0b3J5IGZ1bmN0aW9uIHRvIGNyZWF0ZSB2YWxpZGF0aW9uIHBpcGVzXG5leHBvcnQgZnVuY3Rpb24gWm9kVmFsaWRhdGlvblBpcGVGYWN0b3J5KHNjaGVtYTogYW55KSB7XG4gIHJldHVybiBuZXcgWm9kVmFsaWRhdGlvblBpcGUoc2NoZW1hKTtcbn1cblxuLy8gRGVjb3JhdG9yIGZvciBlYXN5IHBhcmFtZXRlciB2YWxpZGF0aW9uXG5leHBvcnQgZnVuY3Rpb24gVmFsaWRhdGVCb2R5KHNjaGVtYTogYW55KSB7XG4gIHJldHVybiBmdW5jdGlvbiAodGFyZ2V0OiBhbnksIHByb3BlcnR5S2V5OiBzdHJpbmcsIHBhcmFtZXRlckluZGV4OiBudW1iZXIpIHtcbiAgICAvLyBUaGlzIHdvdWxkIHdvcmsgd2l0aCBhIGN1c3RvbSBkZWNvcmF0b3IgaW1wbGVtZW50YXRpb25cbiAgICAvLyBGb3Igbm93LCB3ZSdsbCB1c2UgdGhlIHBpcGUgZGlyZWN0bHkgaW4gY29udHJvbGxlcnNcbiAgfTtcbn1cblxuLy8gRGVjb3JhdG9yIGZvciBxdWVyeSB2YWxpZGF0aW9uXG5leHBvcnQgZnVuY3Rpb24gVmFsaWRhdGVRdWVyeShzY2hlbWE6IGFueSkge1xuICByZXR1cm4gZnVuY3Rpb24gKHRhcmdldDogYW55LCBwcm9wZXJ0eUtleTogc3RyaW5nLCBwYXJhbWV0ZXJJbmRleDogbnVtYmVyKSB7XG4gICAgLy8gVGhpcyB3b3VsZCB3b3JrIHdpdGggYSBjdXN0b20gZGVjb3JhdG9yIGltcGxlbWVudGF0aW9uXG4gIH07XG59XG5cbi8vIERlY29yYXRvciBmb3IgcGFyYW0gdmFsaWRhdGlvblxuZXhwb3J0IGZ1bmN0aW9uIFZhbGlkYXRlUGFyYW0oc2NoZW1hOiBhbnkpIHtcbiAgcmV0dXJuIGZ1bmN0aW9uICh0YXJnZXQ6IGFueSwgcHJvcGVydHlLZXk6IHN0cmluZywgcGFyYW1ldGVySW5kZXg6IG51bWJlcikge1xuICAgIC8vIFRoaXMgd291bGQgd29yayB3aXRoIGEgY3VzdG9tIGRlY29yYXRvciBpbXBsZW1lbnRhdGlvblxuICB9O1xufVxuIl0sInZlcnNpb24iOjN9

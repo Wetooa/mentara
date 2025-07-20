@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search, User, LogOut, ChevronDown } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { Bell, User, LogOut, ChevronDown } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserSearchBar, User as SearchUser } from "@/components/search";
 
 export default function TherapistLayout({
   children,
@@ -14,16 +15,24 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { signOut } = useClerk();
+  const { logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
   const handleLogout = async () => {
     try {
-      await signOut();
-      router.push("/sign-in");
+      await logout();
     } catch (error) {
       console.error("Error during logout:", error);
+    }
+  };
+
+  // Handle user selection from search
+  const handleUserSelect = (user: SearchUser) => {
+    console.log("Selected user:", user);
+    // Navigate to patient profile if it's a client, or handle other user types
+    if (user.role === "client") {
+      router.push(`/therapist/patients/${user.id}`);
     }
   };
 
@@ -237,6 +246,35 @@ export default function TherapistLayout({
       ),
       id: "worksheets",
     },
+    {
+      name: "Requests",
+      path: "/therapist/requests",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8 12L10.5 14.5L16 9"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      id: "requests",
+    },
   ];
 
   return (
@@ -272,9 +310,12 @@ export default function TherapistLayout({
                         : "text-gray-600 hover:text-primary"
                     }`}
                   >
-                    {React.cloneElement(item.icon as React.ReactElement, {
-                      className: "h-5 w-5",
-                    })}
+                    {React.cloneElement(
+                      item.icon as React.ReactElement<{ className?: string }>,
+                      {
+                        className: "h-5 w-5",
+                      }
+                    )}
                   </div>
                   <span
                     className={`mt-1 text-center text-[10px] ${
@@ -296,15 +337,13 @@ export default function TherapistLayout({
         <header className="flex items-center justify-between px-4 bg-primary text-white h-14">
           <div className="flex items-center">
             {/* Search Bar */}
-            <div className="relative ml-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-                <input
-                  type="text"
-                  placeholder="Search Mentara"
-                  className="w-72 rounded-full bg-white/20 py-1.5 pl-9 pr-4 text-white placeholder-white/70 focus:outline-none focus:ring-1 focus:ring-white/30"
-                />
-              </div>
+            <div className="relative ml-6 w-72">
+              <UserSearchBar
+                placeholder="Search users (clients, therapists, moderators)..."
+                onUserSelect={handleUserSelect}
+                showRoleFilter={false}
+                className="w-full"
+              />
             </div>
           </div>
 

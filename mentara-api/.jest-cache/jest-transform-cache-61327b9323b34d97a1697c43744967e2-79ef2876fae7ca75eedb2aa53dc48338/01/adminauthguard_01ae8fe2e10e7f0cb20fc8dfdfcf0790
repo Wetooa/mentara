@@ -1,0 +1,59 @@
+f1e71fcb305393f607abec7be654e6ea
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var AdminAuthGuard_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminAuthGuard = void 0;
+const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
+const role_utils_1 = require("../../utils/role-utils");
+const admin_only_decorator_1 = require("../decorators/admin-only.decorator");
+require("../../types");
+let AdminAuthGuard = AdminAuthGuard_1 = class AdminAuthGuard {
+    reflector;
+    roleUtils;
+    logger = new common_1.Logger(AdminAuthGuard_1.name);
+    constructor(reflector, roleUtils) {
+        this.reflector = reflector;
+        this.roleUtils = roleUtils;
+    }
+    async canActivate(context) {
+        const isAdminOnly = this.reflector.getAllAndOverride(admin_only_decorator_1.ADMIN_ONLY_KEY, [context.getHandler(), context.getClass()]);
+        if (!isAdminOnly) {
+            return true;
+        }
+        const request = context.switchToHttp().getRequest();
+        const userId = request.userId;
+        if (!userId) {
+            this.logger.warn('No user ID found in request');
+            throw new common_1.ForbiddenException('Authentication required');
+        }
+        try {
+            const isAdmin = await this.roleUtils.isUserAdmin(userId);
+            if (!isAdmin) {
+                this.logger.warn(`User ${userId} attempted to access admin endpoint without permission`);
+                throw new common_1.ForbiddenException('Admin access required');
+            }
+            return true;
+        }
+        catch (error) {
+            this.logger.error('Error checking admin permissions:', error);
+            throw new common_1.ForbiddenException('Unable to verify admin permissions');
+        }
+    }
+};
+exports.AdminAuthGuard = AdminAuthGuard;
+exports.AdminAuthGuard = AdminAuthGuard = AdminAuthGuard_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof role_utils_1.RoleUtils !== "undefined" && role_utils_1.RoleUtils) === "function" ? _b : Object])
+], AdminAuthGuard);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvZ3VhcmRzL2FkbWluLWF1dGguZ3VhcmQudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7QUFBQSwyQ0FNd0I7QUFDeEIsdUNBQXlDO0FBRXpDLHVEQUFtRDtBQUNuRCw2RUFBb0U7QUFDcEUsdUJBQXFCO0FBR2QsSUFBTSxjQUFjLHNCQUFwQixNQUFNLGNBQWM7SUFJZjtJQUNBO0lBSk8sTUFBTSxHQUFHLElBQUksZUFBTSxDQUFDLGdCQUFjLENBQUMsSUFBSSxDQUFDLENBQUM7SUFFMUQsWUFDVSxTQUFvQixFQUNwQixTQUFvQjtRQURwQixjQUFTLEdBQVQsU0FBUyxDQUFXO1FBQ3BCLGNBQVMsR0FBVCxTQUFTLENBQVc7SUFDM0IsQ0FBQztJQUVKLEtBQUssQ0FBQyxXQUFXLENBQUMsT0FBeUI7UUFDekMsTUFBTSxXQUFXLEdBQUcsSUFBSSxDQUFDLFNBQVMsQ0FBQyxpQkFBaUIsQ0FDbEQscUNBQWMsRUFDZCxDQUFDLE9BQU8sQ0FBQyxVQUFVLEVBQUUsRUFBRSxPQUFPLENBQUMsUUFBUSxFQUFFLENBQUMsQ0FDM0MsQ0FBQztRQUVGLElBQUksQ0FBQyxXQUFXLEVBQUUsQ0FBQztZQUNqQixPQUFPLElBQUksQ0FBQztRQUNkLENBQUM7UUFFRCxNQUFNLE9BQU8sR0FBRyxPQUFPLENBQUMsWUFBWSxFQUFFLENBQUMsVUFBVSxFQUFXLENBQUM7UUFDN0QsTUFBTSxNQUFNLEdBQUcsT0FBTyxDQUFDLE1BQU0sQ0FBQztRQUU5QixJQUFJLENBQUMsTUFBTSxFQUFFLENBQUM7WUFDWixJQUFJLENBQUMsTUFBTSxDQUFDLElBQUksQ0FBQyw2QkFBNkIsQ0FBQyxDQUFDO1lBQ2hELE1BQU0sSUFBSSwyQkFBa0IsQ0FBQyx5QkFBeUIsQ0FBQyxDQUFDO1FBQzFELENBQUM7UUFFRCxJQUFJLENBQUM7WUFDSCxNQUFNLE9BQU8sR0FBRyxNQUFNLElBQUksQ0FBQyxTQUFTLENBQUMsV0FBVyxDQUFDLE1BQU0sQ0FBQyxDQUFDO1lBRXpELElBQUksQ0FBQyxPQUFPLEVBQUUsQ0FBQztnQkFDYixJQUFJLENBQUMsTUFBTSxDQUFDLElBQUksQ0FDZCxRQUFRLE1BQU0sd0RBQXdELENBQ3ZFLENBQUM7Z0JBQ0YsTUFBTSxJQUFJLDJCQUFrQixDQUFDLHVCQUF1QixDQUFDLENBQUM7WUFDeEQsQ0FBQztZQUVELE9BQU8sSUFBSSxDQUFDO1FBQ2QsQ0FBQztRQUFDLE9BQU8sS0FBSyxFQUFFLENBQUM7WUFDZixJQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssQ0FBQyxtQ0FBbUMsRUFBRSxLQUFLLENBQUMsQ0FBQztZQUM5RCxNQUFNLElBQUksMkJBQWtCLENBQUMsb0NBQW9DLENBQUMsQ0FBQztRQUNyRSxDQUFDO0lBQ0gsQ0FBQztDQUNGLENBQUE7QUExQ1ksd0NBQWM7eUJBQWQsY0FBYztJQUQxQixJQUFBLG1CQUFVLEdBQUU7eURBS1UsZ0JBQVMsb0JBQVQsZ0JBQVMsb0RBQ1Qsc0JBQVMsb0JBQVQsc0JBQVM7R0FMbkIsY0FBYyxDQTBDMUIiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvZ3VhcmRzL2FkbWluLWF1dGguZ3VhcmQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHtcbiAgSW5qZWN0YWJsZSxcbiAgQ2FuQWN0aXZhdGUsXG4gIEV4ZWN1dGlvbkNvbnRleHQsXG4gIEZvcmJpZGRlbkV4Y2VwdGlvbixcbiAgTG9nZ2VyLFxufSBmcm9tICdAbmVzdGpzL2NvbW1vbic7XG5pbXBvcnQgeyBSZWZsZWN0b3IgfSBmcm9tICdAbmVzdGpzL2NvcmUnO1xuaW1wb3J0IHsgUmVxdWVzdCB9IGZyb20gJ2V4cHJlc3MnO1xuaW1wb3J0IHsgUm9sZVV0aWxzIH0gZnJvbSAnLi4vLi4vdXRpbHMvcm9sZS11dGlscyc7XG5pbXBvcnQgeyBBRE1JTl9PTkxZX0tFWSB9IGZyb20gJy4uL2RlY29yYXRvcnMvYWRtaW4tb25seS5kZWNvcmF0b3InO1xuaW1wb3J0ICcuLi8uLi90eXBlcyc7XG5cbkBJbmplY3RhYmxlKClcbmV4cG9ydCBjbGFzcyBBZG1pbkF1dGhHdWFyZCBpbXBsZW1lbnRzIENhbkFjdGl2YXRlIHtcbiAgcHJpdmF0ZSByZWFkb25seSBsb2dnZXIgPSBuZXcgTG9nZ2VyKEFkbWluQXV0aEd1YXJkLm5hbWUpO1xuXG4gIGNvbnN0cnVjdG9yKFxuICAgIHByaXZhdGUgcmVmbGVjdG9yOiBSZWZsZWN0b3IsXG4gICAgcHJpdmF0ZSByb2xlVXRpbHM6IFJvbGVVdGlscyxcbiAgKSB7fVxuXG4gIGFzeW5jIGNhbkFjdGl2YXRlKGNvbnRleHQ6IEV4ZWN1dGlvbkNvbnRleHQpOiBQcm9taXNlPGJvb2xlYW4+IHtcbiAgICBjb25zdCBpc0FkbWluT25seSA9IHRoaXMucmVmbGVjdG9yLmdldEFsbEFuZE92ZXJyaWRlPGJvb2xlYW4+KFxuICAgICAgQURNSU5fT05MWV9LRVksXG4gICAgICBbY29udGV4dC5nZXRIYW5kbGVyKCksIGNvbnRleHQuZ2V0Q2xhc3MoKV0sXG4gICAgKTtcblxuICAgIGlmICghaXNBZG1pbk9ubHkpIHtcbiAgICAgIHJldHVybiB0cnVlO1xuICAgIH1cblxuICAgIGNvbnN0IHJlcXVlc3QgPSBjb250ZXh0LnN3aXRjaFRvSHR0cCgpLmdldFJlcXVlc3Q8UmVxdWVzdD4oKTtcbiAgICBjb25zdCB1c2VySWQgPSByZXF1ZXN0LnVzZXJJZDtcblxuICAgIGlmICghdXNlcklkKSB7XG4gICAgICB0aGlzLmxvZ2dlci53YXJuKCdObyB1c2VyIElEIGZvdW5kIGluIHJlcXVlc3QnKTtcbiAgICAgIHRocm93IG5ldyBGb3JiaWRkZW5FeGNlcHRpb24oJ0F1dGhlbnRpY2F0aW9uIHJlcXVpcmVkJyk7XG4gICAgfVxuXG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IGlzQWRtaW4gPSBhd2FpdCB0aGlzLnJvbGVVdGlscy5pc1VzZXJBZG1pbih1c2VySWQpO1xuXG4gICAgICBpZiAoIWlzQWRtaW4pIHtcbiAgICAgICAgdGhpcy5sb2dnZXIud2FybihcbiAgICAgICAgICBgVXNlciAke3VzZXJJZH0gYXR0ZW1wdGVkIHRvIGFjY2VzcyBhZG1pbiBlbmRwb2ludCB3aXRob3V0IHBlcm1pc3Npb25gLFxuICAgICAgICApO1xuICAgICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKCdBZG1pbiBhY2Nlc3MgcmVxdWlyZWQnKTtcbiAgICAgIH1cblxuICAgICAgcmV0dXJuIHRydWU7XG4gICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgIHRoaXMubG9nZ2VyLmVycm9yKCdFcnJvciBjaGVja2luZyBhZG1pbiBwZXJtaXNzaW9uczonLCBlcnJvcik7XG4gICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKCdVbmFibGUgdG8gdmVyaWZ5IGFkbWluIHBlcm1pc3Npb25zJyk7XG4gICAgfVxuICB9XG59XG4iXSwidmVyc2lvbiI6M30=

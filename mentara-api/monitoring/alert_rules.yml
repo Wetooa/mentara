@@ -1,0 +1,237 @@
+# Prometheus Alert Rules for Mentara API
+# Critical performance and availability alerts for Backend Agent monitoring
+
+groups:
+  - name: mentara-api-alerts
+    rules:
+      # API Availability Alerts
+      - alert: APIDown
+        expr: up{job="mentara-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "Mentara API is down"
+          description: "The Mentara API has been down for more than 1 minute."
+
+      - alert: APIHighErrorRate
+        expr: rate(http_requests_total{job="mentara-api",status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "High error rate on Mentara API"
+          description: "Error rate is above 10% for more than 2 minutes."
+
+      # Performance Alerts
+      - alert: APIHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mentara-api"}[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile response time is above 2 seconds for more than 3 minutes."
+
+      - alert: APIVeryHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mentara-api"}[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "Very high API response time"
+          description: "95th percentile response time is above 5 seconds for more than 1 minute."
+
+      # Database Alerts
+      - alert: DatabaseDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "The PostgreSQL database has been down for more than 1 minute."
+
+      - alert: DatabaseHighConnections
+        expr: pg_stat_database_numbackends{job="postgres"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High number of database connections"
+          description: "Database has more than 80 active connections for more than 5 minutes."
+
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_stat_database_tup_fetched{job="postgres"}[5m]) / rate(pg_stat_database_tup_returned{job="postgres"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Database queries are slow"
+          description: "Database query efficiency is degraded for more than 5 minutes."
+
+      # Redis Alerts
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache has been down for more than 2 minutes."
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes{job="redis"} / redis_memory_max_bytes{job="redis"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is above 90% for more than 5 minutes."
+
+      # System Resource Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 85% for more than 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90% for more than 5 minutes."
+
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is above 85% for more than 5 minutes."
+
+      # Application-specific Alerts
+      - alert: AuthenticationFailureSpike
+        expr: rate(http_requests_total{job="mentara-api",endpoint=~"/auth.*",status="401"}[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failure rate is unusually high, possible attack."
+
+      - alert: FileUploadFailures
+        expr: rate(http_requests_total{job="mentara-api",endpoint=~"/files.*",status=~"4.."}[5m]) > 0.3
+        for: 3m
+        labels:
+          severity: warning
+          service: files
+        annotations:
+          summary: "High file upload failure rate"
+          description: "File upload failure rate is above 30% for more than 3 minutes."
+
+      - alert: WebSocketConnectionDrop
+        expr: websocket_connections{job="mentara-api"} < 1
+        for: 5m
+        labels:
+          severity: warning
+          service: messaging
+        annotations:
+          summary: "WebSocket connections dropped"
+          description: "No active WebSocket connections for messaging service."
+
+  - name: mentara-business-logic-alerts
+    rules:
+      # Business Logic Alerts
+      - alert: BookingSystemDown
+        expr: rate(http_requests_total{job="mentara-api",endpoint=~"/booking.*",status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: booking
+        annotations:
+          summary: "Booking system experiencing errors"
+          description: "Booking system error rate above 10% for more than 2 minutes."
+
+      - alert: MessagingSystemDown
+        expr: rate(http_requests_total{job="mentara-api",endpoint=~"/messaging.*",status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: messaging
+        annotations:
+          summary: "Messaging system experiencing errors"
+          description: "Messaging system error rate above 10% for more than 2 minutes."
+
+      - alert: UserRegistrationFailures
+        expr: rate(http_requests_total{job="mentara-api",endpoint=~"/auth/register",status=~"4.."}[10m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: registration
+        annotations:
+          summary: "High user registration failure rate"
+          description: "User registration failures above 50% for more than 5 minutes."
+
+      - alert: TherapistApplicationErrors
+        expr: rate(http_requests_total{job="mentara-api",endpoint=~"/therapist.*",status=~"5.."}[5m]) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+          service: therapist
+        annotations:
+          summary: "Therapist application system errors"
+          description: "Therapist system error rate above 20% for more than 3 minutes."
+
+  - name: mentara-security-alerts
+    rules:
+      # Security Alerts
+      - alert: SuspiciousActivityDetected
+        expr: rate(http_requests_total{job="mentara-api",status="403"}[5m]) > 1
+        for: 1m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "High rate of 403 Forbidden responses, possible security threat."
+
+      - alert: RateLimitExceeded
+        expr: rate(http_requests_total{job="mentara-api",status="429"}[5m]) > 2
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Rate limit frequently exceeded"
+          description: "Rate limiting is being triggered frequently, check for abuse."
+
+      - alert: UnauthorizedAccessAttempts
+        expr: rate(http_requests_total{job="mentara-api",status="401"}[10m]) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Multiple unauthorized access attempts"
+          description: "High rate of 401 Unauthorized responses detected."

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import SinglePageTherapistApplication from '../page';
 
 // Mock necessary modules
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@/hooks/useMobile', () => ({
   useIsMobile: jest.fn(() => false), // Default to desktop
 }));
 
@@ -93,13 +93,13 @@ describe('SinglePageTherapistApplication', () => {
   describe('Mobile Responsive Behavior', () => {
     beforeEach(() => {
       // Mock mobile viewport
-      const useIsMobile = require('@/hooks/use-mobile').useIsMobile;
+      const useIsMobile = jest.requireMock('@/hooks/useMobile').useIsMobile;
       useIsMobile.mockReturnValue(true);
     });
 
     afterEach(() => {
       // Reset to desktop
-      const useIsMobile = require('@/hooks/use-mobile').useIsMobile;
+      const useIsMobile = jest.requireMock('@/hooks/useMobile').useIsMobile;
       useIsMobile.mockReturnValue(false);
     });
 
@@ -387,7 +387,7 @@ describe('SinglePageTherapistApplication', () => {
 
   describe('Error Handling', () => {
     it('handles form submission errors gracefully', async () => {
-      const { submitApplicationWithDocuments } = require('@/lib/api/therapist-application');
+      const { submitApplicationWithDocuments } = await import('@/lib/api/therapist-application');
       submitApplicationWithDocuments.mockRejectedValueOnce(new Error('Network error'));
       
       const user = userEvent.setup();

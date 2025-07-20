@@ -1,100 +1,30 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Body,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-  Param,
-} from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { TherapistManagementService } from './therapist-management.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
+import { WorksheetsService } from '../worksheets/worksheets.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
-  ClientResponse,
-  TherapistResponse,
-  TherapistUpdateDto,
-} from 'schema/auth';
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('therapists')
+@ApiBearerAuth('JWT-auth')
 @Controller('therapist-management')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TherapistManagementController {
   constructor(
     private readonly therapistManagementService: TherapistManagementService,
+    private readonly worksheetsService: WorksheetsService,
   ) {}
 
-  @Get('profile')
-  @HttpCode(HttpStatus.OK)
-  async getTherapistProfile(
-    @CurrentUserId() therapistId: string,
-  ): Promise<TherapistResponse> {
-    return this.therapistManagementService.getTherapistProfile(therapistId);
-  }
-
-  @Put('profile')
-  @HttpCode(HttpStatus.OK)
-  async updateTherapistProfile(
-    @CurrentUserId() therapistId: string,
-    @Body() data: TherapistUpdateDto,
-  ): Promise<TherapistResponse> {
-    return this.therapistManagementService.updateTherapistProfile(
-      therapistId,
-      data,
-    );
-  }
-
-  @Put('specializations')
-  @HttpCode(HttpStatus.OK)
-  async updateTherapistSpecializations(
-    @CurrentUserId() therapistId: string,
-    @Body() data: TherapistUpdateDto,
-  ): Promise<TherapistResponse> {
-    return this.therapistManagementService.updateTherapistProfile(
-      therapistId,
-      data,
-    );
-  }
-
-  @Get('assigned-patients')
-  @HttpCode(HttpStatus.OK)
-  async getAssignedPatients(
-    @CurrentUserId() therapistId: string,
-  ): Promise<ClientResponse[]> {
-    return this.therapistManagementService.getAssignedPatients(therapistId);
-  }
-
-  @Get('all-clients')
-  @HttpCode(HttpStatus.OK)
-  async getAllClients(
-    @CurrentUserId() therapistId: string,
-  ): Promise<ClientResponse[]> {
-    return this.therapistManagementService.getAllClients(therapistId);
-  }
-
-  @Get('client/:id')
-  @HttpCode(HttpStatus.OK)
-  async getClientById(
-    @CurrentUserId() therapistId: string,
-    @Param('id') clientId: string,
-  ): Promise<ClientResponse> {
-    return this.therapistManagementService.getClientById(therapistId, clientId);
-  }
-
-  @Get('profile')
-  @HttpCode(HttpStatus.OK)
-  async getProfile(
-    @CurrentUserId() therapistId: string,
-  ): Promise<TherapistResponse> {
-    return this.therapistManagementService.getProfile(therapistId);
-  }
-
-  @Put('profile')
-  @HttpCode(HttpStatus.OK)
-  async updateProfile(
-    @CurrentUserId() therapistId: string,
-    @Body() data: TherapistUpdateDto,
-  ): Promise<TherapistResponse> {
-    return this.therapistManagementService.updateProfile(therapistId, data);
-  }
+  // Note: Profile, client, and worksheet management routes have been moved to dedicated controllers:
+  // - TherapistProfileController handles profile operations
+  // - TherapistClientController handles client management
+  // - TherapistWorksheetController handles worksheet operations
+  // This controller can be deprecated or used for other general therapist management operations
 }

@@ -2,106 +2,81 @@
 // This file contains models for user notifications and alerts
 
 model Notification {
-  id        String           @id @default(uuid())
-  userId    String
-  title     String
-  message   String           @db.Text
-  type      NotificationType
-  priority  NotificationPriority @default(NORMAL)
-  
+  id       String               @id @default(uuid())
+  userId   String
+  title    String
+  message  String               @db.Text
+  type     NotificationType
+  priority NotificationPriority @default(NORMAL)
+
   // Metadata
-  data      Json?            // Additional data for the notification
-  actionUrl String?          // URL to navigate when notification is clicked
-  
+  data      Json? // Additional data for the notification
+  actionUrl String? // URL to navigate when notification is clicked
+
   // Status tracking
-  isRead    Boolean          @default(false)
-  readAt    DateTime?
-  
-  // For scheduled notifications
-  scheduledFor DateTime?
-  sentAt       DateTime?
-  
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
   // Relations
-  user      User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([isRead])
   @@index([type])
   @@index([priority])
-  @@index([scheduledFor])
   @@index([createdAt])
-}
-
-model NotificationSettings {
-  id     String @id @default(uuid())
-  userId String @unique
-  
-  // Email preferences
-  emailAppointmentReminders Boolean @default(true)
-  emailNewMessages         Boolean @default(true)
-  emailWorksheetUpdates    Boolean @default(true)
-  emailSystemUpdates       Boolean @default(false)
-  emailMarketing           Boolean @default(false)
-  
-  // Push notification preferences
-  pushAppointmentReminders Boolean @default(true)
-  pushNewMessages         Boolean @default(true)
-  pushWorksheetUpdates    Boolean @default(true)
-  pushSystemUpdates       Boolean @default(true)
-  
-  // In-app notification preferences
-  inAppMessages           Boolean @default(true)
-  inAppUpdates           Boolean @default(true)
-  
-  // Quiet hours
-  quietHoursEnabled       Boolean @default(false)
-  quietHoursStart         String? // Time in HH:MM format
-  quietHoursEnd           String? // Time in HH:MM format
-  quietHoursTimezone      String? // Timezone identifier
-  
-  // Relations
-  user      User     @relation("UserNotificationSettings", fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@index([userId])
+  @@index([userId, isRead, createdAt(sort: Desc)]) // For efficient unread notification queries
 }
 
 // Enums
 enum NotificationType {
-  APPOINTMENT_REMINDER     // Upcoming therapy session
-  APPOINTMENT_CONFIRMED    // Session confirmed
-  APPOINTMENT_CANCELLED    // Session cancelled
-  APPOINTMENT_RESCHEDULED  // Session rescheduled
-  
-  MESSAGE_RECEIVED         // New chat message
-  MESSAGE_REACTION         // Someone reacted to your message
-  
-  WORKSHEET_ASSIGNED       // New worksheet assigned
-  WORKSHEET_DUE           // Worksheet due soon
-  WORKSHEET_FEEDBACK      // Therapist provided feedback
-  
-  REVIEW_REQUEST          // Request to review therapist
-  REVIEW_RECEIVED         // Received a review
-  
-  THERAPIST_APPLICATION   // Application status update
-  THERAPIST_APPROVED      // Application approved
-  THERAPIST_REJECTED      // Application rejected
-  
-  COMMUNITY_POST          // New post in followed community
-  COMMUNITY_REPLY         // Reply to your post/comment
-  
-  SYSTEM_MAINTENANCE      // System maintenance notice
-  SYSTEM_UPDATE           // Platform update
-  SECURITY_ALERT          // Security-related notification
-  
-  PAYMENT_SUCCESS         // Payment processed
-  PAYMENT_FAILED          // Payment failed
-  SUBSCRIPTION_EXPIRING   // Subscription expiring soon
+  APPOINTMENT_REMINDER // Upcoming therapy session
+  APPOINTMENT_CONFIRMED // Session confirmed
+  APPOINTMENT_CANCELLED // Session cancelled
+  APPOINTMENT_RESCHEDULED // Session rescheduled
+
+  MESSAGE_RECEIVED // New chat message
+  MESSAGE_REACTION // Someone reacted to your message
+
+  WORKSHEET_ASSIGNED // New worksheet assigned
+  WORKSHEET_DUE // Worksheet due soon
+  WORKSHEET_FEEDBACK // Therapist provided feedback
+
+  REVIEW_REQUEST // Request to review therapist
+  REVIEW_RECEIVED // Received a review
+
+  THERAPIST_APPLICATION // Application status update
+  THERAPIST_APPROVED // Application approved
+  THERAPIST_REJECTED // Application rejected
+  THERAPIST_STATUS_UPDATED // Therapist status changed
+  THERAPIST_REQUEST_ACCEPTED // Therapist request accepted
+  THERAPIST_REQUEST_DECLINED // Therapist request declined
+  ALTERNATIVE_RECOMMENDATIONS // Alternative recommendations available
+  CLIENT_REQUEST_RECEIVED // Therapist received client request
+  CLIENT_REQUEST_CANCELLED // Client cancelled therapist request
+  PROFILE_COMPLETION // Profile completion reminder
+
+  COMMUNITY_POST // New post in followed community
+  COMMUNITY_REPLY // Reply to your post/comment
+  COMMUNITY_RECOMMENDATION // New community recommendations available
+  COMMUNITY_JOINED // Successfully joined a community
+  COMMUNITY_WELCOME // Welcome message after joining
+  RECOMMENDATIONS_UPDATED // Community recommendations refreshed
+  NEW_RECOMMENDATIONS // New community recommendations available
+  RELATIONSHIP_ESTABLISHED // Therapist-client relationship established  
+  REQUEST_REMINDER // Reminder for pending request
+
+  SYSTEM_MAINTENANCE // System maintenance notice
+  SYSTEM_UPDATE // Platform update
+  SECURITY_ALERT // Security-related notification
+  SCHEDULING_INFO // Session scheduling information
+
+  PAYMENT_SUCCESS // Payment processed
+  PAYMENT_FAILED // Payment failed
+  SUBSCRIPTION_EXPIRING // Subscription expiring soon
 }
 
 enum NotificationPriority {

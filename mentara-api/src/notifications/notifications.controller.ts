@@ -10,12 +10,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import {
+  NotificationQuerySchema,
+  type NotificationQuery,
+} from 'mentara-commons';
 import { NotificationType, NotificationPriority } from '@prisma/client';
 
 @Controller('notifications')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
@@ -29,30 +34,26 @@ export class NotificationsController {
       priority?: NotificationPriority;
       data?: any;
       actionUrl?: string;
-      scheduledFor?: string;
     },
     @CurrentUserId() userId: string,
   ) {
     return this.notificationsService.create({
       ...body,
       userId,
-      scheduledFor: body.scheduledFor ? new Date(body.scheduledFor) : undefined,
     });
   }
 
   @Get()
   findAll(
     @CurrentUserId() userId: string,
-    @Query('isRead') isRead?: string,
-    @Query('type') type?: NotificationType,
-    @Query('priority') priority?: NotificationPriority,
+    @Query(new ZodValidationPipe(NotificationQuerySchema))
+    query: NotificationQuery,
   ) {
-    const isReadBool = isRead !== undefined ? isRead === 'true' : undefined;
     return this.notificationsService.findAll(
       userId,
-      isReadBool,
-      type,
-      priority,
+      query.isRead,
+      query.type,
+      query.priority,
     );
   }
 

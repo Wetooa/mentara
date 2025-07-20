@@ -8,21 +8,28 @@ import {
   Param,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { WorksheetsService } from './worksheets.service';
 import { PaginationQuery, FilterQuery } from 'src/types';
 import {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
   WorksheetSubmissionCreateInputDto,
-} from 'schema/worksheet';
+} from 'mentara-commons';
 
 @Controller('worksheets')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class WorksheetsController {
-  constructor(private readonly worksheetsService: WorksheetsService) {}
+  constructor(
+    private readonly worksheetsService: WorksheetsService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   @Get()
   findAll(
@@ -42,6 +49,7 @@ export class WorksheetsController {
   }
 
   @Post()
+  @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   create(
     @CurrentUserId() clerkId: string,
     @Body()
@@ -49,11 +57,13 @@ export class WorksheetsController {
       clientId: string;
       therapistId: string;
     },
+    @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ) {
     return this.worksheetsService.create(
       createWorksheetDto,
       createWorksheetDto.clientId,
       createWorksheetDto.therapistId,
+      files,
     );
   }
 

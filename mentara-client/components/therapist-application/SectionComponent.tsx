@@ -25,24 +25,23 @@ import { ReviewSection } from "@/components/therapist-application/ReviewSection"
 // Toast Context
 import { useToast } from "@/contexts/ToastContext";
 
-interface Section {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-  description: string;
-  estimatedTime: string;
-  fields: string[];
-  isRequired: boolean;
-}
+// Types
+import { 
+  TherapistApplicationFormData, 
+  TherapistApplicationWatchedValues,
+  DocumentUpload,
+  ApplicationSection,
+  CompletionStatus 
+} from "@/types/therapist-application";
 
 interface SectionComponentProps {
-  section: Section;
+  section: ApplicationSection;
   isOpen: boolean;
   onToggle: () => void;
-  completion: { completed: number; total: number; percentage: number };
-  form: UseFormReturn<any>;
-  watchedValues: any;
-  documents: Record<string, File[]>;
+  completion: CompletionStatus;
+  form: UseFormReturn<TherapistApplicationFormData>;
+  watchedValues: TherapistApplicationWatchedValues;
+  documents: DocumentUpload;
   updateDocuments: (docType: string, files: File[]) => void;
   removeDocument: (docType: string, index: number) => void;
 }

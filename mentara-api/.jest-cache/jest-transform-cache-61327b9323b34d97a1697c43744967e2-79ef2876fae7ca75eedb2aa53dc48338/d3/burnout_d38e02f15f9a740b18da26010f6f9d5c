@@ -1,0 +1,161 @@
+bd6cf546d740b5f186f11c7c28429912
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const MBI = {
+    title: "Maslach Burnout Inventory (MBI)",
+    description: "The Maslach Burnout Inventory (MBI) is a self-assessment tool used to measure burnout risk. It evaluates three key components: Emotional Exhaustion, Depersonalization, and Personal Achievement. This tool should not be used as a formal diagnosis but as an awareness tool.",
+    questions: [
+        // Burnout (Emotional Exhaustion) questions
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "I feel emotionally drained by my work.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "Working with people all day long requires a great deal of effort.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "I feel like my work is breaking me down.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "I feel frustrated by my work.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "I feel I work too hard at my job.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "It stresses me too much to work in direct contact with people.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Burnout (Emotional Exhaustion)",
+            question: "I feel like I'm at the end of my rope.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        // Depersonalization questions
+        {
+            prefix: "Depersonalization",
+            question: "I feel I look after certain patients/clients impersonally, as if they are objects.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Depersonalization",
+            question: "I feel tired when I get up in the morning and have to face another day at work.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Depersonalization",
+            question: "I have the impression that my patients/clients make me responsible for some of their problems.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Depersonalization",
+            question: "I am at the end of my patience at the end of my work day.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Depersonalization",
+            question: "I really don't care about what happens to some of my patients/clients.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Depersonalization",
+            question: "I have become more insensitive to people since I've been working.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Depersonalization",
+            question: "I'm afraid that this job is making me uncaring.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        // Personal Achievement questions
+        {
+            prefix: "Personal Achievement",
+            question: "I accomplish many worthwhile things in this job.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "I feel full of energy.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "I am easily able to understand what my patients/clients feel.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "I look after my patients'/clients' problems very effectively.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "In my work, I handle emotional problems very calmly.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "Through my work, I feel that I have a positive influence on people.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "I am easily able to create a relaxed atmosphere with my patients/clients.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Personal Achievement",
+            question: "I feel refreshed when I have been close to my patients/clients at work.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+    ],
+    scoring: {
+        scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+        severityLevels: {
+            low: { range: [0, 17], label: "Low-level burnout" },
+            moderate: { range: [18, 29], label: "Moderate burnout" },
+            high: { range: [30, 132], label: "High-level burnout" },
+        },
+        getScore: (answers) => {
+            // Combine scores from all three scales for a total burnout score
+            // Emotional exhaustion: items 0-6
+            const emotionalExhaustion = answers
+                .slice(0, 7)
+                .reduce((sum, answer) => sum + (answer || 0), 0);
+            // Depersonalization: items 7-13
+            const depersonalization = answers
+                .slice(7, 14)
+                .reduce((sum, answer) => sum + (answer || 0), 0);
+            // Personal achievement: items 14-21 (reverse scored)
+            // Note: For personal achievement, higher scores indicate LOWER burnout
+            // So we subtract from max possible (32) to convert to burnout score
+            const personalAchievement = answers
+                .slice(14, 22)
+                .reduce((sum, answer) => sum + (answer || 0), 0);
+            // For total burnout score, we could use a weighted approach or simply sum them
+            return (emotionalExhaustion + depersonalization + (32 - personalAchievement));
+        },
+        getSeverity: (score) => {
+            if (score <= 17)
+                return "Low-level burnout";
+            if (score >= 18 && score <= 29)
+                return "Moderate burnout";
+            if (score >= 30)
+                return "High-level burnout";
+            return "Invalid score";
+        },
+    },
+    disclaimer: "This questionnaire is a screening tool to assess burnout risk. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you are experiencing symptoms of burnout, please seek support from a healthcare professional.",
+};
+exports.default = MBI;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvYnVybm91dC5qcyIsIm1hcHBpbmdzIjoiQUFBQSxZQUFZLENBQUM7QUFDYixNQUFNLENBQUMsY0FBYyxDQUFDLE9BQU8sRUFBRSxZQUFZLEVBQUUsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztBQUM5RCxNQUFNLEdBQUcsR0FBRztJQUNSLEtBQUssRUFBRSxpQ0FBaUM7SUFDeEMsV0FBVyxFQUFFLGdSQUFnUjtJQUM3UixTQUFTLEVBQUU7UUFDUCwyQ0FBMkM7UUFDM0M7WUFDSSxNQUFNLEVBQUUsZ0NBQWdDO1lBQ3hDLFFBQVEsRUFBRSx3Q0FBd0M7WUFDbEQsT0FBTyxFQUFFLENBQUMsT0FBTyxFQUFFLFFBQVEsRUFBRSxXQUFXLEVBQUUsT0FBTyxFQUFFLFFBQVEsQ0FBQztTQUMvRDtRQUNEO1lBQ0ksTUFBTSxFQUFFLGdDQUFnQztZQUN4QyxRQUFRLEVBQUUsbUVBQW1FO1lBQzdFLE9BQU8sRUFBRSxDQUFDLE9BQU8sRUFBRSxRQUFRLEVBQUUsV0FBVyxFQUFFLE9BQU8sRUFBRSxRQUFRLENBQUM7U0FDL0Q7UUFDRDtZQUNJLE1BQU0sRUFBRSxnQ0FBZ0M7WUFDeEMsUUFBUSxFQUFFLDBDQUEwQztZQUNwRCxPQUFPLEVBQUUsQ0FBQyxPQUFPLEVBQUUsUUFBUSxFQUFFLFdBQVcsRUFBRSxPQUFPLEVBQUUsUUFBUSxDQUFDO1NBQy9EO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsZ0NBQWdDO1lBQ3hDLFFBQVEsRUFBRSwrQkFBK0I7WUFDekMsT0FBTyxFQUFFLENBQUMsT0FBTyxFQUFFLFFBQVEsRUFBRSxXQUFXLEVBQUUsT0FBTyxFQUFFLFFBQVEsQ0FBQztTQUMvRDtRQUNEO1lBQ0ksTUFBTSxFQUFFLGdDQUFnQztZQUN4QyxRQUFRLEVBQUUsbUNBQW1DO1lBQzdDLE9BQU8sRUFBRSxDQUFDLE9BQU8sRUFB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Q0FBQztLQUNKO0lBQ0QsVUFBVSxFQUFFLHlQQUF5UDtDQUN4USxDQUFDO0FBQ0YsT0FBTyxDQUFDLE9BQU8sR0FBRyxHQUFHLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvYnVybm91dC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBzdHJpY3RcIjtcbk9iamVjdC5kZWZpbmVQcm9wZXJ0eShleHBvcnRzLCBcIl9fZXNNb2R1bGVcIiwgeyB2YWx1ZTogdHJ1ZSB9KTtcbmNvbnN0IE1CSSA9IHtcbiAgICB0aXRsZTogXCJNYXNsYWNoIEJ1cm5vdXQgSW52ZW50b3J5IChNQkkpXCIsXG4gICAgZGVzY3JpcHRpb246IFwiVGhlIE1hc2xhY2ggQnVybm91dCBJbnZlbnRvcnkgKE1CSSkgaXMgYSBzZWxmLWFzc2Vzc21lbnQgdG9vbCB1c2VkIHRvIG1lYXN1cmUgYnVybm91dCByaXNrLiBJdCBldmFsdWF0ZXMgdGhyZWUga2V5IGNvbXBvbmVudHM6IEVtb3Rpb25hbCBFeGhhdXN0aW9uLCBEZXBlcnNvbmFsaXphdGlvbiwgYW5kIFBlcnNvbmFsIEFjaGlldmVtZW50LiBUaGlzIHRvb2wgc2hvdWxkIG5vdCBiZSB1c2VkIGFzIGEgZm9ybWFsIGRpYWdub3NpcyBidXQgYXMgYW4gYXdhcmVuZXNzIHRvb2wuXCIsXG4gICAgcXVlc3Rpb25zOiBbXG4gICAgICAgIC8vIEJ1cm5vdXQgKEVtb3Rpb25hbCBFeGhhdXN0aW9uKSBxdWVzdGlvbnNcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkJ1cm5vdXQgKEVtb3Rpb25hbCBFeGhhdXN0aW9uKVwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBmZWVsIGVtb3Rpb25hbGx5IGRyYWluZWQgYnkgbXkgd29yay5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJCdXJub3V0IChFbW90aW9uYWwgRXhoYXVzdGlvbilcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIldvcmtpbmcgd2l0aCBwZW9wbGUgYWxsIGRheSBsb25nIHJlcXVpcmVzIGEgZ3JlYXQgZGVhbCBvZiBlZmZvcnQuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiQnVybm91dCAoRW1vdGlvbmFsIEV4aGF1c3Rpb24pXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGZlZWwgbGlrZSBteSB3b3JrIGlzIGJyZWFraW5nIG1lIGRvd24uXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiQnVybm91dCAoRW1vdGlvbmFsIEV4aGF1c3Rpb24pXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGZlZWwgZnJ1c3RyYXRlZCBieSBteSB3b3JrLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkJ1cm5vdXQgKEVtb3Rpb25hbCBFeGhhdXN0aW9uKVwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBmZWVsIEkgd29yayB0b28gaGFyZCBhdCBteSBqb2IuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiQnVybm91dCAoRW1vdGlvbmFsIEV4aGF1c3Rpb24pXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJdCBzdHJlc3NlcyBtZSB0b28gbXVjaCB0byB3b3JrIGluIGRpcmVjdCBjb250YWN0IHdpdGggcGVvcGxlLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkJ1cm5vdXQgKEVtb3Rpb25hbCBFeGhhdXN0aW9uKVwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBmZWVsIGxpa2UgSSdtIGF0IHRoZSBlbmQgb2YgbXkgcm9wZS5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIC8vIERlcGVyc29uYWxpemF0aW9uIHF1ZXN0aW9uc1xuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRGVwZXJzb25hbGl6YXRpb25cIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgZmVlbCBJIGxvb2sgYWZ0ZXIgY2VydGFpbiBwYXRpZW50cy9jbGllbnRzIGltcGVyc29uYWxseSwgYXMgaWYgdGhleSBhcmUgb2JqZWN0cy5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJEZXBlcnNvbmFsaXphdGlvblwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBmZWVsIHRpcmVkIHdoZW4gSSBnZXQgdXAgaW4gdGhlIG1vcm5pbmcgYW5kIGhhdmUgdG8gZmFjZSBhbm90aGVyIGRheSBhdCB3b3JrLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkRlcGVyc29uYWxpemF0aW9uXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGhhdmUgdGhlIGltcHJlc3Npb24gdGhhdCBteSBwYXRpZW50cy9jbGllbnRzIG1ha2UgbWUgcmVzcG9uc2libGUgZm9yIHNvbWUgb2YgdGhlaXIgcHJvYmxlbXMuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRGVwZXJzb25hbGl6YXRpb25cIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgYW0gYXQgdGhlIGVuZCBvZiBteSBwYXRpZW5jZSBhdCB0aGUgZW5kIG9mIG15IHdvcmsgZGF5LlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkRlcGVyc29uYWxpemF0aW9uXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIHJlYWxseSBkb24ndCBjYXJlIGFib3V0IHdoYXQgaGFwcGVucyB0byBzb21lIG9mIG15IHBhdGllbnRzL2NsaWVudHMuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRGVwZXJzb25hbGl6YXRpb25cIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgaGF2ZSBiZWNvbWUgbW9yZSBpbnNlbnNpdGl2ZSB0byBwZW9wbGUgc2luY2UgSSd2ZSBiZWVuIHdvcmtpbmcuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRGVwZXJzb25hbGl6YXRpb25cIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkknbSBhZnJhaWQgdGhhdCB0aGlzIGpvYiBpcyBtYWtpbmcgbWUgdW5jYXJpbmcuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICAvLyBQZXJzb25hbCBBY2hpZXZlbWVudCBxdWVzdGlvbnNcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlBlcnNvbmFsIEFjaGlldmVtZW50XCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGFjY29tcGxpc2ggbWFueSB3b3J0aHdoaWxlIHRoaW5ncyBpbiB0aGlzIGpvYi5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJQZXJzb25hbCBBY2hpZXZlbWVudFwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBmZWVsIGZ1bGwgb2YgZW5lcmd5LlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlBlcnNvbmFsIEFjaGlldmVtZW50XCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGFtIGVhc2lseSBhYmxlIHRvIHVuZGVyc3RhbmQgd2hhdCBteSBwYXRpZW50cy9jbGllbnRzIGZlZWwuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiUGVyc29uYWwgQWNoaWV2ZW1lbnRcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgbG9vayBhZnRlciBteSBwYXRpZW50cycvY2xpZW50cycgcHJvYmxlbXMgdmVyeSBlZmZlY3RpdmVseS5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJQZXJzb25hbCBBY2hpZXZlbWVudFwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSW4gbXkgd29yaywgSSBoYW5kbGUgZW1vdGlvbmFsIHByb2JsZW1zIHZlcnkgY2FsbWx5LlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlBlcnNvbmFsIEFjaGlldmVtZW50XCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJUaHJvdWdoIG15IHdvcmssIEkgZmVlbCB0aGF0IEkgaGF2ZSBhIHBvc2l0aXZlIGluZmx1ZW5jZSBvbiBwZW9wbGUuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiUGVyc29uYWwgQWNoaWV2ZW1lbnRcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgYW0gZWFzaWx5IGFibGUgdG8gY3JlYXRlIGEgcmVsYXhlZCBhdG1vc3BoZXJlIHdpdGggbXkgcGF0aWVudHMvY2xpZW50cy5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJQZXJzb25hbCBBY2hpZXZlbWVudFwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBmZWVsIHJlZnJlc2hlZCB3aGVuIEkgaGF2ZSBiZWVuIGNsb3NlIHRvIG15IHBhdGllbnRzL2NsaWVudHMgYXQgd29yay5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgXSxcbiAgICBzY29yaW5nOiB7XG4gICAgICAgIHNjb3JlTWFwcGluZzogeyAwOiAwLCAxOiAxLCAyOiAyLCAzOiAzLCA0OiA0IH0sXG4gICAgICAgIHNldmVyaXR5TGV2ZWxzOiB7XG4gICAgICAgICAgICBsb3c6IHsgcmFuZ2U6IFswLCAxN10sIGxhYmVsOiBcIkxvdy1sZXZlbCBidXJub3V0XCIgfSxcbiAgICAgICAgICAgIG1vZGVyYXRlOiB7IHJhbmdlOiBbMTgsIDI5XSwgbGFiZWw6IFwiTW9kZXJhdGUgYnVybm91dFwiIH0sXG4gICAgICAgICAgICBoaWdoOiB7IHJhbmdlOiBbMzAsIDEzMl0sIGxhYmVsOiBcIkhpZ2gtbGV2ZWwgYnVybm91dFwiIH0sXG4gICAgICAgIH0sXG4gICAgICAgIGdldFNjb3JlOiAoYW5zd2VycykgPT4ge1xuICAgICAgICAgICAgLy8gQ29tYmluZSBzY29yZXMgZnJvbSBhbGwgdGhyZWUgc2NhbGVzIGZvciBhIHRvdGFsIGJ1cm5vdXQgc2NvcmVcbiAgICAgICAgICAgIC8vIEVtb3Rpb25hbCBleGhhdXN0aW9uOiBpdGVtcyAwLTZcbiAgICAgICAgICAgIGNvbnN0IGVtb3Rpb25hbEV4aGF1c3Rpb24gPSBhbnN3ZXJzXG4gICAgICAgICAgICAgICAgLnNsaWNlKDAsIDcpXG4gICAgICAgICAgICAgICAgLnJlZHVjZSgoc3VtLCBhbnN3ZXIpID0+IHN1bSArIChhbnN3ZXIgfHwgMCksIDApO1xuICAgICAgICAgICAgLy8gRGVwZXJzb25hbGl6YXRpb246IGl0ZW1zIDctMTNcbiAgICAgICAgICAgIGNvbnN0IGRlcGVyc29uYWxpemF0aW9uID0gYW5zd2Vyc1xuICAgICAgICAgICAgICAgIC5zbGljZSg3LCAxNClcbiAgICAgICAgICAgICAgICAucmVkdWNlKChzdW0sIGFuc3dlcikgPT4gc3VtICsgKGFuc3dlciB8fCAwKSwgMCk7XG4gICAgICAgICAgICAvLyBQZXJzb25hbCBhY2hpZXZlbWVudDogaXRlbXMgMTQtMjEgKHJldmVyc2Ugc2NvcmVkKVxuICAgICAgICAgICAgLy8gTm90ZTogRm9yIHBlcnNvbmFsIGFjaGlldmVtZW50LCBoaWdoZXIgc2NvcmVzIGluZGljYXRlIExPV0VSIGJ1cm5vdXRcbiAgICAgICAgICAgIC8vIFNvIHdlIHN1YnRyYWN0IGZyb20gbWF4IHBvc3NpYmxlICgzMikgdG8gY29udmVydCB0byBidXJub3V0IHNjb3JlXG4gICAgICAgICAgICBjb25zdCBwZXJzb25hbEFjaGlldmVtZW50ID0gYW5zd2Vyc1xuICAgICAgICAgICAgICAgIC5zbGljZSgxNCwgMjIpXG4gICAgICAgICAgICAgICAgLnJlZHVjZSgoc3VtLCBhbnN3ZXIpID0+IHN1bSArIChhbnN3ZXIgfHwgMCksIDApO1xuICAgICAgICAgICAgLy8gRm9yIHRvdGFsIGJ1cm5vdXQgc2NvcmUsIHdlIGNvdWxkIHVzZSBhIHdlaWdodGVkIGFwcHJvYWNoIG9yIHNpbXBseSBzdW0gdGhlbVxuICAgICAgICAgICAgcmV0dXJuIChlbW90aW9uYWxFeGhhdXN0aW9uICsgZGVwZXJzb25hbGl6YXRpb24gKyAoMzIgLSBwZXJzb25hbEFjaGlldmVtZW50KSk7XG4gICAgICAgIH0sXG4gICAgICAgIGdldFNldmVyaXR5OiAoc2NvcmUpID0+IHtcbiAgICAgICAgICAgIGlmIChzY29yZSA8PSAxNylcbiAgICAgICAgICAgICAgICByZXR1cm4gXCJMb3ctbGV2ZWwgYnVybm91dFwiO1xuICAgICAgICAgICAgaWYgKHNjb3JlID49IDE4ICYmIHNjb3JlIDw9IDI5KVxuICAgICAgICAgICAgICAgIHJldHVybiBcIk1vZGVyYXRlIGJ1cm5vdXRcIjtcbiAgICAgICAgICAgIGlmIChzY29yZSA+PSAzMClcbiAgICAgICAgICAgICAgICByZXR1cm4gXCJIaWdoLWxldmVsIGJ1cm5vdXRcIjtcbiAgICAgICAgICAgIHJldHVybiBcIkludmFsaWQgc2NvcmVcIjtcbiAgICAgICAgfSxcbiAgICB9LFxuICAgIGRpc2NsYWltZXI6IFwiVGhpcyBxdWVzdGlvbm5haXJlIGlzIGEgc2NyZWVuaW5nIHRvb2wgdG8gYXNzZXNzIGJ1cm5vdXQgcmlzay4gSXQgZG9lcyBub3Qgc2VydmUgYXMgYSBkaWFnbm9zdGljIHRvb2wgYW5kIHNob3VsZCBiZSBmb2xsb3dlZCBieSBhIGNsaW5pY2FsIGV2YWx1YXRpb24uIElmIHlvdSBhcmUgZXhwZXJpZW5jaW5nIHN5bXB0b21zIG9mIGJ1cm5vdXQsIHBsZWFzZSBzZWVrIHN1cHBvcnQgZnJvbSBhIGhlYWx0aGNhcmUgcHJvZmVzc2lvbmFsLlwiLFxufTtcbmV4cG9ydHMuZGVmYXVsdCA9IE1CSTtcbi8vIyBzb3VyY2VNYXBwaW5nVVJMPWJ1cm5vdXQuanMubWFwIl0sInZlcnNpb24iOjN9

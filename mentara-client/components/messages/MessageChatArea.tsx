@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { Paperclip, Smile, Send, X } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
-import { Attachment, Conversation, Message } from "./types";
+import { Conversation, Message, Attachment } from "./types";
 import {
   fetchConversation,
   sendMessage,
@@ -17,7 +17,7 @@ const Picker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 interface MessageChatAreaProps {
   contactId: string;
   conversation?: Conversation;
-  onSendMessage?: (text: string, attachments?: any[]) => Promise<void>;
+  onSendMessage?: (text: string, attachments?: Attachment[]) => Promise<void>;
   onMarkAsRead?: (messageId: string) => void;
   onAddReaction?: (messageId: string, emoji: string) => void;
   onRemoveReaction?: (messageId: string, emoji: string) => void;
@@ -26,13 +26,13 @@ interface MessageChatAreaProps {
   error?: string | null;
 }
 
-export default function MessageChatArea({
+export function MessageChatArea({
   contactId,
   conversation: propConversation,
   onSendMessage,
-  onMarkAsRead,
-  onAddReaction,
-  onRemoveReaction,
+  // onMarkAsRead,
+  // onAddReaction,
+  // onRemoveReaction,
   onSendTyping,
   isLoadingMessages: propIsLoadingMessages,
   error: propError,
@@ -114,15 +114,17 @@ export default function MessageChatArea({
   const handleSend = async () => {
     if (message.trim() || selectedFile) {
       try {
-        const fileAttachments: { name: string; url: string; type: string }[] = [];
+        const fileAttachments: Attachment[] = [];
         if (selectedFile) {
           // In a real app, you'd upload the file first and get a URL
           // For now, simulate file upload by creating a dummy URL
           const fakeUrl = `/files/${selectedFile.name}`;
           fileAttachments.push({
+            id: crypto.randomUUID(),
             name: selectedFile.name,
             url: fakeUrl,
             type: selectedFile.type.startsWith("image/") ? "image" : "document",
+            size: selectedFile.size,
           });
         }
 
@@ -172,7 +174,7 @@ export default function MessageChatArea({
     }
   };
 
-  const handleEmojiClick = (emojiData: any) => {
+  const handleEmojiClick = (emojiData: { emoji: string }) => {
     setMessage((prev) => prev + emojiData.emoji);
   };
 
@@ -268,7 +270,7 @@ export default function MessageChatArea({
             No messages yet. Start the conversation!
           </div>
         ) : (
-          messageGroups.map((group, index) => (
+          messageGroups.map((group) => (
             <div key={group.date} className="mb-6">
               {/* Date Divider */}
               <div className="text-center my-4">

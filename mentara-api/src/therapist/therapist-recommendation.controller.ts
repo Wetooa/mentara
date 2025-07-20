@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Query,
+  Param,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -10,15 +11,30 @@ import {
 } from '@nestjs/common';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
-  TherapistRecommendationRequest,
-  TherapistRecommendationResponse,
-} from './dto/therapist-application.dto';
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import {
+  TherapistRecommendationQuerySchema,
+  WelcomeRecommendationQuerySchema,
+  type TherapistRecommendationRequest,
+  type TherapistRecommendationResponseDto,
+  type TherapistRecommendationQuery,
+  type WelcomeRecommendationQuery,
+} from 'mentara-commons';
 
+@ApiTags('therapist-recommendation')
+@ApiBearerAuth('JWT-auth')
 @Controller('therapist-recommendations')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TherapistRecommendationController {
   constructor(
     private readonly therapistRecommendationService: TherapistRecommendationService,
@@ -26,29 +42,38 @@ export class TherapistRecommendationController {
   ) {}
 
   @Get()
+  @ApiOperation({
+    summary: 'Retrieve get recommended therapists',
+
+    description: 'Retrieve get recommended therapists',
+  })
+  @ApiResponse({
+    status: 200,
+
+    description: 'Retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async getRecommendedTherapists(
     @CurrentUserId() clerkId: string,
-    @Query('limit') limit?: string,
-    @Query('includeInactive') includeInactive?: string,
-    @Query('province') province?: string,
-    @Query('maxHourlyRate') maxHourlyRate?: string,
-  ): Promise<TherapistRecommendationResponse> {
+    @Query(new ZodValidationPipe(TherapistRecommendationQuerySchema))
+    query: TherapistRecommendationQuery,
+  ): Promise<TherapistRecommendationResponseDto> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: clerkId },
       });
-      
+
       if (!user) {
         throw new NotFoundException(`User with ID ${clerkId} not found`);
       }
-      
+
       const request: TherapistRecommendationRequest = {
         userId: user.id,
-        limit: limit ? parseInt(limit) : 10,
-        includeInactive: includeInactive === 'true',
-        province,
-        maxHourlyRate: maxHourlyRate ? parseFloat(maxHourlyRate) : undefined,
+        limit: query.limit,
+        includeInactive: query.includeInactive,
+        province: query.province,
+        maxHourlyRate: query.maxHourlyRate,
       };
       return await this.therapistRecommendationService.getRecommendedTherapists(
         request,
@@ -60,6 +85,175 @@ export class TherapistRecommendationController {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : error,
       );
+    }
+  }
+
+  @Get('compatibility/:therapistId')
+  @ApiOperation({
+    summary: 'Retrieve get compatibility analysis',
+
+    description: 'Retrieve get compatibility analysis',
+  })
+  @ApiResponse({
+    status: 200,
+
+    description: 'Retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @HttpCode(HttpStatus.OK)
+  async getCompatibilityAnalysis(
+    @CurrentUserId() clerkId: string,
+    @Param('therapistId') therapistId: string,
+  ) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: clerkId },
+      });
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${clerkId} not found`);
+      }
+
+      return await this.therapistRecommendationService.getCompatibilityAnalysis(
+        user.id,
+        therapistId,
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  @Get('welcome')
+  @ApiOperation({
+    summary: 'Retrieve get welcome recommendations',
+
+    description: 'Retrieve get welcome recommendations',
+  })
+  @ApiResponse({
+    status: 200,
+
+    description: 'Retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @HttpCode(HttpStatus.OK)
+  async getWelcomeRecommendations(
+    @CurrentUserId() userId: string,
+    @Query(new ZodValidationPipe(WelcomeRecommendationQuerySchema))
+    query: WelcomeRecommendationQuery,
+  ) {
+    try {
+      // Verify user exists and get client status
+      const [user, client] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            createdAt: true,
+          },
+        }),
+        this.prisma.client.findUnique({
+          where: { userId },
+          select: {
+            hasSeenTherapistRecommendations: true,
+            createdAt: true,
+          },
+        }),
+      ]);
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+
+      if (!client) {
+        throw new NotFoundException(
+          `Client profile not found for user ${userId}`,
+        );
+      }
+
+      // Check if this is truly a first-time user (unless forcing refresh)
+      const isFirstTime = !client.hasSeenTherapistRecommendations;
+      const shouldShowWelcome = isFirstTime || query.forceRefresh;
+
+      if (!shouldShowWelcome) {
+        // User has already seen recommendations, redirect to regular recommendations
+        return {
+          isFirstTime: false,
+          redirectTo: '/therapist-recommendations',
+          message: 'User has already completed welcome flow',
+          lastSeenAt: client.createdAt,
+        };
+      }
+
+      // Get personalized welcome recommendations
+      const request: TherapistRecommendationRequest = {
+        userId: user.id,
+        limit: query.limit,
+        includeInactive: false, // Only active therapists for welcome
+        province: query.province,
+        maxHourlyRate: undefined, // No rate filter for initial welcome
+      };
+
+      const recommendations =
+        await this.therapistRecommendationService.getRecommendedTherapists(
+          request,
+        );
+
+      // Enhance recommendations with welcome-specific data
+      const enhancedRecommendations = {
+        ...recommendations,
+        welcomeMessage: this.generateWelcomeMessage(
+          user.firstName,
+          isFirstTime,
+        ),
+        isFirstTime,
+        userInfo: {
+          firstName: user.firstName,
+          memberSince: user.createdAt,
+          needsOnboarding: isFirstTime,
+        },
+        nextSteps: {
+          canSendRequests: true,
+          recommendedActions: [
+            'Browse therapist profiles',
+            'Send requests to therapists you find interesting',
+            'Complete your profile for better matches',
+            'Take the mental health assessment for personalized recommendations',
+          ],
+        },
+        matchingInsights: {
+          totalAvailableTherapists: recommendations.totalCount,
+          recommendationEngine: 'AI-powered compatibility matching',
+          lastUpdated: new Date(),
+        },
+      };
+
+      return enhancedRecommendations;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  private generateWelcomeMessage(
+    firstName: string,
+    isFirstTime: boolean,
+  ): string {
+    if (isFirstTime) {
+      return `Welcome to Mentara, ${firstName}! We've curated a personalized list of therapists who may be a great fit for you. Take your time browsing through their profiles and don't hesitate to reach out to those who resonate with you.`;
+    } else {
+      return `Welcome back, ${firstName}! Here are some fresh therapist recommendations based on your preferences and our latest matching insights.`;
     }
   }
 }

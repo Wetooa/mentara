@@ -1,19 +1,27 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { apiConfig } from "../config/api";
-import { handleApiError, MentaraApiError } from "./errorHandler";
+import axios, { AxiosInstance } from "axios";
+import { apiConfig } from "@/lib/config/api";
+import { handleApiError, MentaraApiError } from "@/lib/api/errorHandler";
 
-// Types for token getters
-type TokenGetter = () => Promise<string | null>;
+// Token provider function type
+type TokenProvider = () => Promise<string | null>;
 
-// Create axios instance factory
-export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
+// Global token provider (will be set by the main API)
+let globalTokenProvider: TokenProvider | null = null;
+
+// Function to set the token provider
+export const setTokenProvider = (provider: TokenProvider) => {
+  globalTokenProvider = provider;
+};
+
+// Create the base axios client instance
+export const createAxiosClient = (): AxiosInstance => {
   const client = axios.create({
     baseURL: apiConfig.baseURL,
     timeout: apiConfig.timeout,
     headers: {
       "Content-Type": "application/json",
     },
-    withCredentials: true, // Include credentials for cross-origin requests
+    withCredentials: true,
   });
 
   // Request interceptor for authentication
@@ -22,12 +30,29 @@ export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
       try {
         let token: string | null = null;
 
-        // Client-side fallback: try to get token from global Clerk instance
-        if (typeof window !== "undefined" && (window as any).Clerk?.session) {
+        // Priority 1: Use the provided getToken function if available
+        if (getToken) {
           try {
-            token = await (window as any).Clerk.session.getToken();
+            token = await getToken();
           } catch (error) {
-            console.warn("Failed to get client-side token:", error);
+            console.warn("Failed to get token from provided getter:", error);
+          }
+        }
+
+        // Priority 2: Client-side fallback: try to get token from global Clerk instance
+        if (
+          !token &&
+          typeof window !== "undefined" &&
+          (window as any).Clerk?.session
+        ) {
+          try {
+            // Use our secure storage fallback method
+            const { SecureTokenStorage } = await import(
+              "@/contexts/AuthContext"
+            );
+            token = SecureTokenStorage.getAccessTokenFallback();
+          } catch (error) {
+            console.warn("Failed to get token from secure storage:", error);
           }
         }
 
@@ -70,7 +95,18 @@ export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
         );
       }
 
-      // Return just the data for successful responses
+      // Handle wrapped API responses from NestJS ResponseInterceptor
+      // Backend wraps responses in: { success: true, data: actualData, timestamp, path, statusCode }
+      if (
+        response.data &&
+        typeof response.data === "object" &&
+        "success" in response.data &&
+        "data" in response.data
+      ) {
+        return response.data.data; // Return the actual data from the wrapper
+      }
+
+      // Return just the data for successful responses (fallback for non-wrapped responses)
       return response.data;
     },
     (error) => {
@@ -82,11 +118,9 @@ export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
       if (apiError.status === 401) {
         // Unauthorized - potentially redirect to login
         if (typeof window !== "undefined") {
-          // Only redirect on client-side
           console.warn(
             "Unauthorized request detected. User may need to re-authenticate."
           );
-          // You could dispatch a global auth event here
         }
       }
 
@@ -97,44 +131,5 @@ export const createAxiosClient = (getToken?: TokenGetter): AxiosInstance => {
   return client;
 };
 
-// Default client instance (without specific token getter)
-export const apiClient = createAxiosClient();
-
-// Client factory for use with custom token getters
-export const createApiClientWithAuth = (getToken: TokenGetter) => {
-  return createAxiosClient(getToken);
-};
-
-// Helper function to create a request with automatic retry logic
-export const createRetryableRequest = <T = any>(
-  client: AxiosInstance,
-  config: AxiosRequestConfig,
-  maxRetries: number = apiConfig.maxRetries
-): Promise<T> => {
-  const makeRequest = async (attempt: number = 1): Promise<T> => {
-    try {
-      const response = await client.request<T>(config);
-      return response as T; // Response interceptor already extracts data
-    } catch (error: any) {
-      // Check if we should retry
-      if (attempt < maxRetries && error.status && error.status >= 500) {
-        const delay = apiConfig.retryDelay(attempt - 1);
-
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `🔄 Retrying request in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`
-          );
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        return makeRequest(attempt + 1);
-      }
-
-      throw error;
-    }
-  };
-
-  return makeRequest();
-};
-
-export default apiClient;
+// Export a default client instance for backward compatibility
+export const axiosClient = createAxiosClient();

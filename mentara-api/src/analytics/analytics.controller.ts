@@ -6,27 +6,36 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
-import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../decorators/current-user-role.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import {
+  PlatformAnalyticsQueryDtoSchema,
+  TherapistAnalyticsQueryDtoSchema,
+  ClientAnalyticsQueryDtoSchema,
+  type PlatformAnalyticsQueryDto,
+  type TherapistAnalyticsQueryDto,
+  type ClientAnalyticsQueryDto,
+} from 'mentara-commons';
 
 @Controller('analytics')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Get('platform')
   getPlatformAnalytics(
     @CurrentUserRole() role: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(PlatformAnalyticsQueryDtoSchema))
+    query: PlatformAnalyticsQueryDto,
   ) {
     if (role !== 'admin') {
       throw new ForbiddenException('Access denied: Admin role required');
     }
 
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
+    const start = query.dateFrom ? new Date(query.dateFrom) : undefined;
+    const end = query.dateTo ? new Date(query.dateTo) : undefined;
 
     return this.analyticsService.getPlatformAnalytics(start, end);
   }
@@ -35,12 +44,11 @@ export class AnalyticsController {
   getTherapistAnalytics(
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
-    @Query('therapistId') therapistId?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(TherapistAnalyticsQueryDtoSchema))
+    query: TherapistAnalyticsQueryDto,
   ) {
     // Allow therapists to view their own analytics or admins to view any
-    const targetTherapistId = therapistId || userId;
+    const targetTherapistId = query.therapistId || userId;
 
     if (role === 'therapist' && targetTherapistId !== userId) {
       throw new ForbiddenException(
@@ -54,8 +62,8 @@ export class AnalyticsController {
       );
     }
 
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
+    const start = query.dateFrom ? new Date(query.dateFrom) : undefined;
+    const end = query.dateTo ? new Date(query.dateTo) : undefined;
 
     return this.analyticsService.getTherapistAnalytics(
       targetTherapistId,
@@ -68,12 +76,11 @@ export class AnalyticsController {
   getClientAnalytics(
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
-    @Query('clientId') clientId?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query(new ZodValidationPipe(ClientAnalyticsQueryDtoSchema))
+    query: ClientAnalyticsQueryDto,
   ) {
     // Allow clients to view their own analytics or admins/therapists to view assigned clients
-    const targetClientId = clientId || userId;
+    const targetClientId = query.clientId || userId;
 
     if (role === 'user' && targetClientId !== userId) {
       throw new ForbiddenException(
@@ -85,8 +92,8 @@ export class AnalyticsController {
       throw new ForbiddenException('Access denied: Invalid role');
     }
 
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
+    const start = query.dateFrom ? new Date(query.dateFrom) : undefined;
+    const end = query.dateTo ? new Date(query.dateTo) : undefined;
 
     return this.analyticsService.getClientAnalytics(targetClientId, start, end);
   }

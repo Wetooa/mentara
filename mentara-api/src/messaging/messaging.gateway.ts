@@ -15,7 +15,7 @@ import {
   JoinConversationDto,
   LeaveConversationDto,
   TypingIndicatorDto,
-} from './dto/messaging.dto';
+} from 'mentara-commons';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -123,33 +123,45 @@ export class MessagingGateway
   }
 
   async handleDisconnect(client: AuthenticatedSocket) {
-    if (client.userId) {
-      const userSockets = this.userSockets.get(client.userId);
-      if (userSockets) {
-        userSockets.delete(client.id);
+    try {
+      if (client.userId) {
+        const userSockets = this.userSockets.get(client.userId);
+        if (userSockets) {
+          userSockets.delete(client.id);
 
-        // If no more sockets for this user, remove from tracking
-        if (userSockets.size === 0) {
-          this.userSockets.delete(client.userId);
+          // If no more sockets for this user, remove from tracking
+          if (userSockets.size === 0) {
+            this.userSockets.delete(client.userId);
 
-          // Clean up conversation participants tracking
-          for (const [
-            conversationId,
-            participants,
-          ] of this.conversationParticipants.entries()) {
-            participants.delete(client.userId);
-            // Remove empty conversation sets
-            if (participants.size === 0) {
-              this.conversationParticipants.delete(conversationId);
+            // Clean up conversation participants tracking
+            for (const [
+              conversationId,
+              participants,
+            ] of this.conversationParticipants.entries()) {
+              participants.delete(client.userId);
+              // Remove empty conversation sets
+              if (participants.size === 0) {
+                this.conversationParticipants.delete(conversationId);
+              }
             }
-          }
 
-          // Broadcast user offline status to their contacts
-          await this.broadcastUserStatus(client.userId, 'offline');
+            // Broadcast user offline status to their contacts
+            await this.broadcastUserStatus(client.userId, 'offline');
+          }
         }
+
+        this.logger.log(
+          `User ${client.userId} disconnected socket ${client.id}`,
+        );
       }
 
-      this.logger.log(`User ${client.userId} disconnected socket ${client.id}`);
+      // Clean up authentication tracking
+      this.webSocketAuth.cleanupConnection(client.id);
+    } catch (error) {
+      this.logger.error(
+        `Error during disconnect cleanup for socket ${client.id}:`,
+        error,
+      );
     }
   }
 
@@ -415,12 +427,103 @@ export class MessagingGateway
     }
   }
 
-  private sendPushNotifications(conversationId: string, message: any) {
-    // TODO: Implement push notifications for offline users
-    // This could integrate with FCM, APNS, or other push notification services
-    this.logger.log(
-      `Push notification would be sent for message ${message.id} in conversation ${conversationId}`,
-    );
+  private async sendPushNotifications(conversationId: string, message: any) {
+    try {
+      // Get all participants in the conversation except the sender
+      const conversation = await this.prisma.conversation.findUnique({
+        where: { id: conversationId },
+        include: {
+          participants: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      if (!conversation) {
+        this.logger.warn(
+          `Conversation ${conversationId} not found for push notifications`,
+        );
+        return;
+      }
+
+      // Filter participants who should receive push notifications
+      const eligibleParticipants = conversation.participants.filter(
+        (participant) => {
+          // Don't send to message sender
+          if (participant.userId === message.senderId) {
+            return false;
+          }
+
+          // Use default notification settings since notificationSettings model doesn't exist
+          // Default to true for push notifications for new messages
+          const defaultPushNewMessages = true;
+          if (!defaultPushNewMessages) {
+            return false;
+          }
+
+          // Note: No device token filtering available (no DeviceToken model)
+          // All participants are considered eligible for alternative notifications
+          return true;
+        },
+      );
+
+      if (eligibleParticipants.length === 0) {
+        this.logger.log(
+          `No eligible participants for push notifications in conversation ${conversationId}`,
+        );
+        return;
+      }
+
+      // Prepare notification payload
+      const notificationPayload = {
+        title: 'New Message',
+        body:
+          message.content.length > 50
+            ? `${message.content.substring(0, 50)}...`
+            : message.content,
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        data: {
+          conversationId: conversationId,
+          messageId: message.id,
+          senderId: message.senderId,
+          url: `/user/messages?conversation=${conversationId}`,
+        },
+      };
+
+      // Alternative notification approach (no device tokens available)
+      const pushPromises = eligibleParticipants.map(async (participant) => {
+        try {
+          // Log notification attempt (alternative to push notifications)
+          this.logger.log(
+            `Would send push notification to user ${participant.userId} for message ${message.id} (no DeviceToken model available)`,
+          );
+          
+          // Here you could implement WebSocket-based real-time notifications
+          // or other alternative notification methods
+          
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(
+            `Failed to process notification for user ${participant.userId}: ${errorMessage}`,
+          );
+        }
+      });
+
+      await Promise.allSettled(pushPromises);
+
+      this.logger.log(
+        `Push notification processing completed for conversation ${conversationId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send push notifications for conversation ${conversationId}:`,
+        error,
+      );
+    }
   }
 
   // Clean up old typing indicators (call this periodically)

@@ -1,0 +1,1344 @@
+{
+	"info": {
+		"_postman_id": "communities-api-collection",
+		"name": "Communities API",
+		"description": "Complete collection for Mentara Communities API endpoints based on the actual controller implementation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "communities-api-v2"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"// Set base URL if not already set",
+					"if (!pm.environment.get('base_url')) {",
+					"    pm.environment.set('base_url', 'http://localhost:3000');",
+					"}",
+					"",
+					"// Generate test IDs if not set",
+					"if (!pm.environment.get('test_community_id')) {",
+					"    pm.environment.set('test_community_id', 'test-community-id-' + Date.now());",
+					"}",
+					"if (!pm.environment.get('test_user_id')) {",
+					"    pm.environment.set('test_user_id', 'test-user-id-' + Date.now());",
+					"}",
+					"if (!pm.environment.get('test_room_group_id')) {",
+					"    pm.environment.set('test_room_group_id', 'test-room-group-id-' + Date.now());",
+					"}"
+				],
+				"type": "text/javascript"
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Community Discovery & Basic Operations",
+			"item": [
+				{
+					"name": "Get All Communities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Each community has required fields', function () {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.length > 0) {",
+									"        const community = responseJson[0];",
+									"        pm.expect(community).to.have.property('id');",
+									"        pm.expect(community).to.have.property('name');",
+									"        pm.expect(community).to.have.property('description');",
+									"        pm.expect(community).to.have.property('slug');",
+									"        pm.expect(community).to.have.property('imageUrl');",
+									"        pm.expect(community).to.have.property('createdAt');",
+									"        pm.expect(community).to.have.property('updatedAt');",
+									"        ",
+									"        // Store first community ID for other tests",
+									"        pm.environment.set('existing_community_id', community.id);",
+									"        pm.environment.set('existing_community_slug', community.slug);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities"
+							]
+						},
+						"description": "Retrieve all communities. Requires authentication but no specific role."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Community Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has stats fields', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('object');",
+									"    // Stats may include memberCount, postCount, activeMembers, etc.",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"stats"
+							]
+						},
+						"description": "Get community statistics including member counts, post counts, etc."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Community by Slug",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has community structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('slug');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/slug/{{existing_community_slug}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"slug",
+								"{{existing_community_slug}}"
+							]
+						},
+						"description": "Get a community by its slug identifier."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Community by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has community structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('description');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}"
+							]
+						},
+						"description": "Get a community by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Community Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has members array', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('members');",
+									"    pm.expect(responseJson.members).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}/members?limit=20&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}",
+								"members"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Maximum number of members to return (1-100)"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Number of members to skip"
+								}
+							]
+						},
+						"description": "Get members of a community with pagination support."
+					},
+					"response": []
+				}
+			],
+			"description": "Basic community discovery and information retrieval endpoints."
+		},
+		{
+			"name": "2. Membership Management",
+			"item": [
+				{
+					"name": "Join Community",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response indicates successful join', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('joined');",
+									"    pm.expect(responseJson.joined).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}/join",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}",
+								"join"
+							]
+						},
+						"description": "Join a community. Available to client, therapist, moderator, and admin roles."
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Community",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response indicates successful leave', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('left');",
+									"    pm.expect(responseJson.left).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}",
+								"leave"
+							]
+						},
+						"description": "Leave a community. Available to client, therapist, moderator, and admin roles."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Communities by User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array of communities', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/user/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"user",
+								"{{test_user_id}}"
+							]
+						},
+						"description": "Get all communities that a specific user is a member of. Note: This endpoint currently allows any authenticated user to view another user's memberships."
+					},
+					"response": []
+				}
+			],
+			"description": "Community membership management endpoints for joining, leaving, and viewing user memberships."
+		},
+		{
+			"name": "3. Room Structure Management",
+			"item": [
+				{
+					"name": "Get All Communities with Structure",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array with room groups', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"    if (responseJson.length > 0) {",
+									"        pm.expect(responseJson[0]).to.have.property('roomGroups');",
+									"        pm.expect(responseJson[0].roomGroups).to.be.an('array');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/with-structure",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"with-structure"
+							]
+						},
+						"description": "Get all communities including their room group and room structure."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Community with Structure by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has room structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('roomGroups');",
+									"    pm.expect(responseJson.roomGroups).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}/with-structure",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}",
+								"with-structure"
+							]
+						},
+						"description": "Get a specific community including its room group and room structure."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Room Group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has room group structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('order');",
+									"    pm.expect(responseJson).to.have.property('communityId');",
+									"    ",
+									"    // Store room group ID for room creation",
+									"    pm.environment.set('created_room_group_id', responseJson.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"General Discussion\",\n    \"order\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}/room-group",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}",
+								"room-group"
+							]
+						},
+						"description": "Create a new room group in a community. Requires moderator or admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has room structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('order');",
+									"    pm.expect(responseJson).to.have.property('roomGroupId');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Welcome Room\",\n    \"order\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/room-group/{{created_room_group_id}}/room",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"room-group",
+								"{{created_room_group_id}}",
+								"room"
+							]
+						},
+						"description": "Create a new room within a room group. Requires moderator or admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rooms by Group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array of rooms', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/room-group/{{created_room_group_id}}/rooms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"room-group",
+								"{{created_room_group_id}}",
+								"rooms"
+							]
+						},
+						"description": "Get all rooms within a specific room group."
+					},
+					"response": []
+				}
+			],
+			"description": "Room structure management endpoints for creating and organizing community rooms and room groups."
+		},
+		{
+			"name": "4. Community Assignment & Recommendations",
+			"item": [
+				{
+					"name": "Assign Communities to Me",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has assigned communities', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('assignedCommunities');",
+									"    pm.expect(responseJson.assignedCommunities).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/assign/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"assign",
+								"me"
+							]
+						},
+						"description": "Assign appropriate communities to the current authenticated user based on their profile/assessment."
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Communities to Specific User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has assigned communities', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('assignedCommunities');",
+									"    pm.expect(responseJson.assignedCommunities).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/assign/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"assign",
+								"{{test_user_id}}"
+							]
+						},
+						"description": "Assign appropriate communities to a specific user. Requires admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Recommended Communities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has recommended communities', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('recommendedCommunities');",
+									"    pm.expect(responseJson.recommendedCommunities).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/recommended/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"recommended",
+								"me"
+							]
+						},
+						"description": "Get recommended communities for the current authenticated user based on their profile/assessment."
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Assign Communities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has bulk assignment results', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('results');",
+									"    pm.expect(responseJson.results).to.be.an('object');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userIds\": [\n        \"user-id-1\",\n        \"user-id-2\",\n        \"user-id-3\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/assign/bulk",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"assign",
+								"bulk"
+							]
+						},
+						"description": "Bulk assign communities to multiple users. Requires admin role."
+					},
+					"response": []
+				}
+			],
+			"description": "Community assignment and recommendation endpoints for automated community matching and bulk operations."
+		},
+		{
+			"name": "5. Admin Operations",
+			"item": [
+				{
+					"name": "Create Community",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response has community structure', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson).to.have.property('description');",
+									"    pm.expect(responseJson).to.have.property('slug');",
+									"    pm.expect(responseJson).to.have.property('imageUrl');",
+									"    ",
+									"    // Store created community ID for cleanup",
+									"    pm.environment.set('created_community_id', responseJson.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Community\",\n    \"description\": \"A test community created via Postman\",\n    \"slug\": \"test-community-postman\",\n    \"imageUrl\": \"https://example.com/test-image.jpg\",\n    \"isPrivate\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities"
+							]
+						},
+						"description": "Create a new community. Requires moderator or admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Community",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response has updated community', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    pm.expect(responseJson).to.have.property('name');",
+									"    pm.expect(responseJson.name).to.equal('Updated Test Community');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Test Community\",\n    \"description\": \"An updated test community description\",\n    \"imageUrl\": \"https://example.com/updated-image.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communities/{{created_community_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{created_community_id}}"
+							]
+						},
+						"description": "Update an existing community. Requires moderator or admin role."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Community",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response confirms deletion', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/{{created_community_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{created_community_id}}"
+							]
+						},
+						"description": "Delete a community. Requires moderator or admin role."
+					},
+					"response": []
+				}
+			],
+			"description": "Administrative operations for creating, updating, and deleting communities. Requires elevated permissions."
+		},
+		{
+			"name": "6. Error Handling & Validation",
+			"item": [
+				{
+					"name": "Get Non-existent Community (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 404 or 500', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});",
+									"",
+									"pm.test('Response has error message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/non-existent-id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"non-existent-id"
+							]
+						},
+						"description": "Test error handling for non-existent community ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Community by Invalid Slug (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 404 or 500', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});",
+									"",
+									"pm.test('Response has error message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/slug/invalid-slug-that-does-not-exist",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"slug",
+								"invalid-slug-that-does-not-exist"
+							]
+						},
+						"description": "Test error handling for non-existent community slug."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Pagination Parameters (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400 or 500', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});",
+									"",
+									"pm.test('Response has error message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/communities/{{existing_community_id}}/members?limit=invalid&offset=invalid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities",
+								"{{existing_community_id}}",
+								"members"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "invalid",
+									"description": "Invalid limit parameter"
+								},
+								{
+									"key": "offset",
+									"value": "invalid",
+									"description": "Invalid offset parameter"
+								}
+							]
+						},
+						"description": "Test error handling for invalid pagination parameters."
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized Request (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Response indicates unauthorized', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/communities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities"
+							]
+						},
+						"description": "Test authentication requirement by making request without auth token."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Community without Required Role (403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 403', function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test('Response indicates forbidden', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{client_auth_token}}",
+								"type": "text",
+								"description": "Use a client role token (not moderator/admin)"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Unauthorized Community\",\n    \"description\": \"This should fail\",\n    \"slug\": \"unauthorized-community\",\n    \"imageUrl\": \"https://example.com/image.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/communities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"communities"
+							]
+						},
+						"description": "Test role-based access control by attempting to create community with insufficient permissions."
+					},
+					"response": []
+				}
+			],
+			"description": "Error handling and validation test cases for various failure scenarios."
+		}
+	]
+}

@@ -1,0 +1,41 @@
+c32ba5e10cb8bc894591550406b336f7
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MessagingModule = void 0;
+const common_1 = require("@nestjs/common");
+const messaging_controller_1 = require("./messaging.controller");
+const messaging_service_1 = require("./messaging.service");
+const messaging_gateway_1 = require("./messaging.gateway");
+const websocket_auth_service_1 = require("./services/websocket-auth.service");
+const websocket_event_service_1 = require("./services/websocket-event.service");
+const prisma_client_provider_1 = require("../providers/prisma-client.provider");
+const event_bus_service_1 = require("../common/events/event-bus.service");
+let MessagingModule = class MessagingModule {
+};
+exports.MessagingModule = MessagingModule;
+exports.MessagingModule = MessagingModule = __decorate([
+    (0, common_1.Module)({
+        controllers: [messaging_controller_1.MessagingController],
+        providers: [
+            messaging_service_1.MessagingService,
+            messaging_gateway_1.MessagingGateway,
+            websocket_auth_service_1.WebSocketAuthService,
+            websocket_event_service_1.WebSocketEventService,
+            prisma_client_provider_1.PrismaService,
+            event_bus_service_1.EventBusService,
+        ],
+        exports: [
+            messaging_service_1.MessagingService,
+            messaging_gateway_1.MessagingGateway,
+            websocket_auth_service_1.WebSocketAuthService,
+            websocket_event_service_1.WebSocketEventService,
+        ],
+    })
+], MessagingModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL21lc3NhZ2luZy9tZXNzYWdpbmcubW9kdWxlLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQUFBLDJDQUF3QztBQUN4QyxpRUFBNkQ7QUFDN0QsMkRBQXVEO0FBQ3ZELDJEQUF1RDtBQUN2RCw4RUFBeUU7QUFDekUsZ0ZBQTJFO0FBQzNFLGdGQUFvRTtBQUNwRSwwRUFBcUU7QUFtQjlELElBQU0sZUFBZSxHQUFyQixNQUFNLGVBQWU7Q0FBRyxDQUFBO0FBQWxCLDBDQUFlOzBCQUFmLGVBQWU7SUFqQjNCLElBQUEsZUFBTSxFQUFDO1FBQ04sV0FBVyxFQUFFLENBQUMsMENBQW1CLENBQUM7UUFDbEMsU0FBUyxFQUFFO1lBQ1Qsb0NBQWdCO1lBQ2hCLG9DQUFnQjtZQUNoQiw2Q0FBb0I7WUFDcEIsK0NBQXFCO1lBQ3JCLHNDQUFhO1lBQ2IsbUNBQWU7U0FDaEI7UUFDRCxPQUFPLEVBQUU7WUFDUCxvQ0FBZ0I7WUFDaEIsb0NBQWdCO1lBQ2hCLDZDQUFvQjtZQUNwQiwrQ0FBcUI7U0FDdEI7S0FDRixDQUFDO0dBQ1csZUFBZSxDQUFHIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9tZXNzYWdpbmcvbWVzc2FnaW5nLm1vZHVsZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBNb2R1bGUgfSBmcm9tICdAbmVzdGpzL2NvbW1vbic7XG5pbXBvcnQgeyBNZXNzYWdpbmdDb250cm9sbGVyIH0gZnJvbSAnLi9tZXNzYWdpbmcuY29udHJvbGxlcic7XG5pbXBvcnQgeyBNZXNzYWdpbmdTZXJ2aWNlIH0gZnJvbSAnLi9tZXNzYWdpbmcuc2VydmljZSc7XG5pbXBvcnQgeyBNZXNzYWdpbmdHYXRld2F5IH0gZnJvbSAnLi9tZXNzYWdpbmcuZ2F0ZXdheSc7XG5pbXBvcnQgeyBXZWJTb2NrZXRBdXRoU2VydmljZSB9IGZyb20gJy4vc2VydmljZXMvd2Vic29ja2V0LWF1dGguc2VydmljZSc7XG5pbXBvcnQgeyBXZWJTb2NrZXRFdmVudFNlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL3dlYnNvY2tldC1ldmVudC5zZXJ2aWNlJztcbmltcG9ydCB7IFByaXNtYVNlcnZpY2UgfSBmcm9tICcuLi9wcm92aWRlcnMvcHJpc21hLWNsaWVudC5wcm92aWRlcic7XG5pbXBvcnQgeyBFdmVudEJ1c1NlcnZpY2UgfSBmcm9tICcuLi9jb21tb24vZXZlbnRzL2V2ZW50LWJ1cy5zZXJ2aWNlJztcblxuQE1vZHVsZSh7XG4gIGNvbnRyb2xsZXJzOiBbTWVzc2FnaW5nQ29udHJvbGxlcl0sXG4gIHByb3ZpZGVyczogW1xuICAgIE1lc3NhZ2luZ1NlcnZpY2UsXG4gICAgTWVzc2FnaW5nR2F0ZXdheSxcbiAgICBXZWJTb2NrZXRBdXRoU2VydmljZSxcbiAgICBXZWJTb2NrZXRFdmVudFNlcnZpY2UsXG4gICAgUHJpc21hU2VydmljZSxcbiAgICBFdmVudEJ1c1NlcnZpY2UsXG4gIF0sXG4gIGV4cG9ydHM6IFtcbiAgICBNZXNzYWdpbmdTZXJ2aWNlLFxuICAgIE1lc3NhZ2luZ0dhdGV3YXksXG4gICAgV2ViU29ja2V0QXV0aFNlcnZpY2UsXG4gICAgV2ViU29ja2V0RXZlbnRTZXJ2aWNlLFxuICBdLFxufSlcbmV4cG9ydCBjbGFzcyBNZXNzYWdpbmdNb2R1bGUge31cbiJdLCJ2ZXJzaW9uIjozfQ==

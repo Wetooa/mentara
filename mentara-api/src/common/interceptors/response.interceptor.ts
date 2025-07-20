@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse } from '../types/api-response.types';
+import { ApiResponse } from 'mentara-commons';
+import { ApiResponseDto } from '../dto/api-response.dto';
 
 @Injectable()
 export class ResponseInterceptor<T>
@@ -16,16 +17,21 @@ export class ResponseInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
-    const request = context.switchToHttp().getRequest();
-
     return next.handle().pipe(
-      map((data) => ({
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-        statusCode: context.switchToHttp().getResponse().statusCode,
-      })),
+      map((data) => {
+        // If the controller already returns an ApiResponseDto, pass it through
+        if (data instanceof ApiResponseDto) {
+          return data;
+        }
+
+        // If the data has success property, it's already formatted
+        if (data && typeof data === 'object' && 'success' in data) {
+          return data as ApiResponse<T>;
+        }
+
+        // Otherwise, wrap the data in our standard response format
+        return ApiResponseDto.success(data);
+      }),
     );
   }
 }

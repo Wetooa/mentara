@@ -181,3 +181,81 @@ export class TherapistUnassignedEvent extends BaseDomainEvent<TherapistUnassigne
     );
   }
 }
+
+// Meeting-specific events
+
+export interface MeetingConfirmedData {
+  meetingId: string;
+  clientId: string;
+  therapistId: string;
+  confirmedAt: Date;
+  startTime: Date;
+  duration: number;
+}
+
+export class MeetingConfirmedEvent extends BaseDomainEvent<MeetingConfirmedData> {
+  constructor(data: MeetingConfirmedData, metadata?: EventMetadata) {
+    super(data.meetingId, 'Meeting', data, metadata);
+  }
+}
+
+export interface MeetingStartedData {
+  meetingId: string;
+  clientId: string;
+  therapistId: string;
+  startedAt: Date;
+  actualStartTime: Date;
+  scheduledStartTime: Date;
+}
+
+export class MeetingStartedEvent extends BaseDomainEvent<MeetingStartedData> {
+  constructor(data: MeetingStartedData, metadata?: EventMetadata) {
+    super(data.meetingId, 'Meeting', data, metadata);
+  }
+}
+
+export interface MeetingCompletedData {
+  meetingId: string;
+  clientId: string;
+  therapistId: string;
+  completedAt: Date;
+  actualDuration: number;
+  scheduledDuration: number;
+}
+
+export class MeetingCompletedEvent extends BaseDomainEvent<MeetingCompletedData> {
+  constructor(data: MeetingCompletedData, metadata?: EventMetadata) {
+    super(data.meetingId, 'Meeting', data, metadata);
+  }
+}
+
+export interface MeetingCancelledData {
+  meetingId: string;
+  clientId: string;
+  therapistId: string;
+  cancelledBy: string;
+  cancelledAt: Date;
+  cancellationReason?: string;
+  originalStartTime: Date;
+}
+
+export class MeetingCancelledEvent extends BaseDomainEvent<MeetingCancelledData> {
+  constructor(data: MeetingCancelledData, metadata?: EventMetadata) {
+    super(data.meetingId, 'Meeting', data, metadata);
+  }
+}
+
+export interface MeetingEmergencyTerminatedData {
+  meetingId: string;
+  clientId: string;
+  therapistId: string;
+  terminatedBy: string;
+  terminatedAt: Date;
+  reason: string;
+}
+
+export class MeetingEmergencyTerminatedEvent extends BaseDomainEvent<MeetingEmergencyTerminatedData> {
+  constructor(data: MeetingEmergencyTerminatedData, metadata?: EventMetadata) {
+    super(data.meetingId, 'Meeting', data, metadata);
+  }
+}

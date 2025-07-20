@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import SinglePageTherapistApplication from '../page';
 
 // Mock necessary modules
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@/hooks/useMobile', () => ({
   useIsMobile: jest.fn(() => false),
 }));
 
@@ -65,7 +65,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('calculates partial completion as fields are filled', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Fill first name
@@ -82,7 +82,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('calculates 100% completion when all basic fields are filled', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Fill all basic information fields
@@ -97,7 +97,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('shows completion icon when section is 100% complete', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Complete all fields in basic section
@@ -113,7 +113,7 @@ describe('Section Completion Calculation', () => {
 
   describe('Professional Profile Section Completion', () => {
     beforeEach(async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Open professional profile section
@@ -121,7 +121,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('calculates completion for professional license fields', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       
       // Initially 0 complete
       const profSection = screen.getAllByText(/\/\d+ complete/)[1]; // Second occurrence (prof section)
@@ -135,7 +135,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('includes conditional PRC fields in completion calculation', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       
       // Select RPsy and PRC licensed
       await user.click(screen.getByLabelText(/RPsy \(Registered Psychologist\)/));
@@ -149,7 +149,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('calculates expertise areas completion', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       
       // Should start with no expertise selected
       expect(screen.getByText('0 area')).toBeInTheDocument();
@@ -168,7 +168,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('validates required vs optional fields correctly', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       
       // Fill all required professional fields
       await user.click(screen.getByLabelText(/RPsy \(Registered Psychologist\)/));
@@ -194,7 +194,7 @@ describe('Section Completion Calculation', () => {
 
   describe('Document Upload Section Completion', () => {
     it('calculates completion based on required documents', () => {
-      const mockStore = require('@/store/therapistform').default();
+      const mockStore = jest.requireMock('@/store/therapistform').default();
       
       // Mock documents uploaded
       mockStore.documents = {
@@ -212,7 +212,7 @@ describe('Section Completion Calculation', () => {
     });
 
     it('does not count optional documents in completion', () => {
-      const mockStore = require('@/store/therapistform').default();
+      const mockStore = jest.requireMock('@/store/therapistform').default();
       
       // Mock only optional documents uploaded
       mockStore.documents = {
@@ -232,7 +232,7 @@ describe('Section Completion Calculation', () => {
 
   describe('Overall Progress Calculation', () => {
     it('calculates overall progress across all sections', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Initial progress should be 0%
@@ -264,7 +264,7 @@ describe('Section Completion Calculation', () => {
     it('enables submission when all required sections complete', async () => {
       // This would require completing all sections in the test
       // Implementation would need to be more comprehensive
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Complete all required sections...
@@ -288,7 +288,7 @@ describe('Section Completion Calculation', () => {
     it('shows correct visual state for completed sections', async () => {
       // This test would require actually completing a section
       // and verifying the visual styling changes
-      const user = userEvent.setup();
+      userEvent.setup();
       render(<SinglePageTherapistApplication />);
       
       // Complete basic information fully...

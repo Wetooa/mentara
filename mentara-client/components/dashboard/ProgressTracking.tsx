@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
-import { TrendingUp, Smile, Frown, Meh } from "lucide-react";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import { Smile, Frown, Meh } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface ProgressTrackingProps {

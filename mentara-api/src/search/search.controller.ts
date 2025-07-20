@@ -1,69 +1,79 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { SearchService } from './search.service';
-import { ClerkAuthGuard } from '../guards/clerk-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import {
+  SearchTherapistsQueryDtoSchema,
+  SearchPostsQueryDtoSchema,
+  SearchCommunitiesQueryDtoSchema,
+  SearchUsersQueryDtoSchema,
+  GlobalSearchQueryDtoSchema,
+  type SearchTherapistsQueryDto,
+  type SearchPostsQueryDto,
+  type SearchCommunitiesQueryDto,
+  type SearchUsersQueryDto,
+  type GlobalSearchQueryDto,
+} from 'mentara-commons';
 
 @Controller('search')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get('therapists')
   searchTherapists(
-    @Query('q') query: string,
-    @Query('province') province?: string,
-    @Query('expertise') expertise?: string,
-    @Query('maxRate') maxHourlyRate?: string,
-    @Query('minExp') minExperience?: string,
+    @Query(new ZodValidationPipe(SearchTherapistsQueryDtoSchema))
+    query: SearchTherapistsQueryDto,
   ) {
-    const filters: any = {};
-    if (province && typeof province === 'string') {
-      filters.province = province.trim();
-    }
-    if (expertise && typeof expertise === 'string') {
-      filters.expertise = expertise
-        .split(',')
-        .map((e) => e.trim())
-        .filter((e) => e.length > 0);
-    }
-    if (maxHourlyRate && typeof maxHourlyRate === 'string') {
-      const rate = parseFloat(maxHourlyRate);
-      if (!isNaN(rate) && rate >= 0) {
-        filters.maxHourlyRate = rate;
-      }
-    }
-    if (minExperience && typeof minExperience === 'string') {
-      const exp = parseInt(minExperience, 10);
-      if (!isNaN(exp) && exp >= 0) {
-        filters.minExperience = exp;
-      }
-    }
-
-    return this.searchService.searchTherapists(query, filters);
+    return this.searchService.searchTherapists(query.query || '', {
+      location: query.location,
+      specialties: query.specialties,
+      priceRange: query.priceRange,
+      experienceYears: query.experienceYears,
+      rating: query.rating,
+      gender: query.gender,
+      languages: query.languages,
+      availability: query.availability,
+      verifiedOnly: query.verifiedOnly,
+      // Map maxHourlyRate from priceRange.max for backward compatibility
+      maxHourlyRate: query.priceRange?.max,
+    });
   }
 
   @Get('posts')
   searchPosts(
-    @Query('q') query: string,
-    @Query('community') communityId?: string,
+    @Query(new ZodValidationPipe(SearchPostsQueryDtoSchema))
+    query: SearchPostsQueryDto,
   ) {
-    return this.searchService.searchPosts(query, communityId);
+    return this.searchService.searchPosts(query.query, query.communityId);
   }
 
   @Get('communities')
-  searchCommunities(@Query('q') query: string) {
-    return this.searchService.searchCommunities(query);
+  searchCommunities(
+    @Query(new ZodValidationPipe(SearchCommunitiesQueryDtoSchema))
+    query: SearchCommunitiesQueryDto,
+  ) {
+    return this.searchService.searchCommunities(query.query);
   }
 
   @Get('users')
-  searchUsers(@Query('q') query: string, @Query('role') role?: string) {
-    return this.searchService.searchUsers(query, role);
+  searchUsers(
+    @Query(new ZodValidationPipe(SearchUsersQueryDtoSchema))
+    query: SearchUsersQueryDto,
+  ) {
+    return this.searchService.searchUsers(query.query, query.role);
   }
 
   @Get('global')
   globalSearch(
-    @Query('q') query: string,
-    @Query('type') type?: 'therapists' | 'posts' | 'communities' | 'users',
+    @Query(new ZodValidationPipe(GlobalSearchQueryDtoSchema))
+    query: GlobalSearchQueryDto,
   ) {
-    return this.searchService.globalSearch(query, type);
+    // Filter out unsupported types like 'worksheets'
+    const supportedTypes = query.types?.filter((type) =>
+      ['users', 'therapists', 'posts', 'communities'].includes(type),
+    ) as ('users' | 'therapists' | 'posts' | 'communities')[] | undefined;
+
+    return this.searchService.globalSearch(query.query, supportedTypes);
   }
 }

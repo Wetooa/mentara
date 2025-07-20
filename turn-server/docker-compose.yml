@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  coturn:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mentara-coturn
+    restart: unless-stopped
+    ports:
+      # STUN/TURN ports
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+      - "5349:5349/udp"
+      - "5349:5349/tcp"
+      # Media relay port range (adjust as needed)
+      - "49152-49252:49152-49252/udp"
+    environment:
+      # Override default credentials with environment variables
+      - TURN_USERNAME=${TURN_USERNAME:-mentara}
+      - TURN_PASSWORD=${TURN_PASSWORD:-mentara123}
+      - TURN_REALM=${TURN_REALM:-mentara.local}
+    volumes:
+      # Persist logs
+      - coturn_logs:/var/log/coturn
+      # Mount custom config if needed
+      - ./turnserver.conf:/etc/turnserver.conf:ro
+      # For SSL certificates in production
+      # - ./certs:/etc/coturn/certs:ro
+    networks:
+      - coturn_network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # Health check
+    healthcheck:
+      test: ["CMD", "netstat", "-ln", "|", "grep", ":3478"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Redis for user database in production
+  redis:
+    image: redis:7-alpine
+    container_name: mentara-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - coturn_network
+    # Uncomment for production with authentication
+    # command: redis-server --requirepass your_redis_password
+
+  # Optional: Monitoring with Prometheus metrics
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: mentara-prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #   networks:
+  #     - coturn_network
+
+volumes:
+  coturn_logs:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  coturn_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,1 @@
+{"version":3,"file":"alcohol.d.ts","sourceRoot":"","sources":["../../../src/constants/questionnaire/alcohol.ts"],"names":[],"mappings":"AAAA,OAAO,EAAyB,kBAAkB,EAAE,MAAM,YAAY,CAAC;AAEvE,QAAA,MAAM,KAAK,EAAE;IACX,cAAc,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,CAAC,CAAC,CAAC;CACxD,GAAG,kBAgJH,CAAC;AAEF,eAAe,KAAK,CAAC"}

@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Logo from "@/components/logo";
+import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,8 +29,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAdminRequired } from "@/hooks/useAdminAuth";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRole } from "@/hooks/useRole";
 
 export default function AdminLayout({
   children,
@@ -40,16 +40,14 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAdmin, isLoading } = useAdminRequired();
-  const { signOut } = useClerk();
-  const { user } = useUser();
+  const { isAdmin } = useRole();
+  const { user, isLoaded, logout } = useAuth();
 
-  // Admin data from Clerk user
+  // Admin data from auth user
   const admin = {
-    name:
-      user?.fullName || user?.primaryEmailAddress?.emailAddress || "Admin User",
-    email: user?.primaryEmailAddress?.emailAddress || "admin@mentara.com",
-    avatarUrl: user?.imageUrl || "/icons/user-avatar.png",
+    name: user?.firstName ? `${user.firstName} ${user.lastName}` : "Admin User",
+    email: user?.email || "admin@mentara.com",
+    avatarUrl: "/icons/user-avatar.png",
   };
 
   const navItems = [
@@ -92,32 +90,27 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      // Use Clerk's signOut method to properly sign out the user
-      await signOut();
-
-      // After successful logout, redirect to admin login page
-      router.push("/admin-login");
+      await logout();
     } catch (error) {
       console.error("Error during logout:", error);
-      // Even if there's an error, try to redirect to login
-      router.push("/admin-login");
     }
   };
 
-  // Show loading state while checking admin status
-  if (isLoading) {
+  // Show loading state while user data is loading
+  if (!isLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-gray-500">Verifying admin access...</p>
+          <p className="text-sm text-gray-500">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
-  // If not an admin and not loading, the useAdminRequired hook will redirect to login page
-  if (!isAdmin && !isLoading) {
+  // If not an admin, redirect to main page (middleware should handle this)
+  if (!isAdmin) {
+    router.push("/");
     return null;
   }
 

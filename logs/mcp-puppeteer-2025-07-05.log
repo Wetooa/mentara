@@ -1,6 +1,0 @@
-{"level":"info","message":"Starting MCP server","service":"mcp-puppeteer","timestamp":"2025-07-05 19:11:33.288"}
-{"level":"info","message":"MCP server started successfully","service":"mcp-puppeteer","timestamp":"2025-07-05 19:11:33.289"}
-{"arguments":{"debugPort":9222},"level":"debug","message":"Tool call received","service":"mcp-puppeteer","timestamp":"2025-07-05 19:24:04.043","tool":"puppeteer_connect_active_tab"}
-{"0":"n","1":"p","2":"x","level":"info","message":"Launching browser with config:","service":"mcp-puppeteer","timestamp":"2025-07-05 19:24:04.044"}
-{"level":"info","message":"Browser launched successfully","service":"mcp-puppeteer","timestamp":"2025-07-05 19:24:04.527"}
-{"arguments":{"debugPort":9222},"level":"debug","message":"Tool call received","service":"mcp-puppeteer","timestamp":"2025-07-05 19:25:06.089","tool":"puppeteer_connect_active_tab"}

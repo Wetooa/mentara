@@ -4,21 +4,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Calendar, Star, Loader2 } from "lucide-react";
-import { useTherapist } from "@/hooks/useTherapist";
+import { MessageCircle, Calendar } from "lucide-react";
+
+interface Therapist {
+  id: string;
+  userId: string;
+  user: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    imageUrl?: string;
+  };
+  specializations?: string[];
+  hourlyRate?: number;
+  status: string;
+}
 
 interface AssignedTherapistProps {
+  assignedTherapists?: Therapist[];
+  isLoading?: boolean;
   onMessageTherapist?: () => void;
   onScheduleSession?: () => void;
 }
 
 export default function AssignedTherapist({
+  assignedTherapists = [],
+  isLoading = false,
   onMessageTherapist,
   onScheduleSession,
 }: AssignedTherapistProps) {
-  const { therapist, loading, error } = useTherapist();
+  // Get the primary therapist (first one if multiple)
+  const therapist = assignedTherapists.length > 0 ? assignedTherapists[0] : null;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -29,30 +47,15 @@ export default function AssignedTherapist({
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
-            Your Therapist
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <div className="text-muted-foreground mb-4">
-              <p className="text-sm text-red-500">{error}</p>
+            <div className="animate-pulse space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+                <div className="space-y-1">
+                  <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                  <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                </div>
+              </div>
             </div>
-            <Button variant="outline" size="sm">
-              Try Again
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -83,8 +86,10 @@ export default function AssignedTherapist({
     );
   }
 
-  const fullName = `${therapist.firstName} ${therapist.lastName}`;
-  const initials = `${therapist.firstName[0]}${therapist.lastName[0]}`;
+  const firstName = therapist.user.firstName || '';
+  const lastName = therapist.user.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Therapist';
+  const initials = `${firstName[0] || 'T'}${lastName[0] || 'H'}`;
 
   return (
     <Card>
@@ -99,55 +104,42 @@ export default function AssignedTherapist({
           {/* Therapist Info */}
           <div className="flex items-start gap-3">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={therapist.profileImageUrl} alt={fullName} />
+              <AvatarImage src={therapist.user.imageUrl} alt={fullName} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-sm truncate">{fullName}</h3>
-                {therapist.isVerified && (
+                {therapist.status === 'approved' && (
                   <Badge variant="secondary" className="text-xs">
                     Verified
                   </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground mb-1">
-                {therapist.providerType} • {therapist.province}
+                Licensed Therapist
               </p>
-              {therapist.yearsOfExperience && (
+              {therapist.hourlyRate && (
                 <p className="text-xs text-muted-foreground">
-                  {therapist.yearsOfExperience} years experience
+                  ${therapist.hourlyRate}/hour
                 </p>
               )}
             </div>
           </div>
 
-          {/* Rating */}
-          {therapist.patientSatisfaction && (
-            <div className="flex items-center gap-1">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-medium">
-                {therapist.patientSatisfaction.toFixed(1)}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                ({therapist.totalPatients} patients)
-              </span>
-            </div>
-          )}
-
           {/* Specializations */}
-          {therapist.illnessSpecializations.length > 0 && (
+          {therapist.specializations && therapist.specializations.length > 0 && (
             <div>
               <p className="text-xs font-medium mb-1">Specializations</p>
               <div className="flex flex-wrap gap-1">
-                {therapist.illnessSpecializations.slice(0, 3).map((spec) => (
-                  <Badge key={spec} variant="outline" className="text-xs">
+                {therapist.specializations.slice(0, 3).map((spec, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
                     {spec}
                   </Badge>
                 ))}
-                {therapist.illnessSpecializations.length > 3 && (
+                {therapist.specializations.length > 3 && (
                   <Badge variant="outline" className="text-xs">
-                    +{therapist.illnessSpecializations.length - 3} more
+                    +{therapist.specializations.length - 3} more
                   </Badge>
                 )}
               </div>

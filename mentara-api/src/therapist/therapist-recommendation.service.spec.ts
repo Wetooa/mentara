@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { InternalServerErrorException } from '@nestjs/common';
-import { TherapistRecommendationRequest } from './dto/therapist-application.dto';
+import { TherapistRecommendationRequest } from 'mentara-commons';
 
 describe('TherapistRecommendationService', () => {
   let service: TherapistRecommendationService;

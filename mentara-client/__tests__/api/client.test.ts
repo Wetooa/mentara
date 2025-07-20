@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { createAxiosClient } from '../../lib/api/client';
-import { MentaraApiError } from '../../lib/api/errorHandler';
+import { createAxiosClient } from '@/lib/api/client';
+import { MentaraApiError } from '@/lib/api/errorHandler';
 
 // Mock axios
 jest.mock('axios');

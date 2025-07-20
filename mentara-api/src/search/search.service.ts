@@ -9,14 +9,23 @@ export class SearchService {
     query: string,
     filters?: {
       province?: string;
+      location?: string;
       expertise?: string[];
+      specialties?: string[];
       maxHourlyRate?: number;
       minExperience?: number;
+      experienceYears?: number;
+      rating?: number;
+      gender?: string;
+      languages?: string[];
+      availability?: any;
+      verifiedOnly?: boolean;
+      priceRange?: { min?: number; max?: number };
     },
   ) {
     try {
       const where: any = {
-        status: 'approved',
+        status: 'APPROVED',
         OR: [
           {
             user: {
@@ -194,24 +203,36 @@ export class SearchService {
 
   async globalSearch(
     query: string,
-    type?: 'therapists' | 'posts' | 'communities' | 'users',
+    types?:
+      | ('therapists' | 'posts' | 'communities' | 'users')[]
+      | 'therapists'
+      | 'posts'
+      | 'communities'
+      | 'users',
   ) {
     try {
       const results: any = {};
 
-      if (!type || type === 'therapists') {
+      // Handle both single type and array of types
+      const typesArray = Array.isArray(types)
+        ? types
+        : types
+          ? [types]
+          : ['therapists', 'posts', 'communities', 'users'];
+
+      if (typesArray.includes('therapists')) {
         results.therapists = await this.searchTherapists(query);
       }
 
-      if (!type || type === 'posts') {
+      if (typesArray.includes('posts')) {
         results.posts = await this.searchPosts(query);
       }
 
-      if (!type || type === 'communities') {
+      if (typesArray.includes('communities')) {
         results.communities = await this.searchCommunities(query);
       }
 
-      if (!type || type === 'users') {
+      if (typesArray.includes('users')) {
         results.users = await this.searchUsers(query);
       }
 

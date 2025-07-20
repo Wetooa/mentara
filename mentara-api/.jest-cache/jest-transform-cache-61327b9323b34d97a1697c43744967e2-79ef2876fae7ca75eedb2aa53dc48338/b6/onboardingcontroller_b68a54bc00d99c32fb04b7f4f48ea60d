@@ -1,0 +1,173 @@
+8980ece14b8c1d0dff5d4f423607f5f6
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var OnboardingController_1;
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.OnboardingController = void 0;
+const common_1 = require("@nestjs/common");
+const onboarding_service_1 = require("./onboarding.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const admin_auth_guard_1 = require("../auth/guards/admin-auth.guard");
+const current_user_id_decorator_1 = require("../auth/decorators/current-user-id.decorator");
+const admin_only_decorator_1 = require("../auth/decorators/admin-only.decorator");
+const swagger_1 = require("@nestjs/swagger");
+let OnboardingController = OnboardingController_1 = class OnboardingController {
+    onboardingService;
+    logger = new common_1.Logger(OnboardingController_1.name);
+    constructor(onboardingService) {
+        this.onboardingService = onboardingService;
+    }
+    async getMyOnboardingStatus(userId) {
+        try {
+            return await this.onboardingService.getOnboardingStatus(userId);
+        }
+        catch (error) {
+            this.logger.error(`Failed to get onboarding status for user ${userId}:`, error);
+            throw new common_1.HttpException('Failed to retrieve onboarding status', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async getUserOnboardingStatus(userId) {
+        try {
+            return await this.onboardingService.getOnboardingStatus(userId);
+        }
+        catch (error) {
+            this.logger.error(`Failed to get onboarding status for user ${userId}:`, error);
+            if (error instanceof common_1.HttpException) {
+                throw error;
+            }
+            throw new common_1.HttpException('Failed to retrieve onboarding status', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async completeStep(userId, stepName) {
+        try {
+            return await this.onboardingService.markStepCompleted(userId, stepName);
+        }
+        catch (error) {
+            this.logger.error(`Failed to complete step ${stepName} for user ${userId}:`, error);
+            throw new common_1.HttpException('Failed to complete onboarding step', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async validateOnboarding(userId) {
+        try {
+            return await this.onboardingService.validateOnboardingCompleteness(userId);
+        }
+        catch (error) {
+            this.logger.error(`Failed to validate onboarding for user ${userId}:`, error);
+            throw new common_1.HttpException('Failed to validate onboarding completeness', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async getOnboardingInsights() {
+        try {
+            return await this.onboardingService.getOnboardingInsights();
+        }
+        catch (error) {
+            this.logger.error('Failed to get onboarding insights:', error);
+            throw new common_1.HttpException('Failed to retrieve onboarding insights', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+};
+exports.OnboardingController = OnboardingController;
+__decorate([
+    (0, common_1.Get)('status'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Retrieve get my onboarding status',
+        description: 'Retrieve get my onboarding status',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Retrieved successfully',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], OnboardingController.prototype, "getMyOnboardingStatus", null);
+__decorate([
+    (0, common_1.Get)('status/:userId'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Retrieve get user onboarding status',
+        description: 'Retrieve get user onboarding status',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Retrieved successfully',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
+    (0, admin_only_decorator_1.AdminOnly)(),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], OnboardingController.prototype, "getUserOnboardingStatus", null);
+__decorate([
+    (0, common_1.Post)('complete-step/:stepName'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Create complete step',
+        description: 'Create complete step',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Created successfully',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(1, (0, common_1.Param)('stepName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], OnboardingController.prototype, "completeStep", null);
+__decorate([
+    (0, common_1.Get)('validate'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Retrieve validate onboarding',
+        description: 'Retrieve validate onboarding',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Retrieved successfully',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], OnboardingController.prototype, "validateOnboarding", null);
+__decorate([
+    (0, common_1.Get)('insights'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Retrieve get onboarding insights',
+        description: 'Retrieve get onboarding insights',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Retrieved successfully',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
+    (0, admin_only_decorator_1.AdminOnly)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], OnboardingController.prototype, "getOnboardingInsights", null);
+exports.OnboardingController = OnboardingController = OnboardingController_1 = __decorate([
+    (0, swagger_1.ApiTags)('onboarding'),
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.Controller)('onboarding'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof onboarding_service_1.OnboardingService !== "undefined" && onboarding_service_1.OnboardingService) === "function" ? _a : Object])
+], OnboardingController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL29uYm9hcmRpbmcvb25ib2FyZGluZy5jb250cm9sbGVyLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsMkNBU3dCO0FBQ3hCLDZEQUEyRTtBQUMzRSxrRUFBNkQ7QUFDN0Qsc0VBQWlFO0FBQ2pFLDRGQUE2RTtBQUM3RSxrRkFBb0U7QUFDcEUsNkNBUXlCO0FBTWxCLElBQU0sb0JBQW9CLDRCQUExQixNQUFNLG9CQUFvQjtJQUdGO0lBRlosTUFBTSxHQUFHLElBQUksZUFBTSxDQUFDLHNCQUFvQixDQUFDLElBQUksQ0FBQyxDQUFDO0lBRWhFLFlBQTZCLGlCQUFvQztRQUFwQyxzQkFBaUIsR0FBakIsaUJBQWlCLENBQW1CO0lBQUcsQ0FBQztJQWMvRCxBQUFOLEtBQUssQ0FBQyxxQkFBcUIsQ0FDUixNQUFjO1FBRS9CLElBQUksQ0FBQztZQUNILE9BQU8sTUFBTSxJQUFJLENBQUMsaUJBQWlCLENBQUMsbUJBQW1CLENBQUMsTUFBTSxDQUFDLENBQUM7UUFDbEUsQ0FBQztRQUFDLE9BQU8sS0FBSyxFQUFFLENBQUM7WUFDZixJQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssQ0FDZiw0Q0FBNEMsTUFBTSxHQUFHLEVBQ3JELEtBQUssQ0FDTixDQUFDO1lBQ0YsTUFBTSxJQUFJLHNCQUFhLENBQ3JCLHNDQUFzQyxFQUN0QyxtQkFBVSxDQUFDLHFCQUFxQixDQUNqQyxDQUFDO1FBQ0osQ0FBQztJQUNILENBQUM7SUFnQkssQUFBTixLQUFLLENBQUMsdUJBQXVCLENBQ1YsTUFBYztRQUUvQixJQUFJLENBQUM7WUFDSCxPQUFPLE1BQU0sSUFBSSxDQUFDLGlCQUFpQixDQUFDLG1CQUFtQixDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQ2xFLENBQUM7UUFBQyxPQUFPLEtBQUssRUFBRSxDQUFDO1lBQ2YsSUFBSSxDQUFDLE1BQU0sQ0FBQyxLQUFLLENBQ2YsNENBQTRDLE1BQU0sR0FBRyxFQUNyRCxLQUFLLENBQ04sQ0FBQztZQUNGLElBQUksS0FBSyxZQUFZLHNCQUFhLEVBQUUsQ0FBQztnQkFDbkMsTUFBTSxLQUFLLENBQUM7WUFDZCxDQUFDO1lBQ0QsTUFBTSxJQUFJLHNCQUFhLENBQ3JCLHNDQUFzQyxFQUN0QyxtQkFBVSxDQUFDLHFCQUFxQixDQUNqQyxDQUFDO1FBQ0osQ0FBQztJQUNILENBQUM7SUFjSyxBQUFOLEtBQUssQ0FBQyxZQUFZLENBQ0MsTUFBYyxFQUNaLFFBQWdCO1FBRW5DLElBQUksQ0FBQztZQUNILE9BQU8sTUFBTSxJQUFJLENBQUMsaUJBQWlCLENBQUMsaUJBQWlCLENBQUMsTUFBTSxFQUFFLFFBQVEsQ0FBQyxDQUFDO1FBQzFFLENBQUM7UUFBQyxPQUFPLEtBQUssRUFBRSxDQUFDO1lBQ2YsSUFBSSxDQUFDLE1BQU0sQ0FBQyxLQUFLLENBQ2YsMkJBQTJCLFFBQVEsYUFBYSxNQUFNLEdBQUcsRUFDekQsS0FBSyxDQUNOLENBQUM7WUFDRixNQUFNLElBQUksc0JBQWEsQ0FDckIsb0NBQW9DLEVBQ3BDLG1CQUFVLENBQUMscUJBQXFCLENBQ2pDLENBQUM7UUFDSixDQUFDO0lBQ0gsQ0FBQztJQWNLLEFBQU4sS0FBSyxDQUFDLGtCQUFrQixDQUFrQixNQUFjO1FBQ3RELElBQUksQ0FBQztZQUNILE9BQU8sTUFBTSxJQUFJLENBQUMsaUJBQWlCLENBQUMsOEJBQThCLENBQ2hFLE1BQU0sQ0FDUCxDQUFDO1FBQ0osQ0FBQztRQUFDLE9BQU8sS0FBSyxFQUFFLENBQUM7WUFDZixJQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssQ0FDZiwwQ0FBMEMsTUFBTSxHQUFHLEVBQ25ELEtBQUssQ0FDTixDQUFDO1lBQ0YsTUFBTSxJQUFJLHNCQUFhLENBQ3JCLDRDQUE0QyxFQUM1QyxtQkFBVSxDQUFDLHFCQUFxQixDQUNqQyxDQUFDO1FBQ0osQ0FBQztJQUNILENBQUM7SUFnQkssQUFBTixLQUFLLENBQUMscUJBQXFCO1FBQ3pCLElBQUksQ0FBQztZQUNILE9BQU8sTUFBTSxJQUFJLENBQUMsaUJBQWlCLENBQUMscUJBQXFCLEVBQUUsQ0FBQztRQUM5RCxDQUFDO1FBQUMsT0FBTyxLQUFLLEVBQUUsQ0FBQztZQUNmLElBQUksQ0FBQyxNQUFNLENBQUMsS0FBSyxDQUFDLG9DQUFvQyxFQUFFLEtBQUssQ0FBQyxDQUFDO1lBQy9ELE1BQU0sSUFBSSxzQkFBYSxDQUNyQix3Q0FBd0MsRUFDeEMsbUJBQVUsQ0FBQyxxQkFBcUIsQ0FDakMsQ0FBQztRQUNKLENBQUM7SUFDSCxDQUFDO0NBQ0YsQ0FBQTtBQXhKWSxvREFBb0I7QUFpQnpCO0lBWkwsSUFBQSxZQUFHLEVBQUMsUUFBUSxDQUFDO0lBQ2IsSUFBQSxzQkFBWSxFQUFDO1FBQ1osT0FBTyxFQUFFLG1DQUFtQztRQUU1QyxXQUFXLEVBQUUsbUNBQW1DO0tBQ2pELENBQUM7SUFDRCxJQUFBLHFCQUFXLEVBQUM7UUFDWCxNQUFNLEVBQUUsR0FBRztRQUVYLFdBQVcsRUFBRSx3QkFBd0I7S0FDdEMsQ0FBQztJQUNELElBQUEscUJBQVcsRUFBQyxFQUFFLE1BQU0sRUFBRSxHQUFHLEVBQUUsV0FBVyxFQUFFLGNBQWMsRUFBRSxDQUFDO0lBRXZELFdBQUEsSUFBQSx5Q0FBYSxHQUFFLENBQUE7Ozt3REFDZixPQUFPLG9CQUFQLE9BQU87aUVBYVQ7QUFnQks7SUFkTCxJQUFBLFlBQUcsRUFBQyxnQkFBZ0IsQ0FBQztJQUNyQixJQUFBLHNCQUFZLEVBQUM7UUFDWixPQUFPLEVBQUUscUNBQXFDO1FBRTlDLFdBQVcsRUFBRSxxQ0FBcUM7S0FDbkQsQ0FBQztJQUNELElBQUEscUJBQVcsRUFBQztRQUNYLE1BQU0sRUFBRSxHQUFHO1FBRVgsV0FBVyxFQUFFLHdCQUF3QjtLQUN0QyxDQUFDO0lBQ0QsSUFBQSxxQkFBVyxFQUFDLEVBQUUsTUFBTSxFQUFFLEdBQUcsRUFBRSxXQUFXLEVBQUUsY0FBYyxFQUFFLENBQUM7SUFDekQsSUFBQSxrQkFBUyxFQUFDLGlDQUFjLENBQUM7SUFDekIsSUFBQSxnQ0FBUyxHQUFFO0lBRVQsV0FBQSxJQUFBLGNBQUssRUFBQyxRQUFRLENBQUMsQ0FBQTs7O3dEQUNmLE9BQU8sb0JBQVAsT0FBTzttRUFnQlQ7QUFjSztJQVpMLElBQUEsYUFBSSxFQUFDLHlCQUF5QixDQUFDO0lBQy9CLElBQUEsc0JBQVksRUFBQztRQUNaLE9BQU8sRUFBRSxzQkFBc0I7UUFFL0IsV0FBVyxFQUFFLHNCQUFzQjtLQUNwQyxDQUFDO0lBQ0QsSUFBQSxxQkFBVyxFQUFDO1FBQ1gsTUFBTSxFQUFFLEdBQUc7UUFFWCxXQUFXLEVBQUUsc0JBQXNCO0tBQ3BDLENBQUM7SUFDRCxJQUFBLHFCQUFXLEVBQUMsRUFBRSxNQUFNLEVBQUUsR0FBRyxFQUFFLFdBQVcsRUFBRSxjQUFjLEVBQUUsQ0FBQztJQUV2RCxXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBO0lBQ2YsV0FBQSxJQUFBLGNBQUssRUFBQyxVQUFVLENBQUMsQ0FBQTs7O3dEQUNqQixPQUFPLG9CQUFQLE9BQU87d0RBYVQ7QUFjSztJQVpMLElBQUEsWUFBRyxFQUFDLFVBQVUsQ0FBQztJQUNmLElBQUEsc0JBQVksRUFBQztRQUNaLE9BQU8sRUFBRSw4QkFBOEI7UUFFdkMsV0FBVyxFQUFFLDhCQUE4QjtLQUM1QyxDQUFDO0lBQ0QsSUFBQSxxQkFBVyxFQUFDO1FBQ1gsTUFBTSxFQUFFLEdBQUc7UUFFWCxXQUFXLEVBQUUsd0JBQXdCO0tBQ3RDLENBQUM7SUFDRCxJQUFBLHFCQUFXLEVBQUMsRUFBRSxNQUFNLEVBQUUsR0FBRyxFQUFFLFdBQVcsRUFBRSxjQUFjLEVBQUUsQ0FBQztJQUNoQyxXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7OzhEQWV4QztBQWdCSztJQWRMLElBQUEsWUFBRyxFQUFDLFVBQVUsQ0FBQztJQUNmLElBQUEsc0JBQVksRUFBQztRQUNaLE9BQU8sRUFBRSxrQ0FBa0M7UUFFM0MsV0FBVyxFQUFFLGtDQUFrQztLQUNoRCxDQUFDO0lBQ0QsSUFBQSxxQkFBVyxFQUFDO1FBQ1gsTUFBTSxFQUFFLEdBQUc7UUFFWCxXQUFXLEVBQUUsd0JBQXdCO0tBQ3RDLENBQUM7SUFDRCxJQUFBLHFCQUFXLEVBQUMsRUFBRSxNQUFNLEVBQUUsR0FBRyxFQUFFLFdBQVcsRUFBRSxjQUFjLEVBQUUsQ0FBQztJQUN6RCxJQUFBLGtCQUFTLEVBQUMsaUNBQWMsQ0FBQztJQUN6QixJQUFBLGdDQUFTLEdBQUU7Ozs7aUVBV1g7K0JBdkpVLG9CQUFvQjtJQUpoQyxJQUFBLGlCQUFPLEVBQUMsWUFBWSxDQUFDO0lBQ3JCLElBQUEsdUJBQWEsRUFBQyxVQUFVLENBQUM7SUFDekIsSUFBQSxtQkFBVSxFQUFDLFlBQVksQ0FBQztJQUN4QixJQUFBLGtCQUFTLEVBQUMsNkJBQVksQ0FBQzt5REFJMEIsc0NBQWlCLG9CQUFqQixzQ0FBaUI7R0FIdEQsb0JBQW9CLENBd0poQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvb25ib2FyZGluZy9vbmJvYXJkaW5nLmNvbnRyb2xsZXIudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHtcbiAgQ29udHJvbGxlcixcbiAgR2V0LFxuICBQb3N0LFxuICBQYXJhbSxcbiAgVXNlR3VhcmRzLFxuICBIdHRwRXhjZXB0aW9uLFxuICBIdHRwU3RhdHVzLFxuICBMb2dnZXIsXG59IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IE9uYm9hcmRpbmdTZXJ2aWNlLCBPbmJvYXJkaW5nU3RhdHVzIH0gZnJvbSAnLi9vbmJvYXJkaW5nLnNlcnZpY2UnO1xuaW1wb3J0IHsgSnd0QXV0aEd1YXJkIH0gZnJvbSAnLi4vYXV0aC9ndWFyZHMvand0LWF1dGguZ3VhcmQnO1xuaW1wb3J0IHsgQWRtaW5BdXRoR3VhcmQgfSBmcm9tICcuLi9hdXRoL2d1YXJkcy9hZG1pbi1hdXRoLmd1YXJkJztcbmltcG9ydCB7IEN1cnJlbnRVc2VySWQgfSBmcm9tICcuLi9hdXRoL2RlY29yYXRvcnMvY3VycmVudC11c2VyLWlkLmRlY29yYXRvcic7XG5pbXBvcnQgeyBBZG1pbk9ubHkgfSBmcm9tICcuLi9hdXRoL2RlY29yYXRvcnMvYWRtaW4tb25seS5kZWNvcmF0b3InO1xuaW1wb3J0IHtcbiAgQXBpVGFncyxcbiAgQXBpT3BlcmF0aW9uLFxuICBBcGlSZXNwb25zZSxcbiAgQXBpQm9keSxcbiAgQXBpQmVhcmVyQXV0aCxcbiAgQXBpUGFyYW0sXG4gIEFwaVF1ZXJ5LFxufSBmcm9tICdAbmVzdGpzL3N3YWdnZXInO1xuXG5AQXBpVGFncygnb25ib2FyZGluZycpXG5AQXBpQmVhcmVyQXV0aCgnSldULWF1dGgnKVxuQENvbnRyb2xsZXIoJ29uYm9hcmRpbmcnKVxuQFVzZUd1YXJkcyhKd3RBdXRoR3VhcmQpXG5leHBvcnQgY2xhc3MgT25ib2FyZGluZ0NvbnRyb2xsZXIge1xuICBwcml2YXRlIHJlYWRvbmx5IGxvZ2dlciA9IG5ldyBMb2dnZXIoT25ib2FyZGluZ0NvbnRyb2xsZXIubmFtZSk7XG5cbiAgY29uc3RydWN0b3IocHJpdmF0ZSByZWFkb25seSBvbmJvYXJkaW5nU2VydmljZTogT25ib2FyZGluZ1NlcnZpY2UpIHt9XG5cbiAgQEdldCgnc3RhdHVzJylcbiAgQEFwaU9wZXJhdGlvbih7XG4gICAgc3VtbWFyeTogJ1JldHJpZXZlIGdldCBteSBvbmJvYXJkaW5nIHN0YXR1cycsXG5cbiAgICBkZXNjcmlwdGlvbjogJ1JldHJpZXZlIGdldCBteSBvbmJvYXJkaW5nIHN0YXR1cycsXG4gIH0pXG4gIEBBcGlSZXNwb25zZSh7XG4gICAgc3RhdHVzOiAyMDAsXG5cbiAgICBkZXNjcmlwdGlvbjogJ1JldHJpZXZlZCBzdWNjZXNzZnVsbHknLFxuICB9KVxuICBAQXBpUmVzcG9uc2UoeyBzdGF0dXM6IDQwMSwgZGVzY3JpcHRpb246ICdVbmF1dGhvcml6ZWQnIH0pXG4gIGFzeW5jIGdldE15T25ib2FyZGluZ1N0YXR1cyhcbiAgICBAQ3VycmVudFVzZXJJZCgpIHVzZXJJZDogc3RyaW5nLFxuICApOiBQcm9taXNlPE9uYm9hcmRpbmdTdGF0dXM+IHtcbiAgICB0cnkge1xuICAgICAgcmV0dXJuIGF3YWl0IHRoaXMub25ib2FyZGluZ1NlcnZpY2UuZ2V0T25ib2FyZGluZ1N0YXR1cyh1c2VySWQpO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICB0aGlzLmxvZ2dlci5lcnJvcihcbiAgICAgICAgYEZhaWxlZCB0byBnZXQgb25ib2FyZGluZyBzdGF0dXMgZm9yIHVzZXIgJHt1c2VySWR9OmAsXG4gICAgICAgIGVycm9yLFxuICAgICAgKTtcbiAgICAgIHRocm93IG5ldyBIdHRwRXhjZXB0aW9uKFxuICAgICAgICAnRmFpbGVkIHRvIHJldHJpZXZlIG9uYm9hcmRpbmcgc3RhdHVzJyxcbiAgICAgICAgSHR0cFN0YXR1cy5JTlRFUk5BTF9TRVJWRVJfRVJST1IsXG4gICAgICApO1xuICAgIH1cbiAgfVxuXG4gIEBHZXQoJ3N0YXR1cy86dXNlcklkJylcbiAgQEFwaU9wZXJhdGlvbih7XG4gICAgc3VtbWFyeTogJ1JldHJpZXZlIGdldCB1c2VyIG9uYm9hcmRpbmcgc3RhdHVzJyxcblxuICAgIGRlc2NyaXB0aW9uOiAnUmV0cmlldmUgZ2V0IHVzZXIgb25ib2FyZGluZyBzdGF0dXMnLFxuICB9KVxuICBAQXBpUmVzcG9uc2Uoe1xuICAgIHN0YXR1czogMjAwLFxuXG4gICAgZGVzY3JpcHRpb246ICdSZXRyaWV2ZWQgc3VjY2Vzc2Z1bGx5JyxcbiAgfSlcbiAgQEFwaVJlc3BvbnNlKHsgc3RhdHVzOiA0MDEsIGRlc2NyaXB0aW9uOiAnVW5hdXRob3JpemVkJyB9KVxuICBAVXNlR3VhcmRzKEFkbWluQXV0aEd1YXJkKVxuICBAQWRtaW5Pbmx5KClcbiAgYXN5bmMgZ2V0VXNlck9uYm9hcmRpbmdTdGF0dXMoXG4gICAgQFBhcmFtKCd1c2VySWQnKSB1c2VySWQ6IHN0cmluZyxcbiAgKTogUHJvbWlzZTxPbmJvYXJkaW5nU3RhdHVzPiB7XG4gICAgdHJ5IHtcbiAgICAgIHJldHVybiBhd2FpdCB0aGlzLm9uYm9hcmRpbmdTZXJ2aWNlLmdldE9uYm9hcmRpbmdTdGF0dXModXNlcklkKTtcbiAgICB9IGNhdGNoIChlcnJvcikge1xuICAgICAgdGhpcy5sb2dnZXIuZXJyb3IoXG4gICAgICAgIGBGYWlsZWQgdG8gZ2V0IG9uYm9hcmRpbmcgc3RhdHVzIGZvciB1c2VyICR7dXNlcklkfTpgLFxuICAgICAgICBlcnJvcixcbiAgICAgICk7XG4gICAgICBpZiAoZXJyb3IgaW5zdGFuY2VvZiBIdHRwRXhjZXB0aW9uKSB7XG4gICAgICAgIHRocm93IGVycm9yO1xuICAgICAgfVxuICAgICAgdGhyb3cgbmV3IEh0dHBFeGNlcHRpb24oXG4gICAgICAgICdGYWlsZWQgdG8gcmV0cmlldmUgb25ib2FyZGluZyBzdGF0dXMnLFxuICAgICAgICBIdHRwU3RhdHVzLklOVEVSTkFMX1NFUlZFUl9FUlJPUixcbiAgICAgICk7XG4gICAgfVxuICB9XG5cbiAgQFBvc3QoJ2NvbXBsZXRlLXN0ZXAvOnN0ZXBOYW1lJylcbiAgQEFwaU9wZXJhdGlvbih7XG4gICAgc3VtbWFyeTogJ0NyZWF0ZSBjb21wbGV0ZSBzdGVwJyxcblxuICAgIGRlc2NyaXB0aW9uOiAnQ3JlYXRlIGNvbXBsZXRlIHN0ZXAnLFxuICB9KVxuICBAQXBpUmVzcG9uc2Uoe1xuICAgIHN0YXR1czogMjAxLFxuXG4gICAgZGVzY3JpcHRpb246ICdDcmVhdGVkIHN1Y2Nlc3NmdWxseScsXG4gIH0pXG4gIEBBcGlSZXNwb25zZSh7IHN0YXR1czogNDAxLCBkZXNjcmlwdGlvbjogJ1VuYXV0aG9yaXplZCcgfSlcbiAgYXN5bmMgY29tcGxldGVTdGVwKFxuICAgIEBDdXJyZW50VXNlcklkKCkgdXNlcklkOiBzdHJpbmcsXG4gICAgQFBhcmFtKCdzdGVwTmFtZScpIHN0ZXBOYW1lOiBzdHJpbmcsXG4gICk6IFByb21pc2U8T25ib2FyZGluZ1N0YXR1cz4ge1xuICAgIHRyeSB7XG4gICAgICByZXR1cm4gYXdhaXQgdGhpcy5vbmJvYXJkaW5nU2VydmljZS5tYXJrU3RlcENvbXBsZXRlZCh1c2VySWQsIHN0ZXBOYW1lKTtcbiAgICB9IGNhdGNoIChlcnJvcikge1xuICAgICAgdGhpcy5sb2dnZXIuZXJyb3IoXG4gICAgICAgIGBGYWlsZWQgdG8gY29tcGxldGUgc3RlcCAke3N0ZXBOYW1lfSBmb3IgdXNlciAke3VzZXJJZH06YCxcbiAgICAgICAgZXJyb3IsXG4gICAgICApO1xuICAgICAgdGhyb3cgbmV3IEh0dHBFeGNlcHRpb24oXG4gICAgICAgICdGYWlsZWQgdG8gY29tcGxldGUgb25ib2FyZGluZyBzdGVwJyxcbiAgICAgICAgSHR0cFN0YXR1cy5JTlRFUk5BTF9TRVJWRVJfRVJST1IsXG4gICAgICApO1xuICAgIH1cbiAgfVxuXG4gIEBHZXQoJ3ZhbGlkYXRlJylcbiAgQEFwaU9wZXJhdGlvbih7XG4gICAgc3VtbWFyeTogJ1JldHJpZXZlIHZhbGlkYXRlIG9uYm9hcmRpbmcnLFxuXG4gICAgZGVzY3JpcHRpb246ICdSZXRyaWV2ZSB2YWxpZGF0ZSBvbmJvYXJkaW5nJyxcbiAgfSlcbiAgQEFwaVJlc3BvbnNlKHtcbiAgICBzdGF0dXM6IDIwMCxcblxuICAgIGRlc2NyaXB0aW9uOiAnUmV0cmlldmVkIHN1Y2Nlc3NmdWxseScsXG4gIH0pXG4gIEBBcGlSZXNwb25zZSh7IHN0YXR1czogNDAxLCBkZXNjcmlwdGlvbjogJ1VuYXV0aG9yaXplZCcgfSlcbiAgYXN5bmMgdmFsaWRhdGVPbmJvYXJkaW5nKEBDdXJyZW50VXNlcklkKCkgdXNlcklkOiBzdHJpbmcpIHtcbiAgICB0cnkge1xuICAgICAgcmV0dXJuIGF3YWl0IHRoaXMub25ib2FyZGluZ1NlcnZpY2UudmFsaWRhdGVPbmJvYXJkaW5nQ29tcGxldGVuZXNzKFxuICAgICAgICB1c2VySWQsXG4gICAgICApO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7XG4gICAgICB0aGlzLmxvZ2dlci5lcnJvcihcbiAgICAgICAgYEZhaWxlZCB0byB2YWxpZGF0ZSBvbmJvYXJkaW5nIGZvciB1c2VyICR7dXNlcklkfTpgLFxuICAgICAgICBlcnJvcixcbiAgICAgICk7XG4gICAgICB0aHJvdyBuZXcgSHR0cEV4Y2VwdGlvbihcbiAgICAgICAgJ0ZhaWxlZCB0byB2YWxpZGF0ZSBvbmJvYXJkaW5nIGNvbXBsZXRlbmVzcycsXG4gICAgICAgIEh0dHBTdGF0dXMuSU5URVJOQUxfU0VSVkVSX0VSUk9SLFxuICAgICAgKTtcbiAgICB9XG4gIH1cblxuICBAR2V0KCdpbnNpZ2h0cycpXG4gIEBBcGlPcGVyYXRpb24oe1xuICAgIHN1bW1hcnk6ICdSZXRyaWV2ZSBnZXQgb25ib2FyZGluZyBpbnNpZ2h0cycsXG5cbiAgICBkZXNjcmlwdGlvbjogJ1JldHJpZXZlIGdldCBvbmJvYXJkaW5nIGluc2lnaHRzJyxcbiAgfSlcbiAgQEFwaVJlc3BvbnNlKHtcbiAgICBzdGF0dXM6IDIwMCxcblxuICAgIGRlc2NyaXB0aW9uOiAnUmV0cmlldmVkIHN1Y2Nlc3NmdWxseScsXG4gIH0pXG4gIEBBcGlSZXNwb25zZSh7IHN0YXR1czogNDAxLCBkZXNjcmlwdGlvbjogJ1VuYXV0aG9yaXplZCcgfSlcbiAgQFVzZUd1YXJkcyhBZG1pbkF1dGhHdWFyZClcbiAgQEFkbWluT25seSgpXG4gIGFzeW5jIGdldE9uYm9hcmRpbmdJbnNpZ2h0cygpIHtcbiAgICB0cnkge1xuICAgICAgcmV0dXJuIGF3YWl0IHRoaXMub25ib2FyZGluZ1NlcnZpY2UuZ2V0T25ib2FyZGluZ0luc2lnaHRzKCk7XG4gICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgIHRoaXMubG9nZ2VyLmVycm9yKCdGYWlsZWQgdG8gZ2V0IG9uYm9hcmRpbmcgaW5zaWdodHM6JywgZXJyb3IpO1xuICAgICAgdGhyb3cgbmV3IEh0dHBFeGNlcHRpb24oXG4gICAgICAgICdGYWlsZWQgdG8gcmV0cmlldmUgb25ib2FyZGluZyBpbnNpZ2h0cycsXG4gICAgICAgIEh0dHBTdGF0dXMuSU5URVJOQUxfU0VSVkVSX0VSUk9SLFxuICAgICAgKTtcbiAgICB9XG4gIH1cbn1cbiJdLCJ2ZXJzaW9uIjozfQ==

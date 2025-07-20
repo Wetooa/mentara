@@ -13,6 +13,9 @@ import {
 import { PreAssessment } from '@prisma/client';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { AiServiceClient } from './services/ai-service.client';
+import { ClinicalInsightsService } from './analysis/clinical-insights.service';
+import { TherapeuticRecommendationsService } from './analysis/therapeutic-recommendations.service';
+import { QuestionnaireScores } from './pre-assessment.utils';
 
 @Injectable()
 export class PreAssessmentService {
@@ -21,6 +24,8 @@ export class PreAssessmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiServiceClient: AiServiceClient,
+    private readonly clinicalInsightsService: ClinicalInsightsService,
+    private readonly therapeuticRecommendationsService: TherapeuticRecommendationsService,
   ) {}
 
   private async getAiEstimate(
@@ -210,14 +215,11 @@ export class PreAssessmentService {
       }
 
       // Comprehensive input validation
-      this.validateQuestionnaires(data.questionnaires as string[]);
-      this.validateAnswersStructure(data.answers as number[][]);
+      this.validateQuestionnaires(data.questionnaires);
+      this.validateAnswersStructure(data.answers);
 
       // Validate questionnaires and answers alignment
-      if (
-        (data.questionnaires as string[]).length !==
-        (data.answers as number[][]).length
-      ) {
+      if (data.questionnaires.length !== data.answers.length) {
         throw new BadRequestException(
           'Number of questionnaires must match number of answer arrays',
         );
@@ -234,8 +236,8 @@ export class PreAssessmentService {
       if (!data.scores || !data.severityLevels) {
         this.logger.debug('Calculating scores and severity levels');
         const calculatedScores = calculateAllScores(
-          data.questionnaires as string[],
-          data.answers as number[][],
+          data.questionnaires,
+          data.answers,
         );
         scores = Object.fromEntries(
           Object.entries(calculatedScores).map(([key, value]) => [
@@ -249,7 +251,7 @@ export class PreAssessmentService {
       // Safely flatten answers and attempt AI prediction
       let aiEstimate: Record<string, boolean> = {};
       try {
-        const flatAnswers = this.flattenAnswers(data.answers as number[][]);
+        const flatAnswers = this.flattenAnswers(data.answers);
 
         if (flatAnswers.length === 201) {
           this.logger.debug('Attempting AI prediction with validated input');
@@ -275,20 +277,59 @@ export class PreAssessmentService {
         // Continue without AI estimate - don't fail the entire assessment
       }
 
-      // Create pre-assessment with validated data
+      // Create pre-assessment with validated data (all data stored in answers JSON field)
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          questionnaires: data.questionnaires as string[],
-          answers: data.answers as number[][],
-          answerMatrix: data.answerMatrix as number[][],
-          scores,
-          severityLevels,
-          aiEstimate,
+          answers: {
+            questionnaires: data.questionnaires,
+            rawAnswers: data.answers,
+            answerMatrix: data.answerMatrix,
+            scores,
+            severityLevels,
+            aiEstimate,
+          },
         },
       });
 
-      this.logger.log(`Pre-assessment created successfully for user ${userId}`);
+      this.logger.log(`Pre-assessment completed for user ${userId}`);
+
+      // Generate comprehensive clinical analysis in background
+      // This provides detailed insights for therapist matching and treatment planning
+      try {
+        // Convert scores to QuestionnaireScores format for analysis
+        const questionnaireScores: QuestionnaireScores = {};
+        const severityLevelsForAnalysis = severityLevels;
+        
+        data.questionnaires.forEach(questionnaire => {
+          if (scores[questionnaire] !== undefined) {
+            questionnaireScores[questionnaire] = {
+              score: scores[questionnaire],
+              severity: severityLevelsForAnalysis[questionnaire] || 'Unknown'
+            };
+          }
+        });
+
+        const analysis = await this.generateClinicalAnalysis(
+          preAssessment,
+          data.questionnaires,
+          questionnaireScores,
+        );
+
+        this.logger.log(
+          `Clinical analysis generated: ${analysis.clinicalProfile.primaryConditions.length} primary conditions, ` +
+            `risk level: ${analysis.clinicalProfile.overallRiskLevel}`,
+        );
+      } catch (analysisError) {
+        this.logger.warn(
+          'Advanced clinical analysis failed but core assessment succeeded:',
+          analysisError instanceof Error
+            ? analysisError.message
+            : analysisError,
+        );
+        // Don't fail the entire process - basic scoring is still available
+      }
+
       return preAssessment;
     } catch (error) {
       if (
@@ -379,13 +420,26 @@ export class PreAssessmentService {
         throw new NotFoundException('Client not found');
       }
 
+      // Get existing pre-assessment to preserve current data
+      const existingAssessment = await this.prisma.preAssessment.findUnique({
+        where: { clientId: userId },
+      });
+      
+      if (!existingAssessment) {
+        throw new NotFoundException('Pre-assessment not found');
+      }
+
+      // Extract current data from answers JSON field
+      const currentAnswers = existingAssessment.answers as any || {};
+      
       let scores: Record<string, number>;
       let severityLevels: Record<string, string>;
+      let aiEstimate: Record<string, boolean> = currentAnswers.aiEstimate || {};
 
       if (data.scores && this.isValidScores(data.scores)) {
         scores = data.scores;
       } else {
-        scores = {};
+        scores = currentAnswers.scores || {};
       }
 
       if (
@@ -394,14 +448,18 @@ export class PreAssessmentService {
       ) {
         severityLevels = data.severityLevels;
       } else {
-        severityLevels = {};
+        severityLevels = currentAnswers.severityLevels || {};
       }
 
+      // Recalculate scores if new questionnaires and answers provided
       if (
         data.questionnaires &&
         data.answers &&
         (!data.scores || !data.severityLevels)
       ) {
+        this.validateQuestionnaires(data.questionnaires);
+        this.validateAnswersStructure(data.answers);
+        
         const calculatedScores = calculateAllScores(
           data.questionnaires,
           data.answers,
@@ -413,22 +471,35 @@ export class PreAssessmentService {
           ]),
         );
         severityLevels = generateSeverityLevels(calculatedScores);
+        
+        // Attempt to get new AI estimate if answers changed
+        try {
+          const flatAnswers = this.flattenAnswers(data.answers);
+          if (flatAnswers.length === 201) {
+            const aiResult = await this.getAiEstimate(flatAnswers);
+            if (aiResult) {
+              aiEstimate = aiResult;
+            }
+          }
+        } catch (aiError) {
+          this.logger.warn('AI prediction failed during update:', aiError);
+        }
       }
 
+      // Update pre-assessment with new data structure
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          questionnaires: data.questionnaires as string[],
-          answers: data.answers as number[][],
-          answerMatrix: data.answerMatrix as number[][],
-          scores,
-          severityLevels,
+          answers: {
+            questionnaires: data.questionnaires || currentAnswers.questionnaires,
+            rawAnswers: data.answers || currentAnswers.rawAnswers,
+            answerMatrix: data.answerMatrix || currentAnswers.answerMatrix,
+            scores,
+            severityLevels,
+            aiEstimate,
+          },
         },
       });
-
-      if (!preAssessment) {
-        throw new NotFoundException('Pre-assessment not found');
-      }
 
       return preAssessment;
     } catch (error: unknown) {
@@ -444,6 +515,144 @@ export class PreAssessmentService {
       return null;
     } catch (error: unknown) {
       this.handleError(error, 'Error deleting pre-assessment');
+    }
+  }
+
+  /**
+   * Generate comprehensive clinical analysis from pre-assessment data
+   * This method orchestrates the clinical insights and therapeutic recommendations
+   */
+  async generateClinicalAnalysis(
+    preAssessment: PreAssessment,
+    questionnaires: string[],
+    scores: QuestionnaireScores,
+  ) {
+    try {
+      this.logger.log('Generating comprehensive clinical analysis');
+
+      // Generate clinical profile with insights
+      const clinicalProfile =
+        await this.clinicalInsightsService.generateClinicalProfile(
+          preAssessment,
+          questionnaires,
+          scores,
+        );
+
+      // Generate personalized treatment plan
+      const treatmentPlan =
+        await this.therapeuticRecommendationsService.generatePersonalizedTreatmentPlan(
+          clinicalProfile,
+        );
+
+      // Extract risk assessment
+      const riskAssessment = {
+        overallRisk: clinicalProfile.overallRiskLevel,
+        riskFactors: clinicalProfile.riskFactors,
+        immediateInterventionNeeded:
+          clinicalProfile.overallRiskLevel === 'critical',
+        crisisRisk: clinicalProfile.riskFactors.some(
+          (rf) => rf.type === 'suicide' && rf.level === 'critical',
+        ),
+      };
+
+      return {
+        clinicalProfile,
+        treatmentPlan,
+        riskAssessment,
+        analysisTimestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      this.logger.error('Error generating clinical analysis:', error);
+      throw new InternalServerErrorException(
+        'Failed to generate clinical analysis',
+      );
+    }
+  }
+
+  /**
+   * Get comprehensive clinical analysis for a user
+   * Returns cached analysis if available, otherwise generates new one
+   */
+  async getComprehensiveClinicalAnalysis(userId: string) {
+    try {
+      // Get user's pre-assessment
+      const preAssessment = await this.getPreAssessmentByUserId(userId);
+
+      if (!preAssessment) {
+        throw new NotFoundException('Pre-assessment not found for user');
+      }
+
+      // Extract data from the answers JSON field
+      const answers = preAssessment.answers as any;
+      const questionnaires = answers?.questionnaires as string[];
+      const scores = answers?.scores as Record<string, number>;
+      const severityLevels = answers?.severityLevels as Record<
+        string,
+        string
+      >;
+
+      if (!questionnaires || !scores || !severityLevels) {
+        throw new BadRequestException('Invalid pre-assessment data structure');
+      }
+
+      // Convert scores to QuestionnaireScores format
+      const questionnaireScores: QuestionnaireScores = {};
+
+      questionnaires.forEach((questionnaire) => {
+        if (scores[questionnaire] !== undefined) {
+          questionnaireScores[questionnaire] = {
+            score: scores[questionnaire],
+            severity: severityLevels[questionnaire] || 'Unknown',
+          };
+        }
+      });
+
+      // Generate comprehensive analysis
+      return await this.generateClinicalAnalysis(
+        preAssessment,
+        questionnaires,
+        questionnaireScores,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error getting clinical analysis for user ${userId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Get crisis assessment for a user
+   * Returns immediate risk factors and intervention needs
+   */
+  async getCrisisAssessment(userId: string) {
+    try {
+      const analysis = await this.getComprehensiveClinicalAnalysis(userId);
+
+      return {
+        overallRisk: analysis.riskAssessment.overallRisk,
+        immediateInterventionNeeded:
+          analysis.riskAssessment.immediateInterventionNeeded,
+        crisisRisk: analysis.riskAssessment.crisisRisk,
+        riskFactors: analysis.riskAssessment.riskFactors,
+        primaryConcerns: analysis.clinicalProfile.primaryConditions.map(
+          (pc) => ({
+            condition: pc.condition,
+            riskLevel: pc.riskLevel,
+            priority: pc.priority,
+          }),
+        ),
+        emergencyContacts:
+          analysis.treatmentPlan.contingencyPlan.crisisContacts,
+        safetyPlan: analysis.treatmentPlan.contingencyPlan.emergencySteps,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error getting crisis assessment for user ${userId}:`,
+        error,
+      );
+      throw error;
     }
   }
 }

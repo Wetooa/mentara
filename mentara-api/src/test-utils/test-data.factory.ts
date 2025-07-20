@@ -155,6 +155,7 @@ export class TestDataFactory {
       data: {
         userId: user.id,
         ...therapistData,
+        status: 'APPROVED' as const,
       },
       include: { user: true },
     });
@@ -446,7 +447,6 @@ export class TestDataFactory {
         data: {
           userId: user.id,
           communityId: community.id,
-          role: 'member',
         },
       });
     }

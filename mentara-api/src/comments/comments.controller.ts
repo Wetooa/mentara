@@ -9,17 +9,31 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  CommunityAccessGuard,
+  RequireRoomAccess,
+} from 'src/auth/guards/community-access.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import {
+  SupabaseStorageService,
+  FileUploadResult,
+} from 'src/common/services/supabase-storage.service';
 import { CommentsService } from './comments.service';
 import { Comment } from '@prisma/client';
-import { CommentCreateInputDto, CommentUpdateInputDto } from 'schema/comment';
+import { CommentCreateInputDto, CommentUpdateInputDto } from 'mentara-commons';
 
 @Controller('comments')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard, CommunityAccessGuard)
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   @Get()
   async findAll(@CurrentUserId() id: string): Promise<Comment[]> {
@@ -34,6 +48,7 @@ export class CommentsController {
   }
 
   @Get(':id')
+  @RequireRoomAccess()
   async findOne(@Param('id') id: string): Promise<Comment> {
     try {
       const comment = await this.commentsService.findOne(id);
@@ -50,6 +65,7 @@ export class CommentsController {
   }
 
   @Get('post/:postId')
+  @RequireRoomAccess()
   async findByPostId(
     @Param('postId') postId: string,
     @CurrentUserId() userId: string,
@@ -65,12 +81,42 @@ export class CommentsController {
   }
 
   @Post()
+  @RequireRoomAccess()
+  @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   async create(
     @CurrentUserId() userId: string,
     @Body() commentData: CommentCreateInputDto,
+    @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ): Promise<Comment> {
     try {
-      return await this.commentsService.create(commentData, userId);
+      // Validate and upload files if provided
+      const fileResults: FileUploadResult[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const validation = this.supabaseStorageService.validateFile(file);
+          if (!validation.isValid) {
+            throw new HttpException(
+              `File validation failed: ${validation.error}`,
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+        }
+
+        // Upload files to Supabase
+        const uploadResults = await this.supabaseStorageService.uploadFiles(
+          files,
+          SupabaseStorageService.getSupportedBuckets().POST_ATTACHMENTS,
+        );
+        fileResults.push(...uploadResults);
+      }
+
+      return await this.commentsService.create(
+        commentData,
+        userId,
+        fileResults.map((f) => f.url),
+        fileResults.map((f) => f.filename),
+        files.map((f) => f.size),
+      );
     } catch (error) {
       throw new HttpException(
         `Failed to create comment: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -80,6 +126,7 @@ export class CommentsController {
   }
 
   @Put(':id')
+  @RequireRoomAccess()
   async update(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
@@ -96,6 +143,7 @@ export class CommentsController {
   }
 
   @Delete(':id')
+  @RequireRoomAccess()
   async remove(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
@@ -112,6 +160,7 @@ export class CommentsController {
 
   // Heart functionality
   @Post(':id/heart')
+  @RequireRoomAccess()
   async heartComment(
     @CurrentUserId() userId: string,
     @Param('id') commentId: string,
@@ -140,6 +189,29 @@ export class CommentsController {
     } catch (error) {
       throw new HttpException(
         `Failed to check comment heart status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post(':id/report')
+  @RequireRoomAccess()
+  async reportComment(
+    @CurrentUserId() userId: string,
+    @Param('id') commentId: string,
+    @Body() reportData: { reason: string; content?: string },
+  ): Promise<{ success: boolean; reportId: string }> {
+    try {
+      const reportId = await this.commentsService.reportComment(
+        commentId,
+        userId,
+        reportData.reason,
+        reportData.content,
+      );
+      return { success: true, reportId };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to report comment: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

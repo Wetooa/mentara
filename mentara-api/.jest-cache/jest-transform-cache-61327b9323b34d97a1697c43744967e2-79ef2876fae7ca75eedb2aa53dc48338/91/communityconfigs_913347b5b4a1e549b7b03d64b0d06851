@@ -1,0 +1,593 @@
+c150c8450dfc9546e484ddd72b494e96
+"use strict";
+
+/**
+ * Community Configuration
+ *
+ * This file contains configurations for pre-generated communities,
+ * particularly illness-specific communities that are created during
+ * database seeding and application setup.
+ */
+/* istanbul ignore next */
+function cov_1d3136ngxt() {
+  var path = "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/config/community-configs.ts";
+  var hash = "3612bafb2bd6b20742ca0d3528b47fe6310f6876";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/config/community-configs.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 9,
+          column: 0
+        },
+        end: {
+          line: 9,
+          column: 62
+        }
+      },
+      "1": {
+        start: {
+          line: 10,
+          column: 0
+        },
+        end: {
+          line: 10,
+          column: 59
+        }
+      },
+      "2": {
+        start: {
+          line: 11,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 48
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 0
+        },
+        end: {
+          line: 12,
+          column: 52
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 0
+        },
+        end: {
+          line: 13,
+          column: 58
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 0
+        },
+        end: {
+          line: 14,
+          column: 48
+        }
+      },
+      "6": {
+        start: {
+          line: 20,
+          column: 0
+        },
+        end: {
+          line: 105,
+          column: 2
+        }
+      },
+      "7": {
+        start: {
+          line: 107,
+          column: 0
+        },
+        end: {
+          line: 107,
+          column: 50
+        }
+      },
+      "8": {
+        start: {
+          line: 114,
+          column: 4
+        },
+        end: {
+          line: 114,
+          column: 84
+        }
+      },
+      "9": {
+        start: {
+          line: 114,
+          column: 59
+        },
+        end: {
+          line: 114,
+          column: 82
+        }
+      },
+      "10": {
+        start: {
+          line: 121,
+          column: 4
+        },
+        end: {
+          line: 121,
+          column: 74
+        }
+      },
+      "11": {
+        start: {
+          line: 121,
+          column: 58
+        },
+        end: {
+          line: 121,
+          column: 72
+        }
+      },
+      "12": {
+        start: {
+          line: 129,
+          column: 4
+        },
+        end: {
+          line: 129,
+          column: 92
+        }
+      },
+      "13": {
+        start: {
+          line: 129,
+          column: 61
+        },
+        end: {
+          line: 129,
+          column: 90
+        }
+      },
+      "14": {
+        start: {
+          line: 136,
+          column: 4
+        },
+        end: {
+          line: 138,
+          column: 6
+        }
+      },
+      "15": {
+        start: {
+          line: 137,
+          column: 66
+        },
+        end: {
+          line: 137,
+          column: 83
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "getCommunityBySlug",
+        decl: {
+          start: {
+            line: 113,
+            column: 9
+          },
+          end: {
+            line: 113,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 113,
+            column: 34
+          },
+          end: {
+            line: 115,
+            column: 1
+          }
+        },
+        line: 113
+      },
+      "1": {
+        name: "(anonymous_1)",
+        decl: {
+          start: {
+            line: 114,
+            column: 44
+          },
+          end: {
+            line: 114,
+            column: 45
+          }
+        },
+        loc: {
+          start: {
+            line: 114,
+            column: 59
+          },
+          end: {
+            line: 114,
+            column: 82
+          }
+        },
+        line: 114
+      },
+      "2": {
+        name: "getAllCommunityNames",
+        decl: {
+          start: {
+            line: 120,
+            column: 9
+          },
+          end: {
+            line: 120,
+            column: 29
+          }
+        },
+        loc: {
+          start: {
+            line: 120,
+            column: 32
+          },
+          end: {
+            line: 122,
+            column: 1
+          }
+        },
+        line: 120
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 121,
+            column: 43
+          },
+          end: {
+            line: 121,
+            column: 44
+          }
+        },
+        loc: {
+          start: {
+            line: 121,
+            column: 58
+          },
+          end: {
+            line: 121,
+            column: 72
+          }
+        },
+        line: 121
+      },
+      "4": {
+        name: "getCommunitiesByIllness",
+        decl: {
+          start: {
+            line: 128,
+            column: 9
+          },
+          end: {
+            line: 128,
+            column: 32
+          }
+        },
+        loc: {
+          start: {
+            line: 128,
+            column: 42
+          },
+          end: {
+            line: 130,
+            column: 1
+          }
+        },
+        line: 128
+      },
+      "5": {
+        name: "(anonymous_5)",
+        decl: {
+          start: {
+            line: 129,
+            column: 46
+          },
+          end: {
+            line: 129,
+            column: 47
+          }
+        },
+        loc: {
+          start: {
+            line: 129,
+            column: 61
+          },
+          end: {
+            line: 129,
+            column: 90
+          }
+        },
+        line: 129
+      },
+      "6": {
+        name: "getAllIllnessTypes",
+        decl: {
+          start: {
+            line: 135,
+            column: 9
+          },
+          end: {
+            line: 135,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 135,
+            column: 30
+          },
+          end: {
+            line: 139,
+            column: 1
+          }
+        },
+        line: 135
+      },
+      "7": {
+        name: "(anonymous_7)",
+        decl: {
+          start: {
+            line: 137,
+            column: 51
+          },
+          end: {
+            line: 137,
+            column: 52
+          }
+        },
+        loc: {
+          start: {
+            line: 137,
+            column: 66
+          },
+          end: {
+            line: 137,
+            column: 83
+          }
+        },
+        line: 137
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    b: {},
+    inputSourceMap: {
+      file: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/config/community-configs.ts",
+      mappings: "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",
+      names: [],
+      sources: ["/home/wetooa/Documents/code/projects/mentara/mentara-api/src/config/community-configs.ts"],
+      sourcesContent: ["/**\n * Community Configuration\n *\n * This file contains configurations for pre-generated communities,\n * particularly illness-specific communities that are created during\n * database seeding and application setup.\n */\n\nexport interface CommunityConfig {\n  name: string;\n  description: string;\n  slug: string;\n  illness?: string;\n}\n\n/**\n * Predefined illness communities that are automatically created\n * during database seeding. These communities provide focused\n * support spaces for users with specific mental health conditions.\n */\nexport const ILLNESS_COMMUNITIES: CommunityConfig[] = [\n  {\n    name: 'Stress Support Community',\n    description:\n      'A supportive community for people dealing with stress, pressure, and life challenges. Share coping strategies and find understanding.',\n    slug: 'stress-support',\n    illness: 'Stress',\n  },\n  {\n    name: 'Anxiety Warriors',\n    description:\n      'A safe space for individuals with anxiety disorders. Connect with others who understand the challenges of living with anxiety.',\n    slug: 'anxiety-warriors',\n    illness: 'Anxiety',\n  },\n  {\n    name: 'Depression Support Network',\n    description:\n      'A compassionate community for those dealing with depression. Find hope, support, and understanding from people who care.',\n    slug: 'depression-support',\n    illness: 'Depression',\n  },\n  {\n    name: 'Sleep & Insomnia Support',\n    description:\n      'A community for people struggling with sleep issues and insomnia. Share tips and find solutions for better sleep.',\n    slug: 'insomnia-support',\n    illness: 'Insomnia',\n  },\n  {\n    name: 'Panic Disorder Support',\n    description:\n      'A supportive community for individuals with panic disorder. Learn coping strategies and find understanding.',\n    slug: 'panic-disorder-support',\n    illness: 'Panic Disorder',\n  },\n  {\n    name: 'Bipolar Support Circle',\n    description:\n      'A community for individuals with bipolar disorder and their loved ones. Share experiences and find support.',\n    slug: 'bipolar-support',\n    illness: 'Bipolar Disorder',\n  },\n  {\n    name: 'OCD Support Community',\n    description:\n      'A safe space for individuals with obsessive-compulsive disorder. Connect with others who understand OCD challenges.',\n    slug: 'ocd-support',\n    illness: 'OCD',\n  },\n  {\n    name: 'PTSD Support Network',\n    description:\n      'A compassionate community for individuals with post-traumatic stress disorder. Find healing and support.',\n    slug: 'ptsd-support',\n    illness: 'PTSD',\n  },\n  {\n    name: 'Social Anxiety Support',\n    description:\n      'A community for people with social anxiety. Build confidence and find understanding from others who share similar experiences.',\n    slug: 'social-anxiety-support',\n    illness: 'Social Anxiety',\n  },\n  {\n    name: 'Phobia Support Group',\n    description:\n      'A supportive community for individuals dealing with specific phobias. Face fears together and find coping strategies.',\n    slug: 'phobia-support',\n    illness: 'Phobia',\n  },\n  {\n    name: 'Burnout Recovery',\n    description:\n      'A community for people experiencing burnout and work-related stress. Find balance and recovery strategies.',\n    slug: 'burnout-recovery',\n    illness: 'Burnout',\n  },\n  {\n    name: 'Eating Disorder Recovery',\n    description:\n      'A supportive community for individuals with eating disorders. Find healing, understanding, and recovery support.',\n    slug: 'eating-disorder-recovery',\n    illness: 'Eating Disorder',\n  },\n  {\n    name: 'ADHD Support Community',\n    description:\n      'A community for individuals with ADHD/ADD. Share strategies, experiences, and find understanding.',\n    slug: 'adhd-support',\n    illness: 'ADHD',\n  },\n  {\n    name: 'Substance Recovery Support',\n    description:\n      'A supportive community for individuals dealing with substance or alcohol use issues. Find recovery and healing.',\n    slug: 'substance-recovery-support',\n    illness: 'Substance Use',\n  },\n];\n\n// Keep legacy export for backward compatibility\nexport const COMMUNITIES = ILLNESS_COMMUNITIES;\n\n/**\n * Helper function to get community configuration by slug\n * @param slug - The unique slug identifier for the community\n * @returns The community configuration or undefined if not found\n */\nexport function getCommunityBySlug(slug: string): CommunityConfig | undefined {\n  return ILLNESS_COMMUNITIES.find((community) => community.slug === slug);\n}\n\n/**\n * Helper function to get all community names\n * @returns Array of all community names\n */\nexport function getAllCommunityNames(): string[] {\n  return ILLNESS_COMMUNITIES.map((community) => community.name);\n}\n\n/**\n * Helper function to get communities by illness type\n * @param illness - The illness type to filter by\n * @returns Array of communities for the specified illness\n */\nexport function getCommunitiesByIllness(illness: string): CommunityConfig[] {\n  return ILLNESS_COMMUNITIES.filter(\n    (community) => community.illness === illness,\n  );\n}\n\n/**\n * Helper function to get all available illness types\n * @returns Array of unique illness types\n */\nexport function getAllIllnessTypes(): string[] {\n  return [\n    ...new Set(\n      ILLNESS_COMMUNITIES.map((community) => community.illness).filter(Boolean),\n    ),\n  ] as string[];\n}\n"],
+      version: 3
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "3612bafb2bd6b20742ca0d3528b47fe6310f6876"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1d3136ngxt = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1d3136ngxt();
+cov_1d3136ngxt().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1d3136ngxt().s[1]++;
+exports.COMMUNITIES = exports.ILLNESS_COMMUNITIES = void 0;
+/* istanbul ignore next */
+cov_1d3136ngxt().s[2]++;
+exports.getCommunityBySlug = getCommunityBySlug;
+/* istanbul ignore next */
+cov_1d3136ngxt().s[3]++;
+exports.getAllCommunityNames = getAllCommunityNames;
+/* istanbul ignore next */
+cov_1d3136ngxt().s[4]++;
+exports.getCommunitiesByIllness = getCommunitiesByIllness;
+/* istanbul ignore next */
+cov_1d3136ngxt().s[5]++;
+exports.getAllIllnessTypes = getAllIllnessTypes;
+/**
+ * Predefined illness communities that are automatically created
+ * during database seeding. These communities provide focused
+ * support spaces for users with specific mental health conditions.
+ */
+/* istanbul ignore next */
+cov_1d3136ngxt().s[6]++;
+exports.ILLNESS_COMMUNITIES = [{
+  name: 'Stress Support Community',
+  description: 'A supportive community for people dealing with stress, pressure, and life challenges. Share coping strategies and find understanding.',
+  slug: 'stress-support',
+  illness: 'Stress'
+}, {
+  name: 'Anxiety Warriors',
+  description: 'A safe space for individuals with anxiety disorders. Connect with others who understand the challenges of living with anxiety.',
+  slug: 'anxiety-warriors',
+  illness: 'Anxiety'
+}, {
+  name: 'Depression Support Network',
+  description: 'A compassionate community for those dealing with depression. Find hope, support, and understanding from people who care.',
+  slug: 'depression-support',
+  illness: 'Depression'
+}, {
+  name: 'Sleep & Insomnia Support',
+  description: 'A community for people struggling with sleep issues and insomnia. Share tips and find solutions for better sleep.',
+  slug: 'insomnia-support',
+  illness: 'Insomnia'
+}, {
+  name: 'Panic Disorder Support',
+  description: 'A supportive community for individuals with panic disorder. Learn coping strategies and find understanding.',
+  slug: 'panic-disorder-support',
+  illness: 'Panic Disorder'
+}, {
+  name: 'Bipolar Support Circle',
+  description: 'A community for individuals with bipolar disorder and their loved ones. Share experiences and find support.',
+  slug: 'bipolar-support',
+  illness: 'Bipolar Disorder'
+}, {
+  name: 'OCD Support Community',
+  description: 'A safe space for individuals with obsessive-compulsive disorder. Connect with others who understand OCD challenges.',
+  slug: 'ocd-support',
+  illness: 'OCD'
+}, {
+  name: 'PTSD Support Network',
+  description: 'A compassionate community for individuals with post-traumatic stress disorder. Find healing and support.',
+  slug: 'ptsd-support',
+  illness: 'PTSD'
+}, {
+  name: 'Social Anxiety Support',
+  description: 'A community for people with social anxiety. Build confidence and find understanding from others who share similar experiences.',
+  slug: 'social-anxiety-support',
+  illness: 'Social Anxiety'
+}, {
+  name: 'Phobia Support Group',
+  description: 'A supportive community for individuals dealing with specific phobias. Face fears together and find coping strategies.',
+  slug: 'phobia-support',
+  illness: 'Phobia'
+}, {
+  name: 'Burnout Recovery',
+  description: 'A community for people experiencing burnout and work-related stress. Find balance and recovery strategies.',
+  slug: 'burnout-recovery',
+  illness: 'Burnout'
+}, {
+  name: 'Eating Disorder Recovery',
+  description: 'A supportive community for individuals with eating disorders. Find healing, understanding, and recovery support.',
+  slug: 'eating-disorder-recovery',
+  illness: 'Eating Disorder'
+}, {
+  name: 'ADHD Support Community',
+  description: 'A community for individuals with ADHD/ADD. Share strategies, experiences, and find understanding.',
+  slug: 'adhd-support',
+  illness: 'ADHD'
+}, {
+  name: 'Substance Recovery Support',
+  description: 'A supportive community for individuals dealing with substance or alcohol use issues. Find recovery and healing.',
+  slug: 'substance-recovery-support',
+  illness: 'Substance Use'
+}];
+// Keep legacy export for backward compatibility
+/* istanbul ignore next */
+cov_1d3136ngxt().s[7]++;
+exports.COMMUNITIES = exports.ILLNESS_COMMUNITIES;
+/**
+ * Helper function to get community configuration by slug
+ * @param slug - The unique slug identifier for the community
+ * @returns The community configuration or undefined if not found
+ */
+function getCommunityBySlug(slug) {
+  /* istanbul ignore next */
+  cov_1d3136ngxt().f[0]++;
+  cov_1d3136ngxt().s[8]++;
+  return exports.ILLNESS_COMMUNITIES.find(community => {
+    /* istanbul ignore next */
+    cov_1d3136ngxt().f[1]++;
+    cov_1d3136ngxt().s[9]++;
+    return community.slug === slug;
+  });
+}
+/**
+ * Helper function to get all community names
+ * @returns Array of all community names
+ */
+function getAllCommunityNames() {
+  /* istanbul ignore next */
+  cov_1d3136ngxt().f[2]++;
+  cov_1d3136ngxt().s[10]++;
+  return exports.ILLNESS_COMMUNITIES.map(community => {
+    /* istanbul ignore next */
+    cov_1d3136ngxt().f[3]++;
+    cov_1d3136ngxt().s[11]++;
+    return community.name;
+  });
+}
+/**
+ * Helper function to get communities by illness type
+ * @param illness - The illness type to filter by
+ * @returns Array of communities for the specified illness
+ */
+function getCommunitiesByIllness(illness) {
+  /* istanbul ignore next */
+  cov_1d3136ngxt().f[4]++;
+  cov_1d3136ngxt().s[12]++;
+  return exports.ILLNESS_COMMUNITIES.filter(community => {
+    /* istanbul ignore next */
+    cov_1d3136ngxt().f[5]++;
+    cov_1d3136ngxt().s[13]++;
+    return community.illness === illness;
+  });
+}
+/**
+ * Helper function to get all available illness types
+ * @returns Array of unique illness types
+ */
+function getAllIllnessTypes() {
+  /* istanbul ignore next */
+  cov_1d3136ngxt().f[6]++;
+  cov_1d3136ngxt().s[14]++;
+  return [...new Set(exports.ILLNESS_COMMUNITIES.map(community => {
+    /* istanbul ignore next */
+    cov_1d3136ngxt().f[7]++;
+    cov_1d3136ngxt().s[15]++;
+    return community.illness;
+  }).filter(Boolean))];
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMWQzMTM2bmd4dCIsInBhdGgiLCJoYXNoIiwiZ2xvYmFsIiwiRnVuY3Rpb24iLCJnY3YiLCJjb3ZlcmFnZURhdGEiLCJzdGF0ZW1lbnRNYXAiLCJzdGFydCIsImxpbmUiLCJjb2x1bW4iLCJlbmQiLCJmbk1hcCIsIm5hbWUiLCJkZWNsIiwibG9jIiwiYnJhbmNoTWFwIiwicyIsImYiLCJiIiwiaW5wdXRTb3VyY2VNYXAiLCJmaWxlIiwibWFwcGluZ3MiLCJuYW1lcyIsInNvdXJjZXMiLCJzb3VyY2VzQ29udGVudCIsInZlcnNpb24iLCJfY292ZXJhZ2VTY2hlbWEiLCJjb3ZlcmFnZSIsImFjdHVhbENvdmVyYWdlIiwiZXhwb3J0cyIsImdldENvbW11bml0eUJ5U2x1ZyIsImdldEFsbENvbW11bml0eU5hbWVzIiwiZ2V0Q29tbXVuaXRpZXNCeUlsbG5lc3MiLCJnZXRBbGxJbGxuZXNzVHlwZXMiLCJJTExORVNTX0NPTU1VTklUSUVTIiwiZGVzY3JpcHRpb24iLCJzbHVnIiwiaWxsbmVzcyIsIkNPTU1VTklUSUVTIiwiZmluZCIsImNvbW11bml0eSIsIm1hcCIsImZpbHRlciIsIlNldCIsIkJvb2xlYW4iXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvY29uZmlnL2NvbW11bml0eS1jb25maWdzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQ29tbXVuaXR5IENvbmZpZ3VyYXRpb25cbiAqXG4gKiBUaGlzIGZpbGUgY29udGFpbnMgY29uZmlndXJhdGlvbnMgZm9yIHByZS1nZW5lcmF0ZWQgY29tbXVuaXRpZXMsXG4gKiBwYXJ0aWN1bGFybHkgaWxsbmVzcy1zcGVjaWZpYyBjb21tdW5pdGllcyB0aGF0IGFyZSBjcmVhdGVkIGR1cmluZ1xuICogZGF0YWJhc2Ugc2VlZGluZyBhbmQgYXBwbGljYXRpb24gc2V0dXAuXG4gKi9cblxuZXhwb3J0IGludGVyZmFjZSBDb21tdW5pdHlDb25maWcge1xuICBuYW1lOiBzdHJpbmc7XG4gIGRlc2NyaXB0aW9uOiBzdHJpbmc7XG4gIHNsdWc6IHN0cmluZztcbiAgaWxsbmVzcz86IHN0cmluZztcbn1cblxuLyoqXG4gKiBQcmVkZWZpbmVkIGlsbG5lc3MgY29tbXVuaXRpZXMgdGhhdCBhcmUgYXV0b21hdGljYWxseSBjcmVhdGVkXG4gKiBkdXJpbmcgZGF0YWJhc2Ugc2VlZGluZy4gVGhlc2UgY29tbXVuaXRpZXMgcHJvdmlkZSBmb2N1c2VkXG4gKiBzdXBwb3J0IHNwYWNlcyBmb3IgdXNlcnMgd2l0aCBzcGVjaWZpYyBtZW50YWwgaGVhbHRoIGNvbmRpdGlvbnMuXG4gKi9cbmV4cG9ydCBjb25zdCBJTExORVNTX0NPTU1VTklUSUVTOiBDb21tdW5pdHlDb25maWdbXSA9IFtcbiAge1xuICAgIG5hbWU6ICdTdHJlc3MgU3VwcG9ydCBDb21tdW5pdHknLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0Egc3VwcG9ydGl2ZSBjb21tdW5pdHkgZm9yIHBlb3BsZSBkZWFsaW5nIHdpdGggc3RyZXNzLCBwcmVzc3VyZSwgYW5kIGxpZmUgY2hhbGxlbmdlcy4gU2hhcmUgY29waW5nIHN0cmF0ZWdpZXMgYW5kIGZpbmQgdW5kZXJzdGFuZGluZy4nLFxuICAgIHNsdWc6ICdzdHJlc3Mtc3VwcG9ydCcsXG4gICAgaWxsbmVzczogJ1N0cmVzcycsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnQW54aWV0eSBXYXJyaW9ycycsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnQSBzYWZlIHNwYWNlIGZvciBpbmRpdmlkdWFscyB3aXRoIGFueGlldHkgZGlzb3JkZXJzLiBDb25uZWN0IHdpdGggb3RoZXJzIHdobyB1bmRlcnN0YW5kIHRoZSBjaGFsbGVuZ2VzIG9mIGxpdmluZyB3aXRoIGFueGlldHkuJyxcbiAgICBzbHVnOiAnYW54aWV0eS13YXJyaW9ycycsXG4gICAgaWxsbmVzczogJ0FueGlldHknLFxuICB9LFxuICB7XG4gICAgbmFtZTogJ0RlcHJlc3Npb24gU3VwcG9ydCBOZXR3b3JrJyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdBIGNvbXBhc3Npb25hdGUgY29tbXVuaXR5IGZvciB0aG9zZSBkZWFsaW5nIHdpdGggZGVwcmVzc2lvbi4gRmluZCBob3BlLCBzdXBwb3J0LCBhbmQgdW5kZXJzdGFuZGluZyBmcm9tIHBlb3BsZSB3aG8gY2FyZS4nLFxuICAgIHNsdWc6ICdkZXByZXNzaW9uLXN1cHBvcnQnLFxuICAgIGlsbG5lc3M6ICdEZXByZXNzaW9uJyxcbiAgfSxcbiAge1xuICAgIG5hbWU6ICdTbGVlcCAmIEluc29tbmlhIFN1cHBvcnQnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0EgY29tbXVuaXR5IGZvciBwZW9wbGUgc3RydWdnbGluZyB3aXRoIHNsZWVwIGlzc3VlcyBhbmQgaW5zb21uaWEuIFNoYXJlIHRpcHMgYW5kIGZpbmQgc29sdXRpb25zIGZvciBiZXR0ZXIgc2xlZXAuJyxcbiAgICBzbHVnOiAnaW5zb21uaWEtc3VwcG9ydCcsXG4gICAgaWxsbmVzczogJ0luc29tbmlhJyxcbiAgfSxcbiAge1xuICAgIG5hbWU6ICdQYW5pYyBEaXNvcmRlciBTdXBwb3J0JyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdBIHN1cHBvcnRpdmUgY29tbXVuaXR5IGZvciBpbmRpdmlkdWFscyB3aXRoIHBhbmljIGRpc29yZGVyLiBMZWFybiBjb3Bpbmcgc3RyYXRlZ2llcyBhbmQgZmluZCB1bmRlcnN0YW5kaW5nLicsXG4gICAgc2x1ZzogJ3BhbmljLWRpc29yZGVyLXN1cHBvcnQnLFxuICAgIGlsbG5lc3M6ICdQYW5pYyBEaXNvcmRlcicsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnQmlwb2xhciBTdXBwb3J0IENpcmNsZScsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnQSBjb21tdW5pdHkgZm9yIGluZGl2aWR1YWxzIHdpdGggYmlwb2xhciBkaXNvcmRlciBhbmQgdGhlaXIgbG92ZWQgb25lcy4gU2hhcmUgZXhwZXJpZW5jZXMgYW5kIGZpbmQgc3VwcG9ydC4nLFxuICAgIHNsdWc6ICdiaXBvbGFyLXN1cHBvcnQnLFxuICAgIGlsbG5lc3M6ICdCaXBvbGFyIERpc29yZGVyJyxcbiAgfSxcbiAge1xuICAgIG5hbWU6ICdPQ0QgU3VwcG9ydCBDb21tdW5pdHknLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0Egc2FmZSBzcGFjZSBmb3IgaW5kaXZpZHVhbHMgd2l0aCBvYnNlc3NpdmUtY29tcHVsc2l2ZSBkaXNvcmRlci4gQ29ubmVjdCB3aXRoIG90aGVycyB3aG8gdW5kZXJzdGFuZCBPQ0QgY2hhbGxlbmdlcy4nLFxuICAgIHNsdWc6ICdvY2Qtc3VwcG9ydCcsXG4gICAgaWxsbmVzczogJ09DRCcsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnUFRTRCBTdXBwb3J0IE5ldHdvcmsnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0EgY29tcGFzc2lvbmF0ZSBjb21tdW5pdHkgZm9yIGluZGl2aWR1YWxzIHdpdGggcG9zdC10cmF1bWF0aWMgc3RyZXNzIGRpc29yZGVyLiBGaW5kIGhlYWxpbmcgYW5kIHN1cHBvcnQuJyxcbiAgICBzbHVnOiAncHRzZC1zdXBwb3J0JyxcbiAgICBpbGxuZXNzOiAnUFRTRCcsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnU29jaWFsIEFueGlldHkgU3VwcG9ydCcsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnQSBjb21tdW5pdHkgZm9yIHBlb3BsZSB3aXRoIHNvY2lhbCBhbnhpZXR5LiBCdWlsZCBjb25maWRlbmNlIGFuZCBmaW5kIHVuZGVyc3RhbmRpbmcgZnJvbSBvdGhlcnMgd2hvIHNoYXJlIHNpbWlsYXIgZXhwZXJpZW5jZXMuJyxcbiAgICBzbHVnOiAnc29jaWFsLWFueGlldHktc3VwcG9ydCcsXG4gICAgaWxsbmVzczogJ1NvY2lhbCBBbnhpZXR5JyxcbiAgfSxcbiAge1xuICAgIG5hbWU6ICdQaG9iaWEgU3VwcG9ydCBHcm91cCcsXG4gICAgZGVzY3JpcHRpb246XG4gICAgICAnQSBzdXBwb3J0aXZlIGNvbW11bml0eSBmb3IgaW5kaXZpZHVhbHMgZGVhbGluZyB3aXRoIHNwZWNpZmljIHBob2JpYXMuIEZhY2UgZmVhcnMgdG9nZXRoZXIgYW5kIGZpbmQgY29waW5nIHN0cmF0ZWdpZXMuJyxcbiAgICBzbHVnOiAncGhvYmlhLXN1cHBvcnQnLFxuICAgIGlsbG5lc3M6ICdQaG9iaWEnLFxuICB9LFxuICB7XG4gICAgbmFtZTogJ0J1cm5vdXQgUmVjb3ZlcnknLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0EgY29tbXVuaXR5IGZvciBwZW9wbGUgZXhwZXJpZW5jaW5nIGJ1cm5vdXQgYW5kIHdvcmstcmVsYXRlZCBzdHJlc3MuIEZpbmQgYmFsYW5jZSBhbmQgcmVjb3Zlcnkgc3RyYXRlZ2llcy4nLFxuICAgIHNsdWc6ICdidXJub3V0LXJlY292ZXJ5JyxcbiAgICBpbGxuZXNzOiAnQnVybm91dCcsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnRWF0aW5nIERpc29yZGVyIFJlY292ZXJ5JyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdBIHN1cHBvcnRpdmUgY29tbXVuaXR5IGZvciBpbmRpdmlkdWFscyB3aXRoIGVhdGluZyBkaXNvcmRlcnMuIEZpbmQgaGVhbGluZywgdW5kZXJzdGFuZGluZywgYW5kIHJlY292ZXJ5IHN1cHBvcnQuJyxcbiAgICBzbHVnOiAnZWF0aW5nLWRpc29yZGVyLXJlY292ZXJ5JyxcbiAgICBpbGxuZXNzOiAnRWF0aW5nIERpc29yZGVyJyxcbiAgfSxcbiAge1xuICAgIG5hbWU6ICdBREhEIFN1cHBvcnQgQ29tbXVuaXR5JyxcbiAgICBkZXNjcmlwdGlvbjpcbiAgICAgICdBIGNvbW11bml0eSBmb3IgaW5kaXZpZHVhbHMgd2l0aCBBREhEL0FERC4gU2hhcmUgc3RyYXRlZ2llcywgZXhwZXJpZW5jZXMsIGFuZCBmaW5kIHVuZGVyc3RhbmRpbmcuJyxcbiAgICBzbHVnOiAnYWRoZC1zdXBwb3J0JyxcbiAgICBpbGxuZXNzOiAnQURIRCcsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnU3Vic3RhbmNlIFJlY292ZXJ5IFN1cHBvcnQnLFxuICAgIGRlc2NyaXB0aW9uOlxuICAgICAgJ0Egc3VwcG9ydGl2ZSBjb21tdW5pdHkgZm9yIGluZGl2aWR1YWxzIGRlYWxpbmcgd2l0aCBzdWJzdGFuY2Ugb3IgYWxjb2hvbCB1c2UgaXNzdWVzLiBGaW5kIHJlY292ZXJ5IGFuZCBoZWFsaW5nLicsXG4gICAgc2x1ZzogJ3N1YnN0YW5jZS1yZWNvdmVyeS1zdXBwb3J0JyxcbiAgICBpbGxuZXNzOiAnU3Vic3RhbmNlIFVzZScsXG4gIH0sXG5dO1xuXG4vLyBLZWVwIGxlZ2FjeSBleHBvcnQgZm9yIGJhY2t3YXJkIGNvbXBhdGliaWxpdHlcbmV4cG9ydCBjb25zdCBDT01NVU5JVElFUyA9IElMTE5FU1NfQ09NTVVOSVRJRVM7XG5cbi8qKlxuICogSGVscGVyIGZ1bmN0aW9uIHRvIGdldCBjb21tdW5pdHkgY29uZmlndXJhdGlvbiBieSBzbHVnXG4gKiBAcGFyYW0gc2x1ZyAtIFRoZSB1bmlxdWUgc2x1ZyBpZGVudGlmaWVyIGZvciB0aGUgY29tbXVuaXR5XG4gKiBAcmV0dXJucyBUaGUgY29tbXVuaXR5IGNvbmZpZ3VyYXRpb24gb3IgdW5kZWZpbmVkIGlmIG5vdCBmb3VuZFxuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0Q29tbXVuaXR5QnlTbHVnKHNsdWc6IHN0cmluZyk6IENvbW11bml0eUNvbmZpZyB8IHVuZGVmaW5lZCB7XG4gIHJldHVybiBJTExORVNTX0NPTU1VTklUSUVTLmZpbmQoKGNvbW11bml0eSkgPT4gY29tbXVuaXR5LnNsdWcgPT09IHNsdWcpO1xufVxuXG4vKipcbiAqIEhlbHBlciBmdW5jdGlvbiB0byBnZXQgYWxsIGNvbW11bml0eSBuYW1lc1xuICogQHJldHVybnMgQXJyYXkgb2YgYWxsIGNvbW11bml0eSBuYW1lc1xuICovXG5leHBvcnQgZnVuY3Rpb24gZ2V0QWxsQ29tbXVuaXR5TmFtZXMoKTogc3RyaW5nW10ge1xuICByZXR1cm4gSUxMTkVTU19DT01NVU5JVElFUy5tYXAoKGNvbW11bml0eSkgPT4gY29tbXVuaXR5Lm5hbWUpO1xufVxuXG4vKipcbiAqIEhlbHBlciBmdW5jdGlvbiB0byBnZXQgY29tbXVuaXRpZXMgYnkgaWxsbmVzcyB0eXBlXG4gKiBAcGFyYW0gaWxsbmVzcyAtIFRoZSBpbGxuZXNzIHR5cGUgdG8gZmlsdGVyIGJ5XG4gKiBAcmV0dXJucyBBcnJheSBvZiBjb21tdW5pdGllcyBmb3IgdGhlIHNwZWNpZmllZCBpbGxuZXNzXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRDb21tdW5pdGllc0J5SWxsbmVzcyhpbGxuZXNzOiBzdHJpbmcpOiBDb21tdW5pdHlDb25maWdbXSB7XG4gIHJldHVybiBJTExORVNTX0NPTU1VTklUSUVTLmZpbHRlcihcbiAgICAoY29tbXVuaXR5KSA9PiBjb21tdW5pdHkuaWxsbmVzcyA9PT0gaWxsbmVzcyxcbiAgKTtcbn1cblxuLyoqXG4gKiBIZWxwZXIgZnVuY3Rpb24gdG8gZ2V0IGFsbCBhdmFpbGFibGUgaWxsbmVzcyB0eXBlc1xuICogQHJldHVybnMgQXJyYXkgb2YgdW5pcXVlIGlsbG5lc3MgdHlwZXNcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGdldEFsbElsbG5lc3NUeXBlcygpOiBzdHJpbmdbXSB7XG4gIHJldHVybiBbXG4gICAgLi4ubmV3IFNldChcbiAgICAgIElMTE5FU1NfQ09NTVVOSVRJRVMubWFwKChjb21tdW5pdHkpID0+IGNvbW11bml0eS5pbGxuZXNzKS5maWx0ZXIoQm9vbGVhbiksXG4gICAgKSxcbiAgXSBhcyBzdHJpbmdbXTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7QUFBQTs7Ozs7OztBQUFBO0FBQUEsU0FBQUEsZUFBQTtFQUFBLElBQUFDLElBQUE7RUFBQSxJQUFBQyxJQUFBO0VBQUEsSUFBQUMsTUFBQSxPQUFBQyxRQUFBO0VBQUEsSUFBQUMsR0FBQTtFQUFBLElBQUFDLFlBQUE7SUFBQUwsSUFBQTtJQUFBTSxZQUFBO01BQUE7UUFBQUMsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7SUFBQTtJQUFBRSxLQUFBO01BQUE7UUFBQUMsSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFBQUMsSUFBQTtZQUFBQyxNQUFBO1VBQUE7VUFBQUMsR0FBQTtZQUFBRixJQUFBO1lBQUFDLE1BQUE7VUFBQTtRQUFBO1FBQUFLLEdBQUE7VUFBQVAsS0FBQTtZQUFBQyxJQUFBO1lBQUFDLE1BQUE7VUFBQTtVQUFBQyxHQUFBO1lBQUFGLElBQUE7WUFBQUMsTUFBQTtVQUFBO1FBQUE7UUFBQUQsSUFBQTtNQUFBO01BQUE7UUFBQUksSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFBQUMsSUFBQTtZQUFBQyxNQUFBO1VBQUE7VUFBQUMsR0FBQTtZQUFBRixJQUFBO1lBQUFDLE1BQUE7VUFBQTtRQUFBO1FBQUFLLEdBQUE7VUFBQVAsS0FBQTtZQUFBQyxJQUFBO1lBQUFDLE1BQUE7VUFBQTtVQUFBQyxHQUFBO1lBQUFGLElBQUE7WUFBQUMsTUFBQTtVQUFBO1FBQUE7UUFBQUQsSUFBQTtNQUFBO01BQUE7UUFBQUksSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFBQUMsSUFBQTtZQUFBQyxNQUFBO1VBQUE7VUFBQUMsR0FBQTtZQUFBRixJQUFBO1lBQUFDLE1BQUE7VUFBQTtRQUFBO1FBQUFLLEdBQUE7VUFBQVAsS0FBQTtZQUFBQyxJQUFBO1lBQUFDLE1BQUE7VUFBQTtVQUFBQyxHQUFBO1lBQUFGLElBQUE7WUFBQUMsTUFBQTtVQUFBO1FBQUE7UUFBQUQsSUFBQTtNQUFBO01BQUE7UUFBQUksSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFBQUMsSUFBQTtZQUFBQyxNQUFBO1VBQUE7VUFBQUMsR0FBQTtZQUFBRixJQUFBO1lBQUFDLE1BQUE7VUFBQTtRQUFBO1FBQUFLLEdBQUE7VUFBQVAsS0FBQTtZQUFBQyxJQUFBO1lBQUFDLE1BQUE7VUFBQTtVQUFBQyxHQUFBO1lBQUFGLElBQUE7WUFBQUMsTUFBQTtVQUFBO1FBQUE7UUFBQUQsSUFBQTtNQUFBO01BQUE7UUFBQUksSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFBQUMsSUFBQTtZQUFBQyxNQUFBO1VBQUE7VUFBQUMsR0FBQTtZQUFBRixJQUFBO1lBQUFDLE1BQUE7VUFBQTtRQUFBO1FBQUFLLEdBQUE7VUFBQVAsS0FBQTtZQUFBQyxJQUFBO1lBQUFDLE1BQUE7VUFBQTtVQUFBQyxHQUFBO1lBQUFGLElBQUE7WUFBQUMsTUFBQTtVQUFBO1FBQUE7UUFBQUQsSUFBQTtNQUFBO01BQUE7UUFBQUksSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFBQUMsSUFBQTtZQUFBQyxNQUFBO1VBQUE7VUFBQUMsR0FBQTtZQUFBRixJQUFBO1lBQUFDLE1BQUE7VUFBQTtRQUFBO1FBQUFLLEdBQUE7VUFBQVAsS0FBQTtZQUFBQyxJQUFBO1lBQUFDLE1BQUE7VUFBQTtVQUFBQyxHQUFBO1lBQUFGLElBQUE7WUFBQUMsTUFBQTtVQUFBO1FBQUE7UUFBQUQsSUFBQTtNQUFBO01BQUE7UUFBQUksSUFBQTtRQUFBQyxJQUFBO1VBQUFOLEtBQUE7WUFB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OUM7Ozs7O0FBS0EsU0FBZ0JKLGtCQUFrQkEsQ0FBQ00sSUFBWTtFQUFBO0VBQUFyQyxjQUFBLEdBQUFrQixDQUFBO0VBQUFsQixjQUFBLEdBQUFpQixDQUFBO0VBQzdDLE9BQU9hLE9BQUEsQ0FBQUssbUJBQW1CLENBQUNLLElBQUksQ0FBRUMsU0FBUyxJQUFLO0lBQUE7SUFBQXpDLGNBQUEsR0FBQWtCLENBQUE7SUFBQWxCLGNBQUEsR0FBQWlCLENBQUE7SUFBQSxPQUFBd0IsU0FBUyxDQUFDSixJQUFJLEtBQUtBLElBQUk7RUFBSixDQUFJLENBQUM7QUFDekU7QUFFQTs7OztBQUlBLFNBQWdCTCxvQkFBb0JBLENBQUE7RUFBQTtFQUFBaEMsY0FBQSxHQUFBa0IsQ0FBQTtFQUFBbEIsY0FBQSxHQUFBaUIsQ0FBQTtFQUNsQyxPQUFPYSxPQUFBLENBQUFLLG1CQUFtQixDQUFDTyxHQUFHLENBQUVELFNBQVMsSUFBSztJQUFBO0lBQUF6QyxjQUFBLEdBQUFrQixDQUFBO0lBQUFsQixjQUFBLEdBQUFpQixDQUFBO0lBQUEsT0FBQXdCLFNBQVMsQ0FBQzVCLElBQUk7RUFBSixDQUFJLENBQUM7QUFDL0Q7QUFFQTs7Ozs7QUFLQSxTQUFnQm9CLHVCQUF1QkEsQ0FBQ0ssT0FBZTtFQUFBO0VBQUF0QyxjQUFBLEdBQUFrQixDQUFBO0VBQUFsQixjQUFBLEdBQUFpQixDQUFBO0VBQ3JELE9BQU9hLE9BQUEsQ0FBQUssbUJBQW1CLENBQUNRLE1BQU0sQ0FDOUJGLFNBQVMsSUFBSztJQUFBO0lBQUF6QyxjQUFBLEdBQUFrQixDQUFBO0lBQUFsQixjQUFBLEdBQUFpQixDQUFBO0lBQUEsT0FBQXdCLFNBQVMsQ0FBQ0gsT0FBTyxLQUFLQSxPQUFPO0VBQVAsQ0FBTyxDQUM3QztBQUNIO0FBRUE7Ozs7QUFJQSxTQUFnQkosa0JBQWtCQSxDQUFBO0VBQUE7RUFBQWxDLGNBQUEsR0FBQWtCLENBQUE7RUFBQWxCLGNBQUEsR0FBQWlCLENBQUE7RUFDaEMsT0FBTyxDQUNMLEdBQUcsSUFBSTJCLEdBQUcsQ0FDUmQsT0FBQSxDQUFBSyxtQkFBbUIsQ0FBQ08sR0FBRyxDQUFFRCxTQUFTLElBQUs7SUFBQTtJQUFBekMsY0FBQSxHQUFBa0IsQ0FBQTtJQUFBbEIsY0FBQSxHQUFBaUIsQ0FBQTtJQUFBLE9BQUF3QixTQUFTLENBQUNILE9BQU87RUFBUCxDQUFPLENBQUMsQ0FBQ0ssTUFBTSxDQUFDRSxPQUFPLENBQUMsQ0FDMUUsQ0FDVTtBQUNmIiwiaWdub3JlTGlzdCI6W119

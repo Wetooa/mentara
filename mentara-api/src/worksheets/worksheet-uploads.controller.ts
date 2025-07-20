@@ -5,62 +5,22 @@ import {
   UploadedFile,
   Body,
   BadRequestException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 
 @Controller('worksheets/upload')
 export class WorksheetUploadsController {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          // Get the type from the request (material or submission)
-          const type = req.body.type || 'submission';
-          const dest = path.join(process.cwd(), 'uploads', 'worksheets', type);
-          cb(null, dest);
-        },
-        filename: (req, file, cb) => {
-          // Generate a unique filename with original extension
-          const originalName = file.originalname;
-          const extension = path.extname(originalName);
-          const filename = `${uuidv4()}${extension}`;
-          cb(null, filename);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        // Only allow certain file types
-        const allowedMimeTypes = [
-          'application/pdf', // PDF files
-          'application/msword', // DOC files
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX files
-          'text/plain', // Text files
-          'image/jpeg', // JPEG images
-          'image/png', // PNG images
-        ];
-
-        if (allowedMimeTypes.includes(file.mimetype)) {
-          cb(null, true);
-        } else {
-          cb(
-            new BadRequestException(
-              `File type not allowed. Only PDF, DOC, DOCX, TXT, JPG, and PNG files are allowed.`,
-            ),
-            false,
-          );
-        }
-      },
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB file size limit
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body('worksheetId') worksheetId: string,
@@ -74,70 +34,119 @@ export class WorksheetUploadsController {
       throw new BadRequestException('Worksheet ID is required');
     }
 
-    // Check if the worksheet exists
-    const worksheet = await this.prisma.worksheet.findUnique({
-      where: { id: worksheetId },
-    });
-
-    if (!worksheet) {
+    if (!type || !['material', 'submission'].includes(type)) {
       throw new BadRequestException(
-        `Worksheet with ID ${worksheetId} not found`,
+        'Type must be either "material" or "submission"',
       );
     }
 
-    // Create a URL for the file
-    const fileUrl = `/uploads/worksheets/${type}/${file.filename}`;
-
-    // Store the file in the database based on the type
-    if (type === 'material') {
-      const material = await this.prisma.worksheetMaterial.create({
-        data: {
-          filename: file.originalname,
-          url: fileUrl,
-          fileSize: file.size,
-          fileType: file.mimetype,
-          worksheetId,
-        },
-      });
-
-      return {
-        id: material.id,
-        filename: material.filename,
-        url: material.url,
-        fileSize: material.fileSize,
-        fileType: material.fileType,
-      };
-    } else {
-      // Default to submission - need to get the worksheet's clientId
-      const worksheetData = await this.prisma.worksheet.findUnique({
+    try {
+      // Check if the worksheet exists
+      const worksheet = await this.prisma.worksheet.findUnique({
         where: { id: worksheetId },
-        select: { clientId: true },
       });
 
-      if (!worksheetData) {
+      if (!worksheet) {
         throw new BadRequestException(
           `Worksheet with ID ${worksheetId} not found`,
         );
       }
 
-      const submission = await this.prisma.worksheetSubmission.create({
-        data: {
-          filename: file.originalname,
-          url: fileUrl,
-          fileSize: file.size,
-          fileType: file.mimetype,
-          worksheetId,
-          clientId: worksheetData.clientId,
-        },
-      });
+      // Validate file
+      const allowedMimeTypes = [
+        'application/pdf', // PDF files
+        'application/msword', // DOC files
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX files
+        'text/plain', // Text files
+        'image/jpeg', // JPEG images
+        'image/png', // PNG images
+      ];
 
+      const validation = this.supabaseStorageService.validateFile(
+        file,
+        5 * 1024 * 1024, // 5MB limit
+        allowedMimeTypes,
+      );
+
+      if (!validation.isValid) {
+        throw new BadRequestException(
+          `File validation failed: ${validation.error}`,
+        );
+      }
+
+      // Upload file to Supabase Storage
+      const uploadResult = await this.supabaseStorageService.uploadFile(
+        file,
+        SupabaseStorageService.getSupportedBuckets().WORKSHEETS,
+      );
+
+      // Update the worksheet with the new file information
+      if (type === 'material') {
+        // Add to material arrays
+        await this.prisma.worksheet.update({
+          where: { id: worksheetId },
+          data: {
+            materialUrls: {
+              push: uploadResult.url,
+            },
+            materialNames: {
+              push: file.originalname,
+            },
+
+          },
+        });
+      } else {
+        // For submissions, create or update WorksheetSubmission
+        const existingSubmission = await this.prisma.worksheetSubmission.findUnique({
+          where: { worksheetId },
+        });
+
+        if (existingSubmission) {
+          // Update existing submission
+          await this.prisma.worksheetSubmission.update({
+            where: { worksheetId },
+            data: {
+              fileUrls: {
+                push: uploadResult.url,
+              },
+              fileNames: {
+                push: file.originalname,
+              },
+              fileSizes: {
+                push: file.size,
+              },
+            },
+          });
+        } else {
+          // Create new submission
+          await this.prisma.worksheetSubmission.create({
+            data: {
+              worksheetId,
+              fileUrls: [uploadResult.url],
+              fileNames: [file.originalname],
+              fileSizes: [file.size],
+            },
+          });
+        }
+      }
+
+      // Return the expected response format
       return {
-        id: submission.id,
-        filename: submission.filename,
-        url: submission.url,
-        fileSize: submission.fileSize,
-        fileType: submission.fileType,
+        id: uploadResult.filename, // Use the unique filename as ID
+        filename: file.originalname,
+        url: uploadResult.url,
+        fileSize: file.size,
+        fileType: file.mimetype,
       };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

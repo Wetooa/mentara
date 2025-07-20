@@ -6,11 +6,33 @@ import {
 import { PrismaService } from '../providers/prisma-client.provider';
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
-import {
-  ClientResponse,
-  TherapistResponse,
-  TherapistUpdateDto,
-} from 'schema/auth';
+// Removed import - using local types instead
+interface TherapistResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  specialties: string[];
+  isActive: boolean;
+}
+
+interface ClientResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface TherapistUpdateDto {
+  specialties?: string[];
+  isActive?: boolean;
+  mobile?: string;
+  province?: string;
+  hourlyRate?: any;
+  areasOfExpertise?: string[];
+  languagesOffered?: string[];
+  preferredSessionLength?: number[];
+  // Allow any other properties
+  [key: string]: any;
+}
 
 @Injectable()
 export class TherapistManagementService {
@@ -29,7 +51,7 @@ export class TherapistManagementService {
     return years;
   }
 
-  async getTherapistProfile(userId: string): Promise<TherapistResponse> {
+  async getTherapistProfile(userId: string): Promise<any> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId },
@@ -61,7 +83,7 @@ export class TherapistManagementService {
   async updateTherapistProfile(
     userId: string,
     data: TherapistUpdateDto,
-  ): Promise<TherapistResponse> {
+  ): Promise<any> {
     try {
       // Update therapist profile data
       const therapistData: any = {};
@@ -151,7 +173,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getAssignedPatients(therapistId: string): Promise<ClientResponse[]> {
+  async getAssignedPatients(therapistId: string): Promise<any[]> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId: therapistId },
@@ -159,7 +181,7 @@ export class TherapistManagementService {
 
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapist.userId, status: 'active' },
+        where: { therapistId: therapist.userId, status: 'ACTIVE' },
         include: { client: { include: { user: true } } },
       });
 
@@ -179,11 +201,11 @@ export class TherapistManagementService {
     }
   }
 
-  async getAllClients(therapistId: string): Promise<ClientResponse[]> {
+  async getAllClients(therapistId: string): Promise<any[]> {
     try {
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapistId, status: 'active' },
+        where: { therapistId: therapistId, status: 'ACTIVE' },
         include: { client: { include: { user: true } } },
       });
 
@@ -199,10 +221,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getClientById(
-    therapistId: string,
-    clientId: string,
-  ): Promise<ClientResponse> {
+  async getClientById(therapistId: string, clientId: string): Promise<any> {
     try {
       // Find the specific client assigned to this therapist
       const assignedClient = await this.prisma.clientTherapist.findFirst({
@@ -223,7 +242,7 @@ export class TherapistManagementService {
     }
   }
 
-  async getProfile(therapistId: string): Promise<TherapistResponse> {
+  async getProfile(therapistId: string): Promise<any> {
     try {
       const therapist = await this.prisma.therapist.findUniqueOrThrow({
         where: { userId: therapistId },
@@ -251,7 +270,7 @@ export class TherapistManagementService {
   async updateProfile(
     therapistId: string,
     data: Prisma.TherapistUpdateInput,
-  ): Promise<TherapistResponse> {
+  ): Promise<any> {
     try {
       const updatedTherapist = await this.prisma.therapist.update({
         where: { userId: therapistId },

@@ -1,0 +1,366 @@
+{
+  "info": {
+    "name": "Mentara - Users",
+    "description": "User management API endpoints. This collection handles basic user CRUD operations, profile management, and admin user management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "users-collection-v2"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set base URL if not already set",
+          "if (!pm.collectionVariables.get('baseUrl')) {",
+          "    pm.collectionVariables.set('baseUrl', pm.environment.get('baseUrl') || 'http://localhost:3001');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "User Management",
+      "description": "Core user management endpoints from /users controller",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Retrieve all users in the system. Admin access required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users Including Inactive",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/all-including-inactive",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "all-including-inactive"]
+            },
+            "description": "Retrieve all users including inactive ones. Admin access required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Get user by ID. Users can only view their own profile unless they're admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"{{userFirstName}}\",\n  \"lastName\": \"{{userLastName}}\",\n  \"bio\": \"{{userBio}}\",\n  \"phoneNumber\": \"+1234567890\",\n  \"timezone\": \"America/Toronto\",\n  \"language\": \"en\",\n  \"theme\": \"light\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Update user profile. Users can only update their own profile unless they're admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile with File Upload",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "firstName",
+                  "value": "{{userFirstName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "{{userLastName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "{{userBio}}",
+                  "type": "text"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Update user profile with file uploads for avatar and cover images."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Deactivate user account. Users can only deactivate their own account unless they're admin."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin User Management",
+      "description": "Admin-only user management operations",
+      "item": [
+        {
+          "name": "Admin Deactivate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Violation of terms of service\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{targetUserId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{targetUserId}}", "deactivate"]
+            },
+            "description": "Admin endpoint to deactivate a user account with a reason."
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Reactivate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{targetUserId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{targetUserId}}", "reactivate"]
+            },
+            "description": "Admin endpoint to reactivate a previously deactivated user account."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "description": "Test endpoints for validation and error scenarios",
+      "item": [
+        {
+          "name": "Get User by ID - Invalid UUID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/invalid-user-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "invalid-user-id"]
+            },
+            "description": "Test endpoint for invalid UUID format validation."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile - Missing Required Fields",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated bio without required fields\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Test validation for missing required fields in profile update."
+          },
+          "response": []
+        },
+        {
+          "name": "Access Another User's Profile Without Permission",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{anotherUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{anotherUserId}}"]
+            },
+            "description": "Test unauthorized access to another user's profile (should fail for non-admin users)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "targetUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "anotherUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userFirstName",
+      "value": "John",
+      "type": "string"
+    },
+    {
+      "key": "userLastName",
+      "value": "Doe",
+      "type": "string"
+    },
+    {
+      "key": "userBio",
+      "value": "Software developer passionate about mental health technology",
+      "type": "string"
+    }
+  ]
+}

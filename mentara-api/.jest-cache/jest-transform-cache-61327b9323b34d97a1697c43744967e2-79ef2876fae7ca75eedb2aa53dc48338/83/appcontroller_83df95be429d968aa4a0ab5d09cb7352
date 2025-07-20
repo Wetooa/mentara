@@ -1,0 +1,52 @@
+72113047903f0527af6cb3b2adb171ed
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AppController = void 0;
+const common_1 = require("@nestjs/common");
+const app_service_1 = require("./app.service");
+const swagger_1 = require("@nestjs/swagger");
+let AppController = class AppController {
+    appService;
+    constructor(appService) {
+        this.appService = appService;
+    }
+    getHello() {
+        return this.appService.getHello();
+    }
+};
+exports.AppController = AppController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Health check endpoint',
+        description: 'Basic health check endpoint that returns a welcome message to verify the API is running',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'API is running successfully',
+        schema: {
+            type: 'string',
+            example: 'Hello World!',
+        },
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", String)
+], AppController.prototype, "getHello", null);
+exports.AppController = AppController = __decorate([
+    (0, swagger_1.ApiTags)('app'),
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.Controller)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _a : Object])
+], AppController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2FwcC5jb250cm9sbGVyLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7QUFBQSwyQ0FBaUQ7QUFDakQsK0NBQTJDO0FBQzNDLDZDQVF5QjtBQUtsQixJQUFNLGFBQWEsR0FBbkIsTUFBTSxhQUFhO0lBQ0s7SUFBN0IsWUFBNkIsVUFBc0I7UUFBdEIsZUFBVSxHQUFWLFVBQVUsQ0FBWTtJQUFHLENBQUM7SUFldkQsUUFBUTtRQUNOLE9BQU8sSUFBSSxDQUFDLFVBQVUsQ0FBQyxRQUFRLEVBQUUsQ0FBQztJQUNwQyxDQUFDO0NBQ0YsQ0FBQTtBQW5CWSxzQ0FBYTtBQWdCeEI7SUFiQyxJQUFBLFlBQUcsR0FBRTtJQUNMLElBQUEsc0JBQVksRUFBQztRQUNaLE9BQU8sRUFBRSx1QkFBdUI7UUFDaEMsV0FBVyxFQUFFLHlGQUF5RjtLQUN2RyxDQUFDO0lBQ0QsSUFBQSxxQkFBVyxFQUFDO1FBQ1gsTUFBTSxFQUFFLEdBQUc7UUFDWCxXQUFXLEVBQUUsNkJBQTZCO1FBQzFDLE1BQU0sRUFBRTtZQUNOLElBQUksRUFBRSxRQUFRO1lBQ2QsT0FBTyxFQUFFLGNBQWM7U0FDeEI7S0FDRixDQUFDOzs7OzZDQUdEO3dCQWxCVSxhQUFhO0lBSHpCLElBQUEsaUJBQU8sRUFBQyxLQUFLLENBQUM7SUFDZCxJQUFBLHVCQUFhLEVBQUMsVUFBVSxDQUFDO0lBQ3pCLElBQUEsbUJBQVUsR0FBRTt5REFFOEIsd0JBQVUsb0JBQVYsd0JBQVU7R0FEeEMsYUFBYSxDQW1CekIiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2FwcC5jb250cm9sbGVyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IENvbnRyb2xsZXIsIEdldCB9IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IEFwcFNlcnZpY2UgfSBmcm9tICcuL2FwcC5zZXJ2aWNlJztcbmltcG9ydCB7XG4gIEFwaVRhZ3MsXG4gIEFwaU9wZXJhdGlvbixcbiAgQXBpUmVzcG9uc2UsXG4gIEFwaUJvZHksXG4gIEFwaUJlYXJlckF1dGgsXG4gIEFwaVBhcmFtLFxuICBBcGlRdWVyeSxcbn0gZnJvbSAnQG5lc3Rqcy9zd2FnZ2VyJztcblxuQEFwaVRhZ3MoJ2FwcCcpXG5AQXBpQmVhcmVyQXV0aCgnSldULWF1dGgnKVxuQENvbnRyb2xsZXIoKVxuZXhwb3J0IGNsYXNzIEFwcENvbnRyb2xsZXIge1xuICBjb25zdHJ1Y3Rvcihwcml2YXRlIHJlYWRvbmx5IGFwcFNlcnZpY2U6IEFwcFNlcnZpY2UpIHt9XG5cbiAgQEdldCgpXG4gIEBBcGlPcGVyYXRpb24oe1xuICAgIHN1bW1hcnk6ICdIZWFsdGggY2hlY2sgZW5kcG9pbnQnLFxuICAgIGRlc2NyaXB0aW9uOiAnQmFzaWMgaGVhbHRoIGNoZWNrIGVuZHBvaW50IHRoYXQgcmV0dXJucyBhIHdlbGNvbWUgbWVzc2FnZSB0byB2ZXJpZnkgdGhlIEFQSSBpcyBydW5uaW5nJyxcbiAgfSlcbiAgQEFwaVJlc3BvbnNlKHtcbiAgICBzdGF0dXM6IDIwMCxcbiAgICBkZXNjcmlwdGlvbjogJ0FQSSBpcyBydW5uaW5nIHN1Y2Nlc3NmdWxseScsXG4gICAgc2NoZW1hOiB7XG4gICAgICB0eXBlOiAnc3RyaW5nJyxcbiAgICAgIGV4YW1wbGU6ICdIZWxsbyBXb3JsZCEnLFxuICAgIH0sXG4gIH0pXG4gIGdldEhlbGxvKCk6IHN0cmluZyB7XG4gICAgcmV0dXJuIHRoaXMuYXBwU2VydmljZS5nZXRIZWxsbygpO1xuICB9XG59XG4iXSwidmVyc2lvbiI6M30=

@@ -1,30 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Get the authenticated user
-    const { userId, getToken } = auth();
+    const { id } = await params;
     
-    if (!userId) {
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization');
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    // Get the auth token for backend requests
-    const token = await getToken();
-    
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Failed to get authentication token' },
-        { status: 401 }
-      );
-    }
+    // Extract the token from the authorization header
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Get the status update data from the request body
     const updateData = await request.json();
@@ -32,7 +26,7 @@ export async function PUT(
     // Forward the request to the backend API
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     const backendResponse = await fetch(
-      `${backendUrl}/api/therapist/application/${params.id}/status`, 
+      `${backendUrl}/api/therapist/application/${id}/status`, 
       {
         method: 'PUT',
         headers: {

@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Calendar, 
-  MapPin, 
   Clock, 
   DollarSign, 
   Star, 
@@ -21,8 +20,7 @@ import {
   Heart,
   BookOpen,
   Award,
-  Users,
-  Languages
+  Users
 } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,8 +28,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
 import ReviewSection from "@/components/reviews/ReviewSection";
-import ReviewForm from "@/components/reviews/ReviewForm";
-import { useAuth } from "@clerk/nextjs";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { useAuth } from "@/hooks/auth";
 
 interface TherapistProfileModalProps {
   therapist: TherapistCardData | null;
@@ -41,7 +39,7 @@ interface TherapistProfileModalProps {
   onMessage?: (therapistId: string) => void;
 }
 
-export default function TherapistProfileModal({
+export function TherapistProfileModal({
   therapist,
   isOpen,
   onClose,
@@ -49,7 +47,8 @@ export default function TherapistProfileModal({
   onMessage,
 }: TherapistProfileModalProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { userId } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
   const [isReviewFormOpen, setIsReviewFormOpen] = React.useState(false);
 
   if (!therapist) return null;

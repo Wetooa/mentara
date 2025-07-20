@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserDashboardData } from "@/data/mockUserDashboardData";
+import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import ProfileSettings from "./ProfileSettings";
 
 interface DashboardHeaderProps {
@@ -43,7 +43,7 @@ export default function DashboardHeader({ user, onBookSession }: DashboardHeader
             {greeting}, {user.name}
           </h1>
           <p className="text-muted-foreground">
-            Here's an overview of your mental health journey
+            Here&apos;s an overview of your mental health journey
           </p>
         </div>
       </div>

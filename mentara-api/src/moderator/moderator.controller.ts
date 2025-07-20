@@ -12,10 +12,10 @@ import {
 } from '@nestjs/common';
 import { ModeratorService } from './moderator.service';
 import { Moderator, Prisma } from '@prisma/client';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('moderator')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class ModeratorController {
   constructor(private readonly moderatorService: ModeratorService) {}
 
