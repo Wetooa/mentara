@@ -54,9 +54,7 @@ export class ClientAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      accessToken: result.tokens.accessToken, // This is now the single token
-      refreshToken: result.tokens.accessToken, // Same token for compatibility
-      expiresIn: 0, // Non-expiring
+      token: result.tokens.accessToken, // Single JWT token
       message: result.message,
     };
   }
@@ -88,9 +86,7 @@ export class ClientAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      accessToken: result.tokens.accessToken, // This is now the single token
-      refreshToken: result.tokens.accessToken, // Same token for compatibility
-      expiresIn: 0, // Non-expiring
+      token: result.tokens.accessToken, // Single JWT token
     };
   }
 

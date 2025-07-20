@@ -135,9 +135,16 @@
       "mcp__serena__check_onboarding_performed",
       "mcp__serena__onboarding",
       "mcp__serena__list_dir",
-      "mcp__serena__insert_after_symbol"
+      "mcp__serena__insert_after_symbol",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(node:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["supabase", "Prisma-Local", "clerk", "puppeteer"]
+  "enabledMcpjsonServers": [
+    "supabase",
+    "Prisma-Local",
+    "clerk",
+    "puppeteer"
+  ]
 }

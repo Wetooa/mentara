@@ -92,9 +92,8 @@ export class AdminAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      accessToken: result.token,
-      refreshToken: result.token, // Same token for compatibility
-      expiresIn: 0, // Non-expiring
+      token: result.token, // Single JWT token
+      message: 'Admin login successful',
     };
   }
 

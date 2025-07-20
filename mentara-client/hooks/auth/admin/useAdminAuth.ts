@@ -6,12 +6,28 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useApi } from "@/lib/api";
-import { 
-  AdminLoginDto, 
-  AdminUser,
+import type { 
+  LoginDto as AdminLoginDto, 
   AdminAuthResponse,
-  AuditLogQueryParams,
-} from "@/lib/api/services/auth";
+} from "@/lib/api";
+
+// Temporary type - should come from mentara-commons
+interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'admin';
+  emailVerified: boolean;
+}
+
+// Temporary interface - should be moved to proper location
+interface AuditLogQueryParams {
+  page?: number;
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+}
 
 export interface UseAdminAuthReturn {
   user: AdminUser | null;
