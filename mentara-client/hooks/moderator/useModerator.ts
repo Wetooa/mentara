@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
+
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
@@ -27,7 +27,7 @@ export function useModeratorDashboard() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.dashboard(),
+    queryKey: ['moderator', 'dashboard'],
     queryFn: () => api.moderator.getDashboardStats(),
     staleTime: 1000 * 60 * 2, // 2 minutes (dashboard data changes frequently)
   });
@@ -40,7 +40,7 @@ export function useContentModerationQueue(params: ContentModerationParams = {}) 
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.content.queue(params),
+    queryKey: ['moderator', 'content', 'queue', params],
     queryFn: () => api.moderator.content.getQueue(params),
     staleTime: 1000 * 60 * 1, // 1 minute (moderation queue is very dynamic)
   });
@@ -68,27 +68,27 @@ export function useModerateContent() {
       
       // Invalidate moderation queues
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.content.all() 
+        queryKey: ['moderator', 'content'] 
       });
       
       // Invalidate content moderation data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.contentModeration.all 
+        queryKey: ['contentModeration'] 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.dashboard() 
+        queryKey: ['moderator', 'dashboard'] 
       });
       
       // Invalidate related content queries
       if (contentType === 'post') {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.posts.all 
+          queryKey: ['posts'] 
         });
       } else {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.comments.all 
+          queryKey: ['comments'] 
         });
       }
     },
@@ -105,7 +105,7 @@ export function useContentModerationReports(params: { type?: string; status?: st
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.content.reports(params),
+    queryKey: ['moderator', 'content', 'reports', params],
     queryFn: () => api.moderator.content.getReports(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
@@ -131,13 +131,13 @@ export function useUpdateModerationReport() {
       
       // Invalidate reports
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.content.all() 
+        queryKey: ['moderator', 'content'] 
       });
       
       // Invalidate dashboard if resolved
       if (data.status === 'resolved') {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.moderator.dashboard() 
+          queryKey: ['moderator', 'dashboard'] 
         });
       }
     },
@@ -154,7 +154,7 @@ export function useFlaggedUsers(params: UserModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.users.flagged(params),
+    queryKey: ['moderator', 'users', 'flagged', params],
     queryFn: () => api.moderator.users.getFlagged(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
@@ -183,24 +183,24 @@ export function useModerateUser() {
       
       // Invalidate user moderation data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.users.all() 
+        queryKey: ['moderator', 'users'] 
       });
       
       // Invalidate specific user data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.detail(userId) 
+        queryKey: ['admin', 'users', 'detail', userId] 
       });
       
       // Invalidate content moderation if user was suspended
       if (data.action === 'suspend') {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.contentModeration.userViolations(userId) 
+          queryKey: ['contentModeration', 'userViolations', userId] 
         });
       }
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.dashboard() 
+        queryKey: ['moderator', 'dashboard'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -216,7 +216,7 @@ export function useUserModerationHistory(userId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.users.history(userId || ''),
+    queryKey: ['moderator', 'users', 'history', userId || ''],
     queryFn: () => api.moderator.users.getHistory(userId!),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -230,7 +230,7 @@ export function useAuditLogsSearch(params: AuditLogParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.auditLogs.search(params),
+    queryKey: ['moderator', 'auditLogs', 'search', params],
     queryFn: () => api.moderator.auditLogs.search(params),
     staleTime: 1000 * 60 * 5, // 5 minutes (audit logs are relatively stable)
   });
@@ -243,7 +243,7 @@ export function useAuditLogsStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.auditLogs.stats(),
+    queryKey: ['moderator', 'auditLogs', 'stats'],
     queryFn: () => api.moderator.auditLogs.getStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -256,7 +256,7 @@ export function useSystemEvents(params: SystemEventParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.systemEvents.list(params),
+    queryKey: ['moderator', 'systemEvents', 'list', params],
     queryFn: () => api.moderator.systemEvents.getList(params),
     staleTime: 1000 * 60 * 2, // 2 minutes (system events are dynamic)
   });
@@ -282,12 +282,12 @@ export function useResolveSystemEvent() {
       
       // Invalidate system events
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.systemEvents.all() 
+        queryKey: ['moderator', 'systemEvents'] 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.dashboard() 
+        queryKey: ['moderator', 'dashboard'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -303,7 +303,7 @@ export function useModeratorProfile() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.profile(),
+    queryKey: ['moderator', 'profile'],
     queryFn: () => api.moderator.profile.get(),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -323,7 +323,7 @@ export function useUpdateModeratorProfile() {
       
       // Invalidate profile cache
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.profile() 
+        queryKey: ['moderator', 'profile'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -339,7 +339,7 @@ export function useModeratorActivity() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.activity(),
+    queryKey: ['moderator', 'activity'],
     queryFn: () => api.moderator.profile.getActivity(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -356,13 +356,13 @@ export function usePrefetchContentForModeration() {
     // Prefetch content details for faster moderation
     if (contentType === 'post') {
       queryClient.prefetchQuery({
-        queryKey: queryKeys.posts.detail(contentId),
+        queryKey: ['posts', 'detail', contentId],
         queryFn: () => api.posts.getById(contentId),
         staleTime: 1000 * 60 * 5,
       });
     } else {
       queryClient.prefetchQuery({
-        queryKey: queryKeys.comments.detail(contentId),
+        queryKey: ['comments', 'detail', contentId],
         queryFn: () => api.comments.getById(contentId),
         staleTime: 1000 * 60 * 5,
       });
@@ -412,13 +412,13 @@ export function useBulkModeration() {
       
       // Invalidate all moderation-related queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.content.all() 
+        queryKey: ['moderator', 'content'] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.contentModeration.all 
+        queryKey: ['contentModeration'] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.dashboard() 
+        queryKey: ['moderator', 'dashboard'] 
       });
     },
     onError: (error: MentaraApiError) => {
