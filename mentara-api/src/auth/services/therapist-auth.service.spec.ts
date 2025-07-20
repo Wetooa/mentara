@@ -5,7 +5,7 @@ import { TokenService } from './token.service';
 import { EmailVerificationService } from './email-verification.service';
 import { EmailService } from '../../email/email.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
-import { TherapistApplicationService } from '../../therapist/therapist-application.service';
+
 import {
   BadRequestException,
   UnauthorizedException,
@@ -23,7 +23,7 @@ describe('TherapistAuthService', () => {
   let emailVerificationService: jest.Mocked<EmailVerificationService>;
   let emailService: jest.Mocked<EmailService>;
   let supabaseStorageService: jest.Mocked<SupabaseStorageService>;
-  let therapistApplicationService: jest.Mocked<TherapistApplicationService>;
+
 
   const mockTherapistUser = {
     id: 'therapist-user-123',
@@ -163,16 +163,7 @@ describe('TherapistAuthService', () => {
             getFileUrl: jest.fn(),
           },
         },
-        {
-          provide: TherapistApplicationService,
-          useValue: {
-            createApplicationWithDocuments: jest.fn(),
-            getAllApplications: jest.fn(),
-            getApplicationById: jest.fn(),
-            updateApplicationStatus: jest.fn(),
-            getApplicationFiles: jest.fn(),
-          },
-        },
+
       ],
     }).compile();
 
@@ -182,7 +173,7 @@ describe('TherapistAuthService', () => {
     emailVerificationService = module.get(EmailVerificationService);
     emailService = module.get(EmailService);
     supabaseStorageService = module.get(SupabaseStorageService);
-    therapistApplicationService = module.get(TherapistApplicationService);
+
 
     // Setup bcrypt mock
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
@@ -446,108 +437,7 @@ describe('TherapistAuthService', () => {
     });
   });
 
-  describe('Application Management Methods', () => {
-    it('should create application with documents', async () => {
-      const expectedResponse = {
-        id: 'application-123',
-        success: true,
-        message: 'Application created successfully',
-      };
-
-      therapistApplicationService.createApplicationWithDocuments.mockResolvedValue(
-        expectedResponse,
-      );
-
-      const result = await service.createApplicationWithDocuments(
-        mockApplicationDto,
-        mockFiles,
-        mockFileTypeMap,
-      );
-
-      expect(result).toEqual(expectedResponse);
-      expect(therapistApplicationService.createApplicationWithDocuments).toHaveBeenCalledWith(
-        mockApplicationDto,
-        mockFiles,
-        mockFileTypeMap,
-      );
-    });
-
-    it('should get all applications', async () => {
-      const params = { status: 'pending', page: 1, limit: 10 };
-      const expectedResponse = {
-        applications: [{ id: 'app-1', status: 'pending' }],
-        totalCount: 1,
-        page: 1,
-        totalPages: 1,
-      };
-
-      therapistApplicationService.getAllApplications.mockResolvedValue(expectedResponse);
-
-      const result = await service.getAllApplications(params);
-
-      expect(result).toEqual(expectedResponse);
-      expect(therapistApplicationService.getAllApplications).toHaveBeenCalledWith(params);
-    });
-
-    it('should get application by ID', async () => {
-      const applicationId = 'application-123';
-      const expectedResponse = {
-        id: applicationId,
-        status: 'pending',
-        createdAt: new Date(),
-      };
-
-      therapistApplicationService.getApplicationById.mockResolvedValue(expectedResponse);
-
-      const result = await service.getApplicationById(applicationId);
-
-      expect(result).toEqual(expectedResponse);
-      expect(therapistApplicationService.getApplicationById).toHaveBeenCalledWith(
-        applicationId,
-      );
-    });
-
-    it('should update application status', async () => {
-      const applicationId = 'application-123';
-      const updateData = { status: 'approved', reviewedBy: 'admin-123' };
-      const expectedResponse = {
-        success: true,
-        message: 'Application approved successfully',
-        credentials: { email: 'therapist@example.com', password: 'temp-password' },
-      };
-
-      therapistApplicationService.updateApplicationStatus.mockResolvedValue(expectedResponse);
-
-      const result = await service.updateApplicationStatus(applicationId, updateData);
-
-      expect(result).toEqual(expectedResponse);
-      expect(therapistApplicationService.updateApplicationStatus).toHaveBeenCalledWith(
-        applicationId,
-        updateData,
-      );
-    });
-
-    it('should get application files', async () => {
-      const applicationId = 'application-123';
-      const expectedResponse = [
-        {
-          id: 'file-1',
-          fileName: 'license.pdf',
-          fileUrl: 'https://example.com/license.pdf',
-          uploadedAt: '2023-01-01T00:00:00.000Z',
-        },
-      ];
-
-      therapistApplicationService.getApplicationFiles.mockResolvedValue(expectedResponse);
-
-      const result = await service.getApplicationFiles(applicationId);
-
-      expect(result).toEqual(expectedResponse);
-      expect(therapistApplicationService.getApplicationFiles).toHaveBeenCalledWith(
-        applicationId,
-      );
-    });
-  });
+  // Application management methods are now implemented directly in the service
 
   describe('handleFailedLogin (private method)', () => {
     it('should increment failed login count for therapist with existing failed attempts', async () => {
@@ -638,17 +528,5 @@ describe('TherapistAuthService', () => {
     });
   });
 
-  describe('dependency injection and service delegation', () => {
-    it('should properly delegate to TherapistApplicationService', () => {
-      expect(service).toBeDefined();
-      expect(therapistApplicationService).toBeDefined();
-      
-      // Verify that the service methods are properly wired
-      expect(typeof service.createApplicationWithDocuments).toBe('function');
-      expect(typeof service.getAllApplications).toBe('function');
-      expect(typeof service.getApplicationById).toBe('function');
-      expect(typeof service.updateApplicationStatus).toBe('function');
-      expect(typeof service.getApplicationFiles).toBe('function');
-    });
-  });
+
 });

@@ -85,7 +85,7 @@ export class TherapistAuthController {
     refreshToken: string;
     expiresIn: number;
     message: string;
-    applicationId?: string;
+    therapistId?: string;
     uploadedFiles?: Array<{ id: string; fileName: string; url: string }>;
   }> {
     try {
@@ -211,7 +211,7 @@ export class TherapistAuthController {
         refreshToken: result.token, // Same token for compatibility
         expiresIn: 0, // Non-expiring
         message: result.message,
-        applicationId: result.applicationId,
+        therapistId: result.therapist?.userId,
         uploadedFiles: result.uploadedFiles,
       };
     } catch (error) {

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError } from "axios";
 
 /**
  * Create and configure the main API client
@@ -6,10 +6,10 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
  */
 export function createApiClient(): AxiosInstance {
   const client = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
     timeout: 10000,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
@@ -17,8 +17,8 @@ export function createApiClient(): AxiosInstance {
   client.interceptors.request.use(
     (config) => {
       // Get token from localStorage (client-side only)
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('auth_token');
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("auth_token");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -35,9 +35,9 @@ export function createApiClient(): AxiosInstance {
       // Handle 401 errors (unauthorized)
       if (error.response?.status === 401) {
         // Clear token and redirect to login
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          window.location.href = '/sign-in';
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("auth_token");
+          window.location.href = "/sign-in";
         }
       }
       return Promise.reject(error);
