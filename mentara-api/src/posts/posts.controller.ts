@@ -27,18 +27,7 @@ import {
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
 import { PostCreateInputDto, PostUpdateInputDto } from 'mentara-commons';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
 
-@ApiTags('posts')
-@ApiBearerAuth('JWT-auth')
 @Controller('posts')
 @UseGuards(JwtAuthGuard, CommunityAccessGuard)
 export class PostsController {
@@ -48,17 +37,6 @@ export class PostsController {
   ) {}
 
   @Get()
-  @ApiOperation({
-    summary: 'Retrieve find all',
-
-    description: 'Retrieve find all',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findAll(@CurrentUserId() id: string): Promise<PostEntity[]> {
     try {
       const user = await this.postsService.findUserById(id);
@@ -74,19 +52,6 @@ export class PostsController {
 
   @Get(':id')
   @RequireRoomAccess()
-  @ApiOperation({
-    summary: 'Retrieve find one',
-    description: 'Retrieve find one',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to access this post',
-  })
   async findOne(
     @Param('id') postId: string,
     @CurrentUserId() userId: string,
@@ -108,19 +73,6 @@ export class PostsController {
 
   @Post()
   @RequirePostingRole()
-  @ApiOperation({
-    summary: 'Create create',
-    description: 'Create create',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to post in this room',
-  })
   @UseInterceptors(FilesInterceptor('files', 10)) // Support up to 10 files
   async create(
     @CurrentUserId() id: string,
@@ -175,19 +127,6 @@ export class PostsController {
 
   @Put(':id')
   @RequireRoomAccess()
-  @ApiOperation({
-    summary: 'Update update',
-    description: 'Update update',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to access this post',
-  })
   async update(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -205,19 +144,6 @@ export class PostsController {
 
   @Delete(':id')
   @RequireRoomAccess()
-  @ApiOperation({
-    summary: 'Delete remove',
-    description: 'Delete remove',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Deleted successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to access this post',
-  })
   async remove(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -233,17 +159,6 @@ export class PostsController {
   }
 
   @Get('user/:userId')
-  @ApiOperation({
-    summary: 'Retrieve find by user id',
-
-    description: 'Retrieve find by user id',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findByUserId(@Param('userId') userId: string): Promise<PostEntity[]> {
     try {
       return await this.postsService.findByUserId(userId);
@@ -257,19 +172,6 @@ export class PostsController {
 
   @Get('room/:roomId')
   @RequireRoomAccess()
-  @ApiOperation({
-    summary: 'Retrieve find by room id',
-    description: 'Retrieve find by room id',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to access this room',
-  })
   async findByRoomId(
     @Param('roomId') roomId: string,
     @CurrentUserId() userId: string,
@@ -287,19 +189,6 @@ export class PostsController {
   // Heart functionality
   @Post(':id/heart')
   @RequireRoomAccess()
-  @ApiOperation({
-    summary: 'Create heart post',
-    description: 'Create heart post',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to access this post',
-  })
   async heartPost(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -315,17 +204,6 @@ export class PostsController {
   }
 
   @Get(':id/hearted')
-  @ApiOperation({
-    summary: 'Retrieve is post hearted',
-
-    description: 'Retrieve is post hearted',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async isPostHearted(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -346,20 +224,6 @@ export class PostsController {
 
   @Post(':id/report')
   @RequireRoomAccess()
-  @ApiOperation({
-    summary: 'Report a post',
-    description: 'Submit a report for inappropriate or harmful post content',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Report submitted successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({
-    status: 403,
-    description: 'Insufficient permissions to access this post',
-  })
-  @ApiResponse({ status: 404, description: 'Post not found' })
   async reportPost(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,

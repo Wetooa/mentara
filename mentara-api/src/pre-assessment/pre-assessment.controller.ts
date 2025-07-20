@@ -19,18 +19,7 @@ import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { PreAssessment } from '@prisma/client';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
 
-@ApiTags('pre-assessment')
-@ApiBearerAuth('JWT-auth')
 @Controller('pre-assessment')
 @UseGuards(JwtAuthGuard)
 export class PreAssessmentController {
@@ -42,17 +31,6 @@ export class PreAssessmentController {
   ) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create create pre assessment',
-
-    description: 'Create create pre assessment',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.CREATED)
   async createPreAssessment(
     @CurrentUserId() id: string,
@@ -68,17 +46,6 @@ export class PreAssessmentController {
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Retrieve get pre assessment',
-
-    description: 'Retrieve get pre assessment',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async getPreAssessment(@CurrentUserId() id: string): Promise<PreAssessment> {
     try {
@@ -91,17 +58,6 @@ export class PreAssessmentController {
   }
 
   @Put()
-  @ApiOperation({
-    summary: 'Update update pre assessment',
-
-    description: 'Update update pre assessment',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async updatePreAssessment(
     @CurrentUserId() id: string,
@@ -117,17 +73,6 @@ export class PreAssessmentController {
   }
 
   @Delete()
-  @ApiOperation({
-    summary: 'Delete delete pre assessment',
-
-    description: 'Delete delete pre assessment',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Deleted successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async deletePreAssessment(@CurrentUserId() id: string): Promise<null> {
     try {
@@ -140,17 +85,6 @@ export class PreAssessmentController {
   }
 
   @Get('ai-service/health')
-  @ApiOperation({
-    summary: 'Retrieve check ai service health',
-
-    description: 'Retrieve check ai service health',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
   async checkAiServiceHealth(@CurrentUserId() currentUserId: string): Promise<{

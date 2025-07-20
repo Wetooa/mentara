@@ -9,19 +9,8 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { TherapistManagementService } from '../therapist-management.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
 // Using any type to avoid conflicts with service definitions
 
-@ApiTags('therapist-client')
-@ApiBearerAuth('JWT-auth')
 @Controller('therapist/clients')
 @UseGuards(JwtAuthGuard)
 export class TherapistClientController {
@@ -30,17 +19,6 @@ export class TherapistClientController {
   ) {}
 
   @Get('assigned')
-  @ApiOperation({
-    summary: 'Retrieve get assigned patients',
-
-    description: 'Retrieve get assigned patients',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async getAssignedPatients(
     @CurrentUserId() therapistId: string,
@@ -49,34 +27,12 @@ export class TherapistClientController {
   }
 
   @Get('all')
-  @ApiOperation({
-    summary: 'Retrieve get all clients',
-
-    description: 'Retrieve get all clients',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async getAllClients(@CurrentUserId() therapistId: string): Promise<any[]> {
     return this.therapistManagementService.getAllClients(therapistId);
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Retrieve get client by id',
-
-    description: 'Retrieve get client by id',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async getClientById(
     @CurrentUserId() therapistId: string,

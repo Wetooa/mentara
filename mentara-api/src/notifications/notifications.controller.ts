@@ -18,18 +18,7 @@ import {
   type NotificationQuery,
 } from 'mentara-commons';
 import { NotificationType, NotificationPriority } from '@prisma/client';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
 
-@ApiTags('notifications')
-@ApiBearerAuth('JWT-auth')
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
@@ -111,14 +100,6 @@ export class NotificationsController {
   }
 
   @Patch(':id/read')
-  @ApiOperation({
-    summary: 'Mark notification as read',
-    description: 'Mark a specific notification as read',
-  })
-  @ApiParam({ name: 'id', description: 'Notification ID' })
-  @ApiResponse({ status: 200, description: 'Notification marked as read' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Notification not found' })
   markAsRead(@Param('id') id: string) {
     return this.notificationsService.markAsRead(id);
   }

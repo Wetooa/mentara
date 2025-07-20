@@ -18,15 +18,6 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
-import {
   CreateReviewDto,
   CreateReviewDtoSchema,
   UpdateReviewDto,
@@ -42,25 +33,12 @@ import {
   ReviewStats,
 } from 'mentara-commons';
 
-@ApiTags('reviews')
-@ApiBearerAuth('JWT-auth')
 @Controller('reviews')
 @UseGuards(JwtAuthGuard)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post(':meetingId/:therapistId')
-  @ApiOperation({
-    summary: 'Create create review',
-
-    description: 'Create create review',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.CREATED)
   async createReview(
     @Param('meetingId') meetingId: string,
@@ -78,17 +56,6 @@ export class ReviewsController {
   }
 
   @Put(':id')
-  @ApiOperation({
-    summary: 'Update update review',
-
-    description: 'Update update review',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateReview(
     @Param('id') reviewId: string,
     @CurrentUserId() clientId: string,
@@ -103,17 +70,6 @@ export class ReviewsController {
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Delete delete review',
-
-    description: 'Delete delete review',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Deleted successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteReview(
     @Param('id') reviewId: string,
@@ -123,17 +79,6 @@ export class ReviewsController {
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Retrieve get reviews',
-
-    description: 'Retrieve get reviews',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getReviews(
     @Query(new ZodValidationPipe(GetReviewsDtoSchema)) query: GetReviewsDto,
   ): Promise<ReviewListResponse> {
@@ -141,17 +86,6 @@ export class ReviewsController {
   }
 
   @Get('therapist/:therapistId')
-  @ApiOperation({
-    summary: 'Retrieve get therapist reviews',
-
-    description: 'Retrieve get therapist reviews',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getTherapistReviews(
     @Param('therapistId') therapistId: string,
     @Query(new ZodValidationPipe(GetReviewsDtoSchema))
@@ -161,33 +95,11 @@ export class ReviewsController {
   }
 
   @Get('therapist/:therapistId/stats')
-  @ApiOperation({
-    summary: 'Retrieve get therapist review stats',
-
-    description: 'Retrieve get therapist review stats',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getTherapistReviewStats(@Param('therapistId') therapistId: string) {
     return this.reviewsService.getReviewStats(therapistId);
   }
 
   @Post(':id/helpful')
-  @ApiOperation({
-    summary: 'Create mark review helpful',
-
-    description: 'Create mark review helpful',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async markReviewHelpful(
     @Param('id', new ZodValidationPipe(ReviewIdParamSchema)) reviewId: string,
@@ -198,17 +110,6 @@ export class ReviewsController {
 
   // Admin/Moderator endpoints
   @Post(':id/moderate')
-  @ApiOperation({
-    summary: 'Create moderate review',
-
-    description: 'Create moderate review',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async moderateReview(
     @Param('id', new ZodValidationPipe(ReviewIdParamSchema)) reviewId: string,
@@ -230,17 +131,6 @@ export class ReviewsController {
   }
 
   @Get('pending')
-  @ApiOperation({
-    summary: 'Retrieve get pending reviews',
-
-    description: 'Retrieve get pending reviews',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getPendingReviews(
     @CurrentUserRole() userRole: string,
     @Query(new ZodValidationPipe(GetReviewsDtoSchema)) query: GetReviewsDto,
