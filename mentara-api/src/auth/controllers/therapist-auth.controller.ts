@@ -33,7 +33,7 @@ import {
   type LoginDto,
   type TherapistApplicationCreateDto,
 } from 'mentara-commons';
-import { TherapistAuthService } from '../services/therapist-auth.service';
+import { TherapistAuthService } from '../../services/auth/therapist-auth.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { Request } from 'express';
 

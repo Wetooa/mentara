@@ -34,9 +34,9 @@ import {
   type UserResponse,
   type SuccessMessageResponse,
 } from 'mentara-commons';
-import { AuthService } from './auth.service';
-import { EmailVerificationService } from './services/email-verification.service';
-import { PasswordResetService } from './services/password-reset.service';
+import { AuthService } from '../services/auth/auth.service';
+import { EmailVerificationService } from '../services/email/email-verification.service';
+import { PasswordResetService } from '../services/email/password-reset.service';
 import { Request } from 'express';
 import {
   AuthResponseDto,
