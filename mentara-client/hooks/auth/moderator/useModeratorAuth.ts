@@ -84,13 +84,13 @@ export function useModeratorAuth(): UseModeratorAuthReturn {
       queryClient.clear();
       setError(null);
       toast.success("Logged out successfully");
-      router.push("/moderator/sign-in");
+      router.push("/auth/sign-in");
     },
     onError: () => {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       queryClient.clear();
-      router.push("/moderator/sign-in");
+      router.push("/auth/sign-in");
     },
   });
 

@@ -214,38 +214,6 @@ export const TherapistRecommendationResponseSchema = z.object({
   pageSize: z.number().min(1)
 });
 
-// Therapist Dashboard Data Schema
-export const TherapistDashboardDataSchema = z.object({
-  therapist: z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    avatar: z.string().url()
-  }),
-  stats: z.object({
-    activePatients: z.number().min(0),
-    rescheduled: z.number().min(0),
-    cancelled: z.number().min(0),
-    income: z.number().min(0),
-    patientStats: z.object({
-      total: z.number().min(0),
-      percentage: z.number().min(0).max(100),
-      months: z.number().min(0),
-      chartData: z.array(z.object({
-        month: z.string().min(1),
-        value: z.number().min(0)
-      }))
-    })
-  }),
-  upcomingAppointments: z.array(z.object({
-    id: z.string().min(1),
-    patientId: z.string().min(1),
-    patientName: z.string().min(1),
-    time: z.string().min(1),
-    date: z.string().datetime(),
-    type: z.string().min(1),
-    status: z.enum(['scheduled', 'confirmed', 'cancelled', 'completed'])
-  }))
-});
 
 // Patient Data Schema
 export const PatientDataSchema = z.object({
@@ -440,7 +408,6 @@ export type TherapistRecommendation = z.infer<typeof TherapistRecommendationSche
 export type MatchCriteria = z.infer<typeof MatchCriteriaSchema>;
 export type TherapistSearchParams = z.infer<typeof TherapistSearchParamsSchema>;
 export type TherapistRecommendationResponse = z.infer<typeof TherapistRecommendationResponseSchema>;
-export type TherapistDashboardData = z.infer<typeof TherapistDashboardDataSchema>;
 export type PatientData = z.infer<typeof PatientDataSchema>;
 export type PersonalInfo = z.infer<typeof PersonalInfoSchema>;
 export type ProfessionalInfo = z.infer<typeof ProfessionalInfoSchema>;

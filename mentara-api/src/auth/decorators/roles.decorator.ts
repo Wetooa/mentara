@@ -6,11 +6,15 @@ export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
 
 // Specific role decorators for convenience
 export const AdminOnly = () => SetMetadata(ROLES_KEY, ['admin']);
+export const ModeratorOnly = () => SetMetadata(ROLES_KEY, ['moderator']);
+export const TherapistOnly = () => SetMetadata(ROLES_KEY, ['therapist']);
+export const ClientOnly = () => SetMetadata(ROLES_KEY, ['client']);
+
+// Combined role decorators
 export const ModeratorOrAdmin = () =>
   SetMetadata(ROLES_KEY, ['moderator', 'admin']);
 export const TherapistOrAdmin = () =>
   SetMetadata(ROLES_KEY, ['therapist', 'admin']);
-export const ClientOnly = () => SetMetadata(ROLES_KEY, ['client']);
 
 // Permission-based decorators
 export const PERMISSIONS_KEY = 'permissions';

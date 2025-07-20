@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AdminAuthController } from './admin-auth.controller';
-import { AdminAuthService } from '../services/admin-auth.service';
+import { AdminAuthService } from '../../services/auth/admin-auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {

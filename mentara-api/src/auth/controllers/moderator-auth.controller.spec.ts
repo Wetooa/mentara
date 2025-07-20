@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ModeratorAuthController } from './moderator-auth.controller';
-import { ModeratorAuthService } from '../services/moderator-auth.service';
+import { ModeratorAuthService } from '../../services/auth/moderator-auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {

@@ -3,24 +3,31 @@
  * Simple, unified interface for all API operations
  */
 
-import { apiClient, createApiClient } from './client';
-import { createAuthService, type AuthService } from './auth';
-export type { ApiResponse, ApiError } from './types';
+import { apiClient, createApiClient } from "./client";
+import { createAuthService, type AuthService } from "./auth";
+import {
+  createDashboardService,
+  type DashboardService,
+} from "./services/dashboard";
+export type { ApiResponse, ApiError } from "./types";
 
 // Export client utilities
 export { apiClient, createApiClient };
 
-// Export auth service creator
+// Export service creators
 export { createAuthService, type AuthService };
+export { createDashboardService, type DashboardService };
 
-// Create auth service instance
+// Create service instances
 const authService = createAuthService(apiClient);
+const dashboardService = createDashboardService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
   // New unified structure
   auth: authService,
-  
+  dashboard: dashboardService,
+
   // Backwards compatible structure for existing hooks
   clientAuth: authService.client,
   adminAuth: authService.admin,
@@ -58,4 +65,4 @@ export type {
   ClientUser,
   ApiResponse,
   ApiError,
-} from './types';
+} from "./types";

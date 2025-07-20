@@ -195,7 +195,7 @@ export default function TherapistListing({
         return;
       }
       
-      router.push(`/user/messages?contact=${encodeURIComponent(therapistId)}`);
+      router.push(`/client/messages?contact=${encodeURIComponent(therapistId)}`);
       toast.success("Opening messages...");
     } catch (error) {
       console.error('Error navigating to messages:', error);
@@ -302,7 +302,7 @@ export default function TherapistListing({
               } catch (error) {
                 console.error('Error reloading page:', error);
                 // Fallback: try to navigate to base therapist listing
-                router.push('/user/therapists');
+                router.push('/client/therapists');
               }
             }}
           >

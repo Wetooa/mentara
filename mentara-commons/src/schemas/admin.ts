@@ -199,22 +199,6 @@ export type AdminFlaggedContentParamsDto = z.infer<
   typeof AdminFlaggedContentParamsDtoSchema
 >;
 
-// Additional admin types moved from frontend services
-export const SystemStatsSchema = z.object({
-  totalUsers: z.number().min(0),
-  totalClients: z.number().min(0),
-  totalTherapists: z.number().min(0),
-  pendingApplications: z.number().min(0),
-  totalCommunities: z.number().min(0),
-  totalPosts: z.number().min(0),
-  totalSessions: z.number().min(0),
-  growth: z.object({
-    usersGrowth: z.number(),
-    clientsGrowth: z.number(),
-    therapistsGrowth: z.number(),
-    sessionsGrowth: z.number(),
-  }),
-});
 
 export const UserGrowthDataSchema = z.object({
   date: z.string().datetime(),
@@ -312,7 +296,6 @@ export const UserSuspendRequestSchema = z.object({
 });
 
 // Export type inference helpers for new schemas
-export type SystemStats = z.infer<typeof SystemStatsSchema>;
 export type UserGrowthData = z.infer<typeof UserGrowthDataSchema>;
 export type EngagementData = z.infer<typeof EngagementDataSchema>;
 export type AdminModerationReport = z.infer<typeof AdminModerationReportSchema>;

@@ -34,9 +34,9 @@ import {
   type UserResponse,
   type SuccessMessageResponse,
 } from 'mentara-commons';
-import { AuthService } from './auth.service';
-import { EmailVerificationService } from './services/email-verification.service';
-import { PasswordResetService } from './services/password-reset.service';
+import { AuthService } from '../services/auth/auth.service';
+import { EmailVerificationService } from '../services/email/email-verification.service';
+import { PasswordResetService } from '../services/email/password-reset.service';
 import { Request } from 'express';
 import {
   AuthResponseDto,
@@ -83,30 +83,6 @@ export class AuthController {
     return new SuccessMessageDto('Successfully logged out from all devices');
   }
 
-  // Local Authentication Endpoints
-  @Public()
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registration attempts per 5 minutes
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body(new ZodValidationPipe(RegisterUserDtoSchema))
-    registerDto: RegisterUserDto,
-  ): Promise<SuccessMessageResponse> {
-    // Only allow client and therapist roles for general registration
-    const allowedRole =
-      registerDto.role === 'therapist' ? 'therapist' : 'client';
-
-    const result = await this.authService.registerUserWithEmail(
-      registerDto.email,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-      allowedRole,
-    );
-
-    return new SuccessMessageDto(result.message);
-  }
-
   @Public()
   @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
   @Post('login')
@@ -140,7 +116,6 @@ export class AuthController {
   }
 
   // Removed refresh token endpoint - no longer needed with non-expiring tokens
-
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
@@ -159,6 +134,22 @@ export class AuthController {
       throw new UnauthorizedException('User not found');
     }
     return UserResponseDto.fromPrismaUser(user);
+  }
+
+  // ===== SECURE ROLE CHECKING ENDPOINT =====
+
+  @UseGuards(JwtAuthGuard)
+  @Get('user-role')
+  async getUserRole(@CurrentUserId() userId: string): Promise<{ role: string; userId: string }> {
+    const user = await this.authService.validateUser(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    
+    return {
+      role: user.role,
+      userId: user.id,
+    };
   }
 
   // Role-specific profile endpoints moved to dedicated controllers:

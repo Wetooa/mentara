@@ -112,7 +112,7 @@ export function ClientOnboarding() {
     // Mark onboarding as complete
     localStorage.setItem("mentara_client_onboarding_complete", "true");
     // Redirect to client dashboard
-    router.push("/user");
+    router.push("/client");
   };
 
   return (

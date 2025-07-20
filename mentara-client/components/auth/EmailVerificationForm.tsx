@@ -10,7 +10,7 @@ import {
   AlertCircle,
   RefreshCw,
   Shield,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +25,10 @@ import { cn } from "@/lib/utils";
 import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 const otpSchema = z.object({
-  code: z.string().min(6, "Verification code must be 6 digits").max(6, "Verification code must be 6 digits"),
+  code: z
+    .string()
+    .min(6, "Verification code must be 6 digits")
+    .max(6, "Verification code must be 6 digits"),
 });
 
 type OtpForm = z.infer<typeof otpSchema>;
@@ -33,7 +36,7 @@ type OtpForm = z.infer<typeof otpSchema>;
 interface EmailVerificationFormProps {
   email: string;
   name: string;
-  type: 'registration' | 'password_reset' | 'login_verification';
+  type: "registration" | "password_reset" | "login_verification";
   onVerificationSuccess: (code: string) => void;
   onCancel?: () => void;
   onResendCode?: () => void;
@@ -48,7 +51,7 @@ export function EmailVerificationForm({
   onCancel,
   onResendCode,
   isVerifying = false,
-  className
+  className,
 }: EmailVerificationFormProps) {
   // Use the email verification hook for ALL business logic
   const {
@@ -69,7 +72,6 @@ export function EmailVerificationForm({
       code: "",
     },
   });
-
 
   // Simple wrapper functions that delegate to the hook
   const onResendCodeWrapper = async () => {
@@ -106,9 +108,11 @@ export function EmailVerificationForm({
             >
               {config.icon}
             </motion.div>
-            
+
             <div>
-              <CardTitle className="text-xl font-bold">{config.title}</CardTitle>
+              <CardTitle className="text-xl font-bold">
+                {config.title}
+              </CardTitle>
               <p className="text-muted-foreground mt-2">{config.description}</p>
             </div>
 
@@ -121,7 +125,10 @@ export function EmailVerificationForm({
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <form onSubmit={form.handleSubmit(onVerifyCodeWrapper)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onVerifyCodeWrapper)}
+              className="space-y-6"
+            >
               {/* OTP Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-center block">
@@ -160,23 +167,25 @@ export function EmailVerificationForm({
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className={cn(
-                      "font-medium",
-                      isExpired ? "text-red-500" : timeLeft < 60 ? "text-orange-500" : "text-muted-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        "font-medium",
+                        isExpired
+                          ? "text-red-500"
+                          : timeLeft < 60
+                            ? "text-orange-500"
+                            : "text-muted-foreground"
+                      )}
+                    >
                       {isExpired ? "Expired" : formatTime(timeLeft)}
                     </span>
                   </div>
                 </div>
-                
-                <Progress 
-                  value={progressValue} 
-                  className={cn(
-                    "h-2",
-                    isExpired && "opacity-50"
-                  )}
-                />
 
+                <Progress
+                  value={progressValue}
+                  className={cn("h-2", isExpired && "opacity-50")}
+                />
               </div>
 
               {/* Status Messages */}
@@ -190,7 +199,8 @@ export function EmailVerificationForm({
                     <Alert variant="destructive">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Your verification code has expired. Please request a new one.
+                        Your verification code has expired. Please request a new
+                        one.
                       </AlertDescription>
                     </Alert>
                   </motion.div>
@@ -201,14 +211,20 @@ export function EmailVerificationForm({
               <div className="space-y-3">
                 <Button
                   type="submit"
-                  disabled={isVerifying || isExpired || form.watch("code").length !== 6}
+                  disabled={
+                    isVerifying || isExpired || form.watch("code").length !== 6
+                  }
                   className="w-full"
                 >
                   {isVerifying ? (
                     <>
                       <motion.div
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
                         className="mr-2"
                       >
                         <RefreshCw className="h-4 w-4" />
@@ -224,7 +240,9 @@ export function EmailVerificationForm({
                 </Button>
 
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-sm text-muted-foreground">Didn&apos;t receive the code?</span>
+                  <span className="text-sm text-muted-foreground">
+                    Didn&apos;t receive the code?
+                  </span>
                   <Button
                     type="button"
                     variant="link"
@@ -266,7 +284,8 @@ export function EmailVerificationForm({
                 <div className="text-sm text-blue-800">
                   <p className="font-medium">Security Notice</p>
                   <p className="text-blue-700 mt-1">
-                    Never share your verification code with anyone. Mentara will never ask for your codes.
+                    Never share your verification code with anyone. Mentara will
+                    never ask for your codes.
                   </p>
                 </div>
               </div>

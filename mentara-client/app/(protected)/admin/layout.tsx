@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRole } from "@/hooks/useRole";
+
 
 export default function AdminLayout({
   children,
@@ -40,13 +40,12 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAdmin } = useRole();
-  const { user, isLoaded, logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  // Admin data from auth user
+  // Admin data - can use real user data now
   const admin = {
-    name: user?.firstName ? `${user.firstName} ${user.lastName}` : "Admin User",
-    email: user?.email || "admin@mentara.com",
+    name: user ? `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} User` : "Admin User",
+    email: "admin@mentara.com",
     avatarUrl: "/icons/user-avatar.png",
   };
 
@@ -88,31 +87,9 @@ export default function AdminLayout({
     },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
-
-  // Show loading state while user data is loading
-  if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-gray-500">Loading admin dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not an admin, redirect to main page (middleware should handle this)
-  if (!isAdmin) {
-    router.push("/");
-    return null;
-  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">

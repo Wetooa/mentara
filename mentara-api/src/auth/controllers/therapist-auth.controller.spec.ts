@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TherapistAuthController } from './therapist-auth.controller';
-import { TherapistAuthService } from '../services/therapist-auth.service';
+import { TherapistAuthService } from '../../services/auth/therapist-auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';

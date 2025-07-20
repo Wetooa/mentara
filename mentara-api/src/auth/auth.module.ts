@@ -3,11 +3,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthService } from '../services/auth/auth.service';
 import { EventBusService } from '../common/events/event-bus.service';
-import { TokenService } from './services/token.service';
-import { EmailVerificationService } from './services/email-verification.service';
-import { PasswordResetService } from './services/password-reset.service';
+import { TokenService } from '../services/auth/token.service';
+import { EmailVerificationService } from '../services/email/email-verification.service';
+import { PasswordResetService } from '../services/email/password-reset.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
@@ -20,10 +20,10 @@ import { AdminAuthController } from './controllers/admin-auth.controller';
 import { ModeratorAuthController } from './controllers/moderator-auth.controller';
 
 // Role-specific services
-import { ClientAuthService } from './services/client-auth.service';
-import { TherapistAuthService } from './services/therapist-auth.service';
-import { AdminAuthService } from './services/admin-auth.service';
-import { ModeratorAuthService } from './services/moderator-auth.service';
+import { ClientAuthService } from '../services/auth/client-auth.service';
+import { TherapistAuthService } from '../services/auth/therapist-auth.service';
+import { AdminAuthService } from '../services/auth/admin-auth.service';
+import { ModeratorAuthService } from '../services/auth/moderator-auth.service';
 
 import { TherapistModule } from '../therapist/therapist.module';
 
@@ -62,7 +62,6 @@ import { TherapistModule } from '../therapist/therapist.module';
     TherapistAuthService,
     AdminAuthService,
     ModeratorAuthService,
-
   ],
   exports: [
     AuthService,

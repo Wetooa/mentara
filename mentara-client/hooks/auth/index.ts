@@ -1,6 +1,12 @@
 // Main auth hook
 export { useAuth } from "../../contexts/AuthContext";
 
+// Registration and verification hooks
+export { useClientRegistration } from "./useClientRegistration";
+export type { ClientRegistrationData, UseClientRegistrationReturn } from "./useClientRegistration";
+
+export { useEmailVerification } from "./useEmailVerification";
+
 // Role-specific auth hooks
 export { useClientAuth } from "./client";
 export type { UseClientAuthReturn } from "./client";
@@ -14,9 +20,7 @@ export type { UseAdminAuthReturn } from "./admin";
 export { useModeratorAuth } from "./moderator";
 export type { UseModeratorAuthReturn } from "./moderator";
 
-// Enhanced auth utilities
-export { useAuthErrorHandler } from "./useAuthErrorHandler";
-export type { AuthErrorContext, AuthErrorResult } from "./useAuthErrorHandler";
+// Enhanced auth utilities (removed useAuthErrorHandler - overcomplicated)
 
 export { useAuthLoadingStates } from "./useAuthLoadingStates";
 export type { AuthOperation, LoadingState } from "./useAuthLoadingStates";
