@@ -10,7 +10,7 @@ import { EmailVerificationService } from './email-verification.service';
 import { EmailService } from '../../email/email.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { TherapistApplicationService } from '../../therapist/therapist-application.service';
-import { type TherapistApplicationCreateDto } from 'mentara-commons';
+import { type TherapistApplicationCreateDto, type RegisterTherapistDto } from 'mentara-commons';
 import {
   TherapistApplicationResponse,
   ApplicationStatusUpdateDto,
@@ -27,6 +27,131 @@ export class TherapistAuthService {
     private readonly supabaseStorageService: SupabaseStorageService,
     private readonly therapistApplicationService: TherapistApplicationService,
   ) {}
+
+  async registerTherapistWithDocuments(
+    registerData: RegisterTherapistDto,
+    files: Express.Multer.File[],
+    fileTypeMap: Record<string, string>,
+  ) {
+    // Check if user already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: registerData.email },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('User with this email already exists');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(registerData.password, 12);
+
+    // Transform registration data to application format
+    const applicationData: TherapistApplicationCreateDto = {
+      userId: `temp_${Date.now()}_${registerData.email.replace('@', '_at_')}`,
+      firstName: registerData.firstName,
+      lastName: registerData.lastName,
+      email: registerData.email,
+      mobile: registerData.mobile,
+      province: registerData.province,
+      providerType: registerData.providerType,
+      professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
+      isPRCLicensed: registerData.isPRCLicensed,
+      prcLicenseNumber: registerData.prcLicenseNumber || '',
+      isLicenseActive: registerData.isLicenseActive || '',
+      expirationDateOfLicense: registerData.expirationDateOfLicense,
+      practiceStartDate: registerData.practiceStartDate,
+      areasOfExpertise: registerData.areasOfExpertise,
+      assessmentTools: registerData.assessmentTools,
+      therapeuticApproachesUsedList: registerData.therapeuticApproachesUsedList_specify
+        ? [...registerData.therapeuticApproachesUsedList.filter(t => t !== 'other'), registerData.therapeuticApproachesUsedList_specify]
+        : registerData.therapeuticApproachesUsedList,
+      languagesOffered: registerData.languagesOffered_specify
+        ? [...registerData.languagesOffered.filter(l => l !== 'other'), registerData.languagesOffered_specify]
+        : registerData.languagesOffered,
+      providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
+      comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
+      privateConfidentialSpace: registerData.privateConfidentialSpace === 'yes',
+      compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
+      weeklyAvailability: registerData.weeklyAvailability,
+      preferredSessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength,
+      accepts: registerData.accepts,
+      bio: registerData.bio || '',
+      hourlyRate: registerData.hourlyRate || 0,
+      professionalLiabilityInsurance: registerData.professionalLiabilityInsurance,
+      complaintsOrDisciplinaryActions: registerData.complaintsOrDisciplinaryActions,
+      complaintsOrDisciplinaryActions_specify: registerData.complaintsOrDisciplinaryActions_specify,
+      willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
+    };
+
+    // Create application with documents first
+    const applicationResult = await this.therapistApplicationService.createApplicationWithDocuments(
+      applicationData,
+      files,
+      fileTypeMap,
+    );
+
+    // Create user and therapist profile in transaction
+    const userResult = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: registerData.email,
+          password: hashedPassword,
+          firstName: registerData.firstName,
+          lastName: registerData.lastName,
+          role: 'therapist',
+          emailVerified: false,
+        },
+      });
+
+      // Update the application with the real user ID
+      await tx.therapist.update({
+        where: { userId: applicationResult.application.userId },
+        data: { userId: user.id },
+      });
+
+      const therapist = await tx.therapist.create({
+        data: {
+          userId: user.id,
+          status: 'PENDING',
+          mobile: registerData.mobile,
+          province: registerData.province,
+          providerType: registerData.providerType,
+          professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
+          isPRCLicensed: registerData.isPRCLicensed,
+          prcLicenseNumber: registerData.prcLicenseNumber || '',
+          expirationDateOfLicense: registerData.expirationDateOfLicense ? new Date(registerData.expirationDateOfLicense) : new Date(),
+          practiceStartDate: new Date(registerData.practiceStartDate),
+          sessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength || '60 minutes',
+          hourlyRate: registerData.hourlyRate || 0,
+          providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
+          comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
+          compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
+          willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
+          treatmentSuccessRates: {},
+        },
+      });
+
+      return { user, therapist };
+    });
+
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
+      userResult.user.id,
+      userResult.user.email,
+      userResult.user.role,
+    );
+
+    // Send verification email
+    await this.emailVerificationService.sendVerificationEmail(userResult.user.id);
+
+    return {
+      user: userResult.user,
+      token,
+      message: 'Therapist registration successful with documents uploaded. Application is under review.',
+      applicationId: applicationResult.application.id,
+      uploadedFiles: applicationResult.uploadedFiles,
+    };
+  }
 
   async registerTherapist(
     email: string,
