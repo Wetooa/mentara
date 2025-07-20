@@ -235,9 +235,9 @@ export declare const CommunityUpdateInputDtoSchema: z.ZodObject<{
     requireApproval: z.ZodOptional<z.ZodBoolean>;
     isActive: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    isActive?: boolean | undefined;
     description?: string | undefined;
     name?: string | undefined;
-    isActive?: boolean | undefined;
     category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
@@ -245,9 +245,9 @@ export declare const CommunityUpdateInputDtoSchema: z.ZodObject<{
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
 }, {
+    isActive?: boolean | undefined;
     description?: string | undefined;
     name?: string | undefined;
-    isActive?: boolean | undefined;
     category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;

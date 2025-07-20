@@ -398,6 +398,7 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
     page: number;
+    total: number;
     totalPages: number;
     hasMore: boolean;
     logs: {
@@ -416,9 +417,9 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
         timestamp: string;
         details: string;
     }[];
-    total: number;
 }, {
     page: number;
+    total: number;
     totalPages: number;
     hasMore: boolean;
     logs: {
@@ -437,7 +438,6 @@ export declare const AuditLogListResponseSchema: z.ZodObject<{
         timestamp: string;
         details: string;
     }[];
-    total: number;
 }>;
 export declare const AuditLogStatsSchema: z.ZodObject<{
     totalLogs: z.ZodNumber;
@@ -466,12 +466,12 @@ export declare const AuditLogStatsSchema: z.ZodObject<{
         errors: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         date: string;
-        count: number;
         errors: number;
+        count: number;
     }, {
         date: string;
-        count: number;
         errors: number;
+        count: number;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     totalUsers: number;
@@ -488,8 +488,8 @@ export declare const AuditLogStatsSchema: z.ZodObject<{
     }[];
     trends: {
         date: string;
-        count: number;
         errors: number;
+        count: number;
     }[];
 }, {
     totalUsers: number;
@@ -506,8 +506,8 @@ export declare const AuditLogStatsSchema: z.ZodObject<{
     }[];
     trends: {
         date: string;
-        count: number;
         errors: number;
+        count: number;
     }[];
 }>;
 export declare const SecurityEventSchema: z.ZodObject<{

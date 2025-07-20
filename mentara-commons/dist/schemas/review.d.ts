@@ -191,9 +191,9 @@ export declare const ReviewListParamsSchema: z.ZodEffects<z.ZodObject<{
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     minRating?: number | undefined;
@@ -211,9 +211,9 @@ export declare const ReviewListParamsSchema: z.ZodEffects<z.ZodObject<{
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "createdAt" | "rating" | "helpfulCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     minRating?: number | undefined;
@@ -335,6 +335,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
     }>>;
 }, "strip", z.ZodTypeAny, {
     page: number;
+    totalPages: number;
     reviews: {
         status: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
         id: string;
@@ -362,7 +363,6 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
     }[];
     totalCount: number;
     pageSize: number;
-    totalPages: number;
     averageRating?: number | undefined;
     ratingDistribution?: {
         '1': number;
@@ -373,6 +373,7 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
     } | undefined;
 }, {
     page: number;
+    totalPages: number;
     reviews: {
         id: string;
         createdAt: string;
@@ -400,7 +401,6 @@ export declare const ReviewListResponseSchema: z.ZodObject<{
     }[];
     totalCount: number;
     pageSize: number;
-    totalPages: number;
     averageRating?: number | undefined;
     ratingDistribution?: {
         '1': number;
@@ -874,10 +874,10 @@ export declare const GetReviewsDtoSchema: z.ZodObject<{
 }, {
     status?: "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED" | undefined;
     therapistId?: string | undefined;
-    rating?: number | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    rating?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: string | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }>;

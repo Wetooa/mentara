@@ -112,9 +112,9 @@ export declare const TherapistRequestFiltersDtoSchema: z.ZodObject<{
     respondedBefore?: string | undefined;
 }, {
     status?: "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED" | "WITHDRAWN" | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "status" | "priority" | "requestedAt" | "respondedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;

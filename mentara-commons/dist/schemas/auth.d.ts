@@ -587,13 +587,11 @@ export declare const AuthResponseSchema: z.ZodObject<{
         id: string;
         emailVerified: boolean;
     }>;
-    accessToken: z.ZodString;
-    refreshToken: z.ZodString;
-    expiresIn: z.ZodNumber;
+    token: z.ZodString;
+    message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -603,9 +601,8 @@ export declare const AuthResponseSchema: z.ZodObject<{
         emailVerified: boolean;
     };
 }, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -638,15 +635,11 @@ export declare const ClientAuthResponseSchema: z.ZodObject<{
         id: string;
         emailVerified: boolean;
     }>;
-    accessToken: z.ZodString;
-    refreshToken: z.ZodString;
-    expiresIn: z.ZodNumber;
+    token: z.ZodString;
 } & {
     message: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -657,9 +650,7 @@ export declare const ClientAuthResponseSchema: z.ZodObject<{
     };
     message?: string | undefined;
 }, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -693,13 +684,11 @@ export declare const TherapistAuthResponseSchema: z.ZodObject<{
         id: string;
         emailVerified: boolean;
     }>;
-    accessToken: z.ZodString;
-    refreshToken: z.ZodString;
-    expiresIn: z.ZodNumber;
+    token: z.ZodString;
+    message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -709,9 +698,8 @@ export declare const TherapistAuthResponseSchema: z.ZodObject<{
         emailVerified: boolean;
     };
 }, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -744,13 +732,11 @@ export declare const AdminAuthResponseSchema: z.ZodObject<{
         id: string;
         emailVerified: boolean;
     }>;
-    accessToken: z.ZodString;
-    refreshToken: z.ZodString;
-    expiresIn: z.ZodNumber;
+    token: z.ZodString;
+    message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -760,9 +746,8 @@ export declare const AdminAuthResponseSchema: z.ZodObject<{
         emailVerified: boolean;
     };
 }, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -795,13 +780,11 @@ export declare const ModeratorAuthResponseSchema: z.ZodObject<{
         id: string;
         emailVerified: boolean;
     }>;
-    accessToken: z.ZodString;
-    refreshToken: z.ZodString;
-    expiresIn: z.ZodNumber;
+    token: z.ZodString;
+    message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;
@@ -811,9 +794,8 @@ export declare const ModeratorAuthResponseSchema: z.ZodObject<{
         emailVerified: boolean;
     };
 }, {
-    refreshToken: string;
-    accessToken: string;
-    expiresIn: number;
+    message: string;
+    token: string;
     user: {
         email: string;
         firstName: string;

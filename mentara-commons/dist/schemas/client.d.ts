@@ -66,8 +66,8 @@ export declare const ClientProfileSchema: z.ZodObject<{
     role: "client" | "therapist" | "moderator" | "admin";
     id: string;
     createdAt: string;
-    updatedAt: string;
     isActive: boolean;
+    updatedAt: string;
     isOnboardingComplete: boolean;
     therapistId?: string | undefined;
     preferences?: {
@@ -92,8 +92,8 @@ export declare const ClientProfileSchema: z.ZodObject<{
     role: "client" | "therapist" | "moderator" | "admin";
     id: string;
     createdAt: string;
-    updatedAt: string;
     isActive: boolean;
+    updatedAt: string;
     isOnboardingComplete: boolean;
     therapistId?: string | undefined;
     preferences?: {

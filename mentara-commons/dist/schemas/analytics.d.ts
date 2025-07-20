@@ -269,13 +269,13 @@ export declare const CustomAnalyticsQueryDtoSchema: z.ZodObject<{
         aggregation: z.ZodEnum<["sum", "avg", "count", "min", "max"]>;
         filter: z.ZodOptional<z.ZodAny>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         field: string;
+        name: string;
         aggregation: "count" | "min" | "max" | "sum" | "avg";
         filter?: any;
     }, {
-        name: string;
         field: string;
+        name: string;
         aggregation: "count" | "min" | "max" | "sum" | "avg";
         filter?: any;
     }>, "many">;
@@ -299,8 +299,8 @@ export declare const CustomAnalyticsQueryDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     timeframe: "month" | "week" | "quarter" | "year";
     metrics: {
-        name: string;
         field: string;
+        name: string;
         aggregation: "count" | "min" | "max" | "sum" | "avg";
         filter?: any;
     }[];
@@ -316,8 +316,8 @@ export declare const CustomAnalyticsQueryDtoSchema: z.ZodObject<{
     }[] | undefined;
 }, {
     metrics: {
-        name: string;
         field: string;
+        name: string;
         aggregation: "count" | "min" | "max" | "sum" | "avg";
         filter?: any;
     }[];

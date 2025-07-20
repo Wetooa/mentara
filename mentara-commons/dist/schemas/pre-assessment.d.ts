@@ -465,8 +465,8 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
-    hasMore: boolean;
     total: number;
+    hasMore: boolean;
     assessments: {
         id: string;
         userId: string;
@@ -486,8 +486,8 @@ export declare const PreAssessmentListResponseSchema: z.ZodObject<{
 }, {
     page: number;
     limit: number;
-    hasMore: boolean;
     total: number;
+    hasMore: boolean;
     assessments: {
         id: string;
         userId: string;

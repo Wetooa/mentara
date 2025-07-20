@@ -398,8 +398,8 @@ export declare const PostListParamsDtoSchema: z.ZodObject<{
     tags?: string[] | undefined;
     authorId?: string | undefined;
 }, {
-    isAnonymous?: boolean | undefined;
     limit?: number | undefined;
+    isAnonymous?: boolean | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
     roomId?: string | undefined;
     offset?: number | undefined;
@@ -424,8 +424,8 @@ export declare const PostByUserParamsDtoSchema: z.ZodObject<{
     tags?: string[] | undefined;
 }, {
     userId: string;
-    isAnonymous?: boolean | undefined;
     limit?: number | undefined;
+    isAnonymous?: boolean | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
     roomId?: string | undefined;
     offset?: number | undefined;
@@ -449,8 +449,8 @@ export declare const PostByRoomParamsDtoSchema: z.ZodObject<{
     authorId?: string | undefined;
 }, {
     roomId: string;
-    isAnonymous?: boolean | undefined;
     limit?: number | undefined;
+    isAnonymous?: boolean | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
     offset?: number | undefined;
     tags?: string[] | undefined;
@@ -858,6 +858,7 @@ export declare const PostListResponseSchema: z.ZodObject<{
     total: z.ZodNumber;
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
+    total: number;
     hasMore: boolean;
     posts: {
         type: "video" | "image" | "text" | "link" | "poll";
@@ -901,8 +902,8 @@ export declare const PostListResponseSchema: z.ZodObject<{
         };
         isHearted?: boolean | undefined;
     }[];
-    total: number;
 }, {
+    total: number;
     hasMore: boolean;
     posts: {
         type: "video" | "image" | "text" | "link" | "poll";
@@ -946,7 +947,6 @@ export declare const PostListResponseSchema: z.ZodObject<{
         };
         isHearted?: boolean | undefined;
     }[];
-    total: number;
 }>;
 export declare const HeartPostResponseSchema: z.ZodObject<{
     isHearted: z.ZodBoolean;

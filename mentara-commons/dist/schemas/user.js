@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EmailSchema = exports.UserIdSchema = exports.VerifyEmailDtoSchema = exports.ResendVerificationEmailDtoSchema = exports.SendVerificationEmailDtoSchema = exports.ResetPasswordDtoSchema = exports.RequestPasswordResetDtoSchema = exports.UserIdParamSchema = exports.LogoutDtoSchema = exports.RegisterUserDtoSchema = exports.ChangePasswordDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = exports.RegisterModeratorDtoSchema = exports.RegisterAdminDtoSchema = exports.UserDeactivationResponseDtoSchema = exports.DeactivateUserDtoSchema = exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema = exports.RolePermissionsSchema = exports.FirstSignInResponseSchema = exports.UpdateUserRequestSchema = exports.CreateUserRequestSchema = exports.UserSchema = exports.UserRoleSchema = void 0;
+exports.SuccessMessageResponseSchema = exports.AuthResponseSchema = exports.UserProfileResponseSchema = exports.UserResponseSchema = exports.PaginatedResponseSchema = exports.PaginationMetaSchema = exports.ApiResponseSchema = exports.EmailSchema = exports.UserIdSchema = exports.VerifyEmailDtoSchema = exports.ResendVerificationEmailDtoSchema = exports.SendVerificationEmailDtoSchema = exports.ResetPasswordDtoSchema = exports.RequestPasswordResetDtoSchema = exports.UserIdParamSchema = exports.LogoutDtoSchema = exports.RegisterUserDtoSchema = exports.ChangePasswordDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = exports.RegisterModeratorDtoSchema = exports.RegisterAdminDtoSchema = exports.UserDeactivationResponseDtoSchema = exports.DeactivateUserDtoSchema = exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema = exports.RolePermissionsSchema = exports.FirstSignInResponseSchema = exports.UpdateUserRequestSchema = exports.CreateUserRequestSchema = exports.UserSchema = exports.UserRoleSchema = void 0;
 const zod_1 = require("zod");
 // User Role Enum Schema
 exports.UserRoleSchema = zod_1.z.enum([
-    'client', // Regular user/patient (frontend standard)
-    'user', // Regular user/patient (backend standard)  
+    'client', // Regular user/patient
     'therapist', // Licensed therapist
     'moderator', // Content moderator
     'admin' // System administrator
@@ -15,8 +14,22 @@ exports.UserSchema = zod_1.z.object({
     id: zod_1.z.string().min(1, 'User ID is required'),
     email: zod_1.z.string().email('Invalid email format'),
     firstName: zod_1.z.string().optional(),
+    middleName: zod_1.z.string().optional(),
     lastName: zod_1.z.string().optional(),
+    birthDate: zod_1.z.string().datetime().optional(),
+    address: zod_1.z.string().optional(),
     role: exports.UserRoleSchema,
+    bio: zod_1.z.string().optional(),
+    avatarUrl: zod_1.z.string().url().optional(),
+    coverImageUrl: zod_1.z.string().url().optional(),
+    phoneNumber: zod_1.z.string().optional(),
+    timezone: zod_1.z.string().optional(),
+    language: zod_1.z.string().optional(),
+    theme: zod_1.z.string().optional(),
+    isActive: zod_1.z.boolean().optional(),
+    isVerified: zod_1.z.boolean().optional(),
+    emailVerified: zod_1.z.boolean().optional(),
+    lastLoginAt: zod_1.z.string().datetime().optional(),
     createdAt: zod_1.z.string().datetime(),
     updatedAt: zod_1.z.string().datetime()
 });
@@ -24,14 +37,20 @@ exports.UserSchema = zod_1.z.object({
 exports.CreateUserRequestSchema = zod_1.z.object({
     email: zod_1.z.string().email('Invalid email format'),
     firstName: zod_1.z.string().min(1, 'First name is required').optional(),
+    middleName: zod_1.z.string().optional(),
     lastName: zod_1.z.string().min(1, 'Last name is required').optional(),
+    birthDate: zod_1.z.string().datetime().optional(),
+    address: zod_1.z.string().optional(),
     role: exports.UserRoleSchema.optional()
 });
 // Update User Request Schema
 exports.UpdateUserRequestSchema = zod_1.z.object({
     firstName: zod_1.z.string().min(1, 'First name cannot be empty').optional(),
+    middleName: zod_1.z.string().optional(),
     lastName: zod_1.z.string().min(1, 'Last name cannot be empty').optional(),
     email: zod_1.z.string().email('Invalid email format').optional(),
+    birthDate: zod_1.z.string().datetime().optional(),
+    address: zod_1.z.string().optional(),
     bio: zod_1.z.string().max(500, 'Bio must not exceed 500 characters').optional(),
     avatarUrl: zod_1.z.string().url('Invalid avatar URL').optional(),
     coverImageUrl: zod_1.z.string().url('Invalid cover image URL').optional(),
@@ -62,7 +81,13 @@ exports.RegisterClientDtoSchema = zod_1.z.object({
     lastName: zod_1.z.string().min(1, 'Last name is required'),
     birthDate: zod_1.z.string().datetime().optional(),
     address: zod_1.z.string().optional(),
+    bio: zod_1.z.string().max(500, 'Bio must not exceed 500 characters').optional(),
     avatarUrl: zod_1.z.string().url().optional(),
+    coverImageUrl: zod_1.z.string().url().optional(),
+    phoneNumber: zod_1.z.string().optional(),
+    timezone: zod_1.z.string().optional(),
+    language: zod_1.z.string().optional(),
+    theme: zod_1.z.string().optional(),
     hasSeenTherapistRecommendations: zod_1.z.boolean().optional()
 });
 exports.UpdateClientDtoSchema = exports.RegisterClientDtoSchema.partial().omit({
@@ -147,4 +172,78 @@ exports.VerifyEmailDtoSchema = zod_1.z.object({
 // Utility schemas for specific use cases
 exports.UserIdSchema = zod_1.z.string().min(1, 'User ID is required');
 exports.EmailSchema = zod_1.z.string().email('Invalid email format');
+// ===== RESPONSE DTO SCHEMAS =====
+// Standard API Response Wrapper
+const ApiResponseSchema = (dataSchema) => zod_1.z.object({
+    success: zod_1.z.boolean(),
+    data: dataSchema.optional(),
+    message: zod_1.z.string().optional(),
+    errors: zod_1.z.array(zod_1.z.object({
+        field: zod_1.z.string().optional(),
+        code: zod_1.z.string(),
+        message: zod_1.z.string()
+    })).optional()
+});
+exports.ApiResponseSchema = ApiResponseSchema;
+// Pagination Meta Schema
+exports.PaginationMetaSchema = zod_1.z.object({
+    page: zod_1.z.number().int().positive(),
+    limit: zod_1.z.number().int().positive(),
+    total: zod_1.z.number().int().nonnegative(),
+    totalPages: zod_1.z.number().int().nonnegative(),
+    hasNextPage: zod_1.z.boolean(),
+    hasPreviousPage: zod_1.z.boolean()
+});
+// Paginated Response Schema
+const PaginatedResponseSchema = (dataSchema) => zod_1.z.object({
+    success: zod_1.z.boolean(),
+    data: zod_1.z.array(dataSchema),
+    pagination: exports.PaginationMetaSchema,
+    message: zod_1.z.string().optional(),
+    errors: zod_1.z.array(zod_1.z.object({
+        field: zod_1.z.string().optional(),
+        code: zod_1.z.string(),
+        message: zod_1.z.string()
+    })).optional()
+});
+exports.PaginatedResponseSchema = PaginatedResponseSchema;
+// User Response Schema (for public API responses)
+exports.UserResponseSchema = zod_1.z.object({
+    id: zod_1.z.string().min(1, 'User ID is required'),
+    email: zod_1.z.string().email('Invalid email format'),
+    firstName: zod_1.z.string().optional(),
+    middleName: zod_1.z.string().optional(),
+    lastName: zod_1.z.string().optional(),
+    birthDate: zod_1.z.string().datetime().optional(),
+    address: zod_1.z.string().optional(),
+    role: exports.UserRoleSchema,
+    bio: zod_1.z.string().optional(),
+    avatarUrl: zod_1.z.string().url().optional(),
+    coverImageUrl: zod_1.z.string().url().optional(),
+    phoneNumber: zod_1.z.string().optional(),
+    timezone: zod_1.z.string().optional(),
+    language: zod_1.z.string().optional(),
+    theme: zod_1.z.string().optional(),
+    isActive: zod_1.z.boolean().optional(),
+    isVerified: zod_1.z.boolean().optional(),
+    emailVerified: zod_1.z.boolean().optional(),
+    lastLoginAt: zod_1.z.string().datetime().optional(),
+    createdAt: zod_1.z.string().datetime(),
+    updatedAt: zod_1.z.string().datetime()
+});
+// User Profile Response Schema (more detailed for profile endpoints)
+exports.UserProfileResponseSchema = exports.UserResponseSchema.extend({
+    fullName: zod_1.z.string().optional()
+});
+// Authentication Response Schema
+exports.AuthResponseSchema = zod_1.z.object({
+    user: exports.UserResponseSchema,
+    token: zod_1.z.string(),
+    message: zod_1.z.string()
+});
+// Success Message Response Schema
+exports.SuccessMessageResponseSchema = zod_1.z.object({
+    success: zod_1.z.boolean(),
+    message: zod_1.z.string()
+});
 //# sourceMappingURL=user.js.map

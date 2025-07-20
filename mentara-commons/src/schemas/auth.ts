@@ -249,9 +249,8 @@ export const TokensSchema = z.object({
 
 export const AuthResponseSchema = z.object({
   user: AuthUserSchema,
-  accessToken: z.string(),
-  refreshToken: z.string(),
-  expiresIn: z.number(),
+  token: z.string(),
+  message: z.string(),
 });
 
 export const ClientAuthResponseSchema = AuthResponseSchema.extend({

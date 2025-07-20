@@ -27,11 +27,13 @@ import {
   type UserIdParam,
   type DeactivateUserDto,
   type UpdateUserRequest,
-  type User,
+  type UserResponse,
+  type SuccessMessageResponse,
 } from 'mentara-commons';
 import { UsersService } from './users.service';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { RoleUtils } from 'src/utils/role-utils';
+import { UserResponseDto, SuccessMessageDto } from 'src/common/dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -47,10 +49,11 @@ export class UsersController {
   @Get()
   @UseGuards(AdminAuthGuard)
   @AdminOnly()
-  async findAll(@CurrentUserId() currentUserId: string): Promise<User[]> {
+  async findAll(@CurrentUserId() currentUserId: string): Promise<UserResponse[]> {
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all users`);
-      return (await this.usersService.findAll()) as any;
+      const users = await this.usersService.findAll();
+      return UserResponseDto.fromPrismaUsers(users);
     } catch (error) {
       this.logger.error('Failed to fetch users:', error);
       throw new HttpException(
@@ -65,12 +68,13 @@ export class UsersController {
   @AdminOnly()
   async findAllIncludeInactive(
     @CurrentUserId() currentUserId: string,
-  ): Promise<User[]> {
+  ): Promise<UserResponse[]> {
     try {
       this.logger.log(
         `Admin ${currentUserId} retrieving all users including inactive`,
       );
-      return (await this.usersService.findAllIncludeInactive()) as any;
+      const users = await this.usersService.findAllIncludeInactive();
+      return UserResponseDto.fromPrismaUsers(users);
     } catch (error) {
       this.logger.error('Failed to fetch all users:', error);
       throw new HttpException(
@@ -84,7 +88,7 @@ export class UsersController {
   async findOne(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
-  ): Promise<User> {
+  ): Promise<UserResponse> {
     try {
       // Users can only view their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -100,7 +104,7 @@ export class UsersController {
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
-      return user as any;
+      return UserResponseDto.fromPrismaUser(user);
     } catch (error) {
       if (
         error instanceof ForbiddenException ||
@@ -130,7 +134,7 @@ export class UsersController {
     @CurrentUserId() currentUserId: string,
     @UploadedFiles()
     files?: { avatar?: Express.Multer.File[]; cover?: Express.Multer.File[] },
-  ): Promise<User> {
+  ): Promise<UserResponse> {
     try {
       // Users can only update their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -181,7 +185,10 @@ export class UsersController {
       if (!isAdmin) {
         const allowedFields = [
           'firstName',
+          'middleName',
           'lastName',
+          'birthDate',
+          'address',
           'bio',
           'avatarUrl',
           'coverImageUrl',
@@ -205,7 +212,8 @@ export class UsersController {
       if (avatarUrl) userData.avatarUrl = avatarUrl;
       if (coverImageUrl) userData.coverImageUrl = coverImageUrl;
 
-      return (await this.usersService.update(params.id, userData)) as any;
+      const updatedUser = await this.usersService.update(params.id, userData);
+      return UserResponseDto.fromPrismaUser(updatedUser);
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;
@@ -222,7 +230,7 @@ export class UsersController {
   async remove(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
-  ): Promise<{ message: string }> {
+  ): Promise<SuccessMessageResponse> {
     try {
       // Users can only deactivate their own account unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -238,7 +246,7 @@ export class UsersController {
       );
       await this.usersService.remove(params.id);
 
-      return { message: 'User account deactivated successfully' };
+      return new SuccessMessageDto('User account deactivated successfully');
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;
@@ -259,14 +267,14 @@ export class UsersController {
     @Body(new ZodValidationPipe(DeactivateUserDtoSchema))
     body: DeactivateUserDto,
     @CurrentUserId() currentUserId: string,
-  ): Promise<{ message: string }> {
+  ): Promise<SuccessMessageResponse> {
     try {
       this.logger.log(
         `Admin ${currentUserId} deactivating user ${params.id} with reason: ${body.reason}`,
       );
       await this.usersService.deactivate(params.id, body.reason, currentUserId);
 
-      return { message: 'User account deactivated by administrator' };
+      return new SuccessMessageDto('User account deactivated by administrator');
     } catch (error) {
       this.logger.error('Failed to deactivate user:', error);
       throw new HttpException(
@@ -282,12 +290,12 @@ export class UsersController {
   async reactivateUser(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
-  ): Promise<{ message: string }> {
+  ): Promise<SuccessMessageResponse> {
     try {
       this.logger.log(`Admin ${currentUserId} reactivating user ${params.id}`);
       await this.usersService.reactivate(params.id);
 
-      return { message: 'User account reactivated successfully' };
+      return new SuccessMessageDto('User account reactivated successfully');
     } catch (error) {
       this.logger.error('Failed to reactivate user:', error);
       throw new HttpException(

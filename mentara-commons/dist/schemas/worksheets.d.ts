@@ -290,9 +290,9 @@ export declare const AssignmentQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     status?: "in_progress" | "completed" | "assigned" | "overdue" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "status" | "priority" | "dueDate" | "assignedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     priority?: "high" | "medium" | "low" | undefined;
@@ -301,9 +301,9 @@ export declare const AssignmentQuerySchema: z.ZodObject<{
 }, {
     status?: "in_progress" | "completed" | "assigned" | "overdue" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "status" | "priority" | "dueDate" | "assignedAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     priority?: "high" | "medium" | "low" | undefined;
@@ -363,9 +363,9 @@ export declare const WorksheetsQueryDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "createdAt" | "updatedAt" | "title" | "dueDate" | "difficulty" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;
@@ -378,9 +378,9 @@ export declare const WorksheetsQueryDtoSchema: z.ZodObject<{
 }, {
     type?: "exercise" | "assessment" | "journal" | "goal_setting" | "cognitive_restructuring" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "createdAt" | "updatedAt" | "title" | "dueDate" | "difficulty" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPublic?: boolean | undefined;

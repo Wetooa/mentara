@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Delete,
   Query,
   UseGuards,
   Req,
@@ -31,11 +30,15 @@ import {
   type ResetPasswordDto,
   type VerifyEmailDto,
   type ResendVerificationEmailDto,
+  type AuthResponse,
+  type UserResponse,
+  type SuccessMessageResponse,
 } from 'mentara-commons';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './services/email-verification.service';
 import { PasswordResetService } from './services/password-reset.service';
 import { Request } from 'express';
+import { AuthResponseDto, UserResponseDto, SuccessMessageDto } from '../common/dto';
 
 @Controller('auth')
 export class AuthController {
@@ -47,28 +50,31 @@ export class AuthController {
 
   // Universal login works for all roles - role-specific registration endpoints:
   // - /auth/client/register
-  // - /auth/therapist/register  
+  // - /auth/therapist/register
   // - /auth/admin/create-account
   // - /auth/moderator/create-account
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMe(@CurrentUserId() id: string) {
-    return await this.authService.getUser(id);
+  async getMe(@CurrentUserId() id: string): Promise<UserResponse> {
+    const user = await this.authService.getUser(id);
+    return UserResponseDto.fromPrismaUser(user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('users')
-  async getAllUsers() {
-    return await this.authService.getUsers();
+  async getAllUsers(): Promise<UserResponse[]> {
+    const users = await this.authService.getUsers();
+    return UserResponseDto.fromPrismaUsers(users);
   }
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 logout attempts per 5 minutes
   @Post('force-logout')
   @HttpCode(HttpStatus.OK)
-  async forceLogout(@CurrentUserId() id: string) {
-    return await this.authService.forceLogout(id);
+  async forceLogout(@CurrentUserId() id: string): Promise<SuccessMessageResponse> {
+    await this.authService.forceLogout(id);
+    return new SuccessMessageDto('Successfully logged out from all devices');
   }
 
   // Local Authentication Endpoints
@@ -79,18 +85,20 @@ export class AuthController {
   async register(
     @Body(new ZodValidationPipe(RegisterUserDtoSchema))
     registerDto: RegisterUserDto,
-  ) {
+  ): Promise<SuccessMessageResponse> {
     // Only allow client and therapist roles for general registration
     const allowedRole =
       registerDto.role === 'therapist' ? 'therapist' : 'client';
 
-    return await this.authService.registerUserWithEmail(
+    const result = await this.authService.registerUserWithEmail(
       registerDto.email,
       registerDto.password,
       registerDto.firstName,
       registerDto.lastName,
       allowedRole,
     );
+
+    return new SuccessMessageDto(result.message);
   }
 
   @Public()
@@ -100,7 +108,7 @@ export class AuthController {
   async login(
     @Body(new ZodValidationPipe(LoginDtoSchema)) loginDto: LoginDto,
     @Req() req: Request,
-  ) {
+  ): Promise<AuthResponse> {
     const ipAddress = req.ip;
     const userAgent = req.get('User-Agent');
 
@@ -111,18 +119,7 @@ export class AuthController {
       userAgent,
     );
 
-    return {
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
-      },
-      token: result.token,
-      message: 'Login successful',
-    };
+    return new AuthResponseDto(result.user, result.token, 'Login successful');
   }
 
   // Removed refresh token endpoint - no longer needed with non-expiring tokens
@@ -130,19 +127,19 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@CurrentUserId() userId: string) {
+  async logout(@CurrentUserId() userId: string): Promise<SuccessMessageResponse> {
     await this.authService.logout(userId);
-    return { message: 'Logged out successfully' };
+    return new SuccessMessageDto('Logged out successfully');
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@CurrentUserId() userId: string) {
+  async getProfile(@CurrentUserId() userId: string): Promise<UserResponse> {
     const user = await this.authService.validateUser(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    return user;
+    return UserResponseDto.fromPrismaUser(user);
   }
 
   // Role-specific profile endpoints moved to dedicated controllers:
@@ -160,12 +157,11 @@ export class AuthController {
   async requestPasswordReset(
     @Body(new ZodValidationPipe(RequestPasswordResetDtoSchema))
     requestResetDto: RequestPasswordResetDto,
-  ) {
+  ): Promise<SuccessMessageResponse> {
     await this.passwordResetService.requestPasswordReset(requestResetDto.email);
-    return {
-      message:
-        'If an account with that email exists, we will send a password reset link.',
-    };
+    return new SuccessMessageDto(
+      'If an account with that email exists, we will send a password reset link.'
+    );
   }
 
   @Public()

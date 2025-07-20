@@ -2,8 +2,7 @@ import { z } from 'zod';
 
 // User Role Enum Schema
 export const UserRoleSchema = z.enum([
-  'client',     // Regular user/patient (frontend standard)
-  'user',       // Regular user/patient (backend standard)  
+  'client',     // Regular user/patient
   'therapist',  // Licensed therapist
   'moderator',  // Content moderator
   'admin'       // System administrator
@@ -14,8 +13,22 @@ export const UserSchema = z.object({
   id: z.string().min(1, 'User ID is required'),
   email: z.string().email('Invalid email format'),
   firstName: z.string().optional(),
+  middleName: z.string().optional(),
   lastName: z.string().optional(),
+  birthDate: z.string().datetime().optional(),
+  address: z.string().optional(),
   role: UserRoleSchema,
+  bio: z.string().optional(),
+  avatarUrl: z.string().url().optional(),
+  coverImageUrl: z.string().url().optional(),
+  phoneNumber: z.string().optional(),
+  timezone: z.string().optional(),
+  language: z.string().optional(),
+  theme: z.string().optional(),
+  isActive: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
+  emailVerified: z.boolean().optional(),
+  lastLoginAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 });
@@ -24,15 +37,21 @@ export const UserSchema = z.object({
 export const CreateUserRequestSchema = z.object({
   email: z.string().email('Invalid email format'),
   firstName: z.string().min(1, 'First name is required').optional(),
+  middleName: z.string().optional(),
   lastName: z.string().min(1, 'Last name is required').optional(),
+  birthDate: z.string().datetime().optional(),
+  address: z.string().optional(),
   role: UserRoleSchema.optional()
 });
 
 // Update User Request Schema
 export const UpdateUserRequestSchema = z.object({
   firstName: z.string().min(1, 'First name cannot be empty').optional(),
+  middleName: z.string().optional(),
   lastName: z.string().min(1, 'Last name cannot be empty').optional(),
   email: z.string().email('Invalid email format').optional(),
+  birthDate: z.string().datetime().optional(),
+  address: z.string().optional(),
   bio: z.string().max(500, 'Bio must not exceed 500 characters').optional(),
   avatarUrl: z.string().url('Invalid avatar URL').optional(),
   coverImageUrl: z.string().url('Invalid cover image URL').optional(),
@@ -66,7 +85,13 @@ export const RegisterClientDtoSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   birthDate: z.string().datetime().optional(),
   address: z.string().optional(),
+  bio: z.string().max(500, 'Bio must not exceed 500 characters').optional(),
   avatarUrl: z.string().url().optional(),
+  coverImageUrl: z.string().url().optional(),
+  phoneNumber: z.string().optional(),
+  timezone: z.string().optional(),
+  language: z.string().optional(),
+  theme: z.string().optional(),
   hasSeenTherapistRecommendations: z.boolean().optional()
 });
 
@@ -197,3 +222,113 @@ export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type SendVerificationEmailDto = z.infer<typeof SendVerificationEmailDtoSchema>;
 export type ResendVerificationEmailDto = z.infer<typeof ResendVerificationEmailDtoSchema>;
 export type VerifyEmailDto = z.infer<typeof VerifyEmailDtoSchema>;
+
+// ===== RESPONSE DTO SCHEMAS =====
+
+// Standard API Response Wrapper
+export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) => z.object({
+  success: z.boolean(),
+  data: dataSchema.optional(),
+  message: z.string().optional(),
+  errors: z.array(z.object({
+    field: z.string().optional(),
+    code: z.string(),
+    message: z.string()
+  })).optional()
+});
+
+// Pagination Meta Schema
+export const PaginationMetaSchema = z.object({
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean()
+});
+
+// Paginated Response Schema
+export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) => z.object({
+  success: z.boolean(),
+  data: z.array(dataSchema),
+  pagination: PaginationMetaSchema,
+  message: z.string().optional(),
+  errors: z.array(z.object({
+    field: z.string().optional(),
+    code: z.string(),
+    message: z.string()
+  })).optional()
+});
+
+// User Response Schema (for public API responses)
+export const UserResponseSchema = z.object({
+  id: z.string().min(1, 'User ID is required'),
+  email: z.string().email('Invalid email format'),
+  firstName: z.string().optional(),
+  middleName: z.string().optional(),
+  lastName: z.string().optional(),
+  birthDate: z.string().datetime().optional(),
+  address: z.string().optional(),
+  role: UserRoleSchema,
+  bio: z.string().optional(),
+  avatarUrl: z.string().url().optional(),
+  coverImageUrl: z.string().url().optional(),
+  phoneNumber: z.string().optional(),
+  timezone: z.string().optional(),
+  language: z.string().optional(),
+  theme: z.string().optional(),
+  isActive: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
+  emailVerified: z.boolean().optional(),
+  lastLoginAt: z.string().datetime().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+
+// User Profile Response Schema (more detailed for profile endpoints)
+export const UserProfileResponseSchema = UserResponseSchema.extend({
+  fullName: z.string().optional()
+});
+
+// Authentication Response Schema
+export const AuthResponseSchema = z.object({
+  user: UserResponseSchema,
+  token: z.string(),
+  message: z.string()
+});
+
+// Success Message Response Schema
+export const SuccessMessageResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string()
+});
+
+// Type exports for response schemas
+export type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  message?: string;
+  errors?: Array<{
+    field?: string;
+    code: string;
+    message: string;
+  }>;
+};
+
+export type PaginationMeta = z.infer<typeof PaginationMetaSchema>;
+export type PaginatedResponse<T> = {
+  success: boolean;
+  data: T[];
+  pagination: PaginationMeta;
+  message?: string;
+  errors?: Array<{
+    field?: string;
+    code: string;
+    message: string;
+  }>;
+};
+
+export type UserResponse = z.infer<typeof UserResponseSchema>;
+export type UserProfileResponse = z.infer<typeof UserProfileResponseSchema>;
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type SuccessMessageResponse = z.infer<typeof SuccessMessageResponseSchema>;

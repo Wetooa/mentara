@@ -59,6 +59,10 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
     sortBy: "date" | "rating" | "name" | "relevance" | "price";
     sortOrder: "asc" | "desc";
     query: string;
+    pagination?: {
+        page: number;
+        limit: number;
+    } | undefined;
     filters?: {
         location?: string | undefined;
         rating?: number | undefined;
@@ -71,13 +75,13 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
             max?: number | undefined;
         } | undefined;
     } | undefined;
-    pagination?: {
-        page: number;
-        limit: number;
-    } | undefined;
 }, {
     query: string;
     type?: "sessions" | "users" | "posts" | "therapists" | "communities" | "all" | "worksheets" | undefined;
+    pagination?: {
+        page?: number | undefined;
+        limit?: number | undefined;
+    } | undefined;
     sortBy?: "date" | "rating" | "name" | "relevance" | "price" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     filters?: {
@@ -91,10 +95,6 @@ export declare const SearchRequestDtoSchema: z.ZodObject<{
             min?: number | undefined;
             max?: number | undefined;
         } | undefined;
-    } | undefined;
-    pagination?: {
-        page?: number | undefined;
-        limit?: number | undefined;
     } | undefined;
 }>;
 export declare const SearchResultItemSchema: z.ZodObject<{
@@ -343,9 +343,9 @@ export declare const TherapistSearchDtoSchema: z.ZodObject<{
     verifiedOnly?: boolean | undefined;
 }, {
     location?: string | undefined;
-    rating?: number | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    rating?: number | undefined;
     sortBy?: "rating" | "experience" | "relevance" | "price" | "distance" | undefined;
     query?: string | undefined;
     specialties?: string[] | undefined;
@@ -484,9 +484,9 @@ export declare const SearchTherapistsQueryDtoSchema: z.ZodObject<{
     verifiedOnly?: boolean | undefined;
 }, {
     location?: string | undefined;
-    rating?: number | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    rating?: number | undefined;
     sortBy?: "rating" | "experience" | "relevance" | "price" | "distance" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     query?: string | undefined;
@@ -590,10 +590,10 @@ export declare const SearchUsersQueryDtoSchema: z.ZodObject<{
     sortBy: z.ZodDefault<z.ZodEnum<["relevance", "name", "joined", "activity"]>>;
     includeProfile: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    isActive: boolean;
     page: number;
     limit: number;
     sortBy: "name" | "activity" | "relevance" | "joined";
-    isActive: boolean;
     query: string;
     includeProfile: boolean;
     role?: "client" | "therapist" | "moderator" | "admin" | undefined;
@@ -603,10 +603,10 @@ export declare const SearchUsersQueryDtoSchema: z.ZodObject<{
     query: string;
     role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     location?: string | undefined;
+    isActive?: boolean | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "name" | "activity" | "relevance" | "joined" | undefined;
-    isActive?: boolean | undefined;
     verifiedOnly?: boolean | undefined;
     includeProfile?: boolean | undefined;
 }>;
@@ -756,14 +756,14 @@ export declare const UserSearchParamsSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     q: string;
     role?: string | undefined;
-    limit?: number | undefined;
     isActive?: boolean | undefined;
+    limit?: number | undefined;
     offset?: number | undefined;
 }, {
     q: string;
     role?: string | undefined;
-    limit?: number | undefined;
     isActive?: boolean | undefined;
+    limit?: number | undefined;
     offset?: number | undefined;
 }>;
 export declare const CommunitySearchParamsSchema: z.ZodObject<{
@@ -809,15 +809,15 @@ export declare const SearchResultSchema: z.ZodObject<{
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
     page: number;
+    total: number;
     totalPages: number;
     hasMore: boolean;
-    total: number;
     results: any[];
 }, {
     page: number;
+    total: number;
     totalPages: number;
     hasMore: boolean;
-    total: number;
     results: any[];
 }>;
 export declare const TherapistSearchResultSchema: z.ZodObject<{

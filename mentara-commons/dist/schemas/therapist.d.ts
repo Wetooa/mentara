@@ -399,8 +399,8 @@ export declare const TherapistRecommendationSchema: z.ZodObject<{
     firstName: string;
     lastName: string;
     id: string;
-    title: string;
     isActive: boolean;
+    title: string;
     hourlyRate: number;
     specialties: string[];
     experience: number;
@@ -429,8 +429,8 @@ export declare const TherapistRecommendationSchema: z.ZodObject<{
     firstName: string;
     lastName: string;
     id: string;
-    title: string;
     isActive: boolean;
+    title: string;
     hourlyRate: number;
     specialties: string[];
     experience: number;
@@ -583,8 +583,8 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -613,8 +613,8 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -665,8 +665,8 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -706,8 +706,8 @@ export declare const TherapistRecommendationResponseSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -950,11 +950,11 @@ export declare const PatientDataSchema: z.ZodObject<{
         duration: number;
         notes: string;
     }[];
+    fullName: string;
     phone: string;
     name: string;
     avatar: string;
     totalSessions: number;
-    fullName: string;
     age: number;
     diagnosis: string;
     treatmentPlan: string;
@@ -970,11 +970,11 @@ export declare const PatientDataSchema: z.ZodObject<{
         duration: number;
         notes: string;
     }[];
+    fullName: string;
     phone: string;
     name: string;
     avatar: string;
     totalSessions: number;
-    fullName: string;
     age: number;
     diagnosis: string;
     treatmentPlan: string;
@@ -2777,8 +2777,8 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -2807,8 +2807,8 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -2859,8 +2859,8 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -2900,8 +2900,8 @@ export declare const TherapistRecommendationResponseDtoSchema: z.ZodObject<{
         firstName: string;
         lastName: string;
         id: string;
-        title: string;
         isActive: boolean;
+        title: string;
         hourlyRate: number;
         specialties: string[];
         experience: number;
@@ -3401,8 +3401,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
-    hasMore: boolean;
     total: number;
+    hasMore: boolean;
     applications: {
         status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         id: string;
@@ -3487,8 +3487,8 @@ export declare const ApplicationListResponseSchema: z.ZodObject<{
 }, {
     page: number;
     limit: number;
-    hasMore: boolean;
     total: number;
+    hasMore: boolean;
     applications: {
         status: "approved" | "rejected" | "pending" | "under_review" | "additional_info_required";
         id: string;
@@ -4056,8 +4056,8 @@ export declare const TherapistWorksheetQueryDtoSchema: z.ZodObject<{
     clientId?: string | undefined;
 }, {
     status?: "in_progress" | "completed" | "assigned" | "overdue" | undefined;
-    clientId?: string | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     offset?: number | undefined;
 }>;
 export declare const TherapistMeetingQueryDtoSchema: z.ZodObject<{

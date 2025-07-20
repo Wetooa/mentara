@@ -1375,8 +1375,8 @@ export declare const ConversationParticipantSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     role: "ADMIN" | "MODERATOR" | "MEMBER";
     id: string;
-    userId: string;
     isActive: boolean;
+    userId: string;
     joinedAt: string;
     conversationId: string;
     leftAt: string | null;
@@ -1406,8 +1406,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         role: "ADMIN" | "MODERATOR" | "MEMBER";
         id: string;
-        userId: string;
         isActive: boolean;
+        userId: string;
         joinedAt: string;
         conversationId: string;
         leftAt: string | null;
@@ -1527,13 +1527,13 @@ export declare const BackendConversationSchema: z.ZodObject<{
     type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
     id: string;
     createdAt: string;
-    updatedAt: string;
     isActive: boolean;
+    updatedAt: string;
     participants: {
         role: "ADMIN" | "MODERATOR" | "MEMBER";
         id: string;
-        userId: string;
         isActive: boolean;
+        userId: string;
         joinedAt: string;
         conversationId: string;
         leftAt: string | null;
@@ -1608,8 +1608,8 @@ export declare const BackendConversationSchema: z.ZodObject<{
             readAt: string;
         }[] | undefined;
     }[];
-    title?: string | undefined;
     isActive?: boolean | undefined;
+    title?: string | undefined;
     lastMessageAt?: string | undefined;
 }>;
 export declare const MessageSearchResultSchema: z.ZodObject<{
@@ -1720,9 +1720,9 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
     totalPages: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
     page: number;
+    totalPages: number;
     totalCount: number;
     pageSize: number;
-    totalPages: number;
     messages: {
         id: string;
         createdAt: string;
@@ -1752,9 +1752,9 @@ export declare const MessageSearchResultSchema: z.ZodObject<{
     }[];
 }, {
     page: number;
+    totalPages: number;
     totalCount: number;
     pageSize: number;
-    totalPages: number;
     messages: {
         id: string;
         createdAt: string;
@@ -1799,11 +1799,11 @@ export declare const ConversationListParamsSchema: z.ZodObject<{
     isActive?: boolean | undefined;
 }, {
     type?: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT" | undefined;
+    isActive?: boolean | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "lastMessageAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
-    isActive?: boolean | undefined;
 }>;
 export declare const MessageAnalyticsSchema: z.ZodObject<{
     conversationId: z.ZodString;
@@ -2096,8 +2096,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         }, "strip", z.ZodTypeAny, {
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             id: string;
-            userId: string;
             isActive: boolean;
+            userId: string;
             joinedAt: string;
             conversationId: string;
             leftAt: string | null;
@@ -2217,13 +2217,13 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         id: string;
         createdAt: string;
-        updatedAt: string;
         isActive: boolean;
+        updatedAt: string;
         participants: {
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             id: string;
-            userId: string;
             isActive: boolean;
+            userId: string;
             joinedAt: string;
             conversationId: string;
             leftAt: string | null;
@@ -2298,8 +2298,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 readAt: string;
             }[] | undefined;
         }[];
-        title?: string | undefined;
         isActive?: boolean | undefined;
+        title?: string | undefined;
         lastMessageAt?: string | undefined;
     }>, "many">;
     totalResults: z.ZodNumber;
@@ -2342,13 +2342,13 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
         type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
         id: string;
         createdAt: string;
-        updatedAt: string;
         isActive: boolean;
+        updatedAt: string;
         participants: {
             role: "ADMIN" | "MODERATOR" | "MEMBER";
             id: string;
-            userId: string;
             isActive: boolean;
+            userId: string;
             joinedAt: string;
             conversationId: string;
             leftAt: string | null;
@@ -2457,8 +2457,8 @@ export declare const SearchMessagesResponseSchema: z.ZodObject<{
                 readAt: string;
             }[] | undefined;
         }[];
-        title?: string | undefined;
         isActive?: boolean | undefined;
+        title?: string | undefined;
         lastMessageAt?: string | undefined;
     }[];
     totalResults: number;

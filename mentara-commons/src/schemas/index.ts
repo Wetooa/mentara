@@ -101,6 +101,12 @@ export {
   UpdateClientDtoSchema,
   DeactivateUserDtoSchema,
   UserDeactivationResponseDtoSchema,
+  ApiResponseSchema,
+  PaginationMetaSchema,
+  PaginatedResponseSchema,
+  UserResponseSchema,
+  UserProfileResponseSchema,
+  SuccessMessageResponseSchema,
   type User,
   type CreateUserRequest,
   type UpdateUserRequest,
@@ -109,7 +115,13 @@ export {
   type RegisterClientDto,
   type UpdateClientDto,
   type DeactivateUserDto,
-  type UserDeactivationResponseDto
+  type UserDeactivationResponseDto,
+  type ApiResponse,
+  type PaginationMeta,
+  type PaginatedResponse,
+  type UserResponse,
+  type UserProfileResponse,
+  type SuccessMessageResponse
 } from './user';
 
 export {

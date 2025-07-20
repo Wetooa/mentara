@@ -215,9 +215,8 @@ exports.TokensSchema = zod_1.z.object({
 });
 exports.AuthResponseSchema = zod_1.z.object({
     user: exports.AuthUserSchema,
-    accessToken: zod_1.z.string(),
-    refreshToken: zod_1.z.string(),
-    expiresIn: zod_1.z.number(),
+    token: zod_1.z.string(),
+    message: zod_1.z.string(),
 });
 exports.ClientAuthResponseSchema = exports.AuthResponseSchema.extend({
     message: zod_1.z.string().optional(), // For registration success messages

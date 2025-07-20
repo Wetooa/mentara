@@ -160,8 +160,8 @@ export declare const BulkNotificationRequestDtoSchema: z.ZodObject<{
     title: string;
     userIds: string[];
     body: string;
-    expiresAt?: string | undefined;
     data?: Record<string, any> | undefined;
+    expiresAt?: string | undefined;
     scheduledFor?: string | undefined;
     icon?: string | undefined;
     badge?: string | undefined;
@@ -169,8 +169,8 @@ export declare const BulkNotificationRequestDtoSchema: z.ZodObject<{
     title: string;
     userIds: string[];
     body: string;
-    expiresAt?: string | undefined;
     data?: Record<string, any> | undefined;
+    expiresAt?: string | undefined;
     scheduledFor?: string | undefined;
     icon?: string | undefined;
     badge?: string | undefined;
@@ -185,9 +185,9 @@ export declare const NotificationTemplateSchema: z.ZodObject<{
     isActive: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    isActive: boolean;
     title: string;
     name: string;
-    isActive: boolean;
     category: "message" | "emergency" | "appointment" | "community" | "system";
     body: string;
     variables?: string[] | undefined;

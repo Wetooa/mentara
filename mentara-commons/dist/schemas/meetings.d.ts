@@ -36,8 +36,8 @@ export declare const GetUpcomingMeetingsQueryDtoSchema: z.ZodObject<{
 }, {
     therapistId?: string | undefined;
     userId?: string | undefined;
-    clientId?: string | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     days?: number | undefined;
     includeDetails?: boolean | undefined;
 }>;

@@ -174,9 +174,9 @@ export declare const SessionQuerySchema: z.ZodObject<{
     type?: "video" | "audio" | "phone" | "in_person" | undefined;
     status?: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "status" | "createdAt" | "duration" | "scheduledAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
@@ -185,9 +185,9 @@ export declare const SessionQuerySchema: z.ZodObject<{
     type?: "video" | "audio" | "phone" | "in_person" | undefined;
     status?: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "status" | "createdAt" | "duration" | "scheduledAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     dateFrom?: string | undefined;
@@ -531,8 +531,8 @@ export declare const SessionListParamsSchema: z.ZodObject<{
 }, {
     status?: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     therapistId?: string | undefined;
-    clientId?: string | undefined;
     limit?: number | undefined;
+    clientId?: string | undefined;
     sortBy?: "status" | "createdAt" | "duration" | "scheduledAt" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     startDate?: string | undefined;
@@ -614,8 +614,8 @@ export declare const SessionListResponseSchema: z.ZodObject<{
     }[];
     page: number;
     limit: number;
-    hasMore: boolean;
     total: number;
+    hasMore: boolean;
 }, {
     sessions: {
         type: "video" | "audio" | "phone" | "in_person";
@@ -636,8 +636,8 @@ export declare const SessionListResponseSchema: z.ZodObject<{
     }[];
     page: number;
     limit: number;
-    hasMore: boolean;
     total: number;
+    hasMore: boolean;
 }>;
 export declare const SessionStatsSchema: z.ZodObject<{
     totalSessions: z.ZodNumber;
