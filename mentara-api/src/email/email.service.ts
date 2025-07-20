@@ -15,7 +15,6 @@ export class EmailService {
     privateKey: process.env.EMAILJS_PRIVATE_KEY ?? '',
   };
 
-
   constructor() {
     this.initializeEmailJS();
   }
@@ -73,13 +72,13 @@ export class EmailService {
     }
 
     try {
-      const otp = otpCode || this.generateOtp(6);
+      const otp = otpCode ?? this.generateOtp(6);
       const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
       <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #8B5CF6; text-align: center; margin-bottom: 30px;">Mentara - Email Verification</h1>
+        <h1 style="color: #436B00; text-align: center; margin-bottom: 30px;">Mentara - Email Verification</h1>
         <h2 style="color: #1F2937; text-align: center;">Your verification code is:</h2>
-        <div style="background-color: #8B5CF6; color: white; font-size: 32px; font-weight: bold; text-align: center; padding: 20px; margin: 20px 0; border-radius: 8px; letter-spacing: 4px;">${otp}</div>
+        <div style="background-color: #436B00; color: white; font-size: 32px; font-weight: bold; text-align: center; padding: 20px; margin: 20px 0; border-radius: 8px; letter-spacing: 4px;">${otp}</div>
         <p style="color: #4B5563; text-align: center; margin: 20px 0;">This code will expire in ${expiresIn}.</p>
         <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">If you didn't request this verification, please ignore this email.</p>
       </div>
@@ -90,9 +89,12 @@ export class EmailService {
         name,
         subject,
         html,
+        otp,
+        expiresIn,
+        appUrl: process.env.APP_URL ?? 'https://mentara.com',
       };
 
-      const response = await emailjs.send(
+      await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
         templateParams,
@@ -162,7 +164,7 @@ export class EmailService {
         html,
       };
 
-      const response = await emailjs.send(
+      await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
         templateParams,
@@ -213,7 +215,7 @@ export class EmailService {
     }
 
     try {
-      const appUrl = process.env.APP_URL || 'https://mentara.com';
+      const appUrl = process.env.APP_URL ?? 'https://mentara.com';
       const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
       <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -230,7 +232,7 @@ export class EmailService {
           </ul>
         </div>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${appUrl}/therapist/dashboard" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Go to Dashboard</a>
+          <a href="${appUrl}/therapist/dashboard" style="background-color: #436B00; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Go to Dashboard</a>
         </div>
         <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Welcome to the Mentara therapist community!</p>
       </div>
@@ -243,7 +245,7 @@ export class EmailService {
         html,
       };
 
-      const response = await emailjs.send(
+      await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
         templateParams,
@@ -317,7 +319,7 @@ export class EmailService {
         html,
       };
 
-      const response = await emailjs.send(
+      await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
         templateParams,
@@ -370,11 +372,11 @@ export class EmailService {
       const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
       <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #8B5CF6; text-align: center; margin-bottom: 30px;">Reset Your Password</h1>
+        <h1 style="color: #436B00; text-align: center; margin-bottom: 30px;">Reset Your Password</h1>
         <p style="color: #1F2937; font-size: 16px;">Hello ${name}, we received a request to reset your password for your Mentara account.</p>
         <p style="color: #4B5563;">Click the button below to reset your password:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetLink}" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
+          <a href="${resetLink}" style="background-color: #436B00; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
         </div>
         <p style="color: #6B7280; font-size: 14px;">If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
         <p style="color: #6B7280; font-size: 14px;">For security reasons, this link will expire in 1 hour.</p>
@@ -388,7 +390,7 @@ export class EmailService {
         html,
       };
 
-      const response = await emailjs.send(
+      await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
         templateParams,
@@ -448,7 +450,7 @@ export class EmailService {
           <p style="color: #065F46; margin: 10px 0 0 0;">Make sure to use a strong, unique password and keep it secure.</p>
         </div>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${appUrl}/auth/login" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Login to Your Account</a>
+          <a href="${appUrl}/auth/login" style="background-color: #436B00; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Login to Your Account</a>
         </div>
         <p style="color: #6B7280; font-size: 14px; text-align: center;">If you didn't make this change, please contact our support team immediately.</p>
       </div>
@@ -461,7 +463,7 @@ export class EmailService {
         html,
       };
 
-      const response = await emailjs.send(
+      await emailjs.send(
         this.config.serviceId,
         this.config.templateId,
         templateParams,
