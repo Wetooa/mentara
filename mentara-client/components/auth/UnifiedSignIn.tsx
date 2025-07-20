@@ -12,11 +12,19 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 import { ContinueWithGoogle } from "@/components/auth/ContinueWithGoogle";
 import { ContinueWithMicrosoft } from "@/components/auth/ContinueWithMicrosoft";
-import { useApiAuth } from "@/hooks/auth/useApiAuth";
+import { useApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAuthErrorHandler } from "@/hooks/auth/useAuthErrorHandler";
 import { useAuthLoadingStates } from "@/hooks/auth/useAuthLoadingStates";
 
@@ -33,10 +41,15 @@ export function UnifiedSignIn() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
-  
-  const { login, isLoading } = useApiAuth();
+
+  const api = useApi();
+  const { login: authLogin } = useAuth();
   const { handleAuthError, handleRetry } = useAuthErrorHandler();
-  const { setLoadingWithDefaults, isLoading: isAuthLoading, getLoadingMessage } = useAuthLoadingStates();
+  const {
+    setLoadingWithDefaults,
+    isLoading: isAuthLoading,
+    getLoadingMessage,
+  } = useAuthLoadingStates();
 
   const form = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
@@ -46,86 +59,83 @@ export function UnifiedSignIn() {
     },
   });
 
-  const onSubmit = useCallback(async (data: SignInForm) => {
-    try {
-      setFieldErrors({});
-      setLoadingWithDefaults("login", true);
-      
-      // Use the universal login method
-      const result = await login(data.email, data.password);
-      
-      // Reset retry count on success
-      setRetryCount(0);
-      setLoadingWithDefaults("login", false);
-      
-      // Redirect based on user role
-      if (result?.user?.role) {
-        switch (result.user.role) {
-          case 'admin':
-            router.push('/admin');
-            break;
-          case 'moderator':
-            router.push('/moderator');
-            break;
-          case 'therapist':
-            router.push('/therapist');
-            break;
-          case 'client':
-          default:
-            router.push('/user');
-            break;
-        }
-      }
-    } catch (err) {
-      setLoadingWithDefaults("login", false);
-      
-      const result = handleAuthError(err, {
-        component: "UnifiedSignIn",
-        action: "login",
-        userId: data.email,
-        metadata: { retryCount }
-      });
-      
-      // Handle field-level errors
-      if (result.fieldErrors) {
-        setFieldErrors(result.fieldErrors);
-      }
-      
-      // Handle redirect
-      if (result.shouldRedirect && result.redirectTo) {
-        router.push(result.redirectTo);
-        return;
-      }
-      
-      // Handle automatic retry for transient errors
-      if (result.shouldRetry && retryCount < 3) {
-        setIsRetrying(true);
-        setRetryCount(prev => prev + 1);
+  const onSubmit = useCallback(
+    async (data: SignInForm) => {
+      try {
+        setFieldErrors({});
+        setLoadingWithDefaults("login", true);
+
+        // Use the AuthContext's universal login method
+        await authLogin({ email: data.email, password: data.password });
+
+        // Reset retry count on success
+        setRetryCount(0);
+        setLoadingWithDefaults("login", false);
+
+        // AuthContext handles storing tokens, user data, and role-based redirects
+        // No manual redirect needed here
         
-        try {
-          await handleRetry(
-            async () => {
-              await login(data.email, data.password);
-            },
-            result.retryAfter || 5000,
-            3 - retryCount
-          );
-          
-          // Success after retry
-          setRetryCount(0);
-          setIsRetrying(false);
-        } catch {
-          setIsRetrying(false);
-          // Final retry failed, don't try again
+      } catch (err) {
+        setLoadingWithDefaults("login", false);
+
+        const result = handleAuthError(err, {
+          component: "UnifiedSignIn",
+          action: "login",
+          userId: data.email,
+          metadata: { retryCount },
+        });
+
+        // Handle field-level errors
+        if (result.fieldErrors) {
+          setFieldErrors(result.fieldErrors);
+        }
+
+        // Handle redirect
+        if (result.shouldRedirect && result.redirectTo) {
+          router.push(result.redirectTo);
+          return;
+        }
+
+        // Handle automatic retry for transient errors
+        if (result.shouldRetry && retryCount < 3) {
+          setIsRetrying(true);
+          setRetryCount((prev) => prev + 1);
+
+          try {
+            await handleRetry(
+              async () => {
+                await authLogin({ email: data.email, password: data.password });
+              },
+              result.retryAfter || 5000,
+              3 - retryCount
+            );
+
+            // Success after retry
+            setRetryCount(0);
+            setIsRetrying(false);
+          } catch {
+            setIsRetrying(false);
+            // Final retry failed, don't try again
+          }
         }
       }
-    }
-  }, [login, handleAuthError, handleRetry, setLoadingWithDefaults, router, retryCount]);
+    },
+    [
+      authLogin,
+      handleAuthError,
+      handleRetry,
+      setLoadingWithDefaults,
+      router,
+      retryCount,
+    ]
+  );
 
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Welcome to Mentara</CardTitle>
+        <CardTitle className="text-2xl text-center">
+          Welcome to Mentara
+        </CardTitle>
         <p className="text-sm text-muted-foreground text-center">
           Sign in to access your account
         </p>
@@ -146,7 +156,8 @@ export function UnifiedSignIn() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Multiple connection attempts failed. Please check your internet connection and try again.
+              Multiple connection attempts failed. Please check your internet
+              connection and try again.
             </AlertDescription>
           </Alert>
         )}
@@ -182,7 +193,9 @@ export function UnifiedSignIn() {
                       type="email"
                       placeholder="Enter your email"
                       {...field}
-                      disabled={isLoading || isAuthLoading("login") || isRetrying}
+                      disabled={
+                        isAuthLoading("login") || isRetrying
+                      }
                       className={fieldErrors.email ? "border-red-500" : ""}
                     />
                   </FormControl>
@@ -210,7 +223,9 @@ export function UnifiedSignIn() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         {...field}
-                        disabled={isLoading || isAuthLoading("login") || isRetrying}
+                        disabled={
+                          isAuthLoading("login") || isRetrying
+                        }
                         className={fieldErrors.password ? "border-red-500" : ""}
                       />
                       <Button
@@ -219,7 +234,9 @@ export function UnifiedSignIn() {
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading || isAuthLoading("login") || isRetrying}
+                        disabled={
+                          isAuthLoading("login") || isRetrying
+                        }
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -244,15 +261,14 @@ export function UnifiedSignIn() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || isAuthLoading("login") || isRetrying}
+              disabled={isAuthLoading("login") || isRetrying}
             >
-              {(isLoading || isAuthLoading("login") || isRetrying) ? (
+              {isAuthLoading("login") || isRetrying ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isRetrying 
-                    ? `Retrying... (${retryCount}/3)` 
-                    : getLoadingMessage("login") || "Signing in..."
-                  }
+                  {isRetrying
+                    ? `Retrying... (${retryCount}/3)`
+                    : getLoadingMessage("login") || "Signing in..."}
                 </>
               ) : (
                 "Sign In"

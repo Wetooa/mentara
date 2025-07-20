@@ -1,9 +1,6 @@
 // Main auth hook
 export { useAuth } from "../../contexts/AuthContext";
 
-// API authentication hook
-export { useApiAuth } from "./useApiAuth";
-
 // Registration and verification hooks
 export { useClientRegistration } from "./useClientRegistration";
 export type { ClientRegistrationData, UseClientRegistrationReturn } from "./useClientRegistration";
