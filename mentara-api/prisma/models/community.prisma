@@ -1,35 +1,29 @@
-enum MembershipRole {
-    MEMBER
-    MODERATOR
-    ADMIN
-}
-
 model Community {
-    id                   String               @id @default(uuid())
-    name                 String               @unique
-    slug                 String               @unique
-    description          String
-    imageUrl             String
-    createdAt            DateTime             @default(now())
-    updatedAt            DateTime             @updatedAt
+    id          String   @id @default(uuid())
+    name        String   @unique
+    slug        String   @unique
+    description String
+    imageUrl    String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
     memberships          Membership[]
     moderatorCommunities ModeratorCommunity[]
     roomGroups           RoomGroup[]
-    
-    // Simplified community system (removed complex recommendation and join request features)
 
+    // Simplified community system (removed complex recommendation and join request features)
     @@index([name])
     @@index([slug])
 }
 
 model Membership {
-    id          String    @id @default(uuid())
+    id       String   @id @default(uuid())
+    joinedAt DateTime @default(now())
+
     communityId String
-    role        MembershipRole @default(MEMBER)
-    joinedAt    DateTime  @default(now())
+    userId      String
     community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
     user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId      String
 
     @@unique([userId, communityId])
     @@index([userId])
@@ -68,4 +62,3 @@ model Room {
     roomGroupId String
     posts       Post[]
 }
-

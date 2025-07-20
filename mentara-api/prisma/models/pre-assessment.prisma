@@ -5,12 +5,7 @@ model PreAssessment {
     clientId  String   @unique
     client    Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
 
-    questionnaires Json // Array of questionnaire objects
-    answers        Json // Array of answer objects
-    answerMatrix   Json // Array of answer matrix objects
-    scores         Json // Array of score objects
-    severityLevels Json // Array of severity level objects
-    aiEstimate     Json // Array of ai estimate objects
+    answers Json // Array of answer objects
 
     @@index([clientId])
 }

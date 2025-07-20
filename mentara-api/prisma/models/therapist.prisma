@@ -1,7 +1,7 @@
 enum TherapistApplicationStatus {
-    PENDING
-    APPROVED
-    REJECTED
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Therapist {
@@ -12,12 +12,12 @@ model Therapist {
   // Contact information
   mobile   String
   province String
-  timezone String   @default("UTC") // Therapist's timezone for availability calculations
+  timezone String @default("UTC") // Therapist's timezone for availability calculations
 
   // Application status
   status         TherapistApplicationStatus @default(PENDING)
-  submissionDate DateTime @default(now())
-  processingDate DateTime @default(now())
+  submissionDate DateTime                   @default(now())
+  processingDate DateTime                   @default(now())
 
   processedByAdminId String?
   processedByAdmin   Admin?  @relation(fields: [processedByAdminId], references: [userId])
@@ -84,17 +84,15 @@ model Therapist {
 
   // Session details
   sessionLength String // Duration description like '60 minutes'
-  hourlyRate      Decimal @db.Decimal(10, 2)
+  hourlyRate    Decimal @db.Decimal(10, 2)
 
   // Relations
   meetings                Meeting[]               @relation("TherapistMeetings")
   therapistAvailabilities TherapistAvailability[]
   worksheets              Worksheet[]
   assignedClients         ClientTherapist[]
-  receivedRequests        ClientTherapistRequest[] // Client requests received by this therapist
   reviews                 Review[]
   paymentsAsTherapist     Payment[] // Payments received by this therapist
-
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -104,4 +102,3 @@ model Therapist {
   @@index([status])
   @@index([timezone])
 }
-

@@ -2,37 +2,37 @@ model User {
     id         String    @id @unique @default(uuid())
     email      String    @unique
     firstName  String
-    middleName String?   // Optional middle name
+    middleName String? // Optional middle name
     lastName   String
     birthDate  DateTime? // User's birth date
-    address    String?   // User's address
+    address    String? // User's address
     role       String    @default("client") // client, therapist, moderator, admin
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
 
     // Authentication fields
-    password             String? // Hashed password
-    emailVerified        Boolean @default(false)
-    emailVerifyToken     String? @unique
-    emailVerifyTokenExp  DateTime?
-    resetToken           String? @unique
-    resetTokenExpiry     DateTime?
-    isActive             Boolean @default(true)
-    isVerified           Boolean @default(false)
-    failedLoginCount     Int     @default(0)
-    avatarUrl            String?
-    coverImageUrl        String? // Cover/banner image URL
-    bio                  String?
-    
+    password            String? // Hashed password
+    emailVerified       Boolean   @default(false)
+    emailVerifyToken    String?   @unique
+    emailVerifyTokenExp DateTime?
+    resetToken          String?   @unique
+    resetTokenExpiry    DateTime?
+    isActive            Boolean   @default(true)
+    isVerified          Boolean   @default(false)
+    failedLoginCount    Int       @default(0)
+    avatarUrl           String?
+    coverImageUrl       String? // Cover/banner image URL
+    bio                 String?
+
     // Account status fields
-    suspendedAt       DateTime?
-    suspendedBy       String?
-    suspensionReason  String?
-    deactivatedAt     DateTime?
-    deactivatedBy     String?
+    suspendedAt        DateTime?
+    suspendedBy        String?
+    suspensionReason   String?
+    deactivatedAt      DateTime?
+    deactivatedBy      String?
     deactivationReason String?
-    lastLoginAt       DateTime?
-    lockoutUntil      DateTime?
+    lastLoginAt        DateTime?
+    lockoutUntil       DateTime?
 
     // Essential content relations
     posts         Post[]
@@ -54,27 +54,19 @@ model User {
     sentMessages        Message[]                 @relation("UserMessages")
     messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
     messageReactions    MessageReaction[]         @relation("UserMessageReactions")
-    
+
     // User blocking system
-    blocking            UserBlock[]               @relation("UserBlocking")
-    blockedBy           UserBlock[]               @relation("UserBlocked")
+    blocking  UserBlock[] @relation("UserBlocking")
+    blockedBy UserBlock[] @relation("UserBlocked")
 
     // Simple notifications (WebSocket only)
-    notifications        Notification[]        @relation("UserNotifications")
-    notificationSettings NotificationSettings? @relation("UserNotificationSettings")
+    notifications Notification[] @relation("UserNotifications")
 
     // Simple billing
     paymentMethods PaymentMethod[] @relation("UserPaymentMethods")
 
     // Essential community features (minimal)
     memberships Membership[]
-
-
-    // Essential auth
-    refreshTokens RefreshToken[] @relation("UserRefreshTokens")
-
-    // Reviews
-    reviewsHelpful ReviewHelpful[]
 
     @@index([email])
     @@index([role])
@@ -85,14 +77,12 @@ model Client {
     user   User   @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
 
     // Patient-specific relations
-    worksheets             Worksheet[]
-    preAssessment          PreAssessment?
-    assignedTherapists     ClientTherapist[]
-    sentRequests           ClientTherapistRequest[] // Therapist requests sent by this client
-    meetings               Meeting[]               @relation("ClientMeetings")
-    reviews                Review[] // Reviews written by this client
-    paymentsAsClient       Payment[] // Payments made by this client
-
+    worksheets         Worksheet[]
+    preAssessment      PreAssessment?
+    assignedTherapists ClientTherapist[]
+    meetings           Meeting[]         @relation("ClientMeetings")
+    reviews            Review[] // Reviews written by this client
+    paymentsAsClient   Payment[] // Payments made by this client
 
     hasSeenTherapistRecommendations Boolean @default(false)
 

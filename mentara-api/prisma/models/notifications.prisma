@@ -17,10 +17,6 @@ model Notification {
   isRead Boolean   @default(false)
   readAt DateTime?
 
-  // For scheduled notifications
-  scheduledFor DateTime?
-  sentAt       DateTime?
-
   // Relations
   user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -31,45 +27,8 @@ model Notification {
   @@index([isRead])
   @@index([type])
   @@index([priority])
-  @@index([scheduledFor])
   @@index([createdAt])
   @@index([userId, isRead, createdAt(sort: Desc)]) // For efficient unread notification queries
-}
-
-model NotificationSettings {
-  id     String @id @default(uuid())
-  userId String @unique
-
-  // Email preferences
-  emailAppointmentReminders Boolean @default(true)
-  emailNewMessages          Boolean @default(true)
-  emailWorksheetUpdates     Boolean @default(true)
-  emailSystemUpdates        Boolean @default(false)
-  emailMarketing            Boolean @default(false)
-
-  // Push notification preferences
-  pushAppointmentReminders Boolean @default(true)
-  pushNewMessages          Boolean @default(true)
-  pushWorksheetUpdates     Boolean @default(true)
-  pushSystemUpdates        Boolean @default(true)
-
-  // In-app notification preferences
-  inAppMessages Boolean @default(true)
-  inAppUpdates  Boolean @default(true)
-
-  // Quiet hours
-  quietHoursEnabled  Boolean @default(false)
-  quietHoursStart    String? // Time in HH:MM format
-  quietHoursEnd      String? // Time in HH:MM format
-  quietHoursTimezone String? // Timezone identifier
-
-  // Relations
-  user User @relation("UserNotificationSettings", fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
 }
 
 // Enums

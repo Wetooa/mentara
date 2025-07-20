@@ -11,9 +11,6 @@ model ClientTherapist {
     therapistId String
     assignedAt  DateTime              @default(now())
     status      ClientTherapistStatus @default(ACTIVE)
-    notes       String? // Optional notes about the relationship
-
-    score Int? // Optional score for the therapist by the client
 
     client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
     therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
