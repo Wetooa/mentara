@@ -1,48 +1,47 @@
 model User {
-    id         String    @id @unique @default(uuid()) // Clerk user ID for authentication
-    email      String    @unique // User's email address
+    id         String    @id @unique @default(uuid())
+    email      String    @unique
     firstName  String
-    middleName String?
+    middleName String? // Optional middle name
     lastName   String
-    birthDate  DateTime?
-    address    String?
-    avatarUrl  String? // Profile image URL
+    birthDate  DateTime? // User's birth date
+    address    String? // User's address
     role       String    @default("client") // client, therapist, moderator, admin
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
 
-    // Profile and verification
-    bio           String?
-    coverImageUrl String?
-    isActive      Boolean @default(true)
-    isVerified    Boolean @default(false)
-    
-    // Contact information
-    phoneNumber   String?
-    phoneVerified Boolean @default(false)
-    
-    // Preferences
-    timezone      String? @default("UTC")
-    language      String? @default("en")
-    theme         String? @default("light")
-    
-    // Privacy settings
-    profileVisibility String @default("private") // public, private, therapists_only
-    allowMessagesFrom String @default("therapists") // all, therapists, none
-    
-    // Account status
-    lastLoginAt   DateTime?
-    lastActiveAt  DateTime?
-    suspendedAt   DateTime?
-    suspendedBy   String?
-    suspensionReason String?
+    // Authentication fields
+    password            String? // Hashed password
+    emailVerified       Boolean   @default(false)
+    emailVerifyToken    String?   @unique
+    emailVerifyTokenExp DateTime?
+    resetToken          String?   @unique
+    resetTokenExpiry    DateTime?
+    isActive            Boolean   @default(true)
+    isVerified          Boolean   @default(false)
+    failedLoginCount    Int       @default(0)
+    avatarUrl           String?
+    coverImageUrl       String? // Cover/banner image URL
+    bio                 String?
 
-    // Community and content relations (available to all users)
-    memberships   Membership[]
+    // Account status fields
+    suspendedAt        DateTime?
+    suspendedBy        String?
+    suspensionReason   String?
+    deactivatedAt      DateTime?
+    deactivatedBy      String?
+    deactivationReason String?
+    lastLoginAt        DateTime?
+    lockoutUntil       DateTime?
+
+    // Essential content relations
     posts         Post[]
-    comments      Comment[]
+    comments      Comment[] // Supports nested comments through parentId
     postHearts    PostHeart[]
-    commentHearts CommentHeart[]
+    commentHearts CommentHeart[] // Supports hearts on all comment levels
+
+    // Reports (instead of reddit-like features)
+    reports Report[] @relation("UserReports")
 
     // Role-specific relations
     client    Client?    @relation("UserClient")
@@ -50,36 +49,24 @@ model User {
     moderator Moderator? @relation("UserModerator")
     admin     Admin?     @relation("UserAdmin")
 
-    replies        Reply[]
-    replyHearts    ReplyHeart[]
-    reviewsHelpful ReviewHelpful[]
+    // Essential messaging
+    conversations       ConversationParticipant[] @relation("UserConversations")
+    sentMessages        Message[]                 @relation("UserMessages")
+    messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
+    messageReactions    MessageReaction[]         @relation("UserMessageReactions")
 
-    // Messaging relations
-    conversations      ConversationParticipant[] @relation("UserConversations")
-    sentMessages       Message[]                 @relation("UserMessages")
-    messageReadReceipts MessageReadReceipt[]    @relation("UserReadReceipts")
-    messageReactions   MessageReaction[]        @relation("UserMessageReactions")
-    blocking           UserBlock[]              @relation("UserBlocking")
-    blockedBy          UserBlock[]              @relation("UserBlocked")
-    
-    // Notification relations
-    notifications      Notification[]           @relation("UserNotifications")
-    notificationSettings NotificationSettings?  @relation("UserNotificationSettings")
-    
-    // Audit and activity relations
-    auditLogs          AuditLog[]               @relation("UserAuditLogs")
-    activities         UserActivity[]           @relation("UserActivities")
-    
-    // File relations
-    uploadedFiles      File[]                   @relation("UserUploadedFiles")
-    fileVersions       FileVersion[]            @relation("UserFileVersions")
-    fileShares         FileShare[]              @relation("UserFileShares")
-    fileDownloads      FileDownload[]           @relation("UserFileDownloads")
-    
-    // Billing relations
-    subscription       Subscription?            @relation("UserSubscription")
-    paymentMethods     PaymentMethod[]          @relation("UserPaymentMethods")
-    discountRedemptions DiscountRedemption[]    @relation("UserDiscountRedemptions")
+    // User blocking system
+    blocking  UserBlock[] @relation("UserBlocking")
+    blockedBy UserBlock[] @relation("UserBlocked")
+
+    // Simple notifications (WebSocket only)
+    notifications Notification[] @relation("UserNotifications")
+
+    // Simple billing
+    paymentMethods PaymentMethod[] @relation("UserPaymentMethods")
+
+    // Essential community features (minimal)
+    memberships Membership[]
 
     @@index([email])
     @@index([role])
@@ -90,18 +77,12 @@ model Client {
     user   User   @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
 
     // Patient-specific relations
-    worksheets           Worksheet[]
-    preAssessment        PreAssessment?
-    worksheetSubmissions WorksheetSubmission[]
-    clientMedicalHistory ClientMedicalHistory[]
-    clientPreferences    ClientPreference[]
-    assignedTherapists   ClientTherapist[]
-    meetings             Meeting[]              @relation("ClientMeetings")
-    reviews              Review[] // Reviews written by this client
-    sessionLogs          SessionLog[]
-    therapyProgress      TherapyProgress[]
-    assessments          Assessment[]
-    mentalHealthIndicators MentalHealthIndicator[]
+    worksheets         Worksheet[]
+    preAssessment      PreAssessment?
+    assignedTherapists ClientTherapist[]
+    meetings           Meeting[]         @relation("ClientMeetings")
+    reviews            Review[] // Reviews written by this client
+    paymentsAsClient   Payment[] // Payments made by this client
 
     hasSeenTherapistRecommendations Boolean @default(false)
 

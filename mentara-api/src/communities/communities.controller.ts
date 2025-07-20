@@ -13,33 +13,80 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
+import { CommunityAssignmentService } from './community-assignment.service';
 import {
   CommunityCreateInputDto,
-  CommunityResponse,
-  CommunityStatsResponse,
   CommunityUpdateInputDto,
-  CommunityWithMembersResponse,
-  CommunityWithRoomGroupsResponse,
-} from 'schema/community';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+} from 'mentara-commons';
+
+// Local response interfaces
+interface CommunityResponse {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  imageUrl: string;
+  isPrivate?: boolean;
+  memberCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CommunityStatsResponse {
+  memberCount?: number;
+  postCount?: number;
+  activeMembers?: number;
+  totalMembers?: number;
+  totalPosts?: number;
+  activeCommunities?: number;
+  illnessCommunities?: any[];
+}
+
+interface CommunityWithMembersResponse extends CommunityResponse {
+  members: any[];
+}
+
+interface CommunityWithRoomGroupsResponse extends CommunityResponse {
+  roomGroups: Array<{
+    id: string;
+    name: string;
+    order: number;
+    communityId: string;
+    rooms: Array<{
+      id: string;
+      name: string;
+      order: number;
+      postingRole: string;
+      roomGroupId: string;
+    }>;
+  }>;
+}
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('communities')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class CommunitiesController {
   constructor(
     private readonly communitiesService: CommunitiesService,
+    private readonly communityAssignmentService: CommunityAssignmentService,
     private readonly prisma: PrismaService,
   ) {}
 
   @Get()
+  // TODO: CONFUSING - Missing @Roles decorator - should this endpoint require authentication only or specific roles?
+  // All authenticated users can currently access this endpoint, verify if this is intended behavior
   async findAll(): Promise<CommunityResponse[]> {
     try {
       return await this.communitiesService.findAll();
     } catch (error) {
+      // TODO: CONFUSING PATTERN - This generic error handling masks specific exceptions
+      // Consider letting service-level exceptions bubble up for better error responses
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
       );
@@ -113,6 +160,7 @@ export class CommunitiesController {
   }
 
   @Post()
+  @Roles('moderator', 'admin')
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() communityData: CommunityCreateInputDto,
@@ -127,6 +175,7 @@ export class CommunitiesController {
   }
 
   @Put(':id')
+  @Roles('moderator', 'admin')
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
@@ -142,6 +191,7 @@ export class CommunitiesController {
   }
 
   @Delete(':id')
+  @Roles('moderator', 'admin')
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string): Promise<CommunityResponse> {
     try {
@@ -154,6 +204,7 @@ export class CommunitiesController {
   }
 
   @Post(':id/join')
+  @Roles('client', 'therapist', 'moderator', 'admin')
   @HttpCode(HttpStatus.OK)
   async joinCommunity(
     @Param('id') communityId: string,
@@ -163,13 +214,24 @@ export class CommunitiesController {
       await this.communitiesService.joinCommunity(communityId, userId);
       return { joined: true };
     } catch (error) {
+      // Re-throw known HTTP exceptions to preserve proper error responses
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // Only wrap unknown errors
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Unknown error',
+        error instanceof Error ? error.message : 'Failed to join community',
       );
     }
   }
 
   @Post(':id/leave')
+  @Roles('client', 'therapist', 'moderator', 'admin')
   @HttpCode(HttpStatus.OK)
   async leaveCommunity(
     @Param('id') communityId: string,
@@ -179,13 +241,25 @@ export class CommunitiesController {
       await this.communitiesService.leaveCommunity(communityId, userId);
       return { left: true };
     } catch (error) {
+      // Re-throw known HTTP exceptions to preserve proper error responses
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // Only wrap unknown errors
       throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Unknown error',
+        error instanceof Error ? error.message : 'Failed to leave community',
       );
     }
   }
 
   @Get('user/:userId')
+  // TODO: SECURITY CONCERN - Missing @Roles decorator allows any authenticated user to view another user's community memberships
+  // This could be a privacy issue - consider adding role restrictions or user ownership validation
   async findByUserId(
     @Param('userId') userId: string,
   ): Promise<CommunityResponse[]> {
@@ -209,6 +283,7 @@ export class CommunitiesController {
   }
 
   @Post(':id/room-group')
+  @Roles('moderator', 'admin')
   async createRoomGroup(
     @Param('id') communityId: string,
     @Body() dto: { name: string; order: number },
@@ -221,6 +296,7 @@ export class CommunitiesController {
   }
 
   @Post('room-group/:roomGroupId/room')
+  @Roles('moderator', 'admin')
   async createRoom(
     @Param('roomGroupId') roomGroupId: string,
     @Body() dto: { name: string; order: number },
@@ -235,5 +311,73 @@ export class CommunitiesController {
   @Get('room-group/:roomGroupId/rooms')
   async getRoomsByGroup(@Param('roomGroupId') roomGroupId: string) {
     return await this.communitiesService.findRoomsByGroup(roomGroupId);
+  }
+
+  // Community Assignment Endpoints
+  @Post('assign/me')
+  @HttpCode(HttpStatus.OK)
+  async assignCommunitiesToMe(
+    @CurrentUserId() userId: string,
+  ): Promise<{ assignedCommunities: string[] }> {
+    try {
+      const assignedCommunities =
+        await this.communityAssignmentService.assignCommunitiesToUser(userId);
+      return { assignedCommunities };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  @Post('assign/:userId')
+  @Roles('admin')
+  @HttpCode(HttpStatus.OK)
+  async assignCommunitiesToUser(
+    @Param('userId') userId: string,
+  ): Promise<{ assignedCommunities: string[] }> {
+    try {
+      const assignedCommunities =
+        await this.communityAssignmentService.assignCommunitiesToUser(userId);
+      return { assignedCommunities };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  @Get('recommended/me')
+  async getMyRecommendedCommunities(
+    @CurrentUserId() userId: string,
+  ): Promise<{ recommendedCommunities: string[] }> {
+    try {
+      const recommendedCommunities =
+        await this.communityAssignmentService.getRecommendedCommunities(userId);
+      return { recommendedCommunities };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  @Post('assign/bulk')
+  @Roles('admin')
+  @HttpCode(HttpStatus.OK)
+  async bulkAssignCommunities(
+    @Body() body: { userIds: string[] },
+  ): Promise<{ results: { [userId: string]: string[] } }> {
+    try {
+      const results =
+        await this.communityAssignmentService.bulkAssignCommunities(
+          body.userIds,
+        );
+      return { results };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
   }
 }

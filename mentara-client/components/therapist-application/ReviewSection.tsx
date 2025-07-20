@@ -13,10 +13,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+// Types
+import { 
+  TherapistApplicationFormData, 
+  TherapistApplicationWatchedValues,
+  DocumentUpload 
+} from "@/types/therapist-application";
+
 interface ReviewSectionProps {
-  form: UseFormReturn<any>;
-  watchedValues: any;
-  documents: Record<string, File[]>;
+  form: UseFormReturn<TherapistApplicationFormData>;
+  watchedValues: TherapistApplicationWatchedValues;
+  documents: DocumentUpload;
 }
 
 export const ReviewSection = memo(function ReviewSection({
@@ -61,7 +68,7 @@ export const ReviewSection = memo(function ReviewSection({
             <p>
               <strong>Documents:</strong>{" "}
               {Object.values(documents).reduce(
-                (sum: number, docs) => sum + (docs as File[]).length,
+                (sum: number, docs: File[]) => sum + docs.length,
                 0
               )}{" "}
               files uploaded

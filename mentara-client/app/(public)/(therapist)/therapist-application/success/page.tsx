@@ -94,7 +94,7 @@ export default function ApplicationSuccessPage() {
                     <span className="text-blue-600 font-bold text-xs">3</span>
                   </div>
                   <p>
-                    <strong>Decision Notification</strong> - You'll receive an email with our decision and next steps.
+                    <strong>Decision Notification</strong> - You&apos;ll receive an email with our decision and next steps.
                   </p>
                 </div>
               </div>
@@ -107,7 +107,7 @@ export default function ApplicationSuccessPage() {
                 <h3 className="font-semibold text-blue-900">Email Notification</h3>
               </div>
               <p className="text-sm text-blue-700">
-                You will receive an email confirmation shortly. If approved, we'll send you login credentials 
+                You will receive an email confirmation shortly. If approved, we&apos;ll send you login credentials 
                 and onboarding instructions to get started on the Mentara platform.
               </p>
             </div>

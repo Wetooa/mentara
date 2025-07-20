@@ -3,21 +3,21 @@ model Meeting {
     title        String? // Optional meeting title
     description  String? // Optional meeting description
     startTime    DateTime
+    endTime      DateTime? // Calculated from startTime + duration, helps with queries
     duration     Int            @default(60)
     status       MeetingStatus  @default(SCHEDULED)
-    meetingType  String         @default("video") // video, audio, chat
+    meetingType  String         @default("video") // video, audio
     meetingUrl   String? // Video call URL
     meetingNotes MeetingNotes[]
 
     // Relations
     clientId    String
     therapistId String
-    client      Client    @relation("ClientMeetings", fields: [clientId], references: [userId])
-    therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId])
+    client      Client    @relation("ClientMeetings", fields: [clientId], references: [userId], onDelete: Cascade)
+    therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId], onDelete: Cascade)
 
     // Reviews for this meeting
-    reviews Review[]
-    sessionLogs SessionLog[]
+    reviews  Review[]
     payments Payment[]
 
     createdAt DateTime @default(now())
@@ -28,14 +28,17 @@ model Meeting {
     @@index([clientId])
     @@index([therapistId])
     @@index([startTime])
+    @@index([endTime])
     @@index([status])
-    @@index([therapistId, startTime]) // For availability queries
+    @@index([therapistId, startTime, status]) // For availability queries
+    @@index([therapistId, startTime, endTime]) // For conflict detection
+    @@index([clientId, startTime, endTime]) // For client conflict detection
 }
 
 model MeetingNotes {
     id        String   @id @unique
     meetingId String
-    meeting   Meeting  @relation(fields: [meetingId], references: [id])
+    meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
     notes     String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -46,13 +49,14 @@ model MeetingNotes {
 model TherapistAvailability {
     id          String  @id @default(uuid())
     therapistId String
-    dayOfWeek   Int // 0 = Sunday, 1 = Monday, etc.
+    dayOfWeek   String // MONDAY, TUESDAY, etc. - more readable than numbers
     startTime   String // Time in HH:MM format (e.g., "09:00")
     endTime     String // Time in HH:MM format (e.g., "17:00")
+    timezone    String  @default("UTC") // Handle timezone properly
     isAvailable Boolean @default(true)
     notes       String? // Optional notes
 
-    therapist Therapist @relation(fields: [therapistId], references: [userId])
+    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

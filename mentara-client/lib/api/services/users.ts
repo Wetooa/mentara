@@ -1,58 +1,65 @@
 import { AxiosInstance } from 'axios';
+import {
+  User,
+  CreateUserRequest,
+  CreateUserRequestSchema,
+  UpdateUserRequest,
+  UpdateUserRequestSchema,
+  FirstSignInResponse,
+  UserIdParam,
+  UserIdParamSchema,
+} from 'mentara-commons';
 
-// Types
-export interface User {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  role: 'client' | 'therapist' | 'moderator' | 'admin';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateUserRequest {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  role?: string;
-}
-
-export interface UpdateUserRequest {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-}
-
-export interface FirstSignInResponse {
-  isFirstSignIn: boolean;
-}
+// Re-export commons types for backward compatibility
+export type { User, CreateUserRequest, UpdateUserRequest, FirstSignInResponse, UserIdParam };
 
 // User service factory
 export const createUserService = (client: AxiosInstance) => ({
-  // Get all users
+  // Get all users (admin only)
   getAll: (): Promise<User[]> =>
     client.get('/users'),
 
-  // Get user by ID
-  getOne: (id: string): Promise<User> =>
-    client.get(`/users/${id}`),
+  // Get all users including inactive (admin only)  
+  getAllIncludingInactive: (): Promise<User[]> =>
+    client.get('/users/all-including-inactive'),
 
-  // Create new user
-  create: (data: CreateUserRequest): Promise<User> =>
-    client.post('/users', data),
+  // Get user by ID with Zod validation
+  getOne: async (id: string): Promise<User> => {
+    const validatedId = UserIdParamSchema.parse({ id });
+    return client.get(`/users/${validatedId.id}`);
+  },
 
-  // Update user
-  update: (id: string, data: UpdateUserRequest): Promise<User> =>
-    client.put(`/users/${id}`, data),
+  // Create new user with Zod validation (handled by auth service)
+  create: async (data: CreateUserRequest): Promise<User> => {
+    const validatedData = CreateUserRequestSchema.parse(data);
+    return client.post('/users', validatedData);
+  },
 
-  // Delete user
-  delete: (id: string): Promise<void> =>
-    client.delete(`/users/${id}`),
+  // Update user with Zod validation
+  update: async (id: string, data: UpdateUserRequest): Promise<User> => {
+    const validatedId = UserIdParamSchema.parse({ id });
+    const validatedData = UpdateUserRequestSchema.parse(data);
+    return client.put(`/users/${validatedId.id}`, validatedData);
+  },
 
-  // Check if user is signing in for the first time
-  isFirstSignIn: (userId: string): Promise<FirstSignInResponse> =>
-    client.get(`/users/is-first-signin/${userId}`),
+  // Delete/deactivate user with ID validation
+  delete: async (id: string): Promise<{ message: string }> => {
+    const validatedId = UserIdParamSchema.parse({ id });
+    return client.delete(`/users/${validatedId.id}`);
+  },
+
+  // Admin deactivate user with reason and ID validation
+  deactivate: async (id: string, reason?: string): Promise<{ message: string }> => {
+    const validatedId = UserIdParamSchema.parse({ id });
+    // Note: Should add DeactivateUserDtoSchema when available in commons
+    return client.post(`/users/${validatedId.id}/deactivate`, { reason });
+  },
+
+  // Admin reactivate user with ID validation
+  reactivate: async (id: string): Promise<{ message: string }> => {
+    const validatedId = UserIdParamSchema.parse({ id });
+    return client.post(`/users/${validatedId.id}/reactivate`);
+  },
 });
 
 export type UserService = ReturnType<typeof createUserService>;

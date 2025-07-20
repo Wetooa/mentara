@@ -1,0 +1,166 @@
+1d67f864e766fc7a86b8332e309210f2
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TypingIndicatorDto = exports.LeaveConversationDto = exports.JoinConversationDto = exports.SearchMessagesDto = exports.BlockUserDto = exports.AddReactionDto = exports.UpdateMessageDto = exports.SendMessageDto = exports.CreateConversationDto = void 0;
+const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
+class CreateConversationDto {
+    participantIds;
+    type;
+    title;
+}
+exports.CreateConversationDto = CreateConversationDto;
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)('4', { each: true }),
+    __metadata("design:type", Array)
+], CreateConversationDto.prototype, "participantIds", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.ConversationType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateConversationDto.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateConversationDto.prototype, "title", void 0);
+class SendMessageDto {
+    content;
+    messageType;
+    replyToId;
+    attachmentUrl;
+    attachmentName;
+    attachmentSize;
+}
+exports.SendMessageDto = SendMessageDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "content", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.MessageType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "messageType", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)('4'),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "replyToId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "attachmentUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "attachmentName", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], SendMessageDto.prototype, "attachmentSize", void 0);
+class UpdateMessageDto {
+    content;
+}
+exports.UpdateMessageDto = UpdateMessageDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], UpdateMessageDto.prototype, "content", void 0);
+class AddReactionDto {
+    emoji;
+}
+exports.AddReactionDto = AddReactionDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], AddReactionDto.prototype, "emoji", void 0);
+class BlockUserDto {
+    userId;
+    reason;
+}
+exports.BlockUserDto = BlockUserDto;
+__decorate([
+    (0, class_validator_1.IsUUID)('4'),
+    __metadata("design:type", String)
+], BlockUserDto.prototype, "userId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], BlockUserDto.prototype, "reason", void 0);
+class SearchMessagesDto {
+    query;
+    conversationId;
+    page;
+    limit;
+}
+exports.SearchMessagesDto = SearchMessagesDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], SearchMessagesDto.prototype, "query", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)('4'),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SearchMessagesDto.prototype, "conversationId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SearchMessagesDto.prototype, "page", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], SearchMessagesDto.prototype, "limit", void 0);
+// WebSocket DTOs
+class JoinConversationDto {
+    conversationId;
+}
+exports.JoinConversationDto = JoinConversationDto;
+__decorate([
+    (0, class_validator_1.IsUUID)('4'),
+    __metadata("design:type", String)
+], JoinConversationDto.prototype, "conversationId", void 0);
+class LeaveConversationDto {
+    conversationId;
+}
+exports.LeaveConversationDto = LeaveConversationDto;
+__decorate([
+    (0, class_validator_1.IsUUID)('4'),
+    __metadata("design:type", String)
+], LeaveConversationDto.prototype, "conversationId", void 0);
+class TypingIndicatorDto {
+    conversationId;
+    isTyping;
+}
+exports.TypingIndicatorDto = TypingIndicatorDto;
+__decorate([
+    (0, class_validator_1.IsUUID)('4'),
+    __metadata("design:type", String)
+], TypingIndicatorDto.prototype, "conversationId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], TypingIndicatorDto.prototype, "isTyping", void 0);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL21lc3NhZ2luZy9kdG8vbWVzc2FnaW5nLmR0by50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7QUFBQSxxREFTeUI7QUFDekIsMkNBQStEO0FBRS9ELE1BQWEscUJBQXFCO0lBR2hDLGNBQWMsQ0FBWTtJQUkxQixJQUFJLENBQW9CO0lBSXhCLEtBQUssQ0FBVTtDQUNoQjtBQVpELHNEQVlDO0FBVEM7SUFGQyxJQUFBLHlCQUFPLEdBQUU7SUFDVCxJQUFBLHdCQUFNLEVBQUMsR0FBRyxFQUFFLEVBQUUsSUFBSSxFQUFFLElBQUksRUFBRSxDQUFDOzs2REFDRjtBQUkxQjtJQUZDLElBQUEsd0JBQU0sRUFBQyx5QkFBZ0IsQ0FBQztJQUN4QixJQUFBLDRCQUFVLEdBQUU7O21EQUNXO0FBSXhCO0lBRkMsSUFBQSwwQkFBUSxHQUFFO0lBQ1YsSUFBQSw0QkFBVSxHQUFFOztvREFDRTtBQUdqQixNQUFhLGNBQWM7SUFHekIsT0FBTyxDQUFVO0lBSWpCLFdBQVcsQ0FBZTtJQUkxQixTQUFTLENBQVU7SUFJbkIsYUFBYSxDQUFVO0lBSXZCLGNBQWMsQ0FBVTtJQUt4QixjQUFjLENBQVU7Q0FDekI7QUF6QkQsd0NBeUJDO0FBdEJDO0lBRkMsSUFBQSwwQkFBUSxHQUFFO0lBQ1YsSUFBQSw0QkFBVSxHQUFFOzsrQ0FDSTtBQUlqQjtJQUZDLElBQUEsd0JBQU0sRUFBQyxvQkFBVyxDQUFDO0lBQ25CLElBQUEsNEJBQVUsR0FBRTs7bURBQ2E7QUFJMUI7SUFGQyxJQUFBLHdCQUFNLEVBQUMsR0FBRyxDQUFDO0lBQ1gsSUFBQSw0QkFBVSxHQUFFOztpREFDTTtBQUluQjtJQUZDLElBQUEsMEJBQVEsR0FBRTtJQUNWLElBQUEsNEJBQVUsR0FBRTs7cURBQ1U7QUFJdkI7SUFGQyxJQUFBLDBCQUFRLEdBQUU7SUFDVixJQUFBLDRCQUFVLEdBQUU7O3NEQUNXO0FBS3hCO0lBSEMsSUFBQSx1QkFBSyxHQUFFO0lBQ1AsSUFBQSxxQkFBRyxFQUFDLENBQUMsQ0FBQztJQUNOLElBQUEsNEJBQVUsR0FBRTs7c0RBQ1c7QUFHMUIsTUFBYSxnQkFBZ0I7SUFHM0IsT0FBTyxDQUFVO0NBQ2xCO0FBSkQsNENBSUM7QUFEQztJQUZDLElBQUEsMEJBQVEsR0FBRTtJQUNWLElBQUEsNEJBQVUsR0FBRTs7aURBQ0k7QUFHbkIsTUFBYSxjQUFjO0lBR3pCLEtBQUssQ0FBVTtDQUNoQjtBQUpELHdDQUlDO0FBREM7SUFGQyxJQUFBLDBCQUFRLEdBQUU7SUFDVixJQUFBLDRCQUFVLEdBQUU7OzZDQUNFO0FBR2pCLE1BQWEsWUFBWTtJQUV2QixNQUFNLENBQVU7SUFJaEIsTUFBTSxDQUFVO0NBQ2pCO0FBUEQsb0NBT0M7QUFMQztJQURDLElBQUEsd0JBQU0sRUFBQyxHQUFHLENBQUM7OzRDQUNJO0FBSWhCO0lBRkMsSUFBQSwwQkFBUSxHQUFFO0lBQ1YsSUFBQSw0QkFBVSxHQUFFOzs0Q0FDRztBQUdsQixNQUFhLGlCQUFpQjtJQUc1QixLQUFLLENBQVU7SUFJZixjQUFjLENBQVU7SUFJeEIsSUFBSSxDQUFVO0lBSWQsS0FBSyxDQUFVO0NBQ2hCO0FBaEJELDhDQWdCQztBQWJDO0lBRkMsSUFBQSwwQkFBUSxHQUFFO0lBQ1YsSUFBQSw0QkFBVSxHQUFFOztnREFDRTtBQUlmO0lBRkMsSUFBQSx3QkFBTSxFQUFDLEdBQUcsQ0FBQztJQUNYLElBQUEsNEJBQVUsR0FBRTs7eURBQ1c7QUFJeEI7SUFGQyxJQUFBLDBCQUFRLEdBQUU7SUFDVixJQUFBLDRCQUFVLEdBQUU7OytDQUNDO0FBSWQ7SUFGQyxJQUFBLDBCQUFRLEdBQUU7SUFDVixJQUFBLDRCQUFVLEdBQUU7O2dEQUNFO0FBR2pCLGlCQUFpQjtBQUNqQixNQUFhLG1CQUFtQjtJQUU5QixjQUFjLENBQVU7Q0FDekI7QUFIRCxrREFHQztBQURDO0lBREMsSUFBQSx3QkFBTSxFQUFDLEdBQUcsQ0FBQzs7MkRBQ1k7QUFHMUIsTUFBYSxvQkFBb0I7SUFFL0IsY0FBYyxDQUFVO0NBQ3pCO0FBSEQsb0RBR0M7QUFEQztJQURDLElBQUEsd0JBQU0sRUFBQyxHQUFHLENBQUM7OzREQUNZO0FBRzFCLE1BQWEsa0JBQWtCO0lBRTdCLGNBQWMsQ0FBVTtJQUd4QixRQUFRLENBQVc7Q0FDcEI7QUFORCxnREFNQztBQUpDO0lBREMsSUFBQSx3QkFBTSxFQUFDLEdBQUcsQ0FBQzs7MERBQ1k7QUFHeEI7SUFEQyxJQUFBLDRCQUFVLEdBQUU7O29EQUNNIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9tZXNzYWdpbmcvZHRvL21lc3NhZ2luZy5kdG8udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHtcbiAgSXNTdHJpbmcsXG4gIElzT3B0aW9uYWwsXG4gIElzQXJyYXksXG4gIElzRW51bSxcbiAgSXNJbnQsXG4gIE1pbixcbiAgSXNVVUlELFxuICBJc05vdEVtcHR5LFxufSBmcm9tICdjbGFzcy12YWxpZGF0b3InO1xuaW1wb3J0IHsgQ29udmVyc2F0aW9uVHlwZSwgTWVzc2FnZVR5cGUgfSBmcm9tICdAcHJpc21hL2NsaWVudCc7XG5cbmV4cG9ydCBjbGFzcyBDcmVhdGVDb252ZXJzYXRpb25EdG8ge1xuICBASXNBcnJheSgpXG4gIEBJc1VVSUQoJzQnLCB7IGVhY2g6IHRydWUgfSlcbiAgcGFydGljaXBhbnRJZHMhOiBzdHJpbmdbXTtcblxuICBASXNFbnVtKENvbnZlcnNhdGlvblR5cGUpXG4gIEBJc09wdGlvbmFsKClcbiAgdHlwZT86IENvbnZlcnNhdGlvblR5cGU7XG5cbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICB0aXRsZT86IHN0cmluZztcbn1cblxuZXhwb3J0IGNsYXNzIFNlbmRNZXNzYWdlRHRvIHtcbiAgQElzU3RyaW5nKClcbiAgQElzTm90RW1wdHkoKVxuICBjb250ZW50ITogc3RyaW5nO1xuXG4gIEBJc0VudW0oTWVzc2FnZVR5cGUpXG4gIEBJc09wdGlvbmFsKClcbiAgbWVzc2FnZVR5cGU/OiBNZXNzYWdlVHlwZTtcblxuICBASXNVVUlEKCc0JylcbiAgQElzT3B0aW9uYWwoKVxuICByZXBseVRvSWQ/OiBzdHJpbmc7XG5cbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICBhdHRhY2htZW50VXJsPzogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIEBJc09wdGlvbmFsKClcbiAgYXR0YWNobWVudE5hbWU/OiBzdHJpbmc7XG5cbiAgQElzSW50KClcbiAgQE1pbigwKVxuICBASXNPcHRpb25hbCgpXG4gIGF0dGFjaG1lbnRTaXplPzogbnVtYmVyO1xufVxuXG5leHBvcnQgY2xhc3MgVXBkYXRlTWVzc2FnZUR0byB7XG4gIEBJc1N0cmluZygpXG4gIEBJc05vdEVtcHR5KClcbiAgY29udGVudCE6IHN0cmluZztcbn1cblxuZXhwb3J0IGNsYXNzIEFkZFJlYWN0aW9uRHRvIHtcbiAgQElzU3RyaW5nKClcbiAgQElzTm90RW1wdHkoKVxuICBlbW9qaSE6IHN0cmluZztcbn1cblxuZXhwb3J0IGNsYXNzIEJsb2NrVXNlckR0byB7XG4gIEBJc1VVSUQoJzQnKVxuICB1c2VySWQhOiBzdHJpbmc7XG5cbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICByZWFzb24/OiBzdHJpbmc7XG59XG5cbmV4cG9ydCBjbGFzcyBTZWFyY2hNZXNzYWdlc0R0byB7XG4gIEBJc1N0cmluZygpXG4gIEBJc05vdEVtcHR5KClcbiAgcXVlcnkhOiBzdHJpbmc7XG5cbiAgQElzVVVJRCgnNCcpXG4gIEBJc09wdGlvbmFsKClcbiAgY29udmVyc2F0aW9uSWQ/OiBzdHJpbmc7XG5cbiAgQElzU3RyaW5nKClcbiAgQElzT3B0aW9uYWwoKVxuICBwYWdlPzogc3RyaW5nO1xuXG4gIEBJc1N0cmluZygpXG4gIEBJc09wdGlvbmFsKClcbiAgbGltaXQ/OiBzdHJpbmc7XG59XG5cbi8vIFdlYlNvY2tldCBEVE9zXG5leHBvcnQgY2xhc3MgSm9pbkNvbnZlcnNhdGlvbkR0byB7XG4gIEBJc1VVSUQoJzQnKVxuICBjb252ZXJzYXRpb25JZCE6IHN0cmluZztcbn1cblxuZXhwb3J0IGNsYXNzIExlYXZlQ29udmVyc2F0aW9uRHRvIHtcbiAgQElzVVVJRCgnNCcpXG4gIGNvbnZlcnNhdGlvbklkITogc3RyaW5nO1xufVxuXG5leHBvcnQgY2xhc3MgVHlwaW5nSW5kaWNhdG9yRHRvIHtcbiAgQElzVVVJRCgnNCcpXG4gIGNvbnZlcnNhdGlvbklkITogc3RyaW5nO1xuXG4gIEBJc09wdGlvbmFsKClcbiAgaXNUeXBpbmc/OiBib29sZWFuO1xufVxuIl0sInZlcnNpb24iOjN9

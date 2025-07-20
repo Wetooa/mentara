@@ -43,7 +43,7 @@ describe('CommentsService', () => {
         email: 'john@example.com',
       };
 
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await service.findUserById(TEST_USER_IDS.CLIENT);
 
@@ -54,7 +54,7 @@ describe('CommentsService', () => {
     });
 
     it('should return null when user not found', async () => {
-      prismaService.user.findUnique.mockResolvedValue(null);
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await service.findUserById('non-existent-id');
 
@@ -62,7 +62,7 @@ describe('CommentsService', () => {
     });
 
     it('should re-throw NotFoundException', async () => {
-      prismaService.user.findUnique.mockRejectedValue(
+      (prismaService.user.findUnique as jest.Mock).mockRejectedValue(
         new NotFoundException('User not found'),
       );
 
@@ -72,7 +72,7 @@ describe('CommentsService', () => {
     });
 
     it('should wrap database errors in InternalServerErrorException', async () => {
-      prismaService.user.findUnique.mockRejectedValue(
+      (prismaService.user.findUnique as jest.Mock).mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -109,7 +109,9 @@ describe('CommentsService', () => {
     ];
 
     it('should return all comments without user hearts when no userId provided', async () => {
-      prismaService.comment.findMany.mockResolvedValue(mockComments);
+      (prismaService.comment.findMany as jest.Mock).mockResolvedValue(
+        mockComments,
+      );
 
       const result = await service.findAll();
 
@@ -160,7 +162,9 @@ describe('CommentsService', () => {
     });
 
     it('should return comments with user hearts when userId provided', async () => {
-      prismaService.comment.findMany.mockResolvedValue(mockComments);
+      (prismaService.comment.findMany as jest.Mock).mockResolvedValue(
+        mockComments,
+      );
 
       const result = await service.findAll(TEST_USER_IDS.CLIENT);
 
@@ -180,7 +184,7 @@ describe('CommentsService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.comment.findMany.mockRejectedValue(
+      (prismaService.comment.findMany as jest.Mock).mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -217,7 +221,9 @@ describe('CommentsService', () => {
         },
       ];
 
-      prismaService.comment.findUnique.mockResolvedValue(mockComment);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(
+        mockComment,
+      );
       jest.spyOn(service, 'getCommentAttachments').mockResolvedValue(mockFiles);
 
       const result = await service.findOne('comment-1');
@@ -231,7 +237,7 @@ describe('CommentsService', () => {
     });
 
     it('should throw NotFoundException when comment not found', async () => {
-      prismaService.comment.findUnique.mockResolvedValue(null);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(service.findOne('non-existent-id')).rejects.toThrow(
         NotFoundException,
@@ -239,7 +245,7 @@ describe('CommentsService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.comment.findUnique.mockRejectedValue(
+      (prismaService.comment.findUnique as jest.Mock).mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -263,7 +269,9 @@ describe('CommentsService', () => {
     ];
 
     it('should return comments for specific post', async () => {
-      prismaService.comment.findMany.mockResolvedValue(mockComments);
+      (prismaService.comment.findMany as jest.Mock).mockResolvedValue(
+        mockComments,
+      );
 
       const result = await service.findByPostId('post-1');
 
@@ -278,7 +286,9 @@ describe('CommentsService', () => {
     });
 
     it('should include user hearts when userId provided', async () => {
-      prismaService.comment.findMany.mockResolvedValue(mockComments);
+      (prismaService.comment.findMany as jest.Mock).mockResolvedValue(
+        mockComments,
+      );
 
       await service.findByPostId('post-1', TEST_USER_IDS.CLIENT);
 
@@ -316,7 +326,9 @@ describe('CommentsService', () => {
     it('should create comment successfully', async () => {
       const mockFiles = [];
 
-      prismaService.comment.create.mockResolvedValue(mockCreatedComment);
+      (prismaService.comment.create as jest.Mock).mockResolvedValue(
+        mockCreatedComment,
+      );
       jest.spyOn(service, 'getCommentAttachments').mockResolvedValue(mockFiles);
 
       const result = await service.create(
@@ -343,7 +355,7 @@ describe('CommentsService', () => {
     });
 
     it('should handle creation errors', async () => {
-      prismaService.comment.create.mockRejectedValue(
+      (prismaService.comment.create as jest.Mock).mockRejectedValue(
         new Error('Creation failed'),
       );
 
@@ -355,6 +367,7 @@ describe('CommentsService', () => {
 
   describe('update', () => {
     const mockUpdateData = {
+      postId: 'post-1',
       content: 'Updated comment',
     };
 
@@ -379,8 +392,12 @@ describe('CommentsService', () => {
     it('should update comment successfully', async () => {
       const mockFiles = [];
 
-      prismaService.comment.findUnique.mockResolvedValue(mockComment);
-      prismaService.comment.update.mockResolvedValue(mockUpdatedComment);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(
+        mockComment,
+      );
+      (prismaService.comment.update as jest.Mock).mockResolvedValue(
+        mockUpdatedComment,
+      );
       jest.spyOn(service, 'getCommentAttachments').mockResolvedValue(mockFiles);
 
       const result = await service.update(
@@ -412,7 +429,7 @@ describe('CommentsService', () => {
     });
 
     it('should throw NotFoundException when comment not found', async () => {
-      prismaService.comment.findUnique.mockResolvedValue(null);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.update('non-existent-id', mockUpdateData, TEST_USER_IDS.CLIENT),
@@ -425,7 +442,9 @@ describe('CommentsService', () => {
         userId: 'other-user-id',
       };
 
-      prismaService.comment.findUnique.mockResolvedValue(otherUserComment);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(
+        otherUserComment,
+      );
 
       await expect(
         service.update('comment-1', mockUpdateData, TEST_USER_IDS.CLIENT),
@@ -446,8 +465,12 @@ describe('CommentsService', () => {
     };
 
     it('should delete comment successfully', async () => {
-      prismaService.comment.findUnique.mockResolvedValue(mockComment);
-      prismaService.comment.delete.mockResolvedValue(mockDeletedComment);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(
+        mockComment,
+      );
+      (prismaService.comment.delete as jest.Mock).mockResolvedValue(
+        mockDeletedComment,
+      );
 
       const result = await service.remove('comment-1', TEST_USER_IDS.CLIENT);
 
@@ -458,7 +481,7 @@ describe('CommentsService', () => {
     });
 
     it('should throw NotFoundException when comment not found', async () => {
-      prismaService.comment.findUnique.mockResolvedValue(null);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.remove('non-existent-id', TEST_USER_IDS.CLIENT),
@@ -471,7 +494,9 @@ describe('CommentsService', () => {
         userId: 'other-user-id',
       };
 
-      prismaService.comment.findUnique.mockResolvedValue(otherUserComment);
+      (prismaService.comment.findUnique as jest.Mock).mockResolvedValue(
+        otherUserComment,
+      );
 
       await expect(
         service.remove('comment-1', TEST_USER_IDS.CLIENT),
@@ -493,7 +518,9 @@ describe('CommentsService', () => {
     ];
 
     it('should return comments by user ID', async () => {
-      prismaService.comment.findMany.mockResolvedValue(mockUserComments);
+      (prismaService.comment.findMany as jest.Mock).mockResolvedValue(
+        mockUserComments,
+      );
 
       const result = await service.findByUserId(TEST_USER_IDS.CLIENT);
 
@@ -514,8 +541,10 @@ describe('CommentsService', () => {
   describe('Heart functionality', () => {
     describe('heartComment', () => {
       it('should add heart when not already hearted', async () => {
-        prismaService.commentHeart.findUnique.mockResolvedValue(null);
-        prismaService.commentHeart.create.mockResolvedValue({
+        (prismaService.commentHeart.findUnique as jest.Mock).mockResolvedValue(
+          null,
+        );
+        (prismaService.commentHeart.create as jest.Mock).mockResolvedValue({
           id: 'heart-1',
           commentId: 'comment-1',
           userId: TEST_USER_IDS.CLIENT,
@@ -542,8 +571,12 @@ describe('CommentsService', () => {
           userId: TEST_USER_IDS.CLIENT,
         };
 
-        prismaService.commentHeart.findUnique.mockResolvedValue(existingHeart);
-        prismaService.commentHeart.delete.mockResolvedValue(existingHeart);
+        (prismaService.commentHeart.findUnique as jest.Mock).mockResolvedValue(
+          existingHeart,
+        );
+        (prismaService.commentHeart.delete as jest.Mock).mockResolvedValue(
+          existingHeart,
+        );
 
         const result = await service.heartComment(
           'comment-1',
@@ -562,7 +595,7 @@ describe('CommentsService', () => {
       });
 
       it('should handle database errors', async () => {
-        prismaService.commentHeart.findUnique.mockRejectedValue(
+        (prismaService.commentHeart.findUnique as jest.Mock).mockRejectedValue(
           new Error('Database error'),
         );
 
@@ -580,7 +613,9 @@ describe('CommentsService', () => {
           userId: TEST_USER_IDS.CLIENT,
         };
 
-        prismaService.commentHeart.findUnique.mockResolvedValue(existingHeart);
+        (prismaService.commentHeart.findUnique as jest.Mock).mockResolvedValue(
+          existingHeart,
+        );
 
         const result = await service.isCommentHeartedByUser(
           'comment-1',
@@ -591,7 +626,9 @@ describe('CommentsService', () => {
       });
 
       it('should return false when comment is not hearted', async () => {
-        prismaService.commentHeart.findUnique.mockResolvedValue(null);
+        (prismaService.commentHeart.findUnique as jest.Mock).mockResolvedValue(
+          null,
+        );
 
         const result = await service.isCommentHeartedByUser(
           'comment-1',
@@ -630,7 +667,9 @@ describe('CommentsService', () => {
       };
 
       it('should create reply successfully', async () => {
-        prismaService.reply.create.mockResolvedValue(mockCreatedReply);
+        (prismaService.reply.create as jest.Mock).mockResolvedValue(
+          mockCreatedReply,
+        );
 
         const result = await service.createReply(mockReplyData);
 
@@ -653,7 +692,7 @@ describe('CommentsService', () => {
       });
 
       it('should handle creation errors', async () => {
-        prismaService.reply.create.mockRejectedValue(
+        (prismaService.reply.create as jest.Mock).mockRejectedValue(
           new Error('Creation failed'),
         );
 
@@ -676,7 +715,9 @@ describe('CommentsService', () => {
       ];
 
       it('should return replies without user hearts when no userId provided', async () => {
-        prismaService.reply.findMany.mockResolvedValue(mockReplies);
+        (prismaService.reply.findMany as jest.Mock).mockResolvedValue(
+          mockReplies,
+        );
 
         const result = await service.findRepliesByCommentId('comment-1');
 
@@ -702,7 +743,9 @@ describe('CommentsService', () => {
       });
 
       it('should return replies with user hearts when userId provided', async () => {
-        prismaService.reply.findMany.mockResolvedValue(mockReplies);
+        (prismaService.reply.findMany as jest.Mock).mockResolvedValue(
+          mockReplies,
+        );
 
         await service.findRepliesByCommentId('comment-1', TEST_USER_IDS.CLIENT);
 
@@ -720,8 +763,10 @@ describe('CommentsService', () => {
 
     describe('heartReply', () => {
       it('should add heart to reply when not already hearted', async () => {
-        prismaService.replyHeart.findUnique.mockResolvedValue(null);
-        prismaService.replyHeart.create.mockResolvedValue({
+        (prismaService.replyHeart.findUnique as jest.Mock).mockResolvedValue(
+          null,
+        );
+        (prismaService.replyHeart.create as jest.Mock).mockResolvedValue({
           id: 'heart-1',
           replyId: 'reply-1',
           userId: TEST_USER_IDS.CLIENT,
@@ -748,8 +793,12 @@ describe('CommentsService', () => {
           userId: TEST_USER_IDS.CLIENT,
         };
 
-        prismaService.replyHeart.findUnique.mockResolvedValue(existingHeart);
-        prismaService.replyHeart.delete.mockResolvedValue(existingHeart);
+        (prismaService.replyHeart.findUnique as jest.Mock).mockResolvedValue(
+          existingHeart,
+        );
+        (prismaService.replyHeart.delete as jest.Mock).mockResolvedValue(
+          existingHeart,
+        );
 
         const result = await service.heartReply(
           'reply-1',
@@ -776,7 +825,9 @@ describe('CommentsService', () => {
           userId: TEST_USER_IDS.CLIENT,
         };
 
-        prismaService.replyHeart.findUnique.mockResolvedValue(existingHeart);
+        (prismaService.replyHeart.findUnique as jest.Mock).mockResolvedValue(
+          existingHeart,
+        );
 
         const result = await service.isReplyHeartedByUser(
           'reply-1',
@@ -787,7 +838,9 @@ describe('CommentsService', () => {
       });
 
       it('should return false when reply is not hearted', async () => {
-        prismaService.replyHeart.findUnique.mockResolvedValue(null);
+        (prismaService.replyHeart.findUnique as jest.Mock).mockResolvedValue(
+          null,
+        );
 
         const result = await service.isReplyHeartedByUser(
           'reply-1',
@@ -821,7 +874,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.createMany.mockResolvedValue({
+          (
+            prismaService.fileAttachment.createMany as jest.Mock
+          ).mockResolvedValue({
             count: 2,
           });
 
@@ -878,9 +933,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.findMany.mockResolvedValue(
-            mockAttachments,
-          );
+          (
+            prismaService.fileAttachment.findMany as jest.Mock
+          ).mockResolvedValue(mockAttachments);
 
           const result = await service.getCommentAttachments('comment-1');
 
@@ -914,7 +969,9 @@ describe('CommentsService', () => {
 
       describe('removeCommentAttachment', () => {
         it('should remove comment attachment', async () => {
-          prismaService.fileAttachment.deleteMany.mockResolvedValue({
+          (
+            prismaService.fileAttachment.deleteMany as jest.Mock
+          ).mockResolvedValue({
             count: 1,
           });
 
@@ -949,7 +1006,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.createMany.mockResolvedValue({
+          (
+            prismaService.fileAttachment.createMany as jest.Mock
+          ).mockResolvedValue({
             count: 1,
           });
 
@@ -976,9 +1035,9 @@ describe('CommentsService', () => {
             },
           ];
 
-          prismaService.fileAttachment.findMany.mockResolvedValue(
-            mockAttachments,
-          );
+          (
+            prismaService.fileAttachment.findMany as jest.Mock
+          ).mockResolvedValue(mockAttachments);
 
           const result = await service.getReplyAttachments('reply-1');
 
@@ -998,7 +1057,9 @@ describe('CommentsService', () => {
 
       describe('removeReplyAttachment', () => {
         it('should remove reply attachment', async () => {
-          prismaService.fileAttachment.deleteMany.mockResolvedValue({
+          (
+            prismaService.fileAttachment.deleteMany as jest.Mock
+          ).mockResolvedValue({
             count: 1,
           });
 
@@ -1022,7 +1083,9 @@ describe('CommentsService', () => {
 
   describe('Error handling', () => {
     it('should handle non-Error objects in catch blocks', async () => {
-      prismaService.comment.findMany.mockRejectedValue('String error');
+      (prismaService.comment.findMany as jest.Mock).mockRejectedValue(
+        'String error',
+      );
 
       await expect(service.findAll()).rejects.toThrow(
         InternalServerErrorException,
@@ -1030,7 +1093,7 @@ describe('CommentsService', () => {
     });
 
     it('should re-throw ForbiddenException from database operations', async () => {
-      prismaService.comment.findMany.mockRejectedValue(
+      (prismaService.comment.findMany as jest.Mock).mockRejectedValue(
         new ForbiddenException('Access denied'),
       );
 
@@ -1038,7 +1101,7 @@ describe('CommentsService', () => {
     });
 
     it('should handle complex database operations errors', async () => {
-      prismaService.reply.create.mockRejectedValue(
+      (prismaService.reply.create as jest.Mock).mockRejectedValue(
         new Error('Complex database error'),
       );
 

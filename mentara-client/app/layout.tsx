@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
-import QueryProvider from "@/components/providers/query-provider";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: "Mentara",
@@ -23,11 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html suppressHydrationWarning lang="en">
-        <body
-          className={`font-[Futura] antialiased min-h-screen min-w-screen h-screen w-screen`}
-        >
+    <html suppressHydrationWarning lang="en">
+      <body
+        className={`font-[Futura] antialiased min-h-screen min-w-screen h-screen w-screen`}
+      >
+        <AuthProvider>
           <QueryProvider>
             <ThemeProvider
               attribute="class"
@@ -40,8 +40,8 @@ export default function RootLayout({
               <Toaster />
             </ThemeProvider>
           </QueryProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

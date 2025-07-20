@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Users, UserCircle, Shield, Filter } from 'lucide-react';
+import { Search, Users, UserCircle, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserSearchItem, User } from './UserSearchItem';
@@ -109,7 +108,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
         <div className="flex items-center justify-center p-8">
           <div className="flex flex-col items-center gap-2 text-muted-foreground">
             <Users className="w-8 h-8" />
-            <span className="text-sm">No users found for "{query}"</span>
+            <span className="text-sm">No users found for &quot;{query}&quot;</span>
             <span className="text-xs">Try adjusting your search terms</span>
           </div>
         </div>
@@ -163,7 +162,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
         {showRoleFilter ? (
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsContent value="all" className="mt-0">
-              {getFilteredUsers('all').map((user, index) => (
+              {getFilteredUsers('all').map((user) => (
                 <UserSearchItem
                   key={user.id}
                   user={user}
@@ -176,7 +175,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
             </TabsContent>
             
             <TabsContent value="client" className="mt-0">
-              {getFilteredUsers('client').map((user, index) => (
+              {getFilteredUsers('client').map((user) => (
                 <UserSearchItem
                   key={user.id}
                   user={user}
@@ -189,7 +188,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
             </TabsContent>
             
             <TabsContent value="therapist" className="mt-0">
-              {getFilteredUsers('therapist').map((user, index) => (
+              {getFilteredUsers('therapist').map((user) => (
                 <UserSearchItem
                   key={user.id}
                   user={user}
@@ -202,7 +201,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
             </TabsContent>
             
             <TabsContent value="moderator" className="mt-0">
-              {getFilteredUsers('moderator').map((user, index) => (
+              {getFilteredUsers('moderator').map((user) => (
                 <UserSearchItem
                   key={user.id}
                   user={user}
@@ -215,7 +214,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
             </TabsContent>
           </Tabs>
         ) : (
-          users.map((user, index) => (
+          users.map((user) => (
             <UserSearchItem
               key={user.id}
               user={user}

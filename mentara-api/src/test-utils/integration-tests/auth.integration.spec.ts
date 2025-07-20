@@ -330,7 +330,7 @@ describe('Auth Integration Tests', () => {
           comfortableUsingVideoConferencing: true,
           preferredSessionLength: [60],
           acceptTypes: ['Individual'],
-          status: 'approved',
+          status: 'APPROVED',
           hourlyRate: 150,
           expirationDateOfLicense: new Date('2025-01-01'),
           compliesWithDataPrivacyAct: true,

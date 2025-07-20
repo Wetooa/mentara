@@ -15,6 +15,7 @@ export interface MessageSentData {
   replyToMessageId?: string;
   recipientIds: string[];
   sentAt: Date;
+  isEncrypted?: boolean; // For security tracking and compliance
 }
 
 export class MessageSentEvent extends BaseDomainEvent<MessageSentData> {

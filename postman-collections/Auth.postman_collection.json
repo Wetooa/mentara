@@ -1,0 +1,1064 @@
+{
+	"info": {
+		"_postman_id": "auth-collection-v2",
+		"name": "Mentara - Authentication",
+		"description": "Comprehensive authentication endpoints for all user roles including login, registration, OAuth, password management, session management, and role-specific authentication flows.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "mentara-auth"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-refresh token if needed",
+					"if (pm.environment.get('accessToken') && pm.environment.get('refreshToken')) {",
+					"    const now = new Date().getTime();",
+					"    const expiresAt = pm.environment.get('tokenExpiresAt');",
+					"    if (expiresAt && now > expiresAt - 60000) {",
+					"        console.log('Token will expire soon, refreshing...');",
+					"        // Token refresh logic would go here",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Store auth tokens from successful responses",
+					"if (pm.response.code === 200 || pm.response.code === 201) {",
+					"    const responseJson = pm.response.json();",
+					"    if (responseJson.accessToken) {",
+					"        pm.environment.set('accessToken', responseJson.accessToken);",
+					"        pm.environment.set('refreshToken', responseJson.refreshToken);",
+					"        pm.environment.set('userId', responseJson.user.id);",
+					"        ",
+					"        // Calculate token expiration time",
+					"        const expiresIn = responseJson.expiresIn || 3600;",
+					"        const expiresAt = new Date(Date.now() + expiresIn * 1000).getTime();",
+					"        pm.environment.set('tokenExpiresAt', expiresAt);",
+					"        ",
+					"        console.log('Auth tokens updated successfully');",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "{{baseUrl}}",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Public Authentication",
+			"item": [
+				{
+					"name": "General Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "General Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"role\": \"client\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Role-Specific Registration",
+			"item": [
+				{
+					"name": "Client Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"client@example.com\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/client/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "client", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Client Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"client@example.com\",\n  \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/client/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "client", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Therapist Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"therapist@example.com\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"Dr. Sarah\",\n  \"lastName\": \"Johnson\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Therapist Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"therapist@example.com\",\n  \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Therapist Application with Documents",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "applicationDataJson",
+									"value": "{\"email\":\"therapist@example.com\",\"firstName\":\"Dr. Sarah\",\"lastName\":\"Johnson\",\"licenseNumber\":\"LIC123456\",\"specializations\":[\"anxiety\",\"depression\"],\"education\":\"PhD in Psychology\",\"experience\":\"5 years\"}",
+									"type": "text"
+								},
+								{
+									"key": "fileTypes",
+									"value": "{\"0\":\"license\",\"1\":\"diploma\"}",
+									"type": "text"
+								},
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/apply-with-documents",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "apply-with-documents"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Create Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@mentara.com\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"adminLevel\": \"admin\",\n  \"permissions\": [\"read\", \"write\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/admin/create-account",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "admin", "create-account"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@mentara.com\",\n  \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/admin/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "admin", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Moderator Create Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"moderator@mentara.com\",\n  \"password\": \"{{testPassword}}\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"permissions\": [\"moderate_posts\", \"ban_users\"],\n  \"assignedCommunities\": [\"community1\", \"community2\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/moderator/create-account",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "moderator", "create-account"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Moderator Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"moderator@mentara.com\",\n  \"password\": \"{{testPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/moderator/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "moderator", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OAuth Integration",
+			"item": [
+				{
+					"name": "Google OAuth",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "google"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Google OAuth Callback",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google/callback?state=client",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "google", "callback"],
+							"query": [
+								{
+									"key": "state",
+									"value": "client"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Microsoft OAuth",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/microsoft",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "microsoft"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Microsoft OAuth Callback",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/microsoft/callback?state=client",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "microsoft", "callback"],
+							"query": [
+								{
+									"key": "state",
+									"value": "client"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth Token Exchange",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"google\",\n  \"code\": \"authorization_code_from_oauth_provider\",\n  \"state\": \"client\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/oauth/token-exchange",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "oauth", "token-exchange"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Password Management",
+			"item": [
+				{
+					"name": "Request Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/request-password-reset",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "request-password-reset"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"reset_token\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "reset-password"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Reset Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/validate-reset-token?token=reset_token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "validate-reset-token"],
+							"query": [
+								{
+									"key": "token",
+									"value": "reset_token"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Email Verification",
+			"item": [
+				{
+					"name": "Send Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/send-verification-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "send-verification-email"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/resend-verification-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "resend-verification-email"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"verification_token\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "verify-email"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Session Management",
+			"item": [
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "users"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Force Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/force-logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "force-logout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-refresh-token",
+								"value": "{{refreshToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/session-info",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "session-info"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Sessions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-refresh-token",
+								"value": "{{refreshToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/active-sessions",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "active-sessions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Terminate Session",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"{{sessionId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/terminate-session",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "terminate-session"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Terminate Other Sessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-refresh-token",
+								"value": "{{refreshToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/terminate-other-sessions",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "terminate-other-sessions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Universal Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/universal-logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "universal-logout"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Role-Specific Profiles",
+			"item": [
+				{
+					"name": "Client Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/client/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "client", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Client First Sign-In Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/client/first-sign-in-status",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "client", "first-sign-in-status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Recommendations Seen",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/client/mark-recommendations-seen",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "client", "mark-recommendations-seen"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Therapist Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/admin/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "admin", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/admin/permissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "admin", "permissions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/admin/dashboard-stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "admin", "dashboard-stats"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Moderator Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/moderator/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "moderator", "profile"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Moderator Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/moderator/permissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "moderator", "permissions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Moderator Assigned Communities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/moderator/assigned-communities",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "moderator", "assigned-communities"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Moderator Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/moderator/dashboard-stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "moderator", "dashboard-stats"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Therapist Application Management",
+			"item": [
+				{
+					"name": "Get All Applications (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/applications?status=pending&page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "applications"],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Application by ID (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/applications/{{therapistId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "applications", "{{therapistId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Application Status (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"approved\",\n  \"notes\": \"Application approved after review\",\n  \"reviewerComments\": \"All credentials verified\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/applications/{{therapistId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "applications", "{{therapistId}}", "status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Application Files (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/therapist/applications/{{therapistId}}/files",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "therapist", "applications", "{{therapistId}}", "files"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Utility & Validation",
+			"item": [
+				{
+					"name": "Validate Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{accessToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/validate-token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "validate-token"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check User Exists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/check-user?email={{testEmail}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "check-user"],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{testEmail}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

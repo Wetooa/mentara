@@ -22,7 +22,6 @@ import { Patient } from "@/types/patient";
 
 interface PatientProgressDashboardProps {
   patient: Patient;
-  patientId: string;
 }
 
 interface ProgressMetric {
@@ -148,7 +147,6 @@ const getCategoryColor = (category: string) => {
 
 export default function PatientProgressDashboard({
   patient,
-  patientId,
 }: PatientProgressDashboardProps) {
   const progressMetrics = generateProgressMetrics(patient);
   const milestones = generateMilestones();

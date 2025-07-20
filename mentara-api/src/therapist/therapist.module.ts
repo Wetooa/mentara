@@ -3,28 +3,49 @@ import { TherapistRecommendationController } from './therapist-recommendation.co
 import { TherapistRecommendationService } from './therapist-recommendation.service';
 import { TherapistManagementController } from './therapist-management.controller';
 import { TherapistManagementService } from './therapist-management.service';
-import { TherapistApplicationController } from './therapist-application.controller';
 import { TherapistApplicationService } from './therapist-application.service';
+import { TherapistProfileController } from './controllers/therapist-profile.controller';
+import { TherapistClientController } from './controllers/therapist-client.controller';
+import { TherapistWorksheetController } from './controllers/therapist-worksheet.controller';
+import { TherapistRequestController } from './controllers/therapist-request.controller';
 import { WorksheetsService } from '../worksheets/worksheets.service';
-import { EmailService } from '../services/email.service';
+import { TherapistRequestService } from './services/therapist-request.service';
+import { AdvancedMatchingService } from './services/advanced-matching.service';
+import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
+import { MatchingAnalyticsService } from './services/matching-analytics.service';
+import { EmailModule } from '../email/email.module';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
+import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
 
 @Module({
+  imports: [PreAssessmentModule, EmailModule],
   controllers: [
     TherapistRecommendationController,
     TherapistManagementController,
-    TherapistApplicationController,
+    TherapistProfileController,
+    TherapistClientController,
+    TherapistWorksheetController,
+    TherapistRequestController,
   ],
   providers: [
     TherapistRecommendationService,
     TherapistManagementService,
     TherapistApplicationService,
+    TherapistRequestService,
     WorksheetsService,
-    EmailService,
+    AdvancedMatchingService,
+    CompatibilityAnalysisService,
+    MatchingAnalyticsService,
+    NotificationsService,
     PrismaService,
     RoleUtils,
   ],
-  exports: [TherapistManagementService, TherapistApplicationService],
+  exports: [
+    TherapistManagementService,
+    TherapistApplicationService,
+    TherapistRequestService,
+  ],
 })
 export class TherapistModule {}

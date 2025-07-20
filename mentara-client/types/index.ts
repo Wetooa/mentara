@@ -17,7 +17,8 @@ export interface DashboardStats {
   };
 }
 
-export interface Appointment {
+// Legacy appointment interface - use types/auth.ts Appointment instead for new code
+export interface LegacyAppointment {
   id: string;
   patientId: string;
   patientName: string;
@@ -56,3 +57,6 @@ export interface Patient {
   sessions: Session[];
   worksheets: Worksheet[];
 }
+
+// Export auth types
+export * from './auth';

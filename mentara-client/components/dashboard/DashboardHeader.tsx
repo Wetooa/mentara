@@ -43,7 +43,7 @@ export default function DashboardHeader({ user, onBookSession }: DashboardHeader
             {greeting}, {user.name}
           </h1>
           <p className="text-muted-foreground">
-            Here's an overview of your mental health journey
+            Here&apos;s an overview of your mental health journey
           </p>
         </div>
       </div>

@@ -1,0 +1,90 @@
+0e9a19caad1d6bc289cf8b0501e0cf99
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthModule = void 0;
+const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
+const passport_1 = require("@nestjs/passport");
+const prisma_client_provider_1 = require("src/providers/prisma-client.provider");
+const auth_controller_1 = require("./auth.controller");
+const auth_service_1 = require("./auth.service");
+const event_bus_service_1 = require("../common/events/event-bus.service");
+const token_service_1 = require("./services/token.service");
+const email_verification_service_1 = require("./services/email-verification.service");
+const password_reset_service_1 = require("./services/password-reset.service");
+const jwt_strategy_1 = require("./strategies/jwt.strategy");
+const google_strategy_1 = require("./strategies/google.strategy");
+const microsoft_strategy_1 = require("./strategies/microsoft.strategy");
+const email_service_1 = require("../services/email.service");
+// Role-specific controllers
+const client_auth_controller_1 = require("./controllers/client-auth.controller");
+const therapist_auth_controller_1 = require("./controllers/therapist-auth.controller");
+const admin_auth_controller_1 = require("./controllers/admin-auth.controller");
+const moderator_auth_controller_1 = require("./controllers/moderator-auth.controller");
+// Role-specific services
+const client_auth_service_1 = require("./services/client-auth.service");
+const therapist_auth_service_1 = require("./services/therapist-auth.service");
+const admin_auth_service_1 = require("./services/admin-auth.service");
+const moderator_auth_service_1 = require("./services/moderator-auth.service");
+// External dependencies
+const supabase_storage_service_1 = require("../common/services/supabase-storage.service");
+let AuthModule = class AuthModule {
+};
+exports.AuthModule = AuthModule;
+exports.AuthModule = AuthModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            passport_1.PassportModule,
+            jwt_1.JwtModule.register({
+                secret: process.env.JWT_SECRET,
+                signOptions: {
+                    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+                },
+            }),
+        ],
+        controllers: [
+            auth_controller_1.AuthController,
+            client_auth_controller_1.ClientAuthController,
+            therapist_auth_controller_1.TherapistAuthController,
+            admin_auth_controller_1.AdminAuthController,
+            moderator_auth_controller_1.ModeratorAuthController,
+        ],
+        providers: [
+            auth_service_1.AuthService,
+            prisma_client_provider_1.PrismaService,
+            event_bus_service_1.EventBusService,
+            token_service_1.TokenService,
+            email_verification_service_1.EmailVerificationService,
+            password_reset_service_1.PasswordResetService,
+            email_service_1.EmailService,
+            jwt_strategy_1.JwtStrategy,
+            google_strategy_1.GoogleStrategy,
+            microsoft_strategy_1.MicrosoftStrategy,
+            // Role-specific services
+            client_auth_service_1.ClientAuthService,
+            therapist_auth_service_1.TherapistAuthService,
+            admin_auth_service_1.AdminAuthService,
+            moderator_auth_service_1.ModeratorAuthService,
+            // External dependencies
+            supabase_storage_service_1.SupabaseStorageService,
+        ],
+        exports: [
+            auth_service_1.AuthService,
+            token_service_1.TokenService,
+            email_verification_service_1.EmailVerificationService,
+            password_reset_service_1.PasswordResetService,
+            jwt_strategy_1.JwtStrategy,
+            client_auth_service_1.ClientAuthService,
+            therapist_auth_service_1.TherapistAuthService,
+            admin_auth_service_1.AdminAuthService,
+            moderator_auth_service_1.ModeratorAuthService,
+        ],
+    })
+], AuthModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvYXV0aC5tb2R1bGUudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUEsMkNBQXdDO0FBQ3hDLHFDQUF3QztBQUN4QywrQ0FBa0Q7QUFDbEQsaUZBQXFFO0FBQ3JFLHVEQUFtRDtBQUNuRCxpREFBNkM7QUFDN0MsMEVBQXFFO0FBQ3JFLDREQUF3RDtBQUN4RCxzRkFBaUY7QUFDakYsOEVBQXlFO0FBQ3pFLDREQUF3RDtBQUN4RCxrRUFBOEQ7QUFDOUQsd0VBQW9FO0FBQ3BFLDZEQUF5RDtBQUV6RCw0QkFBNEI7QUFDNUIsaUZBQTRFO0FBQzVFLHVGQUFrRjtBQUNsRiwrRUFBMEU7QUFDMUUsdUZBQWtGO0FBRWxGLHlCQUF5QjtBQUN6Qix3RUFBbUU7QUFDbkUsOEVBQXlFO0FBQ3pFLHNFQUFpRTtBQUNqRSw4RUFBeUU7QUFFekUsd0JBQXdCO0FBQ3hCLDBGQUFxRjtBQW9EOUUsSUFBTSxVQUFVLEdBQWhCLE1BQU0sVUFBVTtDQUFHLENBQUE7QUFBYixnQ0FBVTtxQkFBVixVQUFVO0lBbER0QixJQUFBLGVBQU0sRUFBQztRQUNOLE9BQU8sRUFBRTtZQUNQLHlCQUFjO1lBQ2QsZUFBUyxDQUFDLFFBQVEsQ0FBQztnQkFDakIsTUFBTSxFQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsVUFBVTtnQkFDOUIsV0FBVyxFQUFFO29CQUNYLFNBQVMsRUFBRSxPQUFPLENBQUMsR0FBRyxDQUFDLGNBQWMsSUFBSSxJQUFJO2lCQUM5QzthQUNGLENBQUM7U0FDSDtRQUNELFdBQVcsRUFBRTtZQUNYLGdDQUFjO1lBQ2QsNkNBQW9CO1lBQ3BCLG1EQUF1QjtZQUN2QiwyQ0FBbUI7WUFDbkIsbURBQXVCO1NBQ3hCO1FBQ0QsU0FBUyxFQUFFO1lBQ1QsMEJBQVc7WUFDWCxzQ0FBYTtZQUNiLG1DQUFlO1lBQ2YsNEJBQVk7WUFDWixxREFBd0I7WUFDeEIsNkNBQW9CO1lBQ3BCLDRCQUFZO1lBQ1osMEJBQVc7WUFDWCxnQ0FBYztZQUNkLHNDQUFpQjtZQUVqQix5QkFBeUI7WUFDekIsdUNBQWlCO1lBQ2pCLDZDQUFvQjtZQUNwQixxQ0FBZ0I7WUFDaEIsNkNBQW9CO1lBRXBCLHdCQUF3QjtZQUN4QixpREFBc0I7U0FDdkI7UUFDRCxPQUFPLEVBQUU7WUFDUCwwQkFBVztZQUNYLDRCQUFZO1lBQ1oscURBQXdCO1lBQ3hCLDZDQUFvQjtZQUNwQiwwQkFBVztZQUNYLHVDQUFpQjtZQUNqQiw2Q0FBb0I7WUFDcEIscUNBQWdCO1lBQ2hCLDZDQUFvQjtTQUNyQjtLQUNGLENBQUM7R0FDVyxVQUFVLENBQUciLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvYXV0aC5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgSnd0TW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9qd3QnO1xuaW1wb3J0IHsgUGFzc3BvcnRNb2R1bGUgfSBmcm9tICdAbmVzdGpzL3Bhc3Nwb3J0JztcbmltcG9ydCB7IFByaXNtYVNlcnZpY2UgfSBmcm9tICdzcmMvcHJvdmlkZXJzL3ByaXNtYS1jbGllbnQucHJvdmlkZXInO1xuaW1wb3J0IHsgQXV0aENvbnRyb2xsZXIgfSBmcm9tICcuL2F1dGguY29udHJvbGxlcic7XG5pbXBvcnQgeyBBdXRoU2VydmljZSB9IGZyb20gJy4vYXV0aC5zZXJ2aWNlJztcbmltcG9ydCB7IEV2ZW50QnVzU2VydmljZSB9IGZyb20gJy4uL2NvbW1vbi9ldmVudHMvZXZlbnQtYnVzLnNlcnZpY2UnO1xuaW1wb3J0IHsgVG9rZW5TZXJ2aWNlIH0gZnJvbSAnLi9zZXJ2aWNlcy90b2tlbi5zZXJ2aWNlJztcbmltcG9ydCB7IEVtYWlsVmVyaWZpY2F0aW9uU2VydmljZSB9IGZyb20gJy4vc2VydmljZXMvZW1haWwtdmVyaWZpY2F0aW9uLnNlcnZpY2UnO1xuaW1wb3J0IHsgUGFzc3dvcmRSZXNldFNlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL3Bhc3N3b3JkLXJlc2V0LnNlcnZpY2UnO1xuaW1wb3J0IHsgSnd0U3RyYXRlZ3kgfSBmcm9tICcuL3N0cmF0ZWdpZXMvand0LnN0cmF0ZWd5JztcbmltcG9ydCB7IEdvb2dsZVN0cmF0ZWd5IH0gZnJvbSAnLi9zdHJhdGVnaWVzL2dvb2dsZS5zdHJhdGVneSc7XG5pbXBvcnQgeyBNaWNyb3NvZnRTdHJhdGVneSB9IGZyb20gJy4vc3RyYXRlZ2llcy9taWNyb3NvZnQuc3RyYXRlZ3knO1xuaW1wb3J0IHsgRW1haWxTZXJ2aWNlIH0gZnJvbSAnLi4vc2VydmljZXMvZW1haWwuc2VydmljZSc7XG5cbi8vIFJvbGUtc3BlY2lmaWMgY29udHJvbGxlcnNcbmltcG9ydCB7IENsaWVudEF1dGhDb250cm9sbGVyIH0gZnJvbSAnLi9jb250cm9sbGVycy9jbGllbnQtYXV0aC5jb250cm9sbGVyJztcbmltcG9ydCB7IFRoZXJhcGlzdEF1dGhDb250cm9sbGVyIH0gZnJvbSAnLi9jb250cm9sbGVycy90aGVyYXBpc3QtYXV0aC5jb250cm9sbGVyJztcbmltcG9ydCB7IEFkbWluQXV0aENvbnRyb2xsZXIgfSBmcm9tICcuL2NvbnRyb2xsZXJzL2FkbWluLWF1dGguY29udHJvbGxlcic7XG5pbXBvcnQgeyBNb2RlcmF0b3JBdXRoQ29udHJvbGxlciB9IGZyb20gJy4vY29udHJvbGxlcnMvbW9kZXJhdG9yLWF1dGguY29udHJvbGxlcic7XG5cbi8vIFJvbGUtc3BlY2lmaWMgc2VydmljZXNcbmltcG9ydCB7IENsaWVudEF1dGhTZXJ2aWNlIH0gZnJvbSAnLi9zZXJ2aWNlcy9jbGllbnQtYXV0aC5zZXJ2aWNlJztcbmltcG9ydCB7IFRoZXJhcGlzdEF1dGhTZXJ2aWNlIH0gZnJvbSAnLi9zZXJ2aWNlcy90aGVyYXBpc3QtYXV0aC5zZXJ2aWNlJztcbmltcG9ydCB7IEFkbWluQXV0aFNlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL2FkbWluLWF1dGguc2VydmljZSc7XG5pbXBvcnQgeyBNb2RlcmF0b3JBdXRoU2VydmljZSB9IGZyb20gJy4vc2VydmljZXMvbW9kZXJhdG9yLWF1dGguc2VydmljZSc7XG5cbi8vIEV4dGVybmFsIGRlcGVuZGVuY2llc1xuaW1wb3J0IHsgU3VwYWJhc2VTdG9yYWdlU2VydmljZSB9IGZyb20gJy4uL2NvbW1vbi9zZXJ2aWNlcy9zdXBhYmFzZS1zdG9yYWdlLnNlcnZpY2UnO1xuXG5ATW9kdWxlKHtcbiAgaW1wb3J0czogW1xuICAgIFBhc3Nwb3J0TW9kdWxlLFxuICAgIEp3dE1vZHVsZS5yZWdpc3Rlcih7XG4gICAgICBzZWNyZXQ6IHByb2Nlc3MuZW52LkpXVF9TRUNSRVQsXG4gICAgICBzaWduT3B0aW9uczoge1xuICAgICAgICBleHBpcmVzSW46IHByb2Nlc3MuZW52LkpXVF9FWFBJUkVTX0lOIHx8ICcxaCcsXG4gICAgICB9LFxuICAgIH0pLFxuICBdLFxuICBjb250cm9sbGVyczogW1xuICAgIEF1dGhDb250cm9sbGVyLFxuICAgIENsaWVudEF1dGhDb250cm9sbGVyLFxuICAgIFRoZXJhcGlzdEF1dGhDb250cm9sbGVyLFxuICAgIEFkbWluQXV0aENvbnRyb2xsZXIsXG4gICAgTW9kZXJhdG9yQXV0aENvbnRyb2xsZXIsXG4gIF0sXG4gIHByb3ZpZGVyczogW1xuICAgIEF1dGhTZXJ2aWNlLFxuICAgIFByaXNtYVNlcnZpY2UsXG4gICAgRXZlbnRCdXNTZXJ2aWNlLFxuICAgIFRva2VuU2VydmljZSxcbiAgICBFbWFpbFZlcmlmaWNhdGlvblNlcnZpY2UsXG4gICAgUGFzc3dvcmRSZXNldFNlcnZpY2UsXG4gICAgRW1haWxTZXJ2aWNlLFxuICAgIEp3dFN0cmF0ZWd5LFxuICAgIEdvb2dsZVN0cmF0ZWd5LFxuICAgIE1pY3Jvc29mdFN0cmF0ZWd5LFxuXG4gICAgLy8gUm9sZS1zcGVjaWZpYyBzZXJ2aWNlc1xuICAgIENsaWVudEF1dGhTZXJ2aWNlLFxuICAgIFRoZXJhcGlzdEF1dGhTZXJ2aWNlLFxuICAgIEFkbWluQXV0aFNlcnZpY2UsXG4gICAgTW9kZXJhdG9yQXV0aFNlcnZpY2UsXG5cbiAgICAvLyBFeHRlcm5hbCBkZXBlbmRlbmNpZXNcbiAgICBTdXBhYmFzZVN0b3JhZ2VTZXJ2aWNlLFxuICBdLFxuICBleHBvcnRzOiBbXG4gICAgQXV0aFNlcnZpY2UsXG4gICAgVG9rZW5TZXJ2aWNlLFxuICAgIEVtYWlsVmVyaWZpY2F0aW9uU2VydmljZSxcbiAgICBQYXNzd29yZFJlc2V0U2VydmljZSxcbiAgICBKd3RTdHJhdGVneSxcbiAgICBDbGllbnRBdXRoU2VydmljZSxcbiAgICBUaGVyYXBpc3RBdXRoU2VydmljZSxcbiAgICBBZG1pbkF1dGhTZXJ2aWNlLFxuICAgIE1vZGVyYXRvckF1dGhTZXJ2aWNlLFxuICBdLFxufSlcbmV4cG9ydCBjbGFzcyBBdXRoTW9kdWxlIHt9XG4iXSwidmVyc2lvbiI6M30=

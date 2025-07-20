@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneCall, MessageSquare, Calendar, Eye, Heart } from "lucide-react";
+import { PhoneCall, MessageSquare, Calendar, Heart } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/useFavorites";

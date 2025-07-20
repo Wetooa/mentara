@@ -1,223 +1,218 @@
 import { AxiosInstance } from 'axios';
+import {
+  Community,
+  CommunityMember,
+  Post,
+  PostCreateInputDto,
+  CreateNestedCommentDto,
+} from '@mentara/commons';
 
-// Types
-export interface Community {
+// Local types for extended structures not in commons
+export interface RoomGroup {
   id: string;
   name: string;
-  description: string;
-  isPrivate: boolean;
-  memberCount: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  moderators: string[];
-  tags: string[];
-  rules?: string[];
-  image?: string;
-}
-
-export interface CreateCommunityRequest {
-  name: string;
-  description: string;
-  isPrivate?: boolean;
-  tags?: string[];
-  rules?: string[];
-  image?: string;
-}
-
-export interface UpdateCommunityRequest {
-  name?: string;
-  description?: string;
-  isPrivate?: boolean;
-  tags?: string[];
-  rules?: string[];
-  image?: string;
-}
-
-export interface CommunityListParams {
-  isPrivate?: boolean;
-  tags?: string[];
-  search?: string;
-  limit?: number;
-  offset?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface CommunityListResponse {
-  communities: Community[];
-  total: number;
-  hasMore: boolean;
-}
-
-export interface Post {
-  id: string;
-  title: string;
-  content: string;
+  order: number;
   communityId: string;
-  authorId: string;
-  isPinned: boolean;
-  isLocked: boolean;
-  tags: string[];
-  upvotes: number;
-  downvotes: number;
-  commentCount: number;
+  rooms: Room[];
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  order: number;
+  postingRole: string;
+  roomGroupId: string;
+}
+
+export interface CommunityWithStructure extends Community {
+  roomGroups: RoomGroup[];
+}
+
+export interface PostHeart {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  parentId?: string; // For nested comments via unified system
   createdAt: string;
   updatedAt: string;
-  author: {
+  user: {
     id: string;
     firstName: string;
     lastName: string;
-    isAnonymous: boolean;
+    avatarUrl?: string;
+    role?: 'client' | 'therapist' | 'moderator' | 'admin';
   };
-  community: {
+  hearts: CommentHeart[];
+  children?: Comment[]; // Nested comments (replaces replies)
+  heartCount: number;
+  childrenCount: number;
+  isHearted?: boolean;
+}
+
+export interface CommentHeart {
+  id: string;
+  commentId: string;
+  userId: string;
+  createdAt: string;
+  user?: {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
   };
 }
 
-export interface CreatePostRequest {
-  title: string;
-  content: string;
+export interface Membership {
+  id: string;
   communityId: string;
-  tags?: string[];
-  isAnonymous?: boolean;
+  userId: string;
+  role: string;
+  joinedAt: string;
+  community: Community;
 }
 
-export interface UpdatePostRequest {
-  title?: string;
-  content?: string;
-  tags?: string[];
-  isPinned?: boolean;
-  isLocked?: boolean;
+export interface CommunityStats {
+  totalCommunities: number;
+  totalMembers: number;
+  totalPosts: number;
+  totalComments: number;
 }
 
-export interface PostListParams {
-  communityId?: string;
-  authorId?: string;
-  tags?: string[];
-  isPinned?: boolean;
-  isLocked?: boolean;
-  search?: string;
-  limit?: number;
-  offset?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+// Extended Post interface with populated fields
+export interface PostWithDetails extends Post {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
+  hearts: PostHeart[];
+  comments: Comment[];
+  _count: {
+    hearts: number;
+    comments: number;
+  };
 }
 
-// Communities service factory
-export const createCommunitiesService = (client: AxiosInstance) => ({
-  // Community management
-  communities: {
-    // Get all communities
-    getAll: (params: CommunityListParams = {}): Promise<CommunityListResponse> => {
-      const searchParams = new URLSearchParams();
-      
-      if (params.isPrivate !== undefined) searchParams.append('isPrivate', params.isPrivate.toString());
-      if (params.tags?.length) searchParams.append('tags', params.tags.join(','));
-      if (params.search) searchParams.append('search', params.search);
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
-      if (params.sortBy) searchParams.append('sortBy', params.sortBy);
-      if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+// Community service factory
+export const createCommunityService = (client: AxiosInstance) => ({
+  // Communities
+  getAllCommunities: (): Promise<Community[]> =>
+    client.get('/communities'),
 
-      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      return client.get(`/communities${queryString}`);
-    },
+  getCommunityById: (id: string): Promise<Community> =>
+    client.get(`/communities/${id}`),
 
-    // Get community by ID
-    getById: (id: string): Promise<Community> =>
-      client.get(`/communities/${id}`),
+  getCommunityBySlug: (slug: string): Promise<Community> =>
+    client.get(`/communities/slug/${slug}`),
 
-    // Create new community
-    create: (data: CreateCommunityRequest): Promise<Community> =>
-      client.post('/communities', data),
+  getCommunitiesWithStructure: (): Promise<CommunityWithStructure[]> =>
+    client.get('/communities/with-structure'),
 
-    // Update community
-    update: (id: string, data: UpdateCommunityRequest): Promise<Community> =>
-      client.put(`/communities/${id}`, data),
+  getCommunityWithStructure: (id: string): Promise<CommunityWithStructure> =>
+    client.get(`/communities/${id}/with-structure`),
 
-    // Delete community
-    delete: (id: string): Promise<void> =>
-      client.delete(`/communities/${id}`),
+  getCommunityStats: (): Promise<CommunityStats> =>
+    client.get('/communities/stats'),
 
-    // Get communities by user ID
-    getByUserId: (userId: string): Promise<Community[]> =>
-      client.get(`/communities/user/${userId}`),
+  // User's Communities
+  getMyMemberships: (): Promise<Membership[]> =>
+    client.get('/communities/user/me'),
 
-    // Get my communities
-    getMy: (): Promise<Community[]> =>
-      client.get('/communities/my'),
+  getUserMemberships: (userId: string): Promise<Membership[]> =>
+    client.get(`/communities/user/${userId}`),
 
-    // Join community
-    join: (id: string): Promise<void> =>
-      client.post(`/communities/${id}/join`),
+  // Community Membership
+  joinCommunity: (communityId: string): Promise<{ joined: boolean }> =>
+    client.post(`/communities/${communityId}/join`),
 
-    // Leave community
-    leave: (id: string): Promise<void> =>
-      client.post(`/communities/${id}/leave`),
+  leaveCommunity: (communityId: string): Promise<{ left: boolean }> =>
+    client.post(`/communities/${communityId}/leave`),
 
-    // Get community members
-    getMembers: (id: string): Promise<any[]> =>
-      client.get(`/communities/${id}/members`),
+  getCommunityMembers: (communityId: string, limit = 50, offset = 0): Promise<{ members: CommunityMember[]; total: number }> => {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    params.append('offset', offset.toString());
+    return client.get(`/communities/${communityId}/members?${params.toString()}`);
   },
 
-  // Post management
-  posts: {
-    // Get all posts
-    getAll: (params: PostListParams = {}): Promise<{ posts: Post[]; total: number; hasMore: boolean }> => {
-      const searchParams = new URLSearchParams();
-      
-      if (params.communityId) searchParams.append('communityId', params.communityId);
-      if (params.authorId) searchParams.append('authorId', params.authorId);
-      if (params.tags?.length) searchParams.append('tags', params.tags.join(','));
-      if (params.isPinned !== undefined) searchParams.append('isPinned', params.isPinned.toString());
-      if (params.isLocked !== undefined) searchParams.append('isLocked', params.isLocked.toString());
-      if (params.search) searchParams.append('search', params.search);
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-      if (params.offset) searchParams.append('offset', params.offset.toString());
-      if (params.sortBy) searchParams.append('sortBy', params.sortBy);
-      if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+  // Room Groups and Rooms
+  createRoomGroup: (communityId: string, name: string, order: number): Promise<RoomGroup> =>
+    client.post(`/communities/${communityId}/room-group`, { name, order }),
 
-      const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      return client.get(`/posts${queryString}`);
-    },
+  createRoom: (roomGroupId: string, name: string, order: number): Promise<Room> =>
+    client.post(`/communities/room-group/${roomGroupId}/room`, { name, order }),
 
-    // Get post by ID
-    getById: (id: string): Promise<Post> =>
-      client.get(`/posts/${id}`),
+  getRoomsByGroup: (roomGroupId: string): Promise<Room[]> =>
+    client.get(`/communities/room-group/${roomGroupId}/rooms`),
 
-    // Create new post
-    create: (data: CreatePostRequest): Promise<Post> =>
-      client.post('/posts', data),
+  // Posts
+  createPost: (data: PostCreateInputDto): Promise<Post> =>
+    client.post('/posts', data),
 
-    // Update post
-    update: (id: string, data: UpdatePostRequest): Promise<Post> =>
-      client.put(`/posts/${id}`, data),
-
-    // Delete post
-    delete: (id: string): Promise<void> =>
-      client.delete(`/posts/${id}`),
-
-    // Get posts by user ID
-    getByUserId: (userId: string): Promise<Post[]> =>
-      client.get(`/posts/user/${userId}`),
-
-    // Get posts by community ID
-    getByCommunityId: (communityId: string): Promise<Post[]> =>
-      client.get(`/posts/community/${communityId}`),
-
-    // Vote on post
-    upvote: (id: string): Promise<void> =>
-      client.post(`/posts/${id}/upvote`),
-
-    downvote: (id: string): Promise<void> =>
-      client.post(`/posts/${id}/downvote`),
-
-    // Remove vote
-    removeVote: (id: string): Promise<void> =>
-      client.delete(`/posts/${id}/vote`),
+  getPostsByRoom: (roomId: string, limit = 20, offset = 0): Promise<{ posts: PostWithDetails[]; total: number }> => {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    params.append('offset', offset.toString());
+    return client.get(`/posts/room/${roomId}?${params.toString()}`);
   },
+
+  getPostById: (postId: string): Promise<PostWithDetails> =>
+    client.get(`/posts/${postId}`),
+
+  updatePost: (postId: string, data: Partial<PostCreateInputDto>): Promise<Post> =>
+    client.put(`/posts/${postId}`, data),
+
+  deletePost: (postId: string): Promise<{ deleted: boolean }> =>
+    client.delete(`/posts/${postId}`),
+
+  heartPost: (postId: string): Promise<{ hearted: boolean }> =>
+    client.post(`/posts/${postId}/heart`),
+
+  unheartPost: (postId: string): Promise<{ unhearted: boolean }> =>
+    client.delete(`/posts/${postId}/heart`),
+
+  // Comments
+  createComment: (data: CreateNestedCommentDto): Promise<Comment> =>
+    client.post('/comments', data),
+
+  getCommentsByPost: (postId: string): Promise<Comment[]> =>
+    client.get(`/comments/post/${postId}`),
+
+  updateComment: (commentId: string, content: string): Promise<Comment> =>
+    client.put(`/comments/${commentId}`, { content }),
+
+  deleteComment: (commentId: string): Promise<{ deleted: boolean }> =>
+    client.delete(`/comments/${commentId}`),
+
+  heartComment: (commentId: string): Promise<{ hearted: boolean }> =>
+    client.post(`/comments/${commentId}/heart`),
+
+  unheartComment: (commentId: string): Promise<{ unhearted: boolean }> =>
+    client.delete(`/comments/${commentId}/heart`),
+
+  // Replies are now handled as nested comments via /comments endpoint with parentId
+
+  // Community Assignment
+  assignCommunitiesToMe: (): Promise<{ assignedCommunities: string[] }> =>
+    client.post('/communities/assign/me'),
+
+  getMyRecommendedCommunities: (): Promise<{ recommendedCommunities: string[] }> =>
+    client.get('/communities/recommended/me'),
+
+  assignCommunitiesToUser: (userId: string): Promise<{ assignedCommunities: string[] }> =>
+    client.post(`/communities/assign/${userId}`),
+
+  bulkAssignCommunities: (userIds: string[]): Promise<{ results: { [userId: string]: string[] } }> =>
+    client.post('/communities/assign/bulk', { userIds }),
 });
 
-export type CommunitiesService = ReturnType<typeof createCommunitiesService>;
+export type CommunityService = ReturnType<typeof createCommunityService>;

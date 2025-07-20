@@ -1,0 +1,340 @@
+# Backend Production Deployment Pipeline
+# Comprehensive CI/CD pipeline supporting Backend Agent's Phase 1 completion
+# and production-ready deployment of the NestJS API
+
+name: Backend Production Deployment
+
+on:
+  push:
+    branches: [ master ]
+    paths: [ 'mentara-api/**' ]
+  pull_request:
+    branches: [ master ]
+    paths: [ 'mentara-api/**' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  NODE_VERSION: '18.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: mentara/api
+
+jobs:
+  # Phase 1: Code Quality & Testing
+  quality-assurance:
+    name: Code Quality & Testing
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: mentara_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: mentara-api/package-lock.json
+
+    - name: Install dependencies
+      working-directory: mentara-api
+      run: npm ci
+
+    - name: Code linting
+      working-directory: mentara-api
+      run: npm run lint
+
+    - name: TypeScript type checking
+      working-directory: mentara-api
+      run: npx tsc --noEmit
+
+    - name: Setup test database
+      working-directory: mentara-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        DIRECT_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+      run: |
+        npm run db:generate
+        npx prisma db push
+
+    - name: Run unit tests
+      working-directory: mentara-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        DIRECT_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        NODE_ENV: test
+      run: npm run test -- --coverage
+
+    - name: Run integration tests
+      working-directory: mentara-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        DIRECT_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        NODE_ENV: test
+      run: npm run test:e2e
+
+    - name: Upload test coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: mentara-api/coverage/lcov.info
+        flags: backend
+        name: backend-coverage
+
+  # Phase 2: Security & Performance Testing
+  security-performance:
+    name: Security & Performance Testing
+    runs-on: ubuntu-latest
+    needs: quality-assurance
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: mentara_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: mentara-api/package-lock.json
+
+    - name: Install dependencies
+      working-directory: mentara-api
+      run: npm ci
+
+    - name: Setup database
+      working-directory: mentara-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        DIRECT_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+      run: |
+        npm run db:generate
+        npx prisma db push
+
+    - name: Run security tests
+      working-directory: mentara-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        DIRECT_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        NODE_ENV: test
+      run: npm run test -- src/test-utils/security/security-tests.spec.ts
+
+    - name: Run performance tests
+      working-directory: mentara-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        DIRECT_URL: postgresql://test_user:test_password@localhost:5432/mentara_test
+        NODE_ENV: test
+      run: npm run test -- src/test-utils/performance/load-tests.spec.ts
+
+    - name: Run OWASP dependency check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'mentara-api'
+        path: 'mentara-api'
+        format: 'HTML'
+
+    - name: Upload dependency check results
+      uses: actions/upload-artifact@v3
+      with:
+        name: dependency-check-report
+        path: reports/
+
+  # Phase 3: Build & Container Creation
+  build-container:
+    name: Build Container Image
+    runs-on: ubuntu-latest
+    needs: [quality-assurance, security-performance]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./mentara-api
+        file: ./mentara-api/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  # Phase 4: Staging Deployment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-container
+    if: github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to staging environment
+      run: |
+        echo "Deploying to staging environment..."
+        echo "Image: ${{ needs.build-container.outputs.image-tag }}"
+        echo "Digest: ${{ needs.build-container.outputs.image-digest }}"
+        # Add actual deployment commands here (kubectl, helm, etc.)
+
+    - name: Run smoke tests
+      run: |
+        echo "Running smoke tests against staging..."
+        # Add smoke test commands here
+
+    - name: Performance benchmarking
+      run: |
+        echo "Running performance benchmarks..."
+        # Add performance benchmark commands here
+
+  # Phase 5: Production Deployment
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-container, deploy-staging]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to production environment
+      run: |
+        echo "Deploying to production environment..."
+        echo "Image: ${{ needs.build-container.outputs.image-tag }}"
+        echo "Digest: ${{ needs.build-container.outputs.image-digest }}"
+        # Add actual production deployment commands here
+
+    - name: Run production health checks
+      run: |
+        echo "Running production health checks..."
+        # Add health check commands here
+
+    - name: Monitor deployment
+      run: |
+        echo "Monitoring deployment metrics..."
+        # Add monitoring commands here
+
+  # Phase 6: Post-Deployment Validation
+  post-deployment:
+    name: Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+
+    steps:
+    - name: API health check
+      run: |
+        echo "Validating API health..."
+        # Add API health check commands
+
+    - name: Database migration verification
+      run: |
+        echo "Verifying database migrations..."
+        # Add migration verification commands
+
+    - name: Performance monitoring setup
+      run: |
+        echo "Setting up performance monitoring..."
+        # Add monitoring setup commands
+
+    - name: Security scanning
+      run: |
+        echo "Running post-deployment security scan..."
+        # Add security scanning commands
+
+    - name: Notification
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Rollback capability
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'workflow_dispatch'
+    needs: [deploy-staging, deploy-production]
+
+    steps:
+    - name: Rollback to previous version
+      run: |
+        echo "Initiating rollback procedure..."
+        # Add rollback commands here
+
+    - name: Verify rollback
+      run: |
+        echo "Verifying rollback success..."
+        # Add rollback verification commands

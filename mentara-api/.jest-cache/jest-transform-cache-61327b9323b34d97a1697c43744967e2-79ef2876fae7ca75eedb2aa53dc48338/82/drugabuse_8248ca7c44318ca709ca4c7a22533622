@@ -1,0 +1,93 @@
+acd1b95e16090309243bb64411893cec
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const scoring_1 = require("../scoring");
+const DAST_10 = {
+    title: "Drug Abuse Screening Test (DAST-10)",
+    description: "The Drug Abuse Screening Test (DAST-10) is a self-administered questionnaire designed to assess drug use and its potential consequences over the past 12 months. It is used for screening and evaluating substance use disorders.",
+    questions: [
+        {
+            prefix: "",
+            question: "Have you used drugs other than those required for medical reasons?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Do you use more than one drug at a time?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Are you always able to stop using drugs when you want to?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Have you had 'blackouts' or 'flashbacks' as a result of drug use?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Do you ever feel bad or guilty about your drug use?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Does your spouse (or parents) ever complain about your involvement with drugs?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Have you neglected your family because of your use of drugs?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Have you engaged in illegal activities in order to obtain drugs?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?",
+            options: ["Yes", "No"],
+        },
+        {
+            prefix: "",
+            question: "Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?",
+            options: ["Yes", "No"],
+        },
+    ],
+    scoring: {
+        ...scoring_1.QUESTIONNAIRE_SCORING,
+        scoreMapping: { 0: 1, 1: 0 },
+        severityLevels: {
+            none: { range: [0, 0], label: "No problems reported" },
+            low: { range: [1, 2], label: "Low level - Monitor, reassess later" },
+            moderate: {
+                range: [3, 5],
+                label: "Moderate level - Further investigation",
+            },
+            substantial: {
+                range: [6, 8],
+                label: "Substantial level - Intensive assessment",
+            },
+            severe: { range: [9, 10], label: "Severe level - Intensive assessment" },
+        },
+        getSeverity: (score) => {
+            if (score === 0)
+                return "No problems reported";
+            if (score >= 1 && score <= 2)
+                return "Low level - Monitor, reassess later";
+            if (score >= 3 && score <= 5)
+                return "Moderate level - Further investigation";
+            if (score >= 6 && score <= 8)
+                return "Substantial level - Intensive assessment";
+            if (score >= 9 && score <= 10)
+                return "Severe level - Intensive assessment";
+            return "Invalid score";
+        },
+    },
+    disclaimer: "This questionnaire is a screening tool for substance use disorders and does not provide a definitive diagnosis. A clinical evaluation by a healthcare professional is necessary for a formal assessment.",
+};
+exports.default = DAST_10;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvZHJ1Zy1hYnVzZS5qcyIsIm1hcHBpbmdzIjoiQUFBQSxZQUFZLENBQUM7QUFDYixNQUFNLENBQUMsY0FBYyxDQUFDLE9BQU8sRUFBRSxZQUFZLEVBQUUsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztBQUM5RCxNQUFNLFNBQVMsR0FBRyxPQUFPLENBQUMsWUFBWSxDQUFDLENBQUM7QUFDeEMsTUFBTSxPQUFPLEdBQUc7SUFDWixLQUFLLEVBQUUscUNBQXFDO0lBQzVDLFdBQVcsRUFBRSxtT0FBbU87SUFDaFAsU0FBUyxFQUFFO1FBQ1A7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSxvRUFBb0U7WUFDOUUsT0FBTyxFQUFFLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQztTQUN6QjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsMENBQTBDO1lBQ3BELE9BQU8sRUFBRSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUM7U0FDekI7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLDJEQUEyRDtZQUNyRSxPQUFPLEVBQUUsQ0FBQyxLQUFLLEVBQUUsSUFBSSxDQUFDO1NBQ3pCO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSxtRUFBbUU7WUFDN0UsT0FBTyxFQUFFLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQztTQUN6QjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUscURBQXFEO1lBQy9ELE9BQU8sRUFBRSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUM7U0FDekI7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLGdGQUFnRjtZQUMxRixPQUFPLEVBQUUsQ0FBQyxLQUFLLEVBQUUsSUFBSSxDQUFDO1NBQ3pCO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSw4REFBOEQ7WUFDeEUsT0FBTyxFQUFFLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQztTQUN6QjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsa0VBQWtFO1lBQzVFLE9BQU8sRUFBRSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUM7U0FDekI7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLDBGQUEwRjtZQUNwRyxPQUFPLEVBQUUsQ0FBQyxLQUFLLEVBQUUsSUFBSSxDQUFDO1NBQ3pCO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSx5SEFBeUg7WUFDbkksT0FBTyxFQUFFLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQztTQUN6QjtLQUNKO0lBQ0QsT0FBTyxFQUFFO1FBQ0wsR0FBRyxTQUFTLENBQUMscUJBQXFCO1FBQ2xDLFlBQVksRUFBRSxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRTtRQUM1QixjQUFjLEVBQUU7WUFDWixJQUFJLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDLEVBQUUsS0FBSyxFQUFFLHNCQUFzQixFQUFFO1lBQ3RELEdBQUcsRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUMsRUFBRSxLQUFLLEVBQUUscUNBQXFDLEVBQUU7WUFDcEUsUUFBUSxFQUFFO2dCQUNOLEtBQUssRUFBRSxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUM7Z0JBQ2IsS0FBSyxFQUFFLHdDQUF3QzthQUNsRDtZQUNELFdBQVcsRUFBRTtnQkFDVCxLQUFLLEVBQUUsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDO2dCQUNiLEtBQUssRUFBRSwwQ0FBMEM7YUFDcEQ7WUFDRCxNQUFNLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLEVBQUUsS0FBSyxFQUFFLHFDQUFxQyxFQUFFO1NBQzNFO1FBQ0QsV0FBVyxFQUFFLENBQUMsS0FBSyxFQUFFLEVBQUU7WUFDbkIsSUFBSSxLQUFLLEtBQUssQ0FBQztnQkFDWCxPQUFPLHNCQUFzQixDQUFDO1lBQ2xDLElBQUksS0FBSyxJQUFJLENBQUMsSUFBSSxLQUFLLElBQUksQ0FBQztnQkFDeEIsT0FBTyxxQ0FBcUMsQ0FBQztZQUNqRCxJQUFJLEtBQUssSUFBSSxDQUFDLElBQUksS0FBSyxJQUFJLENBQUM7Z0JBQ3hCLE9BQU8sd0NBQXdDLENBQUM7WUFDcEQsSUFBSSxLQUFLLElBQUksQ0FBQyxJQUFJLEtBQUssSUFBSSxDQUFDO2dCQUN4QixPQUFPLDBDQUEwQyxDQUFDO1lBQ3RELElBQUksS0FBSyxJQUFJLENBQUMsSUFBSSxLQUFLLElBQUksRUFBRTtnQkFDekIsT0FBTyxxQ0FBcUMsQ0FBQztZQUNqRCxPQUFPLGVBQWUsQ0FBQztRQUMzQixDQUFDO0tBQ0o7SUFDRCxVQUFVLEVBQUUsME1BQTBNO0NBQ3pOLENBQUM7QUFDRixPQUFPLENBQUMsT0FBTyxHQUFHLE9BQU8sQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWNvbW1vbnMvZGlzdC9jb25zdGFudHMvcXVlc3Rpb25uYWlyZS9kcnVnLWFidXNlLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIlwidXNlIHN0cmljdFwiO1xuT2JqZWN0LmRlZmluZVByb3BlcnR5KGV4cG9ydHMsIFwiX19lc01vZHVsZVwiLCB7IHZhbHVlOiB0cnVlIH0pO1xuY29uc3Qgc2NvcmluZ18xID0gcmVxdWlyZShcIi4uL3Njb3JpbmdcIik7XG5jb25zdCBEQVNUXzEwID0ge1xuICAgIHRpdGxlOiBcIkRydWcgQWJ1c2UgU2NyZWVuaW5nIFRlc3QgKERBU1QtMTApXCIsXG4gICAgZGVzY3JpcHRpb246IFwiVGhlIERydWcgQWJ1c2UgU2NyZWVuaW5nIFRlc3QgKERBU1QtMTApIGlzIGEgc2VsZi1hZG1pbmlzdGVyZWQgcXVlc3Rpb25uYWlyZSBkZXNpZ25lZCB0byBhc3Nlc3MgZHJ1ZyB1c2UgYW5kIGl0cyBwb3RlbnRpYWwgY29uc2VxdWVuY2VzIG92ZXIgdGhlIHBhc3QgMTIgbW9udGhzLiBJdCBpcyB1c2VkIGZvciBzY3JlZW5pbmcgYW5kIGV2YWx1YXRpbmcgc3Vic3RhbmNlIHVzZSBkaXNvcmRlcnMuXCIsXG4gICAgcXVlc3Rpb25zOiBbXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkhhdmUgeW91IHVzZWQgZHJ1Z3Mgb3RoZXIgdGhhbiB0aG9zZSByZXF1aXJlZCBmb3IgbWVkaWNhbCByZWFzb25zP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiWWVzXCIsIFwiTm9cIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkRvIHlvdSB1c2UgbW9yZSB0aGFuIG9uZSBkcnVnIGF0IGEgdGltZT9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIlllc1wiLCBcIk5vXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJBcmUgeW91IGFsd2F5cyBhYmxlIHRvIHN0b3AgdXNpbmcgZHJ1Z3Mgd2hlbiB5b3Ugd2FudCB0bz9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIlllc1wiLCBcIk5vXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJIYXZlIHlvdSBoYWQgJ2JsYWNrb3V0cycgb3IgJ2ZsYXNoYmFja3MnIGFzIGEgcmVzdWx0IG9mIGRydWcgdXNlP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiWWVzXCIsIFwiTm9cIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkRvIHlvdSBldmVyIGZlZWwgYmFkIG9yIGd1aWx0eSBhYm91dCB5b3VyIGRydWcgdXNlP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiWWVzXCIsIFwiTm9cIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkRvZXMgeW91ciBzcG91c2UgKG9yIHBhcmVudHMpIGV2ZXIgY29tcGxhaW4gYWJvdXQgeW91ciBpbnZvbHZlbWVudCB3aXRoIGRydWdzP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiWWVzXCIsIFwiTm9cIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkhhdmUgeW91IG5lZ2xlY3RlZCB5b3VyIGZhbWlseSBiZWNhdXNlIG9mIHlvdXIgdXNlIG9mIGRydWdzP1wiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiWWVzXCIsIFwiTm9cIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkhhdmUgeW91IGVuZ2FnZWQgaW4gaWxsZWdhbCBhY3Rpdml0aWVzIGluIG9yZGVyIHRvIG9idGFpbiBkcnVncz9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIlllc1wiLCBcIk5vXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJIYXZlIHlvdSBldmVyIGV4cGVyaWVuY2VkIHdpdGhkcmF3YWwgc3ltcHRvbXMgKGZlbHQgc2ljaykgd2hlbiB5b3Ugc3RvcHBlZCB0YWtpbmcgZHJ1Z3M/XCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJZZXNcIiwgXCJOb1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSGF2ZSB5b3UgaGFkIG1lZGljYWwgcHJvYmxlbXMgYXMgYSByZXN1bHQgb2YgeW91ciBkcnVnIHVzZSAoZS5nLiwgbWVtb3J5IGxvc3MsIGhlcGF0aXRpcywgY29udnVsc2lvbnMsIGJsZWVkaW5nLCBldGMuKT9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIlllc1wiLCBcIk5vXCJdLFxuICAgICAgICB9LFxuICAgIF0sXG4gICAgc2NvcmluZzoge1xuICAgICAgICAuLi5zY29yaW5nXzEuUVVFU1RJT05OQUlSRV9TQ09SSU5HLFxuICAgICAgICBzY29yZU1hcHBpbmc6IHsgMDogMSwgMTogMCB9LFxuICAgICAgICBzZXZlcml0eUxldmVsczoge1xuICAgICAgICAgICAgbm9uZTogeyByYW5nZTogWzAsIDBdLCBsYWJlbDogXCJObyBwcm9ibGVtcyByZXBvcnRlZFwiIH0sXG4gICAgICAgICAgICBsb3c6IHsgcmFuZ2U6IFsxLCAyXSwgbGFiZWw6IFwiTG93IGxldmVsIC0gTW9uaXRvciwgcmVhc3Nlc3MgbGF0ZXJcIiB9LFxuICAgICAgICAgICAgbW9kZXJhdGU6IHtcbiAgICAgICAgICAgICAgICByYW5nZTogWzMsIDVdLFxuICAgICAgICAgICAgICAgIGxhYmVsOiBcIk1vZGVyYXRlIGxldmVsIC0gRnVydGhlciBpbnZlc3RpZ2F0aW9uXCIsXG4gICAgICAgICAgICB9LFxuICAgICAgICAgICAgc3Vic3RhbnRpYWw6IHtcbiAgICAgICAgICAgICAgICByYW5nZTogWzYsIDhdLFxuICAgICAgICAgICAgICAgIGxhYmVsOiBcIlN1YnN0YW50aWFsIGxldmVsIC0gSW50ZW5zaXZlIGFzc2Vzc21lbnRcIixcbiAgICAgICAgICAgIH0sXG4gICAgICAgICAgICBzZXZlcmU6IHsgcmFuZ2U6IFs5LCAxMF0sIGxhYmVsOiBcIlNldmVyZSBsZXZlbCAtIEludGVuc2l2ZSBhc3Nlc3NtZW50XCIgfSxcbiAgICAgICAgfSxcbiAgICAgICAgZ2V0U2V2ZXJpdHk6IChzY29yZSkgPT4ge1xuICAgICAgICAgICAgaWYgKHNjb3JlID09PSAwKVxuICAgICAgICAgICAgICAgIHJldHVybiBcIk5vIHByb2JsZW1zIHJlcG9ydGVkXCI7XG4gICAgICAgICAgICBpZiAoc2NvcmUgPj0gMSAmJiBzY29yZSA8PSAyKVxuICAgICAgICAgICAgICAgIHJldHVybiBcIkxvdyBsZXZlbCAtIE1vbml0b3IsIHJlYXNzZXNzIGxhdGVyXCI7XG4gICAgICAgICAgICBpZiAoc2NvcmUgPj0gMyAmJiBzY29yZSA8PSA1KVxuICAgICAgICAgICAgICAgIHJldHVybiBcIk1vZGVyYXRlIGxldmVsIC0gRnVydGhlciBpbnZlc3RpZ2F0aW9uXCI7XG4gICAgICAgICAgICBpZiAoc2NvcmUgPj0gNiAmJiBzY29yZSA8PSA4KVxuICAgICAgICAgICAgICAgIHJldHVybiBcIlN1YnN0YW50aWFsIGxldmVsIC0gSW50ZW5zaXZlIGFzc2Vzc21lbnRcIjtcbiAgICAgICAgICAgIGlmIChzY29yZSA+PSA5ICYmIHNjb3JlIDw9IDEwKVxuICAgICAgICAgICAgICAgIHJldHVybiBcIlNldmVyZSBsZXZlbCAtIEludGVuc2l2ZSBhc3Nlc3NtZW50XCI7XG4gICAgICAgICAgICByZXR1cm4gXCJJbnZhbGlkIHNjb3JlXCI7XG4gICAgICAgIH0sXG4gICAgfSxcbiAgICBkaXNjbGFpbWVyOiBcIlRoaXMgcXVlc3Rpb25uYWlyZSBpcyBhIHNjcmVlbmluZyB0b29sIGZvciBzdWJzdGFuY2UgdXNlIGRpc29yZGVycyBhbmQgZG9lcyBub3QgcHJvdmlkZSBhIGRlZmluaXRpdmUgZGlhZ25vc2lzLiBBIGNsaW5pY2FsIGV2YWx1YXRpb24gYnkgYSBoZWFsdGhjYXJlIHByb2Zlc3Npb25hbCBpcyBuZWNlc3NhcnkgZm9yIGEgZm9ybWFsIGFzc2Vzc21lbnQuXCIsXG59O1xuZXhwb3J0cy5kZWZhdWx0ID0gREFTVF8xMDtcbi8vIyBzb3VyY2VNYXBwaW5nVVJMPWRydWctYWJ1c2UuanMubWFwIl0sInZlcnNpb24iOjN9

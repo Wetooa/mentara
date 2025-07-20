@@ -1,0 +1,1280 @@
+{
+  "info": {
+    "name": "Mentara - Search",
+    "description": "Search module endpoints for platform-wide search functionality including therapists, communities, content, and resources across the Mentara mental health platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-search"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error('❌ Validation Error: ' + issue.message + ' (' + issue.path.join('.') + ');',
+          "            });"",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Universal Search",
+      "item": [
+        {
+          "name": "Global Search",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Search results have required structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('results');",
+                  "    pm.expect(responseJson).to.have.property('totalCount');",
+                  "    pm.expect(responseJson).to.have.property('categories');",
+                  "    pm.expect(responseJson).to.have.property('filters');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?q=anxiety therapy&categories=therapists,communities,content&page=1&limit=20&sortBy=relevance&includeFilters=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety therapy"
+                },
+                {
+                  "key": "categories",
+                  "value": "therapists,communities,content"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "relevance"
+                },
+                {
+                  "key": "includeFilters",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Perform global search across all platform content"
+          },
+          "response": []
+        },
+        {
+          "name": "Quick Search",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Quick search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Quick search results are limited', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.results.length).to.be.at.most(5);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/quick?q=depression&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "quick"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "depression"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Quick search for autocomplete and suggestions"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/suggestions?q=anx&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "suggestions"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anx"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get search suggestions for autocomplete"
+          },
+          "response": []
+        },
+        {
+          "name": "Advanced Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"anxiety therapy\",\n  \"filters\": {\n    \"categories\": [\"therapists\", \"communities\"],\n    \"location\": {\n      \"city\": \"New York\",\n      \"state\": \"NY\",\n      \"radius\": 25,\n      \"unit\": \"miles\"\n    },\n    \"specialties\": [\"anxiety\", \"depression\", \"trauma\"],\n    \"availability\": {\n      \"onlineOnly\": false,\n      \"inPersonOnly\": false,\n      \"acceptingNewClients\": true\n    },\n    \"insurance\": [\"Aetna\", \"Blue Cross Blue Shield\"],\n    \"priceRange\": {\n      \"min\": 50,\n      \"max\": 200\n    },\n    \"rating\": {\n      \"min\": 4.0\n    },\n    \"languages\": [\"English\", \"Spanish\"],\n    \"dateRange\": {\n      \"from\": \"2024-01-01\",\n      \"to\": \"2024-12-31\"\n    }\n  },\n  \"sorting\": {\n    \"field\": \"relevance\",\n    \"order\": \"desc\",\n    \"secondarySort\": {\n      \"field\": \"rating\",\n      \"order\": \"desc\"\n    }\n  },\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 20\n  },\n  \"includeAggregations\": true,\n  \"highlightResults\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/search/advanced",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "advanced"]
+            },
+            "description": "Advanced search with complex filters and options"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Therapist Search",
+      "item": [
+        {
+          "name": "Search Therapists",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Therapist search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Therapist results have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.results && responseJson.results.length > 0) {",
+                  "        const therapist = responseJson.results[0];",
+                  "        pm.expect(therapist).to.have.property('id');",
+                  "        pm.expect(therapist).to.have.property('name');",
+                  "        pm.expect(therapist).to.have.property('specialties');",
+                  "        pm.expect(therapist).to.have.property('location');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/therapists?q=anxiety specialist&location=New York, NY&radius=25&specialties=anxiety,depression&acceptingNewClients=true&rating=4.0&insurance=Aetna&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "therapists"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety specialist"
+                },
+                {
+                  "key": "location",
+                  "value": "New York, NY"
+                },
+                {
+                  "key": "radius",
+                  "value": "25"
+                },
+                {
+                  "key": "specialties",
+                  "value": "anxiety,depression"
+                },
+                {
+                  "key": "acceptingNewClients",
+                  "value": "true"
+                },
+                {
+                  "key": "rating",
+                  "value": "4.0"
+                },
+                {
+                  "key": "insurance",
+                  "value": "Aetna"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search for therapists with specific criteria"
+          },
+          "response": []
+        },
+        {
+          "name": "Find Therapists by Specialty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/therapists/specialty/{{specialtyId}}?location=Boston, MA&radius=50&sortBy=rating&page=1&limit=15",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "therapists", "specialty", "{{specialtyId}}"],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "Boston, MA"
+                },
+                {
+                  "key": "radius",
+                  "value": "50"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "rating"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "15"
+                }
+              ]
+            },
+            "description": "Find therapists by specific specialty"
+          },
+          "response": []
+        },
+        {
+          "name": "Search by Location",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/therapists/location?lat=40.7128&lng=-74.0060&radius=10&onlineOnly=false&acceptingNewClients=true&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "therapists", "location"],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "40.7128"
+                },
+                {
+                  "key": "lng",
+                  "value": "-74.0060"
+                },
+                {
+                  "key": "radius",
+                  "value": "10"
+                },
+                {
+                  "key": "onlineOnly",
+                  "value": "false"
+                },
+                {
+                  "key": "acceptingNewClients",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search therapists by geographic location"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Therapist Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/therapists/{{therapistId}}/availability?from=2024-01-15&to=2024-01-31&timeSlots=morning,afternoon",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "therapists", "{{therapistId}}", "availability"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2024-01-15"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "timeSlots",
+                  "value": "morning,afternoon"
+                }
+              ]
+            },
+            "description": "Get therapist availability for booking"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Community Search",
+      "item": [
+        {
+          "name": "Search Communities",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Community search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Community results have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.results && responseJson.results.length > 0) {",
+                  "        const community = responseJson.results[0];",
+                  "        pm.expect(community).to.have.property('id');",
+                  "        pm.expect(community).to.have.property('name');",
+                  "        pm.expect(community).to.have.property('description');",
+                  "        pm.expect(community).to.have.property('memberCount');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/communities?q=anxiety support&category=support_group&memberCount=50&isPublic=true&isActive=true&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "communities"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety support"
+                },
+                {
+                  "key": "category",
+                  "value": "support_group"
+                },
+                {
+                  "key": "memberCount",
+                  "value": "50"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search for communities with specific criteria"
+          },
+          "response": []
+        },
+        {
+          "name": "Find Communities by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/communities/category/{{categoryId}}?sortBy=memberCount&sortOrder=desc&page=1&limit=15",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "communities", "category", "{{categoryId}}"],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "memberCount"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "15"
+                }
+              ]
+            },
+            "description": "Find communities by category"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Community Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/communities/{{communityId}}/posts?q=coping strategies&tags=anxiety,tips&authorId={{userId}}&from=2024-01-01&to=2024-01-31&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "communities", "{{communityId}}", "posts"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "coping strategies"
+                },
+                {
+                  "key": "tags",
+                  "value": "anxiety,tips"
+                },
+                {
+                  "key": "authorId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "from",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search posts within a specific community"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Communities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/communities/trending?period=week&limit=10&category=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "communities", "trending"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "week"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "category",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Get trending communities"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Content Search",
+      "item": [
+        {
+          "name": "Search All Content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Content search completed successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Content results have type information', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.results && responseJson.results.length > 0) {",
+                  "        const content = responseJson.results[0];",
+                  "        pm.expect(content).to.have.property('type');",
+                  "        pm.expect(content).to.have.property('title');",
+                  "        pm.expect(content).to.have.property('excerpt');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/content?q=mindfulness meditation&types=post,article,worksheet&tags=meditation,mindfulness&authorType=therapist&from=2024-01-01&sortBy=relevance&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "content"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "mindfulness meditation"
+                },
+                {
+                  "key": "types",
+                  "value": "post,article,worksheet"
+                },
+                {
+                  "key": "tags",
+                  "value": "meditation,mindfulness"
+                },
+                {
+                  "key": "authorType",
+                  "value": "therapist"
+                },
+                {
+                  "key": "from",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "relevance"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search all content types"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/posts?q=anxiety attack&tags=anxiety,panic&communityId={{communityId}}&hasImages=true&hasComments=true&minLikes=5&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "posts"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety attack"
+                },
+                {
+                  "key": "tags",
+                  "value": "anxiety,panic"
+                },
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "hasImages",
+                  "value": "true"
+                },
+                {
+                  "key": "hasComments",
+                  "value": "true"
+                },
+                {
+                  "key": "minLikes",
+                  "value": "5"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search community posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Worksheets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/worksheets?q=cognitive behavioral&difficulty=beginner&category=cbt&estimatedTime=30&tags=cbt,exercises&isPublic=true&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "worksheets"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "cognitive behavioral"
+                },
+                {
+                  "key": "difficulty",
+                  "value": "beginner"
+                },
+                {
+                  "key": "category",
+                  "value": "cbt"
+                },
+                {
+                  "key": "estimatedTime",
+                  "value": "30"
+                },
+                {
+                  "key": "tags",
+                  "value": "cbt,exercises"
+                },
+                {
+                  "key": "isPublic",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search therapy worksheets"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/files?q=therapy notes&mimeType=application/pdf&tags=therapy,notes&minSize=1000&maxSize=5000000&uploadedAfter=2024-01-01&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "files"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "therapy notes"
+                },
+                {
+                  "key": "mimeType",
+                  "value": "application/pdf"
+                },
+                {
+                  "key": "tags",
+                  "value": "therapy,notes"
+                },
+                {
+                  "key": "minSize",
+                  "value": "1000"
+                },
+                {
+                  "key": "maxSize",
+                  "value": "5000000"
+                },
+                {
+                  "key": "uploadedAfter",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search uploaded files"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search Filters & Facets",
+      "item": [
+        {
+          "name": "Get Search Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/filters?category=therapists&location=New York, NY",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "filters"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "therapists"
+                },
+                {
+                  "key": "location",
+                  "value": "New York, NY"
+                }
+              ]
+            },
+            "description": "Get available search filters for category"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facet Counts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"anxiety therapy\",\n  \"category\": \"therapists\",\n  \"filters\": {\n    \"location\": \"New York, NY\",\n    \"radius\": 25\n  },\n  \"facets\": [\n    \"specialties\",\n    \"insurance\",\n    \"availability\",\n    \"priceRange\",\n    \"rating\",\n    \"languages\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/search/facets",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "facets"]
+            },
+            "description": "Get facet counts for search refinement"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Popular Searches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/popular?category=all&period=week&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "popular"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "all"
+                },
+                {
+                  "key": "period",
+                  "value": "week"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get popular search terms"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Search Trends",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/trends?period=month&category=therapists&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "trends"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "category",
+                  "value": "therapists"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get search trend analysis"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search Analytics",
+      "item": [
+        {
+          "name": "Track Search Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"anxiety therapy\",\n  \"category\": \"therapists\",\n  \"filters\": {\n    \"location\": \"New York, NY\",\n    \"specialties\": [\"anxiety\"],\n    \"insurance\": [\"Aetna\"]\n  },\n  \"resultsCount\": 25,\n  \"clickedResult\": {\n    \"id\": \"therapist_123\",\n    \"position\": 3,\n    \"type\": \"therapist\"\n  },\n  \"sessionId\": \"search_session_456\",\n  \"timestamp\": \"2024-01-15T10:30:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/search/analytics/track",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "analytics", "track"]
+            },
+            "description": "Track search event for analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Search Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/analytics?period=week&category=therapists&includeMetrics=true&includeTopQueries=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "analytics"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "week"
+                },
+                {
+                  "key": "category",
+                  "value": "therapists"
+                },
+                {
+                  "key": "includeMetrics",
+                  "value": "true"
+                },
+                {
+                  "key": "includeTopQueries",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get search analytics (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Search History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/history?limit=50&category=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "history"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "category",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Get user's search history"
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Search History",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "history"]
+            },
+            "description": "Clear user's search history"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Saved Searches",
+      "item": [
+        {
+          "name": "Save Search",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Search saved successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has saved search ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('savedSearchId', responseJson.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"NYC Anxiety Therapists\",\n  \"description\": \"Anxiety specialists in NYC area accepting new clients\",\n  \"query\": \"anxiety therapy\",\n  \"category\": \"therapists\",\n  \"filters\": {\n    \"location\": \"New York, NY\",\n    \"radius\": 25,\n    \"specialties\": [\"anxiety\", \"panic_disorder\"],\n    \"acceptingNewClients\": true,\n    \"insurance\": [\"Aetna\", \"Blue Cross Blue Shield\"],\n    \"rating\": {\n      \"min\": 4.0\n    }\n  },\n  \"notificationSettings\": {\n    \"enabled\": true,\n    \"frequency\": \"weekly\",\n    \"newResultsOnly\": true\n  },\n  \"isPublic\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/search/saved",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "saved"]
+            },
+            "description": "Save search with filters and notifications"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Saved Searches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/saved?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "saved"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get user's saved searches"
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Saved Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/saved/{{savedSearchId}}/execute?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "saved", "{{savedSearchId}}", "execute"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Execute saved search"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Saved Search",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"NYC Anxiety Therapists - Updated\",\n  \"description\": \"Anxiety specialists in NYC area accepting new clients (updated criteria)\",\n  \"filters\": {\n    \"location\": \"New York, NY\",\n    \"radius\": 30,\n    \"specialties\": [\"anxiety\", \"panic_disorder\", \"trauma\"],\n    \"acceptingNewClients\": true,\n    \"insurance\": [\"Aetna\", \"Blue Cross Blue Shield\", \"UnitedHealthcare\"],\n    \"rating\": {\n      \"min\": 4.5\n    }\n  },\n  \"notificationSettings\": {\n    \"enabled\": true,\n    \"frequency\": \"daily\",\n    \"newResultsOnly\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/search/saved/{{savedSearchId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "saved", "{{savedSearchId}}"]
+            },
+            "description": "Update saved search"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Saved Search",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/saved/{{savedSearchId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "saved", "{{savedSearchId}}"]
+            },
+            "description": "Delete saved search"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Handling & Validation",
+      "item": [
+        {
+          "name": "Search with Empty Query",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for empty query', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions query requirement', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('query');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?q=&categories=therapists",
+              "host": ["{{baseUrl}}"],
+              "path": ["search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "categories",
+                  "value": "therapists"
+                }
+              ]
+            },
+            "description": "Test search with empty query"
+          },
+          "response": []
+        },
+        {
+          "name": "Search with Invalid Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for invalid category', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions invalid category', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('category');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?q=anxiety&categories=invalid_category",
+              "host": ["{{baseUrl}}"],
+              "path": ["search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety"
+                },
+                {
+                  "key": "categories",
+                  "value": "invalid_category"
+                }
+              ]
+            },
+            "description": "Test search with invalid category"
+          },
+          "response": []
+        },
+        {
+          "name": "Search with Invalid Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for invalid location', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions location format', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('location');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/therapists?q=anxiety&location=invalid_location_format",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "therapists"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "anxiety"
+                },
+                {
+                  "key": "location",
+                  "value": "invalid_location_format"
+                }
+              ]
+            },
+            "description": "Test search with invalid location format"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

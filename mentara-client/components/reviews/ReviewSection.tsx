@@ -19,7 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import ReviewCard from "./ReviewCard";
 import { useTherapistReviews, useTherapistReviewStats } from "@/hooks/useReviews";
-import { Review } from "@/types/review";
+// import { Review } from "@/types/review";
 
 interface ReviewSectionProps {
   therapistId: string;

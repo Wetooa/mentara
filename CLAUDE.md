@@ -13,6 +13,33 @@ Mentara is a comprehensive mental health platform that connects patients with th
 
 ## Development Commands
 
+### Root Workspace Commands
+```bash
+# Automated setup (recommended for first-time setup)
+chmod +x setup-dev.sh && ./setup-dev.sh  # Complete environment setup
+
+# Workspace-based commands (from project root)
+npm run dev:client    # Start Next.js development server
+npm run dev:api       # Start NestJS development server
+npm run build         # Build all workspaces
+npm run build:client  # Build only frontend
+npm run build:api     # Build only backend
+npm run lint          # Lint all workspaces
+npm run test          # Test all workspaces
+npm run clean         # Clean all build artifacts
+
+# Makefile orchestration commands
+make help            # Show all available commands
+make dev             # Start all services in development mode
+make dev-local       # Start without Docker (faster)
+make start           # Start with Docker Compose
+make stop            # Stop all services
+make status          # Check service health
+make test            # Run tests for all services
+make setup-dev       # Complete development setup
+make ports           # Check port availability
+```
+
 ### Client Development (mentara-client/)
 ```bash
 npm run dev      # Start Next.js development server
@@ -248,10 +275,27 @@ Comprehensive mock data in `data/` directory:
 - Debug tests: `npm run test:debug` (in mentara-api/)
 
 ### Environment Setup
-- Ensure all three services can run simultaneously:
+- Ensure all services can run simultaneously:
   - Frontend: `npm run dev` (port 3000)
-  - Backend: `npm run start:dev` (NestJS default port)
-  - AI Service: `python api.py` (Flask default port)
+  - Backend: `npm run start:dev` (port 3001) 
+  - AI Patient Evaluation: `python api.py` (port 5000)
+  - AI Content Moderation: Flask service (port 5001)
+
+### Port Configuration
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001
+- **AI Patient Evaluation**: http://localhost:5000
+- **AI Content Moderation**: http://localhost:5001
+- **Redis**: port 6379
+- **Ollama**: port 11434
+
+### Quick Troubleshooting
+- Check port availability: `make ports`
+- Health check all services: `make status` or `make health`
+- Common setup issues:
+  - `Cannot find module 'nest'` → Run `npm install` in mentara-api
+  - `Cannot find module 'mentara-commons'` → Build mentara-commons first: `npm run build:commons`
+  - Environment validation errors → Configure `.env` file with required variables
 
 ### Working Directory Context
 - Always specify which directory commands should run in
@@ -344,3 +388,9 @@ Enhanced QueryClient with smart defaults:
 - **Cache Management**: 5-minute stale time, 10-minute garbage collection
 - **Dev Tools**: React Query DevTools in development
 - **Error Boundaries**: Global error handling for queries
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

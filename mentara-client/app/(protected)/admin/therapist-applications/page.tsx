@@ -15,7 +15,7 @@ import { TherapistApplicationsTable } from "@/components/admin/TherapistApplicat
 import { motion } from "framer-motion";
 import { fadeDown } from "@/lib/animations";
 import { useTherapistApplications } from "@/hooks/useTherapistApplications";
-import type { TherapistApplication } from "@/lib/api/services/therapists";
+import type { TherapistApplication } from "@/types/api/therapists";
 
 // Application status options
 const APPLICATION_STATUS = {
@@ -29,11 +29,11 @@ export default function TherapistApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   // Use React Query hook for data fetching
-  const { 
-    data: applications = [], 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: applications = [],
+    isLoading,
+    error,
+    refetch,
   } = useTherapistApplications({
     status: statusFilter || undefined,
   });
@@ -44,20 +44,18 @@ export default function TherapistApplicationsPage() {
     if (!searchQuery) return applications;
 
     const searchLower = searchQuery.toLowerCase();
-    return applications.filter((app) =>
-      app.firstName?.toLowerCase().includes(searchLower) ||
-      app.lastName?.toLowerCase().includes(searchLower) ||
-      app.email?.toLowerCase().includes(searchLower) ||
-      app.providerType?.toLowerCase().includes(searchLower) ||
-      app.province?.toLowerCase().includes(searchLower)
+    return applications.filter(
+      (app) =>
+        app.firstName?.toLowerCase().includes(searchLower) ||
+        app.lastName?.toLowerCase().includes(searchLower) ||
+        app.email?.toLowerCase().includes(searchLower) ||
+        app.providerType?.toLowerCase().includes(searchLower) ||
+        app.province?.toLowerCase().includes(searchLower)
     );
   }, [applications, searchQuery]);
 
   // Handle status change - React Query will automatically update the cache
-  const handleStatusChange = async (
-    id: string,
-    status: "approved" | "rejected" | "pending"
-  ) => {
+  const handleStatusChange = async () => {
     // React Query mutation in TherapistApplicationsTable will handle the update
     // No manual state management needed - React Query cache will be invalidated
   };
@@ -69,19 +67,19 @@ export default function TherapistApplicationsPage() {
       animate="animate"
       exit="exit"
     >
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight">
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
             Therapist Applications
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2">
             <Select
               value={statusFilter || "all"}
               onValueChange={(value) =>
                 setStatusFilter(value === "all" ? null : value)
               }
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] h-9 sm:h-10">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -98,16 +96,16 @@ export default function TherapistApplicationsPage() {
               </SelectContent>
             </Select>
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
               <Input
                 type="search"
                 placeholder="Search applications..."
-                className="pl-9 w-[250px]"
+                className="pl-8 sm:pl-9 w-full sm:w-[250px] h-9 sm:h-10 text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => refetch()}>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
               Refresh
             </Button>
           </div>
@@ -123,7 +121,9 @@ export default function TherapistApplicationsPage() {
         ) : error ? (
           <div className="py-8 text-center">
             <p className="text-red-500">
-              {error instanceof Error ? error.message : 'Failed to load applications. Please try again.'}
+              {error instanceof Error
+                ? error.message
+                : "Failed to load applications. Please try again."}
             </p>
             <Button
               onClick={() => refetch()}

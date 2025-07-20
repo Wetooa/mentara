@@ -1,0 +1,76 @@
+71ce2214f0b8585ac3dc3317ad2850c8
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const scoring_1 = require("../scoring");
+const INSOMNIA_SURVEY = {
+    title: "Insomnia Severity Index (ISI)",
+    description: "The Insomnia Severity Index (ISI) is a self-administered questionnaire used to assess the severity of insomnia symptoms over the past two weeks. It helps determine the impact of sleep difficulties on daily life.",
+    questions: [
+        {
+            prefix: "Over the past two weeks",
+            question: "how much difficulty have you had falling asleep?",
+            options: ["None", "Mild", "Moderate", "Severe", "Very severe"],
+        },
+        {
+            prefix: "Over the past two weeks",
+            question: "how much difficulty have you had staying asleep?",
+            options: ["None", "Mild", "Moderate", "Severe", "Very severe"],
+        },
+        {
+            prefix: "Over the past two weeks",
+            question: "how much of a problem has waking up too early been for you?",
+            options: ["None", "Mild", "Moderate", "Severe", "Very severe"],
+        },
+        {
+            prefix: "Over the past two weeks",
+            question: "how satisfied or dissatisfied are you with your current sleep pattern?",
+            options: [
+                "Very satisfied",
+                "Satisfied",
+                "Neutral",
+                "Dissatisfied",
+                "Very dissatisfied",
+            ],
+        },
+        {
+            prefix: "Over the past two weeks",
+            question: "how much has your sleep problem interfered with your daily functioning?",
+            options: ["Not at all", "A little", "Somewhat", "Much", "Very much"],
+        },
+        {
+            prefix: "Over the past two weeks",
+            question: "how noticeable do you think your sleep problems are to others?",
+            options: [
+                "Not at all noticeable",
+                "A little noticeable",
+                "Somewhat noticeable",
+                "Quite noticeable",
+                "Very noticeable",
+            ],
+        },
+        {
+            prefix: "Over the past two weeks",
+            question: "how worried or distressed are you about your current sleep problem?",
+            options: ["Not at all", "A little", "Somewhat", "Much", "Very much"],
+        },
+    ],
+    scoring: {
+        ...scoring_1.QUESTIONNAIRE_SCORING,
+        scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+        severityLevels: {
+            noInsomnia: {
+                range: [0, 7],
+                label: "No clinically significant insomnia",
+            },
+            subthreshold: { range: [8, 14], label: "Subthreshold insomnia" },
+            moderate: {
+                range: [15, 21],
+                label: "Clinical insomnia (moderate severity)",
+            },
+            severe: { range: [22, 28], label: "Clinical insomnia (severe)" },
+        },
+    },
+    disclaimer: "This questionnaire is a screening tool to assess the severity of insomnia symptoms. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your sleep health, please consult a healthcare professional.",
+};
+exports.default = INSOMNIA_SURVEY;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvaW5zb21uaWEuanMiLCJtYXBwaW5ncyI6IkFBQUEsWUFBWSxDQUFDO0FBQ2IsTUFBTSxDQUFDLGNBQWMsQ0FBQyxPQUFPLEVBQUUsWUFBWSxFQUFFLEVBQUUsS0FBSyxFQUFFLElBQUksRUFBRSxDQUFDLENBQUM7QUFDOUQsTUFBTSxTQUFTLEdBQUcsT0FBTyxDQUFDLFlBQVksQ0FBQyxDQUFDO0FBQ3hDLE1BQU0sZUFBZSxHQUFHO0lBQ3BCLEtBQUssRUFBRSwrQkFBK0I7SUFDdEMsV0FBVyxFQUFFLHFOQUFxTjtJQUNsTyxTQUFTLEVBQUU7UUFDUDtZQUNJLE1BQU0sRUFBRSx5QkFBeUI7WUFDakMsUUFBUSxFQUFFLGtEQUFrRDtZQUM1RCxPQUFPLEVBQUUsQ0FBQyxNQUFNLEVBQUUsTUFBTSxFQUFFLFVBQVUsRUFBRSxRQUFRLEVBQUUsYUFBYSxDQUFDO1NBQ2pFO1FBQ0Q7WUFDSSxNQUFNLEVBQUUseUJBQXlCO1lBQ2pDLFFBQVEsRUFBRSxrREFBa0Q7WUFDNUQsT0FBTyxFQUFFLENBQUMsTUFBTSxFQUFFLE1BQU0sRUFBRSxVQUFVLEVBQUUsUUFBUSxFQUFFLGFBQWEsQ0FBQztTQUNqRTtRQUNEO1lBQ0ksTUFBTSxFQUFFLHlCQUF5QjtZQUNqQyxRQUFRLEVBQUUsNkRBQTZEO1lBQ3ZFLE9BQU8sRUFBRSxDQUFDLE1BQU0sRUFBRSxNQUFNLEVBQUUsVUFBVSxFQUFFLFFBQVEsRUFBRSxhQUFhLENBQUM7U0FDakU7UUFDRDtZQUNJLE1BQU0sRUFBRSx5QkFBeUI7WUFDakMsUUFBUSxFQUFFLHdFQUF3RTtZQUNsRixPQUFPLEVBQUU7Z0JBQ0wsZ0JBQWdCO2dCQUNoQixXQUFXO2dCQUNYLFNBQVM7Z0JBQ1QsY0FBYztnQkFDZCxtQkFBbUI7YUFDdEI7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLHlCQUF5QjtZQUNqQyxRQUFRLEVBQUUseUVBQXlFO1lBQ25GLE9BQU8sRUFBRSxDQUFDLFlBQVksRUFBRSxVQUFVLEVBQUUsVUFBVSxFQUFFLE1BQU0sRUFBRSxXQUFXLENBQUM7U0FDdkU7UUFDRDtZQUNJLE1BQU0sRUFBRSx5QkFBeUI7WUFDakMsUUFBUSxFQUFFLGdFQUFnRTtZQUMxRSxPQUFPLEVBQUU7Z0JBQ0wsdUJBQXVCO2dCQUN2QixxQkFBcUI7Z0JBQ3JCLHFCQUFxQjtnQkFDckIsa0JBQWtCO2dCQUNsQixpQkFBaUI7YUFDcEI7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLHlCQUF5QjtZQUNqQyxRQUFRLEVBQUUscUVBQXFFO1lBQy9FLE9BQU8sRUFBRSxDQUFDLFlBQVksRUFBRSxVQUFVLEVBQUUsVUFBVSxFQUFFLE1BQU0sRUFBRSxXQUFXLENBQUM7U0FDdkU7S0FDSjtJQUNELE9BQU8sRUFBRTtRQUNMLEdBQUcsU0FBUyxDQUFDLHFCQUFxQjtRQUNsQyxZQUFZLEVBQUUsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUU7UUFDOUMsY0FBYyxFQUFFO1lBQ1osVUFBVSxFQUFFO2dCQUNSLEtBQUssRUFBRSxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUM7Z0JBQ2IsS0FBSyxFQUFFLG9DQUFvQzthQUM5QztZQUNELFlBQVksRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLENBQUMsRUFBRSxFQUFFLENBQUMsRUFBRSxLQUFLLEVBQUUsdUJBQXVCLEVBQUU7WUFDaEUsUUFBUSxFQUFFO2dCQUNOLEtBQUssRUFBRSxDQUFDLEVBQUUsRUFBRSxFQUFFLENBQUM7Z0JBQ2YsS0FBSyxFQUFFLHVDQUF1QzthQUNqRDtZQUNELE1BQU0sRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLEVBQUUsRUFBRSxFQUFFLENBQUMsRUFBRSxLQUFLLEVBQUUsNEJBQTRCLEVBQUU7U0FDbkU7S0FDSjtJQUNELFVBQVUsRUFBRSxxUUFBcVE7Q0FDcFIsQ0FBQztBQUNGLE9BQU8sQ0FBQyxPQUFPLEdBQUcsZUFBZSxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtY29tbW9ucy9kaXN0L2NvbnN0YW50cy9xdWVzdGlvbm5haXJlL2luc29tbmlhLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIlwidXNlIHN0cmljdFwiO1xuT2JqZWN0LmRlZmluZVByb3BlcnR5KGV4cG9ydHMsIFwiX19lc01vZHVsZVwiLCB7IHZhbHVlOiB0cnVlIH0pO1xuY29uc3Qgc2NvcmluZ18xID0gcmVxdWlyZShcIi4uL3Njb3JpbmdcIik7XG5jb25zdCBJTlNPTU5JQV9TVVJWRVkgPSB7XG4gICAgdGl0bGU6IFwiSW5zb21uaWEgU2V2ZXJpdHkgSW5kZXggKElTSSlcIixcbiAgICBkZXNjcmlwdGlvbjogXCJUaGUgSW5zb21uaWEgU2V2ZXJpdHkgSW5kZXggKElTSSkgaXMgYSBzZWxmLWFkbWluaXN0ZXJlZCBxdWVzdGlvbm5haXJlIHVzZWQgdG8gYXNzZXNzIHRoZSBzZXZlcml0eSBvZiBpbnNvbW5pYSBzeW1wdG9tcyBvdmVyIHRoZSBwYXN0IHR3byB3ZWVrcy4gSXQgaGVscHMgZGV0ZXJtaW5lIHRoZSBpbXBhY3Qgb2Ygc2xlZXAgZGlmZmljdWx0aWVzIG9uIGRhaWx5IGxpZmUuXCIsXG4gICAgcXVlc3Rpb25zOiBbXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJPdmVyIHRoZSBwYXN0IHR3byB3ZWVrc1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaG93IG11Y2ggZGlmZmljdWx0eSBoYXZlIHlvdSBoYWQgZmFsbGluZyBhc2xlZXA/XCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOb25lXCIsIFwiTWlsZFwiLCBcIk1vZGVyYXRlXCIsIFwiU2V2ZXJlXCIsIFwiVmVyeSBzZXZlcmVcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJPdmVyIHRoZSBwYXN0IHR3byB3ZWVrc1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaG93IG11Y2ggZGlmZmljdWx0eSBoYXZlIHlvdSBoYWQgc3RheWluZyBhc2xlZXA/XCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOb25lXCIsIFwiTWlsZFwiLCBcIk1vZGVyYXRlXCIsIFwiU2V2ZXJlXCIsIFwiVmVyeSBzZXZlcmVcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJPdmVyIHRoZSBwYXN0IHR3byB3ZWVrc1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaG93IG11Y2ggb2YgYSBwcm9ibGVtIGhhcyB3YWtpbmcgdXAgdG9vIGVhcmx5IGJlZW4gZm9yIHlvdT9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5vbmVcIiwgXCJNaWxkXCIsIFwiTW9kZXJhdGVcIiwgXCJTZXZlcmVcIiwgXCJWZXJ5IHNldmVyZVwiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIk92ZXIgdGhlIHBhc3QgdHdvIHdlZWtzXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJob3cgc2F0aXNmaWVkIG9yIGRpc3NhdGlzZmllZCBhcmUgeW91IHdpdGggeW91ciBjdXJyZW50IHNsZWVwIHBhdHRlcm4/XCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJWZXJ5IHNhdGlzZmllZFwiLFxuICAgICAgICAgICAgICAgIFwiU2F0aXNmaWVkXCIsXG4gICAgICAgICAgICAgICAgXCJOZXV0cmFsXCIsXG4gICAgICAgICAgICAgICAgXCJEaXNzYXRpc2ZpZWRcIixcbiAgICAgICAgICAgICAgICBcIlZlcnkgZGlzc2F0aXNmaWVkXCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiT3ZlciB0aGUgcGFzdCB0d28gd2Vla3NcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcImhvdyBtdWNoIGhhcyB5b3VyIHNsZWVwIHByb2JsZW0gaW50ZXJmZXJlZCB3aXRoIHlvdXIgZGFpbHkgZnVuY3Rpb25pbmc/XCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOb3QgYXQgYWxsXCIsIFwiQSBsaXR0bGVcIiwgXCJTb21ld2hhdFwiLCBcIk11Y2hcIiwgXCJWZXJ5IG11Y2hcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJPdmVyIHRoZSBwYXN0IHR3byB3ZWVrc1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiaG93IG5vdGljZWFibGUgZG8geW91IHRoaW5rIHlvdXIgc2xlZXAgcHJvYmxlbXMgYXJlIHRvIG90aGVycz9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGwgbm90aWNlYWJsZVwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGUgbm90aWNlYWJsZVwiLFxuICAgICAgICAgICAgICAgIFwiU29tZXdoYXQgbm90aWNlYWJsZVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgbm90aWNlYWJsZVwiLFxuICAgICAgICAgICAgICAgIFwiVmVyeSBub3RpY2VhYmxlXCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiT3ZlciB0aGUgcGFzdCB0d28gd2Vla3NcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcImhvdyB3b3JyaWVkIG9yIGRpc3RyZXNzZWQgYXJlIHlvdSBhYm91dCB5b3VyIGN1cnJlbnQgc2xlZXAgcHJvYmxlbT9cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5vdCBhdCBhbGxcIiwgXCJBIGxpdHRsZVwiLCBcIlNvbWV3aGF0XCIsIFwiTXVjaFwiLCBcIlZlcnkgbXVjaFwiXSxcbiAgICAgICAgfSxcbiAgICBdLFxuICAgIHNjb3Jpbmc6IHtcbiAgICAgICAgLi4uc2NvcmluZ18xLlFVRVNUSU9OTkFJUkVfU0NPUklORyxcbiAgICAgICAgc2NvcmVNYXBwaW5nOiB7IDA6IDAsIDE6IDEsIDI6IDIsIDM6IDMsIDQ6IDQgfSxcbiAgICAgICAgc2V2ZXJpdHlMZXZlbHM6IHtcbiAgICAgICAgICAgIG5vSW5zb21uaWE6IHtcbiAgICAgICAgICAgICAgICByYW5nZTogWzAsIDddLFxuICAgICAgICAgICAgICAgIGxhYmVsOiBcIk5vIGNsaW5pY2FsbHkgc2lnbmlmaWNhbnQgaW5zb21uaWFcIixcbiAgICAgICAgICAgIH0sXG4gICAgICAgICAgICBzdWJ0aHJlc2hvbGQ6IHsgcmFuZ2U6IFs4LCAxNF0sIGxhYmVsOiBcIlN1YnRocmVzaG9sZCBpbnNvbW5pYVwiIH0sXG4gICAgICAgICAgICBtb2RlcmF0ZToge1xuICAgICAgICAgICAgICAgIHJhbmdlOiBbMTUsIDIxXSxcbiAgICAgICAgICAgICAgICBsYWJlbDogXCJDbGluaWNhbCBpbnNvbW5pYSAobW9kZXJhdGUgc2V2ZXJpdHkpXCIsXG4gICAgICAgICAgICB9LFxuICAgICAgICAgICAgc2V2ZXJlOiB7IHJhbmdlOiBbMjIsIDI4XSwgbGFiZWw6IFwiQ2xpbmljYWwgaW5zb21uaWEgKHNldmVyZSlcIiB9LFxuICAgICAgICB9LFxuICAgIH0sXG4gICAgZGlzY2xhaW1lcjogXCJUaGlzIHF1ZXN0aW9ubmFpcmUgaXMgYSBzY3JlZW5pbmcgdG9vbCB0byBhc3Nlc3MgdGhlIHNldmVyaXR5IG9mIGluc29tbmlhIHN5bXB0b21zLiBJdCBkb2VzIG5vdCBzZXJ2ZSBhcyBhIGRpYWdub3N0aWMgdG9vbCBhbmQgc2hvdWxkIGJlIGZvbGxvd2VkIGJ5IGEgY2xpbmljYWwgZXZhbHVhdGlvbi4gSWYgeW91IGhhdmUgY29uY2VybnMgYWJvdXQgeW91ciBzbGVlcCBoZWFsdGgsIHBsZWFzZSBjb25zdWx0IGEgaGVhbHRoY2FyZSBwcm9mZXNzaW9uYWwuXCIsXG59O1xuZXhwb3J0cy5kZWZhdWx0ID0gSU5TT01OSUFfU1VSVkVZO1xuLy8jIHNvdXJjZU1hcHBpbmdVUkw9aW5zb21uaWEuanMubWFwIl0sInZlcnNpb24iOjN9

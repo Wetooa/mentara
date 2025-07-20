@@ -4,7 +4,7 @@ import {
   WorksheetCreateInputDto,
   WorksheetSubmissionCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'schema/worksheet';
+} from 'mentara-commons';
 
 @Injectable()
 export class WorksheetsService {
@@ -32,8 +32,6 @@ export class WorksheetsService {
     const worksheets = await this.prisma.worksheet.findMany({
       where,
       include: {
-        materials: true,
-        submissions: true,
         client: {
           include: {
             user: {
@@ -71,8 +69,6 @@ export class WorksheetsService {
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
       include: {
-        materials: true,
-        submissions: true,
         client: {
           include: {
             user: {
@@ -104,33 +100,57 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    return worksheet;
+    // Transform the inline arrays into the expected format for backward compatibility
+    return {
+      ...worksheet,
+      materials: worksheet.materialUrls.map((url, index) => ({
+        id: `material-${index}`,
+        filename: worksheet.materialNames[index] || 'Unknown',
+        url,
+        fileType: 'application/octet-stream',
+        fileSize: worksheet.materialSizes[index] || 0,
+      })),
+      submissions: worksheet.submissionUrls.map((url, index) => ({
+        id: `submission-${index}`,
+        filename: worksheet.submissionNames[index] || 'Unknown',
+        url,
+        fileType: 'application/octet-stream',
+        fileSize: worksheet.submissionSizes[index] || 0,
+        submittedAt: worksheet.submittedAt,
+      })),
+    };
   }
 
   async create(
     data: WorksheetCreateInputDto,
     clientId: string,
     therapistId: string,
+    files: Express.Multer.File[] = [],
   ) {
-    // Start a transaction to create the worksheet and any materials
-    return this.prisma.$transaction(async (prisma) => {
-      // Create the worksheet
-      const worksheet = await prisma.worksheet.create({
-        data: {
-          title: data.title,
-          instructions: data.instructions,
-          description: data.description,
-          dueDate: data.dueDate,
-          status: data.status || 'assigned',
-          isCompleted: data.isCompleted || false,
-          clientId,
-          therapistId,
-        },
-      });
-
-      // Return the newly created worksheet with materials
-      return this.findById(worksheet.id);
+    // Create the worksheet
+    const worksheet = await this.prisma.worksheet.create({
+      data: {
+        title: data.title,
+        instructions: data.instructions,
+        description: data.description,
+        dueDate: data.dueDate || new Date(),
+        status: (data as any).status || 'ASSIGNED',
+        isCompleted: (data as any).isCompleted || false,
+        clientId,
+        therapistId,
+        // Files are now handled separately via upload endpoint
+        // These arrays will be populated when files are uploaded
+        materialUrls: [],
+        materialNames: [],
+        materialSizes: [],
+        submissionUrls: [],
+        submissionNames: [],
+        submissionSizes: [],
+      },
     });
+
+    // Return the newly created worksheet
+    return this.findById(worksheet.id);
   }
 
   async update(id: string, data: WorksheetUpdateInputDto) {
@@ -163,7 +183,7 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Delete the worksheet (cascade will delete materials and submissions)
+    // Delete the worksheet (files in Supabase Storage should be cleaned up separately if needed)
     await this.prisma.worksheet.delete({
       where: { id },
     });
@@ -187,19 +207,30 @@ export class WorksheetsService {
       );
     }
 
-    // Create the submission
-    const submission = await this.prisma.worksheetSubmission.create({
+    // Note: File uploads are now handled separately via the upload endpoint
+    // This method now primarily handles text-based submissions
+    // The worksheet has already been updated with file attachments if any
+
+    // Update the worksheet with submission data
+    const updatedWorksheet = await this.prisma.worksheet.update({
+      where: { id: data.worksheetId },
       data: {
-        worksheetId: data.worksheetId,
-        clientId,
-        content: data.content,
-        filename: data.filename,
-        url: data.url,
-        fileType: data.fileType,
+        // Store text-based responses or notes
+        feedback: (data as any).notes || null,
+        // Mark as completed if specified
+        isCompleted: data.isCompleted || false,
+        status: data.isCompleted ? 'COMPLETED' : 'ASSIGNED',
+        submittedAt: data.isCompleted ? new Date() : null,
       },
     });
 
-    return submission;
+    return {
+      id: updatedWorksheet.id,
+      worksheetId: data.worksheetId,
+      clientId,
+      status: updatedWorksheet.status,
+      submittedAt: updatedWorksheet.submittedAt,
+    };
   }
 
   async submitWorksheet(
@@ -216,49 +247,52 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Use transaction to ensure all operations succeed or fail together
-    return this.prisma.$transaction(async (prisma) => {
-      await prisma.worksheetSubmission.create({
-        data: {
-          worksheetId: id,
-          clientId,
-          content: data.content,
-          filename: data.filename,
-          url: data.url,
-          fileType: data.fileType,
-        },
-      });
-
-      // Update worksheet status if completing submission
-      await prisma.worksheet.update({
-        where: { id },
-        data: {
-          isCompleted: true,
-          status: 'completed',
-          submittedAt: new Date(),
-        },
-      });
-
-      // Return the updated worksheet
-      return this.findById(id);
+    // Update worksheet with submission data and mark as completed
+    const updatedWorksheet = await this.prisma.worksheet.update({
+      where: { id },
+      data: {
+        feedback: (data as any).notes || null,
+        isCompleted: true,
+        status: 'COMPLETED',
+        submittedAt: new Date(),
+        // File attachments are handled separately via upload endpoint
+      },
     });
+
+    return {
+      worksheetId: id,
+      submissionId: id, // Use worksheet ID as submission ID since they're now unified
+      status: updatedWorksheet.status,
+      submittedAt: updatedWorksheet.submittedAt,
+      message: 'Worksheet submitted successfully',
+    };
   }
 
   async deleteSubmission(id: string) {
-    // Check if submission exists
-    const submission = await this.prisma.worksheetSubmission.findUnique({
+    // Since submissions are now inline, we reset the worksheet submission status
+    const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
     });
 
-    if (!submission) {
-      throw new NotFoundException(`Submission with ID ${id} not found`);
+    if (!worksheet) {
+      throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Delete the submission
-    await this.prisma.worksheetSubmission.delete({
+    // Reset submission status
+    await this.prisma.worksheet.update({
       where: { id },
+      data: {
+        isCompleted: false,
+        status: 'ASSIGNED',
+        submittedAt: null,
+        feedback: null,
+        // Clear submission files but keep materials
+        submissionUrls: [],
+        submissionNames: [],
+        submissionSizes: [],
+      },
     });
 
-    return { success: true, message: 'Submission deleted successfully' };
+    return { success: true, message: 'Submission reset successfully' };
   }
 }

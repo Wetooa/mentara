@@ -6,13 +6,8 @@ import {
   faTableColumns,
   faUser,
   faUsers,
-  faCalendarAlt,
-  faChartLine,
   faGear,
   faFlag,
-  faSearch,
-  faShieldAlt,
-  faBan,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   SidebarGroup,

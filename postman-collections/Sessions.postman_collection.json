@@ -1,0 +1,557 @@
+{
+  "info": {
+    "name": "Mentara - Sessions",
+    "description": "Sessions module endpoints for therapy session management, session notes, progress tracking, and session analytics between clients and therapists.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "mentara-sessions"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Bearer token for authenticated requests",
+          "if (pm.environment.get('accessToken') && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'Bearer ' + pm.environment.get('accessToken')",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global error handling for all requests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Auto-handle Zod validation errors",
+          "if (pm.response.code === 400) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.issues && Array.isArray(responseJson.issues)) {",
+          "            responseJson.issues.forEach(issue => {",
+          "                console.error('❌ Validation Error: ' + issue.message + ' (' + issue.path.join('.') + ');',
+          "            });"",
+          "        }",
+          "    } catch (e) {",
+          "        console.error('❌ Failed to parse validation error response');",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Session Management",
+      "item": [
+        {
+          "name": "Create Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Session created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has session ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('sessionId', responseJson.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"therapistId\": \"{{therapistId}}\",\n  \"meetingId\": \"{{meetingId}}\",\n  \"type\": \"therapy\",\n  \"modality\": \"video\",\n  \"scheduledStartTime\": \"2024-02-15T14:00:00.000Z\",\n  \"scheduledEndTime\": \"2024-02-15T15:00:00.000Z\",\n  \"title\": \"Weekly Therapy Session\",\n  \"agenda\": [\n    \"Review week's progress\",\n    \"Discuss gratitude journal results\",\n    \"Practice breathing exercises\",\n    \"Plan next week's activities\"\n  ],\n  \"preparationNotes\": \"Client has been working on gratitude practice. Review worksheet submissions before session.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            },
+            "description": "Create a new therapy session"
+          },
+          "response": []
+        },
+        {
+          "name": "Start Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actualStartTime\": \"{{$isoTimestamp}}\",\n  \"location\": \"Virtual - Zoom Room\",\n  \"attendees\": [\n    {\n      \"userId\": \"{{clientId}}\",\n      \"role\": \"client\",\n      \"joinedAt\": \"{{$isoTimestamp}}\"\n    },\n    {\n      \"userId\": \"{{therapistId}}\",\n      \"role\": \"therapist\",\n      \"joinedAt\": \"{{$isoTimestamp}}\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "start"]
+            },
+            "description": "Start a session (therapist only)"
+          },
+          "response": []
+        },
+        {
+          "name": "End Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actualEndTime\": \"{{$isoTimestamp}}\",\n  \"completionStatus\": \"completed\",\n  \"attendanceNotes\": \"Full session completed as scheduled\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/end",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "end"]
+            },
+            "description": "End a session (therapist only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?clientId={{clientId}}&therapistId={{therapistId}}&status=completed&page=1&limit=10&sortBy=scheduledStartTime&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [
+                {
+                  "key": "clientId",
+                  "value": "{{clientId}}"
+                },
+                {
+                  "key": "therapistId",
+                  "value": "{{therapistId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "completed"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "scheduledStartTime"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get therapy sessions with filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}"]
+            },
+            "description": "Get specific session details"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Weekly Therapy Session - Follow-up\",\n  \"agenda\": [\n    \"Review week's progress\",\n    \"Discuss gratitude journal results\",\n    \"Practice breathing exercises\",\n    \"Plan next week's activities\",\n    \"Address anxiety management techniques\"\n  ],\n  \"preparationNotes\": \"Client has been working on gratitude practice. Review worksheet submissions before session. Client mentioned increased anxiety this week.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}"]
+            },
+            "description": "Update session details (therapist only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Session",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Client requested reschedule\",\n  \"cancelledBy\": \"client\",\n  \"notifyParticipants\": true,\n  \"refundAmount\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}"]
+            },
+            "description": "Cancel a session"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Session Notes",
+      "item": [
+        {
+          "name": "Create Session Note",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Session note created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has note ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.environment.set('sessionNoteId', responseJson.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"type\": \"session_summary\",\n  \"content\": \"## Session Summary - February 15, 2024\\n\\n### Key Topics Discussed\\n- Review of gratitude journal practice (client showing consistent engagement)\\n- Breathing exercises practice and refinement\\n- Discussion of anxiety triggers from the past week\\n- Planning for upcoming stressful work presentation\\n\\n### Client Progress\\n- Gratitude practice: Client reports feeling more positive overall\\n- Breathing exercises: Improved technique, using 4-7-8 method effectively\\n- Anxiety management: Still working on anticipatory anxiety\\n- Sleep quality: Improvement noted since starting gratitude practice\\n\\n### Interventions Used\\n- Guided breathing exercise (10 minutes)\\n- Cognitive restructuring for presentation anxiety\\n- Homework assignment: daily gratitude + breathing practice\\n\\n### Next Session Goals\\n- Continue gratitude and breathing practices\\n- Introduce progressive muscle relaxation\\n- Prepare for work presentation using anxiety management techniques\\n- Review progress on sleep quality improvements\\n\\n### Homework Assigned\\n- Complete gratitude worksheet daily\\n- Practice 4-7-8 breathing twice daily\\n- Use breathing technique during work presentation preparation\\n- Track sleep quality and anxiety levels\",\n  \"isSharedWithClient\": false,\n  \"tags\": [\"gratitude\", \"breathing\", \"anxiety\", \"progress\"],\n  \"mood\": {\n    \"clientMoodStart\": 6,\n    \"clientMoodEnd\": 7,\n    \"therapistObservation\": \"Client appeared more relaxed by end of session\"\n  },\n  \"assessments\": [\n    {\n      \"type\": \"anxiety_level\",\n      \"scale\": \"1-10\",\n      \"score\": 5,\n      \"notes\": \"Decreased from 7 last week\"\n    },\n    {\n      \"type\": \"engagement\",\n      \"scale\": \"1-10\",\n      \"score\": 9,\n      \"notes\": \"Highly engaged throughout session\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "notes"]
+            },
+            "description": "Create session note (therapist only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/notes?includeShared=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "notes"],
+              "query": [
+                {
+                  "key": "includeShared",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get notes for a session"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Session Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"## Session Summary - February 15, 2024\\n\\n### Key Topics Discussed\\n- Review of gratitude journal practice (client showing consistent engagement)\\n- Breathing exercises practice and refinement\\n- Discussion of anxiety triggers from the past week\\n- Planning for upcoming stressful work presentation\\n\\n### Client Progress\\n- Gratitude practice: Client reports feeling more positive overall\\n- Breathing exercises: Improved technique, using 4-7-8 method effectively\\n- Anxiety management: Still working on anticipatory anxiety\\n- Sleep quality: Improvement noted since starting gratitude practice\\n\\n### Interventions Used\\n- Guided breathing exercise (10 minutes)\\n- Cognitive restructuring for presentation anxiety\\n- Homework assignment: daily gratitude + breathing practice\\n\\n### Next Session Goals\\n- Continue gratitude and breathing practices\\n- Introduce progressive muscle relaxation\\n- Prepare for work presentation using anxiety management techniques\\n- Review progress on sleep quality improvements\\n\\n### Homework Assigned\\n- Complete gratitude worksheet daily\\n- Practice 4-7-8 breathing twice daily\\n- Use breathing technique during work presentation preparation\\n- Track sleep quality and anxiety levels\\n\\n### Additional Notes\\n- Client mentioned feeling more confident about using coping strategies\\n- Discussed importance of consistency in practice\\n- Scheduled follow-up in one week\",\n  \"tags\": [\"gratitude\", \"breathing\", \"anxiety\", \"progress\", \"confidence\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/notes/{{sessionNoteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "notes", "{{sessionNoteId}}"]
+            },
+            "description": "Update session note (therapist only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Share Note with Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shareWithClient\": true,\n  \"clientMessage\": \"Here's a summary of our session today. Please review the homework assignments and let me know if you have any questions!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/notes/{{sessionNoteId}}/share",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "notes", "{{sessionNoteId}}", "share"]
+            },
+            "description": "Share session note with client (therapist only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Progress Tracking",
+      "item": [
+        {
+          "name": "Get Client Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/progress?clientId={{clientId}}&therapistId={{therapistId}}&timeframe=month",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "progress"],
+              "query": [
+                {
+                  "key": "clientId",
+                  "value": "{{clientId}}"
+                },
+                {
+                  "key": "therapistId",
+                  "value": "{{therapistId}}"
+                },
+                {
+                  "key": "timeframe",
+                  "value": "month"
+                }
+              ]
+            },
+            "description": "Get client progress over time"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/statistics?clientId={{clientId}}&period=quarter&includeOutcomes=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "statistics"],
+              "query": [
+                {
+                  "key": "clientId",
+                  "value": "{{clientId}}"
+                },
+                {
+                  "key": "period",
+                  "value": "quarter"
+                },
+                {
+                  "key": "includeOutcomes",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get session statistics and outcomes"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Progress Goals",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"goals\": [\n    {\n      \"id\": \"anxiety_management\",\n      \"title\": \"Anxiety Management\",\n      \"description\": \"Develop effective coping strategies for anxiety\",\n      \"targetDate\": \"2024-04-15\",\n      \"progress\": 65,\n      \"milestones\": [\n        {\n          \"id\": \"breathing_mastery\",\n          \"title\": \"Master 4-7-8 breathing technique\",\n          \"status\": \"completed\",\n          \"completedDate\": \"2024-02-10\"\n        },\n        {\n          \"id\": \"gratitude_practice\",\n          \"title\": \"Establish daily gratitude practice\",\n          \"status\": \"in_progress\",\n          \"progress\": 80\n        },\n        {\n          \"id\": \"anxiety_triggers\",\n          \"title\": \"Identify and manage anxiety triggers\",\n          \"status\": \"in_progress\",\n          \"progress\": 50\n        }\n      ]\n    },\n    {\n      \"id\": \"sleep_quality\",\n      \"title\": \"Improve Sleep Quality\",\n      \"description\": \"Develop better sleep hygiene and reduce bedtime anxiety\",\n      \"targetDate\": \"2024-03-30\",\n      \"progress\": 40,\n      \"milestones\": [\n        {\n          \"id\": \"bedtime_routine\",\n          \"title\": \"Establish consistent bedtime routine\",\n          \"status\": \"in_progress\",\n          \"progress\": 60\n        },\n        {\n          \"id\": \"sleep_anxiety\",\n          \"title\": \"Reduce bedtime anxiety\",\n          \"status\": \"pending\",\n          \"progress\": 20\n        }\n      ]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/progress/goals",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "progress", "goals"]
+            },
+            "description": "Update client progress goals (therapist only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Session Analytics",
+      "item": [
+        {
+          "name": "Get Therapist Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/analytics/therapist?therapistId={{therapistId}}&period=month&includeOutcomes=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "analytics", "therapist"],
+              "query": [
+                {
+                  "key": "therapistId",
+                  "value": "{{therapistId}}"
+                },
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "includeOutcomes",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get therapist session analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/analytics/client?clientId={{clientId}}&period=quarter&includeProgress=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "analytics", "client"],
+              "query": [
+                {
+                  "key": "clientId",
+                  "value": "{{clientId}}"
+                },
+                {
+                  "key": "period",
+                  "value": "quarter"
+                },
+                {
+                  "key": "includeProgress",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get client session analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Outcomes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/outcomes?clientId={{clientId}}&therapistId={{therapistId}}&period=month&groupBy=intervention",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "outcomes"],
+              "query": [
+                {
+                  "key": "clientId",
+                  "value": "{{clientId}}"
+                },
+                {
+                  "key": "therapistId",
+                  "value": "{{therapistId}}"
+                },
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "intervention"
+                }
+              ]
+            },
+            "description": "Get session outcomes and effectiveness"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

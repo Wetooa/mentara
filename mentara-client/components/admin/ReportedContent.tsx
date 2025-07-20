@@ -26,8 +26,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -38,16 +36,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Search,
-  Flag,
   Eye,
   Ban,
   ShieldAlert,
   Check,
-  X,
   AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -139,7 +134,21 @@ const mockReports = [
 export function ReportedContent() {
   const [reports, setReports] = useState(mockReports);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [selectedReport, setSelectedReport] = useState<{
+    id: string;
+    type: string;
+    reportedItemId: string;
+    reporterName: string;
+    reporterId: string;
+    reportedUserName: string;
+    reportedUserId: string;
+    reason: string;
+    description: string;
+    dateReported: string;
+    status: string;
+    content: string;
+    reportedUserIsTherapist: boolean;
+  } | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<

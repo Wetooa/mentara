@@ -1,0 +1,102 @@
+45385984585a1bbbb939d8138df56cde
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const scoring_1 = require("../scoring");
+const BES = {
+    title: "Binge-Eating Scale (BES)",
+    description: "The Binge-Eating Scale (BES) is a self-assessment tool designed to evaluate the severity of binge-eating behaviors. It helps individuals understand their eating patterns and whether they may indicate symptoms consistent with binge-eating disorder.",
+    questions: [
+        {
+            prefix: "Body Image",
+            question: "I don't feel self-conscious about my weight or body size when I'm with others.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Eating Pace",
+            question: "I don't have any difficulty eating slowly in the proper manner.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Self-Control",
+            question: "I feel capable to control my eating urges when I want to.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Emotional Eating",
+            question: "I don't have the habit of eating when I'm bored.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Hunger Awareness",
+            question: "I'm usually physically hungry when I eat something.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Post-Eating Emotions",
+            question: "I don't feel any guilt or self-hate after I overeat.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Dieting Control",
+            question: "I don't lose total control of my eating when dieting even after periods when I overeat.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Fullness",
+            question: "I rarely eat so much food that I feel uncomfortably stuffed afterwards.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Eating Patterns",
+            question: "My level of calorie intake does not go up very high or go down very low on a regular basis.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Stopping Ability",
+            question: "I usually am able to stop eating when I want to. I know when 'enough is enough.'",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Satiety Response",
+            question: "I don't have any problem stopping eating when I feel full.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Social Eating",
+            question: "I seem to eat just as much when I'm with others as when I'm by myself.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Meal Structure",
+            question: "I eat three meals a day with only an occasional between-meal snack.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Control Strategies",
+            question: "I don't think much about trying to control unwanted eating urges.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Food Preoccupation",
+            question: "I don't think about food a great deal.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+        {
+            prefix: "Portion Control",
+            question: "I usually know whether or not I'm physically hungry. I take the right portion of food to satisfy me.",
+            options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        },
+    ],
+    scoring: {
+        ...scoring_1.QUESTIONNAIRE_SCORING,
+        scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3 },
+        severityLevels: {
+            minimal: { range: [0, 17], label: "No or Minimal Binge-Eating" },
+            mildModerate: { range: [18, 26], label: "Mild to Moderate Binge-Eating" },
+            severe: { range: [27, 46], label: "Severe Binge-Eating" },
+        },
+    },
+    disclaimer: "This questionnaire is a screening tool to assess the severity of binge-eating behaviors. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your eating habits, please consult a healthcare professional.",
+};
+exports.default = BES;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvYmluZ2UtZWF0aW5nLmpzIiwibWFwcGluZ3MiOiJBQUFBLFlBQVksQ0FBQztBQUNiLE1BQU0sQ0FBQyxjQUFjLENBQUMsT0FBTyxFQUFFLFlBQVksRUFBRSxFQUFFLEtBQUssRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO0FBQzlELE1BQU0sU0FBUyxHQUFHLE9BQU8sQ0FBQyxZQUFZLENBQUMsQ0FBQztBQUN4QyxNQUFNLEdBQUcsR0FBRztJQUNSLEtBQUssRUFBRSwwQkFBMEI7SUFDakMsV0FBVyxFQUFFLHlQQUF5UDtJQUN0USxTQUFTLEVBQUU7UUFDUDtZQUNJLE1BQU0sRUFBRSxZQUFZO1lBQ3BCLFFBQVEsRUFBRSxnRkFBZ0Y7WUFDMUYsT0FBTyxFQUFFLENBQUMsT0FBTyxFQUFFLFFBQVEsRUFBRSxXQUFXLEVBQUUsT0FBTyxFQUFFLFFBQVEsQ0FBQztTQUMvRDtRQUNEO1lBQ0ksTUFBTSxFQUFFLGFBQWE7WUFDckIsUUFBUSxFQUFFLGlFQUFpRTtZQUMzRSxPQUFPLEVBQUUsQ0FBQyxPQUFPLEVBQUUsUUFBUSxFQUFFLFdBQVcsRUFBRSxPQUFPLEVBQUUsUUFBUSxDQUFDO1NBQy9EO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsY0FBYztZQUN0QixRQUFRLEVBQUUsMkRBQTJEO1lBQ3JFLE9BQU8sRUFBRSxDQUFDLE9BQU8sRUFBRSxRQUFRLEVBQUUsV0FBVyxFQUFFLE9BQU8sRUFBRSxRQUFRLENBQUM7U0FDL0Q7UUFDRDtZQUNJLE1BQU0sRUFBRSxrQkFBa0I7WUFDMUIsUUFBUSxFQUFFLGtEQUFrRDtZQUM1RCxPQUFPLEVBQUUsQ0FBQyxPQUFPLEVBQUUsUUFBUSxFQUFFLFdBQVcsRUFBRSxPQUFPLEVBQUUsUUFBUSxDQUFDO1NBQy9EO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsa0JBQWtCO1lBQzFCLFFBQVEsRUFBRSxxREFB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RTtZQUN6RSxNQUFNLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxFQUFFLEVBQUUsRUFBRSxDQUFDLEVBQUUsS0FBSyxFQUFFLHFCQUFxQixFQUFFO1NBQzVEO0tBQ0o7SUFDRCxVQUFVLEVBQUUsMlFBQTJRO0NBQzFSLENBQUM7QUFDRixPQUFPLENBQUMsT0FBTyxHQUFHLEdBQUcsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWNvbW1vbnMvZGlzdC9jb25zdGFudHMvcXVlc3Rpb25uYWlyZS9iaW5nZS1lYXRpbmcuanMiXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2Ugc3RyaWN0XCI7XG5PYmplY3QuZGVmaW5lUHJvcGVydHkoZXhwb3J0cywgXCJfX2VzTW9kdWxlXCIsIHsgdmFsdWU6IHRydWUgfSk7XG5jb25zdCBzY29yaW5nXzEgPSByZXF1aXJlKFwiLi4vc2NvcmluZ1wiKTtcbmNvbnN0IEJFUyA9IHtcbiAgICB0aXRsZTogXCJCaW5nZS1FYXRpbmcgU2NhbGUgKEJFUylcIixcbiAgICBkZXNjcmlwdGlvbjogXCJUaGUgQmluZ2UtRWF0aW5nIFNjYWxlIChCRVMpIGlzIGEgc2VsZi1hc3Nlc3NtZW50IHRvb2wgZGVzaWduZWQgdG8gZXZhbHVhdGUgdGhlIHNldmVyaXR5IG9mIGJpbmdlLWVhdGluZyBiZWhhdmlvcnMuIEl0IGhlbHBzIGluZGl2aWR1YWxzIHVuZGVyc3RhbmQgdGhlaXIgZWF0aW5nIHBhdHRlcm5zIGFuZCB3aGV0aGVyIHRoZXkgbWF5IGluZGljYXRlIHN5bXB0b21zIGNvbnNpc3RlbnQgd2l0aCBiaW5nZS1lYXRpbmcgZGlzb3JkZXIuXCIsXG4gICAgcXVlc3Rpb25zOiBbXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJCb2R5IEltYWdlXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGRvbid0IGZlZWwgc2VsZi1jb25zY2lvdXMgYWJvdXQgbXkgd2VpZ2h0IG9yIGJvZHkgc2l6ZSB3aGVuIEknbSB3aXRoIG90aGVycy5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJFYXRpbmcgUGFjZVwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBkb24ndCBoYXZlIGFueSBkaWZmaWN1bHR5IGVhdGluZyBzbG93bHkgaW4gdGhlIHByb3BlciBtYW5uZXIuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiU2VsZi1Db250cm9sXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGZlZWwgY2FwYWJsZSB0byBjb250cm9sIG15IGVhdGluZyB1cmdlcyB3aGVuIEkgd2FudCB0by5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJFbW90aW9uYWwgRWF0aW5nXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGRvbid0IGhhdmUgdGhlIGhhYml0IG9mIGVhdGluZyB3aGVuIEknbSBib3JlZC5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJIdW5nZXIgQXdhcmVuZXNzXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJJ20gdXN1YWxseSBwaHlzaWNhbGx5IGh1bmdyeSB3aGVuIEkgZWF0IHNvbWV0aGluZy5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJQb3N0LUVhdGluZyBFbW90aW9uc1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBkb24ndCBmZWVsIGFueSBndWlsdCBvciBzZWxmLWhhdGUgYWZ0ZXIgSSBvdmVyZWF0LlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkRpZXRpbmcgQ29udHJvbFwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBkb24ndCBsb3NlIHRvdGFsIGNvbnRyb2wgb2YgbXkgZWF0aW5nIHdoZW4gZGlldGluZyBldmVuIGFmdGVyIHBlcmlvZHMgd2hlbiBJIG92ZXJlYXQuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRnVsbG5lc3NcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgcmFyZWx5IGVhdCBzbyBtdWNoIGZvb2QgdGhhdCBJIGZlZWwgdW5jb21mb3J0YWJseSBzdHVmZmVkIGFmdGVyd2FyZHMuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiRWF0aW5nIFBhdHRlcm5zXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJNeSBsZXZlbCBvZiBjYWxvcmllIGludGFrZSBkb2VzIG5vdCBnbyB1cCB2ZXJ5IGhpZ2ggb3IgZ28gZG93biB2ZXJ5IGxvdyBvbiBhIHJlZ3VsYXIgYmFzaXMuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiU3RvcHBpbmcgQWJpbGl0eVwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSB1c3VhbGx5IGFtIGFibGUgdG8gc3RvcCBlYXRpbmcgd2hlbiBJIHdhbnQgdG8uIEkga25vdyB3aGVuICdlbm91Z2ggaXMgZW5vdWdoLidcIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJTYXRpZXR5IFJlc3BvbnNlXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGRvbid0IGhhdmUgYW55IHByb2JsZW0gc3RvcHBpbmcgZWF0aW5nIHdoZW4gSSBmZWVsIGZ1bGwuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiU29jaWFsIEVhdGluZ1wiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBzZWVtIHRvIGVhdCBqdXN0IGFzIG11Y2ggd2hlbiBJJ20gd2l0aCBvdGhlcnMgYXMgd2hlbiBJJ20gYnkgbXlzZWxmLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIk1lYWwgU3RydWN0dXJlXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGVhdCB0aHJlZSBtZWFscyBhIGRheSB3aXRoIG9ubHkgYW4gb2NjYXNpb25hbCBiZXR3ZWVuLW1lYWwgc25hY2suXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXCJOZXZlclwiLCBcIlJhcmVseVwiLCBcIlNvbWV0aW1lc1wiLCBcIk9mdGVuXCIsIFwiQWx3YXlzXCJdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiQ29udHJvbCBTdHJhdGVnaWVzXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGRvbid0IHRoaW5rIG11Y2ggYWJvdXQgdHJ5aW5nIHRvIGNvbnRyb2wgdW53YW50ZWQgZWF0aW5nIHVyZ2VzLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1wiTmV2ZXJcIiwgXCJSYXJlbHlcIiwgXCJTb21ldGltZXNcIiwgXCJPZnRlblwiLCBcIkFsd2F5c1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIkZvb2QgUHJlb2NjdXBhdGlvblwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBkb24ndCB0aGluayBhYm91dCBmb29kIGEgZ3JlYXQgZGVhbC5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJQb3J0aW9uIENvbnRyb2xcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgdXN1YWxseSBrbm93IHdoZXRoZXIgb3Igbm90IEknbSBwaHlzaWNhbGx5IGh1bmdyeS4gSSB0YWtlIHRoZSByaWdodCBwb3J0aW9uIG9mIGZvb2QgdG8gc2F0aXNmeSBtZS5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcIk5ldmVyXCIsIFwiUmFyZWx5XCIsIFwiU29tZXRpbWVzXCIsIFwiT2Z0ZW5cIiwgXCJBbHdheXNcIl0sXG4gICAgICAgIH0sXG4gICAgXSxcbiAgICBzY29yaW5nOiB7XG4gICAgICAgIC4uLnNjb3JpbmdfMS5RVUVTVElPTk5BSVJFX1NDT1JJTkcsXG4gICAgICAgIHNjb3JlTWFwcGluZzogeyAwOiAwLCAxOiAxLCAyOiAyLCAzOiAzIH0sXG4gICAgICAgIHNldmVyaXR5TGV2ZWxzOiB7XG4gICAgICAgICAgICBtaW5pbWFsOiB7IHJhbmdlOiBbMCwgMTddLCBsYWJlbDogXCJObyBvciBNaW5pbWFsIEJpbmdlLUVhdGluZ1wiIH0sXG4gICAgICAgICAgICBtaWxkTW9kZXJhdGU6IHsgcmFuZ2U6IFsxOCwgMjZdLCBsYWJlbDogXCJNaWxkIHRvIE1vZGVyYXRlIEJpbmdlLUVhdGluZ1wiIH0sXG4gICAgICAgICAgICBzZXZlcmU6IHsgcmFuZ2U6IFsyNywgNDZdLCBsYWJlbDogXCJTZXZlcmUgQmluZ2UtRWF0aW5nXCIgfSxcbiAgICAgICAgfSxcbiAgICB9LFxuICAgIGRpc2NsYWltZXI6IFwiVGhpcyBxdWVzdGlvbm5haXJlIGlzIGEgc2NyZWVuaW5nIHRvb2wgdG8gYXNzZXNzIHRoZSBzZXZlcml0eSBvZiBiaW5nZS1lYXRpbmcgYmVoYXZpb3JzLiBJdCBkb2VzIG5vdCBzZXJ2ZSBhcyBhIGRpYWdub3N0aWMgdG9vbCBhbmQgc2hvdWxkIGJlIGZvbGxvd2VkIGJ5IGEgY2xpbmljYWwgZXZhbHVhdGlvbi4gSWYgeW91IGhhdmUgY29uY2VybnMgYWJvdXQgeW91ciBlYXRpbmcgaGFiaXRzLCBwbGVhc2UgY29uc3VsdCBhIGhlYWx0aGNhcmUgcHJvZmVzc2lvbmFsLlwiLFxufTtcbmV4cG9ydHMuZGVmYXVsdCA9IEJFUztcbi8vIyBzb3VyY2VNYXBwaW5nVVJMPWJpbmdlLWVhdGluZy5qcy5tYXAiXSwidmVyc2lvbiI6M30=

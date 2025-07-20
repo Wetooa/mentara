@@ -1,0 +1,38 @@
+da685e0b49eab2ede0b1667b5858d89b
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BookingModule = void 0;
+const common_1 = require("@nestjs/common");
+const booking_controller_1 = require("./booking.controller");
+const booking_service_1 = require("./booking.service");
+const prisma_client_provider_1 = require("../providers/prisma-client.provider");
+const event_bus_service_1 = require("../common/events/event-bus.service");
+const slot_generator_service_1 = require("./services/slot-generator.service");
+const conflict_detection_service_1 = require("./services/conflict-detection.service");
+const availability_validator_service_1 = require("./services/availability-validator.service");
+const billing_service_1 = require("../billing/billing.service");
+let BookingModule = class BookingModule {
+};
+exports.BookingModule = BookingModule;
+exports.BookingModule = BookingModule = __decorate([
+    (0, common_1.Module)({
+        controllers: [booking_controller_1.BookingController],
+        providers: [
+            booking_service_1.BookingService,
+            slot_generator_service_1.SlotGeneratorService,
+            conflict_detection_service_1.ConflictDetectionService,
+            availability_validator_service_1.AvailabilityValidatorService,
+            billing_service_1.BillingService,
+            prisma_client_provider_1.PrismaService,
+            event_bus_service_1.EventBusService,
+        ],
+        exports: [booking_service_1.BookingService],
+    })
+], BookingModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2Jvb2tpbmcvYm9va2luZy5tb2R1bGUudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUEsMkNBQXdDO0FBQ3hDLDZEQUF5RDtBQUN6RCx1REFBbUQ7QUFDbkQsZ0ZBQW9FO0FBQ3BFLDBFQUFxRTtBQUNyRSw4RUFBeUU7QUFDekUsc0ZBQWlGO0FBQ2pGLDhGQUF5RjtBQUN6RixnRUFBNEQ7QUFlckQsSUFBTSxhQUFhLEdBQW5CLE1BQU0sYUFBYTtDQUFHLENBQUE7QUFBaEIsc0NBQWE7d0JBQWIsYUFBYTtJQWJ6QixJQUFBLGVBQU0sRUFBQztRQUNOLFdBQVcsRUFBRSxDQUFDLHNDQUFpQixDQUFDO1FBQ2hDLFNBQVMsRUFBRTtZQUNULGdDQUFjO1lBQ2QsNkNBQW9CO1lBQ3BCLHFEQUF3QjtZQUN4Qiw2REFBNEI7WUFDNUIsZ0NBQWM7WUFDZCxzQ0FBYTtZQUNiLG1DQUFlO1NBQ2hCO1FBQ0QsT0FBTyxFQUFFLENBQUMsZ0NBQWMsQ0FBQztLQUMxQixDQUFDO0dBQ1csYUFBYSxDQUFHIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9ib29raW5nL2Jvb2tpbmcubW9kdWxlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IE1vZHVsZSB9IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IEJvb2tpbmdDb250cm9sbGVyIH0gZnJvbSAnLi9ib29raW5nLmNvbnRyb2xsZXInO1xuaW1wb3J0IHsgQm9va2luZ1NlcnZpY2UgfSBmcm9tICcuL2Jvb2tpbmcuc2VydmljZSc7XG5pbXBvcnQgeyBQcmlzbWFTZXJ2aWNlIH0gZnJvbSAnLi4vcHJvdmlkZXJzL3ByaXNtYS1jbGllbnQucHJvdmlkZXInO1xuaW1wb3J0IHsgRXZlbnRCdXNTZXJ2aWNlIH0gZnJvbSAnLi4vY29tbW9uL2V2ZW50cy9ldmVudC1idXMuc2VydmljZSc7XG5pbXBvcnQgeyBTbG90R2VuZXJhdG9yU2VydmljZSB9IGZyb20gJy4vc2VydmljZXMvc2xvdC1nZW5lcmF0b3Iuc2VydmljZSc7XG5pbXBvcnQgeyBDb25mbGljdERldGVjdGlvblNlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL2NvbmZsaWN0LWRldGVjdGlvbi5zZXJ2aWNlJztcbmltcG9ydCB7IEF2YWlsYWJpbGl0eVZhbGlkYXRvclNlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL2F2YWlsYWJpbGl0eS12YWxpZGF0b3Iuc2VydmljZSc7XG5pbXBvcnQgeyBCaWxsaW5nU2VydmljZSB9IGZyb20gJy4uL2JpbGxpbmcvYmlsbGluZy5zZXJ2aWNlJztcblxuQE1vZHVsZSh7XG4gIGNvbnRyb2xsZXJzOiBbQm9va2luZ0NvbnRyb2xsZXJdLFxuICBwcm92aWRlcnM6IFtcbiAgICBCb29raW5nU2VydmljZSxcbiAgICBTbG90R2VuZXJhdG9yU2VydmljZSxcbiAgICBDb25mbGljdERldGVjdGlvblNlcnZpY2UsXG4gICAgQXZhaWxhYmlsaXR5VmFsaWRhdG9yU2VydmljZSxcbiAgICBCaWxsaW5nU2VydmljZSxcbiAgICBQcmlzbWFTZXJ2aWNlLFxuICAgIEV2ZW50QnVzU2VydmljZSxcbiAgXSxcbiAgZXhwb3J0czogW0Jvb2tpbmdTZXJ2aWNlXSxcbn0pXG5leHBvcnQgY2xhc3MgQm9va2luZ01vZHVsZSB7fVxuIl0sInZlcnNpb24iOjN9

@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
-  MoreHorizontal,
   CheckCircle,
   FileText,
   Download,
   Send,
 } from "lucide-react";
-import Link from "next/link";
 import { Task } from "./types";
 
 interface TaskDetailPageProps {
@@ -132,7 +130,7 @@ export default function TherapistTaskDetailPage({
 
           {/* Patient's Work */}
           <div className="mb-6">
-            <h2 className="text-lg font-medium mb-2">Patient's work</h2>
+            <h2 className="text-lg font-medium mb-2">Patient&apos;s work</h2>
             {task.myWork && task.myWork.length > 0 ? (
               <div className="space-y-2">
                 {task.myWork.map((work, index) => (

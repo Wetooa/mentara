@@ -1,0 +1,211 @@
+a3659fa523694c9b1249aafdcd096e09
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const scoring_1 = require("../scoring");
+const SPIN = {
+    title: "Social Phobia Inventory (SPIN)",
+    description: "The Social Phobia Inventory (SPIN) is a self-administered questionnaire developed by Duke University's Psychiatry and Behavioral Sciences Department. It is used to screen for and measure the severity of social anxiety disorder.",
+    questions: [
+        {
+            prefix: "",
+            question: "I am afraid of people in authority.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I am bothered by blushing in front of people.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Parties and social events scare me.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I avoid talking to people I don’t know.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Being criticized scares me a lot.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I avoid doing things or speaking to people for fear of embarrassment.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Sweating in front of people causes me distress.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I avoid going to parties.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I avoid activities in which I am the center of attention.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Talking to strangers scares me.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I avoid having to give speeches.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I would do anything to avoid being criticized.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Heart palpitations bother me when I am around people.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I am afraid of doing things when people might be watching.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Being embarrassed or looking stupid are among my worst fears.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "I avoid speaking to anyone in authority.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+        {
+            prefix: "",
+            question: "Trembling or shaking in front of others is distressing to me.",
+            options: [
+                "Not at all",
+                "A little",
+                "Moderately",
+                "Quite a bit",
+                "Extremely",
+            ],
+        },
+    ],
+    scoring: {
+        ...scoring_1.QUESTIONNAIRE_SCORING,
+        scoreMapping: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 },
+        severityLevels: {
+            minimal: { range: [0, 20], label: "Minimal or No Social Phobia" },
+            mild: { range: [21, 30], label: "Mild Social Phobia" },
+            moderate: { range: [31, 40], label: "Moderate Social Phobia" },
+            severe: { range: [41, 50], label: "Severe Social Phobia" },
+            verySevere: { range: [51, 68], label: "Very Severe Social Phobia" },
+        },
+    },
+    disclaimer: "This questionnaire is a screening tool to assess the severity of social anxiety disorder. It does not serve as a diagnostic tool and should be followed by a clinical evaluation. If you have concerns about your mental health, please consult a healthcare professional.",
+};
+exports.default = SPIN;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1jb21tb25zL2Rpc3QvY29uc3RhbnRzL3F1ZXN0aW9ubmFpcmUvc29jaWFsLXBob2JpYS5qcyIsIm1hcHBpbmdzIjoiQUFBQSxZQUFZLENBQUM7QUFDYixNQUFNLENBQUMsY0FBYyxDQUFDLE9BQU8sRUFBRSxZQUFZLEVBQUUsRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUMsQ0FBQztBQUM5RCxNQUFNLFNBQVMsR0FBRyxPQUFPLENBQUMsWUFBWSxDQUFDLENBQUM7QUFDeEMsTUFBTSxJQUFJLEdBQUc7SUFDVCxLQUFLLEVBQUUsZ0NBQWdDO0lBQ3ZDLFdBQVcsRUFBRSxxT0FBcU87SUFDbFAsU0FBUyxFQUFFO1FBQ1A7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSxxQ0FBcUM7WUFDL0MsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JBQ2IsV0FBVzthQUNkO1NBQ0o7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLCtDQUErQztZQUN6RCxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUscUNBQXFDO1lBQy9DLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSx5Q0FBeUM7WUFDbkQsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JBQ2IsV0FBVzthQUNkO1NBQ0o7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLG1DQUFtQztZQUM3QyxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsdUVBQXVFO1lBQ2pGLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSxpREFBaUQ7WUFDM0QsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JBQ2IsV0FBVzthQUNkO1NBQ0o7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLDJCQUEyQjtZQUNyQyxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsMkRBQTJEO1lBQ3JFLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSxpQ0FBaUM7WUFDM0MsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JBQ2IsV0FBVzthQUNkO1NBQ0o7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLGtDQUFrQztZQUM1QyxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsZ0RBQWdEO1lBQzFELE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSx1REFBdUQ7WUFDakUsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JBQ2IsV0FBVzthQUNkO1NBQ0o7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLDREQUE0RDtZQUN0RSxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtRQUNEO1lBQ0ksTUFBTSxFQUFFLEVBQUU7WUFDVixRQUFRLEVBQUUsK0RBQStEO1lBQ3pFLE9BQU8sRUFBRTtnQkFDTCxZQUFZO2dCQUNaLFVBQVU7Z0JBQ1YsWUFBWTtnQkFDWixhQUFhO2dCQUNiLFdBQVc7YUFDZDtTQUNKO1FBQ0Q7WUFDSSxNQUFNLEVBQUUsRUFBRTtZQUNWLFFBQVEsRUFBRSwwQ0FBMEM7WUFDcEQsT0FBTyxFQUFFO2dCQUNMLFlBQVk7Z0JBQ1osVUFBVTtnQkFDVixZQUFZO2dCQUNaLGFBQWE7Z0JBQ2IsV0FBVzthQUNkO1NBQ0o7UUFDRDtZQUNJLE1BQU0sRUFBRSxFQUFFO1lBQ1YsUUFBUSxFQUFFLCtEQUErRDtZQUN6RSxPQUFPLEVBQUU7Z0JBQ0wsWUFBWTtnQkFDWixVQUFVO2dCQUNWLFlBQVk7Z0JBQ1osYUFBYTtnQkFDYixXQUFXO2FBQ2Q7U0FDSjtLQUNKO0lBQ0QsT0FBTyxFQUFFO1FBQ0wsR0FBRyxTQUFTLENBQUMscUJBQXFCO1FBQ2xDLFlBQVksRUFBRSxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRTtRQUM5QyxjQUFjLEVBQUU7WUFDWixPQUFPLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLEVBQUUsS0FBSyxFQUFFLDZCQUE2QixFQUFFO1lBQ2pFLElBQUksRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLEVBQUUsRUFBRSxFQUFFLENBQUMsRUFBRSxLQUFLLEVBQUUsb0JBQW9CLEVBQUU7WUFDdEQsUUFBUSxFQUFFLEVBQUUsS0FBSyxFQUFFLENBQUMsRUFBRSxFQUFFLEVBQUUsQ0FBQyxFQUFFLEtBQUssRUFBRSx3QkFBd0IsRUFBRTtZQUM5RCxNQUFNLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxFQUFFLEVBQUUsRUFBRSxDQUFDLEVBQUUsS0FBSyxFQUFFLHNCQUFzQixFQUFFO1lBQzFELFVBQVUsRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLEVBQUUsRUFBRSxFQUFFLENBQUMsRUFBRSxLQUFLLEVBQUUsMkJBQTJCLEVBQUU7U0FDdEU7S0FDSjtJQUNELFVBQVUsRUFBRSw0UUFBNFE7Q0FDM1IsQ0FBQztBQUNGLE9BQU8sQ0FBQyxPQUFPLEdBQUcsSUFBSSxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtY29tbW9ucy9kaXN0L2NvbnN0YW50cy9xdWVzdGlvbm5haXJlL3NvY2lhbC1waG9iaWEuanMiXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2Ugc3RyaWN0XCI7XG5PYmplY3QuZGVmaW5lUHJvcGVydHkoZXhwb3J0cywgXCJfX2VzTW9kdWxlXCIsIHsgdmFsdWU6IHRydWUgfSk7XG5jb25zdCBzY29yaW5nXzEgPSByZXF1aXJlKFwiLi4vc2NvcmluZ1wiKTtcbmNvbnN0IFNQSU4gPSB7XG4gICAgdGl0bGU6IFwiU29jaWFsIFBob2JpYSBJbnZlbnRvcnkgKFNQSU4pXCIsXG4gICAgZGVzY3JpcHRpb246IFwiVGhlIFNvY2lhbCBQaG9iaWEgSW52ZW50b3J5IChTUElOKSBpcyBhIHNlbGYtYWRtaW5pc3RlcmVkIHF1ZXN0aW9ubmFpcmUgZGV2ZWxvcGVkIGJ5IER1a2UgVW5pdmVyc2l0eSdzIFBzeWNoaWF0cnkgYW5kIEJlaGF2aW9yYWwgU2NpZW5jZXMgRGVwYXJ0bWVudC4gSXQgaXMgdXNlZCB0byBzY3JlZW4gZm9yIGFuZCBtZWFzdXJlIHRoZSBzZXZlcml0eSBvZiBzb2NpYWwgYW54aWV0eSBkaXNvcmRlci5cIixcbiAgICBxdWVzdGlvbnM6IFtcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBhbSBhZnJhaWQgb2YgcGVvcGxlIGluIGF1dGhvcml0eS5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGFtIGJvdGhlcmVkIGJ5IGJsdXNoaW5nIGluIGZyb250IG9mIHBlb3BsZS5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJQYXJ0aWVzIGFuZCBzb2NpYWwgZXZlbnRzIHNjYXJlIG1lLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgYXZvaWQgdGFsa2luZyB0byBwZW9wbGUgSSBkb27igJl0IGtub3cuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiQmVpbmcgY3JpdGljaXplZCBzY2FyZXMgbWUgYSBsb3QuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBhdm9pZCBkb2luZyB0aGluZ3Mgb3Igc3BlYWtpbmcgdG8gcGVvcGxlIGZvciBmZWFyIG9mIGVtYmFycmFzc21lbnQuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiU3dlYXRpbmcgaW4gZnJvbnQgb2YgcGVvcGxlIGNhdXNlcyBtZSBkaXN0cmVzcy5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGF2b2lkIGdvaW5nIHRvIHBhcnRpZXMuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBhdm9pZCBhY3Rpdml0aWVzIGluIHdoaWNoIEkgYW0gdGhlIGNlbnRlciBvZiBhdHRlbnRpb24uXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiVGFsa2luZyB0byBzdHJhbmdlcnMgc2NhcmVzIG1lLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkkgYXZvaWQgaGF2aW5nIHRvIGdpdmUgc3BlZWNoZXMuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSB3b3VsZCBkbyBhbnl0aGluZyB0byBhdm9pZCBiZWluZyBjcml0aWNpemVkLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkhlYXJ0IHBhbHBpdGF0aW9ucyBib3RoZXIgbWUgd2hlbiBJIGFtIGFyb3VuZCBwZW9wbGUuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiSSBhbSBhZnJhaWQgb2YgZG9pbmcgdGhpbmdzIHdoZW4gcGVvcGxlIG1pZ2h0IGJlIHdhdGNoaW5nLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgICAgIHtcbiAgICAgICAgICAgIHByZWZpeDogXCJcIixcbiAgICAgICAgICAgIHF1ZXN0aW9uOiBcIkJlaW5nIGVtYmFycmFzc2VkIG9yIGxvb2tpbmcgc3R1cGlkIGFyZSBhbW9uZyBteSB3b3JzdCBmZWFycy5cIixcbiAgICAgICAgICAgIG9wdGlvbnM6IFtcbiAgICAgICAgICAgICAgICBcIk5vdCBhdCBhbGxcIixcbiAgICAgICAgICAgICAgICBcIkEgbGl0dGxlXCIsXG4gICAgICAgICAgICAgICAgXCJNb2RlcmF0ZWx5XCIsXG4gICAgICAgICAgICAgICAgXCJRdWl0ZSBhIGJpdFwiLFxuICAgICAgICAgICAgICAgIFwiRXh0cmVtZWx5XCIsXG4gICAgICAgICAgICBdLFxuICAgICAgICB9LFxuICAgICAgICB7XG4gICAgICAgICAgICBwcmVmaXg6IFwiXCIsXG4gICAgICAgICAgICBxdWVzdGlvbjogXCJJIGF2b2lkIHNwZWFraW5nIHRvIGFueW9uZSBpbiBhdXRob3JpdHkuXCIsXG4gICAgICAgICAgICBvcHRpb25zOiBbXG4gICAgICAgICAgICAgICAgXCJOb3QgYXQgYWxsXCIsXG4gICAgICAgICAgICAgICAgXCJBIGxpdHRsZVwiLFxuICAgICAgICAgICAgICAgIFwiTW9kZXJhdGVseVwiLFxuICAgICAgICAgICAgICAgIFwiUXVpdGUgYSBiaXRcIixcbiAgICAgICAgICAgICAgICBcIkV4dHJlbWVseVwiLFxuICAgICAgICAgICAgXSxcbiAgICAgICAgfSxcbiAgICAgICAge1xuICAgICAgICAgICAgcHJlZml4OiBcIlwiLFxuICAgICAgICAgICAgcXVlc3Rpb246IFwiVHJlbWJsaW5nIG9yIHNoYWtpbmcgaW4gZnJvbnQgb2Ygb3RoZXJzIGlzIGRpc3RyZXNzaW5nIHRvIG1lLlwiLFxuICAgICAgICAgICAgb3B0aW9uczogW1xuICAgICAgICAgICAgICAgIFwiTm90IGF0IGFsbFwiLFxuICAgICAgICAgICAgICAgIFwiQSBsaXR0bGVcIixcbiAgICAgICAgICAgICAgICBcIk1vZGVyYXRlbHlcIixcbiAgICAgICAgICAgICAgICBcIlF1aXRlIGEgYml0XCIsXG4gICAgICAgICAgICAgICAgXCJFeHRyZW1lbHlcIixcbiAgICAgICAgICAgIF0sXG4gICAgICAgIH0sXG4gICAgXSxcbiAgICBzY29yaW5nOiB7XG4gICAgICAgIC4uLnNjb3JpbmdfMS5RVUVTVElPTk5BSVJFX1NDT1JJTkcsXG4gICAgICAgIHNjb3JlTWFwcGluZzogeyAwOiAwLCAxOiAxLCAyOiAyLCAzOiAzLCA0OiA0IH0sXG4gICAgICAgIHNldmVyaXR5TGV2ZWxzOiB7XG4gICAgICAgICAgICBtaW5pbWFsOiB7IHJhbmdlOiBbMCwgMjBdLCBsYWJlbDogXCJNaW5pbWFsIG9yIE5vIFNvY2lhbCBQaG9iaWFcIiB9LFxuICAgICAgICAgICAgbWlsZDogeyByYW5nZTogWzIxLCAzMF0sIGxhYmVsOiBcIk1pbGQgU29jaWFsIFBob2JpYVwiIH0sXG4gICAgICAgICAgICBtb2RlcmF0ZTogeyByYW5nZTogWzMxLCA0MF0sIGxhYmVsOiBcIk1vZGVyYXRlIFNvY2lhbCBQaG9iaWFcIiB9LFxuICAgICAgICAgICAgc2V2ZXJlOiB7IHJhbmdlOiBbNDEsIDUwXSwgbGFiZWw6IFwiU2V2ZXJlIFNvY2lhbCBQaG9iaWFcIiB9LFxuICAgICAgICAgICAgdmVyeVNldmVyZTogeyByYW5nZTogWzUxLCA2OF0sIGxhYmVsOiBcIlZlcnkgU2V2ZXJlIFNvY2lhbCBQaG9iaWFcIiB9LFxuICAgICAgICB9LFxuICAgIH0sXG4gICAgZGlzY2xhaW1lcjogXCJUaGlzIHF1ZXN0aW9ubmFpcmUgaXMgYSBzY3JlZW5pbmcgdG9vbCB0byBhc3Nlc3MgdGhlIHNldmVyaXR5IG9mIHNvY2lhbCBhbnhpZXR5IGRpc29yZGVyLiBJdCBkb2VzIG5vdCBzZXJ2ZSBhcyBhIGRpYWdub3N0aWMgdG9vbCBhbmQgc2hvdWxkIGJlIGZvbGxvd2VkIGJ5IGEgY2xpbmljYWwgZXZhbHVhdGlvbi4gSWYgeW91IGhhdmUgY29uY2VybnMgYWJvdXQgeW91ciBtZW50YWwgaGVhbHRoLCBwbGVhc2UgY29uc3VsdCBhIGhlYWx0aGNhcmUgcHJvZmVzc2lvbmFsLlwiLFxufTtcbmV4cG9ydHMuZGVmYXVsdCA9IFNQSU47XG4vLyMgc291cmNlTWFwcGluZ1VSTD1zb2NpYWwtcGhvYmlhLmpzLm1hcCJdLCJ2ZXJzaW9uIjozfQ==

@@ -16,30 +16,15 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FileText, Shield } from "lucide-react";
 
-// Type definition for the license information form fields
-export interface LicenseInfoFormFields {
-  professionalLicenseType: string;
-  professionalLicenseType_specify?: string;
-  isPRCLicensed: string;
-  prcLicenseNumber?: string;
-  expirationDateOfLicense?: string;
-  isLicenseActive?: string;
-  practiceStartDate: string;
-  yearsOfExperience: number;
-  educationBackground?: string;
-  practiceLocation?: string;
-}
+// Types
+import { 
+  TherapistApplicationFormData, 
+  TherapistApplicationWatchedValues 
+} from "@/types/therapist-application";
 
 interface LicenseInfoSectionProps {
-  control: Control<any>;
-  watchedValues: {
-    professionalLicenseType?: string;
-    isPRCLicensed?: string;
-    yearsOfExperience?: string;
-    practiceStartDate?: string;
-    educationalBackground?: string;
-    practiceLocation?: string;
-  };
+  control: Control<TherapistApplicationFormData>;
+  watchedValues: TherapistApplicationWatchedValues;
 }
 
 export const LicenseInfoSection: React.FC<LicenseInfoSectionProps> = ({

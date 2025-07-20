@@ -1,87 +1,147 @@
-import { AxiosError } from 'axios';
+import { AxiosError } from "axios";
+
 
 export interface ApiError {
   message: string;
   status: number;
   code?: string;
-  details?: any;
+  details?: unknown;
   timestamp: Date;
+  zodIssues?: Array<{ path: (string | number)[]; message: string; code: string; }>;
 }
 
 export class MentaraApiError extends Error {
   public readonly status: number;
   public readonly code?: string;
-  public readonly details?: any;
+  public readonly details?: unknown;
   public readonly timestamp: Date;
+  public readonly zodIssues?: Array<{ path: (string | number)[]; message: string; code: string; }>;
 
   constructor(apiError: ApiError) {
     super(apiError.message);
-    this.name = 'MentaraApiError';
+    this.name = "MentaraApiError";
     this.status = apiError.status;
     this.code = apiError.code;
     this.details = apiError.details;
     this.timestamp = apiError.timestamp;
-    
+    this.zodIssues = apiError.zodIssues;
+
     // Maintain proper stack trace (only available on V8)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, MentaraApiError);
     }
   }
+
+  /**
+   * Extract field-specific error messages from Zod validation issues
+   */
+  getFieldErrors(): Record<string, string> {
+    if (!this.zodIssues) return {};
+    
+    return this.zodIssues.reduce((acc, issue) => {
+      const field = issue.path.length > 0 ? issue.path.join('.') : 'root';
+      acc[field] = issue.message;
+      return acc;
+    }, {} as Record<string, string>);
+  }
+
+  /**
+   * Check if this is a validation error with field-specific issues
+   */
+  isValidationError(): boolean {
+    return this.status === 400 && Boolean(this.zodIssues?.length);
+  }
 }
 
 export const handleApiError = (error: AxiosError): ApiError => {
   const apiError: ApiError = {
-    message: 'An unexpected error occurred',
+    message: "An unexpected error occurred",
     status: error.response?.status || 500,
     code: error.code,
     details: error.response?.data,
     timestamp: new Date(),
   };
 
+  // Handle Zod validation errors from backend
+  if (error.response?.data && typeof error.response.data === 'object') {
+    const responseData = error.response.data as {
+      errors?: string[];
+      message?: string;
+      error?: string;
+    };
+    
+    // Check for Zod validation error format
+    if (responseData.errors && Array.isArray(responseData.errors) && error.response.status === 400) {
+      apiError.zodIssues = responseData.errors.map((err: string) => {
+        // Parse error format: "field: message"
+        const parts = err.split(': ');
+        const field = parts[0] || 'root';
+        const message = parts.slice(1).join(': ') || err;
+        
+        return {
+          path: field === 'root' ? [] : field.split('.'),
+          message,
+          code: 'custom' // Default code for parsed errors
+        };
+      });
+      
+      apiError.message = responseData.message || "Validation failed";
+      return apiError; // Return early for Zod validation errors
+    }
+  }
+
   // Handle specific error cases
   switch (error.response?.status) {
     case 401:
-      apiError.message = 'Authentication required. Please sign in.';
+      apiError.message = "Authentication required. Please sign in.";
       break;
     case 403:
-      apiError.message = 'Permission denied. You don\'t have access to this resource.';
+      apiError.message =
+        "Permission denied. You don't have access to this resource.";
       break;
     case 404:
-      apiError.message = 'Resource not found.';
+      apiError.message = "Resource not found.";
       break;
     case 408:
-      apiError.message = 'Request timeout. Please try again.';
+      apiError.message = "Request timeout. Please try again.";
       break;
     case 409:
-      apiError.message = 'Conflict occurred. The resource may have been modified.';
+      apiError.message =
+        "Conflict occurred. The resource may have been modified.";
       break;
     case 422:
-      apiError.message = 'Validation failed. Please check your input.';
+      apiError.message = "Validation failed. Please check your input.";
       break;
     case 429:
-      apiError.message = 'Too many requests. Please wait a moment and try again.';
+      apiError.message =
+        "Too many requests. Please wait a moment and try again.";
       break;
     case 500:
-      apiError.message = 'Server error occurred. Please try again later.';
+      apiError.message = "Server error occurred. Please try again later.";
       break;
     case 502:
     case 503:
     case 504:
-      apiError.message = 'Service temporarily unavailable. Please try again later.';
+      apiError.message =
+        "Service temporarily unavailable. Please try again later.";
       break;
     default:
       // Try to extract message from response data
       if (error.response?.data) {
-        const responseData = error.response.data as any;
-        apiError.message = responseData.message || responseData.error || apiError.message;
+        const responseData = error.response.data as {
+          message?: string;
+          error?: string;
+        };
+        apiError.message =
+          responseData.message || responseData.error || apiError.message;
       } else if (error.message) {
         apiError.message = error.message;
       }
   }
 
   // Log error for monitoring (in development only to avoid log pollution)
-  if (process.env.NODE_ENV === 'development') {
-    console.error('API Error:', {
+  if (process.env.NODE_ENV === "development") {
+    console.log("API Error:", {
       url: error.config?.url,
       method: error.config?.method?.toUpperCase(),
       status: apiError.status,
@@ -95,7 +155,10 @@ export const handleApiError = (error: AxiosError): ApiError => {
 };
 
 // Helper function to determine if an error should trigger a retry
-export const shouldRetryRequest = (error: AxiosError, attemptNumber: number): boolean => {
+export const shouldRetryRequest = (
+  error: AxiosError,
+  attemptNumber: number
+): boolean => {
   // Don't retry if we've exceeded max attempts
   if (attemptNumber >= 3) return false;
 
@@ -111,13 +174,14 @@ export const shouldRetryRequest = (error: AxiosError, attemptNumber: number): bo
 };
 
 // Helper function to check if error is retryable
-export const isRetryableError = (error: any): boolean => {
+export const isRetryableError = (error: unknown): boolean => {
+  const axiosError = error as { response?: { status?: number } };
   // Network errors (no response)
-  if (!error.response) return true;
-  
+  if (!axiosError.response) return true;
+
   // Server errors (5xx)
-  if (error.response.status >= 500) return true;
-  
+  if (axiosError.response.status && axiosError.response.status >= 500) return true;
+
   // Specific retryable client errors
-  return [408, 429].includes(error.response.status);
+  return axiosError.response.status ? [408, 429].includes(axiosError.response.status) : false;
 };

@@ -41,12 +41,13 @@ import {
 import { TherapistCardData } from "@/types/therapist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useSubscriptionStatus } from "@/hooks/billing";
 
 interface BookingModalProps {
   therapist: TherapistCardData | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (meeting: any) => void;
+  onSuccess?: (meeting: CreateMeetingRequest) => void;
 }
 
 export default function BookingModal({
@@ -67,6 +68,16 @@ export default function BookingModal({
 
   const api = useApi();
   const queryClient = useQueryClient();
+  
+  // Payment verification
+  const {
+    isActive,
+    isTrial,
+    isPastDue,
+    hasPaymentIssue,
+    needsPaymentMethod,
+    isLoading: subscriptionLoading
+  } = useSubscriptionStatus();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -81,11 +92,11 @@ export default function BookingModal({
   }, [isOpen, therapist]);
 
   // Get available durations
-  const { data: durations = [] } = useQuery({
-    queryKey: ["meeting-durations"],
-    queryFn: () => api.booking.getDurations(),
-    enabled: isOpen,
-  });
+  // const { data: durations = [] } = useQuery({
+  //   queryKey: ["meeting-durations"],
+  //   queryFn: () => api.booking.durations.getAll(),
+  //   enabled: isOpen,
+  // });
 
   // Get available slots for selected date
   const {
@@ -96,7 +107,7 @@ export default function BookingModal({
     queryKey: ["available-slots", therapist?.id, selectedDate?.toISOString()],
     queryFn: () => {
       if (!therapist || !selectedDate) return [];
-      return api.booking.getAvailableSlots(
+      return api.booking.availability.getSlots(
         therapist.id,
         selectedDate.toISOString().split("T")[0]
       );
@@ -107,7 +118,7 @@ export default function BookingModal({
   // Create meeting mutation
   const createMeetingMutation = useMutation({
     mutationFn: (meetingData: CreateMeetingRequest) => {
-      return api.booking.createMeeting(meetingData);
+      return api.booking.meetings.create(meetingData);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
@@ -119,6 +130,22 @@ export default function BookingModal({
 
   const handleBooking = () => {
     if (!therapist || !selectedSlot || !selectedDuration || !selectedDate) {
+      return;
+    }
+
+    // Payment verification
+    if (!isActive && !isTrial) {
+      toast.error("Active subscription required to book sessions. Please upgrade your plan.");
+      return;
+    }
+
+    if (hasPaymentIssue) {
+      toast.error("Please resolve payment issues before booking sessions. Check your billing settings.");
+      return;
+    }
+
+    if (needsPaymentMethod) {
+      toast.error("Please add a payment method to book sessions.");
       return;
     }
 
@@ -137,7 +164,13 @@ export default function BookingModal({
   };
 
   const isFormValid =
-    selectedDate && selectedSlot && selectedDuration && title.trim();
+    selectedDate && 
+    selectedSlot && 
+    selectedDuration && 
+    title.trim() &&
+    (isActive || isTrial) && 
+    !hasPaymentIssue && 
+    !needsPaymentMethod;
 
   if (!therapist) return null;
 
@@ -150,6 +183,38 @@ export default function BookingModal({
             Book Session with {therapist.name}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Payment Status Alerts */}
+        {!subscriptionLoading && (
+          <>
+            {isPastDue && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Your payment is past due. Please update your payment method to continue booking sessions.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {needsPaymentMethod && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Please add a payment method to book therapy sessions.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {!isActive && !isTrial && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  An active subscription is required to book sessions. Please upgrade your plan.
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Date Selection */}

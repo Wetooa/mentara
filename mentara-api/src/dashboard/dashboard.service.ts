@@ -52,7 +52,9 @@ export class DashboardService {
 
       // Validate that client has user relationship
       if (!client.user) {
-        throw new InternalServerErrorException(`Client found but user relationship is missing for userId: ${userId}`);
+        throw new InternalServerErrorException(
+          `Client found but user relationship is missing for userId: ${userId}`,
+        );
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -97,7 +99,7 @@ export class DashboardService {
         recentActivity: recentPosts,
         hasPreAssessment: !!client.preAssessment,
       };
-      
+
       return responseData;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -154,7 +156,7 @@ export class DashboardService {
       });
 
       const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId, status: 'active' },
+        where: { therapistId: userId, status: 'ACTIVE' },
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({
@@ -202,7 +204,7 @@ export class DashboardService {
       const totalClients = await this.prisma.client.count();
       const totalTherapists = await this.prisma.therapist.count();
       const pendingTherapists = await this.prisma.therapist.count({
-        where: { status: 'pending' },
+        where: { status: 'PENDING' },
       });
       const totalMeetings = await this.prisma.meeting.count();
       const completedMeetings = await this.prisma.meeting.count({
@@ -222,7 +224,7 @@ export class DashboardService {
       });
 
       const recentTherapistApplications = await this.prisma.therapist.findMany({
-        where: { status: 'pending' },
+        where: { status: 'PENDING' },
         orderBy: { createdAt: 'desc' },
         take: 10,
         include: { user: true },

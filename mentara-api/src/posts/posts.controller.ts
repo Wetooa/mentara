@@ -9,17 +9,32 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ClerkAuthGuard } from 'src/guards/clerk-auth.guard';
-import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  CommunityAccessGuard,
+  RequireRoomAccess,
+  RequirePostingRole,
+} from 'src/auth/guards/community-access.guard';
+import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import {
+  SupabaseStorageService,
+  FileUploadResult,
+} from 'src/common/services/supabase-storage.service';
 import { PostsService } from './posts.service';
 import { Post as PostEntity, Prisma } from '@prisma/client';
-import { PostCreateInputDto, PostUpdateInputDto } from 'schema/post';
+import { PostCreateInputDto, PostUpdateInputDto } from 'mentara-commons';
 
 @Controller('posts')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(JwtAuthGuard, CommunityAccessGuard)
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   @Get()
   async findAll(@CurrentUserId() id: string): Promise<PostEntity[]> {
@@ -36,6 +51,7 @@ export class PostsController {
   }
 
   @Get(':id')
+  @RequireRoomAccess()
   async findOne(
     @Param('id') postId: string,
     @CurrentUserId() userId: string,
@@ -56,9 +72,12 @@ export class PostsController {
   }
 
   @Post()
+  @RequirePostingRole()
+  @UseInterceptors(FilesInterceptor('files', 10)) // Support up to 10 files
   async create(
     @CurrentUserId() id: string,
     @Body() postData: PostCreateInputDto,
+    @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ): Promise<PostEntity> {
     try {
       const user = await this.postsService.findUserById(id);
@@ -67,11 +86,35 @@ export class PostsController {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
 
+      // Validate and upload files if provided
+      const fileResults: FileUploadResult[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const validation = this.supabaseStorageService.validateFile(file);
+          if (!validation.isValid) {
+            throw new HttpException(
+              `File validation failed: ${validation.error}`,
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+        }
+
+        // Upload files to Supabase
+        const uploadResults = await this.supabaseStorageService.uploadFiles(
+          files,
+          SupabaseStorageService.getSupportedBuckets().POST_ATTACHMENTS,
+        );
+        fileResults.push(...uploadResults);
+      }
+
       const createData: Prisma.PostCreateInput = {
         title: postData.title,
         content: postData.content,
         user: { connect: { id: user.id } },
         room: { connect: { id: postData.roomId } },
+        attachmentUrls: fileResults.map((f) => f.url),
+        attachmentNames: fileResults.map((f) => f.filename),
+        attachmentSizes: files.map((f) => f.size),
       };
       return await this.postsService.create(createData);
     } catch (error) {
@@ -83,6 +126,7 @@ export class PostsController {
   }
 
   @Put(':id')
+  @RequireRoomAccess()
   async update(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -99,6 +143,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @RequireRoomAccess()
   async remove(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -126,6 +171,7 @@ export class PostsController {
   }
 
   @Get('room/:roomId')
+  @RequireRoomAccess()
   async findByRoomId(
     @Param('roomId') roomId: string,
     @CurrentUserId() userId: string,
@@ -142,6 +188,7 @@ export class PostsController {
 
   // Heart functionality
   @Post(':id/heart')
+  @RequireRoomAccess()
   async heartPost(
     @CurrentUserId() userId: string,
     @Param('id') postId: string,
@@ -170,6 +217,29 @@ export class PostsController {
     } catch (error) {
       throw new HttpException(
         `Failed to check post heart status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post(':id/report')
+  @RequireRoomAccess()
+  async reportPost(
+    @CurrentUserId() userId: string,
+    @Param('id') postId: string,
+    @Body() reportData: { reason: string; content?: string },
+  ): Promise<{ success: boolean; reportId: string }> {
+    try {
+      const reportId = await this.postsService.reportPost(
+        postId,
+        userId,
+        reportData.reason,
+        reportData.content,
+      );
+      return { success: true, reportId };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to report post: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

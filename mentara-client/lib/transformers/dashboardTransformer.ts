@@ -8,8 +8,8 @@ import type {
  */
 export function transformDashboardData(
   backendData: ApiDashboardResponse,
-  notifications: any[] = [],
-  recentCommunications: any[] = []
+  notifications: unknown[] = [],
+  recentCommunications: unknown[] = []
 ): UserDashboardData {
   const {
     client,

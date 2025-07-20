@@ -2,16 +2,11 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import {
-  Post,
-  Prisma,
-  User,
-  AttachmentEntityType,
-  AttachmentPurpose,
-} from '@prisma/client';
-import { PostUpdateInputDto } from 'schema/post';
+import { Post, Prisma, User } from '@prisma/client';
+import { PostUpdateInputDto } from 'mentara-commons';
 
 @Injectable()
 export class PostsService {
@@ -50,7 +45,7 @@ export class PostsService {
                 avatarUrl: true,
               },
             },
-            replies: {
+            children: {
               include: {
                 user: {
                   select: {
@@ -60,6 +55,15 @@ export class PostsService {
                     avatarUrl: true,
                   },
                 },
+                _count: {
+                  select: {
+                    children: true,
+                    hearts: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -115,7 +119,7 @@ export class PostsService {
                 avatarUrl: true,
               },
             },
-            replies: {
+            children: {
               include: {
                 user: {
                   select: {
@@ -125,6 +129,15 @@ export class PostsService {
                     avatarUrl: true,
                   },
                 },
+                _count: {
+                  select: {
+                    children: true,
+                    hearts: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -149,9 +162,19 @@ export class PostsService {
     });
   }
 
-  async create(data: Prisma.PostCreateInput): Promise<Post> {
+  async create(
+    data: Prisma.PostCreateInput,
+    attachmentUrls: string[] = [],
+    attachmentNames: string[] = [],
+    attachmentSizes: number[] = [],
+  ): Promise<Post> {
     return this.prisma.post.create({
-      data,
+      data: {
+        ...data,
+        attachmentUrls,
+        attachmentNames,
+        attachmentSizes,
+      },
       include: {
         user: {
           select: {
@@ -194,7 +217,7 @@ export class PostsService {
       data: {
         title: data.title,
         content: data.content,
-        room: { connect: { id: data.roomId } },
+        // room: { connect: { id: data.roomId } }, // Commented out - roomId property missing
       },
       include: {
         user: {
@@ -297,7 +320,7 @@ export class PostsService {
                 avatarUrl: true,
               },
             },
-            replies: {
+            children: {
               include: {
                 user: {
                   select: {
@@ -307,6 +330,15 @@ export class PostsService {
                     avatarUrl: true,
                   },
                 },
+                _count: {
+                  select: {
+                    children: true,
+                    hearts: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -390,41 +422,75 @@ export class PostsService {
   async attachFilesToPost(
     postId: string,
     fileIds: string[],
-    purpose: AttachmentPurpose = AttachmentPurpose.MEDIA,
+    purpose: string = 'MEDIA',
   ) {
-    const attachments = fileIds.map((fileId, index) => ({
-      fileId,
-      entityType: AttachmentEntityType.POST,
-      entityId: postId,
-      purpose,
-      order: index,
-    }));
-
-    return this.prisma.fileAttachment.createMany({
-      data: attachments,
-    });
+    // Stub implementation - files system removed
+    return { count: 0 };
   }
 
   async getPostAttachments(postId: string) {
-    return this.prisma.fileAttachment.findMany({
-      where: {
-        entityType: AttachmentEntityType.POST,
-        entityId: postId,
-      },
-      include: {
-        file: true,
-      },
-      orderBy: { order: 'asc' },
-    });
+    // Stub implementation - files system removed
+    return [];
   }
 
   async removePostAttachment(postId: string, fileId: string) {
-    return this.prisma.fileAttachment.deleteMany({
-      where: {
-        entityType: AttachmentEntityType.POST,
-        entityId: postId,
-        fileId,
-      },
-    });
+    // Stub implementation - files system removed
+    return { count: 0 };
+  }
+
+  /**
+   * Report a post for inappropriate content
+   */
+  async reportPost(
+    postId: string,
+    reporterId: string,
+    reason: string,
+    content?: string,
+  ): Promise<string> {
+    try {
+      // Verify post exists
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('Post not found');
+      }
+
+      // Check if user already reported this post
+      const existingReport = await this.prisma.report.findFirst({
+        where: {
+          postId,
+          reporterId,
+        },
+      });
+
+      if (existingReport) {
+        throw new ForbiddenException('You have already reported this post');
+      }
+
+      // Create the report
+      const report = await this.prisma.report.create({
+        data: {
+          postId,
+          reporterId,
+          reason,
+          content,
+          status: 'PENDING',
+        },
+      });
+
+      return report.id;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 }

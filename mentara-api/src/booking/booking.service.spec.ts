@@ -7,11 +7,16 @@ import {
 import { BookingService } from './booking.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
-import { createMockPrismaService, TEST_USER_IDS } from '../test-utils';
+import {
+  createMockPrismaService,
+  TEST_USER_IDS,
+  TestDataFactory,
+} from '../test-utils';
 
 describe('BookingService', () => {
   let service: BookingService;
   let prismaService: jest.Mocked<PrismaService>;
+  let testFactory: TestDataFactory;
 
   beforeEach(async () => {
     const mockPrisma = createMockPrismaService();
@@ -37,7 +42,7 @@ describe('BookingService', () => {
 
   describe('createMeeting', () => {
     const mockCreateMeetingDto = {
-      startTime: new Date('2024-01-15T14:00:00Z'),
+      startTime: '2024-01-15T14:00:00Z',
       duration: 60,
       therapistId: TEST_USER_IDS.THERAPIST,
       title: 'Therapy Session',
@@ -87,15 +92,19 @@ describe('BookingService', () => {
         },
       };
 
-      prismaService.therapist.findFirst.mockResolvedValue(mockTherapist);
-      prismaService.clientTherapist.findFirst.mockResolvedValue(
+      (prismaService.therapist.findFirst as jest.Mock).mockResolvedValue(
+        mockTherapist,
+      );
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
         mockRelationship,
       );
-      prismaService.meeting.findMany.mockResolvedValue([]); // No conflicts
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        mockAvailability,
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([]); // No conflicts
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(mockAvailability);
+      (prismaService.meeting.create as jest.Mock).mockResolvedValue(
+        expectedMeeting,
       );
-      prismaService.meeting.create.mockResolvedValue(expectedMeeting);
 
       const result = await service.createMeeting(
         mockCreateMeetingDto,
@@ -137,7 +146,7 @@ describe('BookingService', () => {
     });
 
     it('should throw NotFoundException when therapist not found', async () => {
-      prismaService.therapist.findFirst.mockResolvedValue(null);
+      (prismaService.therapist.findFirst as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.createMeeting(mockCreateMeetingDto, TEST_USER_IDS.CLIENT),
@@ -147,8 +156,12 @@ describe('BookingService', () => {
     });
 
     it('should throw ForbiddenException when no client-therapist relationship exists', async () => {
-      prismaService.therapist.findFirst.mockResolvedValue(mockTherapist);
-      prismaService.clientTherapist.findFirst.mockResolvedValue(null);
+      (prismaService.therapist.findFirst as jest.Mock).mockResolvedValue(
+        mockTherapist,
+      );
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       await expect(
         service.createMeeting(mockCreateMeetingDto, TEST_USER_IDS.CLIENT),
@@ -165,11 +178,15 @@ describe('BookingService', () => {
         status: 'SCHEDULED' as MeetingStatus,
       };
 
-      prismaService.therapist.findFirst.mockResolvedValue(mockTherapist);
-      prismaService.clientTherapist.findFirst.mockResolvedValue(
+      (prismaService.therapist.findFirst as jest.Mock).mockResolvedValue(
+        mockTherapist,
+      );
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
         mockRelationship,
       );
-      prismaService.meeting.findMany.mockResolvedValue([conflictingMeeting]);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([
+        conflictingMeeting,
+      ]);
 
       await expect(
         service.createMeeting(mockCreateMeetingDto, TEST_USER_IDS.CLIENT),
@@ -181,12 +198,16 @@ describe('BookingService', () => {
     });
 
     it('should throw BadRequestException when therapist is not available', async () => {
-      prismaService.therapist.findFirst.mockResolvedValue(mockTherapist);
-      prismaService.clientTherapist.findFirst.mockResolvedValue(
+      (prismaService.therapist.findFirst as jest.Mock).mockResolvedValue(
+        mockTherapist,
+      );
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
         mockRelationship,
       );
-      prismaService.meeting.findMany.mockResolvedValue([]);
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(null);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([]);
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(null);
 
       await expect(
         service.createMeeting(mockCreateMeetingDto, TEST_USER_IDS.CLIENT),
@@ -201,14 +222,16 @@ describe('BookingService', () => {
         startTime: new Date('invalid-date'),
       };
 
-      prismaService.therapist.findFirst.mockResolvedValue(mockTherapist);
-      prismaService.clientTherapist.findFirst.mockResolvedValue(
+      (prismaService.therapist.findFirst as jest.Mock).mockResolvedValue(
+        mockTherapist,
+      );
+      (prismaService.clientTherapist.findFirst as jest.Mock).mockResolvedValue(
         mockRelationship,
       );
-      prismaService.meeting.findMany.mockResolvedValue([]);
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        mockAvailability,
-      );
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([]);
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(mockAvailability);
 
       await expect(
         service.createMeeting(invalidTimeDto, TEST_USER_IDS.CLIENT),
@@ -241,7 +264,9 @@ describe('BookingService', () => {
     ];
 
     it('should return meetings for therapist', async () => {
-      prismaService.meeting.findMany.mockResolvedValue(mockMeetings);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue(
+        mockMeetings,
+      );
 
       const result = await service.getMeetings(
         TEST_USER_IDS.THERAPIST,
@@ -280,7 +305,9 @@ describe('BookingService', () => {
     });
 
     it('should return meetings for client', async () => {
-      prismaService.meeting.findMany.mockResolvedValue(mockMeetings);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue(
+        mockMeetings,
+      );
 
       const result = await service.getMeetings(TEST_USER_IDS.CLIENT, 'client');
 
@@ -293,7 +320,7 @@ describe('BookingService', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      prismaService.meeting.findMany.mockRejectedValue(
+      (prismaService.meeting.findMany as jest.Mock).mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -327,7 +354,9 @@ describe('BookingService', () => {
     };
 
     it('should return meeting for valid therapist access', async () => {
-      prismaService.meeting.findUnique.mockResolvedValue(mockMeeting);
+      (prismaService.meeting.findUnique as jest.Mock).mockResolvedValue(
+        mockMeeting,
+      );
 
       const result = await service.getMeeting(
         'meeting-id',
@@ -343,7 +372,9 @@ describe('BookingService', () => {
     });
 
     it('should return meeting for valid client access', async () => {
-      prismaService.meeting.findUnique.mockResolvedValue(mockMeeting);
+      (prismaService.meeting.findUnique as jest.Mock).mockResolvedValue(
+        mockMeeting,
+      );
 
       const result = await service.getMeeting(
         'meeting-id',
@@ -355,7 +386,7 @@ describe('BookingService', () => {
     });
 
     it('should throw NotFoundException when meeting does not exist', async () => {
-      prismaService.meeting.findUnique.mockResolvedValue(null);
+      (prismaService.meeting.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.getMeeting('non-existent-id', TEST_USER_IDS.CLIENT, 'client'),
@@ -367,7 +398,9 @@ describe('BookingService', () => {
         ...mockMeeting,
         therapistId: 'different-therapist-id',
       };
-      prismaService.meeting.findUnique.mockResolvedValue(wrongMeeting);
+      (prismaService.meeting.findUnique as jest.Mock).mockResolvedValue(
+        wrongMeeting,
+      );
 
       await expect(
         service.getMeeting('meeting-id', TEST_USER_IDS.THERAPIST, 'therapist'),
@@ -379,7 +412,9 @@ describe('BookingService', () => {
         ...mockMeeting,
         clientId: 'different-client-id',
       };
-      prismaService.meeting.findUnique.mockResolvedValue(wrongMeeting);
+      (prismaService.meeting.findUnique as jest.Mock).mockResolvedValue(
+        wrongMeeting,
+      );
 
       await expect(
         service.getMeeting('meeting-id', TEST_USER_IDS.CLIENT, 'client'),
@@ -389,6 +424,9 @@ describe('BookingService', () => {
 
   describe('updateMeeting', () => {
     const mockUpdateDto = {
+      startTime: '2024-01-15T14:00:00Z',
+      duration: 60,
+      therapistId: TEST_USER_IDS.THERAPIST,
       title: 'Updated Session',
       description: 'Updated description',
       status: 'CONFIRMED' as MeetingStatus,
@@ -408,7 +446,9 @@ describe('BookingService', () => {
       };
 
       jest.spyOn(service, 'getMeeting').mockResolvedValue(mockMeeting as any);
-      prismaService.meeting.update.mockResolvedValue(updatedMeeting as any);
+      (prismaService.meeting.update as jest.Mock).mockResolvedValue(
+        updatedMeeting as any,
+      );
 
       const result = await service.updateMeeting(
         'meeting-id',
@@ -491,7 +531,9 @@ describe('BookingService', () => {
       };
 
       jest.spyOn(service, 'getMeeting').mockResolvedValue(mockMeeting as any);
-      prismaService.meeting.update.mockResolvedValue(cancelledMeeting as any);
+      (prismaService.meeting.update as jest.Mock).mockResolvedValue(
+        cancelledMeeting as any,
+      );
 
       const result = await service.cancelMeeting(
         'meeting-id',
@@ -555,10 +597,12 @@ describe('BookingService', () => {
         ...mockCreateAvailabilityDto,
       };
 
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(null); // No overlap
-      prismaService.therapistAvailability.create.mockResolvedValue(
-        expectedAvailability,
-      );
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(null); // No overlap
+      (
+        prismaService.therapistAvailability.create as jest.Mock
+      ).mockResolvedValue(expectedAvailability);
 
       const result = await service.createAvailability(
         mockCreateAvailabilityDto,
@@ -608,9 +652,9 @@ describe('BookingService', () => {
         endTime: '16:00',
       };
 
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        overlappingAvailability,
-      );
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(overlappingAvailability);
 
       await expect(
         service.createAvailability(
@@ -642,9 +686,9 @@ describe('BookingService', () => {
     ];
 
     it('should return therapist availability', async () => {
-      prismaService.therapistAvailability.findMany.mockResolvedValue(
-        mockAvailabilities,
-      );
+      (
+        prismaService.therapistAvailability.findMany as jest.Mock
+      ).mockResolvedValue(mockAvailabilities);
 
       const result = await service.getAvailability(TEST_USER_IDS.THERAPIST);
 
@@ -658,9 +702,9 @@ describe('BookingService', () => {
     });
 
     it('should handle database errors', async () => {
-      prismaService.therapistAvailability.findMany.mockRejectedValue(
-        new Error('Database error'),
-      );
+      (
+        prismaService.therapistAvailability.findMany as jest.Mock
+      ).mockRejectedValue(new Error('Database error'));
 
       await expect(
         service.getAvailability(TEST_USER_IDS.THERAPIST),
@@ -670,6 +714,7 @@ describe('BookingService', () => {
 
   describe('updateAvailability', () => {
     const mockUpdateDto = {
+      dayOfWeek: 1,
       startTime: '10:00',
       endTime: '16:00',
       notes: 'Updated hours',
@@ -685,12 +730,12 @@ describe('BookingService', () => {
         ...mockUpdateDto,
       };
 
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        existingAvailability,
-      );
-      prismaService.therapistAvailability.update.mockResolvedValue(
-        updatedAvailability,
-      );
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(existingAvailability);
+      (
+        prismaService.therapistAvailability.update as jest.Mock
+      ).mockResolvedValue(updatedAvailability);
 
       const result = await service.updateAvailability(
         'availability-id',
@@ -706,7 +751,9 @@ describe('BookingService', () => {
     });
 
     it('should throw NotFoundException when availability does not exist', async () => {
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(null);
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(null);
 
       await expect(
         service.updateAvailability(
@@ -727,12 +774,12 @@ describe('BookingService', () => {
         therapistId: TEST_USER_IDS.THERAPIST,
       };
 
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        existingAvailability,
-      );
-      prismaService.therapistAvailability.delete.mockResolvedValue(
-        existingAvailability,
-      );
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(existingAvailability);
+      (
+        prismaService.therapistAvailability.delete as jest.Mock
+      ).mockResolvedValue(existingAvailability);
 
       const result = await service.deleteAvailability(
         'availability-id',
@@ -746,7 +793,9 @@ describe('BookingService', () => {
     });
 
     it('should throw NotFoundException when availability does not exist', async () => {
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(null);
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(null);
 
       await expect(
         service.deleteAvailability('non-existent-id', TEST_USER_IDS.THERAPIST),
@@ -770,10 +819,10 @@ describe('BookingService', () => {
     ];
 
     it('should return available slots when no conflicts', async () => {
-      prismaService.therapistAvailability.findMany.mockResolvedValue(
-        mockAvailability,
-      );
-      prismaService.meeting.findMany.mockResolvedValue([]); // No existing bookings
+      (
+        prismaService.therapistAvailability.findMany as jest.Mock
+      ).mockResolvedValue(mockAvailability);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([]); // No existing bookings
 
       const result = await service.getAvailableSlots(
         TEST_USER_IDS.THERAPIST,
@@ -795,7 +844,9 @@ describe('BookingService', () => {
     });
 
     it('should return empty array when therapist has no availability', async () => {
-      prismaService.therapistAvailability.findMany.mockResolvedValue([]);
+      (
+        prismaService.therapistAvailability.findMany as jest.Mock
+      ).mockResolvedValue([]);
 
       const result = await service.getAvailableSlots(
         TEST_USER_IDS.THERAPIST,
@@ -814,10 +865,12 @@ describe('BookingService', () => {
         status: 'SCHEDULED' as MeetingStatus,
       };
 
-      prismaService.therapistAvailability.findMany.mockResolvedValue(
-        mockAvailability,
-      );
-      prismaService.meeting.findMany.mockResolvedValue([existingBooking]);
+      (
+        prismaService.therapistAvailability.findMany as jest.Mock
+      ).mockResolvedValue(mockAvailability);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([
+        existingBooking,
+      ]);
 
       const result = await service.getAvailableSlots(
         TEST_USER_IDS.THERAPIST,
@@ -850,10 +903,10 @@ describe('BookingService', () => {
         isAvailable: true,
       };
 
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        mockAvailability,
-      );
-      prismaService.meeting.findMany.mockResolvedValue([]); // No conflicts
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(mockAvailability);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([]); // No conflicts
 
       await expect(
         service.validateMeetingTime(
@@ -884,7 +937,9 @@ describe('BookingService', () => {
     });
 
     it('should throw BadRequestException when therapist not available', async () => {
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(null);
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(null);
 
       await expect(
         service.validateMeetingTime(
@@ -912,10 +967,12 @@ describe('BookingService', () => {
         status: 'SCHEDULED' as MeetingStatus,
       };
 
-      prismaService.therapistAvailability.findFirst.mockResolvedValue(
-        mockAvailability,
-      );
-      prismaService.meeting.findMany.mockResolvedValue([conflictingMeeting]);
+      (
+        prismaService.therapistAvailability.findFirst as jest.Mock
+      ).mockResolvedValue(mockAvailability);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([
+        conflictingMeeting,
+      ]);
 
       await expect(
         service.validateMeetingTime(
@@ -930,7 +987,7 @@ describe('BookingService', () => {
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle database connection errors', async () => {
-      prismaService.meeting.findMany.mockRejectedValue(
+      (prismaService.meeting.findMany as jest.Mock).mockRejectedValue(
         new Error('Connection timeout'),
       );
 
@@ -952,7 +1009,14 @@ describe('BookingService', () => {
       await expect(
         service.updateMeeting(
           'meeting-id',
-          { status: 'SCHEDULED' as MeetingStatus },
+          {
+            startTime: '2024-01-15T14:00:00Z',
+            duration: 60,
+            therapistId: TEST_USER_IDS.THERAPIST,
+            title: 'Test Session',
+            description: 'Test description',
+            status: 'SCHEDULED' as MeetingStatus,
+          },
           TEST_USER_IDS.CLIENT,
           'client',
         ),
@@ -971,10 +1035,10 @@ describe('BookingService', () => {
         },
       ];
 
-      prismaService.therapistAvailability.findMany.mockResolvedValue(
-        mockAvailability,
-      );
-      prismaService.meeting.findMany.mockResolvedValue([]);
+      (
+        prismaService.therapistAvailability.findMany as jest.Mock
+      ).mockResolvedValue(mockAvailability);
+      (prismaService.meeting.findMany as jest.Mock).mockResolvedValue([]);
 
       const result = await service.getAvailableSlots(
         TEST_USER_IDS.THERAPIST,

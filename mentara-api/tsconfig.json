@@ -11,6 +11,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
@@ -18,9 +19,18 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "strict": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@mentara/commons": ["../mentara-commons/dist/index"]
+    }
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
-    "scripts/**/*",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
     "node_modules",
     "dist"
   ]

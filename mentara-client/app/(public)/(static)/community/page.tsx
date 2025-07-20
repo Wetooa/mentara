@@ -1,6 +1,6 @@
 "use client";
 
-import Logo from "@/components/logo";
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { motion } from "framer-motion";

@@ -1,0 +1,106 @@
+# Mentara Client Service - Docker Compose Configuration
+# Production-ready Next.js frontend service with backend integration
+
+version: '3.8'
+
+services:
+  # Main Frontend Service
+  mentara-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mentara-client
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL:-http://localhost:3000}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3001}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+      NEXT_PUBLIC_MICROSOFT_CLIENT_ID: ${NEXT_PUBLIC_MICROSOFT_CLIENT_ID}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_AI_SERVICE_URL: ${NEXT_PUBLIC_AI_SERVICE_URL:-http://localhost:5000}
+      NEXT_PUBLIC_TURN_SERVER_URL: ${NEXT_PUBLIC_TURN_SERVER_URL}
+      NEXT_PUBLIC_TURN_SERVER_USERNAME: ${NEXT_PUBLIC_TURN_SERVER_USERNAME}
+      NEXT_PUBLIC_TURN_SERVER_CREDENTIAL: ${NEXT_PUBLIC_TURN_SERVER_CREDENTIAL}
+      NEXT_PUBLIC_APP_ENV: ${NEXT_PUBLIC_APP_ENV:-production}
+      NEXT_PUBLIC_ENABLE_ANALYTICS: ${NEXT_PUBLIC_ENABLE_ANALYTICS:-true}
+      NEXT_PUBLIC_ENABLE_CRASH_REPORTING: ${NEXT_PUBLIC_ENABLE_CRASH_REPORTING:-true}
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    volumes:
+      # Mount uploads directory for file handling
+      - uploads_data:/app/uploads
+      # Mount logs directory for persistent logging
+      - logs_data:/app/logs
+    networks:
+      - mentara-client-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-3000}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  # Persistent storage for uploads
+  uploads_data:
+    driver: local
+
+  # Persistent storage for logs
+  logs_data:
+    driver: local
+
+networks:
+  mentara-client-network:
+    driver: bridge
+    name: mentara-client-network
+
+# =============================================================================
+# USAGE INSTRUCTIONS
+# =============================================================================
+#
+# Development:
+#   docker-compose up --build
+#
+# Production:
+#   docker-compose -f docker-compose.yml up -d --build
+#
+# View logs:
+#   docker-compose logs -f mentara-client
+#
+# Stop services:
+#   docker-compose down
+#
+# Remove all data (DESTRUCTIVE):
+#   docker-compose down -v
+#
+# =============================================================================
+# ENVIRONMENT VARIABLES
+# =============================================================================
+#
+# Required variables (must be set in .env file):
+# - NEXT_PUBLIC_API_URL: Backend API endpoint
+# - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: Stripe publishable key
+# - NEXT_PUBLIC_GOOGLE_CLIENT_ID: Google OAuth client ID
+# - NEXT_PUBLIC_MICROSOFT_CLIENT_ID: Microsoft OAuth client ID
+# - NEXT_PUBLIC_SUPABASE_URL: Supabase project URL
+# - NEXT_PUBLIC_SUPABASE_ANON_KEY: Supabase anonymous key
+#
+# Optional variables:
+# - NODE_ENV: Environment (default: production)
+# - PORT: Frontend server port (default: 3000)
+# - NEXT_PUBLIC_WS_URL: WebSocket server URL
+# - NEXT_PUBLIC_AI_SERVICE_URL: AI service endpoint
+# - NEXT_PUBLIC_TURN_SERVER_*: WebRTC TURN server configuration
+#
+# =============================================================================

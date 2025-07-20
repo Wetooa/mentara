@@ -24,9 +24,7 @@ import {
   Save,
   FileText,
   AlertCircle,
-  CheckCircle,
   Clock,
-  Target,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -415,7 +413,7 @@ export default function TreatmentNotesModal({
                         <Label>Progress Status</Label>
                         <Select
                           value={goal.progress}
-                          onValueChange={(value) => updateTreatmentGoal(goal.id, { progress: value as any })}
+                          onValueChange={(value) => updateTreatmentGoal(goal.id, { progress: value as TreatmentGoal['progress'] })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -448,7 +446,7 @@ export default function TreatmentNotesModal({
               ))}
               {formData.treatmentGoals.length === 0 && (
                 <div className="text-center py-6 text-muted-foreground">
-                  No treatment goals added yet. Click "Add Goal" to create one.
+                  No treatment goals added yet. Click &quot;Add Goal&quot; to create one.
                 </div>
               )}
             </CardContent>

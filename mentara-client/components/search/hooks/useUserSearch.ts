@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { User } from '../UserSearchItem';
+import { User } from '@/components/search/UserSearchItem';
 
 export interface SearchUsersResponse {
   users: User[];
@@ -20,7 +20,7 @@ export interface SearchUsersParams {
 export const useUserSearch = () => {
   const api = useApi();
 
-  const searchUsers = async (query: string, role?: string, page = 1, limit = 20): Promise<User[]> => {
+  const searchUsers = async (query: string, role?: string): Promise<User[]> => {
     try {
       if (!query || query.trim().length < 2) {
         return [];
@@ -51,8 +51,8 @@ export const useUserSearch = () => {
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors
         if (error && typeof error === 'object' && 'response' in error) {
-          const response = error.response as any;
-          if (response?.status >= 400 && response?.status < 500) {
+          const response = error.response as { status?: number };
+          if (response?.status && response.status >= 400 && response.status < 500) {
             return false;
           }
         }

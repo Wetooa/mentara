@@ -7,7 +7,6 @@ import {
   Download,
   Music,
   Video as VideoIcon,
-  EyeIcon,
   Smile,
 } from "lucide-react";
 import { Message, Attachment } from "./types";

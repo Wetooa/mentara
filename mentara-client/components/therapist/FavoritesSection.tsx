@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import TherapistCard from "./listing/TherapistCard";
-import TherapistProfileModal from "./TherapistProfileModal";
-import BookingModal from "../booking/BookingModal";
+import TherapistCard from "@/components/therapist/listing/TherapistCard";
+import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
+import BookingModal from "@/components/booking/BookingModal";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useFilteredTherapists } from "@/hooks/useTherapists";
 import { Heart, Star } from "lucide-react";
@@ -48,7 +48,7 @@ export default function FavoritesSection() {
     setSelectedTherapist(null);
   };
 
-  const handleBookingSuccess = (meeting: any) => {
+  const handleBookingSuccess = () => {
     toast.success("Session booked successfully!", {
       description: `Your session with ${selectedTherapist?.name} has been scheduled.`,
     });

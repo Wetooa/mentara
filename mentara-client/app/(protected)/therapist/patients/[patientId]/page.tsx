@@ -7,8 +7,8 @@ import PatientInfoCard from "@/components/therapist/patient/PatientInfoCard";
 import PatientSessionNotes from "@/components/therapist/patient/PatientSessionNotes";
 import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets";
 import PatientProgressDashboard from "@/components/therapist/patient/PatientProgressDashboard";
-import SessionSchedulingModal from "@/components/therapist/patient/SessionSchedulingModal";
-import { usePatientData } from "@/hooks/usePatientData";
+import { SessionSchedulingModal } from "@/components/therapist/patient/SessionSchedulingModal";
+import { usePatientData } from "@/hooks/usePatientsList";
 
 export default function PatientDetailPage(
   props: {
@@ -17,7 +17,7 @@ export default function PatientDetailPage(
 ) {
   const params = use(props.params);
   const { patientId } = params;
-  const { patient, isLoading, error } = usePatientData(patientId);
+  const { data: patient, isLoading, error } = usePatientData(patientId);
   const [activeTab, setActiveTab] = useState<"notes" | "worksheets" | "progress">("notes");
   const [isSchedulingModalOpen, setIsSchedulingModalOpen] = useState(false);
 
@@ -291,7 +291,6 @@ export default function PatientDetailPage(
         {activeTab === "progress" && (
           <PatientProgressDashboard
             patient={patient}
-            patientId={patientId}
           />
         )}
       </div>

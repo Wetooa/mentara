@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -25,7 +26,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  // DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -39,12 +40,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Search,
-  User,
+  // User,
   Eye,
   Ban,
   ShieldAlert,
   UserCheck,
-  UserX,
+  // UserX,
   Filter,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -133,7 +134,7 @@ const mockUsers = [
 export function UserManagement() {
   const [users, setUsers] = useState(mockUsers);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [selectedUser, setSelectedUser] = useState<Record<string, unknown> | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
@@ -187,7 +188,7 @@ export function UserManagement() {
     const index = updatedUsers.findIndex((u) => u.id === selectedUser.id);
 
     if (index !== -1) {
-      let newStatus = selectedUser.status;
+      let newStatus = selectedUser.status as string;
 
       switch (actionType) {
         case "ban":
@@ -349,10 +350,12 @@ export function UserManagement() {
                 <TableRow key={user.id}>
                   <TableCell className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
-                      <img
+                      <Image
                         src={user.avatar}
                         alt={user.name}
                         className="w-full h-full object-cover"
+                        width={32}
+                        height={32}
                       />
                     </div>
                     <span>{user.name}</span>
@@ -400,45 +403,47 @@ export function UserManagement() {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                  <img
-                    src={selectedUser.avatar}
-                    alt={selectedUser.name}
+                  <Image
+                    src={selectedUser.avatar as string}
+                    alt={selectedUser.name as string}
                     className="w-full h-full object-cover"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">{selectedUser.name}</h2>
-                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                  <h2 className="text-lg font-semibold">{selectedUser.name as string}</h2>
+                  <p className="text-sm text-gray-500">{selectedUser.email as string}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">User ID</h3>
-                  <p className="mt-1">{selectedUser.id}</p>
+                  <p className="mt-1">{selectedUser.id as string}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Status</h3>
                   <div className="mt-1">
-                    {getStatusBadge(selectedUser.status)}
+                    {getStatusBadge(selectedUser.status as string)}
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Role</h3>
-                  <p className="mt-1 capitalize">{selectedUser.role}</p>
+                  <p className="mt-1 capitalize">{selectedUser.role as string}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Date Joined
                   </h3>
-                  <p className="mt-1">{formatDate(selectedUser.dateJoined)}</p>
+                  <p className="mt-1">{formatDate(selectedUser.dateJoined as string)}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Last Active
                   </h3>
                   <p className="mt-1">
-                    {formatDateTime(selectedUser.lastActive)}
+                    {formatDateTime(selectedUser.lastActive as string)}
                   </p>
                 </div>
               </div>
@@ -448,7 +453,7 @@ export function UserManagement() {
                   <CardContent className="p-3">
                     <h3 className="text-sm font-medium text-gray-500">Posts</h3>
                     <p className="text-xl font-bold mt-1">
-                      {selectedUser.postCount}
+                      {selectedUser.postCount as number}
                     </p>
                   </CardContent>
                 </Card>
@@ -458,7 +463,7 @@ export function UserManagement() {
                       Comments
                     </h3>
                     <p className="text-xl font-bold mt-1">
-                      {selectedUser.commentCount}
+                      {selectedUser.commentCount as number}
                     </p>
                   </CardContent>
                 </Card>
@@ -468,7 +473,7 @@ export function UserManagement() {
                       Reports Filed
                     </h3>
                     <p className="text-xl font-bold mt-1">
-                      {selectedUser.reportsFiled}
+                      {selectedUser.reportsFiled as number}
                     </p>
                   </CardContent>
                 </Card>
@@ -478,7 +483,7 @@ export function UserManagement() {
                       Reports Against
                     </h3>
                     <p className="text-xl font-bold mt-1">
-                      {selectedUser.reportsAgainst}
+                      {selectedUser.reportsAgainst as number}
                     </p>
                   </CardContent>
                 </Card>
@@ -490,7 +495,7 @@ export function UserManagement() {
                     User Actions
                   </h3>
                   <div className="flex space-x-2">
-                    {selectedUser.status === "active" ? (
+                    {(selectedUser.status as string) === "active" ? (
                       <>
                         <Button
                           variant="outline"
@@ -512,7 +517,7 @@ export function UserManagement() {
                           Ban User
                         </Button>
                       </>
-                    ) : selectedUser.status === "restricted" ? (
+                    ) : (selectedUser.status as string) === "restricted" ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -522,7 +527,7 @@ export function UserManagement() {
                         <UserCheck className="h-4 w-4 mr-1" />
                         Remove Restriction
                       </Button>
-                    ) : selectedUser.status === "banned" ? (
+                    ) : (selectedUser.status as string) === "banned" ? (
                       <Button
                         variant="outline"
                         size="sm"

@@ -8,10 +8,10 @@ import {
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import {
-  ClientResponse,
-  ClientUpdateDto,
-  TherapistResponse,
-} from 'schema/auth';
+  User,
+  UpdateClientDto,
+  TherapistRecommendation,
+} from 'mentara-commons';
 
 @Injectable()
 export class ClientService {
@@ -19,7 +19,7 @@ export class ClientService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getProfile(userId: string): Promise<ClientResponse> {
+  async getProfile(userId: string): Promise<User> {
     try {
       const client = await this.prisma.client.findUnique({
         where: { userId },
@@ -31,7 +31,7 @@ export class ClientService {
         throw new NotFoundException('Client profile not found');
       }
 
-      return client;
+      return this.transformPrismaUserToDTO(client.user);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -53,12 +53,9 @@ export class ClientService {
     }
   }
 
-  async updateProfile(
-    userId: string,
-    data: ClientUpdateDto,
-  ): Promise<ClientResponse> {
+  async updateProfile(userId: string, data: UpdateClientDto): Promise<User> {
     try {
-      return await this.prisma.client.update({
+      const updatedClient = await this.prisma.client.update({
         where: { userId },
         data: {
           user: {
@@ -67,6 +64,8 @@ export class ClientService {
         },
         include: { user: true },
       });
+
+      return this.transformPrismaUserToDTO(updatedClient.user);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         switch (error.code) {
@@ -144,11 +143,11 @@ export class ClientService {
 
   async getAssignedTherapist(
     userId: string,
-  ): Promise<TherapistResponse | null> {
+  ): Promise<TherapistRecommendation | null> {
     const assignment = await this.prisma.clientTherapist.findFirst({
       where: {
         clientId: userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
       include: {
         therapist: {
@@ -162,20 +161,27 @@ export class ClientService {
       return null;
     }
 
-    // Transform the Prisma result to match TherapistResponse type
+    // Transform the Prisma result to match TherapistRecommendation type
     const therapist = assignment.therapist;
     return {
-      ...therapist,
-      treatmentSuccessRates:
-        (therapist.treatmentSuccessRates as Record<string, any>) || {},
-      hourlyRate: therapist.hourlyRate,
+      id: therapist.userId,
+      firstName: therapist.user.firstName,
+      lastName: therapist.user.lastName,
+      title: 'Therapist',
+      specialties: therapist.areasOfExpertise,
+      hourlyRate: Number(therapist.hourlyRate),
+      experience: therapist.yearsOfExperience || 0,
+      province: therapist.province,
+      isActive: therapist.status === 'APPROVED',
+      bio: therapist.user.bio || undefined,
+      profileImage: undefined,
     };
   }
 
   async assignTherapist(
     userId: string,
     therapistId: string,
-  ): Promise<TherapistResponse> {
+  ): Promise<TherapistRecommendation> {
     // Check if client exists
     const client = await this.prisma.client.findUnique({
       where: { userId },
@@ -197,9 +203,9 @@ export class ClientService {
     await this.prisma.clientTherapist.updateMany({
       where: {
         clientId: userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
-      data: { status: 'inactive' },
+      data: { status: 'INACTIVE' },
     });
 
     // Create new assignment
@@ -207,16 +213,23 @@ export class ClientService {
       data: {
         clientId: userId,
         therapistId: therapistId,
-        status: 'active',
+        status: 'ACTIVE',
       },
     });
 
-    // Transform the Prisma result to match TherapistResponse type
+    // Transform the Prisma result to match TherapistRecommendation type
     return {
-      ...therapist,
-      treatmentSuccessRates:
-        (therapist.treatmentSuccessRates as Record<string, any>) || {},
-      hourlyRate: therapist.hourlyRate,
+      id: therapist.userId,
+      firstName: therapist.user.firstName,
+      lastName: therapist.user.lastName,
+      title: 'Therapist',
+      specialties: therapist.areasOfExpertise,
+      hourlyRate: Number(therapist.hourlyRate),
+      experience: therapist.yearsOfExperience || 0,
+      province: therapist.province,
+      isActive: therapist.status === 'APPROVED',
+      bio: therapist.user.bio || undefined,
+      profileImage: undefined,
     };
   }
 
@@ -233,9 +246,26 @@ export class ClientService {
     await this.prisma.clientTherapist.updateMany({
       where: {
         clientId: userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
-      data: { status: 'inactive' },
+      data: { status: 'INACTIVE' },
     });
+  }
+
+  private transformPrismaUserToDTO(user: any): User {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role as
+        | 'client'
+        | 'therapist'
+        | 'admin'
+        | 'moderator'
+        | 'user',
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
   }
 }

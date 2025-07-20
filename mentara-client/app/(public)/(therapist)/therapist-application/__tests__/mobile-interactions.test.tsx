@@ -1,10 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SinglePageTherapistApplication from '../page';
 
 // Mock necessary modules
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@/hooks/useMobile', () => ({
   useIsMobile: jest.fn(() => false),
 }));
 
@@ -52,7 +52,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Mobile Interactions', () => {
-  const mockUseIsMobile = require('@/hooks/use-mobile').useIsMobile;
+  const mockUseIsMobile = jest.requireMock('@/hooks/use-mobile').useIsMobile;
 
   beforeEach(() => {
     jest.clearAllMocks();

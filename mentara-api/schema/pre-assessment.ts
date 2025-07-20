@@ -1,21 +1,16 @@
-import { IsJSON } from 'class-validator';
+// Pre-assessment DTO schema
+export interface CreatePreAssessmentDto {
+  questionnaires: string[];
+  answers: number[][];
+  answerMatrix?: number[][];
+  scores?: Record<string, number>;
+  severityLevels?: Record<string, string>;
+}
 
-export class CreatePreAssessmentDto {
-  @IsJSON()
-  questionnaires!: string[] | any;
-
-  @IsJSON()
-  answers!: number[][] | any;
-
-  @IsJSON()
-  answerMatrix!: number[][] | any;
-
-  @IsJSON()
-  scores!: Record<string, number> | any;
-
-  @IsJSON()
-  severityLevels!: Record<string, string> | any;
-
-  @IsJSON()
-  aiEstimate!: Record<string, any> | any;
+export interface UpdatePreAssessmentDto {
+  answers?: number[][];
+  answerMatrix?: number[][];
+  scores?: Record<string, number>;
+  severityLevels?: Record<string, string>;
+  completed?: boolean;
 }

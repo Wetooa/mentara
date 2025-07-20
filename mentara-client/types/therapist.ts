@@ -25,7 +25,7 @@ export interface TherapistRecommendation {
   expertise?: string[];
   approaches?: string[];
   languages?: string[];
-  sessionLength?: string;
+  sessionDuration?: number;
   hourlyRate?: number;
   bio?: string;
   profileImageUrl?: string;
@@ -92,6 +92,6 @@ export function transformTherapistForCard(therapist: TherapistRecommendation): T
     imageUrl: therapist.profileImageUrl || therapist.user.profileImageUrl || '/team/default-therapist.jpg',
     rating: therapist.patientSatisfaction ? Number(therapist.patientSatisfaction) : 4.0,
     sessionPrice: therapist.hourlyRate ? Number(therapist.hourlyRate) : 120,
-    sessionDuration: therapist.sessionLength ? parseInt(therapist.sessionLength) : 45,
+    sessionDuration: therapist.sessionDuration || 45,
   };
 }

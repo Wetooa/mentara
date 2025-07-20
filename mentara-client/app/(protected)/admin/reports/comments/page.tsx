@@ -100,7 +100,7 @@ const mockReportedComments = [
 export default function ReportedCommentsPage() {
   const [reports, setReports] = useState(mockReportedComments);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [selectedReport, setSelectedReport] = useState<typeof mockReportedComments[0] | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<
@@ -343,7 +343,7 @@ export default function ReportedCommentsPage() {
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500">
-                  Reporter's Description
+                  Reporter&apos;s Description
                 </h3>
                 <p className="mt-1 p-3 bg-gray-50 rounded-md">
                   {selectedReport.description}

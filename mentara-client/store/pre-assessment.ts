@@ -1,5 +1,5 @@
 import {
-  ListOfQuestionnaires,
+  type ListOfQuestionnaires,
   QUESTIONNAIRE_MAP,
 } from "@/constants/questionnaires";
 import { create } from "zustand";
@@ -109,4 +109,27 @@ export interface SignUpStore {
 export const useSignUpStore = create<SignUpStore>()((set) => ({
   details: { email: "", nickName: "" },
   setDetails: (details) => set({ details }),
+}));
+
+// Assessment data interface
+interface AssessmentData {
+  questionnaires: ListOfQuestionnaires[];
+  answers: number[][];
+  step: number;
+  miniStep: number;
+}
+
+// Assessment data store for registration flow
+export interface PreAssessmentStore {
+  assessmentData: AssessmentData | null;
+  setAssessmentData: (data: AssessmentData) => void;
+  getAssessmentData: () => AssessmentData | null;
+  clearAssessmentData: () => void;
+}
+
+export const usePreAssessmentStore = create<PreAssessmentStore>()((set, get) => ({
+  assessmentData: null,
+  setAssessmentData: (data) => set({ assessmentData: data }),
+  getAssessmentData: () => get().assessmentData,
+  clearAssessmentData: () => set({ assessmentData: null }),
 }));

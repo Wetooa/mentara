@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TherapistApplicationService } from './therapist-application.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { EmailService } from '../services/email.service';
+import { EmailService } from '../email/email.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   FileStatus,

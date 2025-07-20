@@ -23,7 +23,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   Calendar as CalendarIcon, 
-  Clock, 
   Video, 
   Phone, 
   MessageSquare,
@@ -33,14 +32,19 @@ import {
   User
 } from "lucide-react";
 import { Patient } from "@/types/patient";
-import { patientsApi } from "@/lib/api/patients";
+import { MeetingType } from "@/types/booking";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import Image from "next/image";
+import { useApi } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useSubscriptionStatus } from "@/hooks/billing";
 
 interface SessionSchedulingModalProps {
   patient: Patient | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (meeting: any) => void;
+  onSuccess?: (meeting: unknown) => void;
 }
 
 interface TimeSlot {
@@ -61,9 +65,9 @@ const AVAILABLE_DURATIONS: SessionDuration[] = [
 ];
 
 const MEETING_TYPES = [
-  { value: "VIDEO", label: "Video Call", icon: Video },
-  { value: "AUDIO", label: "Audio Call", icon: Phone },
-  { value: "CHAT", label: "Chat Session", icon: MessageSquare },
+  { value: MeetingType.VIDEO, label: "Video Call", icon: Video },
+  { value: MeetingType.AUDIO, label: "Audio Call", icon: Phone },
+  { value: MeetingType.CHAT, label: "Chat Session", icon: MessageSquare },
 ];
 
 // Generate time slots from 9 AM to 6 PM
@@ -78,21 +82,71 @@ const generateTimeSlots = (): TimeSlot[] => {
   return slots;
 };
 
-export default function SessionSchedulingModal({
+export function SessionSchedulingModal({
   patient,
   isOpen,
   onClose,
   onSuccess,
 }: SessionSchedulingModalProps) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  
+  // Payment verification
+  const {
+    isActive,
+    isTrial,
+    isPastDue,
+    hasPaymentIssue,
+    needsPaymentMethod,
+    isLoading: subscriptionLoading
+  } = useSubscriptionStatus();
+  
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedDuration, setSelectedDuration] = useState<number>(60);
-  const [meetingType, setMeetingType] = useState<string>("VIDEO");
+  const [meetingType, setMeetingType] = useState<MeetingType>(MeetingType.VIDEO);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(generateTimeSlots());
+
+  // Create meeting mutation
+  const createMeetingMutation = useMutation({
+    mutationFn: async (meetingData: {
+      clientId: string;
+      startTime: string;
+      duration: number;
+      title: string;
+      description?: string;
+      meetingType: MeetingType;
+    }) => {
+      const endTime = new Date(new Date(meetingData.startTime).getTime() + meetingData.duration * 60000).toISOString();
+      
+      return api.booking.meetings.create({
+        clientId: meetingData.clientId,
+        startTime: meetingData.startTime,
+        endTime,
+        title: meetingData.title,
+        description: meetingData.description,
+        meetingType: meetingData.meetingType,
+        status: 'scheduled',
+      });
+    },
+    onSuccess: (meeting) => {
+      // Invalidate meetings queries to refresh the lists
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: ['therapist', 'meetings'] });
+      
+      toast.success('Session scheduled successfully!');
+      onSuccess?.(meeting);
+      onClose();
+    },
+    onError: (error) => {
+      console.error('Error creating meeting:', error);
+      setError(error instanceof Error ? error.message : 'Failed to schedule session');
+      toast.error('Failed to schedule session. Please try again.');
+    },
+  });
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -100,7 +154,7 @@ export default function SessionSchedulingModal({
       setSelectedDate(undefined);
       setSelectedTime("");
       setSelectedDuration(60);
-      setMeetingType("VIDEO");
+      setMeetingType(MeetingType.VIDEO);
       setTitle(`Therapy Session - ${patient.name}`);
       setDescription("");
       setError(null);
@@ -128,47 +182,95 @@ export default function SessionSchedulingModal({
       return;
     }
 
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const startTime = createDateTime(selectedDate, selectedTime);
-      
-      const sessionData = {
-        clientId: patient.id,
-        startTime: startTime.toISOString(),
-        duration: selectedDuration,
-        title: title.trim(),
-        description: description.trim(),
-        meetingType,
-      };
-
-      const result = await patientsApi.scheduleSession(sessionData);
-      
-      onSuccess?.(result);
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to schedule session");
-    } finally {
-      setIsLoading(false);
+    // Payment verification
+    if (!isActive && !isTrial) {
+      setError("Active subscription required to schedule sessions. Please upgrade your plan.");
+      return;
     }
+
+    if (hasPaymentIssue) {
+      setError("Please resolve payment issues before scheduling sessions. Check your billing settings.");
+      return;
+    }
+
+    if (needsPaymentMethod) {
+      setError("Please add a payment method to schedule sessions.");
+      return;
+    }
+
+    const startTime = createDateTime(selectedDate, selectedTime);
+    
+    // Check if the selected slot is in the past
+    if (isSlotInPast(selectedDate, selectedTime)) {
+      setError("Cannot schedule sessions in the past");
+      return;
+    }
+
+    setError(null);
+    
+    createMeetingMutation.mutate({
+      clientId: patient.id,
+      startTime: startTime.toISOString(),
+      duration: selectedDuration,
+      title: title.trim(),
+      description: description.trim(),
+      meetingType,
+    });
   };
 
-  const isFormValid = selectedDate && selectedTime && title.trim() && !isLoading;
+  const isFormValid = selectedDate && 
+    selectedTime && 
+    title.trim() && 
+    !createMeetingMutation.isPending &&
+    (isActive || isTrial) && 
+    !hasPaymentIssue && 
+    !needsPaymentMethod;
 
   if (!patient) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            Schedule Session with {patient.name}
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="truncate">Schedule Session with {patient.name}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Payment Status Alerts */}
+        {!subscriptionLoading && (
+          <>
+            {isPastDue && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Your payment is past due. Please update your payment method to continue scheduling sessions.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {needsPaymentMethod && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Please add a payment method to schedule therapy sessions.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {!isActive && !isTrial && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  An active subscription is required to schedule sessions. Please upgrade your plan.
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Date Selection */}
           <div className="space-y-4">
             <div>
@@ -189,9 +291,11 @@ export default function SessionSchedulingModal({
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                       {patient.avatar ? (
-                        <img 
+                        <Image 
                           src={patient.avatar} 
                           alt={patient.name}
+                          width={48}
+                          height={48}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (
@@ -361,7 +465,7 @@ export default function SessionSchedulingModal({
             onClick={handleScheduleSession}
             disabled={!isFormValid}
           >
-            {isLoading ? (
+            {createMeetingMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 Scheduling...
