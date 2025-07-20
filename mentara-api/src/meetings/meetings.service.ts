@@ -210,7 +210,7 @@ export class MeetingsService {
     const meetings = await this.prisma.meeting.findMany({
       where: whereClause,
       include: {
-        sessionLogs: true,
+        meetingNotes: true,
       },
     });
 
@@ -511,22 +511,19 @@ export class MeetingsService {
 
     // Save session summary if provided
     if (endCallDto.sessionSummary) {
-      await this.prisma.sessionLog.create({
+      await this.prisma.meetingNotes.create({
         data: {
+          id: `notes_${meetingId}_${Date.now()}`,
           meetingId,
-          clientId: meeting.clientId,
-          therapistId: meeting.therapistId,
-          sessionType: 'REGULAR_THERAPY',
-          startTime: meeting.startTime,
-          endTime: new Date(),
-          duration: endCallDto.sessionSummary.duration,
-          status: 'COMPLETED',
-          platform: 'video',
           notes: JSON.stringify({
+            sessionType: 'REGULAR_THERAPY',
+            duration: endCallDto.sessionSummary.duration,
             endReason: endCallDto.endReason,
             connectionQuality: endCallDto.sessionSummary.connectionQuality,
             technicalIssues: endCallDto.sessionSummary.technicalIssues,
             nextSteps: endCallDto.nextSteps,
+            platform: 'video',
+            endTime: new Date().toISOString(),
           }),
         },
       });
@@ -612,18 +609,17 @@ export class MeetingsService {
     // Validate meeting access
     const meeting = await this.getMeetingById(meetingId, userId);
 
-    const session = await this.prisma.sessionLog.create({
+    const session = await this.prisma.meetingNotes.create({
       data: {
+        id: `session_${meetingId}_${Date.now()}`,
         meetingId,
-        clientId: meeting.clientId,
-        therapistId: meeting.therapistId,
-        sessionType: 'REGULAR_THERAPY',
-        startTime: new Date(sessionData.sessionData.startedAt),
-        endTime: new Date(sessionData.sessionData.endedAt),
-        duration: sessionData.sessionData.duration,
-        status: 'COMPLETED',
-        platform: 'video',
         notes: JSON.stringify({
+          sessionType: 'REGULAR_THERAPY',
+          startTime: new Date(sessionData.sessionData.startedAt).toISOString(),
+          endTime: new Date(sessionData.sessionData.endedAt).toISOString(),
+          duration: sessionData.sessionData.duration,
+          status: 'COMPLETED',
+          platform: 'video',
           sessionNotes: sessionData.sessionNotes,
           clientProgress: sessionData.clientProgress,
           followUpActions: sessionData.followUpActions,

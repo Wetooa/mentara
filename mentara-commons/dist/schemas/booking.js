@@ -79,7 +79,6 @@ exports.CreateMeetingRequestSchema = zod_1.z.object({
 // Update Meeting Request Schema
 exports.UpdateMeetingRequestSchema = zod_1.z.object({
     status: exports.MeetingStatusSchema.optional(),
-    notes: zod_1.z.string().optional(),
     meetingUrl: zod_1.z.string().url().optional(),
     startTime: zod_1.z.string().datetime('Invalid start time format').optional(),
     duration: zod_1.z.number().min(15).max(240).optional(),

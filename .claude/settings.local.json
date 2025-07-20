@@ -135,9 +135,25 @@
       "mcp__serena__check_onboarding_performed",
       "mcp__serena__onboarding",
       "mcp__serena__list_dir",
-      "mcp__serena__insert_after_symbol"
+      "mcp__serena__insert_after_symbol",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(node:*)",
+      "mcp__serena__think_about_task_adherence",
+      "mcp__serena__read_memory",
+      "mcp__serena__summarize_changes",
+      "Bash(/dev/null)",
+      "Bash(cat:*)",
+      "Bash(timeout 60s npm run build)",
+      "Bash(timeout 30s npx tsc --noEmit src/reviews/reviews.controller.ts)",
+      "Bash(timeout 30s npm run build:*)",
+      "Bash(timeout 15s npx tsc:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["supabase", "Prisma-Local", "clerk", "puppeteer"]
+  "enabledMcpjsonServers": [
+    "supabase",
+    "Prisma-Local",
+    "clerk",
+    "puppeteer"
+  ]
 }

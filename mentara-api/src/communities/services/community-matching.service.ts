@@ -372,8 +372,7 @@ export class CommunityMatchingService {
       const preAssessment = await this.prisma.preAssessment.findUnique({
         where: { clientId: userId },
         select: {
-          scores: true,
-          severityLevels: true,
+          answers: true,
           createdAt: true,
         },
       });
@@ -382,9 +381,22 @@ export class CommunityMatchingService {
         return null;
       }
 
+      // Extract data from answers JSON
+      const assessmentData = preAssessment.answers as any;
+      if (!assessmentData || typeof assessmentData !== 'object') {
+        this.logger.warn(`Invalid assessment data for user ${userId}`);
+        return null;
+      }
+
+      const scores = assessmentData.scores as any;
+      const severityLevels = assessmentData.severityLevels as any;
+
+      if (!scores) {
+        this.logger.warn(`No scores found in assessment data for user ${userId}`);
+        return null;
+      }
+
       const assessments: { [key: string]: any } = {};
-      const scores = preAssessment.scores as any;
-      const severityLevels = preAssessment.severityLevels as any;
 
       // Map PHQ-9 score from JSON data
       if (scores?.phq9Score !== null && scores?.phq9Score !== undefined) {

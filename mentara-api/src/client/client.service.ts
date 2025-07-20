@@ -256,12 +256,7 @@ export class ClientService {
     return {
       id: user.id,
       email: user.email,
-      role: user.role as
-        | 'client'
-        | 'therapist'
-        | 'admin'
-        | 'moderator'
-        | 'user',
+      role: user.role as 'client' | 'therapist' | 'admin' | 'moderator',
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
       firstName: user.firstName,

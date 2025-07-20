@@ -73,6 +73,9 @@ export class CommunityAssignmentService {
     // Get user's pre-assessment data
     const userAssessment = await this.prisma.preAssessment.findFirst({
       where: { clientId: userId },
+      select: {
+        answers: true,
+      },
     });
 
     if (!userAssessment) {
@@ -80,8 +83,20 @@ export class CommunityAssignmentService {
       return [];
     }
 
-    const scores = userAssessment.scores as PreAssessmentScores;
-    const severityLevels = userAssessment.severityLevels as SeverityLevels;
+    // Extract scores and severity levels from answers JSON
+    const assessmentData = userAssessment.answers as any;
+    if (!assessmentData || typeof assessmentData !== 'object') {
+      console.log(`⚠️  Invalid assessment data for user: ${userId}`);
+      return [];
+    }
+
+    const scores = assessmentData.scores as PreAssessmentScores;
+    const severityLevels = assessmentData.severityLevels as SeverityLevels;
+
+    if (!scores || !severityLevels) {
+      console.log(`⚠️  Missing scores or severity levels for user: ${userId}`);
+      return [];
+    }
     const assignedCommunities: string[] = [];
 
     // Iterate through questionnaire results and assign communities
@@ -125,7 +140,6 @@ export class CommunityAssignmentService {
           data: {
             userId: userId,
             communityId: community.id,
-            role: 'MEMBER',
             joinedAt: new Date(),
           },
         });
@@ -181,7 +195,6 @@ export class CommunityAssignmentService {
           data: {
             userId: userId,
             communityId: community.id,
-            role: 'MEMBER',
             joinedAt: new Date(),
           },
         });
@@ -201,14 +214,27 @@ export class CommunityAssignmentService {
   async getRecommendedCommunities(userId: string): Promise<string[]> {
     const userAssessment = await this.prisma.preAssessment.findFirst({
       where: { clientId: userId },
+      select: {
+        answers: true,
+      },
     });
 
     if (!userAssessment) {
       return [];
     }
 
-    const scores = userAssessment.scores as PreAssessmentScores;
-    const severityLevels = userAssessment.severityLevels as SeverityLevels;
+    // Extract scores and severity levels from answers JSON
+    const assessmentData = userAssessment.answers as any;
+    if (!assessmentData || typeof assessmentData !== 'object') {
+      return [];
+    }
+
+    const scores = assessmentData.scores as PreAssessmentScores;
+    const severityLevels = assessmentData.severityLevels as SeverityLevels;
+
+    if (!scores || !severityLevels) {
+      return [];
+    }
     const recommendedCommunities: string[] = [];
 
     for (const [questionnaire] of Object.entries(scores)) {

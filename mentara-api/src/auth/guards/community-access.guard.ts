@@ -274,7 +274,27 @@ export class CommunityAccessGuard implements CanActivate {
     }
 
     // Check room posting role requirements
-    const userRole = membership.role;
+    // Get user's global role and check if they're a community moderator
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    const isCommunityModerator = await this.prisma.moderatorCommunity.findFirst({
+      where: {
+        moderatorId: userId,
+        communityId: room.roomGroup.community.id,
+      },
+    });
+
+    // Determine effective user role in this community
+    let userRole = 'member'; // Default role for community members
+    if (user?.role === 'admin') {
+      userRole = 'admin';
+    } else if (isCommunityModerator || user?.role === 'moderator') {
+      userRole = 'moderator';
+    }
+
     const requiredRole = room.postingRole;
 
     // Define role hierarchy
@@ -300,17 +320,25 @@ export class CommunityAccessGuard implements CanActivate {
     userId: string,
     communityId: string,
   ): Promise<void> {
-    const membership = await this.prisma.membership.findFirst({
+    // Check if user is a global admin
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'admin') {
+      return; // Global admins have access to all communities
+    }
+
+    // Check if user is assigned as a moderator for this specific community
+    const moderatorCommunity = await this.prisma.moderatorCommunity.findFirst({
       where: {
-        userId,
+        moderatorId: userId,
         communityId,
-        role: {
-          in: ['MODERATOR', 'ADMIN'],
-        },
       },
     });
 
-    if (!membership) {
+    if (!moderatorCommunity) {
       throw new ForbiddenException(
         'You must be a moderator or admin of this community',
       );
@@ -322,17 +350,40 @@ export class CommunityAccessGuard implements CanActivate {
     userId: string,
     communityId: string,
   ): Promise<string | null> {
+    // Check if user is a member of the community
     const membership = await this.prisma.membership.findFirst({
       where: {
         userId,
         communityId,
       },
-      select: {
-        role: true,
+    });
+
+    if (!membership) {
+      return null; // User is not a member
+    }
+
+    // Get user's global role
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    // Check if user is assigned as a moderator for this specific community
+    const moderatorCommunity = await this.prisma.moderatorCommunity.findFirst({
+      where: {
+        moderatorId: userId,
+        communityId,
       },
     });
 
-    return membership?.role || null;
+    // Determine effective role in this community
+    if (user?.role === 'admin') {
+      return 'admin';
+    } else if (moderatorCommunity || user?.role === 'moderator') {
+      return 'moderator';
+    } else {
+      return 'member'; // Default role for community members
+    }
   }
 
   // Helper method to check if user can perform moderation actions

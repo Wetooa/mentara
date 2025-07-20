@@ -6,7 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import { PreAssessment } from '@prisma/client';
+import { PreAssessment, Therapist, User, Review, Prisma } from '@prisma/client';
 import {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
@@ -19,6 +19,12 @@ import {
 } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
 import { PreAssessmentService } from '../pre-assessment/pre-assessment.service';
+
+// Define the type for therapist with included relations
+type TherapistWithRelations = Therapist & {
+  user: User;
+  reviews: Pick<Review, 'rating'>[];
+};
 
 @Injectable()
 export class TherapistRecommendationService {
@@ -66,7 +72,6 @@ export class TherapistRecommendationService {
         where: { userId: request.userId },
         include: {
           preAssessment: true,
-          clientPreferences: true,
           user: true,
         },
       });
@@ -101,7 +106,9 @@ export class TherapistRecommendationService {
 
       // Extract user conditions and severity levels
       const userConditions = this.extractUserConditions(user.preAssessment);
-      const severityLevels = user.preAssessment.severityLevels as Record<
+      // Extract severity levels from the answers JSON field
+      const answers = user.preAssessment.answers as any;
+      const severityLevels = answers?.severityLevels as Record<
         string,
         string
       >;
@@ -140,17 +147,15 @@ export class TherapistRecommendationService {
       }
 
       // Fetch therapists with comprehensive data
-      const therapists = await this.prisma.therapist.findMany({
+      const therapists: TherapistWithRelations[] = await this.prisma.therapist.findMany({
         where: therapistWhere,
         orderBy: { createdAt: 'desc' },
         take: Math.min(request.limit ?? 10, 50), // Increase limit for better filtering
         include: {
           user: true,
           reviews: {
-            where: { status: 'APPROVED' },
             select: {
               rating: true,
-              status: true,
             },
           },
         },
@@ -166,7 +171,6 @@ export class TherapistRecommendationService {
           const clientForMatching: ClientForMatching = {
             ...user,
             preAssessment: user.preAssessment,
-            clientPreferences: user.clientPreferences || [],
             user: user.user,
           };
 
@@ -397,17 +401,18 @@ export class TherapistRecommendationService {
       where: { userId: clientId },
       include: {
         preAssessment: true,
-        clientPreferences: true,
         user: true,
       },
     });
 
-    const therapist = await this.prisma.therapist.findUnique({
+    const therapist: TherapistWithRelations | null = await this.prisma.therapist.findUnique({
       where: { userId: therapistId },
       include: {
         user: true,
         reviews: {
-          where: { status: 'APPROVED' },
+          select: {
+            rating: true,
+          },
         },
       },
     });
@@ -434,16 +439,21 @@ export class TherapistRecommendationService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     const conditions: Record<string, string> = {};
-    const severityLevels = preAssessment.severityLevels as Record<
+    // Extract data from the answers JSON field
+    const answers = preAssessment.answers as any;
+    const severityLevels = answers?.severityLevels as Record<
       string,
       string
     >;
-    const questionnaires = preAssessment.questionnaires as string[];
-    questionnaires.forEach((q) => {
-      if (severityLevels[q]) {
-        conditions[q] = severityLevels[q];
-      }
-    });
+    const questionnaires = answers?.questionnaires as string[];
+    
+    if (questionnaires && severityLevels) {
+      questionnaires.forEach((q) => {
+        if (severityLevels[q]) {
+          conditions[q] = severityLevels[q];
+        }
+      });
+    }
     return conditions;
   }
 

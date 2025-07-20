@@ -334,7 +334,6 @@ export class BookingService {
           startTime: updateMeetingDto.startTime,
           duration: updateMeetingDto.duration,
           meetingType: updateMeetingDto.meetingType,
-          notes: updateMeetingDto.notes,
           meetingUrl: updateMeetingDto.meetingUrl,
           ...(updateMeetingDto.status && {
             status: updateMeetingDto.status as MeetingStatus,

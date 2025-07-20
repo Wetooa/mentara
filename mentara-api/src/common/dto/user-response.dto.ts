@@ -93,12 +93,27 @@ export class UserProfileResponseDto extends UserResponseDto implements UserProfi
  * Authentication response DTO
  */
 export class AuthResponseDto implements AuthResponse {
-  user: UserResponse;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    emailVerified: boolean;
+  };
   token: string;
   message: string;
 
   constructor(user: any, token: string, message: string = 'Authentication successful') {
-    this.user = UserResponseDto.fromPrismaUser(user);
+    // Create AuthUser object with required fields
+    this.user = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      role: user.role,
+      emailVerified: user.emailVerified || false,
+    };
     this.token = token;
     this.message = message;
   }

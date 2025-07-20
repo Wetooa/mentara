@@ -437,7 +437,6 @@ export class MessagingGateway
             include: {
               user: {
                 include: {
-                  notificationSettings: true,
                   deviceTokens: true,
                 },
               },
@@ -461,9 +460,10 @@ export class MessagingGateway
             return false;
           }
 
-          // Check if user has push notifications enabled for messages
-          const settings = participant.user.notificationSettings;
-          if (!settings?.pushNewMessages) {
+          // Use default notification settings since notificationSettings model doesn't exist
+          // Default to true for push notifications for new messages
+          const defaultPushNewMessages = true;
+          if (!defaultPushNewMessages) {
             return false;
           }
 

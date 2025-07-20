@@ -34,14 +34,12 @@ export class NotificationsController {
       priority?: NotificationPriority;
       data?: any;
       actionUrl?: string;
-      scheduledFor?: string;
     },
     @CurrentUserId() userId: string,
   ) {
     return this.notificationsService.create({
       ...body,
       userId,
-      scheduledFor: body.scheduledFor ? new Date(body.scheduledFor) : undefined,
     });
   }
 

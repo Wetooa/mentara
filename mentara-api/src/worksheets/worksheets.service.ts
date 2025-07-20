@@ -56,6 +56,7 @@ export class WorksheetsService {
             },
           },
         },
+        submission: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -93,6 +94,7 @@ export class WorksheetsService {
             },
           },
         },
+        submission: true,
       },
     });
 
@@ -100,7 +102,7 @@ export class WorksheetsService {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Transform the inline arrays into the expected format for backward compatibility
+    // Add submission data if exists
     return {
       ...worksheet,
       materials: worksheet.materialUrls.map((url, index) => ({
@@ -108,16 +110,9 @@ export class WorksheetsService {
         filename: worksheet.materialNames[index] || 'Unknown',
         url,
         fileType: 'application/octet-stream',
-        fileSize: worksheet.materialSizes[index] || 0,
+        fileSize: 0, // File size not available in current schema
       })),
-      submissions: worksheet.submissionUrls.map((url, index) => ({
-        id: `submission-${index}`,
-        filename: worksheet.submissionNames[index] || 'Unknown',
-        url,
-        fileType: 'application/octet-stream',
-        fileSize: worksheet.submissionSizes[index] || 0,
-        submittedAt: worksheet.submittedAt,
-      })),
+      submission: worksheet.submission || null,
     };
   }
 
@@ -131,21 +126,14 @@ export class WorksheetsService {
     const worksheet = await this.prisma.worksheet.create({
       data: {
         title: data.title,
-        instructions: data.instructions,
-        description: data.description,
+        instructions: data.instructions || '',
         dueDate: data.dueDate || new Date(),
         status: (data as any).status || 'ASSIGNED',
-        isCompleted: (data as any).isCompleted || false,
         clientId,
         therapistId,
-        // Files are now handled separately via upload endpoint
-        // These arrays will be populated when files are uploaded
+        // Material files can be uploaded separately
         materialUrls: [],
         materialNames: [],
-        materialSizes: [],
-        submissionUrls: [],
-        submissionNames: [],
-        submissionSizes: [],
       },
     });
 
@@ -207,29 +195,31 @@ export class WorksheetsService {
       );
     }
 
-    // Note: File uploads are now handled separately via the upload endpoint
-    // This method now primarily handles text-based submissions
-    // The worksheet has already been updated with file attachments if any
+    // Create a submission using the WorksheetSubmission model
+    const submission = await this.prisma.worksheetSubmission.create({
+      data: {
+        worksheetId: data.worksheetId,
+        fileUrls: (data as any).fileUrls || [],
+        fileNames: (data as any).fileNames || [],
+        fileSizes: (data as any).fileSizes || [],
+        feedback: (data as any).notes || null,
+      },
+    });
 
-    // Update the worksheet with submission data
+    // Update the worksheet status to SUBMITTED
     const updatedWorksheet = await this.prisma.worksheet.update({
       where: { id: data.worksheetId },
       data: {
-        // Store text-based responses or notes
-        feedback: (data as any).notes || null,
-        // Mark as completed if specified
-        isCompleted: data.isCompleted || false,
-        status: data.isCompleted ? 'COMPLETED' : 'ASSIGNED',
-        submittedAt: data.isCompleted ? new Date() : null,
+        status: 'SUBMITTED',
       },
     });
 
     return {
-      id: updatedWorksheet.id,
+      id: submission.id,
       worksheetId: data.worksheetId,
       clientId,
       status: updatedWorksheet.status,
-      submittedAt: updatedWorksheet.submittedAt,
+      submittedAt: submission.submittedAt,
     };
   }
 
@@ -241,58 +231,84 @@ export class WorksheetsService {
     // Check if worksheet exists
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
+      include: { submission: true },
     });
 
     if (!worksheet) {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Update worksheet with submission data and mark as completed
+    // Create or update submission
+    let submission;
+    if (worksheet.submission) {
+      // Update existing submission
+      submission = await this.prisma.worksheetSubmission.update({
+        where: { worksheetId: id },
+        data: {
+          fileUrls: (data as any).fileUrls || [],
+          fileNames: (data as any).fileNames || [],
+          fileSizes: (data as any).fileSizes || [],
+          feedback: (data as any).notes || null,
+        },
+      });
+    } else {
+      // Create new submission
+      submission = await this.prisma.worksheetSubmission.create({
+        data: {
+          worksheetId: id,
+          fileUrls: (data as any).fileUrls || [],
+          fileNames: (data as any).fileNames || [],
+          fileSizes: (data as any).fileSizes || [],
+          feedback: (data as any).notes || null,
+        },
+      });
+    }
+
+    // Update worksheet status to SUBMITTED
     const updatedWorksheet = await this.prisma.worksheet.update({
       where: { id },
       data: {
-        feedback: (data as any).notes || null,
-        isCompleted: true,
-        status: 'COMPLETED',
-        submittedAt: new Date(),
-        // File attachments are handled separately via upload endpoint
+        status: 'SUBMITTED',
       },
     });
 
     return {
       worksheetId: id,
-      submissionId: id, // Use worksheet ID as submission ID since they're now unified
+      submissionId: submission.id,
       status: updatedWorksheet.status,
-      submittedAt: updatedWorksheet.submittedAt,
+      submittedAt: submission.submittedAt,
       message: 'Worksheet submitted successfully',
     };
   }
 
   async deleteSubmission(id: string) {
-    // Since submissions are now inline, we reset the worksheet submission status
+    // Find worksheet with submission
     const worksheet = await this.prisma.worksheet.findUnique({
       where: { id },
+      include: { submission: true },
     });
 
     if (!worksheet) {
       throw new NotFoundException(`Worksheet with ID ${id} not found`);
     }
 
-    // Reset submission status
+    if (!worksheet.submission) {
+      throw new NotFoundException(`No submission found for worksheet with ID ${id}`);
+    }
+
+    // Delete the submission
+    await this.prisma.worksheetSubmission.delete({
+      where: { worksheetId: id },
+    });
+
+    // Reset worksheet status back to ASSIGNED
     await this.prisma.worksheet.update({
       where: { id },
       data: {
-        isCompleted: false,
         status: 'ASSIGNED',
-        submittedAt: null,
-        feedback: null,
-        // Clear submission files but keep materials
-        submissionUrls: [],
-        submissionNames: [],
-        submissionSizes: [],
       },
     });
 
-    return { success: true, message: 'Submission reset successfully' };
+    return { success: true, message: 'Submission deleted successfully' };
   }
 }

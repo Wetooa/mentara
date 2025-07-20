@@ -288,7 +288,6 @@ export declare const CreateMeetingRequestSchema: z.ZodObject<{
 }>;
 export declare const UpdateMeetingRequestSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>>;
-    notes: z.ZodOptional<z.ZodString>;
     meetingUrl: z.ZodOptional<z.ZodString>;
     startTime: z.ZodOptional<z.ZodString>;
     duration: z.ZodOptional<z.ZodNumber>;
@@ -303,7 +302,6 @@ export declare const UpdateMeetingRequestSchema: z.ZodObject<{
     startTime?: string | undefined;
     meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    notes?: string | undefined;
 }, {
     status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     title?: string | undefined;
@@ -312,7 +310,6 @@ export declare const UpdateMeetingRequestSchema: z.ZodObject<{
     startTime?: string | undefined;
     meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    notes?: string | undefined;
 }>;
 export declare const BookingFormDataSchema: z.ZodObject<{
     date: z.ZodString;
@@ -935,7 +932,6 @@ export declare const MeetingCreateDtoSchema: z.ZodObject<{
 }>;
 export declare const MeetingUpdateDtoSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"]>>;
-    notes: z.ZodOptional<z.ZodString>;
     meetingUrl: z.ZodOptional<z.ZodString>;
     startTime: z.ZodOptional<z.ZodString>;
     duration: z.ZodOptional<z.ZodNumber>;
@@ -950,7 +946,6 @@ export declare const MeetingUpdateDtoSchema: z.ZodObject<{
     startTime?: string | undefined;
     meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    notes?: string | undefined;
 }, {
     status?: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | undefined;
     title?: string | undefined;
@@ -959,7 +954,6 @@ export declare const MeetingUpdateDtoSchema: z.ZodObject<{
     startTime?: string | undefined;
     meetingType?: "video" | "audio" | "phone" | "chat" | "in-person" | undefined;
     meetingUrl?: string | undefined;
-    notes?: string | undefined;
 }>;
 export declare const BookingMeetingParamsDtoSchema: z.ZodObject<{
     id: z.ZodString;

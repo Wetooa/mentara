@@ -789,7 +789,6 @@ describe('MessagingGateway', () => {
             include: {
               user: {
                 include: {
-                  notificationSettings: true,
                   deviceTokens: true,
                 },
               },

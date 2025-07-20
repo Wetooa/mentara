@@ -85,7 +85,6 @@ export const CreateMeetingRequestSchema = z.object({
 // Update Meeting Request Schema
 export const UpdateMeetingRequestSchema = z.object({
   status: MeetingStatusSchema.optional(),
-  notes: z.string().optional(),
   meetingUrl: z.string().url().optional(),
   startTime: z.string().datetime('Invalid start time format').optional(),
   duration: z.number().min(15).max(240).optional(),
