@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import { useEffect, useCallback, useRef, useState } from "react";
@@ -74,14 +74,14 @@ export function useNotifications(params: {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.notifications.list(params),
+    queryKey: ['notifications', 'list', params],
     queryFn: () => api.notifications.getMy(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
   // Get unread count
   const { data: unreadCount } = useQuery({
-    queryKey: queryKeys.notifications.unreadCount(),
+    queryKey: ['notifications', 'unreadCount'],
     queryFn: () => api.notifications.getUnreadCount(),
     staleTime: 1000 * 30, // 30 seconds
   });
@@ -90,7 +90,7 @@ export function useNotifications(params: {
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: string) => api.notifications.markAsRead(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to mark notification as read");
@@ -101,7 +101,7 @@ export function useNotifications(params: {
   const markAllAsReadMutation = useMutation({
     mutationFn: () => api.notifications.markAllAsRead(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success("All notifications marked as read");
     },
     onError: (error: MentaraApiError) => {
@@ -113,7 +113,7 @@ export function useNotifications(params: {
   const deleteNotificationMutation = useMutation({
     mutationFn: (notificationId: string) => api.notifications.delete(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success("Notification deleted");
     },
     onError: (error: MentaraApiError) => {
@@ -235,7 +235,7 @@ export function useNotifications(params: {
         
         // Add to cache
         queryClient.setQueryData(
-          queryKeys.notifications.list(params),
+          ['notifications', 'list', params],
           (oldData: Notification[] | undefined) => {
             if (!oldData) return [newNotification];
             return [newNotification, ...oldData];
@@ -244,7 +244,7 @@ export function useNotifications(params: {
 
         // Update unread count
         queryClient.setQueryData(
-          queryKeys.notifications.unreadCount(),
+          ['notifications', 'unreadCount'],
           (oldData: { count: number } | undefined) => ({
             count: (oldData?.count || 0) + 1
           })
@@ -262,7 +262,7 @@ export function useNotifications(params: {
         
         // Update cache
         queryClient.setQueryData(
-          queryKeys.notifications.list(params),
+          ['notifications', 'list', params],
           (oldData: Notification[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.map(notification =>
@@ -275,7 +275,7 @@ export function useNotifications(params: {
 
         // Update unread count
         queryClient.setQueryData(
-          queryKeys.notifications.unreadCount(),
+          ['notifications', 'unreadCount'],
           (oldData: { count: number } | undefined) => ({
             count: Math.max((oldData?.count || 1) - 1, 0)
           })
@@ -288,7 +288,7 @@ export function useNotifications(params: {
         
         // Remove from cache
         queryClient.setQueryData(
-          queryKeys.notifications.list(params),
+          ['notifications', 'list', params],
           (oldData: Notification[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.filter(notification => notification.id !== deletedNotificationId);
@@ -299,7 +299,7 @@ export function useNotifications(params: {
       case 'unread_count_updated':
         // Unread count updated (e.g., from another client)
         queryClient.setQueryData(
-          queryKeys.notifications.unreadCount(),
+          ['notifications', 'unreadCount'],
           { count: event.data.count }
         );
         break;
@@ -356,7 +356,7 @@ export function useNotifications(params: {
   const markAsReadEnhanced = useCallback((id: string) => {
     // Optimistically update local cache
     queryClient.setQueryData(
-      queryKeys.notifications.list(params),
+      ['notifications', 'list', params],
       (oldData: Notification[] | undefined) => {
         if (!oldData) return oldData;
         return oldData.map(notification =>
@@ -369,7 +369,7 @@ export function useNotifications(params: {
 
     // Update unread count optimistically
     queryClient.setQueryData(
-      queryKeys.notifications.unreadCount(),
+      ['notifications', 'unreadCount'],
       (oldData: { count: number } | undefined) => ({
         count: Math.max((oldData?.count || 1) - 1, 0)
       })

@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { queryKeys } from "@/lib/queryKeys";
+
 
 // Event Types
 export type EventType = 
@@ -113,7 +113,7 @@ export class RealTimeEventManager {
 
     // Update messages cache
     this.queryClient.setQueryData(
-      queryKeys.messages.conversation(event.conversationId),
+      ['messages', 'conversation', event.conversationId],
       (oldData: unknown) => {
         if (!oldData) return oldData;
         return {
@@ -125,7 +125,7 @@ export class RealTimeEventManager {
 
     // Update conversations list
     this.queryClient.invalidateQueries({ 
-      queryKey: queryKeys.conversations.list() 
+      queryKey: ['conversations', 'list'] 
     });
 
     // Show toast for new messages (not from current user)
@@ -141,7 +141,7 @@ export class RealTimeEventManager {
     if (!event.conversationId || !event.data) return;
 
     this.queryClient.setQueryData(
-      queryKeys.messages.conversation(event.conversationId),
+      ['messages', 'conversation', event.conversationId],
       (oldData: unknown) => {
         if (!oldData?.data) return oldData;
         return {
@@ -158,7 +158,7 @@ export class RealTimeEventManager {
     if (!event.conversationId || !event.data?.messageId) return;
 
     this.queryClient.setQueryData(
-      queryKeys.messages.conversation(event.conversationId),
+      ['messages', 'conversation', event.conversationId],
       (oldData: unknown) => {
         if (!oldData?.data) return oldData;
         return {
@@ -173,7 +173,7 @@ export class RealTimeEventManager {
     if (!event.conversationId || !event.data?.messageId) return;
 
     this.queryClient.setQueryData(
-      queryKeys.messages.conversation(event.conversationId),
+      ['messages', 'conversation', event.conversationId],
       (oldData: unknown) => {
         if (!oldData?.data) return oldData;
         return {
@@ -208,7 +208,7 @@ export class RealTimeEventManager {
 
     // Update notifications cache
     this.queryClient.setQueryData(
-      queryKeys.notifications.list(),
+      ['notifications', 'list'],
       (oldData: unknown) => {
         if (!oldData) return oldData;
         return {
@@ -220,7 +220,7 @@ export class RealTimeEventManager {
 
     // Update unread count
     this.queryClient.setQueryData(
-      queryKeys.notifications.unreadCount(),
+      ['notifications', 'unreadCount'],
       (oldCount: number = 0) => oldCount + 1
     );
 
@@ -257,7 +257,7 @@ export class RealTimeEventManager {
     if (!event.data) return;
 
     this.queryClient.setQueryData(
-      queryKeys.notifications.list(),
+      ['notifications', 'list'],
       (oldData: unknown) => {
         if (!oldData?.data) return oldData;
         return {
@@ -274,7 +274,7 @@ export class RealTimeEventManager {
     if (!event.data?.notificationId) return;
 
     this.queryClient.setQueryData(
-      queryKeys.notifications.list(),
+      ['notifications', 'list'],
       (oldData: unknown) => {
         if (!oldData?.data) return oldData;
         const notification = oldData.data.find((n: unknown) => n.id === event.data.notificationId);
@@ -283,7 +283,7 @@ export class RealTimeEventManager {
         // Update unread count if notification was unread
         if (notification && !notification.isRead) {
           this.queryClient.setQueryData(
-            queryKeys.notifications.unreadCount(),
+            ['notifications', 'unreadCount'],
             (oldCount: number = 0) => Math.max(0, oldCount - 1)
           );
         }
@@ -299,7 +299,7 @@ export class RealTimeEventManager {
   private handleNotificationReadAll(): void {
     // Mark all notifications as read
     this.queryClient.setQueryData(
-      queryKeys.notifications.list(),
+      ['notifications', 'list'],
       (oldData: unknown) => {
         if (!oldData?.data) return oldData;
         return {
@@ -314,7 +314,7 @@ export class RealTimeEventManager {
 
     // Reset unread count
     this.queryClient.setQueryData(
-      queryKeys.notifications.unreadCount(),
+      ['notifications', 'unreadCount'],
       0
     );
   }
@@ -325,7 +325,7 @@ export class RealTimeEventManager {
 
     // Update meeting cache
     this.queryClient.invalidateQueries({ 
-      queryKey: queryKeys.meetings.list() 
+      queryKey: ['meetings', 'list'] 
     });
 
     if (this.enableToasts) {
@@ -341,7 +341,7 @@ export class RealTimeEventManager {
 
     // Update meeting cache
     this.queryClient.invalidateQueries({ 
-      queryKey: queryKeys.meetings.list() 
+      queryKey: ['meetings', 'list'] 
     });
 
     if (this.enableToasts) {
@@ -380,7 +380,7 @@ export class RealTimeEventManager {
 
     // Update worksheets cache
     this.queryClient.invalidateQueries({ 
-      queryKey: queryKeys.worksheets.list() 
+      queryKey: ['worksheets', 'list'] 
     });
 
     if (this.enableToasts) {
@@ -396,7 +396,7 @@ export class RealTimeEventManager {
 
     // Update worksheets cache
     this.queryClient.invalidateQueries({ 
-      queryKey: queryKeys.worksheets.list() 
+      queryKey: ['worksheets', 'list'] 
     });
 
     if (this.enableToasts) {
@@ -412,7 +412,7 @@ export class RealTimeEventManager {
 
     // Update worksheets cache
     this.queryClient.invalidateQueries({ 
-      queryKey: queryKeys.worksheets.list() 
+      queryKey: ['worksheets', 'list'] 
     });
   }
 

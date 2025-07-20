@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { AuditLog, AuditLogParams } from '@/types/api';
 
@@ -11,7 +10,7 @@ export function useModeratorAuditLogs(params: AuditLogParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.auditLogs.search(params),
+    queryKey: ['moderator', 'auditLogs', 'search', params],
     queryFn: () => api.moderator.auditLogs.search(params),
     staleTime: 1000 * 60 * 5, // 5 minutes (audit logs are relatively stable)
     retry: (failureCount, error: MentaraApiError) => {
@@ -30,7 +29,7 @@ export function useModeratorAuditLogsStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.auditLogs.stats(),
+    queryKey: ['moderator', 'auditLogs', 'stats'],
     queryFn: () => api.moderator.auditLogs.getStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

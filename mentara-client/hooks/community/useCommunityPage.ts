@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { Post } from "@/types/api/communities";
 
@@ -22,7 +22,7 @@ export function useCommunityPage() {
 
   // Get selected community and room info
   const { data: selectedCommunity } = useQuery({
-    queryKey: queryKeys.communities.withStructureById(selectedCommunityId!),
+    queryKey: ['communities', 'withStructure', selectedCommunityId!],
     queryFn: () => selectedCommunityId ? api.communities.getCommunityWithStructure(selectedCommunityId) : null,
     enabled: !!selectedCommunityId,
   });
@@ -37,7 +37,7 @@ export function useCommunityPage() {
     isLoading: postsLoading, 
     error: postsError 
   } = useQuery({
-    queryKey: queryKeys.communities.roomPosts(selectedRoomId!),
+    queryKey: ['communities', 'roomPosts', selectedRoomId!],
     queryFn: () => selectedRoomId ? api.communities.getPostsByRoom(selectedRoomId) : null,
     enabled: !!selectedRoomId,
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -45,7 +45,7 @@ export function useCommunityPage() {
 
   // Get community stats
   const { data: communityStats } = useQuery({
-    queryKey: queryKeys.communities.stats(),
+    queryKey: ['communities', 'stats'],
     queryFn: () => api.communities.getCommunityStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -56,8 +56,8 @@ export function useCommunityPage() {
       api.communities.createPost(data),
     onSuccess: () => {
       // Invalidate relevant queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.stats() });
+      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+      queryClient.invalidateQueries({ queryKey: ['communities', 'stats'] });
       setNewPostTitle("");
       setNewPostContent("");
       setIsCreatePostOpen(false);
@@ -82,7 +82,7 @@ export function useCommunityPage() {
     mutationFn: ({ postId, isHearted }: { postId: string; isHearted: boolean }) =>
       isHearted ? api.communities.unheartPost(postId) : api.communities.heartPost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
+      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
     },
   });
 
@@ -136,7 +136,7 @@ export function useCommunityPage() {
   };
 
   const retryLoadPosts = () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.communities.roomPosts(selectedRoomId!) });
+    queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
   };
 
   const isPostingAllowed = () => {

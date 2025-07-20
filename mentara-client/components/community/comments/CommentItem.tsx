@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -80,7 +80,7 @@ export function CommentItem({
   const heartMutation = useMutation({
     mutationFn: (commentId: string) => api.comments.heart(commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.all });
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
     },
     onError: () => {
       toast.error('Failed to heart comment');

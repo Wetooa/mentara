@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MeetingType } from "@/types/booking";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -38,7 +38,7 @@ export function useBooking() {
   // Get available time slots
   const getAvailableSlots = (therapistId: string, date: string) => {
     return useQuery({
-      queryKey: queryKeys.booking.slots(therapistId, date),
+      queryKey: ['booking', 'slots', therapistId, date],
       queryFn: () => api.booking.availability.getSlots(therapistId, date),
       enabled: !!(therapistId && date),
       staleTime: 1000 * 60 * 5, // 5 minutes
@@ -50,7 +50,7 @@ export function useBooking() {
     data: durations,
     isLoading: isLoadingDurations,
   } = useQuery({
-    queryKey: queryKeys.booking.durations(),
+    queryKey: ['booking', 'durations'],
     queryFn: () => api.booking.durations.getAll(),
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
@@ -80,8 +80,8 @@ export function useBooking() {
       meetingType,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
+      queryClient.invalidateQueries({ queryKey: ['booking'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
       toast.success("Session booked successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -93,8 +93,8 @@ export function useBooking() {
   const cancelMeetingMutation = useMutation({
     mutationFn: (meetingId: string) => api.booking.meetings.cancel(meetingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
+      queryClient.invalidateQueries({ queryKey: ['booking'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
       toast.success("Meeting cancelled successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -119,8 +119,8 @@ export function useBooking() {
       };
     }) => api.booking.meetings.update(meetingId, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.booking.meetings.all() });
+      queryClient.invalidateQueries({ queryKey: ['booking'] });
+      queryClient.invalidateQueries({ queryKey: ['booking', 'meetings'] });
       toast.success("Meeting updated successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -180,7 +180,7 @@ export function useMeetings(filters: { status?: string; limit?: number; offset?:
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.booking.meetings.list(filters),
+    queryKey: ['booking', 'meetings', 'list', filters],
     queryFn: () => api.booking.meetings.getList(filters),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });

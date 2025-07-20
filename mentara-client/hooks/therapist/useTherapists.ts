@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import type {
   TherapistRecommendationResponse,
   TherapistSearchParams,
@@ -26,7 +26,7 @@ export function useTherapistRecommendations(
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.therapists.recommendations(params),
+    queryKey: ['therapists', 'recommendations', params],
     queryFn: (): Promise<TherapistRecommendationResponse> => {
       return api.therapists.getRecommendations(params);
     },
@@ -43,7 +43,7 @@ export function useTherapistProfile(therapistId: string | null) {
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.therapists.detail(therapistId || ""),
+    queryKey: ['therapists', 'detail', therapistId || ""],
     queryFn: () => api.therapists.getProfile(therapistId!),
     enabled: !!therapistId,
     staleTime: 1000 * 60 * 10, // Profile data is more stable
@@ -59,10 +59,10 @@ export function useInfiniteTherapistRecommendations(
   const api = useApi();
 
   return useInfiniteQuery({
-    queryKey: queryKeys.therapists.recommendations({
+    queryKey: ['therapists', 'recommendations', {
       ...baseParams,
       infinite: true,
-    }),
+    }],
     queryFn: ({ pageParam = 0 }) =>
       api.therapists.getRecommendations({
         ...baseParams,
@@ -277,7 +277,7 @@ export function usePrefetchTherapistProfile() {
 
   return (therapistId: string) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.therapists.detail(therapistId),
+      queryKey: ['therapists', 'detail', therapistId],
       queryFn: () => api.therapists.getProfile(therapistId),
       staleTime: 1000 * 60 * 10,
     });
@@ -293,13 +293,13 @@ export function useTherapistSearch() {
 
   const invalidateRecommendations = () => {
     queryClient.invalidateQueries({
-      queryKey: queryKeys.therapists.recommendations({}),
+      queryKey: ['therapists', 'recommendations'],
     });
   };
 
   const refetchWithParams = (params: TherapistSearchParams) => {
     return queryClient.fetchQuery({
-      queryKey: queryKeys.therapists.recommendations(params),
+      queryKey: ['therapists', 'recommendations', params],
       queryFn: () => api.therapists.getRecommendations(params),
     });
   };
