@@ -54,7 +54,7 @@ export class ClientAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      token: result.tokens.accessToken, // This is now the single token
+      token: result.tokens.accessToken, // Single JWT token
       message: result.message,
     };
   }

@@ -60,7 +60,18 @@ export class ClientAuthService {
         },
       });
 
-      return { user, client };
+      // Create preassessment record if answers are provided
+      let preAssessment = null;
+      if (registerDto.preassessmentAnswers && registerDto.preassessmentAnswers.length > 0) {
+        preAssessment = await tx.preAssessment.create({
+          data: {
+            clientId: user.id,
+            answers: registerDto.preassessmentAnswers,
+          },
+        });
+      }
+
+      return { user, client, preAssessment };
     });
 
     // Generate single token
@@ -101,8 +112,9 @@ export class ClientAuthService {
     return {
       user: result.user,
       tokens: { accessToken: token, refreshToken: token, expiresIn: 0 }, // For backward compatibility
-      message:
-        'Client registration successful. Please check your email for the verification code.',
+      message: result.preAssessment
+        ? 'Client registration and pre-assessment data saved successfully. Please check your email for the verification code.'
+        : 'Client registration successful. Please check your email for the verification code.',
     };
   }
 

@@ -92,7 +92,7 @@ export class AdminAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      token: result.token,
+      token: result.token, // Single JWT token
       message: 'Admin login successful',
     };
   }

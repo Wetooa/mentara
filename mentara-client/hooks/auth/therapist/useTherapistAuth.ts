@@ -6,11 +6,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useApi } from "@/lib/api";
-import { 
-  TherapistLoginDto, 
-  TherapistUser,
-  TherapistAuthResponse 
-} from "@/lib/api/services/auth";
+import type { 
+  LoginDto as TherapistLoginDto, 
+  TherapistAuthResponse
+} from "@/lib/api";
+
+// Temporary type - should come from mentara-commons
+interface TherapistUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'therapist';
+  emailVerified: boolean;
+}
 
 export interface UseTherapistAuthReturn {
   // Auth state
