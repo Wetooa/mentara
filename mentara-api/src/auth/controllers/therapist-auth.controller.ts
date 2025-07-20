@@ -121,10 +121,10 @@ export class TherapistAuthController {
       // Validate required documents are present
       const requiredDocs = ['prcLicense', 'nbiClearance', 'resumeCV'];
       const hasFiles = files && files.length > 0;
-      
+
       if (!hasFiles) {
         throw new BadRequestException(
-          'Required documents must be uploaded: PRC License, NBI Clearance, Resume/CV'
+          'Required documents must be uploaded: PRC License, NBI Clearance, Resume/CV',
         );
       }
 
@@ -133,6 +133,8 @@ export class TherapistAuthController {
       if (fileTypes) {
         try {
           fileTypeMap = JSON.parse(fileTypes);
+          console.log('DEBUG: fileTypes received:', fileTypes);
+          console.log('DEBUG: parsed fileTypeMap:', fileTypeMap);
         } catch {
           console.warn('Invalid fileTypes JSON, proceeding without mapping');
         }
@@ -140,28 +142,60 @@ export class TherapistAuthController {
 
       // Validate that all required document types are present
       const uploadedDocTypes = Object.values(fileTypeMap);
-      const missingDocs = requiredDocs.filter(doc => !uploadedDocTypes.includes(doc));
-      
+      console.log(
+        'DEBUG: uploadedDocTypes from fileTypeMap:',
+        uploadedDocTypes,
+      );
+      console.log('DEBUG: requiredDocs expected:', requiredDocs);
+      console.log('DEBUG: files received count:', files?.length || 0);
+      console.log(
+        'DEBUG: files details:',
+        files?.map((f) => ({ name: f.originalname, mimetype: f.mimetype })),
+      );
+
+      const missingDocs = requiredDocs.filter(
+        (doc) => !uploadedDocTypes.includes(doc),
+      );
+      console.log('DEBUG: missingDocs calculated:', missingDocs);
+
       if (missingDocs.length > 0) {
-        const missingNames = missingDocs.map(doc => {
-          const docNames = {
-            prcLicense: 'PRC License',
-            nbiClearance: 'NBI Clearance', 
-            resumeCV: 'Resume/CV',
-          };
-          return docNames[doc as keyof typeof docNames];
-        }).join(', ');
-        
+        const missingNames = missingDocs
+          .map((doc) => {
+            const docNames = {
+              prcLicense: 'PRC License',
+              nbiClearance: 'NBI Clearance',
+              resumeCV: 'Resume/CV',
+            };
+            return docNames[doc as keyof typeof docNames];
+          })
+          .join(', ');
+
         throw new BadRequestException(
-          `Missing required documents: ${missingNames}`
+          `Missing required documents: ${missingNames}`,
         );
       }
 
       // Create unified therapist registration with documents
-      const result = await this.therapistAuthService.registerTherapistWithDocuments(
-        registerData,
-        files || [],
-        fileTypeMap,
+      console.log(
+        'DEBUG: About to call registerTherapistWithDocuments with data:',
+        {
+          email: registerData.email,
+          firstName: registerData.firstName,
+          lastName: registerData.lastName,
+          filesCount: files?.length || 0,
+          fileTypeMapKeys: Object.keys(fileTypeMap),
+        },
+      );
+
+      const result =
+        await this.therapistAuthService.registerTherapistWithDocuments(
+          registerData,
+          files || [],
+          fileTypeMap,
+        );
+
+      console.log(
+        'DEBUG: registerTherapistWithDocuments completed successfully',
       );
 
       return {
@@ -195,10 +229,21 @@ export class TherapistAuthController {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
+      // Enhanced error handling for user registration scenarios
+      if (errorMessage.includes('already have a therapist account')) {
+        throw new BadRequestException(
+          'You already have a therapist account with this email. Please sign in to your existing account instead.',
+        );
+      }
+
       if (errorMessage.includes('email already exists')) {
         throw new BadRequestException(
           'An account with this email address already exists. Please use a different email or try logging in.',
         );
+      }
+
+      if (errorMessage.includes('privileges. Please contact support')) {
+        throw new BadRequestException(errorMessage);
       }
 
       if (errorMessage.includes('file upload')) {
@@ -251,7 +296,6 @@ export class TherapistAuthController {
       expiresIn: 0, // Non-expiring
     };
   }
-
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
