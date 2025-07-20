@@ -136,6 +136,22 @@ export class AuthController {
     return UserResponseDto.fromPrismaUser(user);
   }
 
+  // ===== SECURE ROLE CHECKING ENDPOINT =====
+
+  @UseGuards(JwtAuthGuard)
+  @Get('user-role')
+  async getUserRole(@CurrentUserId() userId: string): Promise<{ role: string; userId: string }> {
+    const user = await this.authService.validateUser(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    
+    return {
+      role: user.role,
+      userId: user.id,
+    };
+  }
+
   // Role-specific profile endpoints moved to dedicated controllers:
   // - /auth/client/profile
   // - /auth/therapist/profile

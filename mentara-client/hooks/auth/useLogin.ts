@@ -19,13 +19,10 @@ export function useLogin() {
       // Use universal login endpoint
       const response = await api.auth.login(credentials);
 
-      // Store token in localStorage
+      // Store only token in localStorage (secure)
       localStorage.setItem("token", response.token);
 
-      // Store user data
-      localStorage.setItem("user", JSON.stringify(response.user));
-
-      // Redirect based on role
+      // Redirect based on role (from server response)
       const dashboardPath = `/${response.user.role}`;
       router.push(dashboardPath);
     } catch (error) {

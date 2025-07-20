@@ -28,8 +28,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRole } from "@/hooks/user/useRole";
+import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
+
 
 export default function ModeratorLayout({
   children,
@@ -39,34 +39,12 @@ export default function ModeratorLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isModerator, canAccess } = useRole();
-  const { user, isLoaded, logout, isAuthenticated } = useAuth();
+  const { isLoading, isAuthorized } = useRoleCheck("moderator");
 
-  // Route protection: only allow moderator role access
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/sign-in');
-      return;
-    }
-    
-    if (!canAccess('moderator')) {
-      // Redirect to appropriate dashboard based on role
-      if (user?.role === 'client') {
-        router.push('/user');
-      } else if (user?.role === 'admin') {
-        router.push('/admin');
-      } else if (user?.role === 'therapist') {
-        router.push('/therapist');
-      } else {
-        router.push('/auth/sign-in');
-      }
-    }
-  }, [isAuthenticated, canAccess, user?.role, router]);
-
-  // Moderator data from auth user
+  // Moderator data - simplified since we only need display info
   const moderator = {
-    name: user?.firstName ? `${user.firstName} ${user.lastName}` : "Moderator",
-    email: user?.email || "moderator@mentara.com",
+    name: "Moderator",
+    email: "moderator@mentara.com",
     avatarUrl: "/icons/user-avatar.png",
   };
 
@@ -105,27 +83,28 @@ export default function ModeratorLayout({
 
   const handleLogout = async () => {
     try {
-      await logout();
+      // Clear token and redirect to sign-in
+      localStorage.removeItem("token");
+      router.push("/auth/sign-in");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  // Show loading state while user data is loading
-  if (!isLoaded) {
+  // Show loading state while checking authorization
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-gray-500">Loading moderator dashboard...</p>
+          <p className="text-sm text-gray-500">Verifying access permissions...</p>
         </div>
       </div>
     );
   }
 
-  // If not a moderator, redirect to main page (middleware should handle this)
-  if (!isModerator) {
-    router.push("/");
+  // If not authorized, the hook handles redirection automatically
+  if (!isAuthorized) {
     return null;
   }
 

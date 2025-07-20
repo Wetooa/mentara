@@ -34,6 +34,15 @@ export function createAuthService(client: AxiosInstance) {
       return response.data.data;
     },
 
+    /**
+     * Get current user role (secure)
+     * GET /auth/user-role
+     */
+    async getUserRole(): Promise<{ role: string; userId: string }> {
+      const response = await client.get("/auth/user-role");
+      return response.data.data;
+    },
+
     // ================================
     // CLIENT AUTH (/auth/client)
     // ================================

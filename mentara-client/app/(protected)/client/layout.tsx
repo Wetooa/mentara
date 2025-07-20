@@ -5,11 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Menu, X } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
 import { LogOut } from "lucide-react";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { UserSearchBar, User } from "@/components/search";
-import { useRole } from "@/hooks/user/useRole";
+
 
 export default function MainLayout({
   children,
@@ -18,30 +18,8 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout, isAuthenticated } = useAuth();
-  const { canAccess } = useRole();
+  const { isLoading, isAuthorized } = useRoleCheck("client");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Route protection: only allow client role access
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/sign-in');
-      return;
-    }
-    
-    if (!canAccess('client')) {
-      // Redirect to appropriate dashboard based on role
-      if (user?.role === 'admin') {
-        router.push('/admin');
-      } else if (user?.role === 'moderator') {
-        router.push('/moderator');
-      } else if (user?.role === 'therapist') {
-        router.push('/therapist');
-      } else {
-        router.push('/auth/sign-in');
-      }
-    }
-  }, [isAuthenticated, canAccess, user?.role, router]);
 
   const handleUserSelect = (user: User) => {
     // Navigate to user profile or handle user selection
@@ -52,7 +30,9 @@ export default function MainLayout({
 
   const handleLogout = async () => {
     try {
-      await logout();
+      // Clear token and redirect to sign-in
+      localStorage.removeItem("token");
+      router.push("/auth/sign-in");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -91,6 +71,23 @@ export default function MainLayout({
       id: "worksheets",
     },
   ];
+
+  // Show loading state while checking authorization
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent" />
+          <p className="text-sm text-gray-500">Verifying access permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authorized, the hook handles redirection automatically
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <ToastProvider>
@@ -250,7 +247,7 @@ export default function MainLayout({
 
               <div className="flex items-center gap-2">
                 <span className="hidden text-sm font-medium text-gray-700 sm:block">
-                  {user?.firstName || "User"}
+                  User
                 </span>
                 <div className="h-8 w-8 overflow-hidden rounded-full bg-gray-200">
                   <Image

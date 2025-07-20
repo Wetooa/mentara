@@ -5,9 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, User, LogOut, ChevronDown } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
-import { useRole } from "@/hooks/user/useRole";
+
 
 export default function TherapistLayout({
   children,
@@ -16,35 +16,15 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user, isAuthenticated } = useAuth();
-  const { canAccess } = useRole();
+  const { isLoading, isAuthorized } = useRoleCheck("therapist");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-  // Route protection: only allow therapist role access
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/sign-in');
-      return;
-    }
-    
-    if (!canAccess('therapist')) {
-      // Redirect to appropriate dashboard based on role
-      if (user?.role === 'client') {
-        router.push('/user');
-      } else if (user?.role === 'moderator') {
-        router.push('/moderator');
-      } else if (user?.role === 'admin') {
-        router.push('/admin');
-      } else {
-        router.push('/auth/sign-in');
-      }
-    }
-  }, [isAuthenticated, canAccess, user?.role, router]);
 
   // Handle logout
   const handleLogout = async () => {
     try {
-      await logout();
+      // Clear token and redirect to sign-in
+      localStorage.removeItem("token");
+      router.push("/auth/sign-in");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -299,6 +279,23 @@ export default function TherapistLayout({
       id: "requests",
     },
   ];
+
+  // Show loading state while checking authorization
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-gray-500">Verifying access permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authorized, the hook handles redirection automatically
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">

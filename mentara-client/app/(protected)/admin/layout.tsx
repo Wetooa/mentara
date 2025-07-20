@@ -29,8 +29,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRole } from "@/hooks/user/useRole";
+import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
+
 
 export default function AdminLayout({
   children,
@@ -40,34 +40,12 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAdmin, canAccess } = useRole();
-  const { user, isLoaded, logout, isAuthenticated } = useAuth();
+  const { isLoading, isAuthorized, userRole, userId } = useRoleCheck("admin");
 
-  // Route protection: only allow admin role access
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/sign-in');
-      return;
-    }
-    
-    if (!canAccess('admin')) {
-      // Redirect to appropriate dashboard based on role
-      if (user?.role === 'client') {
-        router.push('/user');
-      } else if (user?.role === 'moderator') {
-        router.push('/moderator');
-      } else if (user?.role === 'therapist') {
-        router.push('/therapist');
-      } else {
-        router.push('/auth/sign-in');
-      }
-    }
-  }, [isAuthenticated, canAccess, user?.role, router]);
-
-  // Admin data from auth user
+  // Admin data - simplified since we only need display info
   const admin = {
-    name: user?.firstName ? `${user.firstName} ${user.lastName}` : "Admin User",
-    email: user?.email || "admin@mentara.com",
+    name: "Admin User",
+    email: "admin@mentara.com",
     avatarUrl: "/icons/user-avatar.png",
   };
 
@@ -111,27 +89,28 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      await logout();
+      // Clear token and redirect to sign-in
+      localStorage.removeItem("token");
+      router.push("/auth/sign-in");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  // Show loading state while user data is loading
-  if (!isLoaded) {
+  // Show loading state while checking authorization
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-gray-500">Loading admin dashboard...</p>
+          <p className="text-sm text-gray-500">Verifying access permissions...</p>
         </div>
       </div>
     );
   }
 
-  // If not an admin, redirect to main page (middleware should handle this)
-  if (!isAdmin) {
-    router.push("/");
+  // If not authorized, the hook handles redirection automatically
+  if (!isAuthorized) {
     return null;
   }
 
