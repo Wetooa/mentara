@@ -52,7 +52,7 @@ export default function ClientWelcomePage() {
     onSuccess: () => {
       toast.success(`Successfully sent ${selectedTherapists.length} therapist requests!`);
       queryClient.invalidateQueries({ queryKey: ['user', 'therapist-requests'] });
-      router.push('/user/dashboard?tab=therapist-requests');
+      router.push('/client/dashboard?tab=therapist-requests');
     },
     onError: () => {
       toast.error('Failed to send therapist requests. Please try again.');
@@ -84,7 +84,7 @@ export default function ClientWelcomePage() {
   };
 
   const handleSkipForNow = () => {
-    router.push('/user/dashboard');
+    router.push('/client/dashboard');
   };
 
   const maxSelections = 5;
@@ -258,7 +258,7 @@ export default function ClientWelcomePage() {
               We don&apos;t have any therapist recommendations available at the moment. 
               You can browse all available therapists from your dashboard.
             </p>
-            <Button onClick={() => router.push('/user/therapist')} className="w-full">
+            <Button onClick={() => router.push('/client/therapist')} className="w-full">
               <ArrowRight className="h-4 w-4 mr-2" />
               Browse All Therapists
             </Button>

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Menu, X } from "lucide-react";
-import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
+import { useAuth } from "@/contexts/AuthContext";
 import { LogOut } from "lucide-react";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { UserSearchBar, User } from "@/components/search";
@@ -18,76 +18,53 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isLoading, isAuthorized } = useRoleCheck("client");
+  const { logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleUserSelect = (user: User) => {
     // Navigate to user profile or handle user selection
     console.log("Selected user:", user);
     // For now, we'll just log the user. In a real app, you might navigate to their profile
-    router.push(`/user/profile/${user.id}`);
+    router.push(`/client/profile/${user.id}`);
   };
 
-  const handleLogout = async () => {
-    try {
-      // Clear token and redirect to sign-in
-      localStorage.removeItem("token");
-      router.push("/auth/sign-in");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   // Navigation menu items
   const navItems = [
     {
       name: "Dashboard",
-      path: "/user",
+      path: "/client",
       icon: "/icons/dashboard.svg",
       id: "dashboard",
     },
     {
       name: "Therapist",
-      path: "/user/therapist",
+      path: "/client/therapist",
       icon: "/icons/therapist.svg",
       id: "therapist",
     },
     {
       name: "Community",
-      path: "/user/community",
+      path: "/client/community",
       icon: "/icons/community.svg",
       id: "community",
     },
     {
       name: "Messages",
-      path: "/user/messages",
+      path: "/client/messages",
       icon: "/icons/messages.svg",
       id: "messages",
     },
     {
       name: "Worksheets",
-      path: "/user/worksheets",
+      path: "/client/worksheets",
       icon: "/icons/worksheets.svg",
       id: "worksheets",
     },
   ];
-
-  // Show loading state while checking authorization
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent" />
-          <p className="text-sm text-gray-500">Verifying access permissions...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authorized, the hook handles redirection automatically
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <ToastProvider>

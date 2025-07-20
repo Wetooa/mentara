@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/components/providers/QueryProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Mentara",
@@ -27,8 +27,8 @@ export default function RootLayout({
       <body
         className={`font-[Futura] antialiased min-h-screen min-w-screen h-screen w-screen`}
       >
-        <AuthProvider>
-          <QueryProvider>
+        <QueryProvider>
+          <AuthProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="light"
@@ -39,8 +39,8 @@ export default function RootLayout({
               {children}
               <Toaster />
             </ThemeProvider>
-          </QueryProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

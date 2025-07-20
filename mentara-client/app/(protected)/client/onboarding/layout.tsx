@@ -15,10 +15,10 @@ export default function OnboardingLayout({
   
   // Define onboarding steps
   const steps = [
-    { name: "Profile", path: "/user/onboarding/profile" },
-    { name: "Goals", path: "/user/onboarding/goals" },
-    { name: "Preferences", path: "/user/onboarding/therapist-preferences" },
-    { name: "Complete", path: "/user/onboarding/complete" },
+    { name: "Profile", path: "/client/onboarding/profile" },
+    { name: "Goals", path: "/client/onboarding/goals" },
+    { name: "Preferences", path: "/client/onboarding/therapist-preferences" },
+    { name: "Complete", path: "/client/onboarding/complete" },
   ];
 
   // Calculate current step
@@ -31,7 +31,7 @@ export default function OnboardingLayout({
       <header className="bg-white border-b border-gray-200 px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link
-            href="/user"
+            href="/client"
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
           >
             <ArrowLeft className="h-5 w-5" />

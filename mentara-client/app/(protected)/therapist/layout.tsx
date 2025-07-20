@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, User, LogOut, ChevronDown } from "lucide-react";
-import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
+import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 
 
@@ -16,18 +16,12 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isLoading, isAuthorized } = useRoleCheck("therapist");
+  const { logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
-  const handleLogout = async () => {
-    try {
-      // Clear token and redirect to sign-in
-      localStorage.removeItem("token");
-      router.push("/auth/sign-in");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   // Handle user selection from search
@@ -279,23 +273,6 @@ export default function TherapistLayout({
       id: "requests",
     },
   ];
-
-  // Show loading state while checking authorization
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-gray-500">Verifying access permissions...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authorized, the hook handles redirection automatically
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">

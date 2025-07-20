@@ -46,7 +46,7 @@ export default function UserError({ error, reset }: UserErrorProps) {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => router.push('/user')}
+              onClick={() => router.push('/client')}
               className="w-full"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

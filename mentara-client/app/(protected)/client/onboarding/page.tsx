@@ -8,7 +8,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     // Redirect to the first step of onboarding
-    router.push("/user/onboarding/profile");
+    router.push("/client/onboarding/profile");
   }, [router]);
 
   return (

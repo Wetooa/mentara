@@ -74,7 +74,7 @@ export default function GoalsPage() {
       });
       
       // Navigate to next step
-      router.push("/user/onboarding/therapist-preferences");
+      router.push("/client/onboarding/therapist-preferences");
     } catch {
       toast({
         title: "Error",
@@ -348,7 +348,7 @@ export default function GoalsPage() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => router.push("/user/onboarding/profile")}
+                  onClick={() => router.push("/client/onboarding/profile")}
                 >
                   Back
                 </Button>

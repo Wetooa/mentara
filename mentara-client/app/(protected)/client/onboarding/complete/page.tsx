@@ -110,7 +110,7 @@ export default function OnboardingCompletePage() {
         });
         
         // Redirect to welcome page with therapist recommendations
-        router.push("/user/welcome");
+        router.push("/client/welcome");
       } else {
         throw new Error("Failed to complete onboarding");
       }
@@ -160,7 +160,7 @@ export default function OnboardingCompletePage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="text-gray-500 mb-4">Loading your profile...</div>
-          <Button onClick={() => router.push("/user/onboarding/profile")}>
+          <Button onClick={() => router.push("/client/onboarding/profile")}>
             Start Onboarding
           </Button>
         </div>
@@ -334,7 +334,7 @@ export default function OnboardingCompletePage() {
       <div className="flex justify-center space-x-4">
         <Button 
           variant="outline" 
-          onClick={() => router.push("/user/onboarding/therapist-preferences")}
+          onClick={() => router.push("/client/onboarding/therapist-preferences")}
         >
           Back to Preferences
         </Button>

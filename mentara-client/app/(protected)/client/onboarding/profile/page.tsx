@@ -80,7 +80,7 @@ export default function ProfilePage() {
       });
       
       // Navigate to next step
-      router.push("/user/onboarding/goals");
+      router.push("/client/onboarding/goals");
     } catch {
       toast({
         title: "Error",

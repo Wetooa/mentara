@@ -24,11 +24,11 @@ export default function VerifyPage() {
           // Handle OAuth callback or email verification
           await handleOAuthCallback(token);
           toast.success("Account verified successfully! Welcome to Mentara!");
-          router.push("/user/onboarding/profile");
+          router.push("/client/onboarding/profile");
         } else {
           // Check if user is already authenticated (coming from email verification)
           toast.success("Email verified successfully! Welcome to Mentara!");
-          router.push("/user/onboarding/profile");
+          router.push("/client/onboarding/profile");
         }
       } catch (error) {
         console.error("Verification error:", error);

@@ -29,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRoleCheck } from "@/hooks/auth/useRoleCheck";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 export default function AdminLayout({
@@ -40,11 +40,11 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isLoading, isAuthorized } = useRoleCheck("admin");
+  const { user, logout } = useAuth();
 
-  // Admin data - simplified since we only need display info
+  // Admin data - can use real user data now
   const admin = {
-    name: "Admin User",
+    name: user ? `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} User` : "Admin User",
     email: "admin@mentara.com",
     avatarUrl: "/icons/user-avatar.png",
   };
@@ -87,32 +87,9 @@ export default function AdminLayout({
     },
   ];
 
-  const handleLogout = async () => {
-    try {
-      // Clear token and redirect to sign-in
-      localStorage.removeItem("token");
-      router.push("/auth/sign-in");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
-
-  // Show loading state while checking authorization
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-gray-500">Verifying access permissions...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authorized, the hook handles redirection automatically
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">

@@ -95,7 +95,7 @@ export default function TherapistPreferencesPage() {
       });
       
       // Navigate to completion page
-      router.push("/user/onboarding/complete");
+      router.push("/client/onboarding/complete");
     } catch {
       toast({
         title: "Error",
@@ -470,7 +470,7 @@ export default function TherapistPreferencesPage() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => router.push("/user/onboarding/goals")}
+                  onClick={() => router.push("/client/onboarding/goals")}
                 >
                   Back
                 </Button>
