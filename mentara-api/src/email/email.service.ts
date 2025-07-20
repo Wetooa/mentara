@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import emailjs from '@emailjs/nodejs';
-import { 
-  type OtpEmailData, 
+import {
+  type OtpEmailData,
   type EmailResponse,
-  type OtpType 
+  type OtpType,
 } from 'mentara-commons';
-import { 
-  OtpEmailTemplate, 
+import {
+  OtpEmailTemplate,
   TherapistNotificationTemplate,
-  type TherapistNotificationData 
+  type TherapistNotificationData,
 } from './templates';
 
 export interface EmailNotificationData {
@@ -35,13 +35,15 @@ export class EmailService {
 
   // Template instances
   private readonly otpTemplate = new OtpEmailTemplate();
-  private readonly therapistNotificationTemplate = new TherapistNotificationTemplate();
+  private readonly therapistNotificationTemplate =
+    new TherapistNotificationTemplate();
 
   // EmailJS configuration
   private readonly config = {
     serviceId: process.env.EMAILJS_SERVICE_ID || '',
     templateId: process.env.EMAILJS_TEMPLATE_ID || '',
     publicKey: process.env.EMAILJS_PUBLIC_KEY || '',
+    privateKey: process.env.EMAILJS_PRIVATE_KEY || '',
   };
 
   // Brand colors for Mentara
@@ -64,9 +66,17 @@ export class EmailService {
   private initializeEmailJS() {
     try {
       if (this.config.publicKey) {
-        emailjs.init({
+        const initConfig: any = {
           publicKey: this.config.publicKey,
-        });
+        };
+        
+        // Add private key if available for enhanced security
+        if (this.config.privateKey) {
+          initConfig.privateKey = this.config.privateKey;
+          this.logger.log('EmailJS initializing with private key for enhanced security');
+        }
+
+        emailjs.init(initConfig);
         this.isInitialized = true;
         this.logger.log('EmailJS initialized successfully');
       } else {
@@ -93,7 +103,9 @@ export class EmailService {
    * @param data Therapist notification data
    * @returns Email template with HTML and text content
    */
-  generateTherapistNotificationTemplate(data: TherapistNotificationData): EmailTemplate {
+  generateTherapistNotificationTemplate(
+    data: TherapistNotificationData,
+  ): EmailTemplate {
     return this.therapistNotificationTemplate.generate(data);
   }
 
@@ -106,7 +118,8 @@ export class EmailService {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -139,7 +152,8 @@ export class EmailService {
         message: 'OTP email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('❌ Failed to send OTP email:', errorMessage);
 
       return {
@@ -154,11 +168,14 @@ export class EmailService {
    * @param data Therapist notification data
    * @returns Promise with operation result
    */
-  async sendTherapistApplicationNotification(data: TherapistNotificationData): Promise<EmailResponse> {
+  async sendTherapistApplicationNotification(
+    data: TherapistNotificationData,
+  ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -182,15 +199,22 @@ export class EmailService {
         templateParams,
       );
 
-      this.logger.log('✅ Therapist notification email sent successfully:', response);
+      this.logger.log(
+        '✅ Therapist notification email sent successfully:',
+        response,
+      );
 
       return {
         status: 'success',
         message: 'Therapist notification email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error('❌ Failed to send therapist notification email:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        '❌ Failed to send therapist notification email:',
+        errorMessage,
+      );
 
       return {
         status: 'error',
@@ -205,7 +229,7 @@ export class EmailService {
   async sendTherapistWelcomeEmail(
     email: string,
     name: string,
-    credentials?: { email: string; password: string }
+    credentials?: { email: string; password: string },
   ): Promise<EmailResponse> {
     // Implementation would use a TherapistWelcomeTemplate (to be created)
     // For now, return a placeholder
@@ -222,7 +246,7 @@ export class EmailService {
   async sendTherapistRejectionEmail(
     email: string,
     name: string,
-    reason?: string
+    reason?: string,
   ): Promise<EmailResponse> {
     // Implementation would use a TherapistRejectionTemplate (to be created)
     // For now, return a placeholder
@@ -245,7 +269,8 @@ export class EmailService {
     if (!this.isInitialized) {
       return {
         status: 'error',
-        message: 'EmailJS not properly initialized. Check environment variables.',
+        message:
+          'EmailJS not properly initialized. Check environment variables.',
       };
     }
 
@@ -273,7 +298,8 @@ export class EmailService {
         message: 'Email sent successfully',
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('❌ Failed to send generic email:', errorMessage);
 
       return {
@@ -331,12 +357,14 @@ export class EmailService {
     hasServiceId: boolean;
     hasTemplateId: boolean;
     hasPublicKey: boolean;
+    hasPrivateKey: boolean;
   } {
     return {
       isInitialized: this.isInitialized,
       hasServiceId: !!this.config.serviceId,
       hasTemplateId: !!this.config.templateId,
       hasPublicKey: !!this.config.publicKey,
+      hasPrivateKey: !!this.config.privateKey,
     };
   }
 }
