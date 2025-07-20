@@ -127,7 +127,10 @@ export class TherapistAuthService {
         return { user, therapist, isExistingUser: false };
       } catch (error) {
         // Handle unique constraint violation (P2002) for email
-        if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002' && 
+            'meta' in error && error.meta && typeof error.meta === 'object' && 
+            'target' in error.meta && Array.isArray(error.meta.target) && 
+            error.meta.target.includes('email')) {
           // Check existing user and their role
           const existingUser = await tx.user.findUnique({
             where: { email: registerData.email },
