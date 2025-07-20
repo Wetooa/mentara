@@ -38,7 +38,11 @@ import { AuthService } from './auth.service';
 import { EmailVerificationService } from './services/email-verification.service';
 import { PasswordResetService } from './services/password-reset.service';
 import { Request } from 'express';
-import { AuthResponseDto, UserResponseDto, SuccessMessageDto } from '../common/dto';
+import {
+  AuthResponseDto,
+  UserResponseDto,
+  SuccessMessageDto,
+} from '../common/dto';
 
 @Controller('auth')
 export class AuthController {
@@ -72,7 +76,9 @@ export class AuthController {
   @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 logout attempts per 5 minutes
   @Post('force-logout')
   @HttpCode(HttpStatus.OK)
-  async forceLogout(@CurrentUserId() id: string): Promise<SuccessMessageResponse> {
+  async forceLogout(
+    @CurrentUserId() id: string,
+  ): Promise<SuccessMessageResponse> {
     await this.authService.forceLogout(id);
     return new SuccessMessageDto('Successfully logged out from all devices');
   }
@@ -127,7 +133,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@CurrentUserId() userId: string): Promise<SuccessMessageResponse> {
+  async logout(
+    @CurrentUserId() userId: string,
+  ): Promise<SuccessMessageResponse> {
     await this.authService.logout(userId);
     return new SuccessMessageDto('Logged out successfully');
   }
@@ -160,7 +168,7 @@ export class AuthController {
   ): Promise<SuccessMessageResponse> {
     await this.passwordResetService.requestPasswordReset(requestResetDto.email);
     return new SuccessMessageDto(
-      'If an account with that email exists, we will send a password reset link.'
+      'If an account with that email exists, we will send a password reset link.',
     );
   }
 

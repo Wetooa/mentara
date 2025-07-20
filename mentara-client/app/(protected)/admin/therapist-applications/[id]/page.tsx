@@ -66,7 +66,7 @@ export default function TherapistApplicationPage(props: {
         </div>
       ) : application ? (
         <TherapistApplicationDetails
-          application={application}
+          application={application.data}
           onStatusChange={() => {}}
         />
       ) : (

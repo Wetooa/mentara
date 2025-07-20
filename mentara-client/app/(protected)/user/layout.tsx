@@ -120,7 +120,10 @@ export default function MainLayout({
         {/* Mobile Navigation Overlay */}
         {isMobileMenuOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
-            <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
+            <div
+              className="fixed inset-0 bg-black/50"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
             <nav className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg flex flex-col">
               <div className="flex items-center justify-between p-4 border-b">
                 <Image
@@ -137,7 +140,7 @@ export default function MainLayout({
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              
+
               <div className="flex-1 px-4 py-6">
                 <div className="space-y-2">
                   {navItems.map((item) => {
@@ -158,7 +161,9 @@ export default function MainLayout({
                           alt={item.name}
                           width={20}
                           height={20}
-                          className={isActive ? "text-green-800" : "text-gray-500"}
+                          className={
+                            isActive ? "text-green-800" : "text-gray-500"
+                          }
                         />
                         <span className="font-medium">{item.name}</span>
                       </Link>
@@ -166,7 +171,7 @@ export default function MainLayout({
                   })}
                 </div>
               </div>
-              
+
               <div className="border-t p-4">
                 <button
                   onClick={handleLogout}
@@ -255,7 +260,8 @@ export default function MainLayout({
 
           {/* Main Content - Responsive padding */}
           <main className="flex-1 w-full h-full pt-[60px] md:pt-[60px] pb-16 md:pb-0 overflow-y-auto bg-gray-100">
-            <div className="md:hidden h-[50px]" /> {/* Extra space for mobile search */}
+            <div className="md:hidden h-[50px]" />{" "}
+            {/* Extra space for mobile search */}
             {children}
           </main>
 
@@ -269,9 +275,7 @@ export default function MainLayout({
                     key={item.id}
                     href={item.path}
                     className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 ${
-                      isActive
-                        ? "text-green-800"
-                        : "text-gray-500"
+                      isActive ? "text-green-800" : "text-gray-500"
                     }`}
                   >
                     <Image
