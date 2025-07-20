@@ -21,7 +21,6 @@ import {
   type RegisterAdminDto,
   type LoginDto,
   type AdminAuthResponse,
-  type SuccessResponse,
 } from 'mentara-commons';
 import { AdminAuthService } from '../services/admin-auth.service';
 import { Request } from 'express';

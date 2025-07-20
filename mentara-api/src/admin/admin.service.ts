@@ -60,67 +60,6 @@ export class AdminService {
     }
   }
 
-  async create(data: CreateAdminDto): Promise<AdminResponseDto> {
-    try {
-      // First check if user exists
-      const userExists = await this.prisma.user.findUnique({
-        where: { id: data.userId },
-      });
-
-      if (!userExists) {
-        throw new NotFoundException(`User with ID ${data.userId} not found`);
-      }
-
-      // Check if admin already exists
-      const existingAdmin = await this.prisma.admin.findUnique({
-        where: { userId: data.userId },
-      });
-
-      if (existingAdmin) {
-        throw new ConflictException(`User ${data.userId} is already an admin`);
-      }
-
-      const admin = await this.prisma.admin.create({
-        data: {
-          userId: data.userId,
-          permissions: data.permissions,
-          adminLevel: data.adminLevel ?? 'admin',
-        },
-      });
-
-      this.logger.log(`Created admin for user ${data.userId}`);
-
-      return {
-        userId: admin.userId,
-        permissions: admin.permissions,
-        adminLevel: admin.adminLevel,
-        createdAt: admin.createdAt,
-        updatedAt: admin.updatedAt,
-      };
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ConflictException
-      ) {
-        throw error;
-      }
-
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictException(
-            `User ${data.userId} is already an admin`,
-          );
-        }
-        if (error.code === 'P2003') {
-          throw new NotFoundException(`User with ID ${data.userId} not found`);
-        }
-      }
-
-      this.logger.error('Failed to create admin:', error);
-      throw error;
-    }
-  }
-
   async update(id: string, data: UpdateAdminDto): Promise<AdminResponseDto> {
     try {
       const admin = await this.prisma.admin.update({
@@ -527,14 +466,16 @@ export class AdminService {
       // Matching analytics removed - not needed for student project
       // Return basic stats instead
       const totalTherapists = await this.prisma.therapist.count({
-        where: { status: 'APPROVED' }
+        where: { status: 'APPROVED' },
       });
       const totalClients = await this.prisma.client.count();
 
       return {
-        period: { 
-          start: startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          end: endDate ? new Date(endDate) : new Date()
+        period: {
+          start: startDate
+            ? new Date(startDate)
+            : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          end: endDate ? new Date(endDate) : new Date(),
         },
         metrics: {
           totalTherapists,
@@ -556,7 +497,6 @@ export class AdminService {
   }
 
   // ===== CONTENT MODERATION =====
-
   async getFlaggedContent(params: {
     type?: string;
     page: number;

@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Project configuration
 PROJECT_NAME="Mentara Platform"
-SERVICES=("mentara-api" "mentara-client" "ai-patient-evaluation" "ai-content-moderation")
+SERVICES=("mentara-api" "mentara-client" "ai-patient-evaluation")
 
 # Function to display header
 show_header() {
@@ -46,7 +46,6 @@ show_usage() {
     echo "  api            Start only backend API"
     echo "  client         Start only frontend"
     echo "  ai-eval        Start only AI patient evaluation"
-    echo "  ai-mod         Start only AI content moderation"
     echo ""
     echo -e "${BLUE}Examples:${NC}"
     echo "  $0 setup       # First-time setup"
@@ -187,12 +186,9 @@ start_individual_service() {
         "ai-eval")
             make ai-eval
             ;;
-        "ai-mod")
-            make ai-mod
-            ;;
         *)
             echo -e "${RED}Error: Unknown service '$service'${NC}"
-            echo "Available services: api, client, ai-eval, ai-mod"
+            echo "Available services: api, client, ai-eval"
             exit 1
             ;;
     esac
@@ -248,7 +244,7 @@ main() {
         "update")
             update_dependencies
             ;;
-        "api"|"client"|"ai-eval"|"ai-mod")
+        "api"|"client"|"ai-eval")
             start_individual_service $1
             ;;
         "help"|"--help"|"-h")

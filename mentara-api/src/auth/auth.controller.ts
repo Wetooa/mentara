@@ -20,23 +20,17 @@ import { Public } from './decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   LoginDtoSchema,
-  RefreshTokenDtoSchema,
   RegisterUserDtoSchema,
-  LogoutDtoSchema,
   RequestPasswordResetDtoSchema,
   ResetPasswordDtoSchema,
   VerifyEmailDtoSchema,
   ResendVerificationEmailDtoSchema,
-  TerminateSessionDtoSchema,
   type LoginDto,
-  type RefreshTokenDto,
   type RegisterUserDto,
-  type LogoutDto,
   type RequestPasswordResetDto,
   type ResetPasswordDto,
   type VerifyEmailDto,
   type ResendVerificationEmailDto,
-  type TerminateSessionDto,
 } from 'mentara-commons';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './services/email-verification.service';

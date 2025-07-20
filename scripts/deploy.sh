@@ -146,7 +146,7 @@ fi
 
 # Wait for services to be ready
 log "Waiting for services to be ready..."
-services=("postgres" "redis" "ollama" "mentara-api" "ai-patient-evaluation" "ai-content-moderation")
+services=("postgres" "redis" "ollama" "mentara-api" "ai-patient-evaluation")
 timeout=$HEALTH_CHECK_TIMEOUT
 start_time=$(date +%s)
 
@@ -176,11 +176,6 @@ for service in "${services[@]}"; do
                     ;;
                 "ai-patient-evaluation")
                     if curl -f http://localhost:5000/health >/dev/null 2>&1; then
-                        break
-                    fi
-                    ;;
-                "ai-content-moderation")
-                    if curl -f http://localhost:5001/health >/dev/null 2>&1; then
                         break
                     fi
                     ;;
@@ -228,10 +223,6 @@ if ! curl -f http://localhost:5000/health >/dev/null 2>&1; then
     health_check_failed=true
 fi
 
-if ! curl -f http://localhost:5001/health >/dev/null 2>&1; then
-    log_error "AI Content Moderation service health check failed"
-    health_check_failed=true
-fi
 
 # Check frontend (if not in API-only mode)
 if [ "$ENVIRONMENT" != "api-only" ]; then
@@ -283,7 +274,6 @@ echo "=================================================="
 echo "Frontend:              http://localhost:3000"
 echo "API:                   http://localhost:3001"
 echo "AI Patient Eval:       http://localhost:5000"
-echo "AI Content Moderation: http://localhost:5001"
 if [ "$ENVIRONMENT" = "development" ]; then
     echo "Database Admin:        http://localhost:8080"
     echo "Redis Commander:       http://localhost:8081"

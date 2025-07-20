@@ -35,8 +35,6 @@ echo -e "${YELLOW}📦 Installing AI services dependencies...${NC}"
 cd ../ai-patient-evaluation
 pip install -r requirements.txt 2>/dev/null || echo -e "${YELLOW}⚠️  pip install failed, install Python dependencies manually${NC}"
 
-cd ../ai-content-moderation
-pip install -r requirements.txt 2>/dev/null || echo -e "${YELLOW}⚠️  pip install failed, install Python dependencies manually${NC}"
 
 cd ..
 

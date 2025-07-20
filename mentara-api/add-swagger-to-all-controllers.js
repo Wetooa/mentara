@@ -5,10 +5,8 @@ const path = require('path');
 
 // Controller mappings with their API tags
 const controllerMappings = {
-  'audit-logs.controller.ts': 'audit-logs',
   'communities.controller.ts': 'communities',
   'messaging.controller.ts': 'messaging',
-  'sessions.controller.ts': 'sessions',
   'booking.controller.ts': 'booking',
   'meetings.controller.ts': 'meetings',
   'posts.controller.ts': 'posts',

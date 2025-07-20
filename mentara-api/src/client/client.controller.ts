@@ -59,9 +59,8 @@ export class ClientController {
 
   @Put('profile')
   @ApiOperation({
-    summary: 'Update update profile',
-
-    description: 'Update update profile',
+    summary: 'Update client profile',
+    description: 'Update client profile information',
   })
   @ApiResponse({
     status: 200,

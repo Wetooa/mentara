@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Patch,
   Param,
   Delete,
@@ -17,9 +16,7 @@ import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { ValidatedBody } from '../../common/decorators/validate-body.decorator';
 import {
-  CreateAdminDtoSchema,
   UpdateAdminDtoSchema,
-  type CreateAdminDto,
   type UpdateAdminDto,
   type AdminResponseDto,
 } from 'mentara-commons';
@@ -30,26 +27,6 @@ export class AdminAccountController {
   private readonly logger = new Logger(AdminAccountController.name);
 
   constructor(private readonly adminService: AdminService) {}
-
-  @Post()
-  @AdminOnly()
-  async create(
-    @ValidatedBody(CreateAdminDtoSchema) createAdminDto: CreateAdminDto,
-    @CurrentUserId() currentUserId: string,
-  ): Promise<AdminResponseDto> {
-    try {
-      this.logger.log(
-        `Admin ${currentUserId} creating new admin for user ${createAdminDto.userId}`,
-      );
-      return await this.adminService.create(createAdminDto);
-    } catch (error) {
-      this.logger.error('Failed to create admin:', error);
-      throw new HttpException(
-        'Failed to create admin user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
 
   @Get()
   @AdminOnly()

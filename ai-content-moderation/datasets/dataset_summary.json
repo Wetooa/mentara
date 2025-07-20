@@ -1,9 +1,0 @@
-{
-  "total_samples": 30,
-  "toxic_samples": 5,
-  "mental_health_samples": 20,
-  "non_toxic_samples": 25,
-  "sources": [
-    "mental_health_synthetic"
-  ]
-}

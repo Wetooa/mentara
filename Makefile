@@ -3,7 +3,7 @@
 
 # Variables
 PROJECT_NAME := mentara
-SERVICES := mentara-api mentara-client ai-patient-evaluation ai-content-moderation
+SERVICES := mentara-api mentara-client ai-patient-evaluation
 
 # Colors
 GREEN := \033[0;32m
@@ -22,7 +22,6 @@ help: ## Show this help message
 	@echo "  • mentara-api          - NestJS backend service"
 	@echo "  • mentara-client       - Next.js frontend service"
 	@echo "  • ai-patient-evaluation - Python ML service for assessments"
-	@echo "  • ai-content-moderation - Python AI service for content safety"
 	@echo ""
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "$(YELLOW)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
@@ -35,7 +34,6 @@ install: ## Install dependencies for all services
 	@$(MAKE) -C mentara-api install
 	@$(MAKE) -C mentara-client install
 	@$(MAKE) -C ai-patient-evaluation install
-	@$(MAKE) -C ai-content-moderation install
 	@echo "$(GREEN)All dependencies installed$(NC)"
 
 dev: ## Start all services in development mode
@@ -45,7 +43,6 @@ dev: ## Start all services in development mode
 	$(MAKE) -C mentara-api compose-up-d & \
 	$(MAKE) -C mentara-client compose-up-d & \
 	$(MAKE) -C ai-patient-evaluation compose-up-d & \
-	$(MAKE) -C ai-content-moderation compose-up-d & \
 	echo "$(GREEN)All services starting...$(NC)"; \
 	echo "$(YELLOW)Waiting for services to be ready...$(NC)"; \
 	sleep 30; \
@@ -59,7 +56,6 @@ dev-local: ## Start all services locally (no Docker)
 	cd mentara-api && npm run start:dev & \
 	cd mentara-client && npm run dev & \
 	cd ai-patient-evaluation && python api.py & \
-	cd ai-content-moderation && python api.py & \
 	echo "$(GREEN)All services started$(NC)"; \
 	wait
 
@@ -72,7 +68,6 @@ build: ## Build all Docker images
 	@$(MAKE) -C mentara-api docker-build
 	@$(MAKE) -C mentara-client docker-build
 	@$(MAKE) -C ai-patient-evaluation docker-build
-	@$(MAKE) -C ai-content-moderation docker-build
 	@echo "$(GREEN)All images built$(NC)"
 
 start: ## Start all services with Docker Compose
@@ -80,7 +75,6 @@ start: ## Start all services with Docker Compose
 	@$(MAKE) -C mentara-api compose-up-d
 	@$(MAKE) -C mentara-client compose-up-d
 	@$(MAKE) -C ai-patient-evaluation compose-up-d
-	@$(MAKE) -C ai-content-moderation compose-up-d
 	@echo "$(GREEN)All services started in background$(NC)"
 	@echo "$(YELLOW)Use 'make status' to check service health$(NC)"
 
@@ -89,7 +83,6 @@ stop: ## Stop all services
 	@$(MAKE) -C mentara-api compose-down 2>/dev/null || true
 	@$(MAKE) -C mentara-client compose-down 2>/dev/null || true
 	@$(MAKE) -C ai-patient-evaluation compose-down 2>/dev/null || true
-	@$(MAKE) -C ai-content-moderation compose-down 2>/dev/null || true
 	@echo "$(GREEN)All services stopped$(NC)"
 
 restart: ## Restart all services
@@ -125,7 +118,6 @@ logs: ## View logs from all services
 	@docker-compose -f mentara-api/docker-compose.yml logs -f mentara-api & \
 	docker-compose -f mentara-client/docker-compose.yml logs -f mentara-client & \
 	docker-compose -f ai-patient-evaluation/docker-compose.yml logs -f ai-patient-evaluation & \
-	docker-compose -f ai-content-moderation/docker-compose.yml logs -f ai-content-moderation & \
 	wait
 
 logs-api: ## View logs from backend API
@@ -137,8 +129,6 @@ logs-client: ## View logs from frontend
 logs-ai-eval: ## View logs from AI patient evaluation
 	@$(MAKE) -C ai-patient-evaluation compose-logs
 
-logs-ai-mod: ## View logs from AI content moderation
-	@$(MAKE) -C ai-content-moderation compose-logs
 
 # =============================================================================
 # Testing & Quality
@@ -149,7 +139,6 @@ test: ## Run tests for all services
 	@$(MAKE) -C mentara-api test || echo "$(RED)API tests failed$(NC)"
 	@$(MAKE) -C mentara-client test || echo "$(RED)Client tests failed$(NC)"
 	@$(MAKE) -C ai-patient-evaluation test || echo "$(RED)AI evaluation tests failed$(NC)"
-	@$(MAKE) -C ai-content-moderation test || echo "$(RED)AI moderation tests failed$(NC)"
 	@echo "$(GREEN)All tests completed$(NC)"
 
 test-e2e: ## Run end-to-end tests
@@ -163,7 +152,6 @@ lint: ## Run linting for all services
 	@$(MAKE) -C mentara-api lint || echo "$(RED)API linting failed$(NC)"
 	@$(MAKE) -C mentara-client lint || echo "$(RED)Client linting failed$(NC)"
 	@$(MAKE) -C ai-patient-evaluation lint || echo "$(RED)AI evaluation linting failed$(NC)"
-	@$(MAKE) -C ai-content-moderation lint || echo "$(RED)AI moderation linting failed$(NC)"
 	@echo "$(GREEN)All linting completed$(NC)"
 
 format: ## Format code for all services
@@ -171,7 +159,6 @@ format: ## Format code for all services
 	@$(MAKE) -C mentara-api format || echo "$(RED)API formatting failed$(NC)"
 	@$(MAKE) -C mentara-client format || echo "$(RED)Client formatting failed$(NC)"
 	@$(MAKE) -C ai-patient-evaluation format || echo "$(RED)AI evaluation formatting failed$(NC)"
-	@$(MAKE) -C ai-content-moderation format || echo "$(RED)AI moderation formatting failed$(NC)"
 	@echo "$(GREEN)All formatting completed$(NC)"
 
 # =============================================================================
@@ -183,7 +170,6 @@ setup-env: ## Setup environment files for all services
 	@$(MAKE) -C mentara-api setup-env
 	@$(MAKE) -C mentara-client setup-env
 	@$(MAKE) -C ai-patient-evaluation setup-env
-	@$(MAKE) -C ai-content-moderation setup-env
 	@echo "$(GREEN)Environment setup completed$(NC)"
 	@echo "$(YELLOW)Please edit .env files in each service directory$(NC)"
 
@@ -219,7 +205,6 @@ clean: ## Clean build artifacts for all services
 	@$(MAKE) -C mentara-api clean
 	@$(MAKE) -C mentara-client clean
 	@$(MAKE) -C ai-patient-evaluation clean
-	@$(MAKE) -C ai-content-moderation clean
 	@echo "$(GREEN)Cleanup completed$(NC)"
 
 clean-docker: ## Remove all Docker containers and volumes
@@ -227,7 +212,6 @@ clean-docker: ## Remove all Docker containers and volumes
 	@$(MAKE) -C mentara-api compose-clean
 	@$(MAKE) -C mentara-client compose-clean
 	@$(MAKE) -C ai-patient-evaluation compose-clean
-	@$(MAKE) -C ai-content-moderation compose-clean
 	@echo "$(GREEN)Docker cleanup completed$(NC)"
 
 # =============================================================================
@@ -298,7 +282,6 @@ update: ## Update all dependencies
 	@$(MAKE) -C mentara-api install
 	@$(MAKE) -C mentara-client install
 	@$(MAKE) -C ai-patient-evaluation install
-	@$(MAKE) -C ai-content-moderation install
 	@echo "$(GREEN)All dependencies updated$(NC)"
 
 # =============================================================================
@@ -314,8 +297,6 @@ client: ## Start only the frontend
 ai-eval: ## Start only AI patient evaluation service
 	@$(MAKE) -C ai-patient-evaluation compose-up
 
-ai-mod: ## Start only AI content moderation service
-	@$(MAKE) -C ai-content-moderation compose-up
 
 # =============================================================================
 # Help Text
@@ -340,7 +321,6 @@ usage: ## Show detailed usage information
 	@echo "  • make api           # Start only backend API"
 	@echo "  • make client        # Start only frontend"
 	@echo "  • make ai-eval       # Start only AI evaluation"
-	@echo "  • make ai-mod        # Start only AI moderation"
 	@echo ""
 	@echo "$(BLUE)Cleanup:$(NC)"
 	@echo "  • make stop          # Stop all services"

@@ -28,9 +28,7 @@ import {
   GetReviewsDtoSchema,
   ReviewIdParam,
   ReviewIdParamSchema,
-  Review,
   ReviewListResponse,
-  ReviewStats,
 } from 'mentara-commons';
 
 @Controller('reviews')

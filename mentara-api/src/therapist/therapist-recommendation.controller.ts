@@ -18,14 +18,11 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBody,
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
 import {
-  TherapistRecommendationRequestSchema,
-  TherapistRecommendationResponseDtoSchema,
   TherapistRecommendationQuerySchema,
   WelcomeRecommendationQuerySchema,
   type TherapistRecommendationRequest,
