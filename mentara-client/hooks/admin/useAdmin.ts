@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
+
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
@@ -31,7 +31,7 @@ export function useAdminCheck() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.checkAdmin(),
+    queryKey: ['admin', 'checkAdmin'],
     queryFn: () => api.admin.checkAdmin(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: false,
@@ -45,7 +45,7 @@ export function useAdminDashboard() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.dashboard(),
+    queryKey: ['admin', 'dashboard'],
     queryFn: () => api.admin.getDashboard(),
     staleTime: 1000 * 60 * 2, // 2 minutes (dashboard data changes frequently)
   });
@@ -58,7 +58,7 @@ export function useAdminUsersList(params: AdminUserListParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.users.list(params),
+    queryKey: ['admin', 'users', 'list', params],
     queryFn: () => api.admin.users.getList(params),
     staleTime: 1000 * 60 * 2,
   });
@@ -71,7 +71,7 @@ export function useAdminUser(userId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.users.detail(userId || ''),
+    queryKey: ['admin', 'users', 'detail', userId || ''],
     queryFn: () => api.admin.users.getById(userId!),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5,
@@ -93,12 +93,12 @@ export function useCreateUser() {
       
       // Invalidate users list
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.dashboard() 
+        queryKey: ['admin', 'dashboard'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -125,17 +125,17 @@ export function useUpdateUser() {
     onMutate: async ({ userId, userData }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: queryKeys.admin.users.detail(userId) 
+        queryKey: ['admin', 'users', 'detail', userId] 
       });
       
       // Snapshot the previous value
       const previousUser = queryClient.getQueryData(
-        queryKeys.admin.users.detail(userId)
+        ['admin', 'users', 'detail', userId]
       );
       
       // Optimistically update
       queryClient.setQueryData(
-        queryKeys.admin.users.detail(userId),
+        ['admin', 'users', 'detail', userId],
         (old: User | undefined) => 
           old ? { ...old, ...userData } : old
       );
@@ -146,7 +146,7 @@ export function useUpdateUser() {
       // Rollback on error
       if (context?.previousUser) {
         queryClient.setQueryData(
-          queryKeys.admin.users.detail(userId),
+          ['admin', 'users', 'detail', userId],
           context.previousUser
         );
       }
@@ -157,7 +157,7 @@ export function useUpdateUser() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
     },
   });
@@ -183,10 +183,10 @@ export function useUpdateUserRole() {
       
       // Invalidate user data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.detail(userId) 
+        queryKey: ['admin', 'users', 'detail', userId] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -215,15 +215,15 @@ export function useSuspendUser() {
       
       // Invalidate user data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.detail(userId) 
+        queryKey: ['admin', 'users', 'detail', userId] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
       
       // Invalidate moderation data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.contentModeration.userViolations(userId) 
+        queryKey: ['contentModeration', 'userViolations', userId] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -246,10 +246,10 @@ export function useUnsuspendUser() {
       
       // Invalidate user data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.detail(userId) 
+        queryKey: ['admin', 'users', 'detail', userId] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -272,17 +272,17 @@ export function useDeleteUser() {
       
       // Invalidate users list
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.users.all() 
+        queryKey: ['admin', 'users'] 
       });
       
       // Remove specific user from cache
       queryClient.removeQueries({ 
-        queryKey: queryKeys.admin.users.detail(userId) 
+        queryKey: ['admin', 'users', 'detail', userId] 
       });
       
       // Invalidate dashboard stats
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.dashboard() 
+        queryKey: ['admin', 'dashboard'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -298,7 +298,7 @@ export function useAdminTherapistApplications(params: { status?: string; limit?:
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.therapistApplications.list(params),
+    queryKey: ['admin', 'therapistApplications', 'list', params],
     queryFn: () => api.admin.therapistApplications.getList(params),
     staleTime: 1000 * 60 * 2,
   });
@@ -311,7 +311,7 @@ export function useAdminTherapistApplication(applicationId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.therapistApplications.detail(applicationId || ''),
+    queryKey: ['admin', 'therapistApplications', 'detail', applicationId || ''],
     queryFn: () => api.admin.therapistApplications.getById(applicationId!),
     enabled: !!applicationId,
     staleTime: 1000 * 60 * 5,
@@ -340,18 +340,18 @@ export function useUpdateTherapistApplicationStatus() {
       
       // Invalidate applications list
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.therapistApplications.all() 
+        queryKey: ['admin', 'therapistApplications'] 
       });
       
       // Invalidate specific application
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.therapistApplications.detail(applicationId) 
+        queryKey: ['admin', 'therapistApplications', 'detail', applicationId] 
       });
       
       // If approved, invalidate therapist queries
       if (data.status === 'approved') {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.therapists.all 
+          queryKey: ['therapists'] 
         });
       }
     },
@@ -368,7 +368,7 @@ export function useAdminSystemStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.analytics.systemStats(),
+    queryKey: ['admin', 'analytics', 'systemStats'],
     queryFn: () => api.admin.analytics.getSystemStats(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -381,7 +381,7 @@ export function useAdminUserGrowth(params: UserGrowthParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.analytics.userGrowth(params),
+    queryKey: ['admin', 'analytics', 'userGrowth', params],
     queryFn: () => api.admin.analytics.getUserGrowth(params),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -394,7 +394,7 @@ export function useAdminEngagement(params: EngagementParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.analytics.engagement(params),
+    queryKey: ['admin', 'analytics', 'engagement', params],
     queryFn: () => api.admin.analytics.getEngagement(params),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -407,7 +407,7 @@ export function useAdminPlatformOverview() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.analytics.platformOverview(),
+    queryKey: ['admin', 'analytics', 'platformOverview'],
     queryFn: () => api.admin.analytics.getPlatformOverview(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -420,7 +420,7 @@ export function useAdminMatchingPerformance(startDate?: string, endDate?: string
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.analytics.matchingPerformance(startDate, endDate),
+    queryKey: ['admin', 'analytics', 'matchingPerformance', startDate, endDate],
     queryFn: () => api.admin.analytics.getMatchingPerformance(startDate, endDate),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -433,7 +433,7 @@ export function useAdminModerationReports(params: ModerationReportParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.moderation.reports(params),
+    queryKey: ['admin', 'moderation', 'reports', params],
     queryFn: () => api.admin.moderation.getReports(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
@@ -459,7 +459,7 @@ export function useUpdateModerationReport() {
       
       // Invalidate reports list
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.moderation.all() 
+        queryKey: ['admin', 'moderation'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -475,7 +475,7 @@ export function useAdminFlaggedContent(params: { type?: string; page?: number; l
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.moderation.flaggedContent(params),
+    queryKey: ['admin', 'moderation', 'flaggedContent', params],
     queryFn: () => api.admin.moderation.getFlaggedContent(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
@@ -505,12 +505,12 @@ export function useAdminModerateContent() {
       
       // Invalidate flagged content
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.moderation.all() 
+        queryKey: ['admin', 'moderation'] 
       });
       
       // Invalidate content moderation data
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.contentModeration.all 
+        queryKey: ['contentModeration'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -526,7 +526,7 @@ export function useAdminSystemConfig() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.config.system(),
+    queryKey: ['admin', 'config', 'system'],
     queryFn: () => api.admin.config.get(),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -547,7 +547,7 @@ export function useUpdateSystemConfig() {
       
       // Invalidate config cache
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.config.all() 
+        queryKey: ['admin', 'config'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -563,7 +563,7 @@ export function useAdminFeatureFlags() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.config.featureFlags(),
+    queryKey: ['admin', 'config', 'featureFlags'],
     queryFn: () => api.admin.config.getFeatureFlags(),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -605,7 +605,7 @@ export function useAdminProfile() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.admin.profile(),
+    queryKey: ['admin', 'profile'],
     queryFn: () => api.admin.profile.get(),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
