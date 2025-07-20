@@ -86,13 +86,13 @@ export function useAdminAuth(): UseAdminAuthReturn {
       queryClient.clear();
       setError(null);
       toast.success("Logged out successfully");
-      router.push("/admin/sign-in");
+      router.push("/auth/sign-in");
     },
     onError: () => {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       queryClient.clear();
-      router.push("/admin/sign-in");
+      router.push("/auth/sign-in");
     },
   });
 
