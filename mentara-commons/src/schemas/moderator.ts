@@ -13,14 +13,6 @@ export const ModeratorSchema = z.object({
   lastActiveAt: z.string().datetime().optional()
 });
 
-// Moderator Dashboard Stats Schema
-export const ModeratorDashboardStatsSchema = z.object({
-  pendingReports: z.number().min(0),
-  pendingContent: z.number().min(0),
-  resolvedToday: z.number().min(0),
-  flaggedUsers: z.number().min(0),
-  systemAlerts: z.number().min(0)
-});
 
 // Content Moderation Parameters Schema
 export const ContentModerationParamsSchema = z.object({
@@ -212,7 +204,6 @@ export const ReportSubmissionSchema = z.object({
 
 // Type exports
 export type Moderator = z.infer<typeof ModeratorSchema>;
-export type ModeratorDashboardStats = z.infer<typeof ModeratorDashboardStatsSchema>;
 export type ContentModerationParams = z.infer<typeof ContentModerationParamsSchema>;
 export type UserModerationParams = z.infer<typeof UserModerationParamsSchema>;
 export type AuditLogParams = z.infer<typeof AuditLogParamsSchema>;
