@@ -16,7 +16,7 @@ export function useCommunityMembers(communityId: string, limit = 50, offset = 0)
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.communities.members.byCommunity(communityId, limit, offset),
+    queryKey: ['communities', 'members', 'byCommunity', communityId, limit, offset],
     queryFn: () => api.communities.getCommunityMembers(communityId, limit, offset),
     enabled: !!communityId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -45,8 +45,8 @@ export function useCommunityMemberships(userId?: string) {
     refetch,
   } = useQuery({
     queryKey: userId 
-      ? queryKeys.communities.memberships.byUser(userId)
-      : queryKeys.communities.memberships.my(),
+      ? ['communities', 'memberships', 'byUser', userId]
+      : ['communities', 'memberships', 'my'],
     queryFn: () => userId 
       ? api.communities.getUserMemberships(userId)
       : api.communities.getMyMemberships(),
