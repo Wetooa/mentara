@@ -9,12 +9,6 @@ import {
   AdminOnly,
   ModeratorOnly,
 } from '../auth/decorators/roles.decorator';
-import {
-  type ClientDashboardResponseDto,
-  type TherapistDashboardResponseDto,
-  type AdminDashboardResponseDto,
-  type ModeratorDashboardResponseDto,
-} from 'mentara-commons';
 
 @Controller('dashboard')
 @UseGuards(JwtAuthGuard, RoleBasedAccessGuard)
@@ -23,31 +17,25 @@ export class DashboardController {
 
   @Get('client')
   @ClientOnly()
-  getClientDashboard(
-    @CurrentUserId() userId: string,
-  ): Promise<ClientDashboardResponseDto> {
+  getClientDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getClientDashboardData(userId);
   }
 
   @Get('therapist')
   @TherapistOnly()
-  getTherapistDashboard(
-    @CurrentUserId() userId: string,
-  ): Promise<TherapistDashboardResponseDto> {
+  getTherapistDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getTherapistDashboardData(userId);
   }
 
   @Get('admin')
   @AdminOnly()
-  getAdminDashboard(): Promise<AdminDashboardResponseDto> {
+  getAdminDashboard() {
     return this.dashboardService.getAdminDashboardData();
   }
 
   @Get('moderator')
   @ModeratorOnly()
-  getModeratorDashboard(
-    @CurrentUserId() userId: string,
-  ): Promise<ModeratorDashboardResponseDto> {
+  getModeratorDashboard(@CurrentUserId() userId: string) {
     return this.dashboardService.getModeratorDashboardData(userId);
   }
 }

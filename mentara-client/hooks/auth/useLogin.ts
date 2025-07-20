@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/lib/api";
+import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 interface LoginCredentials {
   email: string;
@@ -20,7 +21,7 @@ export function useLogin() {
       const response = await api.auth.login(credentials);
 
       // Store only token in localStorage (secure)
-      localStorage.setItem("token", response.token);
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
 
       // Redirect based on role (from server response)
       const dashboardPath = `/${response.user.role}`;

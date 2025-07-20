@@ -38,7 +38,8 @@ export class TherapistAuthService {
     // No longer need application data transformation since we create directly
 
     // Process and upload documents if provided
-    let uploadedFiles: Array<{ id: string; fileName: string; url: string }> = [];
+    let uploadedFiles: Array<{ id: string; fileName: string; url: string }> =
+      [];
     let documentUrls: string[] = [];
     let documentNames: string[] = [];
     let certificateUrls: string[] = [];
@@ -72,7 +73,7 @@ export class TherapistAuthService {
       // Categorize files based on fileTypeMap
       uploadedFiles.forEach((file, index) => {
         const fileType = fileTypeMap[files[index].originalname] || 'document';
-        
+
         switch (fileType) {
           case 'certificate':
             certificateUrls.push(file.url);
@@ -109,10 +110,18 @@ export class TherapistAuthService {
         });
       } catch (error) {
         // Handle unique constraint violation (P2002) for email
-        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002' && 
-            'meta' in error && error.meta && typeof error.meta === 'object' && 
-            'target' in error.meta && Array.isArray(error.meta.target) && 
-            error.meta.target.includes('email')) {
+        if (
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          error.code === 'P2002' &&
+          'meta' in error &&
+          error.meta &&
+          typeof error.meta === 'object' &&
+          'target' in error.meta &&
+          Array.isArray(error.meta.target) &&
+          error.meta.target.includes('email')
+        ) {
           // Check existing user and their role
           const existingUser = await tx.user.findUnique({
             where: { email: registerData.email },
@@ -120,7 +129,9 @@ export class TherapistAuthService {
           });
 
           if (!existingUser) {
-            throw new BadRequestException('User creation failed. Please try again.');
+            throw new BadRequestException(
+              'User creation failed. Please try again.',
+            );
           }
 
           // Handle based on existing user's role
@@ -137,7 +148,7 @@ export class TherapistAuthService {
             // Allow client to upgrade to therapist
             user = await tx.user.update({
               where: { id: existingUser.id },
-              data: { 
+              data: {
                 role: 'therapist',
                 password: hashedPassword, // Update password
                 firstName: registerData.firstName,
@@ -167,17 +178,30 @@ export class TherapistAuthService {
           mobile: registerData.mobile,
           province: registerData.province,
           providerType: registerData.providerType,
-          professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
+          professionalLicenseType:
+            registerData.professionalLicenseType_specify ||
+            registerData.professionalLicenseType,
           isPRCLicensed: registerData.isPRCLicensed,
           prcLicenseNumber: registerData.prcLicenseNumber || '',
-          expirationDateOfLicense: registerData.expirationDateOfLicense ? new Date(registerData.expirationDateOfLicense) : new Date(),
-          practiceStartDate: registerData.practiceStartDate ? new Date(registerData.practiceStartDate) : new Date(),
-          sessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength || '60 minutes',
+          expirationDateOfLicense: registerData.expirationDateOfLicense
+            ? new Date(registerData.expirationDateOfLicense)
+            : new Date(),
+          practiceStartDate: registerData.practiceStartDate
+            ? new Date(registerData.practiceStartDate)
+            : new Date(),
+          sessionLength:
+            registerData.preferredSessionLength_specify ||
+            registerData.preferredSessionLength ||
+            '60 minutes',
           hourlyRate: registerData.hourlyRate || 0,
-          providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
-          comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
-          compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
-          willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
+          providedOnlineTherapyBefore:
+            registerData.providedOnlineTherapyBefore === 'yes',
+          comfortableUsingVideoConferencing:
+            registerData.comfortableUsingVideoConferencing === 'yes',
+          compliesWithDataPrivacyAct:
+            registerData.compliesWithDataPrivacyAct === 'yes',
+          willingToAbideByPlatformGuidelines:
+            registerData.willingToAbideByPlatformGuidelines === 'yes',
           treatmentSuccessRates: {},
           // Store document URLs from Supabase uploads
           certificateUrls,
@@ -189,23 +213,43 @@ export class TherapistAuthService {
           // Professional expertise arrays
           areasOfExpertise: registerData.areasOfExpertise,
           assessmentTools: registerData.assessmentTools,
-          therapeuticApproachesUsedList: registerData.therapeuticApproachesUsedList_specify
-            ? [...registerData.therapeuticApproachesUsedList.filter(t => t !== 'other'), registerData.therapeuticApproachesUsedList_specify]
-            : registerData.therapeuticApproachesUsedList,
+          therapeuticApproachesUsedList:
+            registerData.therapeuticApproachesUsedList_specify
+              ? [
+                  ...registerData.therapeuticApproachesUsedList.filter(
+                    (t) => t !== 'other',
+                  ),
+                  registerData.therapeuticApproachesUsedList_specify,
+                ]
+              : registerData.therapeuticApproachesUsedList,
           languagesOffered: registerData.languagesOffered_specify
-            ? [...registerData.languagesOffered.filter(l => l !== 'other'), registerData.languagesOffered_specify]
+            ? [
+                ...registerData.languagesOffered.filter((l) => l !== 'other'),
+                registerData.languagesOffered_specify,
+              ]
             : registerData.languagesOffered,
           // Additional fields from registration
-          privateConfidentialSpace: registerData.privateConfidentialSpace === 'yes' ? 'yes' : 'no',
-          professionalLiabilityInsurance: registerData.professionalLiabilityInsurance,
-          complaintsOrDisciplinaryActions: registerData.complaintsOrDisciplinaryActions,
+          privateConfidentialSpace:
+            registerData.privateConfidentialSpace === 'yes' ? 'yes' : 'no',
+          professionalLiabilityInsurance:
+            registerData.professionalLiabilityInsurance,
+          complaintsOrDisciplinaryActions:
+            registerData.complaintsOrDisciplinaryActions,
           // Compliance arrays for schema compatibility
           expertise: registerData.areasOfExpertise,
           approaches: registerData.therapeuticApproachesUsedList_specify
-            ? [...registerData.therapeuticApproachesUsedList.filter(t => t !== 'other'), registerData.therapeuticApproachesUsedList_specify]
+            ? [
+                ...registerData.therapeuticApproachesUsedList.filter(
+                  (t) => t !== 'other',
+                ),
+                registerData.therapeuticApproachesUsedList_specify,
+              ]
             : registerData.therapeuticApproachesUsedList,
           languages: registerData.languagesOffered_specify
-            ? [...registerData.languagesOffered.filter(l => l !== 'other'), registerData.languagesOffered_specify]
+            ? [
+                ...registerData.languagesOffered.filter((l) => l !== 'other'),
+                registerData.languagesOffered_specify,
+              ]
             : registerData.languagesOffered,
           acceptTypes: registerData.accepts || [],
           acceptsInsurance: false,
@@ -227,12 +271,14 @@ export class TherapistAuthService {
     );
 
     // Send verification email
-    await this.emailVerificationService.sendVerificationEmail(userResult.user.id);
+    await this.emailVerificationService.sendVerificationEmail(
+      userResult.user.id,
+    );
 
     return {
       user: userResult.user,
       token,
-      message: userResult.isExistingUser 
+      message: userResult.isExistingUser
         ? 'Therapist application submitted successfully. Your account has been upgraded to therapist role. Application is under review.'
         : 'Therapist registration successful with documents uploaded. Application is under review.',
       therapist: userResult.therapist,
@@ -731,7 +777,8 @@ export class TherapistAuthService {
     therapist.certificateUrls.forEach((url, index) => {
       files.push({
         id: `cert-${index}`,
-        fileName: therapist.certificateNames[index] || `certificate-${index + 1}`,
+        fileName:
+          therapist.certificateNames[index] || `certificate-${index + 1}`,
         fileUrl: url,
         uploadedAt: therapist.createdAt.toISOString(),
       });

@@ -29,11 +29,11 @@ import { SidebarContent } from "@/components/therapist-application/SidebarConten
 
 // Store and API
 import useTherapistForm from "@/store/therapistform";
-import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useSectionCompletion } from "@/hooks/useSectionCompletion";
 import { useApi } from "@/lib/api";
+import { toast } from "sonner";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
 const unifiedTherapistSchema = z
@@ -377,7 +377,6 @@ const sections: Section[] = [
 
 export default function SinglePageTherapistApplication() {
   const router = useRouter();
-  const { showToast } = useToast();
   const api = useApi();
   const {
     updateField,
@@ -404,7 +403,9 @@ export default function SinglePageTherapistApplication() {
 
   // Form setup with persisted values
   const form = useForm<UnifiedTherapistForm>({
-    resolver: zodResolver(unifiedTherapistSchema) as unknown as Resolver<UnifiedTherapistForm>,
+    resolver: zodResolver(
+      unifiedTherapistSchema
+    ) as unknown as Resolver<UnifiedTherapistForm>,
     values: {
       firstName: formValues.firstName || "",
       lastName: formValues.lastName || "",
@@ -621,12 +622,12 @@ export default function SinglePageTherapistApplication() {
       // Scroll to top
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      showToast("Form restarted successfully", "success");
+      toast.success("Form restarted successfully");
     } catch (error) {
       console.error("Error restarting form:", error);
-      showToast("Failed to restart form", "error");
+      toast.error("Failed to restart form");
     }
-  }, [form, showToast]);
+  }, [form]);
 
   // Submit handler
   const onSubmit = useCallback(
@@ -651,7 +652,8 @@ export default function SinglePageTherapistApplication() {
           professionalLicenseType:
             values.professionalLicenseType_specify ||
             values.professionalLicenseType,
-          professionalLicenseType_specify: values.professionalLicenseType_specify,
+          professionalLicenseType_specify:
+            values.professionalLicenseType_specify,
           isPRCLicensed: values.isPRCLicensed,
           prcLicenseNumber: values.prcLicenseNumber || "",
           isLicenseActive: values.isLicenseActive || "",
@@ -667,21 +669,26 @@ export default function SinglePageTherapistApplication() {
           areasOfExpertise: values.areasOfExpertise,
           assessmentTools: values.assessmentTools,
           therapeuticApproachesUsedList: values.therapeuticApproachesUsedList,
-          therapeuticApproachesUsedList_specify: values.therapeuticApproachesUsedList_specify,
+          therapeuticApproachesUsedList_specify:
+            values.therapeuticApproachesUsedList_specify,
           languagesOffered: values.languagesOffered,
           languagesOffered_specify: values.languagesOffered_specify,
 
           // Teletherapy readiness (keep as strings for unified registration)
           providedOnlineTherapyBefore: values.providedOnlineTherapyBefore,
-          comfortableUsingVideoConferencing: values.comfortableUsingVideoConferencing,
+          comfortableUsingVideoConferencing:
+            values.comfortableUsingVideoConferencing,
           privateConfidentialSpace: values.privateConfidentialSpace,
           compliesWithDataPrivacyAct: values.compliesWithDataPrivacyAct,
 
           // Compliance (keep as strings for unified registration)
           professionalLiabilityInsurance: values.professionalLiabilityInsurance,
-          complaintsOrDisciplinaryActions: values.complaintsOrDisciplinaryActions,
-          complaintsOrDisciplinaryActions_specify: values.complaintsOrDisciplinaryActions_specify,
-          willingToAbideByPlatformGuidelines: values.willingToAbideByPlatformGuidelines,
+          complaintsOrDisciplinaryActions:
+            values.complaintsOrDisciplinaryActions,
+          complaintsOrDisciplinaryActions_specify:
+            values.complaintsOrDisciplinaryActions_specify,
+          willingToAbideByPlatformGuidelines:
+            values.willingToAbideByPlatformGuidelines,
 
           // Availability and payment
           weeklyAvailability: values.weeklyAvailability,
@@ -703,9 +710,15 @@ export default function SinglePageTherapistApplication() {
         };
 
         // Validate that all required documents are uploaded
-        const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"] as const;
+        const requiredDocs = [
+          "prcLicense",
+          "nbiClearance",
+          "resumeCV",
+        ] as const;
         const missingDocs = requiredDocs.filter(
-          (doc) => !documents[doc as keyof typeof documents] || documents[doc as keyof typeof documents].length === 0
+          (doc) =>
+            !documents[doc as keyof typeof documents] ||
+            documents[doc as keyof typeof documents].length === 0
         );
 
         if (missingDocs.length > 0) {
@@ -720,11 +733,7 @@ export default function SinglePageTherapistApplication() {
             })
             .join(", ");
 
-          showToast(
-            `Please upload all required documents: ${missingNames}`,
-            "error",
-            5000
-          );
+          toast.error(`Please upload all required documents: ${missingNames}`);
           return;
         }
 
@@ -737,7 +746,7 @@ export default function SinglePageTherapistApplication() {
         const formData = new FormData();
 
         // Add application data as JSON string (required by backend)
-        formData.append('applicationDataJson', JSON.stringify(transformedData));
+        formData.append("applicationDataJson", JSON.stringify(transformedData));
 
         // Prepare documents for upload - filter out deleted/missing files
         const allFiles = Object.entries(documents)
@@ -753,17 +762,17 @@ export default function SinglePageTherapistApplication() {
         allFiles.forEach(({ file, type }) => {
           // Additional safety check to ensure file is valid before processing
           if (file && file instanceof File && file.name) {
-            formData.append('files', file);
+            formData.append("files", file);
             fileTypeMap[file.name] = type; // Use frontend document type directly
           }
         });
 
         // Add file type mapping as JSON string
         if (Object.keys(fileTypeMap).length > 0) {
-          formData.append('fileTypes', JSON.stringify(fileTypeMap));
+          formData.append("fileTypes", JSON.stringify(fileTypeMap));
         }
 
-        showToast("Registering therapist account with documents...", "info");
+        toast.info("Registering therapist account with documents...");
 
         // Use unified therapist registration endpoint
         const result = await api.therapistAuth.register(formData);
@@ -773,16 +782,14 @@ export default function SinglePageTherapistApplication() {
           result
         );
 
-        showToast(
-          "Successfully registered therapist account with documents",
-          "success",
-          3000
+        toast.success(
+          "Successfully registered therapist account with documents"
         );
 
         // Navigate to success page after successful registration
         setTimeout(() => {
           router.push(
-            `/therapist-application/success?id=${result.applicationId || result.user?.id || 'success'}`
+            `/therapist-application/success?id=${result.applicationId || result.user?.id || "success"}`
           );
         }, 1500);
       } catch (error) {
@@ -844,7 +851,7 @@ export default function SinglePageTherapistApplication() {
         setIsSubmitting(false);
       }
     },
-    [autoSave, router, showToast, documents, api]
+    [autoSave, router, documents, api]
   );
 
   // Memoized sidebar content props to prevent unnecessary re-renders

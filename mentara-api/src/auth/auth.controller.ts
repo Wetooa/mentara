@@ -34,9 +34,9 @@ import {
   type UserResponse,
   type SuccessMessageResponse,
 } from 'mentara-commons';
-import { AuthService } from '../services/auth/auth.service';
-import { EmailVerificationService } from '../services/email/email-verification.service';
-import { PasswordResetService } from '../services/email/password-reset.service';
+import { AuthService } from './auth.service';
+import { EmailVerificationService } from './services/email-verification.service';
+import { PasswordResetService } from './services/password-reset.service';
 import { Request } from 'express';
 import {
   AuthResponseDto,
@@ -140,12 +140,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('user-role')
-  async getUserRole(@CurrentUserId() userId: string): Promise<{ role: string; userId: string }> {
+  async getUserRole(
+    @CurrentUserId() userId: string,
+  ): Promise<{ role: string; userId: string }> {
     const user = await this.authService.validateUser(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    
+
     return {
       role: user.role,
       userId: user.id,

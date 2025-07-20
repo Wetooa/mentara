@@ -22,17 +22,15 @@ import { AvailabilityServicesSection } from "@/components/therapist-application/
 import { DocumentUploadSection } from "@/components/therapist-application/DocumentUploadSection";
 import { ReviewSection } from "@/components/therapist-application/ReviewSection";
 
-// Toast Context
-import { useToast } from "@/contexts/ToastContext";
-
 // Types
-import { 
-  TherapistApplicationFormData, 
+import {
+  TherapistApplicationFormData,
   TherapistApplicationWatchedValues,
   DocumentUpload,
   ApplicationSection,
-  CompletionStatus 
+  CompletionStatus,
 } from "@/types/therapist-application";
+import { toast } from "sonner";
 
 interface SectionComponentProps {
   section: ApplicationSection;
@@ -57,8 +55,6 @@ export const SectionComponent = memo(function SectionComponent({
   updateDocuments,
   removeDocument,
 }: SectionComponentProps) {
-  const { showToast } = useToast();
-
   const handleFileChange = useCallback(
     (docType: string, files: FileList | null) => {
       if (!files || files.length === 0) return;
@@ -78,15 +74,14 @@ export const SectionComponent = memo(function SectionComponent({
       );
 
       if (validFiles.length !== files.length) {
-        showToast(
-          "Some files were invalid (type or size) and were not added",
-          "warning"
+        toast.warning(
+          "Some files were invalid (type or size) and were not added"
         );
       }
 
       updateDocuments(docType, [...documents[docType], ...validFiles]);
     },
-    [documents, updateDocuments, showToast]
+    [documents, updateDocuments]
   );
 
   const handleRemoveFile = useCallback(

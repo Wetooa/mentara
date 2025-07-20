@@ -5,7 +5,7 @@ import {
   useDashboardData,
   useNotifications,
   useRecentCommunications,
-} from "@/hooks/useDashboard";
+} from "@/hooks/dashboard/useClientDashboard";
 import {
   transformDashboardData,
   createFallbackDashboardData,
