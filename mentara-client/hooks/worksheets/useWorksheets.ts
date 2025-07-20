@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -32,7 +32,7 @@ export function useWorksheets() {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.worksheets.my(),
+    queryKey: ['worksheets', 'my'],
     queryFn: () => api.worksheets.getMy(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -42,7 +42,7 @@ export function useWorksheets() {
     mutationFn: ({ worksheetId, responses }: { worksheetId: string; responses: Record<string, any> }) =>
       api.worksheets.submitResponses(worksheetId, responses),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
+      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
       toast.success("Worksheet submitted successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -55,7 +55,7 @@ export function useWorksheets() {
     mutationFn: ({ worksheetId, responses }: { worksheetId: string; responses: Record<string, any> }) =>
       api.worksheets.saveDraft(worksheetId, responses),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
+      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
     },
     onError: (error: MentaraApiError) => {
       console.error("Failed to save draft:", error);
@@ -90,7 +90,7 @@ export function useTherapistWorksheets() {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.worksheets.assigned(),
+    queryKey: ['worksheets', 'assigned'],
     queryFn: () => api.worksheets.getAssigned(),
     staleTime: 1000 * 60 * 5,
   });
@@ -100,7 +100,7 @@ export function useTherapistWorksheets() {
     mutationFn: ({ patientId, worksheetData }: { patientId: string; worksheetData: Partial<Worksheet> }) =>
       api.worksheets.assign(patientId, worksheetData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
+      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
       toast.success("Worksheet assigned successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -113,7 +113,7 @@ export function useTherapistWorksheets() {
     mutationFn: ({ worksheetId, feedback }: { worksheetId: string; feedback: string }) =>
       api.worksheets.reviewResponses(worksheetId, feedback),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.all });
+      queryClient.invalidateQueries({ queryKey: ['worksheets'] });
       toast.success("Review submitted successfully");
     },
     onError: (error: MentaraApiError) => {

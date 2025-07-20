@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { PatientData, WorksheetAssignment } from '@/types/api/therapists';
@@ -13,7 +13,7 @@ export function usePatientsList() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.clients.assigned(),
+    queryKey: ['clients', 'assigned'],
     queryFn: () => api.therapists.patients.getList(),
     select: (response) => response.data || [],
     staleTime: 1000 * 60 * 5, // Patient list is relatively stable
@@ -34,7 +34,7 @@ export function usePatientData(patientId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.clients.detail(patientId || ''),
+    queryKey: ['clients', 'detail', patientId || ''],
     queryFn: () => api.therapists.patients.getById(patientId!),
     select: (response) => response.data || null,
     enabled: !!patientId,
@@ -49,7 +49,7 @@ export function usePatientSessions(patientId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.clients.sessions(patientId || ''),
+    queryKey: ['clients', 'sessions', patientId || ''],
     queryFn: () => api.therapists.patients.getSessions(patientId!),
     select: (response) => response.data || [],
     enabled: !!patientId,
@@ -64,7 +64,7 @@ export function usePatientWorksheets(patientId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.clients.detail(patientId || '').concat(['worksheets']),
+    queryKey: ['clients', 'detail', patientId || '', 'worksheets'],
     queryFn: () => api.therapists.patients.getWorksheets(patientId!),
     select: (response) => response.data || [],
     enabled: !!patientId,
@@ -92,12 +92,12 @@ export function useUpdatePatientNotes() {
     onMutate: async ({ patientId, sessionId, notes }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: queryKeys.clients.sessions(patientId) 
+        queryKey: ['clients', 'sessions', patientId] 
       });
       
       // Optimistically update session notes
       queryClient.setQueryData(
-        queryKeys.clients.sessions(patientId),
+        ['clients', 'sessions', patientId],
         (oldSessions: Session[] | undefined) => {
           if (!oldSessions) return oldSessions;
           
@@ -115,7 +115,7 @@ export function useUpdatePatientNotes() {
       // Revert optimistic update
       if (context?.patientId) {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.clients.sessions(context.patientId) 
+          queryKey: ['clients', 'sessions', context.patientId] 
         });
       }
     },
@@ -124,7 +124,7 @@ export function useUpdatePatientNotes() {
       
       // Invalidate patient details to reflect changes
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.clients.detail(patientId) 
+        queryKey: ['clients', 'detail', patientId] 
       });
     },
   });
@@ -150,12 +150,12 @@ export function useAssignWorksheet() {
       
       // Invalidate patient worksheets
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.clients.detail(patientId).concat(['worksheets']) 
+        queryKey: ['clients', 'detail', patientId, 'worksheets'] 
       });
       
       // Invalidate patient details
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.clients.detail(patientId) 
+        queryKey: ['clients', 'detail', patientId] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -171,7 +171,7 @@ export function usePatientProgress(patientId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.clients.progress(patientId || ''),
+    queryKey: ['clients', 'progress', patientId || ''],
     queryFn: () => api.clients.getProgress(patientId!),
     select: (response) => response.data || null,
     enabled: !!patientId,
@@ -188,7 +188,7 @@ export function usePrefetchPatientData() {
   
   return (patientId: string) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.clients.detail(patientId),
+      queryKey: ['clients', 'detail', patientId],
       queryFn: () => api.therapists.patients.getById(patientId),
       staleTime: 1000 * 60 * 10,
     });

@@ -589,7 +589,7 @@ export function useUpdateFeatureFlag() {
       
       // Invalidate feature flags cache
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.config.featureFlags() 
+        queryKey: ['admin', 'config', 'featureFlags'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -625,7 +625,7 @@ export function useUpdateAdminProfile() {
       
       // Invalidate profile cache
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.admin.profile() 
+        queryKey: ['admin', 'profile'] 
       });
     },
     onError: (error: MentaraApiError) => {

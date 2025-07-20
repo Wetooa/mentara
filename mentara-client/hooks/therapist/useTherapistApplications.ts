@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
+
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { 
@@ -18,7 +18,7 @@ export function useTherapistApplications(params: ApplicationListParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.applications.list(params),
+    queryKey: ['therapists', 'applications', 'list', params],
     queryFn: () => api.therapists.getApplications(params),
     select: (response) => {
       // Transform axios response structure: response.data.applications -> applications
@@ -36,7 +36,7 @@ export function useTherapistApplicationsWithMetadata(params: ApplicationListPara
   const api = useApi();
   
   return useQuery({
-    queryKey: [...queryKeys.therapists.applications.list(params), 'metadata'],
+    queryKey: ['therapists', 'applications', 'list', params, 'metadata'],
     queryFn: () => api.therapists.getApplications(params),
     select: (response) => {
       // Return the full response data structure for pagination
@@ -53,7 +53,7 @@ export function useTherapistApplication(applicationId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.applications.detail(applicationId || ''),
+    queryKey: ['therapists', 'applications', 'detail', applicationId || ''],
     queryFn: () => api.therapists.application.getById(applicationId!),
     enabled: !!applicationId,
     staleTime: 1000 * 60 * 5, // Application details are more stable
@@ -67,7 +67,7 @@ export function useMyTherapistApplication() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.applications.detail('me'),
+    queryKey: ['therapists', 'applications', 'detail', 'me'],
     queryFn: () => api.therapists.application.getMy(),
     staleTime: 1000 * 60 * 10, // My application doesn't change often
     retry: (failureCount, error: MentaraApiError) => {
@@ -95,12 +95,12 @@ export function useSubmitTherapistApplication() {
       
       // Invalidate and refetch my application
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.detail('me') 
+        queryKey: ['therapists', 'applications', 'detail', 'me'] 
       });
       
       // Invalidate applications list for admin
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all() 
+        queryKey: ['therapists', 'applications'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -127,17 +127,17 @@ export function useUpdateTherapistApplicationStatus() {
     onMutate: async ({ applicationId, data }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: queryKeys.therapists.applications.detail(applicationId) 
+        queryKey: ['therapists', 'applications', 'detail', applicationId] 
       });
       
       // Snapshot the previous value
       const previousApplication = queryClient.getQueryData(
-        queryKeys.therapists.applications.detail(applicationId)
+        ['therapists', 'applications', 'detail', applicationId]
       );
       
       // Optimistically update to the new value
       queryClient.setQueryData(
-        queryKeys.therapists.applications.detail(applicationId),
+        ['therapists', 'applications', 'detail', applicationId],
         (old: TherapistApplication | undefined) => 
           old ? { ...old, ...data, reviewedAt: new Date().toISOString() } : old
       );
@@ -148,7 +148,7 @@ export function useUpdateTherapistApplicationStatus() {
       // Rollback to previous value on error
       if (context?.previousApplication) {
         queryClient.setQueryData(
-          queryKeys.therapists.applications.detail(applicationId),
+          ['therapists', 'applications', 'detail', applicationId],
           context.previousApplication
         );
       }
@@ -161,20 +161,20 @@ export function useUpdateTherapistApplicationStatus() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all() 
+        queryKey: ['therapists', 'applications'] 
       });
       
       // If approved, also invalidate therapist-related queries
       if (updateData.status === 'approved') {
         queryClient.invalidateQueries({ 
-          queryKey: queryKeys.therapists.all 
+          queryKey: ['therapists'] 
         });
       }
     },
     onSettled: () => {
       // Always refetch applications list
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all() 
+        queryKey: ['therapists', 'applications'] 
       });
     },
   });
@@ -214,7 +214,7 @@ export function useBulkUpdateApplications() {
       
       // Invalidate all applications queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.applications.all() 
+        queryKey: ['therapists', 'applications'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -232,7 +232,7 @@ export function usePrefetchTherapistApplication() {
   
   return (applicationId: string) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.therapists.applications.detail(applicationId),
+      queryKey: ['therapists', 'applications', 'detail', applicationId],
       queryFn: () => api.therapists.application.getById(applicationId),
       staleTime: 1000 * 60 * 5,
     });
