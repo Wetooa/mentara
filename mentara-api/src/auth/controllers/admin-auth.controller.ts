@@ -22,7 +22,7 @@ import {
   type LoginDto,
   type AdminAuthResponse,
 } from 'mentara-commons';
-import { AdminAuthService } from '../../services/auth/admin-auth.service';
+import { AdminAuthService } from '../services/admin-auth.service';
 import { Request } from 'express';
 
 @Controller('auth/admin')

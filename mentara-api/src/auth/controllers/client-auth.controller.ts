@@ -28,7 +28,7 @@ import {
   type SuccessResponse,
   type EmailResponse,
 } from 'mentara-commons';
-import { ClientAuthService } from '../../services/auth/client-auth.service';
+import { ClientAuthService } from '../services/client-auth.service';
 import { Request } from 'express';
 
 @Controller('auth/client')

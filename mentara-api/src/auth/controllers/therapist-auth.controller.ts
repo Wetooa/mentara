@@ -24,19 +24,13 @@ import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { ValidatedBody } from '../../common/decorators/validate-body.decorator';
 import {
-  RegisterTherapistDtoSchema,
   LoginDtoSchema,
-  TherapistApplicationCreateDtoSchema,
-  RegisterTherapistWithDocumentsRequestSchema,
   ALLOWED_DOCUMENT_MIME_TYPES,
   type RegisterTherapistDto,
   type LoginDto,
-  type TherapistApplicationCreateDto,
-  type RegisterTherapistWithDocumentsRequest,
 } from 'mentara-commons';
-import { TherapistAuthService } from '../../services/auth/therapist-auth.service';
+import { TherapistAuthService } from '../services/therapist-auth.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { Request } from 'express';
 

@@ -56,7 +56,7 @@ export default function Navbar() {
             ))}
 
             <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-border">
-              <Link href="/sign-in">
+              <Link href="/auth/sign-in">
                 <Button
                   variant="outline"
                   size="sm"

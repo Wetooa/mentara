@@ -186,7 +186,7 @@ export class EmailVerificationService {
         to: email,
         subject: 'Verify Your Mentara Account',
         html,
-        text: `Hello ${firstName}, Please verify your email address by visiting: ${verificationUrl}`
+        text: `Hello ${firstName}, Please verify your email address by visiting: ${verificationUrl}`,
       });
     } catch (error) {
       console.error('Failed to send verification email:', error);

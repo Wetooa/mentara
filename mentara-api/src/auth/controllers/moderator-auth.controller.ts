@@ -21,7 +21,7 @@ import {
   type RegisterModeratorDto,
   type LoginDto,
 } from 'mentara-commons';
-import { ModeratorAuthService } from '../../services/auth/moderator-auth.service';
+import { ModeratorAuthService } from '../services/moderator-auth.service';
 import { Request } from 'express';
 
 @Controller('auth/moderator')
