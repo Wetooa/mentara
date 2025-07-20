@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -114,11 +114,11 @@ export function PostList({
     isLoading,
     refetch
   } = useInfiniteQuery({
-    queryKey: queryKeys.posts.list({ 
+    queryKey: ['posts', 'list', { 
       communityId, 
       ...filters, 
       search: searchQuery 
-    }),
+    }],
     queryFn: ({ pageParam = 0 }) => 
       api.posts.getList({
         communityId,

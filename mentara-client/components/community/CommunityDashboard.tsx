@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,21 +76,21 @@ export function CommunityDashboard() {
 
   // Fetch user's communities
   const { data: userCommunities, isLoading: communitiesLoading } = useQuery({
-    queryKey: queryKeys.communities.joined(),
+    queryKey: ['communities', 'joined'],
     queryFn: () => api.communities.getJoined(),
     staleTime: 5 * 60 * 1000,
   });
 
   // Fetch recommended communities
   const { data: recommendedCommunities, isLoading: recommendedLoading } = useQuery({
-    queryKey: queryKeys.communities.recommended(),
+    queryKey: ['communities', 'recommended'],
     queryFn: () => api.communities.getRecommended(),
     staleTime: 10 * 60 * 1000,
   });
 
   // Fetch recent activity
   const { data: recentActivity, isLoading: activityLoading } = useQuery({
-    queryKey: queryKeys.communities.activity(),
+    queryKey: ['communities', 'activity'],
     queryFn: () => api.communities.getRecentActivity(),
     refetchInterval: 30 * 1000, // Refresh every 30 seconds
     staleTime: 30 * 1000,
@@ -98,7 +98,7 @@ export function CommunityDashboard() {
 
   // Fetch community stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: queryKeys.communities.stats(),
+    queryKey: ['communities', 'stats'],
     queryFn: () => api.communities.getStats(),
     staleTime: 5 * 60 * 1000,
   });
@@ -108,7 +108,7 @@ export function CommunityDashboard() {
       await api.communities.join(communityId);
       toast.success('Successfully joined community!');
       // Refresh communities data
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
     } catch {
       toast.error('Failed to join community. Please try again.');
     }

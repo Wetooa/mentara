@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -127,7 +127,7 @@ export function PostItem({
     mutationFn: ({ postId, voteType }: { postId: string; voteType: 'up' | 'down' | null }) =>
       api.posts.vote(postId, voteType),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
     onError: () => {
       toast.error('Failed to register vote');
@@ -140,7 +140,7 @@ export function PostItem({
       post.isBookmarked ? api.posts.unbookmark(postId) : api.posts.bookmark(postId),
     onSuccess: () => {
       toast.success(post.isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
     onError: () => {
       toast.error('Failed to update bookmark');

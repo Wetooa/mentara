@@ -3,7 +3,7 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -79,7 +79,7 @@ export function CommunityCard({
     mutationFn: (communityId: string) => api.communities.join(communityId),
     onSuccess: () => {
       toast.success(`Successfully joined ${community.name}!`);
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
     onError: () => {
       toast.error('Failed to join community. Please try again.');
@@ -90,7 +90,7 @@ export function CommunityCard({
     mutationFn: (communityId: string) => api.communities.leave(communityId),
     onSuccess: () => {
       toast.success(`Left ${community.name}`);
-      queryClient.invalidateQueries({ queryKey: queryKeys.communities.all });
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
     onError: () => {
       toast.error('Failed to leave community. Please try again.');
