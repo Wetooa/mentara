@@ -20,9 +20,7 @@ export type { UseAdminAuthReturn } from "./admin";
 export { useModeratorAuth } from "./moderator";
 export type { UseModeratorAuthReturn } from "./moderator";
 
-// Enhanced auth utilities
-export { useAuthErrorHandler } from "./useAuthErrorHandler";
-export type { AuthErrorContext, AuthErrorResult } from "./useAuthErrorHandler";
+// Enhanced auth utilities (removed useAuthErrorHandler - overcomplicated)
 
 export { useAuthLoadingStates } from "./useAuthLoadingStates";
 export type { AuthOperation, LoadingState } from "./useAuthLoadingStates";
