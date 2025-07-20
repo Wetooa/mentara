@@ -229,26 +229,25 @@ export class AnalyticsService {
         averageDuration,
         sessionsByType,
       ] = await Promise.all([
-        this.prisma.sessionLog.count({ where: whereDate }),
-        this.prisma.sessionLog.count({
+        this.prisma.meeting.count({ where: whereDate }),
+        this.prisma.meeting.count({
           where: { ...whereDate, status: 'COMPLETED' },
         }),
-        this.prisma.sessionLog.aggregate({
+        this.prisma.meeting.aggregate({
           where: { ...whereDate, status: 'COMPLETED' },
           _avg: { duration: true },
         }),
-        this.prisma.sessionLog.groupBy({
-          by: ['sessionType'],
+        this.prisma.meeting.groupBy({
+          by: ['meetingType'],
           where: whereDate,
-          _count: { sessionType: true },
+          _count: { meetingType: true },
         }),
       ]);
 
-      const therapistPerformance = await this.prisma.sessionLog.groupBy({
+      const therapistPerformance = await this.prisma.meeting.groupBy({
         by: ['therapistId'],
         where: { ...whereDate, status: 'COMPLETED' },
         _count: { therapistId: true },
-        _avg: { quality: true },
         orderBy: { _count: { therapistId: 'desc' } },
         take: 10,
       });
@@ -295,15 +294,25 @@ export class AnalyticsService {
         this.prisma.clientTherapist.count({
           where: { therapistId, status: 'ACTIVE' },
         }),
-        this.prisma.sessionLog.count({
+        this.prisma.meeting.count({
           where: { therapistId, ...whereDate },
         }),
-        this.prisma.sessionLog.count({
+        this.prisma.meeting.count({
           where: { therapistId, status: 'COMPLETED', ...whereDate },
         }),
-        this.prisma.sessionLog.aggregate({
-          where: { therapistId, status: 'COMPLETED', ...whereDate },
-          _avg: { quality: true },
+        this.prisma.review.aggregate({
+          where: { 
+            therapistId, 
+            ...(startDate || endDate
+              ? {
+                  createdAt: {
+                    ...(startDate && { gte: startDate }),
+                    ...(endDate && { lte: endDate }),
+                  },
+                }
+              : {})
+          },
+          _avg: { rating: true },
         }),
         this.prisma.worksheet.count({
           where: {
@@ -321,10 +330,10 @@ export class AnalyticsService {
         this.prisma.worksheet.count({
           where: {
             therapistId,
-            isCompleted: true,
+            status: 'SUBMITTED',
             ...(startDate || endDate
               ? {
-                  submittedAt: {
+                  updatedAt: {
                     ...(startDate && { gte: startDate }),
                     ...(endDate && { lte: endDate }),
                   },
@@ -334,24 +343,27 @@ export class AnalyticsService {
         }),
       ]);
 
-      const clientProgress = await this.prisma.therapyProgress.findMany({
+      // Get recent client activities instead of therapy progress
+      const recentClientActivities = await this.prisma.clientTherapist.findMany({
         where: {
           therapistId,
-          ...(startDate || endDate
-            ? {
-                assessmentDate: {
-                  ...(startDate && { gte: startDate }),
-                  ...(endDate && { lte: endDate }),
-                },
-              }
-            : {}),
+          status: 'ACTIVE',
         },
         include: {
           client: {
-            include: { user: true },
+            include: { 
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                }
+              }
+            },
           },
         },
-        orderBy: { assessmentDate: 'desc' },
+        orderBy: { assignedAt: 'desc' },
         take: 10,
       });
 
@@ -362,7 +374,7 @@ export class AnalyticsService {
           completedSessions,
           sessionCompletionRate:
             activeSessions > 0 ? (completedSessions / activeSessions) * 100 : 0,
-          averageRating: averageRating._avg.quality || 0,
+          averageRating: averageRating._avg.rating || 0,
           worksheetsAssigned,
           worksheetsCompleted,
           worksheetCompletionRate:
@@ -370,7 +382,7 @@ export class AnalyticsService {
               ? (worksheetsCompleted / worksheetsAssigned) * 100
               : 0,
         },
-        recentProgress: clientProgress,
+        recentClients: recentClientActivities,
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -397,15 +409,25 @@ export class AnalyticsService {
         communityPosts,
         communityEngagement,
       ] = await Promise.all([
-        this.prisma.sessionLog.count({
+        this.prisma.meeting.count({
           where: { clientId, ...whereDate },
         }),
-        this.prisma.sessionLog.count({
+        this.prisma.meeting.count({
           where: { clientId, status: 'COMPLETED', ...whereDate },
         }),
-        this.prisma.sessionLog.aggregate({
-          where: { clientId, status: 'COMPLETED', ...whereDate },
-          _avg: { quality: true },
+        this.prisma.review.aggregate({
+          where: { 
+            clientId, 
+            ...(startDate || endDate
+              ? {
+                  createdAt: {
+                    ...(startDate && { gte: startDate }),
+                    ...(endDate && { lte: endDate }),
+                  },
+                }
+              : {})
+          },
+          _avg: { rating: true },
         }),
         this.prisma.worksheet.count({
           where: {
@@ -423,10 +445,10 @@ export class AnalyticsService {
         this.prisma.worksheet.count({
           where: {
             clientId,
-            isCompleted: true,
+            status: 'SUBMITTED',
             ...(startDate || endDate
               ? {
-                  submittedAt: {
+                  updatedAt: {
                     ...(startDate && { gte: startDate }),
                     ...(endDate && { lte: endDate }),
                   },
@@ -462,19 +484,34 @@ export class AnalyticsService {
         }),
       ]);
 
-      const progressHistory = await this.prisma.therapyProgress.findMany({
+      // Get recent activity history instead of therapy progress
+      const recentActivityHistory = await this.prisma.worksheet.findMany({
         where: {
           clientId,
           ...(startDate || endDate
             ? {
-                assessmentDate: {
+                createdAt: {
                   ...(startDate && { gte: startDate }),
                   ...(endDate && { lte: endDate }),
                 },
               }
             : {}),
         },
-        orderBy: { assessmentDate: 'desc' },
+        include: {
+          therapist: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                }
+              }
+            }
+          },
+          submission: true,
+        },
+        orderBy: { createdAt: 'desc' },
         take: 10,
       });
 
@@ -484,7 +521,7 @@ export class AnalyticsService {
           completedSessions,
           sessionCompletionRate:
             totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
-          averageSessionRating: averageSessionRating._avg.quality || 0,
+          averageSessionRating: averageSessionRating._avg.rating || 0,
           worksheetsAssigned,
           worksheetsCompleted,
           worksheetCompletionRate:
@@ -494,7 +531,7 @@ export class AnalyticsService {
           communityPosts,
           communityEngagement,
         },
-        progressHistory,
+        recentActivity: recentActivityHistory,
       };
     } catch (error) {
       throw new InternalServerErrorException(

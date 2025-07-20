@@ -17,7 +17,7 @@ import type {
   MeetingEndedEvent,
   WorksheetAssignedEvent,
   WorksheetCompletedEvent
-} from "@mentara-commons";
+} from "mentara-commons";
 
 interface UseRealTimeEventsConfig extends Partial<EventHandlerConfig> {
   namespace?: string;

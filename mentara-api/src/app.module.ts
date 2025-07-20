@@ -20,9 +20,7 @@ import { ModeratorModule } from './moderator/moderator.module';
 import { ClientModule } from './client/client.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { MeetingsModule } from './meetings/meetings.module';
-import { SessionsModule } from './sessions/sessions.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { BillingModule } from './billing/billing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { SearchModule } from './search/search.module';
@@ -88,9 +86,7 @@ import { JwtService } from '@nestjs/jwt';
     ClientModule,
     MessagingModule,
     MeetingsModule,
-    SessionsModule,
     NotificationsModule,
-    AuditLogsModule,
     BillingModule,
     DashboardModule,
     SearchModule,

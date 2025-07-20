@@ -275,19 +275,7 @@ export class AdminService {
         });
 
         // Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'APPROVE_THERAPIST_APPLICATION',
-            entity: 'therapist',
-            entityId: applicationId,
-            metadata: {
-              applicationId,
-              notes,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         return { success: true, therapist };
       });
@@ -316,20 +304,7 @@ export class AdminService {
         });
 
         // Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'REJECT_THERAPIST_APPLICATION',
-            entity: 'therapist',
-            entityId: applicationId,
-            metadata: {
-              applicationId,
-              reason,
-              notes,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         return { success: true, therapist, reason };
       });
@@ -461,21 +436,7 @@ export class AdminService {
         });
 
         // Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'SUSPEND_USER',
-            entity: 'user',
-            entityId: userId,
-            metadata: {
-              userId,
-              reason,
-              duration,
-              suspensionEnd: suspensionEnd?.toISOString(),
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         return { success: true, user };
       });
@@ -499,18 +460,7 @@ export class AdminService {
         });
 
         // Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'UNSUSPEND_USER',
-            entity: 'user',
-            entityId: userId,
-            metadata: {
-              userId,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         return { success: true, user };
       });
@@ -574,57 +524,29 @@ export class AdminService {
 
   async getMatchingPerformance(startDate?: string, endDate?: string) {
     try {
-      const start = startDate
-        ? new Date(startDate)
-        : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const end = endDate ? new Date(endDate) : new Date();
-
-      const matchingMetrics = await this.prisma.matchHistory.findMany({
-        where: {
-          createdAt: {
-            gte: start,
-            lte: end,
-          },
-        },
+      // Matching analytics removed - not needed for student project
+      // Return basic stats instead
+      const totalTherapists = await this.prisma.therapist.count({
+        where: { status: 'APPROVED' }
       });
-
-      const totalRecommendations = matchingMetrics.length;
-      const successfulMatches = matchingMetrics.filter(
-        (m) => m.becameClient,
-      ).length;
-      const viewedRecommendations = matchingMetrics.filter(
-        (m) => m.wasViewed,
-      ).length;
-      const contactedTherapists = matchingMetrics.filter(
-        (m) => m.wasContacted,
-      ).length;
-
-      const averageMatchScore =
-        totalRecommendations > 0
-          ? matchingMetrics.reduce((sum, m) => sum + m.totalScore, 0) /
-            totalRecommendations
-          : 0;
-
-      const conversionRate =
-        totalRecommendations > 0
-          ? (successfulMatches / totalRecommendations) * 100
-          : 0;
-
-      const clickThroughRate =
-        totalRecommendations > 0
-          ? (viewedRecommendations / totalRecommendations) * 100
-          : 0;
+      const totalClients = await this.prisma.client.count();
 
       return {
-        period: { start, end },
+        period: { 
+          start: startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          end: endDate ? new Date(endDate) : new Date()
+        },
         metrics: {
-          totalRecommendations,
-          successfulMatches,
-          viewedRecommendations,
-          contactedTherapists,
-          averageMatchScore,
-          conversionRate,
-          clickThroughRate,
+          totalTherapists,
+          totalClients,
+          // Simplified metrics without complex tracking
+          totalRecommendations: 0,
+          successfulMatches: 0,
+          viewedRecommendations: 0,
+          contactedTherapists: 0,
+          averageMatchScore: 0,
+          conversionRate: 0,
+          clickThroughRate: 0,
         },
       };
     } catch (error) {
@@ -749,22 +671,7 @@ export class AdminService {
         }
 
         // Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action:
-              contentType === 'post' ? 'MODERATE_POST' : 'MODERATE_COMMENT',
-            entity: contentType,
-            entityId: contentId,
-            metadata: {
-              contentId,
-              contentType,
-              moderationAction: action,
-              reason,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         return { success: true, action, moderatedContent };
       });

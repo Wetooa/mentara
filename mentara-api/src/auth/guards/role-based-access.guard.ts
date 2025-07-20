@@ -91,7 +91,6 @@ const ROLE_PERMISSIONS = {
   // Admin functions
   'admin:access': ['admin'],
   'admin:analytics': ['admin', 'moderator'],
-  'admin:audit-logs': ['admin'],
   'admin:system-config': ['admin'],
 
   // Billing

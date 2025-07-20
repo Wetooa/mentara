@@ -1,17 +1,12 @@
 import { AxiosInstance } from "axios";
 import { z } from "zod";
+import { LoginDto, LoginDtoSchema } from "mentara-commons";
 import {
   TherapistUser,
   AvailabilitySchedule,
   Appointment,
   AuthResponse,
 } from "@/types/auth";
-
-// Therapist-specific DTOs and schemas
-export const TherapistLoginDtoSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
 
 export const TherapistAuthResponseSchema = z.object({
   accessToken: z.string(),
@@ -28,7 +23,7 @@ export const TherapistAuthResponseSchema = z.object({
   }),
 });
 
-export type TherapistLoginDto = z.infer<typeof TherapistLoginDtoSchema>;
+export type TherapistLoginDto = LoginDto;
 export type TherapistAuthResponse = AuthResponse<TherapistUser>;
 
 // TherapistUser is now imported from @/types/auth
@@ -38,7 +33,7 @@ export const createTherapistAuthService = (client: AxiosInstance) => ({
    * Therapist login with email and password
    */
   login: async (credentials: TherapistLoginDto): Promise<TherapistAuthResponse> => {
-    const validatedData = TherapistLoginDtoSchema.parse(credentials);
+    const validatedData = LoginDtoSchema.parse(credentials);
     return client.post("/auth/therapist/login", validatedData);
   },
 

@@ -144,8 +144,8 @@ export class PasswordResetService {
       },
     });
 
-    // Revoke all existing refresh tokens for security
-    await this.tokenService.revokeAllUserTokens(user.id);
+    // Simple logout for security after password reset
+    await this.tokenService.logout(user.id);
 
     // Send confirmation email
     await this.sendPasswordResetConfirmationEmail(user.email);

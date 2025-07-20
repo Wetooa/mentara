@@ -1,49 +1,59 @@
-enum WorksheetStatus {
-    UPCOMING
-    ASSIGNED  
-    PAST_DUE
-    COMPLETED
-}
+// Worksheet Assignment System
+// Therapists create worksheets (assignments) for clients
+// Clients submit files as their response
 
 model Worksheet {
-    id           String                @id @default(uuid())
-    clientId     String // Use clientId for proper relation with Client model
-    therapistId  String?
-    title        String
-    instructions String? // Added instructions field
-    description  String?
-    dueDate      DateTime // Added due date
-    status       WorksheetStatus       @default(UPCOMING)
-    isCompleted  Boolean               @default(false) // Completion status
-    submittedAt  DateTime? // When the worksheet was submitted
-    feedback     String? // Therapist feedback
-    
-    // Materials provided by therapist
-    materialUrls  String[] @default([])
-    materialNames String[] @default([])
-    materialSizes Int[]    @default([])
-    
-    // Submissions from client
-    submissionUrls  String[] @default([])
-    submissionNames String[] @default([])
-    submissionSizes Int[]    @default([])
-    
-    // Additional attachments (general use)
-    attachmentUrls  String[] @default([])
-    attachmentNames String[] @default([])
-    attachmentSizes Int[]    @default([])
-    
-    createdAt    DateTime              @default(now())
-    updatedAt    DateTime              @updatedAt
-    client       Client                @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-    therapist    Therapist?            @relation(fields: [therapistId], references: [userId], onDelete: SetNull)
-
-    @@index([clientId])
-    @@index([therapistId])
-    @@index([status])
-    @@index([isCompleted])
+  id          String   @id @default(uuid())
+  clientId    String   // Which client this is assigned to
+  therapistId String   // Which therapist created it
+  
+  // Assignment details
+  title        String
+  instructions String   @db.Text // Detailed instructions for the client
+  dueDate      DateTime
+  status       WorksheetStatus @default(ASSIGNED)
+  
+  // Optional materials from therapist (reference files, examples, etc.)
+  materialUrls  String[] @default([])
+  materialNames String[] @default([])
+  
+  // Relations
+  client     Client              @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist  Therapist           @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  submission WorksheetSubmission? // 1-to-1 relationship with submission
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([clientId])
+  @@index([therapistId])
+  @@index([status])
+  @@index([dueDate])
 }
 
-// WorksheetMaterial and WorksheetSubmission tables removed
-// Files are now stored inline in the Worksheet model using arrays
-// This follows the same pattern as Posts and Comments modules
+model WorksheetSubmission {
+  id          String @id @default(uuid())
+  worksheetId String @unique // 1-to-1 with worksheet
+  
+  // Submission files (client's response)
+  fileUrls  String[] // URLs to submitted files
+  fileNames String[] // Original file names
+  fileSizes Int[]    // File sizes for reference
+  
+  // Submission metadata
+  submittedAt DateTime @default(now())
+  feedback    String?  @db.Text // Therapist feedback on submission
+  
+  // Relations
+  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+  
+  @@index([worksheetId])
+  @@index([submittedAt])
+}
+
+enum WorksheetStatus {
+  ASSIGNED    // Therapist assigned it to client
+  SUBMITTED   // Client submitted files
+  REVIEWED    // Therapist reviewed and gave feedback
+  OVERDUE     // Past due date without submission
+}

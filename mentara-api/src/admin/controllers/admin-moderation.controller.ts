@@ -18,21 +18,10 @@ import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
 import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
-import {
   ModerationService,
   ModerationContext,
 } from '../../common/services/moderation.service';
 
-@ApiTags('admin-moderation')
-@ApiBearerAuth('JWT-auth')
 @Controller('admin/moderation')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminModerationController {
@@ -44,17 +33,6 @@ export class AdminModerationController {
   ) {}
 
   @Get('flagged')
-  @ApiOperation({
-    summary: 'Retrieve get flagged content',
-
-    description: 'Retrieve get flagged content',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async getFlaggedContent(
     @CurrentUserId() currentUserId: string,
@@ -82,17 +60,6 @@ export class AdminModerationController {
   }
 
   @Put(':contentType/:contentId/moderate')
-  @ApiOperation({
-    summary: 'Update moderate content',
-
-    description: 'Update moderate content',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async moderateContent(
     @CurrentUserId() currentUserId: string,
@@ -127,17 +94,6 @@ export class AdminModerationController {
    * Get moderation service health status
    */
   @Get('service/health')
-  @ApiOperation({
-    summary: 'Retrieve get service health status',
-
-    description: 'Retrieve get service health status',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async getServiceHealthStatus() {
     try {
@@ -155,17 +111,6 @@ export class AdminModerationController {
    * Get moderation service statistics
    */
   @Get('service/stats')
-  @ApiOperation({
-    summary: 'Retrieve get service stats',
-
-    description: 'Retrieve get service stats',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async getServiceStats() {
     try {
@@ -183,17 +128,6 @@ export class AdminModerationController {
    * Test content classification (for admin testing)
    */
   @Post('service/test-classify')
-  @ApiOperation({
-    summary: 'Create test classification',
-
-    description: 'Create test classification',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   @AdminOnly()
   async testClassification(
@@ -235,17 +169,6 @@ export class AdminModerationController {
    * Check if content would trigger crisis intervention
    */
   @Post('service/test-crisis')
-  @ApiOperation({
-    summary: 'Create test crisis detection',
-
-    description: 'Create test crisis detection',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   @AdminOnly()
   async testCrisisDetection(
@@ -294,17 +217,6 @@ export class AdminModerationController {
    * Batch test multiple content items
    */
   @Post('service/test-batch')
-  @ApiOperation({
-    summary: 'Create test batch classification',
-
-    description: 'Create test batch classification',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   @AdminOnly()
   async testBatchClassification(

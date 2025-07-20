@@ -1,4 +1,4 @@
-import { QuestionnaireProps } from '../scoring';
+import { QuestionnaireProps } from "../scoring";
 export declare const LIST_OF_QUESTIONNAIRES: readonly ["Stress", "Anxiety", "Depression", "Insomnia", "Panic", "Bipolar disorder (BD)", "Obsessive compulsive disorder (OCD)", "Post-traumatic stress disorder (PTSD)", "Social anxiety", "Phobia", "Burnout", "Binge eating / Eating disorders", "ADD / ADHD", "Substance or Alcohol Use Issues"];
 export type ListOfQuestionnaires = (typeof LIST_OF_QUESTIONNAIRES)[number];
 export declare const QUESTIONNAIRE_MAP: Record<ListOfQuestionnaires, QuestionnaireProps>;

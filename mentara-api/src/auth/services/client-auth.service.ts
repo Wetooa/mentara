@@ -3,7 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { RegisterClientDto } from 'mentara-commons';
+import { RegisterClientDto, type EmailResponse } from 'mentara-commons';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from './token.service';
 import { EmailVerificationService } from './email-verification.service';
@@ -63,8 +63,8 @@ export class ClientAuthService {
       return { user, client };
     });
 
-    // Generate tokens
-    const tokens = await this.tokenService.generateTokenPair(
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
       result.user.id,
       result.user.email,
       result.user.role,
@@ -100,7 +100,7 @@ export class ClientAuthService {
 
     return {
       user: result.user,
-      tokens,
+      tokens: { accessToken: token, refreshToken: token, expiresIn: 0 }, // For backward compatibility
       message:
         'Client registration successful. Please check your email for the verification code.',
     };
@@ -155,18 +155,16 @@ export class ClientAuthService {
       },
     });
 
-    // Generate tokens
-    const tokens = await this.tokenService.generateTokenPair(
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
       user.id,
       user.email,
       user.role,
-      ipAddress,
-      userAgent,
     );
 
     return {
       user,
-      tokens,
+      tokens: { accessToken: token, refreshToken: token, expiresIn: 0 }, // For backward compatibility
     };
   }
 
@@ -243,7 +241,10 @@ export class ClientAuthService {
     };
   }
 
-  async verifyRegistrationOtp(email: string, otpCode: string): Promise<{ success: boolean; message: string }> {
+  async verifyRegistrationOtp(
+    email: string,
+    otpCode: string,
+  ): Promise<EmailResponse> {
     if (!otpCode || !email) {
       throw new BadRequestException('Email and OTP code are required');
     }
@@ -273,7 +274,7 @@ export class ClientAuthService {
 
     if (user.emailVerified) {
       return {
-        success: true,
+        status: 'success',
         message: 'Email already verified',
       };
     }
@@ -302,12 +303,12 @@ export class ClientAuthService {
     });
 
     return {
-      success: true,
+      status: 'success',
       message: 'Email verified successfully',
     };
   }
 
-  async resendRegistrationOtp(email: string): Promise<{ success: boolean; message: string }> {
+  async resendRegistrationOtp(email: string): Promise<EmailResponse> {
     if (!email) {
       throw new BadRequestException('Email is required');
     }
@@ -329,8 +330,9 @@ export class ClientAuthService {
     if (!user) {
       // Don't reveal if email exists for security, but return success
       return {
-        success: true,
-        message: 'If an account with this email exists, a new verification code has been sent.',
+        status: 'success',
+        message:
+          'If an account with this email exists, a new verification code has been sent.',
       };
     }
 
@@ -367,7 +369,7 @@ export class ClientAuthService {
     }
 
     return {
-      success: true,
+      status: 'success',
       message: 'A new verification code has been sent to your email.',
     };
   }

@@ -93,13 +93,8 @@ model Therapist {
   assignedClients         ClientTherapist[]
   receivedRequests        ClientTherapistRequest[] // Client requests received by this therapist
   reviews                 Review[]
-  sessionLogs             SessionLog[]
-  therapyProgress         TherapyProgress[]
+  paymentsAsTherapist     Payment[] // Payments received by this therapist
 
-  // Matching analytics relations
-  matchHistory            MatchHistory[]
-  clientCompatibility     ClientCompatibility[]
-  recommendationFeedback  RecommendationFeedback[]
 
   // Timestamps
   createdAt DateTime @default(now())

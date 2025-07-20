@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Patch,
   Param,
   Delete,
@@ -18,15 +17,6 @@ import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { ValidatedBody } from '../../common/decorators/validate-body.decorator';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
-import {
   CreateAdminDtoSchema,
   UpdateAdminDtoSchema,
   type CreateAdminDto,
@@ -34,8 +24,6 @@ import {
   type AdminResponseDto,
 } from 'mentara-commons';
 
-@ApiTags('admin-account')
-@ApiBearerAuth('JWT-auth')
 @Controller('admin/accounts')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminAccountController {
@@ -44,17 +32,6 @@ export class AdminAccountController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create create',
-
-    description: 'Create create',
-  })
-  @ApiResponse({
-    status: 201,
-
-    description: 'Created successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async create(
     @ValidatedBody(CreateAdminDtoSchema) createAdminDto: CreateAdminDto,
@@ -75,17 +52,6 @@ export class AdminAccountController {
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Retrieve find all',
-
-    description: 'Retrieve find all',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async findAll(
     @CurrentUserId() currentUserId: string,
@@ -103,17 +69,6 @@ export class AdminAccountController {
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Retrieve find one',
-
-    description: 'Retrieve find one',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async findOne(
     @Param('id') id: string,
@@ -141,17 +96,6 @@ export class AdminAccountController {
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Partially update update',
-
-    description: 'Partially update update',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async update(
     @Param('id') id: string,
@@ -171,17 +115,6 @@ export class AdminAccountController {
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Delete remove',
-
-    description: 'Delete remove',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Deleted successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async remove(
     @Param('id') id: string,

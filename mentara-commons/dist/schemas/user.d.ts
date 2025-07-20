@@ -10,7 +10,7 @@ export declare const UserSchema: z.ZodObject<{
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     email: string;
-    role: "client" | "therapist" | "moderator" | "admin" | "user";
+    role: "client" | "user" | "therapist" | "moderator" | "admin";
     id: string;
     createdAt: string;
     updatedAt: string;
@@ -18,7 +18,7 @@ export declare const UserSchema: z.ZodObject<{
     lastName?: string | undefined;
 }, {
     email: string;
-    role: "client" | "therapist" | "moderator" | "admin" | "user";
+    role: "client" | "user" | "therapist" | "moderator" | "admin";
     id: string;
     createdAt: string;
     updatedAt: string;
@@ -34,12 +34,12 @@ export declare const CreateUserRequestSchema: z.ZodObject<{
     email: string;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
+    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
 }, {
     email: string;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
+    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
 }>;
 export declare const UpdateUserRequestSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
@@ -56,10 +56,10 @@ export declare const UpdateUserRequestSchema: z.ZodObject<{
     email?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    phoneNumber?: string | undefined;
     bio?: string | undefined;
     avatarUrl?: string | undefined;
     coverImageUrl?: string | undefined;
-    phoneNumber?: string | undefined;
     timezone?: string | undefined;
     language?: string | undefined;
     theme?: string | undefined;
@@ -67,10 +67,10 @@ export declare const UpdateUserRequestSchema: z.ZodObject<{
     email?: string | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
+    phoneNumber?: string | undefined;
     bio?: string | undefined;
     avatarUrl?: string | undefined;
     coverImageUrl?: string | undefined;
-    phoneNumber?: string | undefined;
     timezone?: string | undefined;
     language?: string | undefined;
     theme?: string | undefined;
@@ -279,13 +279,13 @@ export declare const RegisterUserDtoSchema: z.ZodObject<{
     password: string;
     firstName: string;
     lastName: string;
-    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
+    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
 }, {
     email: string;
     password: string;
     firstName: string;
     lastName: string;
-    role?: "client" | "therapist" | "moderator" | "admin" | "user" | undefined;
+    role?: "client" | "user" | "therapist" | "moderator" | "admin" | undefined;
 }>;
 export declare const LogoutDtoSchema: z.ZodObject<{
     refreshToken: z.ZodString;

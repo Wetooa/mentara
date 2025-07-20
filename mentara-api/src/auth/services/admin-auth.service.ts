@@ -115,18 +115,16 @@ export class AdminAuthService {
       },
     });
 
-    // Generate tokens
-    const tokens = await this.tokenService.generateTokenPair(
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
       user.id,
       user.email,
       user.role,
-      ipAddress,
-      userAgent,
     );
 
     return {
       user,
-      tokens,
+      token,
     };
   }
 

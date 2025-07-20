@@ -1,4 +1,4 @@
-import { WorksheetAssignment, WorksheetSubmission } from "@mentara-commons";
+import { WorksheetAssignment, WorksheetSubmission } from "mentara-commons";
 
 export interface TaskFile {
   id?: string;

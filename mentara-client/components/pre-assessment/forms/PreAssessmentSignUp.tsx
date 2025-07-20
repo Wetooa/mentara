@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import {
   User,
   Mail,
@@ -30,13 +29,9 @@ import {
 } from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { EmailVerificationForm } from "./EmailVerificationForm";
-import {
-  useClientRegistration,
-  type ClientRegistrationData,
-} from "@/hooks/auth/useClientRegistration";
+import { EmailVerificationForm } from "@/components/auth/EmailVerificationForm";
+import { useClientRegistration } from "@/hooks/auth/useClientRegistration";
 
 const clientRegistrationSchema = z
   .object({
@@ -65,35 +60,34 @@ const clientRegistrationSchema = z
 
 type ClientRegistrationForm = z.infer<typeof clientRegistrationSchema>;
 
-interface ClientRegistrationProps {
+interface PreAssessmentSignUpProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   className?: string;
 }
 
-export function ClientRegistration({
+export function PreAssessmentSignUp({
   onSuccess,
   onCancel,
   className,
-}: ClientRegistrationProps) {
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<
-    "registration" | "verification"
-  >("registration");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [registrationData, setRegistrationData] =
-    useState<ClientRegistrationForm | null>(null);
-
-  // Use the client registration hook for business logic
+}: PreAssessmentSignUpProps) {
+  // Use the client registration hook for ALL business logic
   const {
     isLoading,
     isVerifying,
-    registerClient,
-    verifyOtp,
-    resendOtp,
     registrationStatus,
-  } = useClientRegistration();
+    currentStep,
+    showPassword,
+    showConfirmPassword,
+    registrationData,
+    setShowPassword,
+    setShowConfirmPassword,
+    handleBackToRegistration,
+    handleRegistrationSubmit,
+    handleVerificationSuccess,
+    handleResendCode,
+    getPasswordStrength,
+  } = useClientRegistration(onSuccess);
 
   const form = useForm<ClientRegistrationForm>({
     resolver: zodResolver(clientRegistrationSchema),
@@ -106,54 +100,6 @@ export function ClientRegistration({
       termsAccepted: false,
     },
   });
-
-  const handleRegistrationSubmit = async (data: ClientRegistrationForm) => {
-    // Convert form data to the format expected by the hook
-    const registrationData: ClientRegistrationData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      password: data.password,
-      confirmPassword: data.confirmPassword,
-      termsAccepted: data.termsAccepted,
-    };
-
-    // Call the hook's register method which handles backend API call
-    const success = await registerClient(registrationData);
-
-    if (success) {
-      // Store registration data and move to verification step
-      setRegistrationData(data);
-      setCurrentStep("verification");
-    }
-  };
-
-  const handleVerificationSuccess = async (code: string) => {
-    if (!registrationData) return;
-
-    // Call the hook's verify OTP method which handles backend API call
-    const success = await verifyOtp(registrationData.email, code);
-
-    if (success) {
-      onSuccess?.();
-      // The hook handles navigation to dashboard automatically
-    }
-  };
-
-  const handleBackToRegistration = () => {
-    setCurrentStep("registration");
-    setRegistrationData(null);
-  };
-
-  const getPasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/\d/.test(password)) strength++;
-    if (/[^a-zA-Z0-9]/.test(password)) strength++;
-    return strength;
-  };
 
   const passwordStrength = getPasswordStrength(form.watch("password") || "");
   const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
@@ -485,9 +431,7 @@ export function ClientRegistration({
                 type="registration"
                 onVerificationSuccess={handleVerificationSuccess}
                 onCancel={handleBackToRegistration}
-                onResendCode={() =>
-                  registrationData?.email && resendOtp(registrationData.email)
-                }
+                onResendCode={handleResendCode}
                 isVerifying={isVerifying}
               />
 
@@ -508,4 +452,4 @@ export function ClientRegistration({
   );
 }
 
-export default ClientRegistration;
+export default PreAssessmentSignUp;

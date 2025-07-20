@@ -1339,15 +1339,15 @@ export declare const WorksheetAssignedEventSchema: z.ZodObject<{
     title: z.ZodString;
     dueDate: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    therapistId: string;
     userId: string;
     title: string;
-    therapistId: string;
     worksheetId: string;
     dueDate?: string | undefined;
 }, {
+    therapistId: string;
     userId: string;
     title: string;
-    therapistId: string;
     worksheetId: string;
     dueDate?: string | undefined;
 }>;

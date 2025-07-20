@@ -1,30 +1,19 @@
 import { AxiosInstance } from "axios";
-import { z } from "zod";
+import {
+  RefreshTokenDto,
+  RequestPasswordResetDto,
+  RequestPasswordResetDtoSchema,
+  ResetPasswordDto,
+  ResetPasswordDtoSchema,
+  VerifyEmailDto,
+  VerifyEmailDtoSchema
+} from "mentara-commons";
 import { RoleSpecificUser, TokenPair } from "@/types/auth";
 
-// Shared authentication types and schemas
-export const SharedRefreshTokenDtoSchema = z.object({
-  refreshToken: z.string(),
-});
-
-export const PasswordResetDtoSchema = z.object({
-  email: z.string().email(),
-});
-
-export const PasswordResetConfirmDtoSchema = z.object({
-  token: z.string(),
-  newPassword: z.string().min(6),
-});
-
-export const EmailVerificationDtoSchema = z.object({
-  email: z.string().email(),
-  verificationCode: z.string().length(6),
-});
-
-export type SharedRefreshTokenDto = z.infer<typeof SharedRefreshTokenDtoSchema>;
-export type PasswordResetDto = z.infer<typeof PasswordResetDtoSchema>;
-export type PasswordResetConfirmDto = z.infer<typeof PasswordResetConfirmDtoSchema>;
-export type EmailVerificationDto = z.infer<typeof EmailVerificationDtoSchema>;
+export type SharedRefreshTokenDto = RefreshTokenDto;
+export type PasswordResetDto = RequestPasswordResetDto;
+export type PasswordResetConfirmDto = ResetPasswordDto;
+export type EmailVerificationDto = VerifyEmailDto;
 
 export interface TokenPair {
   accessToken: string;
@@ -48,7 +37,7 @@ export const createSharedAuthService = (client: AxiosInstance) => ({
    * Send password reset email (works for all roles)
    */
   sendPasswordReset: async (data: PasswordResetDto): Promise<PasswordResetResponse> => {
-    const validatedData = PasswordResetDtoSchema.parse(data);
+    const validatedData = RequestPasswordResetDtoSchema.parse(data);
     return client.post("/auth/request-password-reset", validatedData);
   },
 
@@ -56,7 +45,7 @@ export const createSharedAuthService = (client: AxiosInstance) => ({
    * Confirm password reset with token (works for all roles)
    */
   confirmPasswordReset: async (data: PasswordResetConfirmDto): Promise<{ success: boolean }> => {
-    const validatedData = PasswordResetConfirmDtoSchema.parse(data);
+    const validatedData = ResetPasswordDtoSchema.parse(data);
     return client.post("/auth/reset-password", validatedData);
   },
 
@@ -71,7 +60,7 @@ export const createSharedAuthService = (client: AxiosInstance) => ({
    * Verify email with code
    */
   verifyEmail: async (data: EmailVerificationDto): Promise<EmailVerificationResponse> => {
-    const validatedData = EmailVerificationDtoSchema.parse(data);
+    const validatedData = VerifyEmailDtoSchema.parse(data);
     return client.post("/auth/verify-email", validatedData);
   },
 

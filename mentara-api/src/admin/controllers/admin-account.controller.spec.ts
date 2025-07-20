@@ -9,8 +9,15 @@ import { AdminAccountController } from './admin-account.controller';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
-import { SecurityGuardTestUtils, RoleBasedTestUtils } from '../../test-utils/auth-testing-helpers';
-import { MockBuilder, TestDataGenerator, TestAssertions } from '../../test-utils/enhanced-test-helpers';
+import {
+  SecurityGuardTestUtils,
+  RoleBasedTestUtils,
+} from '../../test-utils/auth-testing-helpers';
+import {
+  MockBuilder,
+  TestDataGenerator,
+  TestAssertions,
+} from '../../test-utils/enhanced-test-helpers';
 import { TEST_USER_IDS, TEST_EMAILS } from '../../test-utils/index';
 
 describe('AdminAccountController', () => {
@@ -104,13 +111,22 @@ describe('AdminAccountController', () => {
     });
 
     it('should have proper route decorators', () => {
-      const controllerMetadata = Reflect.getMetadata('path', AdminAccountController);
+      const controllerMetadata = Reflect.getMetadata(
+        'path',
+        AdminAccountController,
+      );
       expect(controllerMetadata).toBe('admin/accounts');
     });
 
     it('should require admin role for all endpoints', () => {
-      const adminOnlyMethods = ['create', 'findAll', 'findOne', 'update', 'remove'];
-      adminOnlyMethods.forEach(method => {
+      const adminOnlyMethods = [
+        'create',
+        'findAll',
+        'findOne',
+        'update',
+        'remove',
+      ];
+      adminOnlyMethods.forEach((method) => {
         const metadata = Reflect.getMetadata('roles', controller[method]);
         expect(metadata).toEqual(['admin']);
       });
@@ -121,7 +137,10 @@ describe('AdminAccountController', () => {
     it('should create admin successfully', async () => {
       mockAdminService.create.mockResolvedValue(mockAdmin);
 
-      const result = await controller.create(createAdminDto, TEST_USER_IDS.ADMIN);
+      const result = await controller.create(
+        createAdminDto,
+        TEST_USER_IDS.ADMIN,
+      );
 
       expect(result).toEqual(mockAdmin);
       expect(adminService.create).toHaveBeenCalledWith(createAdminDto);
@@ -132,7 +151,7 @@ describe('AdminAccountController', () => {
       mockAdminService.create.mockRejectedValue(serviceError);
 
       await expect(
-        controller.create(createAdminDto, TEST_USER_IDS.ADMIN)
+        controller.create(createAdminDto, TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(HttpException);
     });
 
@@ -176,9 +195,9 @@ describe('AdminAccountController', () => {
       const serviceError = new Error('Database connection failed');
       mockAdminService.findAll.mockRejectedValue(serviceError);
 
-      await expect(
-        controller.findAll(TEST_USER_IDS.ADMIN)
-      ).rejects.toThrow(HttpException);
+      await expect(controller.findAll(TEST_USER_IDS.ADMIN)).rejects.toThrow(
+        HttpException,
+      );
     });
   });
 
@@ -196,8 +215,10 @@ describe('AdminAccountController', () => {
       mockAdminService.findOne.mockResolvedValue(null);
 
       await expect(
-        controller.findOne('nonexistent_admin', TEST_USER_IDS.ADMIN)
-      ).rejects.toThrow(new HttpException('Admin not found', HttpStatus.NOT_FOUND));
+        controller.findOne('nonexistent_admin', TEST_USER_IDS.ADMIN),
+      ).rejects.toThrow(
+        new HttpException('Admin not found', HttpStatus.NOT_FOUND),
+      );
     });
 
     it('should handle service errors', async () => {
@@ -205,7 +226,7 @@ describe('AdminAccountController', () => {
       mockAdminService.findOne.mockRejectedValue(serviceError);
 
       await expect(
-        controller.findOne('admin_123', TEST_USER_IDS.ADMIN)
+        controller.findOne('admin_123', TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(HttpException);
     });
 
@@ -214,7 +235,7 @@ describe('AdminAccountController', () => {
       mockAdminService.findOne.mockRejectedValue(httpError);
 
       await expect(
-        controller.findOne('admin_123', TEST_USER_IDS.ADMIN)
+        controller.findOne('admin_123', TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(httpError);
     });
   });
@@ -224,10 +245,17 @@ describe('AdminAccountController', () => {
       const updatedAdmin = { ...mockAdmin, ...updateAdminDto };
       mockAdminService.update.mockResolvedValue(updatedAdmin);
 
-      const result = await controller.update('admin_123', updateAdminDto, TEST_USER_IDS.ADMIN);
+      const result = await controller.update(
+        'admin_123',
+        updateAdminDto,
+        TEST_USER_IDS.ADMIN,
+      );
 
       expect(result).toEqual(updatedAdmin);
-      expect(adminService.update).toHaveBeenCalledWith('admin_123', updateAdminDto);
+      expect(adminService.update).toHaveBeenCalledWith(
+        'admin_123',
+        updateAdminDto,
+      );
     });
 
     it('should handle service errors during update', async () => {
@@ -235,7 +263,7 @@ describe('AdminAccountController', () => {
       mockAdminService.update.mockRejectedValue(serviceError);
 
       await expect(
-        controller.update('admin_123', updateAdminDto, TEST_USER_IDS.ADMIN)
+        controller.update('admin_123', updateAdminDto, TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(HttpException);
     });
 
@@ -244,10 +272,17 @@ describe('AdminAccountController', () => {
       const updatedAdmin = { ...mockAdmin, firstName: 'UpdatedFirst' };
       mockAdminService.update.mockResolvedValue(updatedAdmin);
 
-      const result = await controller.update('admin_123', partialUpdate, TEST_USER_IDS.ADMIN);
+      const result = await controller.update(
+        'admin_123',
+        partialUpdate,
+        TEST_USER_IDS.ADMIN,
+      );
 
       expect(result).toEqual(updatedAdmin);
-      expect(adminService.update).toHaveBeenCalledWith('admin_123', partialUpdate);
+      expect(adminService.update).toHaveBeenCalledWith(
+        'admin_123',
+        partialUpdate,
+      );
     });
   });
 
@@ -263,11 +298,13 @@ describe('AdminAccountController', () => {
 
     it('should prevent self-deletion', async () => {
       await expect(
-        controller.remove(TEST_USER_IDS.ADMIN, TEST_USER_IDS.ADMIN)
-      ).rejects.toThrow(new HttpException(
-        'Cannot delete your own admin account',
-        HttpStatus.BAD_REQUEST
-      ));
+        controller.remove(TEST_USER_IDS.ADMIN, TEST_USER_IDS.ADMIN),
+      ).rejects.toThrow(
+        new HttpException(
+          'Cannot delete your own admin account',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
 
       expect(adminService.remove).not.toHaveBeenCalled();
     });
@@ -277,16 +314,19 @@ describe('AdminAccountController', () => {
       mockAdminService.remove.mockRejectedValue(serviceError);
 
       await expect(
-        controller.remove('admin_123', TEST_USER_IDS.ADMIN)
+        controller.remove('admin_123', TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(HttpException);
     });
 
     it('should pass through HTTP exceptions from service', async () => {
-      const httpError = new HttpException('Cannot delete admin', HttpStatus.CONFLICT);
+      const httpError = new HttpException(
+        'Cannot delete admin',
+        HttpStatus.CONFLICT,
+      );
       mockAdminService.remove.mockRejectedValue(httpError);
 
       await expect(
-        controller.remove('admin_123', TEST_USER_IDS.ADMIN)
+        controller.remove('admin_123', TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(httpError);
     });
   });
@@ -295,9 +335,18 @@ describe('AdminAccountController', () => {
     it('should return properly formatted admin response', async () => {
       mockAdminService.create.mockResolvedValue(mockAdmin);
 
-      const result = await controller.create(createAdminDto, TEST_USER_IDS.ADMIN);
+      const result = await controller.create(
+        createAdminDto,
+        TEST_USER_IDS.ADMIN,
+      );
 
-      TestAssertions.expectValidEntity(result, ['id', 'userId', 'email', 'firstName', 'lastName']);
+      TestAssertions.expectValidEntity(result, [
+        'id',
+        'userId',
+        'email',
+        'firstName',
+        'lastName',
+      ]);
       expect(result.role).toBe('admin');
       expect(typeof result.isActive).toBe('boolean');
       expect(result.createdAt).toBeInstanceOf(Date);
@@ -310,7 +359,7 @@ describe('AdminAccountController', () => {
       const result = await controller.findAll(TEST_USER_IDS.ADMIN);
 
       expect(Array.isArray(result)).toBe(true);
-      result.forEach(admin => {
+      result.forEach((admin) => {
         TestAssertions.expectValidEntity(admin, ['id', 'userId', 'email']);
         expect(admin.role).toBe('admin');
       });
@@ -333,7 +382,7 @@ describe('AdminAccountController', () => {
       mockAdminService.create.mockRejectedValue(validationError);
 
       await expect(
-        controller.create(createAdminDto, TEST_USER_IDS.ADMIN)
+        controller.create(createAdminDto, TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(HttpException);
     });
 
@@ -342,7 +391,7 @@ describe('AdminAccountController', () => {
       mockAdminService.create.mockRejectedValue(duplicateError);
 
       await expect(
-        controller.create(createAdminDto, TEST_USER_IDS.ADMIN)
+        controller.create(createAdminDto, TEST_USER_IDS.ADMIN),
       ).rejects.toThrow(HttpException);
     });
 
@@ -350,9 +399,9 @@ describe('AdminAccountController', () => {
       const dbError = new Error('Database connection failed');
       mockAdminService.findAll.mockRejectedValue(dbError);
 
-      await expect(
-        controller.findAll(TEST_USER_IDS.ADMIN)
-      ).rejects.toThrow(HttpException);
+      await expect(controller.findAll(TEST_USER_IDS.ADMIN)).rejects.toThrow(
+        HttpException,
+      );
     });
   });
 
@@ -360,18 +409,28 @@ describe('AdminAccountController', () => {
     it('should handle complete admin lifecycle', async () => {
       // Create admin
       mockAdminService.create.mockResolvedValue(mockAdmin);
-      const createResult = await controller.create(createAdminDto, TEST_USER_IDS.ADMIN);
+      const createResult = await controller.create(
+        createAdminDto,
+        TEST_USER_IDS.ADMIN,
+      );
       expect(createResult.id).toBeDefined();
 
       // Find created admin
       mockAdminService.findOne.mockResolvedValue(mockAdmin);
-      const findResult = await controller.findOne(mockAdmin.id, TEST_USER_IDS.ADMIN);
+      const findResult = await controller.findOne(
+        mockAdmin.id,
+        TEST_USER_IDS.ADMIN,
+      );
       expect(findResult.id).toBe(mockAdmin.id);
 
       // Update admin
       const updatedAdmin = { ...mockAdmin, firstName: 'Updated' };
       mockAdminService.update.mockResolvedValue(updatedAdmin);
-      const updateResult = await controller.update(mockAdmin.id, { firstName: 'Updated' }, TEST_USER_IDS.ADMIN);
+      const updateResult = await controller.update(
+        mockAdmin.id,
+        { firstName: 'Updated' },
+        TEST_USER_IDS.ADMIN,
+      );
       expect(updateResult.firstName).toBe('Updated');
 
       // List all admins
@@ -381,7 +440,10 @@ describe('AdminAccountController', () => {
 
       // Remove admin
       mockAdminService.remove.mockResolvedValue(undefined);
-      const removeResult = await controller.remove(mockAdmin.id, TEST_USER_IDS.ADMIN);
+      const removeResult = await controller.remove(
+        mockAdmin.id,
+        TEST_USER_IDS.ADMIN,
+      );
       expect(removeResult.message).toContain('deleted successfully');
     });
 
@@ -391,7 +453,8 @@ describe('AdminAccountController', () => {
         () => controller.create(createAdminDto, TEST_USER_IDS.ADMIN),
         () => controller.findAll(TEST_USER_IDS.ADMIN),
         () => controller.findOne('admin_123', TEST_USER_IDS.ADMIN),
-        () => controller.update('admin_123', updateAdminDto, TEST_USER_IDS.ADMIN),
+        () =>
+          controller.update('admin_123', updateAdminDto, TEST_USER_IDS.ADMIN),
         () => controller.remove('admin_123', TEST_USER_IDS.ADMIN),
       ];
 

@@ -28,19 +28,19 @@ export declare const RegisterUserDtoSchema: z.ZodObject<{
     password: z.ZodString;
     firstName: z.ZodString;
     lastName: z.ZodString;
-    role: z.ZodEnum<["client", "therapist"]>;
+    role: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
     firstName: string;
     lastName: string;
-    role: "client" | "therapist";
+    role: string;
 }, {
     email: string;
     password: string;
     firstName: string;
     lastName: string;
-    role: "client" | "therapist";
+    role: string;
 }>;
 export declare const ChangePasswordDtoSchema: z.ZodEffects<z.ZodObject<{
     currentPassword: z.ZodString;
@@ -257,14 +257,14 @@ export declare const RegisterWithOtpDtoSchema: z.ZodObject<{
     password: z.ZodString;
     firstName: z.ZodString;
     lastName: z.ZodString;
-    role: z.ZodDefault<z.ZodEnum<["client", "therapist"]>>;
+    role: z.ZodDefault<z.ZodString>;
     otpCode: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
     firstName: string;
     lastName: string;
-    role: "client" | "therapist";
+    role: string;
     otpCode: string;
 }, {
     email: string;
@@ -272,7 +272,7 @@ export declare const RegisterWithOtpDtoSchema: z.ZodObject<{
     firstName: string;
     lastName: string;
     otpCode: string;
-    role?: "client" | "therapist" | undefined;
+    role?: string | undefined;
 }>;
 export declare const UserIdParamSchema: z.ZodObject<{
     id: z.ZodString;
@@ -508,6 +508,7 @@ export declare const UniversalLogoutResponseSchema: z.ZodObject<{
     message: string;
     success: boolean;
 }>;
+export declare const UserRoleSchema: z.ZodString;
 export declare const CheckUserExistsDtoSchema: z.ZodObject<{
     email: z.ZodString;
 }, "strip", z.ZodTypeAny, {
@@ -517,16 +518,370 @@ export declare const CheckUserExistsDtoSchema: z.ZodObject<{
 }>;
 export declare const CheckUserExistsResponseSchema: z.ZodObject<{
     exists: z.ZodBoolean;
-    role: z.ZodOptional<z.ZodEnum<["client", "therapist", "moderator", "admin"]>>;
+    role: z.ZodOptional<z.ZodString>;
     isVerified: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     exists: boolean;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
+    role?: string | undefined;
     isVerified?: boolean | undefined;
 }, {
     exists: boolean;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
+    role?: string | undefined;
     isVerified?: boolean | undefined;
+}>;
+export declare const AuthUserSchema: z.ZodObject<{
+    id: z.ZodString;
+    email: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+    role: z.ZodString;
+    emailVerified: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    id: string;
+    emailVerified: boolean;
+}, {
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    id: string;
+    emailVerified: boolean;
+}>;
+export declare const TokensSchema: z.ZodObject<{
+    accessToken: z.ZodString;
+    refreshToken: z.ZodString;
+    expiresIn: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+}, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+}>;
+export declare const AuthResponseSchema: z.ZodObject<{
+    user: z.ZodObject<{
+        id: z.ZodString;
+        email: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        role: z.ZodString;
+        emailVerified: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }>;
+    accessToken: z.ZodString;
+    refreshToken: z.ZodString;
+    expiresIn: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}>;
+export declare const ClientAuthResponseSchema: z.ZodObject<{
+    user: z.ZodObject<{
+        id: z.ZodString;
+        email: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        role: z.ZodString;
+        emailVerified: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }>;
+    accessToken: z.ZodString;
+    refreshToken: z.ZodString;
+    expiresIn: z.ZodNumber;
+} & {
+    message: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+    message?: string | undefined;
+}, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+    message?: string | undefined;
+}>;
+export declare const TherapistAuthResponseSchema: z.ZodObject<{
+    user: z.ZodObject<{
+        id: z.ZodString;
+        email: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        role: z.ZodString;
+        emailVerified: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }>;
+    accessToken: z.ZodString;
+    refreshToken: z.ZodString;
+    expiresIn: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}>;
+export declare const AdminAuthResponseSchema: z.ZodObject<{
+    user: z.ZodObject<{
+        id: z.ZodString;
+        email: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        role: z.ZodString;
+        emailVerified: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }>;
+    accessToken: z.ZodString;
+    refreshToken: z.ZodString;
+    expiresIn: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}>;
+export declare const ModeratorAuthResponseSchema: z.ZodObject<{
+    user: z.ZodObject<{
+        id: z.ZodString;
+        email: z.ZodString;
+        firstName: z.ZodString;
+        lastName: z.ZodString;
+        role: z.ZodString;
+        emailVerified: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }, {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    }>;
+    accessToken: z.ZodString;
+    refreshToken: z.ZodString;
+    expiresIn: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}, {
+    refreshToken: string;
+    accessToken: string;
+    expiresIn: number;
+    user: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: string;
+        id: string;
+        emailVerified: boolean;
+    };
+}>;
+export declare const ClientProfileResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    email: z.ZodString;
+    firstName: z.ZodString;
+    lastName: z.ZodString;
+    role: z.ZodLiteral<"client">;
+    dateOfBirth: z.ZodOptional<z.ZodString>;
+    phoneNumber: z.ZodOptional<z.ZodString>;
+    profileComplete: z.ZodBoolean;
+    therapistId: z.ZodOptional<z.ZodString>;
+    createdAt: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: "client";
+    id: string;
+    createdAt: string;
+    profileComplete: boolean;
+    dateOfBirth?: string | undefined;
+    phoneNumber?: string | undefined;
+    therapistId?: string | undefined;
+}, {
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: "client";
+    id: string;
+    createdAt: string;
+    profileComplete: boolean;
+    dateOfBirth?: string | undefined;
+    phoneNumber?: string | undefined;
+    therapistId?: string | undefined;
+}>;
+export declare const OnboardingStatusResponseSchema: z.ZodObject<{
+    isFirstSignIn: z.ZodBoolean;
+    hasSeenRecommendations: z.ZodBoolean;
+    profileCompleted: z.ZodBoolean;
+    assessmentCompleted: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    isFirstSignIn: boolean;
+    hasSeenRecommendations: boolean;
+    profileCompleted: boolean;
+    assessmentCompleted: boolean;
+}, {
+    isFirstSignIn: boolean;
+    hasSeenRecommendations: boolean;
+    profileCompleted: boolean;
+    assessmentCompleted: boolean;
+}>;
+export declare const SuccessResponseSchema: z.ZodObject<{
+    success: z.ZodBoolean;
+    message: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    message: string;
+    success: boolean;
+}, {
+    message: string;
+    success: boolean;
 }>;
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RefreshTokenDto = z.infer<typeof RefreshTokenDtoSchema>;
@@ -558,6 +913,17 @@ export type ActiveSessionsResponse = z.infer<typeof ActiveSessionsResponseSchema
 export type TerminateSessionResponse = z.infer<typeof TerminateSessionResponseSchema>;
 export type TerminateOtherSessionsResponse = z.infer<typeof TerminateOtherSessionsResponseSchema>;
 export type UniversalLogoutResponse = z.infer<typeof UniversalLogoutResponseSchema>;
+export type UserRole = z.infer<typeof UserRoleSchema>;
 export type CheckUserExistsDto = z.infer<typeof CheckUserExistsDtoSchema>;
 export type CheckUserExistsResponse = z.infer<typeof CheckUserExistsResponseSchema>;
+export type AuthUser = z.infer<typeof AuthUserSchema>;
+export type Tokens = z.infer<typeof TokensSchema>;
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type ClientAuthResponse = z.infer<typeof ClientAuthResponseSchema>;
+export type TherapistAuthResponse = z.infer<typeof TherapistAuthResponseSchema>;
+export type AdminAuthResponse = z.infer<typeof AdminAuthResponseSchema>;
+export type ModeratorAuthResponse = z.infer<typeof ModeratorAuthResponseSchema>;
+export type ClientProfileResponse = z.infer<typeof ClientProfileResponseSchema>;
+export type OnboardingStatusResponse = z.infer<typeof OnboardingStatusResponseSchema>;
+export type SuccessResponse = z.infer<typeof SuccessResponseSchema>;
 //# sourceMappingURL=auth.d.ts.map

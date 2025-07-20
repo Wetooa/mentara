@@ -20,8 +20,8 @@ export declare const SessionSchema: z.ZodObject<{
     status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
-    updatedAt: string;
     therapistId: string;
+    updatedAt: string;
     clientId: string;
     duration: number;
     scheduledAt: string;
@@ -36,8 +36,8 @@ export declare const SessionSchema: z.ZodObject<{
     status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
-    updatedAt: string;
     therapistId: string;
+    updatedAt: string;
     clientId: string;
     duration: number;
     scheduledAt: string;
@@ -562,8 +562,8 @@ export declare const SessionListResponseSchema: z.ZodObject<{
         status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         scheduledAt: string;
@@ -578,8 +578,8 @@ export declare const SessionListResponseSchema: z.ZodObject<{
         status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         scheduledAt: string;
@@ -600,8 +600,8 @@ export declare const SessionListResponseSchema: z.ZodObject<{
         status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         scheduledAt: string;
@@ -622,8 +622,8 @@ export declare const SessionListResponseSchema: z.ZodObject<{
         status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         scheduledAt: string;

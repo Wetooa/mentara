@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { TherapistUser } from "@/lib/api/services/auth";
-import type { Meeting } from "@mentara-commons";
+import type { Meeting } from "mentara-commons";
 
 export interface TherapistAuthState {
   // Auth state

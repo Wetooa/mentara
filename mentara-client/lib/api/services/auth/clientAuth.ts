@@ -1,25 +1,22 @@
 import { AxiosInstance } from "axios";
-import { z } from "zod";
 import {
-  ClientUser,
-  ClientPreferences,
-  AuthResponse,
-} from "@/types/auth";
+  LoginDto,
+  LoginDtoSchema,
+  RegisterUserDtoSchema,
+  VerifyRegistrationOtpDto,
+  VerifyRegistrationOtpDtoSchema,
+  ResendRegistrationOtpDto,
+  ResendRegistrationOtpDtoSchema,
+  EmailResponse,
+} from "mentara-commons";
+import { ClientUser, ClientPreferences, AuthResponse } from "@/types/auth";
+import { z } from "zod";
 
-// Client-specific DTOs and schemas
-export const ClientLoginDtoSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
-export const ClientRegisterDtoSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+// Client-specific registration schema (extends base with client-specific fields)
+export const ClientRegisterDtoSchema = RegisterUserDtoSchema.extend({
   dateOfBirth: z.string(),
   preAssessmentData: z.object({}).optional(), // Pre-assessment results
-});
+}).omit({ role: true }); // Remove role since it's always 'client' for this service
 
 export const ClientAuthResponseSchema = z.object({
   accessToken: z.string(),
@@ -35,7 +32,7 @@ export const ClientAuthResponseSchema = z.object({
   }),
 });
 
-export type ClientLoginDto = z.infer<typeof ClientLoginDtoSchema>;
+export type ClientLoginDto = LoginDto;
 export type ClientRegisterDto = z.infer<typeof ClientRegisterDtoSchema>;
 export type ClientAuthResponse = AuthResponse<ClientUser>;
 
@@ -46,14 +43,16 @@ export const createClientAuthService = (client: AxiosInstance) => ({
    * Client login with email and password
    */
   login: async (credentials: ClientLoginDto): Promise<ClientAuthResponse> => {
-    const validatedData = ClientLoginDtoSchema.parse(credentials);
+    const validatedData = LoginDtoSchema.parse(credentials);
     return client.post("/auth/client/login", validatedData);
   },
 
   /**
    * Register a new client user (called from pre-assessment flow)
    */
-  register: async (credentials: ClientRegisterDto): Promise<ClientAuthResponse> => {
+  register: async (
+    credentials: ClientRegisterDto
+  ): Promise<ClientAuthResponse> => {
     const validatedData = ClientRegisterDtoSchema.parse(credentials);
     return client.post("/auth/client/register", validatedData);
   },
@@ -66,19 +65,22 @@ export const createClientAuthService = (client: AxiosInstance) => ({
   /**
    * Refresh access token
    */
-  refreshToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<{ accessToken: string; refreshToken: string }> => {
     return client.post("/auth/client/refresh", { refreshToken });
   },
 
   /**
    * Logout client
    */
-  logout: (): Promise<{ success: boolean }> => client.post("/auth/client/logout"),
+  logout: (): Promise<{ success: boolean }> =>
+    client.post("/auth/client/logout"),
 
   /**
    * Update client onboarding status
    */
-  completeOnboarding: (): Promise<{ success: boolean }> => 
+  completeOnboarding: (): Promise<{ success: boolean }> =>
     client.post("/auth/client/complete-onboarding"),
 
   /**
@@ -101,7 +103,9 @@ export const createClientAuthService = (client: AxiosInstance) => ({
   /**
    * Reset password for client
    */
-  resetPassword: (email: string): Promise<{ success: boolean; message: string }> =>
+  resetPassword: (
+    email: string
+  ): Promise<{ success: boolean; message: string }> =>
     client.post("/auth/client/reset-password", { email }),
 
   /**
@@ -110,24 +114,24 @@ export const createClientAuthService = (client: AxiosInstance) => ({
   changePassword: (data: {
     currentPassword: string;
     newPassword: string;
-  }): Promise<{ success: boolean }> => client.post("/auth/client/change-password", data),
+  }): Promise<{ success: boolean }> =>
+    client.post("/auth/client/change-password", data),
 
   /**
    * Verify registration OTP code
    */
-  verifyOtp: (data: {
-    email: string;
-    otpCode: string;
-  }): Promise<{ success: boolean; message: string }> => 
-    client.post("/auth/client/verify-otp", data),
+  verifyOtp: async (data: VerifyRegistrationOtpDto): Promise<EmailResponse> => {
+    const validatedData = VerifyRegistrationOtpDtoSchema.parse(data);
+    return client.post("/auth/client/verify-otp", validatedData);
+  },
 
   /**
    * Resend registration OTP code
    */
-  resendOtp: (data: {
-    email: string;
-  }): Promise<{ success: boolean; message: string }> => 
-    client.post("/auth/client/resend-otp", data),
+  resendOtp: async (data: ResendRegistrationOtpDto): Promise<EmailResponse> => {
+    const validatedData = ResendRegistrationOtpDtoSchema.parse(data);
+    return client.post("/auth/client/resend-otp", validatedData);
+  },
 });
 
 export type ClientAuthService = ReturnType<typeof createClientAuthService>;

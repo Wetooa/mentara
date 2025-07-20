@@ -9,16 +9,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiUnauthorizedResponse,
-  ApiTooManyRequestsResponse,
-  ApiBadRequestResponse,
-} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { Public } from '../decorators/public.decorator';
@@ -32,77 +22,27 @@ import {
   type LoginDto,
   type VerifyRegistrationOtpDto,
   type ResendRegistrationOtpDto,
+  type ClientAuthResponse,
+  type ClientProfileResponse,
+  type OnboardingStatusResponse,
+  type SuccessResponse,
+  type EmailResponse,
 } from 'mentara-commons';
 import { ClientAuthService } from '../services/client-auth.service';
 import { Request } from 'express';
 
-@ApiTags('client-auth')
-@ApiBearerAuth('JWT-auth')
 @Controller('auth/client')
 export class ClientAuthController {
   constructor(private readonly clientAuthService: ClientAuthService) {}
 
   @Public()
-  @ApiOperation({
-    summary: 'Register new client account',
-    description:
-      'Create a new client account for users seeking therapy services',
-  })
-  @ApiBody({
-    type: 'object',
-    description: 'Client registration data',
-    schema: {
-      type: 'object',
-      required: ['email', 'password', 'firstName', 'lastName'],
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-          example: 'client@example.com',
-        },
-        password: { type: 'string', minLength: 8, example: 'SecurePass123!' },
-        firstName: { type: 'string', example: 'John' },
-        lastName: { type: 'string', example: 'Doe' },
-        dateOfBirth: { type: 'string', format: 'date', example: '1990-01-01' },
-        phoneNumber: { type: 'string', example: '+1234567890' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Client account created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-            emailVerified: { type: 'boolean' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        expiresIn: { type: 'number' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid registration data or email already exists',
-  })
-  @ApiTooManyRequestsResponse({ description: 'Too many registration attempts' })
   @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registrations per 5 minutes
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
     @Body(new ZodValidationPipe(RegisterClientDtoSchema))
     registerDto: RegisterClientDto,
-  ) {
+  ): Promise<ClientAuthResponse> {
     const result = await this.clientAuthService.registerClient(registerDto);
 
     return {
@@ -114,66 +54,21 @@ export class ClientAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      accessToken: result.tokens.accessToken,
-      refreshToken: result.tokens.refreshToken,
-      expiresIn: result.tokens.expiresIn,
+      accessToken: result.tokens.accessToken, // This is now the single token
+      refreshToken: result.tokens.accessToken, // Same token for compatibility
+      expiresIn: 0, // Non-expiring
       message: result.message,
     };
   }
 
   @Public()
-  @ApiOperation({
-    summary: 'Client login',
-    description: 'Authenticate client user and return access tokens',
-  })
-  @ApiBody({
-    type: 'object',
-    description: 'Client login credentials',
-    schema: {
-      type: 'object',
-      required: ['email', 'password'],
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-          example: 'client@example.com',
-        },
-        password: { type: 'string', example: 'SecurePass123!' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Login successful',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-            emailVerified: { type: 'boolean' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        expiresIn: { type: 'number' },
-      },
-    },
-  })
-  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
-  @ApiTooManyRequestsResponse({ description: 'Too many login attempts' })
   @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
     @Body(new ZodValidationPipe(LoginDtoSchema)) loginDto: LoginDto,
     @Req() req: Request,
-  ) {
+  ): Promise<ClientAuthResponse> {
     const ipAddress = req.ip;
     const userAgent = req.get('User-Agent');
 
@@ -193,145 +88,46 @@ export class ClientAuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      accessToken: result.tokens.accessToken,
-      refreshToken: result.tokens.refreshToken,
-      expiresIn: result.tokens.expiresIn,
+      accessToken: result.tokens.accessToken, // This is now the single token
+      refreshToken: result.tokens.accessToken, // Same token for compatibility
+      expiresIn: 0, // Non-expiring
     };
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'Get client profile',
-    description: 'Retrieve the authenticated client user profile information',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Client profile retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        email: { type: 'string' },
-        firstName: { type: 'string' },
-        lastName: { type: 'string' },
-        role: { type: 'string' },
-        dateOfBirth: { type: 'string', format: 'date' },
-        phoneNumber: { type: 'string' },
-        profileComplete: { type: 'boolean' },
-        therapistId: { type: 'string', nullable: true },
-        createdAt: { type: 'string', format: 'date-time' },
-      },
-    },
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Invalid or missing authentication token',
-  })
   @Get('profile')
-  async getProfile(@CurrentUserId() userId: string) {
+  async getProfile(
+    @CurrentUserId() userId: string,
+  ): Promise<ClientProfileResponse> {
     return this.clientAuthService.getClientProfile(userId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'Get first sign-in status',
-    description:
-      'Check if this is the client first time signing in and return onboarding status',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'First sign-in status retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        isFirstSignIn: { type: 'boolean' },
-        hasSeenRecommendations: { type: 'boolean' },
-        profileCompleted: { type: 'boolean' },
-        assessmentCompleted: { type: 'boolean' },
-      },
-    },
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Invalid or missing authentication token',
-  })
   @Get('first-sign-in-status')
   @HttpCode(HttpStatus.OK)
-  async getFirstSignInStatus(@CurrentUserId() userId: string) {
+  async getFirstSignInStatus(
+    @CurrentUserId() userId: string,
+  ): Promise<OnboardingStatusResponse> {
     return this.clientAuthService.getFirstSignInStatus(userId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'Mark recommendations as seen',
-    description: 'Mark therapist recommendations as seen by the client',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Recommendations marked as seen successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Invalid or missing authentication token',
-  })
   @Post('mark-recommendations-seen')
   @HttpCode(HttpStatus.OK)
-  async markRecommendationsSeen(@CurrentUserId() userId: string) {
+  async markRecommendationsSeen(
+    @CurrentUserId() userId: string,
+  ): Promise<SuccessResponse> {
     return this.clientAuthService.markRecommendationsSeen(userId);
   }
 
   @Public()
-  @ApiOperation({
-    summary: 'Verify registration OTP',
-    description: 'Verify the OTP code sent to the client email during registration',
-  })
-  @ApiBody({
-    type: 'object',
-    description: 'OTP verification data',
-    schema: {
-      type: 'object',
-      required: ['email', 'otpCode'],
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-          example: 'client@example.com',
-        },
-        otpCode: {
-          type: 'string',
-          minLength: 6,
-          maxLength: 6,
-          example: '123456',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'OTP verified successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid OTP code or email, or OTP expired',
-  })
-  @ApiTooManyRequestsResponse({ description: 'Too many OTP verification attempts' })
   @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 attempts per 5 minutes
   @Post('verify-otp')
   @HttpCode(HttpStatus.OK)
   async verifyOtp(
     @Body(new ZodValidationPipe(VerifyRegistrationOtpDtoSchema))
     verifyDto: VerifyRegistrationOtpDto,
-  ) {
+  ): Promise<EmailResponse> {
     return this.clientAuthService.verifyRegistrationOtp(
       verifyDto.email,
       verifyDto.otpCode,
@@ -339,47 +135,13 @@ export class ClientAuthController {
   }
 
   @Public()
-  @ApiOperation({
-    summary: 'Resend registration OTP',
-    description: 'Resend the OTP code to the client email for registration verification',
-  })
-  @ApiBody({
-    type: 'object',
-    description: 'Email address for OTP resend',
-    schema: {
-      type: 'object',
-      required: ['email'],
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-          example: 'client@example.com',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'OTP resent successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid email or email already verified',
-  })
-  @ApiTooManyRequestsResponse({ description: 'Too many OTP resend attempts' })
   @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 resends per 5 minutes
   @Post('resend-otp')
   @HttpCode(HttpStatus.OK)
   async resendOtp(
     @Body(new ZodValidationPipe(ResendRegistrationOtpDtoSchema))
     resendDto: ResendRegistrationOtpDto,
-  ) {
+  ): Promise<EmailResponse> {
     return this.clientAuthService.resendRegistrationOtp(resendDto.email);
   }
 }

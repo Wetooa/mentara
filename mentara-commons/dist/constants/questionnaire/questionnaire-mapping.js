@@ -39,38 +39,38 @@ exports.LIST_OF_QUESTIONNAIRES = [
 ];
 // Mapping from display names to questionnaire objects
 exports.QUESTIONNAIRE_MAP = {
-    "Stress": perceived_stress_scale_1.default,
-    "Anxiety": gad_7_anxiety_1.default,
-    "Depression": phq_9_1.default,
-    "Insomnia": insomnia_1.default,
-    "Panic": panic_disorder_1.default,
+    Stress: perceived_stress_scale_1.default,
+    Anxiety: gad_7_anxiety_1.default,
+    Depression: phq_9_1.default,
+    Insomnia: insomnia_1.default,
+    Panic: panic_disorder_1.default,
     "Bipolar disorder (BD)": mood_disorder_1.default,
     "Obsessive compulsive disorder (OCD)": obsessional_compulsive_1.default,
     "Post-traumatic stress disorder (PTSD)": ptsd_1.default,
     "Social anxiety": social_phobia_1.default,
-    "Phobia": phobia_1.default,
-    "Burnout": burnout_1.default,
+    Phobia: phobia_1.default,
+    Burnout: burnout_1.default,
     "Binge eating / Eating disorders": binge_eating_1.default,
     "ADD / ADHD": adhd_1.default,
     "Substance or Alcohol Use Issues": alcohol_1.default,
 };
 // Reverse mapping from questionnaire IDs to display names
 exports.QUESTIONNAIRE_ID_TO_NAME_MAP = {
-    'adhd': 'ADD / ADHD',
-    'alcohol': 'Substance or Alcohol Use Issues',
-    'binge-eating': 'Binge eating / Eating disorders',
-    'burnout': 'Burnout',
-    'drug-abuse': 'Substance or Alcohol Use Issues', // Note: shares with alcohol
-    'anxiety': 'Anxiety',
-    'insomnia': 'Insomnia',
-    'mood-disorder': 'Bipolar disorder (BD)',
-    'obsessional-compulsive': 'Obsessive compulsive disorder (OCD)',
-    'panic-disorder': 'Panic',
-    'stress': 'Stress',
-    'phobia': 'Phobia',
-    'depression': 'Depression',
-    'ptsd': 'Post-traumatic stress disorder (PTSD)',
-    'social-phobia': 'Social anxiety',
+    adhd: "ADD / ADHD",
+    alcohol: "Substance or Alcohol Use Issues",
+    "binge-eating": "Binge eating / Eating disorders",
+    burnout: "Burnout",
+    "drug-abuse": "Substance or Alcohol Use Issues", // Note: shares with alcohol
+    anxiety: "Anxiety",
+    insomnia: "Insomnia",
+    "mood-disorder": "Bipolar disorder (BD)",
+    "obsessional-compulsive": "Obsessive compulsive disorder (OCD)",
+    "panic-disorder": "Panic",
+    stress: "Stress",
+    phobia: "Phobia",
+    depression: "Depression",
+    ptsd: "Post-traumatic stress disorder (PTSD)",
+    "social-phobia": "Social anxiety",
 };
 // Helper function to get questionnaire by display name
 const getQuestionnaireByName = (name) => {

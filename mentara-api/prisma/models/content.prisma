@@ -33,17 +33,17 @@ model Post {
 // This model is kept for backward compatibility but should be migrated
 
 model Comment {
-    id        String  @id @default(uuid())
-    postId    String
-    userId    String
-    content   String  @db.Text
-    parentId  String? // For nested comments - supports infinite nesting depth
+    id       String  @id @default(uuid())
+    postId   String
+    userId   String
+    content  String  @db.Text
+    parentId String? // For nested comments - supports infinite nesting depth
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-    user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     parent Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
 
     // File attachments
@@ -52,8 +52,8 @@ model Comment {
     attachmentSizes Int[]    @default([])
 
     // Hearts instead of votes
-    hearts  CommentHeart[]
-    children Comment[] @relation("CommentReplies")
+    hearts   CommentHeart[]
+    children Comment[]      @relation("CommentReplies")
 
     // Reports only
     reports Report[]
@@ -93,31 +93,27 @@ model PostHeart {
     @@index([userId])
 }
 
-// Reply and ReplyHeart models have been removed and unified into the Comment model
-// All reply functionality is now handled through the Comment model with parentId for nesting
-// This provides true infinite nesting capabilities without the complexity of separate models
-
 model Report {
-    id       String @id @default(uuid())
-    reason   String
-    content  String?
-    status   ReportStatus @default(PENDING)
-    
+    id      String       @id @default(uuid())
+    reason  String
+    content String?
+    status  ReportStatus @default(PENDING)
+
     // What's being reported
     postId    String?
     commentId String?
-    
+
     // Who reported
     reporterId String
-    reporter   User @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
-    
+    reporter   User   @relation("UserReports", fields: [reporterId], references: [id], onDelete: Cascade)
+
     // Relations
     post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
     comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-    
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    
+
     @@index([reporterId])
     @@index([postId])
     @@index([commentId])

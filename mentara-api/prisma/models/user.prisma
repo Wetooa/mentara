@@ -59,27 +59,19 @@ model User {
     blocking            UserBlock[]               @relation("UserBlocking")
     blockedBy           UserBlock[]               @relation("UserBlocked")
 
-    // Essential notifications
-    notifications         Notification[]         @relation("UserNotifications")
-    notificationSettings  NotificationSettings?  @relation("UserNotificationSettings")
-    deviceTokens          DeviceToken[]          @relation("UserDeviceTokens")
-    scheduledNotifications ScheduledNotification[] @relation("UserScheduledNotifications")
+    // Simple notifications (WebSocket only)
+    notifications        Notification[]        @relation("UserNotifications")
+    notificationSettings NotificationSettings? @relation("UserNotificationSettings")
 
-    // Essential billing
-    subscription     Subscription? @relation("UserSubscription")
-    paymentMethods   PaymentMethod[] @relation("UserPaymentMethods")
-    discountRedemptions DiscountRedemption[] @relation("UserDiscountRedemptions")
-    stripeCustomerId String?       @unique
+    // Simple billing
+    paymentMethods PaymentMethod[] @relation("UserPaymentMethods")
 
     // Essential community features (minimal)
     memberships Membership[]
 
-    // Essential audit
-    auditLogs AuditLog[] @relation("UserAuditLogs")
 
     // Essential auth
     refreshTokens RefreshToken[] @relation("UserRefreshTokens")
-    userActivities UserActivity[] @relation("UserActivities")
 
     // Reviews
     reviewsHelpful ReviewHelpful[]
@@ -95,21 +87,12 @@ model Client {
     // Patient-specific relations
     worksheets             Worksheet[]
     preAssessment          PreAssessment?
-    clientMedicalHistory   ClientMedicalHistory[]
-    clientPreferences      ClientPreference[]
     assignedTherapists     ClientTherapist[]
     sentRequests           ClientTherapistRequest[] // Therapist requests sent by this client
     meetings               Meeting[]               @relation("ClientMeetings")
     reviews                Review[] // Reviews written by this client
-    sessionLogs            SessionLog[]
-    therapyProgress        TherapyProgress[]
-    assessments            Assessment[]
-    mentalHealthIndicators MentalHealthIndicator[]
+    paymentsAsClient       Payment[] // Payments made by this client
 
-    // Matching analytics relations
-    matchHistory            MatchHistory[]
-    clientCompatibility     ClientCompatibility[]
-    recommendationFeedback  RecommendationFeedback[]
 
     hasSeenTherapistRecommendations Boolean @default(false)
 

@@ -197,24 +197,7 @@ export class AdminTherapistService {
         );
       }
 
-      // Get audit trail for this therapist
-      const auditTrail = await this.prisma.auditLog.findMany({
-        where: {
-          entity: 'therapist',
-          entityId: therapistId,
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        include: {
-          user: {
-            select: {
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
-        },
-      });
+      // Audit trail removed - not needed for student project
 
       this.logger.log(
         `Retrieved detailed application for therapist ${therapistId}`,
@@ -222,7 +205,6 @@ export class AdminTherapistService {
 
       return {
         application,
-        auditTrail,
         statistics: {
           totalClients: application.assignedClients.length,
           averageRating:
@@ -291,23 +273,7 @@ export class AdminTherapistService {
           },
         });
 
-        // 4. Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'APPROVE_THERAPIST_APPLICATION',
-            entity: 'therapist',
-            entityId: therapistId,
-            metadata: {
-              therapistId,
-              approvalMessage: approvalData.approvalMessage,
-              verifyLicense: approvalData.verifyLicense,
-              grantSpecialPermissions: approvalData.grantSpecialPermissions,
-              adminId,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         // 5. Send approval notification
         await this.notificationsService.createTherapistApplicationNotification(
@@ -379,23 +345,7 @@ export class AdminTherapistService {
           },
         });
 
-        // 3. Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'REJECT_THERAPIST_APPLICATION',
-            entity: 'therapist',
-            entityId: therapistId,
-            metadata: {
-              therapistId,
-              rejectionReason: rejectionData.rejectionReason,
-              rejectionMessage: rejectionData.rejectionMessage,
-              allowReapplication: rejectionData.allowReapplication,
-              adminId,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         // 4. Send rejection notification with detailed message
         await this.notificationsService.create({
@@ -492,23 +442,7 @@ export class AdminTherapistService {
           });
         }
 
-        // 5. Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId: adminId,
-            action: 'UPDATE_THERAPIST_STATUS',
-            entity: 'therapist',
-            entityId: therapistId,
-            metadata: {
-              therapistId,
-              previousStatus: existingTherapist.status,
-              newStatus: upperCaseStatus,
-              reason: statusData.reason,
-              adminId,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        });
+        // Audit log removed - not needed for student project
 
         // 6. Send status change notification
         const notificationTitle = this.getStatusChangeNotificationTitle(

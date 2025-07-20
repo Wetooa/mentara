@@ -2,7 +2,6 @@ import { Module, Global } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ConfigModule } from '@nestjs/config';
 import { EventBusService } from './events/event-bus.service';
-import { AuditLoggingService } from './services/audit-logging.service';
 import { SupabaseStorageService } from './services/supabase-storage.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 
@@ -11,11 +10,10 @@ import { PrismaService } from '../providers/prisma-client.provider';
   imports: [ConfigModule],
   providers: [
     EventBusService,
-    AuditLoggingService,
     SupabaseStorageService,
     PrismaService,
     EventEmitter2,
   ],
-  exports: [EventBusService, AuditLoggingService, SupabaseStorageService],
+  exports: [EventBusService, SupabaseStorageService],
 })
 export class CommonModule {}

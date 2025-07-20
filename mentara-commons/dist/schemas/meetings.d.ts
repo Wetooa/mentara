@@ -30,12 +30,12 @@ export declare const GetUpcomingMeetingsQueryDtoSchema: z.ZodObject<{
     limit: number;
     days: number;
     includeDetails: boolean;
-    userId?: string | undefined;
     therapistId?: string | undefined;
+    userId?: string | undefined;
     clientId?: string | undefined;
 }, {
-    userId?: string | undefined;
     therapistId?: string | undefined;
+    userId?: string | undefined;
     clientId?: string | undefined;
     limit?: number | undefined;
     days?: number | undefined;
@@ -236,9 +236,9 @@ export declare const SessionMeetingSchema: z.ZodObject<{
     status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
+    therapistId: string;
     updatedAt: string;
     title: string;
-    therapistId: string;
     clientId: string;
     startTime: string;
     endTime: string;
@@ -263,9 +263,9 @@ export declare const SessionMeetingSchema: z.ZodObject<{
     status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
+    therapistId: string;
     updatedAt: string;
     title: string;
-    therapistId: string;
     clientId: string;
     startTime: string;
     endTime: string;
@@ -551,10 +551,10 @@ export declare const VideoRoomResponseSchema: z.ZodObject<{
     status: z.ZodEnum<["waiting", "active", "ended"]>;
 }, "strip", z.ZodTypeAny, {
     status: "waiting" | "active" | "ended";
+    accessToken: string;
     participantCount: number;
     roomUrl: string;
     roomId: string;
-    accessToken: string;
     participantToken: string;
     roomConfig: {
         maxParticipants: number;
@@ -565,10 +565,10 @@ export declare const VideoRoomResponseSchema: z.ZodObject<{
     expiresAt: string;
 }, {
     status: "waiting" | "active" | "ended";
+    accessToken: string;
     participantCount: number;
     roomUrl: string;
     roomId: string;
-    accessToken: string;
     participantToken: string;
     roomConfig: {
         maxParticipants: number;

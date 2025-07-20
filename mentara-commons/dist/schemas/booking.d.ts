@@ -195,8 +195,8 @@ export declare const MeetingSchema: z.ZodObject<{
     status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
-    updatedAt: string;
     therapistId: string;
+    updatedAt: string;
     clientId: string;
     duration: number;
     startTime: string;
@@ -231,8 +231,8 @@ export declare const MeetingSchema: z.ZodObject<{
     status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
     id: string;
     createdAt: string;
-    updatedAt: string;
     therapistId: string;
+    updatedAt: string;
     clientId: string;
     duration: number;
     startTime: string;
@@ -541,8 +541,8 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         startTime: string;
@@ -577,8 +577,8 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         startTime: string;
@@ -623,8 +623,8 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         startTime: string;
@@ -665,8 +665,8 @@ export declare const MeetingListResponseSchema: z.ZodObject<{
         status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
         id: string;
         createdAt: string;
-        updatedAt: string;
         therapistId: string;
+        updatedAt: string;
         clientId: string;
         duration: number;
         startTime: string;

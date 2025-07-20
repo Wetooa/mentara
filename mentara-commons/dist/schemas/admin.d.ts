@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 export declare const CreateAdminDtoSchema: z.ZodObject<{
     userId: z.ZodString;
     permissions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -607,4 +607,235 @@ export type AdminUserCreateRequest = z.infer<typeof AdminUserCreateRequestSchema
 export type AdminUserUpdateRequest = z.infer<typeof AdminUserUpdateRequestSchema>;
 export type UserRoleUpdateRequest = z.infer<typeof UserRoleUpdateRequestSchema>;
 export type UserSuspendRequest = z.infer<typeof UserSuspendRequestSchema>;
+export declare const TherapistApplicationDetailsResponseSchema: z.ZodObject<{
+    application: z.ZodObject<{
+        userId: z.ZodString;
+        status: z.ZodEnum<["PENDING", "APPROVED", "REJECTED"]>;
+        submissionDate: z.ZodDate;
+        processingDate: z.ZodNullable<z.ZodDate>;
+    }, "strip", z.ZodTypeAny, {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    }, {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    }>;
+    statistics: z.ZodObject<{
+        totalClients: z.ZodNumber;
+        averageRating: z.ZodNumber;
+        totalReviews: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        averageRating: number;
+        totalReviews: number;
+        totalClients: number;
+    }, {
+        averageRating: number;
+        totalReviews: number;
+        totalClients: number;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    application: {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    };
+    statistics: {
+        averageRating: number;
+        totalReviews: number;
+        totalClients: number;
+    };
+}, {
+    application: {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    };
+    statistics: {
+        averageRating: number;
+        totalReviews: number;
+        totalClients: number;
+    };
+}>;
+export declare const TherapistActionResponseSchema: z.ZodObject<{
+    success: z.ZodBoolean;
+    message: z.ZodString;
+    therapist: z.ZodObject<{
+        userId: z.ZodString;
+        status: z.ZodEnum<["PENDING", "APPROVED", "REJECTED"]>;
+        processingDate: z.ZodDate;
+    }, "strip", z.ZodTypeAny, {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        processingDate: Date;
+    }, {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        processingDate: Date;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    message: string;
+    success: boolean;
+    therapist: {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        processingDate: Date;
+    };
+}, {
+    message: string;
+    success: boolean;
+    therapist: {
+        status: "PENDING" | "APPROVED" | "REJECTED";
+        userId: string;
+        processingDate: Date;
+    };
+}>;
+export declare const TherapistApplicationMetricsResponseSchema: z.ZodObject<{
+    period: z.ZodObject<{
+        start: z.ZodDate;
+        end: z.ZodDate;
+    }, "strip", z.ZodTypeAny, {
+        start: Date;
+        end: Date;
+    }, {
+        start: Date;
+        end: Date;
+    }>;
+    summary: z.ZodObject<{
+        totalApplications: z.ZodNumber;
+        pendingApplications: z.ZodNumber;
+        approvedApplications: z.ZodNumber;
+        rejectedApplications: z.ZodNumber;
+        processedApplications: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        pendingApplications: number;
+        totalApplications: number;
+        approvedApplications: number;
+        rejectedApplications: number;
+        processedApplications: number;
+    }, {
+        pendingApplications: number;
+        totalApplications: number;
+        approvedApplications: number;
+        rejectedApplications: number;
+        processedApplications: number;
+    }>;
+    metrics: z.ZodObject<{
+        approvalRate: z.ZodNumber;
+        averageProcessingTimeDays: z.ZodNumber;
+        applicationTrend: z.ZodEnum<["increasing", "decreasing", "stable"]>;
+    }, "strip", z.ZodTypeAny, {
+        approvalRate: number;
+        averageProcessingTimeDays: number;
+        applicationTrend: "increasing" | "decreasing" | "stable";
+    }, {
+        approvalRate: number;
+        averageProcessingTimeDays: number;
+        applicationTrend: "increasing" | "decreasing" | "stable";
+    }>;
+    recentActivity: z.ZodArray<z.ZodObject<{
+        submissionDate: z.ZodDate;
+        status: z.ZodString;
+        processingDate: z.ZodNullable<z.ZodDate>;
+    }, "strip", z.ZodTypeAny, {
+        status: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    }, {
+        status: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    }>, "many">;
+}, "strip", z.ZodTypeAny, {
+    metrics: {
+        approvalRate: number;
+        averageProcessingTimeDays: number;
+        applicationTrend: "increasing" | "decreasing" | "stable";
+    };
+    period: {
+        start: Date;
+        end: Date;
+    };
+    recentActivity: {
+        status: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    }[];
+    summary: {
+        pendingApplications: number;
+        totalApplications: number;
+        approvedApplications: number;
+        rejectedApplications: number;
+        processedApplications: number;
+    };
+}, {
+    metrics: {
+        approvalRate: number;
+        averageProcessingTimeDays: number;
+        applicationTrend: "increasing" | "decreasing" | "stable";
+    };
+    period: {
+        start: Date;
+        end: Date;
+    };
+    recentActivity: {
+        status: string;
+        submissionDate: Date;
+        processingDate: Date | null;
+    }[];
+    summary: {
+        pendingApplications: number;
+        totalApplications: number;
+        approvedApplications: number;
+        rejectedApplications: number;
+        processedApplications: number;
+    };
+}>;
+export declare const TherapistListResponseSchema: z.ZodObject<{
+    applications: z.ZodArray<z.ZodAny, "many">;
+    summary: z.ZodObject<{
+        totalPending: z.ZodNumber;
+        totalApproved: z.ZodNumber;
+        totalRejected: z.ZodNumber;
+        filtered: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        totalPending: number;
+        totalApproved: number;
+        totalRejected: number;
+        filtered: number;
+    }, {
+        totalPending: number;
+        totalApproved: number;
+        totalRejected: number;
+        filtered: number;
+    }>;
+    filters: z.ZodAny;
+}, "strip", z.ZodTypeAny, {
+    summary: {
+        totalPending: number;
+        totalApproved: number;
+        totalRejected: number;
+        filtered: number;
+    };
+    applications: any[];
+    filters?: any;
+}, {
+    summary: {
+        totalPending: number;
+        totalApproved: number;
+        totalRejected: number;
+        filtered: number;
+    };
+    applications: any[];
+    filters?: any;
+}>;
+export type TherapistApplicationDetailsResponse = z.infer<typeof TherapistApplicationDetailsResponseSchema>;
+export type TherapistActionResponse = z.infer<typeof TherapistActionResponseSchema>;
+export type TherapistApplicationMetricsResponse = z.infer<typeof TherapistApplicationMetricsResponseSchema>;
+export type TherapistListResponse = z.infer<typeof TherapistListResponseSchema>;
 //# sourceMappingURL=admin.d.ts.map

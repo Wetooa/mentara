@@ -5,7 +5,6 @@ import { AdminTherapistService } from './services/admin-therapist.service';
 import { AdminAccountController } from './controllers/admin-account.controller';
 import { AdminTherapistController } from './controllers/admin-therapist.controller';
 import { AdminUserController } from './controllers/admin-user.controller';
-import { AdminAnalyticsController } from './controllers/admin-analytics.controller';
 import { AdminModerationController } from './controllers/admin-moderation.controller';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -20,7 +19,6 @@ import { ModerationModule } from '../common/services/moderation.module';
     AdminAccountController,
     AdminTherapistController,
     AdminUserController,
-    AdminAnalyticsController,
     AdminModerationController,
   ],
   providers: [

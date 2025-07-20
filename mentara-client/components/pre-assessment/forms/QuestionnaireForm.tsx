@@ -1,37 +1,20 @@
-import { PreAssessmentPageFormProps } from "@/app/(public)/(user)/pre-assessment/page";
 import { Button } from "@/components/ui/button";
-import { QUESTIONNAIRE_MAP } from "@/constants/questionnaires";
-import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { usePreAssessmentQuestionnaire } from "@/hooks/pre-assessment/usePreAssessmentQuestionnaire";
+
+interface QuestionnaireFormProps {
+  handleNextButtonOnClick: () => void;
+}
 
 export default function QuestionnaireForm({
   handleNextButtonOnClick,
-}: PreAssessmentPageFormProps) {
-  const { step, miniStep, questionnaires, answers, setAnswers } =
-    usePreAssessmentChecklistStore();
-
-  const formIndex = step - 1;
-  const questionIndex = miniStep;
-
-  const questionnaireId = questionnaires[formIndex];
-  const questions = QUESTIONNAIRE_MAP[questionnaireId].questions;
-  const question = questions[questionIndex];
-
-  const currentAnswer = answers[formIndex][questionIndex];
-
-  const isLastQuestion = questions.length - 1 === questionIndex;
-
-  function handleSelectAnswer(answer: number) {
-    const previousAnswers: number[] = answers[formIndex];
-    let formAnswers: number[] = [];
-
-    formAnswers = [
-      ...previousAnswers.slice(0, questionIndex),
-      answer,
-      ...previousAnswers.slice(questionIndex + 1),
-    ];
-
-    setAnswers(formIndex, formAnswers);
-  }
+}: QuestionnaireFormProps) {
+  const {
+    question,
+    currentAnswer,
+    handleSelectAnswer,
+    isAnswerDisabled,
+    buttonText,
+  } = usePreAssessmentQuestionnaire();
 
   return (
     <>
@@ -61,10 +44,10 @@ export default function QuestionnaireForm({
         <Button
           className="w-full font-bold"
           variant={"secondary"}
-          disabled={currentAnswer === -1}
+          disabled={isAnswerDisabled}
           onClick={handleNextButtonOnClick}
         >
-          {isLastQuestion ? "Next form..." : "Continue"}
+          {buttonText}
         </Button>
       </div>
     </>

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ModeratorUser } from "@/lib/api/services/auth";
-import type { AuditLog } from "@mentara-commons";
+import type { AuditLog } from "mentara-commons";
 
 export interface ModeratorAuthState {
   // Auth state

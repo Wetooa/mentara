@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axios";
 import { z } from "zod";
+import { LoginDto, LoginDtoSchema } from "mentara-commons";
 import {
   AdminUser,
   AdminActivity,
@@ -8,12 +9,6 @@ import {
   AuditLogQueryParams,
   AuthResponse,
 } from "@/types/auth";
-
-// Admin-specific DTOs and schemas
-export const AdminLoginDtoSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8), // Stricter password requirements for admin
-});
 
 export const AdminAuthResponseSchema = z.object({
   accessToken: z.string(),
@@ -29,7 +24,7 @@ export const AdminAuthResponseSchema = z.object({
   }),
 });
 
-export type AdminLoginDto = z.infer<typeof AdminLoginDtoSchema>;
+export type AdminLoginDto = LoginDto;
 export type AdminAuthResponse = AuthResponse<AdminUser>;
 
 // AdminUser is now imported from @/types/auth
@@ -39,7 +34,7 @@ export const createAdminAuthService = (client: AxiosInstance) => ({
    * Admin login with email and password
    */
   login: async (credentials: AdminLoginDto): Promise<AdminAuthResponse> => {
-    const validatedData = AdminLoginDtoSchema.parse(credentials);
+    const validatedData = LoginDtoSchema.parse(credentials);
     return client.post("/auth/admin/login", validatedData);
   },
 

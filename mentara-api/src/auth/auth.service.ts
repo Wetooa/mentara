@@ -9,7 +9,7 @@ import { PrismaService } from 'src/providers/prisma-client.provider';
 // Remove unused imports - these DTOs don't exist in mentara-commons
 import { EventBusService } from '../common/events/event-bus.service';
 import { UserRegisteredEvent } from '../common/events/user-events';
-import { TokenService, TokenPair } from './services/token.service';
+import { TokenService, SimpleToken } from './services/token.service';
 import { EmailVerificationService } from './services/email-verification.service';
 import { PasswordResetService } from './services/password-reset.service';
 
@@ -29,7 +29,7 @@ export class AuthService {
     firstName: string,
     lastName: string,
     additionalData?: any,
-  ): Promise<{ user: any; tokens: TokenPair; message: string }> {
+  ): Promise<{ user: any; token: string; message: string }> {
     try {
       // Use the existing local registration method
       const { user } = await this.registerUserWithEmail(
@@ -41,8 +41,8 @@ export class AuthService {
         additionalData,
       );
 
-      // Generate tokens for immediate login after registration
-      const tokens = await this.tokenService.generateTokenPair(
+      // Generate single token for immediate login after registration
+      const { token } = await this.tokenService.generateToken(
         user.id,
         user.email,
         user.role,
@@ -50,7 +50,7 @@ export class AuthService {
 
       return {
         user,
-        tokens,
+        token,
         message:
           'Client registered successfully. Please check your email to verify your account.',
       };
@@ -72,7 +72,7 @@ export class AuthService {
     firstName: string,
     lastName: string,
     additionalData?: any,
-  ): Promise<{ user: any; tokens: TokenPair; message: string }> {
+  ): Promise<{ user: any; token: string; message: string }> {
     try {
       // Use the existing local registration method
       const { user } = await this.registerUserWithEmail(
@@ -84,8 +84,8 @@ export class AuthService {
         additionalData,
       );
 
-      // Generate tokens for immediate login after registration
-      const tokens = await this.tokenService.generateTokenPair(
+      // Generate single token for immediate login after registration
+      const { token } = await this.tokenService.generateToken(
         user.id,
         user.email,
         user.role,
@@ -93,7 +93,7 @@ export class AuthService {
 
       return {
         user,
-        tokens,
+        token,
         message:
           'Therapist registered successfully. Please check your email to verify your account. Your application is pending approval.',
       };
@@ -179,10 +179,10 @@ export class AuthService {
 
   async forceLogout(userId: string) {
     try {
-      // Revoke all JWT refresh tokens for the user
-      await this.tokenService.revokeAllUserTokens(userId);
+      // Simple logout - just update last activity
+      await this.tokenService.logout(userId);
 
-      return { success: true, message: 'User sessions revoked successfully' };
+      return { success: true, message: 'User logged out successfully' };
     } catch (error) {
       console.error(
         'Force logout error:',
@@ -340,7 +340,7 @@ export class AuthService {
     password: string,
     ipAddress?: string,
     userAgent?: string,
-  ): Promise<{ user: any; tokens: TokenPair }> {
+  ): Promise<{ user: any; token: string }> {
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: {
@@ -401,13 +401,11 @@ export class AuthService {
     // Reset failed login count and update last login
     await this.tokenService.resetFailedLoginCount(user.id);
 
-    // Generate tokens
-    const tokens = await this.tokenService.generateTokenPair(
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
       user.id,
       user.email,
       user.role,
-      ipAddress,
-      userAgent,
     );
 
     // Remove sensitive data from user object
@@ -418,23 +416,12 @@ export class AuthService {
       ...safeUser
     } = user;
 
-    return { user: safeUser, tokens };
+    return { user: safeUser, token };
   }
 
-  async refreshTokens(
-    refreshToken: string,
-    ipAddress?: string,
-    userAgent?: string,
-  ): Promise<TokenPair> {
-    return this.tokenService.refreshAccessToken(
-      refreshToken,
-      ipAddress,
-      userAgent,
-    );
-  }
-
-  async logout(refreshToken: string): Promise<void> {
-    await this.tokenService.revokeRefreshToken(refreshToken);
+  // Simplified logout - no refresh tokens to manage
+  async logout(userId: string): Promise<void> {
+    await this.tokenService.logout(userId);
   }
 
   async validateUser(userId: string) {
@@ -468,11 +455,10 @@ export class AuthService {
   async validateToken(token: string): Promise<{
     valid: boolean;
     user?: any;
-    expires?: string;
     error?: string;
   }> {
     try {
-      // Validate token using TokenService
+      // Validate token using TokenService (simplified - no expiration)
       const tokenValidation = await this.tokenService.validateToken(token);
 
       if (!tokenValidation.valid) {
@@ -574,7 +560,6 @@ export class AuthService {
       return {
         valid: true,
         user: roleSpecificUser,
-        expires: tokenValidation.expires,
       };
     } catch (error) {
       console.error('Token validation error:', error);
@@ -662,8 +647,8 @@ export class AuthService {
       data: { password: hashedPassword },
     });
 
-    // Revoke all refresh tokens for security
-    await this.tokenService.revokeAllUserTokens(userId);
+    // Simple logout after password change
+    await this.tokenService.logout(userId);
 
     return {
       success: true,
@@ -685,8 +670,8 @@ export class AuthService {
       },
     });
 
-    // Revoke all tokens
-    await this.tokenService.revokeAllUserTokens(userId);
+    // Simple logout for deactivated account
+    await this.tokenService.logout(userId);
 
     return {
       success: true,
@@ -730,8 +715,8 @@ export class AuthService {
       });
 
       if (existingUser) {
-        // User exists, generate tokens and return
-        const tokens = await this.tokenService.generateTokenPair(
+        // User exists, generate token and return
+        const { token } = await this.tokenService.generateToken(
           existingUser.id,
           existingUser.email,
           existingUser.role,
@@ -746,9 +731,7 @@ export class AuthService {
             role: existingUser.role,
             emailVerified: existingUser.emailVerified,
           },
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-          expiresIn: tokens.expiresIn,
+          token,
           message: 'Login successful',
         };
       } else {
@@ -806,7 +789,7 @@ export class AuthService {
           });
         }
 
-        const tokens = await this.tokenService.generateTokenPair(
+        const { token } = await this.tokenService.generateToken(
           newUser.id,
           newUser.email,
           newUser.role,
@@ -830,9 +813,7 @@ export class AuthService {
 
         return {
           user: newUser,
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-          expiresIn: tokens.expiresIn,
+          token,
           message: 'Account created successfully',
         };
       }
@@ -883,58 +864,5 @@ export class AuthService {
     };
   }
 
-  // ===== SESSION MANAGEMENT METHODS =====
-
-  /**
-   * Get current session information
-   */
-  async getSessionInfo(refreshToken: string) {
-    const sessionInfo = await this.tokenService.getSessionInfo(refreshToken);
-
-    if (!sessionInfo) {
-      throw new UnauthorizedException('Session not found or expired');
-    }
-
-    return sessionInfo;
-  }
-
-  /**
-   * Get all active sessions for a user
-   */
-  async getActiveSessions(userId: string, currentRefreshToken?: string) {
-    return await this.tokenService.getActiveSessions(
-      userId,
-      currentRefreshToken,
-    );
-  }
-
-  /**
-   * Terminate a specific session
-   */
-  async terminateSession(sessionId: string, userId: string) {
-    return await this.tokenService.terminateSession(sessionId, userId);
-  }
-
-  /**
-   * Terminate all other sessions except the current one
-   */
-  async terminateOtherSessions(userId: string, currentRefreshToken?: string) {
-    return await this.tokenService.terminateOtherSessions(
-      userId,
-      currentRefreshToken,
-    );
-  }
-
-  /**
-   * Universal logout - clears all sessions for user
-   */
-  async universalLogout(userId: string) {
-    // Revoke all refresh tokens for the user
-    await this.tokenService.revokeAllUserTokens(userId);
-
-    return {
-      success: true,
-      message: 'All sessions terminated successfully',
-    };
-  }
+  // Removed session management - using single tokens now
 }

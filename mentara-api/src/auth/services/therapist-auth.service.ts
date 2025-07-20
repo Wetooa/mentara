@@ -84,8 +84,8 @@ export class TherapistAuthService {
       return { user, therapist };
     });
 
-    // Generate tokens
-    const tokens = await this.tokenService.generateTokenPair(
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
       result.user.id,
       result.user.email,
       result.user.role,
@@ -96,7 +96,7 @@ export class TherapistAuthService {
 
     return {
       user: result.user,
-      tokens,
+      token,
       message:
         'Therapist registration successful. Please complete your application and submit required documents.',
     };
@@ -151,18 +151,16 @@ export class TherapistAuthService {
       },
     });
 
-    // Generate tokens
-    const tokens = await this.tokenService.generateTokenPair(
+    // Generate single token
+    const { token } = await this.tokenService.generateToken(
       user.id,
       user.email,
       user.role,
-      ipAddress,
-      userAgent,
     );
 
     return {
       user,
-      tokens,
+      token,
     };
   }
 

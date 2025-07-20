@@ -10,13 +10,12 @@ import {
   type OtpEmailData,
   type AutoOtpEmailRequest,
   type EmailResponse,
-  type EmailStatusResponse,
-  type OtpType 
+  type EmailStatusResponse
 } from 'mentara-commons';
 
-// OtpEmailData and AutoOtpEmailRequest are now imported from mentara-commons
-export interface OtpEmailRequest extends OtpEmailData {}
-export interface AutoOtpEmailRequestLocal extends AutoOtpEmailRequest {}
+// Use types directly from mentara-commons
+export type OtpEmailRequest = OtpEmailData;
+export type AutoOtpEmailRequestLocal = AutoOtpEmailRequest;
 
 export interface TherapistNotificationRequest {
   to: string;
@@ -49,7 +48,7 @@ export interface GenericEmailRequest {
   to: string;
   subject: string;
   template: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 // EmailResponse and EmailStatusResponse are now imported from mentara-commons

@@ -17,18 +17,7 @@ import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { AdminUserQuerySchema, type AdminUserQuery } from 'mentara-commons';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
 
-@ApiTags('admin-user')
-@ApiBearerAuth('JWT-auth')
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminUserController {
@@ -37,17 +26,6 @@ export class AdminUserController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
-  @ApiOperation({
-    summary: 'Retrieve get all users',
-
-    description: 'Retrieve get all users',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async getAllUsers(
     @CurrentUserId() currentUserId: string,
@@ -75,17 +53,6 @@ export class AdminUserController {
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Retrieve get user',
-
-    description: 'Retrieve get user',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Retrieved successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async getUser(
     @CurrentUserId() currentUserId: string,
@@ -113,17 +80,6 @@ export class AdminUserController {
   }
 
   @Put(':id/suspend')
-  @ApiOperation({
-    summary: 'Update suspend user',
-
-    description: 'Update suspend user',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async suspendUser(
     @CurrentUserId() currentUserId: string,
@@ -148,17 +104,6 @@ export class AdminUserController {
   }
 
   @Put(':id/unsuspend')
-  @ApiOperation({
-    summary: 'Update unsuspend user',
-
-    description: 'Update unsuspend user',
-  })
-  @ApiResponse({
-    status: 200,
-
-    description: 'Updated successfully',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @AdminOnly()
   async unsuspendUser(
     @CurrentUserId() currentUserId: string,

@@ -14,14 +14,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUserId } from './decorators/current-user-id.decorator';
 import { Public } from './decorators/public.decorator';
@@ -51,7 +43,6 @@ import { EmailVerificationService } from './services/email-verification.service'
 import { PasswordResetService } from './services/password-reset.service';
 import { Request } from 'express';
 
-@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -60,26 +51,13 @@ export class AuthController {
     private readonly passwordResetService: PasswordResetService,
   ) {}
 
-  // Role-specific registration endpoints moved to dedicated controllers:
+  // Universal login works for all roles - role-specific registration endpoints:
   // - /auth/client/register
-  // - /auth/therapist/register
+  // - /auth/therapist/register  
   // - /auth/admin/create-account
   // - /auth/moderator/create-account
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Get current user profile',
-    description: "Retrieve the authenticated user's profile information",
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User profile retrieved successfully',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
   @Get('me')
   async getMe(@CurrentUserId() id: string) {
     return await this.authService.getUser(id);
@@ -101,62 +79,6 @@ export class AuthController {
 
   // Local Authentication Endpoints
   @Public()
-  @ApiOperation({
-    summary: 'Register new user',
-    description:
-      'Register a new user account with email and password. Supports client and therapist roles only.',
-  })
-  @ApiBody({
-    description: 'User registration details',
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string', format: 'email', example: 'user@example.com' },
-        password: {
-          type: 'string',
-          minLength: 8,
-          example: 'SecurePassword123!',
-        },
-        firstName: { type: 'string', example: 'John' },
-        lastName: { type: 'string', example: 'Doe' },
-        role: {
-          type: 'string',
-          enum: ['client', 'therapist'],
-          example: 'client',
-        },
-      },
-      required: ['email', 'password', 'firstName', 'lastName', 'role'],
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'User registered successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Invalid input data',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Conflict - Email already exists',
-  })
   @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registration attempts per 5 minutes
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -178,53 +100,6 @@ export class AuthController {
   }
 
   @Public()
-  @ApiOperation({
-    summary: 'User login',
-    description:
-      'Authenticate user with email and password, returning JWT tokens',
-  })
-  @ApiBody({
-    description: 'Login credentials',
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string', format: 'email', example: 'user@example.com' },
-        password: { type: 'string', example: 'SecurePassword123!' },
-      },
-      required: ['email', 'password'],
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Login successful',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-            emailVerified: { type: 'boolean' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        expiresIn: { type: 'number' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid credentials',
-  })
-  @ApiResponse({
-    status: 429,
-    description: 'Too many login attempts',
-  })
   @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -251,46 +126,18 @@ export class AuthController {
         role: result.user.role,
         emailVerified: result.user.emailVerified,
       },
-      accessToken: result.tokens.accessToken,
-      refreshToken: result.tokens.refreshToken,
-      expiresIn: result.tokens.expiresIn,
+      token: result.token,
+      message: 'Login successful',
     };
   }
 
-  @Public()
-  @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 refresh attempts per 5 minutes
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  async refreshTokens(
-    @Body(new ZodValidationPipe(RefreshTokenDtoSchema))
-    refreshDto: RefreshTokenDto,
-    @Req() req: Request,
-  ) {
-    if (!refreshDto.refreshToken) {
-      throw new UnauthorizedException('Refresh token required');
-    }
-
-    const ipAddress = req.ip;
-    const userAgent = req.get('User-Agent');
-
-    const tokens = await this.authService.refreshTokens(
-      refreshDto.refreshToken,
-      ipAddress,
-      userAgent,
-    );
-
-    return tokens;
-  }
+  // Removed refresh token endpoint - no longer needed with non-expiring tokens
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Body(new ZodValidationPipe(LogoutDtoSchema)) logoutDto: LogoutDto,
-  ) {
-    if (logoutDto.refreshToken) {
-      await this.authService.logout(logoutDto.refreshToken);
-    }
+  async logout(@CurrentUserId() userId: string) {
+    await this.authService.logout(userId);
     return { message: 'Logged out successfully' };
   }
 
@@ -357,49 +204,6 @@ export class AuthController {
   // ===== JWT TOKEN VALIDATION ENDPOINT =====
 
   @Public()
-  @ApiOperation({
-    summary: 'Validate JWT token',
-    description: 'Validate a JWT token and return user information if valid',
-  })
-  @ApiBody({
-    description: 'JWT token to validate',
-    schema: {
-      type: 'object',
-      properties: {
-        token: {
-          type: 'string',
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        },
-      },
-      required: ['token'],
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Token validation result',
-    schema: {
-      type: 'object',
-      properties: {
-        valid: { type: 'boolean' },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-            emailVerified: { type: 'boolean' },
-          },
-        },
-        expires: { type: 'string', format: 'date-time' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Token is required',
-  })
   @Throttle({ default: { limit: 100, ttl: 60000 } }) // 100 validation requests per minute
   @Post('validate-token')
   @HttpCode(HttpStatus.OK)
@@ -420,48 +224,12 @@ export class AuthController {
     return {
       valid: true,
       user: result.user,
-      expires: result.expires,
     };
   }
 
   // ===== USER EXISTENCE CHECK ENDPOINT =====
 
   @Public()
-  @ApiOperation({
-    summary: 'Check user existence by email',
-    description:
-      'Check if a user exists by email address and return their role and verification status',
-  })
-  @ApiQuery({
-    name: 'email',
-    description: 'Email address to check',
-    example: 'user@example.com',
-    required: true,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User existence check result',
-    schema: {
-      type: 'object',
-      properties: {
-        exists: { type: 'boolean' },
-        role: {
-          type: 'string',
-          enum: ['client', 'therapist', 'moderator', 'admin'],
-        },
-        isVerified: { type: 'boolean' },
-      },
-      required: ['exists'],
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Invalid email format',
-  })
-  @ApiResponse({
-    status: 429,
-    description: 'Too many requests',
-  })
   @Throttle({ default: { limit: 30, ttl: 60000 } }) // 30 requests per minute
   @Get('check-user')
   async checkUserExists(@Query('email') email: string) {
@@ -545,12 +313,12 @@ export class AuthController {
         role,
       );
 
-      // Extract tokens from result
-      const { accessToken, refreshToken } = result;
+      // Extract token from result
+      const { token } = result;
 
       // Determine frontend redirect URL based on environment
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const redirectUrl = `${frontendUrl}/sso-callback?token=${accessToken}&refresh_token=${refreshToken}&role=${role}`;
+      const redirectUrl = `${frontendUrl}/sso-callback?token=${token}&role=${role}`;
 
       // Redirect to frontend with tokens in URL parameters
       return res.redirect(redirectUrl);
@@ -587,12 +355,12 @@ export class AuthController {
         role,
       );
 
-      // Extract tokens from result
-      const { accessToken, refreshToken } = result;
+      // Extract token from result
+      const { token } = result;
 
       // Determine frontend redirect URL based on environment
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const redirectUrl = `${frontendUrl}/sso-callback?token=${accessToken}&refresh_token=${refreshToken}&role=${role}`;
+      const redirectUrl = `${frontendUrl}/sso-callback?token=${token}&role=${role}`;
 
       // Redirect to frontend with tokens in URL parameters
       return res.redirect(redirectUrl);
@@ -608,60 +376,6 @@ export class AuthController {
 
   // OAuth Token Exchange API Endpoint (for frontend to call)
   @Public()
-  @ApiOperation({
-    summary: 'Exchange OAuth authorization code for tokens',
-    description:
-      'Exchange OAuth authorization code from Google/Microsoft for JWT tokens',
-  })
-  @ApiBody({
-    description: 'OAuth authorization code and provider information',
-    schema: {
-      type: 'object',
-      properties: {
-        provider: {
-          type: 'string',
-          enum: ['google', 'microsoft'],
-          example: 'google',
-        },
-        code: {
-          type: 'string',
-          example: 'authorization_code_from_oauth_provider',
-        },
-        state: {
-          type: 'string',
-          example: 'client',
-          description: 'Optional role for new user creation',
-        },
-      },
-      required: ['provider', 'code'],
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'OAuth login successful',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        expiresIn: { type: 'number' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid OAuth code or provider',
-  })
   @Post('oauth/token-exchange')
   @HttpCode(HttpStatus.OK)
   async exchangeOAuthToken(
@@ -698,200 +412,5 @@ export class AuthController {
     }
   }
 
-  // ===== SESSION MANAGEMENT ENDPOINTS =====
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Get current session information',
-    description: 'Retrieve information about the current user session',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Session information retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        sessionId: { type: 'string' },
-        createdAt: { type: 'string', format: 'date-time' },
-        lastActivity: { type: 'string', format: 'date-time' },
-        device: { type: 'string' },
-        location: { type: 'string' },
-        ipAddress: { type: 'string' },
-        userAgent: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  @Get('session-info')
-  async getSessionInfo(@Req() req: Request) {
-    // Extract refresh token from Authorization header or cookies
-    const refreshToken = req.headers['x-refresh-token'] as string;
-
-    if (!refreshToken) {
-      throw new UnauthorizedException(
-        'Refresh token required for session info',
-      );
-    }
-
-    return await this.authService.getSessionInfo(refreshToken);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Get all active sessions',
-    description: 'Retrieve all active sessions for the current user',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Active sessions retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        sessions: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              device: { type: 'string' },
-              location: { type: 'string' },
-              lastActivity: { type: 'string', format: 'date-time' },
-              isCurrent: { type: 'boolean' },
-              ipAddress: { type: 'string' },
-              userAgent: { type: 'string' },
-              createdAt: { type: 'string', format: 'date-time' },
-            },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  @Get('active-sessions')
-  async getActiveSessions(
-    @CurrentUserId() userId: string,
-    @Req() req: Request,
-  ) {
-    const refreshToken = req.headers['x-refresh-token'] as string;
-    return await this.authService.getActiveSessions(userId, refreshToken);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Terminate a specific session',
-    description: 'Terminate a specific session by session ID',
-  })
-  @ApiBody({
-    description: 'Session ID to terminate',
-    schema: {
-      type: 'object',
-      properties: {
-        sessionId: { type: 'string', example: 'session-uuid-here' },
-      },
-      required: ['sessionId'],
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Session terminated successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Session not found',
-  })
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 terminations per minute
-  @Delete('terminate-session')
-  @HttpCode(HttpStatus.OK)
-  async terminateSession(
-    @Body(new ZodValidationPipe(TerminateSessionDtoSchema))
-    terminateDto: TerminateSessionDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return await this.authService.terminateSession(
-      terminateDto.sessionId,
-      userId,
-    );
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Terminate all other sessions',
-    description: 'Terminate all other sessions except the current one',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Other sessions terminated successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        terminatedCount: { type: 'number' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 terminations per minute
-  @Post('terminate-other-sessions')
-  @HttpCode(HttpStatus.OK)
-  async terminateOtherSessions(
-    @CurrentUserId() userId: string,
-    @Req() req: Request,
-  ) {
-    const refreshToken = req.headers['x-refresh-token'] as string;
-    return await this.authService.terminateOtherSessions(userId, refreshToken);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Universal logout',
-    description:
-      'Clear all sessions for the current user (logout from all devices)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'All sessions terminated successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing JWT token',
-  })
-  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 universal logouts per minute
-  @Post('universal-logout')
-  @HttpCode(HttpStatus.OK)
-  async universalLogout(@CurrentUserId() userId: string) {
-    return await this.authService.universalLogout(userId);
-  }
+  // Removed session management endpoints - using single tokens now
 }

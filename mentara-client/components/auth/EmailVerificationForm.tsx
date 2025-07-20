@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Mail,
   Clock,
   AlertCircle,
   RefreshCw,
@@ -22,8 +21,8 @@ import {
 } from "@/components/ui/input-otp";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 const otpSchema = z.object({
   code: z.string().min(6, "Verification code must be 6 digits").max(6, "Verification code must be 6 digits"),
@@ -42,9 +41,6 @@ interface EmailVerificationFormProps {
   className?: string;
 }
 
-const EXPIRY_MINUTES = 10;
-const RESEND_COOLDOWN = 60; // seconds
-
 export function EmailVerificationForm({
   email,
   type,
@@ -54,10 +50,18 @@ export function EmailVerificationForm({
   isVerifying = false,
   className
 }: EmailVerificationFormProps) {
-  const [isSending, setIsSending] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(EXPIRY_MINUTES * 60);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [isExpired, setIsExpired] = useState(false);
+  // Use the email verification hook for ALL business logic
+  const {
+    timeLeft,
+    isExpired,
+    progressValue,
+    isSending,
+    resendCooldown,
+    handleResendCode,
+    handleVerifyCode,
+    formatTime,
+    getTypeConfig,
+  } = useEmailVerification();
 
   const form = useForm<OtpForm>({
     resolver: zodResolver(otpSchema),
@@ -67,108 +71,21 @@ export function EmailVerificationForm({
   });
 
 
-  // Countdown timer
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      setIsExpired(true);
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          setIsExpired(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  // Resend cooldown timer
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-
-    const timer = setInterval(() => {
-      setResendCooldown(prev => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
-
-  const handleResendCode = async () => {
-    if (!onResendCode) return;
-    
-    setIsSending(true);
-    
-    try {
-      // Call the parent component's resend function
-      await onResendCode();
-      
-      // Reset form and timers
-      setTimeLeft(EXPIRY_MINUTES * 60);
-      setIsExpired(false);
-      setResendCooldown(RESEND_COOLDOWN);
-      form.reset({ code: "" });
-    } catch (error) {
-      console.error("Failed to resend verification code:", error);
-    } finally {
-      setIsSending(false);
-    }
+  // Simple wrapper functions that delegate to the hook
+  const onResendCodeWrapper = async () => {
+    await handleResendCode(onResendCode);
+    form.reset({ code: "" });
   };
 
-  const handleVerifyCode = async (data: OtpForm) => {
-    if (isExpired) {
-      toast.error("Verification code has expired. Please request a new one.");
-      return;
-    }
-
-    try {
-      // Call the parent component's verification function (backend verification)
-      await onVerificationSuccess(data.code);
-    } catch (error) {
-      console.error("Verification error:", error);
-      form.setError("code", { message: "Invalid code" });
-    }
+  const onVerifyCodeWrapper = async (data: OtpForm) => {
+    await handleVerifyCode(
+      data.code,
+      onVerificationSuccess,
+      (message: string) => form.setError("code", { message })
+    );
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getTypeConfig = () => {
-    switch (type) {
-      case 'registration':
-        return {
-          title: 'Verify Your Email',
-          description: 'Complete your registration by verifying your email address',
-          icon: <Mail className="h-6 w-6" />,
-          color: 'from-purple-500 to-pink-500'
-        };
-      case 'password_reset':
-        return {
-          title: 'Reset Password',
-          description: 'Verify your identity to reset your password',
-          icon: <Shield className="h-6 w-6" />,
-          color: 'from-orange-500 to-red-500'
-        };
-      case 'login_verification':
-        return {
-          title: 'Secure Login',
-          description: 'Two-factor authentication for enhanced security',
-          icon: <Shield className="h-6 w-6" />,
-          color: 'from-blue-500 to-cyan-500'
-        };
-    }
-  };
-
-  const config = getTypeConfig();
-  const progressValue = ((EXPIRY_MINUTES * 60 - timeLeft) / (EXPIRY_MINUTES * 60)) * 100;
+  const config = getTypeConfig(type);
 
   return (
     <div className={cn("w-full max-w-md mx-auto", className)}>
@@ -204,7 +121,7 @@ export function EmailVerificationForm({
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <form onSubmit={form.handleSubmit(handleVerifyCode)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onVerifyCodeWrapper)} className="space-y-6">
               {/* OTP Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-center block">
@@ -312,7 +229,7 @@ export function EmailVerificationForm({
                     type="button"
                     variant="link"
                     size="sm"
-                    onClick={handleResendCode}
+                    onClick={onResendCodeWrapper}
                     disabled={isSending || resendCooldown > 0 || !onResendCode}
                     className="h-auto p-0 text-sm"
                   >

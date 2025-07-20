@@ -19,7 +19,7 @@ export const RegisterUserDtoSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters long'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  role: z.enum(['client', 'therapist']),
+  role: z.string(),
 });
 
 export const ChangePasswordDtoSchema = z.object({
@@ -130,7 +130,7 @@ export const RegisterWithOtpDtoSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters long'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  role: z.enum(['client', 'therapist']).default('client'),
+  role: z.string().default('client'),
   otpCode: z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
 });
 
@@ -217,6 +217,9 @@ export const UniversalLogoutResponseSchema = z.object({
   message: z.string(),
 });
 
+// User Role Schema - simple string type
+export const UserRoleSchema = z.string();
+
 // Check User Existence Schema
 export const CheckUserExistsDtoSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -224,8 +227,65 @@ export const CheckUserExistsDtoSchema = z.object({
 
 export const CheckUserExistsResponseSchema = z.object({
   exists: z.boolean(),
-  role: z.enum(['client', 'therapist', 'moderator', 'admin']).optional(),
+  role: UserRoleSchema.optional(),
   isVerified: z.boolean().optional(),
+});
+
+// Auth Response Schemas
+export const AuthUserSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  role: UserRoleSchema,
+  emailVerified: z.boolean(),
+});
+
+export const TokensSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  expiresIn: z.number(),
+});
+
+export const AuthResponseSchema = z.object({
+  user: AuthUserSchema,
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  expiresIn: z.number(),
+});
+
+export const ClientAuthResponseSchema = AuthResponseSchema.extend({
+  message: z.string().optional(), // For registration success messages
+});
+
+export const TherapistAuthResponseSchema = AuthResponseSchema;
+export const AdminAuthResponseSchema = AuthResponseSchema;
+export const ModeratorAuthResponseSchema = AuthResponseSchema;
+
+// Profile Response Schemas
+export const ClientProfileResponseSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  role: z.literal('client'),
+  dateOfBirth: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  profileComplete: z.boolean(),
+  therapistId: z.string().optional(),
+  createdAt: z.string(),
+});
+
+export const OnboardingStatusResponseSchema = z.object({
+  isFirstSignIn: z.boolean(),
+  hasSeenRecommendations: z.boolean(),
+  profileCompleted: z.boolean(),
+  assessmentCompleted: z.boolean(),
+});
+
+export const SuccessResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
 });
 
 // Type exports
@@ -259,5 +319,16 @@ export type ActiveSessionsResponse = z.infer<typeof ActiveSessionsResponseSchema
 export type TerminateSessionResponse = z.infer<typeof TerminateSessionResponseSchema>;
 export type TerminateOtherSessionsResponse = z.infer<typeof TerminateOtherSessionsResponseSchema>;
 export type UniversalLogoutResponse = z.infer<typeof UniversalLogoutResponseSchema>;
+export type UserRole = z.infer<typeof UserRoleSchema>;
 export type CheckUserExistsDto = z.infer<typeof CheckUserExistsDtoSchema>;
 export type CheckUserExistsResponse = z.infer<typeof CheckUserExistsResponseSchema>;
+export type AuthUser = z.infer<typeof AuthUserSchema>;
+export type Tokens = z.infer<typeof TokensSchema>;
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
+export type ClientAuthResponse = z.infer<typeof ClientAuthResponseSchema>;
+export type TherapistAuthResponse = z.infer<typeof TherapistAuthResponseSchema>;
+export type AdminAuthResponse = z.infer<typeof AdminAuthResponseSchema>;
+export type ModeratorAuthResponse = z.infer<typeof ModeratorAuthResponseSchema>;
+export type ClientProfileResponse = z.infer<typeof ClientProfileResponseSchema>;
+export type OnboardingStatusResponse = z.infer<typeof OnboardingStatusResponseSchema>;
+export type SuccessResponse = z.infer<typeof SuccessResponseSchema>;

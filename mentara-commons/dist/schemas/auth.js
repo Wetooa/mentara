@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckUserExistsResponseSchema = exports.CheckUserExistsDtoSchema = exports.UniversalLogoutResponseSchema = exports.TerminateOtherSessionsResponseSchema = exports.TerminateSessionResponseSchema = exports.ActiveSessionsResponseSchema = exports.SessionInfoResponseSchema = exports.TerminateSessionDtoSchema = exports.RegisterModeratorDtoSchema = exports.RegisterAdminDtoSchema = exports.EmailSchema = exports.UserIdSchema = exports.UserIdParamSchema = exports.RegisterWithOtpDtoSchema = exports.AutoOtpEmailRequestSchema = exports.OtpEmailDataSchema = exports.EmailStatusResponseSchema = exports.EmailResponseSchema = exports.ResendRegistrationOtpDtoSchema = exports.VerifyRegistrationOtpDtoSchema = exports.ResendOtpDtoSchema = exports.VerifyOtpDtoSchema = exports.SendOtpDtoSchema = exports.OtpTypeSchema = exports.VerifyEmailDtoSchema = exports.ResendVerificationEmailDtoSchema = exports.SendVerificationEmailDtoSchema = exports.ResetPasswordDtoSchema = exports.RequestPasswordResetDtoSchema = exports.ChangePasswordDtoSchema = exports.RegisterUserDtoSchema = exports.LogoutDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = void 0;
+exports.SuccessResponseSchema = exports.OnboardingStatusResponseSchema = exports.ClientProfileResponseSchema = exports.ModeratorAuthResponseSchema = exports.AdminAuthResponseSchema = exports.TherapistAuthResponseSchema = exports.ClientAuthResponseSchema = exports.AuthResponseSchema = exports.TokensSchema = exports.AuthUserSchema = exports.CheckUserExistsResponseSchema = exports.CheckUserExistsDtoSchema = exports.UserRoleSchema = exports.UniversalLogoutResponseSchema = exports.TerminateOtherSessionsResponseSchema = exports.TerminateSessionResponseSchema = exports.ActiveSessionsResponseSchema = exports.SessionInfoResponseSchema = exports.TerminateSessionDtoSchema = exports.RegisterModeratorDtoSchema = exports.RegisterAdminDtoSchema = exports.EmailSchema = exports.UserIdSchema = exports.UserIdParamSchema = exports.RegisterWithOtpDtoSchema = exports.AutoOtpEmailRequestSchema = exports.OtpEmailDataSchema = exports.EmailStatusResponseSchema = exports.EmailResponseSchema = exports.ResendRegistrationOtpDtoSchema = exports.VerifyRegistrationOtpDtoSchema = exports.ResendOtpDtoSchema = exports.VerifyOtpDtoSchema = exports.SendOtpDtoSchema = exports.OtpTypeSchema = exports.VerifyEmailDtoSchema = exports.ResendVerificationEmailDtoSchema = exports.SendVerificationEmailDtoSchema = exports.ResetPasswordDtoSchema = exports.RequestPasswordResetDtoSchema = exports.ChangePasswordDtoSchema = exports.RegisterUserDtoSchema = exports.LogoutDtoSchema = exports.RefreshTokenDtoSchema = exports.LoginDtoSchema = void 0;
 const zod_1 = require("zod");
 // Authentication Core Schemas
 exports.LoginDtoSchema = zod_1.z.object({
@@ -18,7 +18,7 @@ exports.RegisterUserDtoSchema = zod_1.z.object({
     password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
     firstName: zod_1.z.string().min(1, 'First name is required'),
     lastName: zod_1.z.string().min(1, 'Last name is required'),
-    role: zod_1.z.enum(['client', 'therapist']),
+    role: zod_1.z.string(),
 });
 exports.ChangePasswordDtoSchema = zod_1.z.object({
     currentPassword: zod_1.z.string().min(1, 'Current password is required'),
@@ -112,7 +112,7 @@ exports.RegisterWithOtpDtoSchema = zod_1.z.object({
     password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
     firstName: zod_1.z.string().min(1, 'First name is required'),
     lastName: zod_1.z.string().min(1, 'Last name is required'),
-    role: zod_1.z.enum(['client', 'therapist']).default('client'),
+    role: zod_1.z.string().default('client'),
     otpCode: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
 });
 // User ID and Email Param Schemas
@@ -188,13 +188,64 @@ exports.UniversalLogoutResponseSchema = zod_1.z.object({
     success: zod_1.z.boolean(),
     message: zod_1.z.string(),
 });
+// User Role Schema - simple string type
+exports.UserRoleSchema = zod_1.z.string();
 // Check User Existence Schema
 exports.CheckUserExistsDtoSchema = zod_1.z.object({
     email: zod_1.z.string().email('Invalid email format'),
 });
 exports.CheckUserExistsResponseSchema = zod_1.z.object({
     exists: zod_1.z.boolean(),
-    role: zod_1.z.enum(['client', 'therapist', 'moderator', 'admin']).optional(),
+    role: exports.UserRoleSchema.optional(),
     isVerified: zod_1.z.boolean().optional(),
+});
+// Auth Response Schemas
+exports.AuthUserSchema = zod_1.z.object({
+    id: zod_1.z.string(),
+    email: zod_1.z.string(),
+    firstName: zod_1.z.string(),
+    lastName: zod_1.z.string(),
+    role: exports.UserRoleSchema,
+    emailVerified: zod_1.z.boolean(),
+});
+exports.TokensSchema = zod_1.z.object({
+    accessToken: zod_1.z.string(),
+    refreshToken: zod_1.z.string(),
+    expiresIn: zod_1.z.number(),
+});
+exports.AuthResponseSchema = zod_1.z.object({
+    user: exports.AuthUserSchema,
+    accessToken: zod_1.z.string(),
+    refreshToken: zod_1.z.string(),
+    expiresIn: zod_1.z.number(),
+});
+exports.ClientAuthResponseSchema = exports.AuthResponseSchema.extend({
+    message: zod_1.z.string().optional(), // For registration success messages
+});
+exports.TherapistAuthResponseSchema = exports.AuthResponseSchema;
+exports.AdminAuthResponseSchema = exports.AuthResponseSchema;
+exports.ModeratorAuthResponseSchema = exports.AuthResponseSchema;
+// Profile Response Schemas
+exports.ClientProfileResponseSchema = zod_1.z.object({
+    id: zod_1.z.string(),
+    email: zod_1.z.string(),
+    firstName: zod_1.z.string(),
+    lastName: zod_1.z.string(),
+    role: zod_1.z.literal('client'),
+    dateOfBirth: zod_1.z.string().optional(),
+    phoneNumber: zod_1.z.string().optional(),
+    profileComplete: zod_1.z.boolean(),
+    therapistId: zod_1.z.string().optional(),
+    createdAt: zod_1.z.string(),
+});
+exports.OnboardingStatusResponseSchema = zod_1.z.object({
+    isFirstSignIn: zod_1.z.boolean(),
+    hasSeenRecommendations: zod_1.z.boolean(),
+    profileCompleted: zod_1.z.boolean(),
+    assessmentCompleted: zod_1.z.boolean(),
+});
+exports.SuccessResponseSchema = zod_1.z.object({
+    success: zod_1.z.boolean(),
+    message: zod_1.z.string(),
 });
 //# sourceMappingURL=auth.js.map

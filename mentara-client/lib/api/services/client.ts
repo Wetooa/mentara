@@ -7,7 +7,7 @@ import {
   AssessmentSubmission,
   AssessmentResults,
   OnboardingData,
-} from 'mentara-commons';
+} from "mentara-commons";
 
 // All client types are now imported from mentara-commons
 
@@ -72,4 +72,3 @@ export const createClientService = (client: AxiosInstance): ClientService => ({
   requestTherapistChange: (reason: string) =>
     client.post("/client/therapist/change-request", { reason }),
 });
-

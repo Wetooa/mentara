@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axios";
 import { z } from "zod";
+import { LoginDto, LoginDtoSchema } from "mentara-commons";
 import {
   ModeratorUser,
   CommunityInfo,
@@ -10,12 +11,6 @@ import {
   ModerationQueueQueryParams,
   AuthResponse,
 } from "@/types/auth";
-
-// Moderator-specific DTOs and schemas
-export const ModeratorLoginDtoSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
 
 export const ModeratorAuthResponseSchema = z.object({
   accessToken: z.string(),
@@ -31,7 +26,7 @@ export const ModeratorAuthResponseSchema = z.object({
   }),
 });
 
-export type ModeratorLoginDto = z.infer<typeof ModeratorLoginDtoSchema>;
+export type ModeratorLoginDto = LoginDto;
 export type ModeratorAuthResponse = AuthResponse<ModeratorUser>;
 
 // ModeratorUser is now imported from @/types/auth
@@ -40,27 +35,33 @@ export const createModeratorAuthService = (client: AxiosInstance) => ({
   /**
    * Moderator login with email and password
    */
-  login: async (credentials: ModeratorLoginDto): Promise<ModeratorAuthResponse> => {
-    const validatedData = ModeratorLoginDtoSchema.parse(credentials);
+  login: async (
+    credentials: ModeratorLoginDto
+  ): Promise<ModeratorAuthResponse> => {
+    const validatedData = LoginDtoSchema.parse(credentials);
     return client.post("/auth/moderator/login", validatedData);
   },
 
   /**
    * Get current moderator user data
    */
-  getCurrentUser: (): Promise<ModeratorUser> => client.get("/auth/moderator/me"),
+  getCurrentUser: (): Promise<ModeratorUser> =>
+    client.get("/auth/moderator/me"),
 
   /**
    * Refresh access token
    */
-  refreshToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<{ accessToken: string; refreshToken: string }> => {
     return client.post("/auth/moderator/refresh", { refreshToken });
   },
 
   /**
    * Logout moderator
    */
-  logout: (): Promise<{ success: boolean }> => client.post("/auth/moderator/logout"),
+  logout: (): Promise<{ success: boolean }> =>
+    client.post("/auth/moderator/logout"),
 
   /**
    * Get moderator dashboard data
@@ -83,7 +84,9 @@ export const createModeratorAuthService = (client: AxiosInstance) => ({
   /**
    * Get moderation queue
    */
-  getModerationQueue: (params?: ModerationQueueQueryParams): Promise<{
+  getModerationQueue: (
+    params?: ModerationQueueQueryParams
+  ): Promise<{
     items: ModerationQueueItem[];
     total: number;
     hasMore: boolean;
@@ -98,7 +101,7 @@ export const createModeratorAuthService = (client: AxiosInstance) => ({
     action: "approve" | "reject" | "warn" | "suspend" | "ban";
     reason?: string;
     notes?: string;
-  }): Promise<{ success: boolean }> => 
+  }): Promise<{ success: boolean }> =>
     client.post("/auth/moderator/action", data),
 
   /**
@@ -123,7 +126,8 @@ export const createModeratorAuthService = (client: AxiosInstance) => ({
   changePassword: (data: {
     currentPassword: string;
     newPassword: string;
-  }): Promise<{ success: boolean }> => client.post("/auth/moderator/change-password", data),
+  }): Promise<{ success: boolean }> =>
+    client.post("/auth/moderator/change-password", data),
 
   /**
    * Get moderation statistics
@@ -155,13 +159,16 @@ export const createModeratorAuthService = (client: AxiosInstance) => ({
   /**
    * Get community guidelines
    */
-  getCommunityGuidelines: (communityId?: string): Promise<{
+  getCommunityGuidelines: (
+    communityId?: string
+  ): Promise<{
     guidelines: ModerationGuideline[];
     lastUpdated: string;
     version: string;
-  }> => client.get("/auth/moderator/guidelines", { 
-    params: communityId ? { communityId } : undefined 
-  }),
+  }> =>
+    client.get("/auth/moderator/guidelines", {
+      params: communityId ? { communityId } : undefined,
+    }),
 
   /**
    * Add moderation note
@@ -171,8 +178,10 @@ export const createModeratorAuthService = (client: AxiosInstance) => ({
     itemType: "post" | "comment" | "user";
     note: string;
     isInternal: boolean;
-  }): Promise<{ success: boolean }> => 
+  }): Promise<{ success: boolean }> =>
     client.post("/auth/moderator/note", data),
 });
 
-export type ModeratorAuthService = ReturnType<typeof createModeratorAuthService>;
+export type ModeratorAuthService = ReturnType<
+  typeof createModeratorAuthService
+>;

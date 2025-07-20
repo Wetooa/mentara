@@ -107,7 +107,7 @@ export declare const SearchResultItemSchema: z.ZodObject<{
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     highlightedFields: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    type: "therapist" | "user" | "community" | "post" | "session" | "worksheet";
+    type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
     id: string;
     title: string;
     score: number;
@@ -116,7 +116,7 @@ export declare const SearchResultItemSchema: z.ZodObject<{
     imageUrl?: string | undefined;
     highlightedFields?: string[] | undefined;
 }, {
-    type: "therapist" | "user" | "community" | "post" | "session" | "worksheet";
+    type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
     id: string;
     title: string;
     score: number;
@@ -140,7 +140,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
         metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
         highlightedFields: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        type: "therapist" | "user" | "community" | "post" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         id: string;
         title: string;
         score: number;
@@ -149,7 +149,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
         imageUrl?: string | undefined;
         highlightedFields?: string[] | undefined;
     }, {
-        type: "therapist" | "user" | "community" | "post" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         id: string;
         title: string;
         score: number;
@@ -176,7 +176,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
     totalResults: number;
     currentPage: number;
     results: {
-        type: "therapist" | "user" | "community" | "post" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         id: string;
         title: string;
         score: number;
@@ -197,7 +197,7 @@ export declare const SearchResponseDtoSchema: z.ZodObject<{
     totalResults: number;
     currentPage: number;
     results: {
-        type: "therapist" | "user" | "community" | "post" | "session" | "worksheet";
+        type: "user" | "therapist" | "community" | "post" | "session" | "worksheet";
         id: string;
         title: string;
         score: number;

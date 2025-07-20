@@ -1,5 +1,5 @@
 import {
-  ListOfQuestionnaires,
+  type ListOfQuestionnaires,
   QUESTIONNAIRE_MAP,
 } from "@/constants/questionnaires";
 import { create } from "zustand";

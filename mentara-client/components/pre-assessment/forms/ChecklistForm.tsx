@@ -2,15 +2,21 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaires";
 import { cn } from "@/lib/utils";
-import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { usePreAssessmentChecklist } from "@/hooks/pre-assessment/usePreAssessmentChecklist";
+
+interface PreAssessmentInitialCheckListProps {
+  handleNextButtonOnClick: () => void;
+}
 
 export default function PreAssessmentInitialCheckList({
   handleNextButtonOnClick,
-}: {
-  handleNextButtonOnClick: () => void;
-}) {
-  const { questionnaires, setQuestionnaires } =
-    usePreAssessmentChecklistStore();
+}: PreAssessmentInitialCheckListProps) {
+  // Use the checklist hook for ALL business logic
+  const {
+    handleSelectQuestionnaire,
+    isQuestionnaireSelected,
+    isSubmitDisabled,
+  } = usePreAssessmentChecklist();
 
   return (
     <>
@@ -24,19 +30,8 @@ export default function PreAssessmentInitialCheckList({
 
         <div className="w-full flex flex-col gap-2">
           {LIST_OF_QUESTIONNAIRES.map((item) => {
-            const isSelected = questionnaires.includes(item);
-
-            const handleSelect = () => {
-              if (isSelected) {
-                setQuestionnaires(
-                  questionnaires.filter(
-                    (questionnaire) => questionnaire !== item
-                  )
-                );
-              } else {
-                setQuestionnaires([...questionnaires, item]);
-              }
-            };
+            const isSelected = isQuestionnaireSelected(item);
+            const handleSelect = () => handleSelectQuestionnaire(item);
 
             return (
               <div
@@ -59,7 +54,7 @@ export default function PreAssessmentInitialCheckList({
         <Button
           className="w-full font-bold"
           variant={"secondary"}
-          disabled={questionnaires.length === 0}
+          disabled={isSubmitDisabled}
           onClick={handleNextButtonOnClick}
         >
           Submit
