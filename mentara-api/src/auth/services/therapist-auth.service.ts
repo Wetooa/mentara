@@ -33,15 +33,6 @@ export class TherapistAuthService {
     files: Express.Multer.File[],
     fileTypeMap: Record<string, string>,
   ) {
-    // Check if user already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: registerData.email },
-    });
-
-    if (existingUser) {
-      throw new BadRequestException('User with this email already exists');
-    }
-
     // Hash password
     const hashedPassword = await bcrypt.hash(registerData.password, 12);
 
@@ -90,48 +81,152 @@ export class TherapistAuthService {
       fileTypeMap,
     );
 
-    // Create user and therapist profile in transaction
+    // Create user and therapist profile in transaction with proper error handling
     const userResult = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email: registerData.email,
-          password: hashedPassword,
-          firstName: registerData.firstName,
-          lastName: registerData.lastName,
-          role: 'therapist',
-          emailVerified: false,
-        },
-      });
+      try {
+        // Try to create new user first
+        const user = await tx.user.create({
+          data: {
+            email: registerData.email,
+            password: hashedPassword,
+            firstName: registerData.firstName,
+            lastName: registerData.lastName,
+            role: 'therapist',
+            emailVerified: false,
+          },
+        });
 
-      // Update the application with the real user ID
-      await tx.therapist.update({
-        where: { userId: applicationResult.application.userId },
-        data: { userId: user.id },
-      });
+        // Update the application with the real user ID
+        await tx.therapist.update({
+          where: { userId: applicationResult.application.userId },
+          data: { userId: user.id },
+        });
 
-      const therapist = await tx.therapist.create({
-        data: {
-          userId: user.id,
-          status: 'PENDING',
-          mobile: registerData.mobile,
-          province: registerData.province,
-          providerType: registerData.providerType,
-          professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
-          isPRCLicensed: registerData.isPRCLicensed,
-          prcLicenseNumber: registerData.prcLicenseNumber || '',
-          expirationDateOfLicense: registerData.expirationDateOfLicense ? new Date(registerData.expirationDateOfLicense) : new Date(),
-          practiceStartDate: new Date(registerData.practiceStartDate),
-          sessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength || '60 minutes',
-          hourlyRate: registerData.hourlyRate || 0,
-          providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
-          comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
-          compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
-          willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
-          treatmentSuccessRates: {},
-        },
-      });
+        const therapist = await tx.therapist.create({
+          data: {
+            userId: user.id,
+            status: 'PENDING',
+            mobile: registerData.mobile,
+            province: registerData.province,
+            providerType: registerData.providerType,
+            professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
+            isPRCLicensed: registerData.isPRCLicensed,
+            prcLicenseNumber: registerData.prcLicenseNumber || '',
+            expirationDateOfLicense: registerData.expirationDateOfLicense ? new Date(registerData.expirationDateOfLicense) : new Date(),
+            practiceStartDate: registerData.practiceStartDate ? new Date(registerData.practiceStartDate) : new Date(),
+            sessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength || '60 minutes',
+            hourlyRate: registerData.hourlyRate || 0,
+            providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
+            comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
+            compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
+            willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
+            treatmentSuccessRates: {},
+          },
+        });
 
-      return { user, therapist };
+        return { user, therapist, isExistingUser: false };
+      } catch (error) {
+        // Handle unique constraint violation (P2002) for email
+        if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+          // Check existing user and their role
+          const existingUser = await tx.user.findUnique({
+            where: { email: registerData.email },
+            include: { therapist: true },
+          });
+
+          if (!existingUser) {
+            throw new BadRequestException('User creation failed. Please try again.');
+          }
+
+          // Handle based on existing user's role
+          if (existingUser.role === 'therapist') {
+            if (existingUser.therapist) {
+              throw new BadRequestException(
+                'You already have a therapist account with this email. Please sign in instead.',
+              );
+            }
+            // User has therapist role but no therapist profile - create profile
+            const therapist = await tx.therapist.create({
+              data: {
+                userId: existingUser.id,
+                status: 'PENDING',
+                mobile: registerData.mobile,
+                province: registerData.province,
+                providerType: registerData.providerType,
+                professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
+                isPRCLicensed: registerData.isPRCLicensed,
+                prcLicenseNumber: registerData.prcLicenseNumber || '',
+                expirationDateOfLicense: registerData.expirationDateOfLicense ? new Date(registerData.expirationDateOfLicense) : new Date(),
+                practiceStartDate: registerData.practiceStartDate ? new Date(registerData.practiceStartDate) : new Date(),
+                sessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength || '60 minutes',
+                hourlyRate: registerData.hourlyRate || 0,
+                providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
+                comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
+                compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
+                willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
+                treatmentSuccessRates: {},
+              },
+            });
+
+            // Update application with existing user ID
+            await tx.therapist.update({
+              where: { userId: applicationResult.application.userId },
+              data: { userId: existingUser.id },
+            });
+
+            return { user: existingUser, therapist, isExistingUser: true };
+          } else if (existingUser.role === 'client') {
+            // Allow client to upgrade to therapist
+            const updatedUser = await tx.user.update({
+              where: { id: existingUser.id },
+              data: { 
+                role: 'therapist',
+                password: hashedPassword, // Update password
+                firstName: registerData.firstName,
+                lastName: registerData.lastName,
+              },
+            });
+
+            const therapist = await tx.therapist.create({
+              data: {
+                userId: existingUser.id,
+                status: 'PENDING',
+                mobile: registerData.mobile,
+                province: registerData.province,
+                providerType: registerData.providerType,
+                professionalLicenseType: registerData.professionalLicenseType_specify || registerData.professionalLicenseType,
+                isPRCLicensed: registerData.isPRCLicensed,
+                prcLicenseNumber: registerData.prcLicenseNumber || '',
+                expirationDateOfLicense: registerData.expirationDateOfLicense ? new Date(registerData.expirationDateOfLicense) : new Date(),
+                practiceStartDate: registerData.practiceStartDate ? new Date(registerData.practiceStartDate) : new Date(),
+                sessionLength: registerData.preferredSessionLength_specify || registerData.preferredSessionLength || '60 minutes',
+                hourlyRate: registerData.hourlyRate || 0,
+                providedOnlineTherapyBefore: registerData.providedOnlineTherapyBefore === 'yes',
+                comfortableUsingVideoConferencing: registerData.comfortableUsingVideoConferencing === 'yes',
+                compliesWithDataPrivacyAct: registerData.compliesWithDataPrivacyAct === 'yes',
+                willingToAbideByPlatformGuidelines: registerData.willingToAbideByPlatformGuidelines === 'yes',
+                treatmentSuccessRates: {},
+              },
+            });
+
+            // Update application with existing user ID
+            await tx.therapist.update({
+              where: { userId: applicationResult.application.userId },
+              data: { userId: existingUser.id },
+            });
+
+            return { user: updatedUser, therapist, isExistingUser: true };
+          } else {
+            // User has admin/moderator role
+            throw new BadRequestException(
+              `An account with this email already exists with ${existingUser.role} privileges. Please contact support if you need assistance.`,
+            );
+          }
+        }
+        
+        // Re-throw other errors
+        throw error;
+      }
     });
 
     // Generate single token
@@ -147,7 +242,9 @@ export class TherapistAuthService {
     return {
       user: userResult.user,
       token,
-      message: 'Therapist registration successful with documents uploaded. Application is under review.',
+      message: userResult.isExistingUser 
+        ? 'Therapist application submitted successfully. Your account has been upgraded to therapist role. Application is under review.'
+        : 'Therapist registration successful with documents uploaded. Application is under review.',
       applicationId: applicationResult.application.id,
       uploadedFiles: applicationResult.uploadedFiles,
     };
