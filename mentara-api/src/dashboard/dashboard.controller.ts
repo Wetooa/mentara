@@ -23,13 +23,17 @@ export class DashboardController {
 
   @Get('client')
   @ClientOnly()
-  getClientDashboard(@CurrentUserId() userId: string): Promise<ClientDashboardResponseDto> {
+  getClientDashboard(
+    @CurrentUserId() userId: string,
+  ): Promise<ClientDashboardResponseDto> {
     return this.dashboardService.getClientDashboardData(userId);
   }
 
   @Get('therapist')
   @TherapistOnly()
-  getTherapistDashboard(@CurrentUserId() userId: string): Promise<TherapistDashboardResponseDto> {
+  getTherapistDashboard(
+    @CurrentUserId() userId: string,
+  ): Promise<TherapistDashboardResponseDto> {
     return this.dashboardService.getTherapistDashboardData(userId);
   }
 
@@ -41,7 +45,9 @@ export class DashboardController {
 
   @Get('moderator')
   @ModeratorOnly()
-  getModeratorDashboard(@CurrentUserId() userId: string): Promise<ModeratorDashboardResponseDto> {
+  getModeratorDashboard(
+    @CurrentUserId() userId: string,
+  ): Promise<ModeratorDashboardResponseDto> {
     return this.dashboardService.getModeratorDashboardData(userId);
   }
 }
