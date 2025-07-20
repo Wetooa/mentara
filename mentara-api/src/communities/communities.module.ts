@@ -9,6 +9,7 @@ import { CommunityRecommendationController } from './controllers/community-recom
 import { ModerationController } from './controllers/moderation.controller';
 import { EnhancedCommunityController } from './controllers/enhanced-community.controller';
 import { PrismaService } from 'src/providers/prisma-client.provider';
+import { AiServiceClient } from '../pre-assessment/services/ai-service.client';
 
 @Module({
   controllers: [
@@ -24,6 +25,7 @@ import { PrismaService } from 'src/providers/prisma-client.provider';
     CommunityRecommendationService,
     EnhancedCommunityService,
     PrismaService,
+    AiServiceClient,
   ],
   exports: [
     CommunitiesService,

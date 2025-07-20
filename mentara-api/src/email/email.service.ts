@@ -9,82 +9,12 @@ export class EmailService {
 
   // EmailJS configuration
   private readonly config = {
-    serviceId: process.env.EMAILJS_SERVICE_ID || '',
-    templateId: process.env.EMAILJS_TEMPLATE_ID || '',
-    publicKey: process.env.EMAILJS_PUBLIC_KEY || '',
-    privateKey: process.env.EMAILJS_PRIVATE_KEY || '',
+    serviceId: process.env.EMAILJS_SERVICE_ID ?? '',
+    templateId: process.env.EMAILJS_TEMPLATE_ID ?? '',
+    publicKey: process.env.EMAILJS_PUBLIC_KEY ?? '',
+    privateKey: process.env.EMAILJS_PRIVATE_KEY ?? '',
   };
 
-  // HTML templates for different email types (constant per function)
-  private readonly OTP_HTML_TEMPLATE = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #8B5CF6; text-align: center; margin-bottom: 30px;">Mentara - Email Verification</h1>
-        <h2 style="color: #1F2937; text-align: center;">Your verification code is:</h2>
-        <div style="background-color: #8B5CF6; color: white; font-size: 32px; font-weight: bold; text-align: center; padding: 20px; margin: 20px 0; border-radius: 8px; letter-spacing: 4px;">{{otp_code}}</div>
-        <p style="color: #4B5563; text-align: center; margin: 20px 0;">This code will expire in {{expires_in}}.</p>
-        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">If you didn't request this verification, please ignore this email.</p>
-      </div>
-    </div>`;
-
-  private readonly THERAPIST_REGISTRATION_SUCCESS_HTML = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">Welcome to Mentara!</h1>
-        <p style="color: #1F2937; font-size: 16px;">Thank you for registering as a therapist with Mentara.</p>
-        <p style="color: #4B5563;">Your application has been received and is currently under review. We will notify you once the review process is complete.</p>
-        <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
-          <p style="color: #065F46; margin: 0; font-weight: 500;">Next Steps:</p>
-          <ul style="color: #065F46; margin: 10px 0;">
-            <li>Complete your profile if you haven't already</li>
-            <li>Upload required documents</li>
-            <li>Wait for admin approval</li>
-          </ul>
-        </div>
-        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Thank you for joining our mental health community.</p>
-      </div>
-    </div>`;
-
-  private readonly THERAPIST_APPROVED_HTML = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">🎉 Congratulations! You're Approved!</h1>
-        <p style="color: #1F2937; font-size: 16px;">Great news! Your therapist application has been approved.</p>
-        <p style="color: #4B5563;">You can now start accepting clients and providing mental health services through the Mentara platform.</p>
-        <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
-          <p style="color: #065F46; margin: 0; font-weight: 500;">You can now:</p>
-          <ul style="color: #065F46; margin: 10px 0;">
-            <li>Complete your therapist profile</li>
-            <li>Set your availability</li>
-            <li>Start accepting client bookings</li>
-            <li>Access the therapist dashboard</li>
-          </ul>
-        </div>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="{{app_url}}/therapist/dashboard" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Go to Dashboard</a>
-        </div>
-        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Welcome to the Mentara therapist community!</p>
-      </div>
-    </div>`;
-
-  private readonly THERAPIST_DENIED_HTML = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #EF4444; text-align: center; margin-bottom: 30px;">Application Update</h1>
-        <p style="color: #1F2937; font-size: 16px;">Thank you for your interest in becoming a therapist with Mentara.</p>
-        <p style="color: #4B5563;">After careful review, we regret to inform you that your application has not been approved at this time.</p>
-        <div style="background-color: #FEF2F2; border-left: 4px solid #EF4444; padding: 16px; margin: 20px 0;">
-          <p style="color: #991B1B; margin: 0; font-weight: 500;">Common reasons for denial:</p>
-          <ul style="color: #991B1B; margin: 10px 0;">
-            <li>Incomplete documentation</li>
-            <li>Licensing requirements not met</li>
-            <li>Application did not meet our current criteria</li>
-          </ul>
-        </div>
-        <p style="color: #4B5563;">You're welcome to reapply in the future once any issues have been addressed.</p>
-        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Thank you for your understanding.</p>
-      </div>
-    </div>`;
 
   constructor() {
     this.initializeEmailJS();
@@ -144,15 +74,22 @@ export class EmailService {
 
     try {
       const otp = otpCode || this.generateOtp(6);
+      const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1 style="color: #8B5CF6; text-align: center; margin-bottom: 30px;">Mentara - Email Verification</h1>
+        <h2 style="color: #1F2937; text-align: center;">Your verification code is:</h2>
+        <div style="background-color: #8B5CF6; color: white; font-size: 32px; font-weight: bold; text-align: center; padding: 20px; margin: 20px 0; border-radius: 8px; letter-spacing: 4px;">${otp}</div>
+        <p style="color: #4B5563; text-align: center; margin: 20px 0;">This code will expire in ${expiresIn}.</p>
+        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">If you didn't request this verification, please ignore this email.</p>
+      </div>
+    </div>`;
 
       const templateParams = {
         email,
         name,
         subject,
-        html: this.OTP_HTML_TEMPLATE,
-        otp_code: otp,
-        expires_in: expiresIn,
-        app_url: process.env.APP_URL || 'https://mentara.com',
+        html,
       };
 
       const response = await emailjs.send(
@@ -200,12 +137,29 @@ export class EmailService {
     }
 
     try {
+      const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">Welcome to Mentara!</h1>
+        <p style="color: #1F2937; font-size: 16px;">Thank you, ${name}, for registering as a therapist with Mentara.</p>
+        <p style="color: #4B5563;">Your application has been received and is currently under review. We will notify you once the review process is complete.</p>
+        <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
+          <p style="color: #065F46; margin: 0; font-weight: 500;">Next Steps:</p>
+          <ul style="color: #065F46; margin: 10px 0;">
+            <li>Complete your profile if you haven't already</li>
+            <li>Upload required documents</li>
+            <li>Wait for admin approval</li>
+          </ul>
+        </div>
+        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Thank you for joining our mental health community.</p>
+      </div>
+    </div>`;
+
       const templateParams = {
         email,
         name,
         subject,
-        html: this.THERAPIST_REGISTRATION_SUCCESS_HTML,
-        app_url: process.env.APP_URL || 'https://mentara.com',
+        html,
       };
 
       const response = await emailjs.send(
@@ -259,12 +213,34 @@ export class EmailService {
     }
 
     try {
+      const appUrl = process.env.APP_URL || 'https://mentara.com';
+      const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">🎉 Congratulations! You're Approved!</h1>
+        <p style="color: #1F2937; font-size: 16px;">Great news, ${name}! Your therapist application has been approved.</p>
+        <p style="color: #4B5563;">You can now start accepting clients and providing mental health services through the Mentara platform.</p>
+        <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
+          <p style="color: #065F46; margin: 0; font-weight: 500;">You can now:</p>
+          <ul style="color: #065F46; margin: 10px 0;">
+            <li>Complete your therapist profile</li>
+            <li>Set your availability</li>
+            <li>Start accepting client bookings</li>
+            <li>Access the therapist dashboard</li>
+          </ul>
+        </div>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${appUrl}/therapist/dashboard" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Go to Dashboard</a>
+        </div>
+        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Welcome to the Mentara therapist community!</p>
+      </div>
+    </div>`;
+
       const templateParams = {
         email,
         name,
         subject,
-        html: this.THERAPIST_APPROVED_HTML,
-        app_url: process.env.APP_URL || 'https://mentara.com',
+        html,
       };
 
       const response = await emailjs.send(
@@ -315,12 +291,30 @@ export class EmailService {
     }
 
     try {
+      const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1 style="color: #EF4444; text-align: center; margin-bottom: 30px;">Application Update</h1>
+        <p style="color: #1F2937; font-size: 16px;">Dear ${name}, thank you for your interest in becoming a therapist with Mentara.</p>
+        <p style="color: #4B5563;">After careful review, we regret to inform you that your application has not been approved at this time.</p>
+        <div style="background-color: #FEF2F2; border-left: 4px solid #EF4444; padding: 16px; margin: 20px 0;">
+          <p style="color: #991B1B; margin: 0; font-weight: 500;">Common reasons for denial:</p>
+          <ul style="color: #991B1B; margin: 10px 0;">
+            <li>Incomplete documentation</li>
+            <li>Licensing requirements not met</li>
+            <li>Application did not meet our current criteria</li>
+          </ul>
+        </div>
+        <p style="color: #4B5563;">You're welcome to reapply in the future once any issues have been addressed.</p>
+        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Thank you for your understanding.</p>
+      </div>
+    </div>`;
+
       const templateParams = {
         email,
         name,
         subject,
-        html: this.THERAPIST_DENIED_HTML,
-        app_url: process.env.APP_URL || 'https://mentara.com',
+        html,
       };
 
       const response = await emailjs.send(
@@ -372,28 +366,26 @@ export class EmailService {
       };
     }
 
-    const PASSWORD_RESET_HTML = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-        <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h1 style="color: #8B5CF6; text-align: center; margin-bottom: 30px;">Reset Your Password</h1>
-          <p style="color: #1F2937; font-size: 16px;">We received a request to reset your password for your Mentara account.</p>
-          <p style="color: #4B5563;">Click the button below to reset your password:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
-          </div>
-          <p style="color: #6B7280; font-size: 14px;">If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
-          <p style="color: #6B7280; font-size: 14px;">For security reasons, this link will expire in 1 hour.</p>
-        </div>
-      </div>`;
-
     try {
+      const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1 style="color: #8B5CF6; text-align: center; margin-bottom: 30px;">Reset Your Password</h1>
+        <p style="color: #1F2937; font-size: 16px;">Hello ${name}, we received a request to reset your password for your Mentara account.</p>
+        <p style="color: #4B5563;">Click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Reset Password</a>
+        </div>
+        <p style="color: #6B7280; font-size: 14px;">If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
+        <p style="color: #6B7280; font-size: 14px;">For security reasons, this link will expire in 1 hour.</p>
+      </div>
+    </div>`;
+
       const templateParams = {
         email,
         name,
         subject,
-        html: PASSWORD_RESET_HTML,
-        reset_link: resetLink,
-        app_url: process.env.APP_URL || 'https://mentara.com',
+        html,
       };
 
       const response = await emailjs.send(
@@ -443,30 +435,30 @@ export class EmailService {
       };
     }
 
-    const PASSWORD_RESET_SUCCESS_HTML = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-        <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">✅ Password Reset Successful</h1>
-          <p style="color: #1F2937; font-size: 16px;">Your password has been successfully reset.</p>
-          <p style="color: #4B5563;">You can now log in to your Mentara account using your new password.</p>
-          <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
-            <p style="color: #065F46; margin: 0; font-weight: 500;">Security Tip:</p>
-            <p style="color: #065F46; margin: 10px 0 0 0;">Make sure to use a strong, unique password and keep it secure.</p>
-          </div>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="{{app_url}}/auth/login" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Login to Your Account</a>
-          </div>
-          <p style="color: #6B7280; font-size: 14px; text-align: center;">If you didn't make this change, please contact our support team immediately.</p>
-        </div>
-      </div>`;
-
     try {
+      const appUrl = process.env.APP_URL || 'https://mentara.com';
+      const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">✅ Password Reset Successful</h1>
+        <p style="color: #1F2937; font-size: 16px;">Hello ${name}, your password has been successfully reset.</p>
+        <p style="color: #4B5563;">You can now log in to your Mentara account using your new password.</p>
+        <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
+          <p style="color: #065F46; margin: 0; font-weight: 500;">Security Tip:</p>
+          <p style="color: #065F46; margin: 10px 0 0 0;">Make sure to use a strong, unique password and keep it secure.</p>
+        </div>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${appUrl}/auth/login" style="background-color: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Login to Your Account</a>
+        </div>
+        <p style="color: #6B7280; font-size: 14px; text-align: center;">If you didn't make this change, please contact our support team immediately.</p>
+      </div>
+    </div>`;
+
       const templateParams = {
         email,
         name,
         subject,
-        html: PASSWORD_RESET_SUCCESS_HTML,
-        app_url: process.env.APP_URL || 'https://mentara.com',
+        html,
       };
 
       const response = await emailjs.send(
