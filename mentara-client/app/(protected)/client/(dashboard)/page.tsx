@@ -15,6 +15,7 @@ import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
+import UpcomingSessionsCalendar from "@/components/dashboard/UpcomingSessionsCalendar";
 import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
 import ProgressTracking from "@/components/dashboard/ProgressTracking";
 import NotificationsCenter from "@/components/dashboard/NotificationsCenter";
@@ -193,7 +194,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          <UpcomingSessions sessions={dashboardData.upcomingSessions} />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <UpcomingSessions sessions={dashboardData.upcomingSessions} />
+            <UpcomingSessionsCalendar />
+          </div>
           <WorksheetStatus worksheets={dashboardData.worksheets} />
         </div>
 
