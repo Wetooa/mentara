@@ -102,7 +102,7 @@ export function createCommunityService(axios: AxiosInstance) {
       message: string;
     }> {
       const { data } = await axios.get("/communities/recommendations/me");
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -114,7 +114,7 @@ export function createCommunityService(axios: AxiosInstance) {
       message: string;
     }> {
       const { data } = await axios.post("/communities/recommendations/generate", { force });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -138,7 +138,7 @@ export function createCommunityService(axios: AxiosInstance) {
       const { data } = await axios.post("/communities/recommendations/join", {
         communitySlugs
       });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -149,7 +149,7 @@ export function createCommunityService(axios: AxiosInstance) {
       message: string;
     }> {
       const { data } = await axios.post("/communities/recommendations/refresh");
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -157,7 +157,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getCommunityDetails(communityId: string) {
       const { data } = await axios.get(`/communities/${communityId}`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -165,7 +165,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async joinCommunity(communityId: string) {
       const { data } = await axios.post(`/communities/${communityId}/join`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -173,7 +173,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async leaveCommunity(communityId: string) {
       const { data } = await axios.post(`/communities/${communityId}/leave`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -181,7 +181,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getMyCommunities() {
       const { data } = await axios.get("/communities/me");
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -194,7 +194,7 @@ export function createCommunityService(axios: AxiosInstance) {
       category?: string;
     }) {
       const { data } = await axios.get("/communities", { params });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -206,7 +206,7 @@ export function createCommunityService(axios: AxiosInstance) {
       sortBy?: 'newest' | 'popular' | 'trending';
     }) {
       const { data } = await axios.get(`/communities/${communityId}/posts`, { params });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
 
@@ -221,7 +221,7 @@ export function createCommunityService(axios: AxiosInstance) {
         `/communities/recommendations/${recommendationId}/interact`,
         { action }
       );
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -229,7 +229,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getRecommendationStats() {
       const { data } = await axios.get("/communities/recommendations/stats/me");
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -237,7 +237,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getCommunityWithStructure(communityId: string): Promise<CommunityWithStructure> {
       const { data } = await axios.get(`/communities/${communityId}/with-structure`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -245,7 +245,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getCommunitiesWithStructure(): Promise<CommunityWithStructure[]> {
       const { data } = await axios.get('/communities/with-structure');
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -256,7 +256,7 @@ export function createCommunityService(axios: AxiosInstance) {
         name,
         order,
       });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -267,7 +267,7 @@ export function createCommunityService(axios: AxiosInstance) {
         name,
         order,
       });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -279,7 +279,7 @@ export function createCommunityService(axios: AxiosInstance) {
     }> {
       const params = { limit, offset };
       const { data } = await axios.get(`/communities/${communityId}/members`, { params });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -287,7 +287,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getMyMemberships(): Promise<CommunityMembership[]> {
       const { data } = await axios.get('/communities/memberships/me');
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -302,7 +302,7 @@ export function createCommunityService(axios: AxiosInstance) {
       };
     }> {
       const { data } = await axios.get(`/communities/rooms/${roomId}/posts`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -310,7 +310,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getCommunityStats(): Promise<CommunityStats> {
       const { data } = await axios.get('/communities/stats');
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -339,7 +339,7 @@ export function createCommunityService(axios: AxiosInstance) {
             'Content-Type': 'multipart/form-data',
           },
         });
-        return data.data || data; // Handle wrapped response format
+        return data;
       } else {
         // No files, use regular JSON submission
         const { data } = await axios.post('/communities/posts', {
@@ -347,7 +347,7 @@ export function createCommunityService(axios: AxiosInstance) {
           content: postData.content,
           roomId: postData.roomId,
         });
-        return data.data || data; // Handle wrapped response format
+        return data;
       }
     },
 
@@ -356,7 +356,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async heartPost(postId: string): Promise<{ success: boolean }> {
       const { data } = await axios.post(`/communities/posts/${postId}/heart`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -364,7 +364,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async unheartPost(postId: string): Promise<{ success: boolean }> {
       const { data } = await axios.delete(`/communities/posts/${postId}/heart`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -372,7 +372,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getJoined(): Promise<CommunityWithStructure[]> {
       const { data } = await axios.get('/communities/me/joined');
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -380,7 +380,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getRecommended(): Promise<CommunityWithStructure[]> {
       const { data } = await axios.get('/communities/me/recommended');
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -388,7 +388,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async getRecentActivity(): Promise<any[]> {
       const { data } = await axios.get('/communities/activity/recent');
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
 
@@ -397,7 +397,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async join(communityId: string): Promise<{ success: boolean }> {
       const { data } = await axios.post(`/communities/${communityId}/join`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -405,7 +405,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async leave(communityId: string): Promise<{ success: boolean }> {
       const { data } = await axios.post(`/communities/${communityId}/leave`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -413,7 +413,7 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async requestJoin(communityId: string): Promise<{ success: boolean }> {
       const { data } = await axios.post(`/communities/${communityId}/request-join`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
   };
 }

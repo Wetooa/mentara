@@ -29,9 +29,9 @@ export function createApiClient(): AxiosInstance {
     (error) => Promise.reject(error)
   );
 
-  // Response interceptor - handle common errors
+  // Response interceptor - extract data and handle common errors
   client.interceptors.response.use(
-    (response) => response,
+    (response) => response.data,
     (error: AxiosError) => {
       // Handle 401 errors (unauthorized) - but only for authenticated requests
       if (error.response?.status === 401) {

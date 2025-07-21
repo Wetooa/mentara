@@ -32,7 +32,7 @@ export function createFilesService(axios: AxiosInstance) {
           'Content-Type': 'multipart/form-data',
         },
       });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -44,7 +44,7 @@ export function createFilesService(axios: AxiosInstance) {
           'Content-Type': 'multipart/form-data',
         },
       });
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -52,7 +52,7 @@ export function createFilesService(axios: AxiosInstance) {
      */
     async delete(fileId: string): Promise<{ success: boolean }> {
       const { data } = await axios.delete(`/files/${fileId}`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -60,7 +60,7 @@ export function createFilesService(axios: AxiosInstance) {
      */
     async getFileInfo(fileId: string): Promise<FileUploadResponse> {
       const { data } = await axios.get(`/files/${fileId}`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
@@ -68,7 +68,7 @@ export function createFilesService(axios: AxiosInstance) {
      */
     async getDownloadUrl(fileId: string): Promise<{ downloadUrl: string; expiresAt?: string }> {
       const { data } = await axios.get(`/files/${fileId}/download-url`);
-      return data.data || data; // Handle wrapped response format
+      return data;
     },
 
     /**
