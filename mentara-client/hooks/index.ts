@@ -51,5 +51,8 @@ export * from './messaging';
 // Billing hooks - Export all named exports
 export * from './billing';
 
+// Profile hooks - Export all named exports
+export * from './profile';
+
 // Utility hooks - Export all named exports
 export * from './utils';
