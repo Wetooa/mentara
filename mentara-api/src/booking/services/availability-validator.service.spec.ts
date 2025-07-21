@@ -33,7 +33,7 @@ describe('AvailabilityValidatorService', () => {
     id: 'relationship-123',
     clientId: 'client-123',
     therapistId: 'therapist-123',
-    status: 'ACTIVE',
+    assignedAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -335,7 +335,6 @@ describe('AvailabilityValidatorService', () => {
         where: {
           clientId: 'client-123',
           therapistId: 'therapist-123',
-          status: 'ACTIVE',
         },
       });
     });

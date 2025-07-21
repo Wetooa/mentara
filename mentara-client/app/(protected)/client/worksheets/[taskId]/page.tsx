@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Task, TaskFile, transformWorksheetAssignmentToTask } from "@/components/worksheets/types";
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
-import { useToast } from "@/contexts/ToastContext";
+import { toast } from "sonner";
 import { useApi } from "@/lib/api";
 import { use } from "react";
 
@@ -37,7 +37,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const api = useApi();
-  const { showToast } = useToast();
+  // Toast functionality using sonner
 
   // Determine if task is editable based on submission status
   const isTaskEditable =
@@ -113,7 +113,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
       // File size validation (5MB limit)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        showToast("File size must be less than 5MB. Please choose a smaller file.", "error");
+        toast.error("File size must be less than 5MB. Please choose a smaller file.");
         return;
       }
 
@@ -128,7 +128,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
       ];
       
       if (!allowedTypes.includes(file.type)) {
-        showToast("Invalid file type. Please upload PDF, DOC, DOCX, TXT, JPG, or PNG files only.", "error");
+        toast.error("Invalid file type. Please upload PDF, DOC, DOCX, TXT, JPG, or PNG files only.");
         return;
       }
 
@@ -167,7 +167,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
           ],
         });
         
-        showToast(`Successfully uploaded ${file.name}`, "success");
+        toast.success(`Successfully uploaded ${file.name}`);
       } catch (err) {
         console.error("Error uploading file:", err);
         
@@ -177,7 +177,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
           myWork: (task.myWork || []).filter((work) => work.id !== "uploading"),
         });
         
-        showToast("Failed to upload file. Please try again.", "error");
+        toast.error("Failed to upload file. Please try again.");
       }
 
       // Reset the file input
@@ -214,10 +214,10 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
         myWork: task.myWork?.filter((work) => work.id !== fileId) || [],
       });
       
-      showToast(`Successfully deleted ${deletedFile?.filename || "file"}`, "success");
+      toast.success(`Successfully deleted ${deletedFile?.filename || "file"}`);
     } catch (err) {
       console.error("Error deleting file:", err);
-      showToast("Failed to delete file. Please try again.", "error");
+      toast.error("Failed to delete file. Please try again.");
     }
 
     // Close dropdown
@@ -256,14 +256,13 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
           isCompleted: true,
           submittedAt: new Date().toISOString(),
         });
-        showToast(
-          task.isCompleted ? "Worksheet unsubmitted successfully" : "Worksheet submitted successfully",
-          "success"
+        toast.success(
+          task.isCompleted ? "Worksheet unsubmitted successfully" : "Worksheet submitted successfully"
         );
       }
     } catch (err) {
       console.error("Error submitting worksheet:", err);
-      showToast("Failed to submit worksheet. Please try again.", "error");
+      toast.error("Failed to submit worksheet. Please try again.");
     } finally {
       setSubmitting(false);
     }

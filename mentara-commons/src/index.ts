@@ -1,14 +1,6 @@
-// Export all schemas and types from schemas module
-// Note: schemas/index.ts is commented out to avoid clunky re-exports
-// So we directly export the schemas we need here
-
-// Dashboard schemas (direct export)
-export * from "./schemas/dashboard";
-
-// Other schema exports can be added directly as needed
-// export * from "./schemas/auth";
-// export * from "./schemas/user";
-// etc.
+// Export all schemas and types
+export * from "./schemas";
+export * from "./types";
 
 // Export all constants
 export {

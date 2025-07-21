@@ -5,6 +5,7 @@ import DashboardGreeting from "@/components/therapist/dashboard/DashboardGreetin
 import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
 import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
 import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
+import { MatchedClientsSection } from "@/components/therapist/dashboard/MatchedClientsSection";
 import { useTherapistDashboard } from "@/hooks/useTherapistDashboard";
 
 export default function TherapistDashboardPage() {
@@ -30,6 +31,12 @@ export default function TherapistDashboardPage() {
   return (
     <div className="p-6">
       <DashboardGreeting name={therapist?.name || 'Therapist'} />
+
+      {/* Matched Clients Section - High Priority */}
+      <div className="mt-8">
+        <h2 className="text-lg font-medium mb-4">Client Matches & Requests</h2>
+        <MatchedClientsSection />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <div className="lg:col-span-2">

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/lib/api";
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
+import { answersToAnswerMatrix } from "@/lib/questionnaire";
 
 /**
  * Client registration form data structure
@@ -67,17 +68,17 @@ export interface UseClientRegistrationReturn {
 
 /**
  * Hook for managing client registration and email verification flow
- * 
+ *
  * This hook handles the complete client registration process including:
  * - Registration form submission with pre-assessment data
  * - Email verification with OTP codes
  * - Password strength validation
  * - UI state management for multi-step registration
  * - Error handling and user feedback
- * 
+ *
  * @param onSuccess - Optional callback to execute on successful registration
  * @returns Object containing registration state and handlers
- * 
+ *
  * @example
  * ```tsx
  * function ClientRegistrationForm() {
@@ -89,20 +90,20 @@ export interface UseClientRegistrationReturn {
  *   } = useClientRegistration(() => {
  *     console.log('Registration completed successfully');
  *   });
- * 
+ *
  *   if (currentStep === 'verification') {
  *     return <VerificationStep onSuccess={handleVerificationSuccess} />;
  *   }
- * 
+ *
  *   return (
- *     <RegistrationForm 
+ *     <RegistrationForm
  *       onSubmit={handleRegistrationSubmit}
  *       isLoading={isLoading}
  *     />
  *   );
  * }
  * ```
- * 
+ *
  * Features:
  * - Multi-step registration flow with email verification
  * - Pre-assessment data integration
@@ -148,7 +149,10 @@ export function useClientRegistration(
 
     try {
       // Prepare preassessment answers if available
-      const preassessmentAnswers = answers.length > 0 ? answers.flat() : undefined;
+      const preassessmentAnswers =
+        answers.length > 0
+          ? answersToAnswerMatrix(questionnaires, answers)
+          : undefined;
 
       // Call real backend registration API - this will automatically send OTP
       const result = await api.clientAuth.register({
@@ -163,12 +167,12 @@ export function useClientRegistration(
       setRegistrationStatus("registered");
       setRegistrationData(data);
       setCurrentStep("verification");
-      
+
       // Show appropriate success message based on whether preassessment data was included
-      const successMessage = preassessmentAnswers 
+      const successMessage = preassessmentAnswers
         ? "Registration and pre-assessment completed! Please check your email for the verification code."
         : "Registration successful! Please check your email for the verification code.";
-      
+
       toast.success(successMessage);
     } catch (error: any) {
       setRegistrationStatus("error");
@@ -176,9 +180,9 @@ export function useClientRegistration(
         error?.response?.data?.message ||
         "Registration failed. Please try again.";
       toast.error(errorMessage);
-      
+
       // Log error for debugging in development
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.error("Registration error:", error);
       }
     } finally {
@@ -206,7 +210,7 @@ export function useClientRegistration(
         onSuccess?.();
 
         // Redirect to client area (layout will handle routing)
-        router.push("/user");
+        router.push("/auth/sign-in");
       } else {
         toast.error(result.message || "Verification failed. Please try again.");
       }
@@ -215,9 +219,9 @@ export function useClientRegistration(
         error?.response?.data?.message ||
         "Verification failed. Please try again.";
       toast.error(errorMessage);
-      
+
       // Log error for debugging in development
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.error("Verification error:", error);
       }
     } finally {
@@ -249,9 +253,9 @@ export function useClientRegistration(
         error?.message ||
         "Failed to resend verification code.";
       toast.error(errorMessage, { id: "resend-otp" });
-      
+
       // Log error for debugging in development
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.error("Resend OTP error:", error);
       }
     }
@@ -259,7 +263,7 @@ export function useClientRegistration(
 
   /**
    * Calculate password strength score based on security criteria
-   * 
+   *
    * @param password - The password to evaluate
    * @returns Score from 0-5 based on: length ≥8, lowercase, uppercase, digits, special chars
    */

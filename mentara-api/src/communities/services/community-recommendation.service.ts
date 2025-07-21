@@ -70,10 +70,8 @@ export class CommunityRecommendationService {
       try {
         const assessmentAnswers = user.client.preAssessment.answers as any;
         if (assessmentAnswers?.questionnaires && Array.isArray(assessmentAnswers.questionnaires)) {
-          const aiResult = await this.aiServiceClient.predict({
-            inputs: assessmentAnswers.questionnaires
-          });
-          disorderPredictions = aiResult;
+          const aiResult = await this.aiServiceClient.predict(assessmentAnswers.questionnaires);
+          disorderPredictions = aiResult.predictions || {};
           this.logger.log(`AI predictions obtained for user ${userId}: ${Object.keys(disorderPredictions).filter(k => disorderPredictions[k]).join(', ')}`);
         } else {
           this.logger.warn(`Invalid preassessment data format for user ${userId}`);

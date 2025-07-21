@@ -27,26 +27,26 @@ export class EmailVerificationService {
       throw new BadRequestException('Email is already verified');
     }
 
-    // Generate verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    // Generate raw OTP code
+    const otpCode = this.emailService.generateOtp(6);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Store token in database
+    // Store raw OTP in database
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        emailVerifyToken: verificationToken,
+        emailVerifyToken: otpCode, // Store raw OTP instead of crypto token
         emailVerifyTokenExp: expiresAt,
       },
     });
 
-    // Send verification email using the sendOTP method (reusing for email verification)
+    // Send the same OTP code via email
     await this.emailService.sendOTP(
       user.email,
       user.firstName || 'User',
       'Verify Your Mentara Email Address',
-      undefined, // Will generate OTP
-      '24 hours'
+      otpCode, // Pass the generated OTP code
+      '24 hours',
     );
   }
 
@@ -55,10 +55,12 @@ export class EmailVerificationService {
    * @param token - Verification token
    * @returns Verification result
    */
-  async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+  async verifyEmail(
+    token: string,
+  ): Promise<{ success: boolean; message: string }> {
     const user = await this.prisma.user.findFirst({
       where: {
-        emailVerifyToken: token,
+        emailVerifyToken: token, // Direct comparison with raw OTP
         emailVerifyTokenExp: {
           gt: new Date(),
         },

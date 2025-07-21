@@ -667,7 +667,61 @@ export const DocumentValidationUtils = {
   },
 };
 
+// Therapist Dashboard Data Schema - Module 2
+export const TherapistDashboardDataSchema = z.object({
+  pendingRequests: z.array(z.object({
+    relationshipId: z.string(),
+    client: z.object({
+      id: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      email: z.string(),
+      profilePicture: z.string().optional(),
+      joinedAt: z.string(),
+    }),
+    matchInfo: z.object({
+      assignedAt: z.string(),
+      status: z.enum(['PENDING', 'ACTIVE']),
+      daysSinceMatch: z.number(),
+    }),
+    assessmentInfo: z.object({
+      hasAssessment: z.boolean(),
+      completedAt: z.string().optional(),
+      assessmentType: z.string().optional(),
+      daysSinceAssessment: z.number().optional(),
+    }),
+  })),
+  recentMatches: z.array(z.object({
+    relationshipId: z.string(),
+    client: z.object({
+      id: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      email: z.string(),
+      profilePicture: z.string().optional(),
+      joinedAt: z.string(),
+    }),
+    matchInfo: z.object({
+      assignedAt: z.string(),
+      status: z.enum(['PENDING', 'ACTIVE']),
+      daysSinceMatch: z.number(),
+    }),
+    assessmentInfo: z.object({
+      hasAssessment: z.boolean(),
+      completedAt: z.string().optional(),
+      assessmentType: z.string().optional(),
+      daysSinceAssessment: z.number().optional(),
+    }),
+  })),
+  summary: z.object({
+    totalPendingRequests: z.number(),
+    totalRecentMatches: z.number(),
+    totalMatches: z.number(),
+  }),
+});
+
 // Export types for the new validation utilities
 export type FileValidation = z.infer<typeof FileValidationSchema>;
 export type DocumentUpload = z.infer<typeof DocumentUploadSchema>;
 export type RegisterTherapistWithDocumentsRequest = z.infer<typeof RegisterTherapistWithDocumentsRequestSchema>;
+export type TherapistDashboardData = z.infer<typeof TherapistDashboardDataSchema>;

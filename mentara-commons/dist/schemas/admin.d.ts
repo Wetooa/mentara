@@ -29,15 +29,15 @@ export declare const AdminResponseDtoSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    userId: string;
     createdAt: Date;
     updatedAt: Date;
-    userId: string;
     permissions?: string[] | undefined;
     adminLevel?: string | undefined;
 }, {
+    userId: string;
     createdAt: Date;
     updatedAt: Date;
-    userId: string;
     permissions?: string[] | undefined;
     adminLevel?: string | undefined;
 }>;
@@ -47,15 +47,15 @@ export declare const AdminQuerySchema: z.ZodObject<{
     adminLevel: z.ZodOptional<z.ZodString>;
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "updatedAt", "adminLevel"]>>;
 }, "strip", z.ZodTypeAny, {
-    adminLevel?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "adminLevel" | undefined;
+    adminLevel?: string | undefined;
 }, {
-    adminLevel?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "adminLevel" | undefined;
+    adminLevel?: string | undefined;
 }>;
 export declare const AdminUserQuerySchema: z.ZodObject<{
     role: z.ZodOptional<z.ZodEnum<["client", "therapist", "moderator", "admin"]>>;
@@ -68,17 +68,17 @@ export declare const AdminUserQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
-    sortBy: "email" | "firstName" | "lastName" | "role" | "createdAt";
+    sortBy: "createdAt" | "role" | "firstName" | "lastName" | "email";
     sortOrder: "asc" | "desc";
     status?: "active" | "inactive" | "suspended" | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
+    role?: "client" | "therapist" | "admin" | "moderator" | undefined;
     search?: string | undefined;
 }, {
     status?: "active" | "inactive" | "suspended" | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "email" | "firstName" | "lastName" | "role" | "createdAt" | undefined;
+    role?: "client" | "therapist" | "admin" | "moderator" | undefined;
+    sortBy?: "createdAt" | "role" | "firstName" | "lastName" | "email" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     search?: string | undefined;
 }>;
@@ -119,10 +119,10 @@ export declare const UpdateTherapistStatusDtoSchema: z.ZodObject<{
     status: z.ZodEnum<["pending", "approved", "rejected", "suspended", "under_review"]>;
     reason: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    status: "approved" | "rejected" | "pending" | "suspended" | "under_review";
+    status: "pending" | "rejected" | "suspended" | "approved" | "under_review";
     reason?: string | undefined;
 }, {
-    status: "approved" | "rejected" | "pending" | "suspended" | "under_review";
+    status: "pending" | "rejected" | "suspended" | "approved" | "under_review";
     reason?: string | undefined;
 }>;
 export declare const PendingTherapistFiltersDtoSchema: z.ZodObject<{
@@ -134,13 +134,13 @@ export declare const PendingTherapistFiltersDtoSchema: z.ZodObject<{
     limit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    status?: "approved" | "rejected" | "pending" | "suspended" | undefined;
+    status?: "pending" | "rejected" | "suspended" | "approved" | undefined;
     province?: string | undefined;
     submittedAfter?: string | undefined;
     processedBy?: string | undefined;
     providerType?: string | undefined;
 }, {
-    status?: "approved" | "rejected" | "pending" | "suspended" | undefined;
+    status?: "pending" | "rejected" | "suspended" | "approved" | undefined;
     limit?: number | undefined;
     province?: string | undefined;
     submittedAfter?: string | undefined;
@@ -173,17 +173,17 @@ export declare const AdminUserListParamsDtoSchema: z.ZodObject<{
     sortOrder: z.ZodDefault<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    sortBy: "email" | "firstName" | "lastName" | "role" | "createdAt";
+    sortBy: "createdAt" | "role" | "firstName" | "lastName" | "email";
     sortOrder: "asc" | "desc";
     offset: number;
     status?: "active" | "inactive" | "suspended" | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
+    role?: "client" | "therapist" | "admin" | "moderator" | undefined;
     search?: string | undefined;
 }, {
     status?: "active" | "inactive" | "suspended" | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
     limit?: number | undefined;
-    sortBy?: "email" | "firstName" | "lastName" | "role" | "createdAt" | undefined;
+    role?: "client" | "therapist" | "admin" | "moderator" | undefined;
+    sortBy?: "createdAt" | "role" | "firstName" | "lastName" | "email" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     offset?: number | undefined;
     search?: string | undefined;
@@ -193,26 +193,26 @@ export declare const AdminUserGrowthParamsDtoSchema: z.ZodObject<{
     endDate: z.ZodOptional<z.ZodString>;
     granularity: z.ZodDefault<z.ZodEnum<["day", "week", "month"]>>;
 }, "strip", z.ZodTypeAny, {
-    granularity: "month" | "week" | "day";
+    granularity: "day" | "week" | "month";
     startDate?: string | undefined;
     endDate?: string | undefined;
 }, {
     startDate?: string | undefined;
     endDate?: string | undefined;
-    granularity?: "month" | "week" | "day" | undefined;
+    granularity?: "day" | "week" | "month" | undefined;
 }>;
 export declare const AdminEngagementParamsDtoSchema: z.ZodObject<{
     startDate: z.ZodOptional<z.ZodString>;
     endDate: z.ZodOptional<z.ZodString>;
     granularity: z.ZodDefault<z.ZodEnum<["day", "week", "month"]>>;
 }, "strip", z.ZodTypeAny, {
-    granularity: "month" | "week" | "day";
+    granularity: "day" | "week" | "month";
     startDate?: string | undefined;
     endDate?: string | undefined;
 }, {
     startDate?: string | undefined;
     endDate?: string | undefined;
-    granularity?: "month" | "week" | "day" | undefined;
+    granularity?: "day" | "week" | "month" | undefined;
 }>;
 export declare const AdminModerationReportParamsDtoSchema: z.ZodObject<{
     type: z.ZodOptional<z.ZodString>;
@@ -224,11 +224,11 @@ export declare const AdminModerationReportParamsDtoSchema: z.ZodObject<{
     limit: number;
     offset: number;
     type?: string | undefined;
-    status?: "pending" | "dismissed" | "resolved" | undefined;
+    status?: "pending" | "resolved" | "dismissed" | undefined;
     assignedTo?: string | undefined;
 }, {
     type?: string | undefined;
-    status?: "pending" | "dismissed" | "resolved" | undefined;
+    status?: "pending" | "resolved" | "dismissed" | undefined;
     limit?: number | undefined;
     offset?: number | undefined;
     assignedTo?: string | undefined;
@@ -240,9 +240,9 @@ export declare const AdminTherapistApplicationParamsDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     offset: number;
-    status?: "approved" | "rejected" | "pending" | "suspended" | undefined;
+    status?: "pending" | "rejected" | "suspended" | "approved" | undefined;
 }, {
-    status?: "approved" | "rejected" | "pending" | "suspended" | undefined;
+    status?: "pending" | "rejected" | "suspended" | "approved" | undefined;
     limit?: number | undefined;
     offset?: number | undefined;
 }>;
@@ -255,13 +255,13 @@ export declare const AdminTherapistApplicationFiltersDtoSchema: z.ZodObject<{
     limit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     limit: number;
-    status?: "approved" | "rejected" | "pending" | "suspended" | undefined;
+    status?: "pending" | "rejected" | "suspended" | "approved" | undefined;
     province?: string | undefined;
     submittedAfter?: string | undefined;
     processedBy?: string | undefined;
     providerType?: string | undefined;
 }, {
-    status?: "approved" | "rejected" | "pending" | "suspended" | undefined;
+    status?: "pending" | "rejected" | "suspended" | "approved" | undefined;
     limit?: number | undefined;
     province?: string | undefined;
     submittedAfter?: string | undefined;
@@ -304,59 +304,6 @@ export type AdminTherapistApplicationParamsDto = z.infer<typeof AdminTherapistAp
 export type AdminTherapistApplicationFiltersDto = z.infer<typeof AdminTherapistApplicationFiltersDtoSchema>;
 export type AdminMatchingPerformanceParamsDto = z.infer<typeof AdminMatchingPerformanceParamsDtoSchema>;
 export type AdminFlaggedContentParamsDto = z.infer<typeof AdminFlaggedContentParamsDtoSchema>;
-export declare const SystemStatsSchema: z.ZodObject<{
-    totalUsers: z.ZodNumber;
-    totalClients: z.ZodNumber;
-    totalTherapists: z.ZodNumber;
-    pendingApplications: z.ZodNumber;
-    totalCommunities: z.ZodNumber;
-    totalPosts: z.ZodNumber;
-    totalSessions: z.ZodNumber;
-    growth: z.ZodObject<{
-        usersGrowth: z.ZodNumber;
-        clientsGrowth: z.ZodNumber;
-        therapistsGrowth: z.ZodNumber;
-        sessionsGrowth: z.ZodNumber;
-    }, "strip", z.ZodTypeAny, {
-        usersGrowth: number;
-        clientsGrowth: number;
-        therapistsGrowth: number;
-        sessionsGrowth: number;
-    }, {
-        usersGrowth: number;
-        clientsGrowth: number;
-        therapistsGrowth: number;
-        sessionsGrowth: number;
-    }>;
-}, "strip", z.ZodTypeAny, {
-    totalUsers: number;
-    totalTherapists: number;
-    totalSessions: number;
-    growth: {
-        usersGrowth: number;
-        clientsGrowth: number;
-        therapistsGrowth: number;
-        sessionsGrowth: number;
-    };
-    totalClients: number;
-    totalCommunities: number;
-    totalPosts: number;
-    pendingApplications: number;
-}, {
-    totalUsers: number;
-    totalTherapists: number;
-    totalSessions: number;
-    growth: {
-        usersGrowth: number;
-        clientsGrowth: number;
-        therapistsGrowth: number;
-        sessionsGrowth: number;
-    };
-    totalClients: number;
-    totalCommunities: number;
-    totalPosts: number;
-    pendingApplications: number;
-}>;
 export declare const UserGrowthDataSchema: z.ZodObject<{
     date: z.ZodString;
     totalUsers: z.ZodNumber;
@@ -408,24 +355,24 @@ export declare const AdminModerationReportSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    type: string;
-    status: "pending" | "dismissed" | "resolved";
     id: string;
+    type: string;
+    status: "pending" | "resolved" | "dismissed";
     createdAt: string;
-    updatedAt: string;
     reason: string;
+    updatedAt: string;
     contentId: string;
     contentType: "message" | "user" | "post" | "comment";
     reportedBy: string;
     description?: string | undefined;
     assignedTo?: string | undefined;
 }, {
-    type: string;
-    status: "pending" | "dismissed" | "resolved";
     id: string;
+    type: string;
+    status: "pending" | "resolved" | "dismissed";
     createdAt: string;
-    updatedAt: string;
     reason: string;
+    updatedAt: string;
     contentId: string;
     contentType: "message" | "user" | "post" | "comment";
     reportedBy: string;
@@ -437,11 +384,11 @@ export declare const UpdateModerationReportRequestSchema: z.ZodObject<{
     assignedTo: z.ZodOptional<z.ZodString>;
     moderatorNotes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    status?: "pending" | "dismissed" | "resolved" | undefined;
+    status?: "pending" | "resolved" | "dismissed" | undefined;
     assignedTo?: string | undefined;
     moderatorNotes?: string | undefined;
 }, {
-    status?: "pending" | "dismissed" | "resolved" | undefined;
+    status?: "pending" | "resolved" | "dismissed" | undefined;
     assignedTo?: string | undefined;
     moderatorNotes?: string | undefined;
 }>;
@@ -504,20 +451,20 @@ export declare const FeatureFlagSchema: z.ZodObject<{
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    name: string;
     createdAt: string;
     updatedAt: string;
-    description: string;
-    name: string;
     enabled: boolean;
+    description: string;
     rolloutPercentage: number;
     conditions: Record<string, any>;
 }, {
     id: string;
+    name: string;
     createdAt: string;
     updatedAt: string;
-    description: string;
-    name: string;
     enabled: boolean;
+    description: string;
     rolloutPercentage: number;
     conditions: Record<string, any>;
 }>;
@@ -541,17 +488,17 @@ export declare const AdminUserCreateRequestSchema: z.ZodObject<{
     role: z.ZodEnum<["client", "therapist", "moderator", "admin"]>;
     password: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    password: string;
+    role: "client" | "therapist" | "admin" | "moderator";
     firstName: string;
     lastName: string;
-    role: "client" | "therapist" | "moderator" | "admin";
+    email: string;
+    password: string;
 }, {
-    email: string;
-    password: string;
+    role: "client" | "therapist" | "admin" | "moderator";
     firstName: string;
     lastName: string;
-    role: "client" | "therapist" | "moderator" | "admin";
+    email: string;
+    password: string;
 }>;
 export declare const AdminUserUpdateRequestSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
@@ -560,26 +507,26 @@ export declare const AdminUserUpdateRequestSchema: z.ZodObject<{
     role: z.ZodOptional<z.ZodEnum<["client", "therapist", "moderator", "admin"]>>;
     isActive: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    email?: string | undefined;
+    role?: "client" | "therapist" | "admin" | "moderator" | undefined;
+    isActive?: boolean | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
-    isActive?: boolean | undefined;
+    email?: string | undefined;
 }, {
-    email?: string | undefined;
+    role?: "client" | "therapist" | "admin" | "moderator" | undefined;
+    isActive?: boolean | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
-    role?: "client" | "therapist" | "moderator" | "admin" | undefined;
-    isActive?: boolean | undefined;
+    email?: string | undefined;
 }>;
 export declare const UserRoleUpdateRequestSchema: z.ZodObject<{
     role: z.ZodEnum<["client", "therapist", "moderator", "admin"]>;
     reason: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    role: "client" | "therapist" | "moderator" | "admin";
+    role: "client" | "therapist" | "admin" | "moderator";
     reason?: string | undefined;
 }, {
-    role: "client" | "therapist" | "moderator" | "admin";
+    role: "client" | "therapist" | "admin" | "moderator";
     reason?: string | undefined;
 }>;
 export declare const UserSuspendRequestSchema: z.ZodObject<{
@@ -595,7 +542,6 @@ export declare const UserSuspendRequestSchema: z.ZodObject<{
     duration?: number | undefined;
     sendNotification?: boolean | undefined;
 }>;
-export type SystemStats = z.infer<typeof SystemStatsSchema>;
 export type UserGrowthData = z.infer<typeof UserGrowthDataSchema>;
 export type EngagementData = z.infer<typeof EngagementDataSchema>;
 export type AdminModerationReport = z.infer<typeof AdminModerationReportSchema>;
@@ -630,12 +576,12 @@ export declare const TherapistApplicationDetailsResponseSchema: z.ZodObject<{
         totalReviews: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
         averageRating: number;
-        totalReviews: number;
         totalClients: number;
+        totalReviews: number;
     }, {
         averageRating: number;
-        totalReviews: number;
         totalClients: number;
+        totalReviews: number;
     }>;
 }, "strip", z.ZodTypeAny, {
     application: {
@@ -646,8 +592,8 @@ export declare const TherapistApplicationDetailsResponseSchema: z.ZodObject<{
     };
     statistics: {
         averageRating: number;
-        totalReviews: number;
         totalClients: number;
+        totalReviews: number;
     };
 }, {
     application: {
@@ -658,8 +604,8 @@ export declare const TherapistApplicationDetailsResponseSchema: z.ZodObject<{
     };
     statistics: {
         averageRating: number;
-        totalReviews: number;
         totalClients: number;
+        totalReviews: number;
     };
 }>;
 export declare const TherapistActionResponseSchema: z.ZodObject<{
@@ -680,20 +626,20 @@ export declare const TherapistActionResponseSchema: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     message: string;
-    success: boolean;
     therapist: {
         status: "PENDING" | "APPROVED" | "REJECTED";
         userId: string;
         processingDate: Date;
     };
+    success: boolean;
 }, {
     message: string;
-    success: boolean;
     therapist: {
         status: "PENDING" | "APPROVED" | "REJECTED";
         userId: string;
         processingDate: Date;
     };
+    success: boolean;
 }>;
 export declare const TherapistApplicationMetricsResponseSchema: z.ZodObject<{
     period: z.ZodObject<{
@@ -713,14 +659,14 @@ export declare const TherapistApplicationMetricsResponseSchema: z.ZodObject<{
         rejectedApplications: z.ZodNumber;
         processedApplications: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        pendingApplications: number;
         totalApplications: number;
+        pendingApplications: number;
         approvedApplications: number;
         rejectedApplications: number;
         processedApplications: number;
     }, {
-        pendingApplications: number;
         totalApplications: number;
+        pendingApplications: number;
         approvedApplications: number;
         rejectedApplications: number;
         processedApplications: number;
@@ -761,18 +707,18 @@ export declare const TherapistApplicationMetricsResponseSchema: z.ZodObject<{
         start: Date;
         end: Date;
     };
+    summary: {
+        totalApplications: number;
+        pendingApplications: number;
+        approvedApplications: number;
+        rejectedApplications: number;
+        processedApplications: number;
+    };
     recentActivity: {
         status: string;
         submissionDate: Date;
         processingDate: Date | null;
     }[];
-    summary: {
-        pendingApplications: number;
-        totalApplications: number;
-        approvedApplications: number;
-        rejectedApplications: number;
-        processedApplications: number;
-    };
 }, {
     metrics: {
         approvalRate: number;
@@ -783,18 +729,18 @@ export declare const TherapistApplicationMetricsResponseSchema: z.ZodObject<{
         start: Date;
         end: Date;
     };
+    summary: {
+        totalApplications: number;
+        pendingApplications: number;
+        approvedApplications: number;
+        rejectedApplications: number;
+        processedApplications: number;
+    };
     recentActivity: {
         status: string;
         submissionDate: Date;
         processingDate: Date | null;
     }[];
-    summary: {
-        pendingApplications: number;
-        totalApplications: number;
-        approvedApplications: number;
-        rejectedApplications: number;
-        processedApplications: number;
-    };
 }>;
 export declare const TherapistListResponseSchema: z.ZodObject<{
     applications: z.ZodArray<z.ZodAny, "many">;

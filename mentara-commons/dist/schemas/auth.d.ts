@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 export declare const LoginDtoSchema: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
@@ -30,17 +30,17 @@ export declare const RegisterUserDtoSchema: z.ZodObject<{
     lastName: z.ZodString;
     role: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    password: string;
+    role: string;
     firstName: string;
     lastName: string;
-    role: string;
+    email: string;
+    password: string;
 }, {
-    email: string;
-    password: string;
+    role: string;
     firstName: string;
     lastName: string;
-    role: string;
+    email: string;
+    password: string;
 }>;
 export declare const ChangePasswordDtoSchema: z.ZodEffects<z.ZodObject<{
     currentPassword: z.ZodString;
@@ -117,8 +117,8 @@ export declare const SendOtpDtoSchema: z.ZodObject<{
     email: z.ZodString;
     type: z.ZodDefault<z.ZodEnum<["registration", "password_reset", "login_verification"]>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
     type: "registration" | "password_reset" | "login_verification";
+    email: string;
 }, {
     email: string;
     type?: "registration" | "password_reset" | "login_verification" | undefined;
@@ -128,8 +128,8 @@ export declare const VerifyOtpDtoSchema: z.ZodObject<{
     otpCode: z.ZodString;
     type: z.ZodDefault<z.ZodEnum<["registration", "password_reset", "login_verification"]>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
     type: "registration" | "password_reset" | "login_verification";
+    email: string;
     otpCode: string;
 }, {
     email: string;
@@ -140,8 +140,8 @@ export declare const ResendOtpDtoSchema: z.ZodObject<{
     email: z.ZodString;
     type: z.ZodDefault<z.ZodEnum<["registration", "password_reset", "login_verification"]>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
     type: "registration" | "password_reset" | "login_verification";
+    email: string;
 }, {
     email: string;
     type?: "registration" | "password_reset" | "login_verification" | undefined;
@@ -169,13 +169,13 @@ export declare const EmailResponseSchema: z.ZodObject<{
     emailId: z.ZodOptional<z.ZodString>;
     otp_code: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    status: "error" | "success";
     message: string;
-    status: "success" | "error";
     emailId?: string | undefined;
     otp_code?: string | undefined;
 }, {
+    status: "error" | "success";
     message: string;
-    status: "success" | "error";
     emailId?: string | undefined;
     otp_code?: string | undefined;
 }>;
@@ -199,7 +199,7 @@ export declare const EmailStatusResponseSchema: z.ZodObject<{
     }>;
     ready: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    status: "success" | "error";
+    status: "error" | "success";
     configuration: {
         isInitialized: boolean;
         hasServiceId: boolean;
@@ -208,7 +208,7 @@ export declare const EmailStatusResponseSchema: z.ZodObject<{
     };
     ready: boolean;
 }, {
-    status: "success" | "error";
+    status: "error" | "success";
     configuration: {
         isInitialized: boolean;
         hasServiceId: boolean;
@@ -260,17 +260,17 @@ export declare const RegisterWithOtpDtoSchema: z.ZodObject<{
     role: z.ZodDefault<z.ZodString>;
     otpCode: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    password: string;
+    role: string;
     firstName: string;
     lastName: string;
-    role: string;
+    email: string;
+    password: string;
     otpCode: string;
 }, {
-    email: string;
-    password: string;
     firstName: string;
     lastName: string;
+    email: string;
+    password: string;
     otpCode: string;
     role?: string | undefined;
 }>;
@@ -311,10 +311,10 @@ export declare const RegisterAdminDtoSchema: z.ZodObject<{
         canAssignWorksheets?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    password: string;
     firstName: string;
     lastName: string;
+    email: string;
+    password: string;
     permissions?: {
         canAccessAdminPanel: boolean;
         canManageUsers: boolean;
@@ -324,10 +324,10 @@ export declare const RegisterAdminDtoSchema: z.ZodObject<{
         canAssignWorksheets: boolean;
     } | undefined;
 }, {
-    email: string;
-    password: string;
     firstName: string;
     lastName: string;
+    email: string;
+    password: string;
     permissions?: {
         canAccessAdminPanel?: boolean | undefined;
         canManageUsers?: boolean | undefined;
@@ -365,10 +365,10 @@ export declare const RegisterModeratorDtoSchema: z.ZodObject<{
         canAssignWorksheets?: boolean | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    password: string;
     firstName: string;
     lastName: string;
+    email: string;
+    password: string;
     permissions?: {
         canAccessAdminPanel: boolean;
         canManageUsers: boolean;
@@ -378,10 +378,10 @@ export declare const RegisterModeratorDtoSchema: z.ZodObject<{
         canAssignWorksheets: boolean;
     } | undefined;
 }, {
-    email: string;
-    password: string;
     firstName: string;
     lastName: string;
+    email: string;
+    password: string;
     permissions?: {
         canAccessAdminPanel?: boolean | undefined;
         canManageUsers?: boolean | undefined;
@@ -407,19 +407,19 @@ export declare const SessionInfoResponseSchema: z.ZodObject<{
     ipAddress: z.ZodString;
     userAgent: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    sessionId: string;
     createdAt: string;
+    location: string;
+    sessionId: string;
     lastActivity: string;
     device: string;
-    location: string;
     ipAddress: string;
     userAgent: string;
 }, {
-    sessionId: string;
     createdAt: string;
+    location: string;
+    sessionId: string;
     lastActivity: string;
     device: string;
-    location: string;
     ipAddress: string;
     userAgent: string;
 }>;
@@ -436,18 +436,18 @@ export declare const ActiveSessionsResponseSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         id: string;
         createdAt: string;
+        location: string;
         lastActivity: string;
         device: string;
-        location: string;
         ipAddress: string;
         userAgent: string;
         isCurrent: boolean;
     }, {
         id: string;
         createdAt: string;
+        location: string;
         lastActivity: string;
         device: string;
-        location: string;
         ipAddress: string;
         userAgent: string;
         isCurrent: boolean;
@@ -456,9 +456,9 @@ export declare const ActiveSessionsResponseSchema: z.ZodObject<{
     sessions: {
         id: string;
         createdAt: string;
+        location: string;
         lastActivity: string;
         device: string;
-        location: string;
         ipAddress: string;
         userAgent: string;
         isCurrent: boolean;
@@ -467,9 +467,9 @@ export declare const ActiveSessionsResponseSchema: z.ZodObject<{
     sessions: {
         id: string;
         createdAt: string;
+        location: string;
         lastActivity: string;
         device: string;
-        location: string;
         ipAddress: string;
         userAgent: string;
         isCurrent: boolean;
@@ -536,20 +536,33 @@ export declare const AuthUserSchema: z.ZodObject<{
     lastName: z.ZodString;
     role: z.ZodString;
     emailVerified: z.ZodBoolean;
+    client: z.ZodOptional<z.ZodObject<{
+        hasSeenTherapistRecommendations: z.ZodBoolean;
+    }, "strip", z.ZodTypeAny, {
+        hasSeenTherapistRecommendations: boolean;
+    }, {
+        hasSeenTherapistRecommendations: boolean;
+    }>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
+    id: string;
+    role: string;
     firstName: string;
     lastName: string;
-    role: string;
-    id: string;
+    email: string;
     emailVerified: boolean;
+    client?: {
+        hasSeenTherapistRecommendations: boolean;
+    } | undefined;
 }, {
-    email: string;
+    id: string;
+    role: string;
     firstName: string;
     lastName: string;
-    role: string;
-    id: string;
+    email: string;
     emailVerified: boolean;
+    client?: {
+        hasSeenTherapistRecommendations: boolean;
+    } | undefined;
 }>;
 export declare const TokensSchema: z.ZodObject<{
     accessToken: z.ZodString;
@@ -572,45 +585,64 @@ export declare const AuthResponseSchema: z.ZodObject<{
         lastName: z.ZodString;
         role: z.ZodString;
         emailVerified: z.ZodBoolean;
+        client: z.ZodOptional<z.ZodObject<{
+            hasSeenTherapistRecommendations: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            hasSeenTherapistRecommendations: boolean;
+        }, {
+            hasSeenTherapistRecommendations: boolean;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }>;
     token: z.ZodString;
     message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }>;
 export declare const ClientAuthResponseSchema: z.ZodObject<{
     user: z.ZodObject<{
@@ -620,45 +652,64 @@ export declare const ClientAuthResponseSchema: z.ZodObject<{
         lastName: z.ZodString;
         role: z.ZodString;
         emailVerified: z.ZodBoolean;
+        client: z.ZodOptional<z.ZodObject<{
+            hasSeenTherapistRecommendations: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            hasSeenTherapistRecommendations: boolean;
+        }, {
+            hasSeenTherapistRecommendations: boolean;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }>;
     token: z.ZodString;
 } & {
     message: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
     message?: string | undefined;
 }, {
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
     message?: string | undefined;
 }>;
 export declare const TherapistAuthResponseSchema: z.ZodObject<{
@@ -669,45 +720,64 @@ export declare const TherapistAuthResponseSchema: z.ZodObject<{
         lastName: z.ZodString;
         role: z.ZodString;
         emailVerified: z.ZodBoolean;
+        client: z.ZodOptional<z.ZodObject<{
+            hasSeenTherapistRecommendations: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            hasSeenTherapistRecommendations: boolean;
+        }, {
+            hasSeenTherapistRecommendations: boolean;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }>;
     token: z.ZodString;
     message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }>;
 export declare const AdminAuthResponseSchema: z.ZodObject<{
     user: z.ZodObject<{
@@ -717,45 +787,64 @@ export declare const AdminAuthResponseSchema: z.ZodObject<{
         lastName: z.ZodString;
         role: z.ZodString;
         emailVerified: z.ZodBoolean;
+        client: z.ZodOptional<z.ZodObject<{
+            hasSeenTherapistRecommendations: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            hasSeenTherapistRecommendations: boolean;
+        }, {
+            hasSeenTherapistRecommendations: boolean;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }>;
     token: z.ZodString;
     message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }>;
 export declare const ModeratorAuthResponseSchema: z.ZodObject<{
     user: z.ZodObject<{
@@ -765,45 +854,64 @@ export declare const ModeratorAuthResponseSchema: z.ZodObject<{
         lastName: z.ZodString;
         role: z.ZodString;
         emailVerified: z.ZodBoolean;
+        client: z.ZodOptional<z.ZodObject<{
+            hasSeenTherapistRecommendations: z.ZodBoolean;
+        }, "strip", z.ZodTypeAny, {
+            hasSeenTherapistRecommendations: boolean;
+        }, {
+            hasSeenTherapistRecommendations: boolean;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }, {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     }>;
     token: z.ZodString;
     message: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }, {
     message: string;
-    token: string;
     user: {
-        email: string;
+        id: string;
+        role: string;
         firstName: string;
         lastName: string;
-        role: string;
-        id: string;
+        email: string;
         emailVerified: boolean;
+        client?: {
+            hasSeenTherapistRecommendations: boolean;
+        } | undefined;
     };
+    token: string;
 }>;
 export declare const ClientProfileResponseSchema: z.ZodObject<{
     id: z.ZodString;
@@ -817,27 +925,27 @@ export declare const ClientProfileResponseSchema: z.ZodObject<{
     therapistId: z.ZodOptional<z.ZodString>;
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: "client";
     id: string;
     createdAt: string;
+    role: "client";
+    firstName: string;
+    lastName: string;
+    email: string;
     profileComplete: boolean;
-    dateOfBirth?: string | undefined;
-    phoneNumber?: string | undefined;
     therapistId?: string | undefined;
+    phoneNumber?: string | undefined;
+    dateOfBirth?: string | undefined;
 }, {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: "client";
     id: string;
     createdAt: string;
+    role: "client";
+    firstName: string;
+    lastName: string;
+    email: string;
     profileComplete: boolean;
-    dateOfBirth?: string | undefined;
-    phoneNumber?: string | undefined;
     therapistId?: string | undefined;
+    phoneNumber?: string | undefined;
+    dateOfBirth?: string | undefined;
 }>;
 export declare const OnboardingStatusResponseSchema: z.ZodObject<{
     isFirstSignIn: z.ZodBoolean;

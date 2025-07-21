@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReportSubmissionSchema = exports.BulkModerationRequestSchema = exports.ContentModerationFiltersSchema = exports.ModerationStatsSchema = exports.ModerationActionSchema = exports.FlaggedContentSchema = exports.ContentModerationActionSchema = exports.ModerationReportSchema = exports.SystemEventSchema = exports.ModerateUserRequestSchema = exports.ModerateContentRequestSchema = exports.SystemEventParamsSchema = exports.AuditLogParamsSchema = exports.UserModerationParamsSchema = exports.ContentModerationParamsSchema = exports.ModeratorDashboardStatsSchema = exports.ModeratorSchema = void 0;
+exports.ReportSubmissionSchema = exports.BulkModerationRequestSchema = exports.ContentModerationFiltersSchema = exports.ModerationStatsSchema = exports.ModerationActionSchema = exports.FlaggedContentSchema = exports.ContentModerationActionSchema = exports.ModerationReportSchema = exports.SystemEventSchema = exports.ModerateUserRequestSchema = exports.ModerateContentRequestSchema = exports.SystemEventParamsSchema = exports.AuditLogParamsSchema = exports.UserModerationParamsSchema = exports.ContentModerationParamsSchema = exports.ModeratorSchema = void 0;
 const zod_1 = require("zod");
 // Moderator Schema
 exports.ModeratorSchema = zod_1.z.object({
@@ -13,14 +13,6 @@ exports.ModeratorSchema = zod_1.z.object({
     createdAt: zod_1.z.string().datetime(),
     updatedAt: zod_1.z.string().datetime(),
     lastActiveAt: zod_1.z.string().datetime().optional()
-});
-// Moderator Dashboard Stats Schema
-exports.ModeratorDashboardStatsSchema = zod_1.z.object({
-    pendingReports: zod_1.z.number().min(0),
-    pendingContent: zod_1.z.number().min(0),
-    resolvedToday: zod_1.z.number().min(0),
-    flaggedUsers: zod_1.z.number().min(0),
-    systemAlerts: zod_1.z.number().min(0)
 });
 // Content Moderation Parameters Schema
 exports.ContentModerationParamsSchema = zod_1.z.object({

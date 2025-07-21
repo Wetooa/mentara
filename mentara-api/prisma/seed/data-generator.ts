@@ -261,29 +261,43 @@ export class SeedDataGenerator {
   }
 
   static generateAnswerMatrix() {
-    const matrix: any[] = [];
-    for (let questionIndex = 0; questionIndex < 201; questionIndex++) {
-      matrix.push({
-        questionId: questionIndex + 1,
-        scale: faker.helpers.arrayElement([
-          'PHQ-9',
-          'GAD-7',
-          'AUDIT',
-          'ASRS',
-          'BES',
-          'DAST-10',
-          'ISI',
-          'MBI',
-          'MDQ',
-          'OCI-R',
-          'PCL-5',
-          'PDSS',
-          'PSS',
-        ]),
-        weight: faker.number.float({ min: 0.1, max: 1.0, fractionDigits: 2 }),
-        reverse_scored: faker.datatype.boolean({ probability: 0.1 }),
-      });
+    // Create a 1D array of exactly 201 elements for AI evaluation
+    // This matches the format expected by the frontend conversion utility
+    const matrix: number[] = new Array(201).fill(0);
+    
+    // Realistic assessment ranges based on frontend startIndices
+    const assessmentRanges = [
+      { start: 0, end: 14, name: 'Phobia' },           // PHQ: 15 questions
+      { start: 15, end: 32, name: 'ADD/ADHD' },        // ASRS: 18 questions  
+      { start: 33, end: 42, name: 'Substance Use' },   // AUDIT: 10 questions
+      { start: 43, end: 58, name: 'Binge Eating' },    // BES: 16 questions
+      { start: 69, end: 75, name: 'Anxiety' },         // GAD7: 7 questions
+      { start: 76, end: 82, name: 'Insomnia' },        // ISI: 7 questions
+      { start: 83, end: 104, name: 'Burnout' },        // MBI: 22 questions
+      { start: 105, end: 117, name: 'Bipolar' },       // MDQ: 13 questions
+      { start: 120, end: 137, name: 'OCD' },           // OCI_R: 18 questions
+      { start: 138, end: 157, name: 'PTSD' },          // PCL5: 20 questions
+      { start: 158, end: 164, name: 'Panic' },         // PDSS: 7 questions
+      { start: 165, end: 173, name: 'Depression' },    // PHQ9: 9 questions
+      { start: 174, end: 183, name: 'Stress' },        // PSS: 10 questions
+      { start: 184, end: 200, name: 'Social Anxiety' } // SPIN: 17 questions
+    ];
+    
+    // Simulate realistic responses for 2-4 assessment categories per person
+    const selectedAssessments = faker.helpers.arrayElements(assessmentRanges, { min: 2, max: 4 });
+    
+    for (const assessment of selectedAssessments) {
+      // Generate realistic responses for this assessment category
+      // Most mental health assessments use 0-4 scale (never, rarely, sometimes, often, always)
+      for (let i = assessment.start; i <= assessment.end; i++) {
+        if (i < 201) { // Safety check
+          // Weighted towards lower scores (most people don't have severe symptoms)
+          const responseOptions = [0, 0, 0, 1, 1, 2, 2, 3, 4]; // 3x more likely to be 0, etc.
+          matrix[i] = faker.helpers.arrayElement(responseOptions);
+        }
+      }
     }
+    
     return matrix;
   }
 

@@ -5,7 +5,23 @@ model PreAssessment {
     clientId  String   @unique
     client    Client   @relation(fields: [clientId], references: [userId], onDelete: Cascade)
 
+    // Original answers in 2D format (for UI)
     answers Json // Array of answer objects
+
+    // Questionnaire metadata
+    questionnaires Json // Array of questionnaire metadata
+
+    // Converted 1D matrix for AI evaluation (201 elements)
+    answerMatrix Json // 1D array of numbers for AI processing
+
+    // Assessment results
+    scores Json // Assessment scale scores (PHQ-9, GAD-7, etc.)
+    severityLevels Json // Severity classifications per condition
+    aiEstimate Json // AI analysis results
+
+    // Processing status
+    isProcessed Boolean @default(false)
+    processedAt DateTime?
 
     @@index([clientId])
 }

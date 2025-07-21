@@ -269,6 +269,9 @@ export const AuthUserSchema = z.object({
   lastName: z.string(),
   role: UserRoleSchema,
   emailVerified: z.boolean(),
+  client: z.object({
+    hasSeenTherapistRecommendations: z.boolean(),
+  }).optional(),
 });
 
 export const TokensSchema = z.object({

@@ -1,16 +1,9 @@
-enum ClientTherapistStatus {
-    ACTIVE
-    INACTIVE
-    PENDING
-}
-
 // Many-to-many relationship between clients and therapists
 model ClientTherapist {
-    id          String                @id @default(uuid())
+    id          String   @id @default(uuid())
     clientId    String
     therapistId String
-    assignedAt  DateTime              @default(now())
-    status      ClientTherapistStatus @default(ACTIVE)
+    assignedAt  DateTime @default(now())
 
     client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
     therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)

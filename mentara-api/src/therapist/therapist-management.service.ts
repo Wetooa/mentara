@@ -181,7 +181,7 @@ export class TherapistManagementService {
 
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapist.userId, status: 'ACTIVE' },
+        where: { therapistId: therapist.userId },
         include: { client: { include: { user: true } } },
       });
 
@@ -205,7 +205,7 @@ export class TherapistManagementService {
     try {
       // Find all clients assigned to this therapist
       const assignedClients = await this.prisma.clientTherapist.findMany({
-        where: { therapistId: therapistId, status: 'ACTIVE' },
+        where: { therapistId: therapistId },
         include: { client: { include: { user: true } } },
       });
 
@@ -292,6 +292,93 @@ export class TherapistManagementService {
       );
       throw new InternalServerErrorException(
         'Failed to update therapist profile',
+      );
+    }
+  }
+
+  async getMatchedClients(therapistId: string): Promise<any> {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      // Get all matched clients (no status needed - all relationships are active)
+      const allMatches = await this.prisma.clientTherapist.findMany({
+        where: { 
+          therapistId: therapistId
+        },
+        include: { 
+          client: { 
+            include: { 
+              user: true,
+              preAssessment: {
+                select: {
+                  id: true,
+                  createdAt: true,
+                  answers: true
+                }
+              }
+            } 
+          } 
+        },
+        orderBy: { assignedAt: 'desc' }
+      });
+
+      // Separate recent matches (last 30 days) from older ones
+      const recentMatches = allMatches.filter(match => 
+        new Date(match.assignedAt) >= thirtyDaysAgo
+      );
+
+      const olderMatches = allMatches.filter(match => 
+        new Date(match.assignedAt) < thirtyDaysAgo
+      );
+
+      // Format the response with additional metadata
+      const formatClientMatch = (relationship: any) => {
+        const latestAssessment = relationship.client.preAssessment;
+        return {
+          relationshipId: relationship.id,
+          client: {
+            id: relationship.client.userId,
+            firstName: relationship.client.user.firstName,
+            lastName: relationship.client.user.lastName,
+            email: relationship.client.user.email,
+            profilePicture: relationship.client.user.profilePicture,
+            joinedAt: relationship.client.user.createdAt,
+          },
+          matchInfo: {
+            assignedAt: relationship.assignedAt,
+            daysSinceMatch: Math.floor((Date.now() - new Date(relationship.assignedAt).getTime()) / (1000 * 60 * 60 * 24)),
+          },
+          assessmentInfo: latestAssessment ? {
+            hasAssessment: true,
+            completedAt: latestAssessment.createdAt,
+            assessmentType: 'Pre-Assessment',
+            daysSinceAssessment: Math.floor((Date.now() - new Date(latestAssessment.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+          } : {
+            hasAssessment: false,
+            completedAt: null,
+            assessmentType: null,
+            daysSinceAssessment: null,
+          }
+        };
+      };
+
+      return {
+        recentMatches: recentMatches.map(formatClientMatch),
+        allMatches: allMatches.map(formatClientMatch),
+        summary: {
+          totalRecentMatches: recentMatches.length,
+          totalAllMatches: allMatches.length,
+          totalMatches: allMatches.length,
+        }
+      };
+    } catch (error) {
+      console.error(
+        'Error retrieving matched clients:',
+        error instanceof Error ? error.message : error,
+      );
+      throw new InternalServerErrorException(
+        'Failed to retrieve matched clients',
       );
     }
   }

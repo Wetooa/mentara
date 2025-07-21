@@ -109,6 +109,7 @@ export class AuthController {
         lastName: result.user.lastName || '',
         role: result.user.role,
         emailVerified: result.user.emailVerified,
+        client: result.user.client,
       },
       token: result.token,
       message: 'Login successful',

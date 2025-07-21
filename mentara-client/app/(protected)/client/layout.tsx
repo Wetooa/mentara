@@ -69,7 +69,7 @@ export default function MainLayout({
       {/* Desktop Sidebar Navigation */}
       <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
         {/* Logo */}
-        <Link href="/dashboard" className="mb-8 px-2">
+        <Link href="/client" className="mb-8 px-2">
           <Image
             src="/icons/mentara/mentara-icon.png"
             alt="Mentara Logo"

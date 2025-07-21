@@ -33,12 +33,19 @@ export function createApiClient(): AxiosInstance {
   client.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-      // Handle 401 errors (unauthorized)
+      // Handle 401 errors (unauthorized) - but only for authenticated requests
       if (error.response?.status === 401) {
-        // Clear token and redirect to login
         if (typeof window !== "undefined") {
-          localStorage.removeItem(TOKEN_STORAGE_KEY);
-          window.location.href = "/auth/sign-in";
+          const currentToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+          const currentPath = window.location.pathname;
+          
+          // Only redirect if user had a token (session expired) and not already on login page
+          if (currentToken && !currentPath.includes("/auth/sign-in")) {
+            localStorage.removeItem(TOKEN_STORAGE_KEY);
+            window.location.href = "/auth/sign-in";
+          }
+          // If no token or already on login page, let the error bubble up normally
+          // This allows login form error handling to work properly
         }
       }
       return Promise.reject(error);

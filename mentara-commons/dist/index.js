@@ -15,8 +15,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.z = exports.validateForEnvironment = exports.validateWithCoercion = exports.createValidationMiddleware = exports.getFirstValidationError = exports.hasValidationErrors = exports.formatValidationErrors = exports.validateAndTransform = exports.validateArray = exports.validatePartial = exports.validateSchemaAsync = exports.validateWithCustomErrors = exports.validateSchema = exports.QUESTIONNAIRE_SCORING = exports.QUESTIONNAIRE_MAPPING = exports.QUESTIONNAIRE_MAP = exports.LIST_OF_QUESTIONNAIRES = exports.COMMUNITY_RECOMMENDATION_THRESHOLDS = exports.QUESTIONNAIRE_TO_COMMUNITY_MAP = exports.SOCIAL_PHOBIA_SPIN = exports.PTSD_PCL5 = exports.DEPRESSION_PHQ9 = exports.PHOBIA_SPECIFIC = exports.STRESS_PSS = exports.PANIC_DISORDER_PDSS = exports.OCD_OCI_R = exports.MOOD_DISORDER_MDQ = exports.INSOMNIA_ISI = exports.ANXIETY_GAD7 = exports.DRUG_ABUSE_DAST = exports.BURNOUT_MBI = exports.BINGE_EATING_BES = exports.ALCOHOL_AUDIT = exports.ADHD_ASRS = void 0;
-// Export all schemas and types from schemas module
+// Export all schemas and types
 __exportStar(require("./schemas"), exports);
+__exportStar(require("./types"), exports);
 // Export all constants
 var constants_1 = require("./constants");
 // Questionnaire constants

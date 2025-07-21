@@ -298,7 +298,6 @@ describe('Complex Workflow Integration', () => {
         data: {
           clientId: client.userId,
           therapistId: selectedTherapist.therapist.userId,
-          status: 'active',
           notes: 'Matched based on CBT expertise and anxiety/depression specialization',
         },
       });
@@ -969,7 +968,6 @@ describe('Complex Workflow Integration', () => {
         data: {
           clientId: traumaClient.userId,
           therapistId: approvedTherapist.userId,
-          status: 'active',
           notes: 'Specialized trauma therapy assignment. Client has PTSD from MVA, excellent match for EMDR treatment.',
         },
       });

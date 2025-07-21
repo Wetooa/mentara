@@ -10,19 +10,19 @@ export declare const CommunitySchema: z.ZodObject<{
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    name: string;
     createdAt: string;
     updatedAt: string;
     description: string;
-    name: string;
     memberCount: number;
     createdBy: string;
     isPrivate: boolean;
 }, {
     id: string;
+    name: string;
     createdAt: string;
     updatedAt: string;
     description: string;
-    name: string;
     memberCount: number;
     createdBy: string;
     isPrivate: boolean;
@@ -33,13 +33,13 @@ export declare const CreateCommunityDtoSchema: z.ZodObject<{
     isPrivate: z.ZodDefault<z.ZodBoolean>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    description: string;
     name: string;
+    description: string;
     isPrivate: boolean;
     tags?: string[] | undefined;
 }, {
-    description: string;
     name: string;
+    description: string;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
 }>;
@@ -49,13 +49,13 @@ export declare const UpdateCommunityDtoSchema: z.ZodObject<{
     isPrivate: z.ZodOptional<z.ZodBoolean>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
-    description?: string | undefined;
     name?: string | undefined;
+    description?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
 }, {
-    description?: string | undefined;
     name?: string | undefined;
+    description?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
 }>;
@@ -65,14 +65,14 @@ export declare const CommunityMemberSchema: z.ZodObject<{
     role: z.ZodEnum<["member", "moderator", "admin"]>;
     joinedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    role: "moderator" | "admin" | "member";
     userId: string;
     joinedAt: string;
+    role: "admin" | "moderator" | "member";
     communityId: string;
 }, {
-    role: "moderator" | "admin" | "member";
     userId: string;
     joinedAt: string;
+    role: "admin" | "moderator" | "member";
     communityId: string;
 }>;
 export declare const JoinCommunityDtoSchema: z.ZodObject<{
@@ -85,9 +85,9 @@ export declare const JoinCommunityDtoSchema: z.ZodObject<{
 export declare const UpdateMemberRoleDtoSchema: z.ZodObject<{
     role: z.ZodEnum<["member", "moderator", "admin"]>;
 }, "strip", z.ZodTypeAny, {
-    role: "moderator" | "admin" | "member";
+    role: "admin" | "moderator" | "member";
 }, {
-    role: "moderator" | "admin" | "member";
+    role: "admin" | "moderator" | "member";
 }>;
 export declare const CommunityQuerySchema: z.ZodObject<{
     page: z.ZodOptional<z.ZodNumber>;
@@ -100,7 +100,7 @@ export declare const CommunityQuerySchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "createdAt" | "name" | "memberCount" | undefined;
+    sortBy?: "name" | "createdAt" | "memberCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
@@ -108,7 +108,7 @@ export declare const CommunityQuerySchema: z.ZodObject<{
 }, {
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "createdAt" | "name" | "memberCount" | undefined;
+    sortBy?: "name" | "createdAt" | "memberCount" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
@@ -120,15 +120,15 @@ export declare const MemberQuerySchema: z.ZodObject<{
     role: z.ZodOptional<z.ZodEnum<["member", "moderator", "admin"]>>;
     sortBy: z.ZodOptional<z.ZodEnum<["joinedAt", "role"]>>;
 }, "strip", z.ZodTypeAny, {
-    role?: "moderator" | "admin" | "member" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "role" | "joinedAt" | undefined;
+    role?: "admin" | "moderator" | "member" | undefined;
+    sortBy?: "joinedAt" | "role" | undefined;
 }, {
-    role?: "moderator" | "admin" | "member" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "role" | "joinedAt" | undefined;
+    role?: "admin" | "moderator" | "member" | undefined;
+    sortBy?: "joinedAt" | "role" | undefined;
 }>;
 export declare const CommunityIdParamSchema: z.ZodObject<{
     id: z.ZodString;
@@ -179,17 +179,17 @@ export declare const GetCommunityMembersQueryDtoSchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["joinedAt", "role", "name"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    role?: "moderator" | "admin" | "member" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "role" | "name" | "joinedAt" | undefined;
+    role?: "admin" | "moderator" | "member" | undefined;
+    sortBy?: "name" | "joinedAt" | "role" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     search?: string | undefined;
 }, {
-    role?: "moderator" | "admin" | "member" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
-    sortBy?: "role" | "name" | "joinedAt" | undefined;
+    role?: "admin" | "moderator" | "member" | undefined;
+    sortBy?: "name" | "joinedAt" | "role" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
     search?: string | undefined;
 }>;
@@ -204,22 +204,22 @@ export declare const CommunityCreateInputDtoSchema: z.ZodObject<{
     maxMembers: z.ZodOptional<z.ZodNumber>;
     requireApproval: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    description: string;
     name: string;
+    description: string;
     isPrivate: boolean;
     slug: string;
     requireApproval: boolean;
-    category?: string | undefined;
     tags?: string[] | undefined;
+    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
 }, {
-    description: string;
     name: string;
+    description: string;
     slug: string;
-    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
+    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
@@ -235,22 +235,22 @@ export declare const CommunityUpdateInputDtoSchema: z.ZodObject<{
     requireApproval: z.ZodOptional<z.ZodBoolean>;
     isActive: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
+    name?: string | undefined;
     isActive?: boolean | undefined;
     description?: string | undefined;
-    name?: string | undefined;
-    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
+    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
 }, {
+    name?: string | undefined;
     isActive?: boolean | undefined;
     description?: string | undefined;
-    name?: string | undefined;
-    category?: string | undefined;
     isPrivate?: boolean | undefined;
     tags?: string[] | undefined;
+    category?: string | undefined;
     rules?: string[] | undefined;
     maxMembers?: number | undefined;
     requireApproval?: boolean | undefined;
@@ -291,14 +291,14 @@ export declare const CreateRoomDtoSchema: z.ZodObject<{
     isPrivate: boolean;
     description?: string | undefined;
     order?: number | undefined;
-    allowedRoles?: ("moderator" | "admin" | "member")[] | undefined;
+    allowedRoles?: ("admin" | "moderator" | "member")[] | undefined;
 }, {
     name: string;
     type?: "video" | "text" | "voice" | undefined;
     description?: string | undefined;
     isPrivate?: boolean | undefined;
     order?: number | undefined;
-    allowedRoles?: ("moderator" | "admin" | "member")[] | undefined;
+    allowedRoles?: ("admin" | "moderator" | "member")[] | undefined;
 }>;
 export declare const UserParamsDtoSchema: z.ZodObject<{
     userId: z.ZodString;
@@ -313,14 +313,14 @@ export declare const BulkAssignCommunitiesDtoSchema: z.ZodObject<{
     role: z.ZodDefault<z.ZodEnum<["member", "moderator", "admin"]>>;
     notifyUsers: z.ZodDefault<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    role: "moderator" | "admin" | "member";
+    role: "admin" | "moderator" | "member";
     userIds: string[];
     communityIds: string[];
     notifyUsers: boolean;
 }, {
     userIds: string[];
     communityIds: string[];
-    role?: "moderator" | "admin" | "member" | undefined;
+    role?: "admin" | "moderator" | "member" | undefined;
     notifyUsers?: boolean | undefined;
 }>;
 export declare const RoomParamsDtoSchema: z.ZodObject<{
@@ -430,20 +430,20 @@ export declare const GenerateRecommendationsDtoSchema: z.ZodObject<{
 export declare const RecommendationInteractionDtoSchema: z.ZodObject<{
     action: z.ZodEnum<["accept", "reject"]>;
 }, "strip", z.ZodTypeAny, {
-    action: "accept" | "reject";
+    action: "reject" | "accept";
 }, {
-    action: "accept" | "reject";
+    action: "reject" | "accept";
 }>;
 export declare const RecommendationQueryDtoSchema: z.ZodObject<{
     status: z.ZodOptional<z.ZodEnum<["pending", "accepted", "rejected"]>>;
     sortBy: z.ZodOptional<z.ZodEnum<["compatibility", "created", "updated"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    status?: "rejected" | "pending" | "accepted" | undefined;
+    status?: "pending" | "accepted" | "rejected" | undefined;
     sortBy?: "compatibility" | "created" | "updated" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }, {
-    status?: "rejected" | "pending" | "accepted" | undefined;
+    status?: "pending" | "accepted" | "rejected" | undefined;
     sortBy?: "compatibility" | "created" | "updated" | undefined;
     sortOrder?: "asc" | "desc" | undefined;
 }>;

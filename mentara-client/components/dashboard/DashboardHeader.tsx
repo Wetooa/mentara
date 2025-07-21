@@ -10,7 +10,10 @@ interface DashboardHeaderProps {
   onBookSession?: () => void;
 }
 
-export default function DashboardHeader({ user, onBookSession }: DashboardHeaderProps) {
+export default function DashboardHeader({
+  user,
+  onBookSession,
+}: DashboardHeaderProps) {
   const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
 
   // Get current time to display appropriate greeting
@@ -48,13 +51,13 @@ export default function DashboardHeader({ user, onBookSession }: DashboardHeader
         </div>
       </div>
       <div className="flex gap-3">
-        <button 
+        <button
           onClick={handleBookSession}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
         >
           Book Session
         </button>
-        <button 
+        <button
           onClick={handleViewProfile}
           className="px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary/10 transition-colors"
         >

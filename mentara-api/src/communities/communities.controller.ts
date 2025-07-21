@@ -380,4 +380,131 @@ export class CommunitiesController {
       );
     }
   }
+
+  // New endpoints for community posts and content management
+
+  @Get('memberships/me')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getMyMemberships(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getMyMemberships(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get memberships',
+      );
+    }
+  }
+
+  @Get('rooms/:roomId/posts')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getPostsByRoom(
+    @Param('roomId') roomId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    try {
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 20;
+      return await this.communitiesService.getPostsByRoom(
+        roomId,
+        Math.max(1, pageNum),
+        Math.max(1, Math.min(50, limitNum)),
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get posts',
+      );
+    }
+  }
+
+  @Post('posts')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @HttpCode(HttpStatus.CREATED)
+  async createPost(
+    @Body() postData: { title: string; content: string; roomId: string },
+    @CurrentUserId() userId: string,
+  ) {
+    try {
+      return await this.communitiesService.createPost(
+        postData.title,
+        postData.content,
+        postData.roomId,
+        userId,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to create post',
+      );
+    }
+  }
+
+  @Post('posts/:postId/heart')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @HttpCode(HttpStatus.OK)
+  async heartPost(
+    @Param('postId') postId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    try {
+      await this.communitiesService.heartPost(postId, userId);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to heart post',
+      );
+    }
+  }
+
+  @Delete('posts/:postId/heart')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @HttpCode(HttpStatus.OK)
+  async unheartPost(
+    @Param('postId') postId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    try {
+      await this.communitiesService.unheartPost(postId, userId);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to unheart post',
+      );
+    }
+  }
+
+  @Get('me/joined')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getJoinedCommunities(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getJoinedCommunities(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get joined communities',
+      );
+    }
+  }
+
+  @Get('me/recommended')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getRecommendedCommunities(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getRecommendedCommunities(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get recommended communities',
+      );
+    }
+  }
+
+  @Get('activity/recent')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getRecentActivity(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getRecentActivity(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get recent activity',
+      );
+    }
+  }
 }

@@ -61,10 +61,7 @@ export async function seedReviews(
           title,
           content,
           isAnonymous,
-          status: 'APPROVED', // Most reviews are approved
           isVerified: true, // Mark as verified since from real client-therapist relationship
-          moderatedBy: faker.helpers.arrayElement(allUsers.filter(u => u.role === 'admin')).id,
-          moderatedAt: faker.date.recent({ days: 7 }),
           createdAt: faker.date.between({
             from: relationship.assignedAt,
             to: new Date(),
@@ -102,13 +99,7 @@ export async function seedReviews(
           title: generateModerationReviewTitle(status),
           content: generateModerationReviewContent(status),
           isAnonymous: true,
-          status,
           isVerified: false,
-          moderatedBy: status !== 'PENDING' 
-            ? faker.helpers.arrayElement(allUsers.filter(u => u.role === 'admin')).id 
-            : null,
-          moderatedAt: status !== 'PENDING' ? faker.date.recent({ days: 3 }) : null,
-          moderationNote: status !== 'PENDING' ? generateModerationNote(status) : null,
         },
       });
     } catch (error) {
@@ -116,32 +107,8 @@ export async function seedReviews(
     }
   }
 
-  // Add helpful votes to reviews
-  for (const review of reviews.slice(0, Math.min(reviews.length, 50))) {
-    try {
-      const voteCount = faker.number.int({ min: 0, max: 8 });
-      const voters = faker.helpers.arrayElements(
-        allUsers.filter(u => u.id !== review.clientId), // Exclude the review author
-        Math.min(voteCount, 8)
-      );
-
-      for (const voter of voters) {
-        try {
-          const helpfulVote = await prisma.reviewHelpful.create({
-            data: {
-              reviewId: review.id,
-              userId: voter.id,
-            },
-          });
-          helpfulVotes.push(helpfulVote);
-        } catch (error) {
-          // Skip if vote already exists
-        }
-      }
-    } catch (error) {
-      // Continue with next review if this one fails
-    }
-  }
+  // Note: ReviewHelpful model not available in current schema
+  // Skipping helpful votes for now
 
   // Calculate and log review statistics
   const reviewStats = calculateReviewStats(reviews);

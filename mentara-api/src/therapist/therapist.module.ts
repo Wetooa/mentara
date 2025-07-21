@@ -12,6 +12,7 @@ import { AdvancedMatchingService } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
 import { EmailModule } from '../email/email.module';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MessagingService } from '../messaging/messaging.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
 import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
@@ -20,7 +21,6 @@ import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
   imports: [PreAssessmentModule, EmailModule],
   controllers: [
     TherapistRecommendationController,
-
     TherapistProfileController,
     TherapistClientController,
     TherapistWorksheetController,
@@ -28,11 +28,11 @@ import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
   providers: [
     TherapistRecommendationService,
     TherapistManagementService,
-
     WorksheetsService,
     AdvancedMatchingService,
     CompatibilityAnalysisService,
     NotificationsService,
+    MessagingService,
     PrismaService,
     RoleUtils,
   ],

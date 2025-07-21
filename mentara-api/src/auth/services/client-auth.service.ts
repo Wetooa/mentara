@@ -7,8 +7,8 @@ import { RegisterClientDto, type EmailResponse } from 'mentara-commons';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from './token.service';
 import { EmailService } from '../../email/email.service';
+import { EmailVerificationService } from './email-verification.service';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class ClientAuthService {
@@ -16,6 +16,7 @@ export class ClientAuthService {
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
+    private readonly emailVerificationService: EmailVerificationService,
   ) {}
 
   async registerClient(registerDto: RegisterClientDto) {
@@ -82,33 +83,8 @@ export class ClientAuthService {
       result.user.role,
     );
 
-    // Generate and send OTP email for registration
-    const otpCode = this.emailService.generateOtp(6);
-    const hashedOtp = crypto.createHash('sha256').update(otpCode).digest('hex');
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    const expiryTimeFormatted = this.emailService.formatExpiryTime(10);
-
-    // Store OTP in database
-    await this.prisma.user.update({
-      where: { id: result.user.id },
-      data: {
-        emailVerifyToken: hashedOtp,
-        emailVerifyTokenExp: otpExpiresAt,
-      },
-    });
-
-    // Send OTP email
-    const emailResult = await this.emailService.sendOTP(
-      result.user.email,
-      result.user.firstName || 'User',
-      'Verify Your Mentara Account',
-      otpCode,
-      expiryTimeFormatted
-    );
-
-    if (emailResult.status === 'error') {
-      throw new BadRequestException(emailResult.message);
-    }
+    // Send verification email using EmailVerificationService
+    await this.emailVerificationService.sendVerificationEmail(result.user.id);
 
     return {
       user: result.user,
@@ -292,62 +268,34 @@ export class ClientAuthService {
       throw new BadRequestException('Email and OTP code are required');
     }
 
-    // Hash the provided OTP to compare with stored hash
-    const hashedOtp = crypto.createHash('sha256').update(otpCode).digest('hex');
-
-    // Find user by email and OTP token
+    // First verify the user exists and has client role
     const user = await this.prisma.user.findFirst({
       where: {
         email,
-        emailVerifyToken: hashedOtp,
         role: 'client',
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        emailVerified: true,
-        emailVerifyTokenExp: true,
       },
     });
 
     if (!user) {
-      throw new BadRequestException('Invalid OTP code or email');
+      throw new BadRequestException('Invalid email');
     }
 
-    if (user.emailVerified) {
-      return {
-        status: 'success',
-        message: 'Email already verified',
-      };
-    }
-
-    if (!user.emailVerifyTokenExp || user.emailVerifyTokenExp < new Date()) {
-      // Clean up expired token
+    // Use EmailVerificationService to verify the OTP
+    const result = await this.emailVerificationService.verifyEmail(otpCode);
+    
+    if (result.success) {
+      // Update isVerified flag for client
       await this.prisma.user.update({
         where: { id: user.id },
         data: {
-          emailVerifyToken: null,
-          emailVerifyTokenExp: null,
+          isVerified: true,
         },
       });
-      throw new BadRequestException('OTP code has expired');
     }
 
-    // Verify the email and clean up OTP token
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: true,
-        emailVerifyToken: null,
-        emailVerifyTokenExp: null,
-        isVerified: true,
-      },
-    });
-
     return {
-      status: 'success',
-      message: 'Email verified successfully',
+      status: result.success ? 'success' : 'error',
+      message: result.message,
     };
   }
 
@@ -383,33 +331,8 @@ export class ClientAuthService {
       throw new BadRequestException('Email already verified');
     }
 
-    // Generate new OTP
-    const otpCode = this.emailService.generateOtp(6);
-    const hashedOtp = crypto.createHash('sha256').update(otpCode).digest('hex');
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    const expiryTimeFormatted = this.emailService.formatExpiryTime(10);
-
-    // Update database with new OTP
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerifyToken: hashedOtp,
-        emailVerifyTokenExp: otpExpiresAt,
-      },
-    });
-
-    // Send new OTP email
-    const emailResult = await this.emailService.sendOTP(
-      user.email,
-      user.firstName || 'User',
-      'New Verification Code for Your Mentara Account',
-      otpCode,
-      expiryTimeFormatted
-    );
-
-    if (emailResult.status === 'error') {
-      throw new BadRequestException(emailResult.message);
-    }
+    // Use EmailVerificationService to resend verification email
+    await this.emailVerificationService.resendVerificationEmail(email);
 
     return {
       status: 'success',

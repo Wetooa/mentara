@@ -26,6 +26,20 @@ export const TEST_ACCOUNTS = {
       role: 'client' as const,
       isActive: false,
     },
+    {
+      id: 'fake_client_test_4',
+      email: 'test.client.premium@mentaratest.dev',
+      firstName: 'David',
+      lastName: 'Kim',
+      role: 'client' as const,
+    },
+    {
+      id: 'fake_client_test_5',
+      email: 'test.client.longterm@mentaratest.dev',
+      firstName: 'Maria',
+      lastName: 'Gonzalez',
+      role: 'client' as const,
+    },
   ],
   THERAPISTS: [
     {
@@ -49,6 +63,20 @@ export const TEST_ACCOUNTS = {
       lastName: 'Williams',
       role: 'therapist' as const,
     },
+    {
+      id: 'fake_therapist_test_4',
+      email: 'test.therapist.trauma@mentaratest.dev',
+      firstName: 'Dr. James',
+      lastName: 'O\'Connor',
+      role: 'therapist' as const,
+    },
+    {
+      id: 'fake_therapist_test_5',
+      email: 'test.therapist.anxiety@mentaratest.dev',
+      firstName: 'Dr. Emily',
+      lastName: 'Zhang',
+      role: 'therapist' as const,
+    },
   ],
   ADMINS: [
     {
@@ -63,6 +91,27 @@ export const TEST_ACCOUNTS = {
       email: 'test.admin.user.manager@mentaratest.dev',
       firstName: 'Linda',
       lastName: 'Martinez',
+      role: 'admin' as const,
+    },
+    {
+      id: 'fake_admin_test_3',
+      email: 'test.admin.content.manager@mentaratest.dev',
+      firstName: 'William',
+      lastName: 'Johnson',
+      role: 'admin' as const,
+    },
+    {
+      id: 'fake_admin_test_4',
+      email: 'test.admin.billing@mentaratest.dev',
+      firstName: 'Nancy',
+      lastName: 'Wilson',
+      role: 'admin' as const,
+    },
+    {
+      id: 'fake_admin_test_5',
+      email: 'test.admin.technical@mentaratest.dev',
+      firstName: 'Kevin',
+      lastName: 'Lee',
       role: 'admin' as const,
     },
   ],
@@ -81,16 +130,37 @@ export const TEST_ACCOUNTS = {
       lastName: 'Davis',
       role: 'moderator' as const,
     },
+    {
+      id: 'fake_moderator_test_3',
+      email: 'test.moderator.content@mentaratest.dev',
+      firstName: 'Jordan',
+      lastName: 'Smith',
+      role: 'moderator' as const,
+    },
+    {
+      id: 'fake_moderator_test_4',
+      email: 'test.moderator.support@mentaratest.dev',
+      firstName: 'Casey',
+      lastName: 'Brown',
+      role: 'moderator' as const,
+    },
+    {
+      id: 'fake_moderator_test_5',
+      email: 'test.moderator.night@mentaratest.dev',
+      firstName: 'Avery',
+      lastName: 'White',
+      role: 'moderator' as const,
+    },
   ],
 };
 
-// Configuration constants - ULTRA-FAST DEV SEEDING
+// Configuration constants - COMPREHENSIVE DEV SEEDING
 export const SEED_CONFIG = {
   USERS: {
-    CLIENTS: 3, // 3 clients for testing
-    THERAPISTS: 3, // 3 therapists for testing
-    ADMINS: 3, // 3 admins for testing
-    MODERATORS: 3, // 3 moderators for testing
+    CLIENTS: 5, // 5 clients for comprehensive testing
+    THERAPISTS: 5, // 5 therapists for comprehensive testing
+    ADMINS: 5, // 5 admins for comprehensive testing
+    MODERATORS: 5, // 5 moderators for comprehensive testing
   },
   COMMUNITIES: {
     ADDITIONAL: 3, // 3 communities total
@@ -161,8 +231,24 @@ export const ILLNESS_COMMUNITIES = [
   },
 ];
 
-// No additional communities needed for ultra-fast seeding
-export const ADDITIONAL_COMMUNITIES = [];
+// Additional communities for comprehensive seeding
+export const ADDITIONAL_COMMUNITIES = [
+  {
+    name: 'General Support',
+    slug: 'general-support',
+    description: 'A welcoming space for anyone seeking general mental health support.',
+  },
+  {
+    name: 'Mindfulness & Meditation',
+    slug: 'mindfulness-meditation',
+    description: 'Share mindfulness practices and meditation techniques.',
+  },
+  {
+    name: 'Family & Relationships',
+    slug: 'family-relationships',
+    description: 'Support for navigating family dynamics and relationship challenges.',
+  },
+];
 
 // Worksheet templates for therapy assignments
 export const WORKSHEET_TEMPLATES = [
