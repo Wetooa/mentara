@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUserSearch } from './hooks/useUserSearch';
 import { useRecentSearches } from './hooks/useRecentSearches';
 import { RecentSearches } from './RecentSearches';
+import { ConnectionStatus, useGlobalConnectionStatus } from '@/components/realtime/ConnectionStatus';
 
 export interface User {
   id: string;
@@ -25,6 +26,7 @@ interface UserSearchBarProps {
   onUserSelect: (user: User) => void;
   roleFilter?: 'all' | 'client' | 'therapist' | 'moderator';
   showRoleFilter?: boolean;
+  showConnectionStatus?: boolean;
   className?: string;
 }
 
@@ -57,6 +59,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   onUserSelect,
   roleFilter = 'all',
   showRoleFilter = false,
+  showConnectionStatus = true,
   className = ''
 }) => {
   const [query, setQuery] = useState('');
@@ -68,6 +71,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const { searchUsers } = useUserSearch();
   const { addRecentSearch } = useRecentSearches();
+  const connectionStatus = useGlobalConnectionStatus();
 
   // Update role filter when prop changes
   React.useEffect(() => {
@@ -262,8 +266,9 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
         Search for users by name or email. Use arrow keys to navigate suggestions, Enter to select, Escape to clear.
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         
         <Autosuggest
           suggestions={suggestions}
@@ -277,15 +282,29 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
           focusInputOnSuggestionClick={false}
         />
         
-        {query && (
-          <button
-            onClick={clearSearch}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Clear search"
-            title="Clear search"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {query && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+              title="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        
+        {/* WebSocket Connection Status Indicator */}
+        {showConnectionStatus && (
+          <div className="flex-shrink-0">
+            <ConnectionStatus
+              {...connectionStatus}
+              onReconnect={connectionStatus.reconnect}
+              compact={true}
+              showDetails={false}
+              className="flex items-center"
+            />
+          </div>
         )}
       </div>
 

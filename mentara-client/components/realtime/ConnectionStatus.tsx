@@ -48,6 +48,18 @@ export function ConnectionStatus({
   compact = false,
   position = "relative",
 }: ConnectionStatusProps) {
+  const getSignalStrength = () => {
+    if (!isConnected || !lastHeartbeat) return 0;
+    
+    const timeSinceHeartbeat = Date.now() - lastHeartbeat;
+    
+    // Signal strength based on heartbeat freshness
+    if (timeSinceHeartbeat < 30000) return 3; // Excellent (< 30s)
+    if (timeSinceHeartbeat < 60000) return 2; // Good (30s-60s)
+    if (timeSinceHeartbeat < 120000) return 1; // Poor (60s-120s)
+    return 0; // Very poor (> 120s)
+  };
+
   const getStatusIcon = () => {
     if (isConnecting) {
       return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
@@ -55,7 +67,16 @@ export function ConnectionStatus({
     
     switch (connectionState) {
       case "connected":
-        return <Wifi className="h-4 w-4 text-green-500" />;
+        const signalStrength = getSignalStrength();
+        if (signalStrength >= 3) {
+          return <Wifi className="h-4 w-4 text-green-500" />; // Excellent signal
+        } else if (signalStrength === 2) {
+          return <Wifi className="h-4 w-4 text-yellow-500" />; // Good signal  
+        } else if (signalStrength === 1) {
+          return <Wifi className="h-4 w-4 text-orange-500" />; // Poor signal
+        } else {
+          return <Wifi className="h-4 w-4 text-red-400" />; // Very poor signal
+        }
       case "error":
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       case "disconnected":
@@ -74,7 +95,9 @@ export function ConnectionStatus({
     
     switch (connectionState) {
       case "connected":
-        return "Connected";
+        const signalStrength = getSignalStrength();
+        const signalLabels = ["Very Poor", "Poor", "Good", "Excellent"];
+        return `Connected (${signalLabels[signalStrength]} Signal)`;
       case "error":
         return lastError || "Connection error";
       case "disconnected":
@@ -272,16 +295,112 @@ export function ConnectionStatus({
 
 // Global connection status hook for easy usage
 export function useGlobalConnectionStatus() {
-  // This would typically connect to a global WebSocket context
-  // For now, return mock data
+  const [connectionState, setConnectionState] = React.useState<"connecting" | "connected" | "disconnected" | "error">("disconnected");
+  const [isConnecting, setIsConnecting] = React.useState(false);
+  const [lastError, setLastError] = React.useState<string | null>(null);
+  const [reconnectAttempts, setReconnectAttempts] = React.useState(0);
+  const [lastHeartbeat, setLastHeartbeat] = React.useState<number | null>(null);
+  const socketRef = React.useRef<any>(null);
+  const heartbeatIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Import socket functions dynamically to avoid SSR issues
+  const initializeSocket = React.useCallback(async () => {
+    try {
+      const { getSocket, connectSocket, isSocketConnected } = await import('@/lib/socket');
+      
+      if (isSocketConnected()) {
+        setConnectionState("connected");
+        setLastHeartbeat(Date.now());
+        return;
+      }
+
+      setIsConnecting(true);
+      setConnectionState("connecting");
+      
+      const socket = getSocket();
+      socketRef.current = socket;
+
+      // Set up connection event listeners
+      socket.on('connect', () => {
+        setConnectionState("connected");
+        setIsConnecting(false);
+        setLastError(null);
+        setReconnectAttempts(0);
+        setLastHeartbeat(Date.now());
+      });
+
+      socket.on('disconnect', (reason) => {
+        setConnectionState("disconnected");
+        setIsConnecting(false);
+        if (reason === 'io server disconnect') {
+          setLastError('Server disconnected');
+        }
+      });
+
+      socket.on('connect_error', (error) => {
+        setConnectionState("error");
+        setIsConnecting(false);
+        setLastError(error.message || 'Connection failed');
+        setReconnectAttempts(prev => prev + 1);
+      });
+
+      // Set up heartbeat monitoring
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+      }
+      
+      heartbeatIntervalRef.current = setInterval(() => {
+        if (socket.connected) {
+          setLastHeartbeat(Date.now());
+        }
+      }, 30000); // Update heartbeat every 30 seconds
+
+      // Connect the socket
+      await connectSocket();
+      
+    } catch (error) {
+      setConnectionState("error");
+      setIsConnecting(false);
+      setLastError('Failed to initialize socket connection');
+    }
+  }, []);
+
+  const reconnect = React.useCallback(async () => {
+    if (isConnecting) return;
+    
+    setIsConnecting(true);
+    setLastError(null);
+    
+    try {
+      const { connectSocket } = await import('@/lib/socket');
+      await connectSocket();
+    } catch (error) {
+      setConnectionState("error");
+      setIsConnecting(false);
+      setLastError('Reconnection failed');
+      setReconnectAttempts(prev => prev + 1);
+    }
+  }, [isConnecting]);
+
+  // Initialize socket connection on mount
+  React.useEffect(() => {
+    initializeSocket();
+    
+    return () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+      }
+    };
+  }, [initializeSocket]);
+
   return {
-    isConnected: true,
-    isConnecting: false,
-    connectionState: "connected" as const,
-    lastError: null,
-    reconnectAttempts: 0,
+    isConnected: connectionState === "connected",
+    isConnecting,
+    connectionState,
+    lastError,
+    reconnectAttempts,
     maxReconnectAttempts: 5,
-    lastHeartbeat: Date.now(),
-    reconnect: () => console.log("Reconnecting..."),
+    lastHeartbeat,
+    reconnect,
   };
 }
