@@ -10,11 +10,11 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
-import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   ApproveTherapistDtoSchema,
@@ -33,8 +33,7 @@ import {
 import { AdminTherapistService } from '../services/admin-therapist.service';
 
 @Controller('admin/therapists')
-@UseGuards(JwtAuthGuard, AdminAuthGuard)
-@AdminOnly()
+@UseGuards(JwtAuthGuard)
 export class AdminTherapistController {
   private readonly logger = new Logger(AdminTherapistController.name);
 
@@ -46,7 +45,11 @@ export class AdminTherapistController {
     @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
     filters: PendingTherapistFiltersDto,
     @CurrentUserId() adminId: string,
+    @CurrentUserRole() role: string,
   ): Promise<TherapistListResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(`Admin ${adminId} fetching pending therapist applications`);
     return this.adminTherapistService.getPendingApplications(filters);
   }
@@ -57,7 +60,11 @@ export class AdminTherapistController {
     @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
     filters: PendingTherapistFiltersDto,
     @CurrentUserId() adminId: string,
+    @CurrentUserRole() role: string,
   ): Promise<TherapistListResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(`Admin ${adminId} fetching all therapist applications`);
     return this.adminTherapistService.getPendingApplications(filters);
   }
@@ -67,7 +74,11 @@ export class AdminTherapistController {
   async getApplicationDetails(
     @Param('id') therapistId: string,
     @CurrentUserId() adminId: string,
+    @CurrentUserRole() role: string,
   ): Promise<TherapistApplicationDetailsResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(
       `Admin ${adminId} viewing therapist application ${therapistId}`,
     );
@@ -81,7 +92,11 @@ export class AdminTherapistController {
     @Body(new ZodValidationPipe(ApproveTherapistDtoSchema))
     approvalDto: ApproveTherapistDto,
     @CurrentUserId() adminId: string,
+    @CurrentUserRole() role: string,
   ): Promise<TherapistActionResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(`Admin ${adminId} approving therapist ${therapistId}`);
     return this.adminTherapistService.approveTherapist(
       therapistId,
@@ -97,7 +112,11 @@ export class AdminTherapistController {
     @Body(new ZodValidationPipe(RejectTherapistDtoSchema))
     rejectionDto: RejectTherapistDto,
     @CurrentUserId() adminId: string,
+    @CurrentUserRole() role: string,
   ): Promise<TherapistActionResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(`Admin ${adminId} rejecting therapist ${therapistId}`);
     return this.adminTherapistService.rejectTherapist(
       therapistId,
@@ -113,7 +132,11 @@ export class AdminTherapistController {
     @Body(new ZodValidationPipe(UpdateTherapistStatusDtoSchema))
     statusDto: UpdateTherapistStatusDto,
     @CurrentUserId() adminId: string,
+    @CurrentUserRole() role: string,
   ): Promise<TherapistActionResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(
       `Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`,
     );
@@ -130,7 +153,11 @@ export class AdminTherapistController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @CurrentUserId() adminId?: string,
+    @CurrentUserRole() role?: string,
   ): Promise<TherapistApplicationMetricsResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     this.logger.log(`Admin ${adminId} fetching therapist application metrics`);
     return this.adminTherapistService.getTherapistApplicationMetrics(
       startDate,

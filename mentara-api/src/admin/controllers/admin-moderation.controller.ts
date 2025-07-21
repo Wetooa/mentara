@@ -9,15 +9,15 @@ import {
   HttpStatus,
   Logger,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
-import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../auth/decorators/current-user-role.decorator';
 
 @Controller('admin/moderation')
-@UseGuards(JwtAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AdminModerationController {
   private readonly logger = new Logger(AdminModerationController.name);
 
@@ -26,13 +26,16 @@ export class AdminModerationController {
   ) {}
 
   @Get('flagged')
-  @AdminOnly()
   async getFlaggedContent(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
     @Query('type') type?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving flagged content`);
       const pageNum = page ? parseInt(page) : 1;
@@ -53,14 +56,17 @@ export class AdminModerationController {
   }
 
   @Put(':contentType/:contentId/moderate')
-  @AdminOnly()
   async moderateContent(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
     @Param('contentType') contentType: string,
     @Param('contentId') contentId: string,
     @Body()
     moderationData: { action: 'approve' | 'remove' | 'flag'; reason?: string },
   ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(
         `Admin ${currentUserId} moderating ${contentType} ${contentId}`,

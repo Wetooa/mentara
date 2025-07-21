@@ -8,12 +8,12 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
-import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../auth/decorators/current-user-role.decorator';
 import { ValidatedBody } from '../../common/decorators/validate-body.decorator';
 import {
   UpdateAdminDtoSchema,
@@ -22,17 +22,20 @@ import {
 } from 'mentara-commons';
 
 @Controller('admin/accounts')
-@UseGuards(JwtAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AdminAccountController {
   private readonly logger = new Logger(AdminAccountController.name);
 
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
-  @AdminOnly()
   async findAll(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<AdminResponseDto[]> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all admins`);
       return await this.adminService.findAll();
@@ -46,11 +49,14 @@ export class AdminAccountController {
   }
 
   @Get(':id')
-  @AdminOnly()
   async findOne(
     @Param('id') id: string,
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<AdminResponseDto | null> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving admin ${id}`);
       const admin = await this.adminService.findOne(id);
@@ -73,12 +79,15 @@ export class AdminAccountController {
   }
 
   @Patch(':id')
-  @AdminOnly()
   async update(
     @Param('id') id: string,
     @ValidatedBody(UpdateAdminDtoSchema) updateAdminDto: UpdateAdminDto,
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<AdminResponseDto> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} updating admin ${id}`);
       return await this.adminService.update(id, updateAdminDto);
@@ -92,11 +101,14 @@ export class AdminAccountController {
   }
 
   @Delete(':id')
-  @AdminOnly()
   async remove(
     @Param('id') id: string,
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<{ message: string }> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} deleting admin ${id}`);
 
