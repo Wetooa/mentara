@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { 
   Heart, 
   MessageCircle, 
-  Plus, 
   Hash, 
   Users, 
   Calendar,
@@ -342,7 +341,7 @@ export default function UserCommunity() {
                             Connection Interrupted
                           </CardTitle>
                           <p className="text-community-soothing-foreground mb-6 max-w-md">
-                            We're having trouble loading posts right now. Your mental health journey is important to us - let's try again.
+                            We&apos;re having trouble loading posts right now. Your mental health journey is important to us - let&apos;s try again.
                           </p>
                         </div>
                         

@@ -145,7 +145,7 @@ export default function CommunitySidebar({
             <div>
               <h3 className="text-sm font-medium text-community-heart-foreground">Connection Issue</h3>
               <p className="text-xs text-community-calm-foreground mt-1">
-                We're having trouble loading your communities
+                We&apos;re having trouble loading your communities
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function CommunitySidebar({
                 Welcome to Your Community Space
               </h3>
               <p className="text-xs text-community-soothing-foreground">
-                You're not in any communities yet
+                You&apos;re not in any communities yet
               </p>
             </div>
           </div>

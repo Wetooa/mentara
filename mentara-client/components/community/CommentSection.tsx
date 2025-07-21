@@ -416,7 +416,7 @@ export default function CommentSection({ postId, className }: CommentSectionProp
                   <div>
                     <p className="text-community-heart-foreground font-medium mb-1">Comments Unavailable</p>
                     <p className="text-community-soothing-foreground text-sm">
-                      We're having trouble loading comments right now
+                      We&apos;re having trouble loading comments right now
                     </p>
                   </div>
                   <Button 
