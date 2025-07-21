@@ -17,7 +17,6 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
-import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
@@ -29,11 +28,6 @@ import {
 import { TherapistAuthService } from '../services/therapist-auth.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { Request } from 'express';
-
-import {
-  TherapistApplicationResponse,
-  ApplicationStatusUpdateDto,
-} from '../../therapist/interfaces/therapist-application.interfaces';
 
 @Controller('auth/therapist')
 export class TherapistAuthController {

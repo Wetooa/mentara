@@ -21,9 +21,7 @@ import { CurrentUserRole } from '../../auth/decorators/current-user-role.decorat
 export class AdminModerationController {
   private readonly logger = new Logger(AdminModerationController.name);
 
-  constructor(
-    private readonly adminService: AdminService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('flagged')
   async getFlaggedContent(
