@@ -3,6 +3,65 @@
  * These types represent the core business entities and their relationships
  */
 
+// Dashboard response types
+export interface ModeratorDashboardResponseDto {
+  pendingReports: number;
+  resolvedReports: number;
+  totalCommunities: number;
+  activeModerators: number;
+  recentActivity: any[];
+  communityStats: any[];
+  performanceMetrics: {
+    averageResponseTime: number;
+    userSatisfactionScore: number;
+    contentFlagged: number;
+    actionsToday: number;
+  };
+}
+
+export interface AdminDashboardResponseDto {
+  totalUsers: number;
+  totalTherapists: number;
+  totalClients: number;
+  pendingApplications: number;
+  systemHealth: 'healthy' | 'warning' | 'critical';
+  revenueMetrics: {
+    monthlyRevenue: number;
+    yearlyRevenue: number;
+    averageSessionCost: number;
+    paymentFailures: number;
+  };
+  userActivity: {
+    activeUsers: number;
+    newRegistrations: number;
+    sessionCount: number;
+    retentionRate: number;
+  };
+}
+
+export interface TherapistDashboardResponseDto {
+  totalClients: number;
+  upcomingAppointments: number;
+  completedSessions: number;
+  monthlyEarnings: number;
+  clientProgress: any[];
+  recentMessages: any[];
+  scheduleOverview: any[];
+}
+
+// Billing types
+export interface CreatePaymentMethodDto {
+  type: 'card' | 'bank_account';
+  cardNumber?: string;
+  expiryDate?: string;
+  cvv?: string;
+  cardholderName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  accountName?: string;
+  isDefault?: boolean;
+}
+
 // User roles enum
 export enum UserRole {
   CLIENT = 'client',

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import type { ModeratorDashboardResponseDto } from 'mentara-commons';
+import type { ModeratorDashboardResponseDto } from '../../types/domain';
 
 /**
  * Hook for fetching moderator-specific dashboard data

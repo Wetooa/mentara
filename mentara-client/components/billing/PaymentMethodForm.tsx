@@ -8,7 +8,7 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
-import type { CreatePaymentMethodDto } from 'mentara-commons';
+import type { CreatePaymentMethodDto } from '../../types/domain';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';

@@ -3,7 +3,7 @@ import { useApi } from '@/lib/api';
 
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
-import type { PatientData, TherapistWorksheetAssignment } from 'mentara-commons';
+import type { PatientData, TherapistWorksheetAssignment } from '../../types/domain';
 import type { Session } from '@/types/api/sessions';
 
 /**

@@ -1,6 +1,6 @@
 /**
- * API Types - Re-exported from mentara-commons for consistency
- * All API-related types should come from the shared commons library
+ * API Types - Re-exported from local types for consistency
+ * All API-related types should come from our local type system
  */
 
 // Authentication Types
@@ -21,17 +21,17 @@ export type {
   EmailResponse,
   SuccessMessageResponse,
   
-  // User Types (if these exist in mentara-commons)
-  // ClientUser,
-  // AdminUser,
-  // TherapistUser,
-  // ModeratorUser,
+  // User Types
+  ClientUser,
+  AdminUser,
+  TherapistUser,
+  ModeratorUser,
   
   // OTP Types
   OtpType,
   OtpEmailData,
   
-} from 'mentara-commons';
+} from '../../types/auth';
 
 // API Response wrapper for consistency
 export interface ApiResponse<T = any> {

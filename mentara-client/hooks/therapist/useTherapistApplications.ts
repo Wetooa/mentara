@@ -8,7 +8,7 @@ import type {
   ApplicationListParams,
   UpdateApplicationRequest,
   CreateApplicationRequest
-} from 'mentara-commons';
+} from '../../types/domain';
 
 /**
  * Shared retry logic for authentication and error handling

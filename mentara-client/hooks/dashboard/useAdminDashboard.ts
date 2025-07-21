@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import type { AdminDashboardResponseDto } from 'mentara-commons';
+import type { AdminDashboardResponseDto } from '../../types/domain';
 
 /**
  * Hook for fetching admin-specific dashboard data

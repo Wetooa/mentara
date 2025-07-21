@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import type { TherapistDashboardResponseDto } from 'mentara-commons';
+import type { TherapistDashboardResponseDto } from '../../types/domain';
 
 /**
  * Hook for fetching therapist-specific dashboard data
