@@ -3,7 +3,7 @@ import { useApi } from '@/lib/api';
 
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
-import type { PatientData, WorksheetAssignment } from '@/types/api/therapists';
+import type { PatientData, TherapistWorksheetAssignment } from 'mentara-commons';
 import type { Session } from '@/types/api/sessions';
 
 /**
@@ -143,7 +143,7 @@ export function useAssignWorksheet() {
       worksheetData 
     }: { 
       patientId: string; 
-      worksheetData: WorksheetAssignment; 
+      worksheetData: TherapistWorksheetAssignment; 
     }) => api.therapists.patients.assignWorksheet(patientId, worksheetData),
     onSuccess: (data, { patientId }) => {
       toast.success('Worksheet assigned successfully!');

@@ -12,10 +12,9 @@ import {
   LogOut,
   ChevronDown,
   Menu,
-  Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
 
@@ -62,7 +60,7 @@ export default function AdminLayout({
     },
     {
       title: "Therapist Applications",
-      href: "/admin/therapist-applications",
+      href: "/admin/therapists",
       icon: <UserCheck className="h-5 w-5" />,
     },
     {

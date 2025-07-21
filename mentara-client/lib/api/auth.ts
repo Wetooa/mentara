@@ -31,7 +31,7 @@ export function createAuthService(client: AxiosInstance) {
      */
     async login(data: LoginDto): Promise<AuthResponse> {
       const response = await client.post("/auth/login", data);
-      return response.data.data;
+      return response.data;
     },
 
     /**
@@ -40,7 +40,7 @@ export function createAuthService(client: AxiosInstance) {
      */
     async getUserRole(): Promise<{ role: string; userId: string }> {
       const response = await client.get("/auth/user-role");
-      return response.data.data;
+      return response.data;
     },
 
     // ================================
@@ -53,7 +53,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async register(data: RegisterClientDto): Promise<ClientAuthResponse> {
         const response = await client.post("/auth/client/register", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -62,7 +62,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async login(data: LoginDto): Promise<ClientAuthResponse> {
         const response = await client.post("/auth/client/login", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -71,7 +71,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getProfile(): Promise<any> {
         const response = await client.get("/auth/client/profile");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -80,7 +80,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getFirstSignInStatus(): Promise<any> {
         const response = await client.get("/auth/client/first-sign-in-status");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -91,7 +91,7 @@ export function createAuthService(client: AxiosInstance) {
         const response = await client.post(
           "/auth/client/mark-recommendations-seen"
         );
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -100,7 +100,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async verifyOtp(data: VerifyOtpDto): Promise<EmailResponse> {
         const response = await client.post("/auth/client/verify-otp", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -109,7 +109,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async resendOtp(data: ResendOtpDto): Promise<EmailResponse> {
         const response = await client.post("/auth/client/resend-otp", data);
-        return response.data.data;
+        return response.data;
       },
     },
 
@@ -123,7 +123,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async createAccount(data: RegisterAdminDto): Promise<any> {
         const response = await client.post("/auth/admin/create-account", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -132,7 +132,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async login(data: LoginDto): Promise<AdminAuthResponse> {
         const response = await client.post("/auth/admin/login", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -141,7 +141,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getProfile(): Promise<any> {
         const response = await client.get("/auth/admin/profile");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -150,7 +150,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getPermissions(): Promise<any> {
         const response = await client.get("/auth/admin/permissions");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -159,7 +159,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getDashboardStats(): Promise<any> {
         const response = await client.get("/auth/admin/dashboard-stats");
-        return response.data.data;
+        return response.data;
       },
     },
 
@@ -176,7 +176,7 @@ export function createAuthService(client: AxiosInstance) {
           "/auth/moderator/create-account",
           data
         );
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -185,7 +185,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async login(data: LoginDto): Promise<AuthResponse> {
         const response = await client.post("/auth/moderator/login", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -194,7 +194,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getProfile(): Promise<any> {
         const response = await client.get("/auth/moderator/profile");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -203,7 +203,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getPermissions(): Promise<any> {
         const response = await client.get("/auth/moderator/permissions");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -214,7 +214,7 @@ export function createAuthService(client: AxiosInstance) {
         const response = await client.get(
           "/auth/moderator/assigned-communities"
         );
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -223,7 +223,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getDashboardStats(): Promise<any> {
         const response = await client.get("/auth/moderator/dashboard-stats");
-        return response.data.data;
+        return response.data;
       },
     },
 
@@ -242,7 +242,7 @@ export function createAuthService(client: AxiosInstance) {
             "Content-Type": "multipart/form-data",
           },
         });
-        return response.data;
+        return response;
       },
 
       /**
@@ -251,7 +251,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async login(data: LoginDto): Promise<TherapistAuthResponse> {
         const response = await client.post("/auth/therapist/login", data);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -260,7 +260,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getProfile(): Promise<any> {
         const response = await client.get("/auth/therapist/profile");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -269,7 +269,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getApplications(): Promise<any> {
         const response = await client.get("/auth/therapist/applications");
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -278,7 +278,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getApplication(id: string): Promise<any> {
         const response = await client.get(`/auth/therapist/applications/${id}`);
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -290,7 +290,7 @@ export function createAuthService(client: AxiosInstance) {
           `/auth/therapist/applications/${id}/status`,
           data
         );
-        return response.data.data;
+        return response.data;
       },
 
       /**
@@ -301,7 +301,7 @@ export function createAuthService(client: AxiosInstance) {
         const response = await client.get(
           `/auth/therapist/applications/${id}/files`
         );
-        return response.data.data;
+        return response.data;
       },
     },
   };

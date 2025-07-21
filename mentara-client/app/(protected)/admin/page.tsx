@@ -209,7 +209,7 @@ export default function AdminDashboardPage() {
             Manage Users
           </Link>
           <Link 
-            href="/admin/therapist-applications"
+            href="/admin/therapists"
             className={buttonVariants({ variant: "outline", className: "justify-start" })}
           >
             <Shield className="mr-2 h-4 w-4 text-purple-600" />

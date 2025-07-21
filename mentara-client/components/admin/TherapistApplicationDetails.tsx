@@ -12,7 +12,45 @@ import { toast } from "sonner";
 import {
   useUpdateTherapistApplicationStatus,
 } from "@/hooks/useTherapistApplications";
-import type { TherapistApplication } from "@/lib/api/services/therapists";
+// Backend-specific type that matches actual API response
+interface BackendTherapistApplication {
+  id: string;
+  userId: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  submissionDate: string;
+  processingDate?: string;
+  mobile: string;
+  province: string;
+  providerType: string;
+  professionalLicenseType?: string;
+  isPRCLicensed?: string;
+  prcLicenseNumber?: string;
+  expirationDateOfLicense?: string;
+  isLicenseActive?: string;
+  yearsOfExperience?: number;
+  areasOfExpertise: string[];
+  languagesOffered: string[];
+  assessmentTools?: string[];
+  therapeuticApproachesUsedList?: string[];
+  providedOnlineTherapyBefore?: string;
+  comfortableUsingVideoConferencing?: string;
+  weeklyAvailability?: string;
+  preferredSessionLength?: string;
+  accepts?: string[];
+  privateConfidentialSpace?: string;
+  compliesWithDataPrivacyAct?: string;
+  professionalLiabilityInsurance?: string;
+  complaintsOrDisciplinaryActions?: string;
+  willingToAbideByPlatformGuidelines?: string;
+  createdAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    createdAt: string;
+  };
+}
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +82,7 @@ interface ApplicationFile {
 }
 
 interface TherapistApplicationDetailsProps {
-  application: TherapistApplication & {
+  application: BackendTherapistApplication & {
     files?: ApplicationFile[];
     uploadedDocuments?: Array<{
       fileName: string;
@@ -368,27 +406,27 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     First Name
                   </h3>
-                  <p className="mt-1">{application.personalInfo.firstName}</p>
+                  <p className="mt-1">{application.user.firstName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Last Name
                   </h3>
-                  <p className="mt-1">{application.personalInfo.lastName}</p>
+                  <p className="mt-1">{application.user.lastName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="mt-1">{application.personalInfo.email}</p>
+                  <p className="mt-1">{application.user.email}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Mobile</h3>
-                  <p className="mt-1">{application.personalInfo.phone}</p>
+                  <p className="mt-1">{application.mobile}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Province
                   </h3>
-                  <p className="mt-1">{application.personalInfo.state}</p>
+                  <p className="mt-1">{application.province}</p>
                 </div>
               </div>
             </TabsContent>
@@ -399,34 +437,34 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     Provider Type
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).providerType as string || 'Not specified'}</p>
+                  <p className="mt-1">{application.providerType || 'Not specified'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Professional License Type
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).professionalLicenseType as string || 'Not specified'}</p>
+                  <p className="mt-1">{application.professionalLicenseType || 'Not specified'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC Licensed
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).isPRCLicensed as string)}
+                    {renderYesNo(application.isPRCLicensed)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC License Number
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).prcLicenseNumber as string || 'Not provided'}</p>
+                  <p className="mt-1">{application.prcLicenseNumber || 'Not provided'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     License Expiration Date
                   </h3>
                   <p className="mt-1">
-                    {formatDate((application as Record<string, unknown>).expirationDateOfLicense as string)}
+                    {formatDate(application.expirationDateOfLicense)}
                   </p>
                 </div>
                 <div>
@@ -434,14 +472,14 @@ export function TherapistApplicationDetails({
                     License Active
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).isLicenseActive as string)}
+                    {renderYesNo(application.isLicenseActive)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Years of Experience
                   </h3>
-                  <p className="mt-1">{application.professionalInfo.yearsOfExperience}</p>
+                  <p className="mt-1">{application.yearsOfExperience}</p>
                 </div>
               </div>
 
@@ -451,28 +489,28 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Areas of Expertise
                 </h3>
-                {renderObjectItems(application.professionalInfo.specialties)}
+                {renderObjectItems(application.areasOfExpertise)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Assessment Tools
                 </h3>
-                {renderObjectItems((application as Record<string, unknown>).assessmentTools as string[])}
+                {renderObjectItems(application.assessmentTools)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Therapeutic Approaches
                 </h3>
-                {renderObjectItems((application as Record<string, unknown>).therapeuticApproachesUsedList as string[])}
+                {renderObjectItems(application.therapeuticApproachesUsedList)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Languages Offered
                 </h3>
-                {renderObjectItems(application.professionalInfo.languages)}
+                {renderObjectItems(application.languagesOffered)}
               </div>
             </TabsContent>
 
@@ -483,7 +521,7 @@ export function TherapistApplicationDetails({
                     Provided Online Therapy Before
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).providedOnlineTherapyBefore as string)}
+                    {renderYesNo(application.providedOnlineTherapyBefore)}
                   </p>
                 </div>
                 <div>
@@ -491,20 +529,20 @@ export function TherapistApplicationDetails({
                     Comfortable Using Video Conferencing
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).comfortableUsingVideoConferencing as string)}
+                    {renderYesNo(application.comfortableUsingVideoConferencing)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Weekly Availability (hours)
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).weeklyAvailability as string}</p>
+                  <p className="mt-1">{application.weeklyAvailability}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Preferred Session Length (minutes)
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).preferredSessionLength as string}</p>
+                  <p className="mt-1">{application.preferredSessionLength}</p>
                 </div>
               </div>
 
@@ -514,7 +552,7 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Accepts
                 </h3>
-                {renderObjectItems((application as Record<string, unknown>).accepts as string[])}
+                {renderObjectItems(application.accepts)}
               </div>
             </TabsContent>
 
@@ -525,7 +563,7 @@ export function TherapistApplicationDetails({
                     Has Private Confidential Space
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).privateConfidentialSpace as string)}
+                    {renderYesNo(application.privateConfidentialSpace)}
                   </p>
                 </div>
                 <div>
@@ -533,7 +571,7 @@ export function TherapistApplicationDetails({
                     Complies With Data Privacy Act
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).compliesWithDataPrivacyAct as string)}
+                    {renderYesNo(application.compliesWithDataPrivacyAct)}
                   </p>
                 </div>
                 <div>
@@ -541,7 +579,7 @@ export function TherapistApplicationDetails({
                     Professional Liability Insurance
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).professionalLiabilityInsurance as string)}
+                    {renderYesNo(application.professionalLiabilityInsurance)}
                   </p>
                 </div>
                 <div>
@@ -549,7 +587,7 @@ export function TherapistApplicationDetails({
                     Complaints Or Disciplinary Actions
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).complaintsOrDisciplinaryActions as string)}
+                    {renderYesNo(application.complaintsOrDisciplinaryActions)}
                   </p>
                 </div>
                 <div>
@@ -558,7 +596,7 @@ export function TherapistApplicationDetails({
                   </h3>
                   <p className="mt-1">
                     {renderYesNo(
-                      (application as Record<string, unknown>).willingToAbideByPlatformGuidelines as string
+                      application.willingToAbideByPlatformGuidelines
                     )}
                   </p>
                 </div>
@@ -616,8 +654,8 @@ export function TherapistApplicationDetails({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "approve"
-                ? `Are you sure you want to approve ${application.personalInfo.firstName} ${application.personalInfo.lastName}'s application? This will allow them to start using the platform as a therapist.`
-                : `Are you sure you want to reject ${application.personalInfo.firstName} ${application.personalInfo.lastName}'s application? They will be notified via email.`}
+                ? `Are you sure you want to approve ${application.user.firstName} ${application.user.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.user.firstName} ${application.user.lastName}'s application? They will be notified via email.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

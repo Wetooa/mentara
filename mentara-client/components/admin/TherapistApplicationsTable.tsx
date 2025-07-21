@@ -64,7 +64,7 @@ export function TherapistApplicationsTable({
   };
 
   const handleViewApplication = (id: string) => {
-    router.push(`/admin/therapist-applications/${id}`);
+    router.push(`/admin/therapists/${id}`);
   };
 
   const confirmStatusChange = () => {
