@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { z } from 'zod';
-import { validateSchema, formatValidationErrors } from 'mentara-commons';
+import { validateSchema, formatValidationErrors } from '../../auth/validation';
 
 // Body validation decorator that validates request body using Zod schemas
 export const ValidatedBody = createParamDecorator(

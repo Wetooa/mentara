@@ -12,19 +12,24 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  RegisterClientDto,
+  VerifyRegistrationOtpDto,
+  ResendRegistrationOtpDto,
+  ClientAuthResponse,
+  ClientProfileResponse,
+  OnboardingStatusResponse,
+  SuccessResponse,
+  EmailResponse,
+} from '../types';
+
+// Import validation schemas from local validation
 import {
   RegisterClientDtoSchema,
   VerifyRegistrationOtpDtoSchema,
   ResendRegistrationOtpDtoSchema,
-  type RegisterClientDto,
-  type VerifyRegistrationOtpDto,
-  type ResendRegistrationOtpDto,
-  type ClientAuthResponse,
-  type ClientProfileResponse,
-  type OnboardingStatusResponse,
-  type SuccessResponse,
-  type EmailResponse,
-} from 'mentara-commons';
+} from '../validation';
 import { ClientAuthService } from '../services/client-auth.service';
 import { Request } from 'express';
 

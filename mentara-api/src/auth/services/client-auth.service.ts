@@ -3,7 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { RegisterClientDto, type EmailResponse } from 'mentara-commons';
+import type { RegisterClientDto, EmailResponse } from '../types';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import { TokenService } from './token.service';
 import { EmailService } from '../../email/email.service';

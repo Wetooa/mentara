@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import emailjs from '@emailjs/nodejs';
-import { type EmailResponse } from 'mentara-commons';
+import type { EmailResponse } from '../auth/types';
 
 @Injectable()
 export class EmailService {

@@ -19,12 +19,21 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  RegisterTherapistDto,
+  LoginDto,
+} from '../types';
+
+// Import validation schemas from local validation
 import {
   LoginDtoSchema,
+} from '../validation';
+
+// Import constants from local auth constants
+import {
   ALLOWED_DOCUMENT_MIME_TYPES,
-  type RegisterTherapistDto,
-  type LoginDto,
-} from 'mentara-commons';
+} from '../types';
 import { TherapistAuthService } from '../services/therapist-auth.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { Request } from 'express';

@@ -15,13 +15,18 @@ import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  RegisterAdminDto,
+  LoginDto,
+  AdminAuthResponse,
+} from '../types';
+
+// Import validation schemas from local validation
 import {
   RegisterAdminDtoSchema,
   LoginDtoSchema,
-  type RegisterAdminDto,
-  type LoginDto,
-  type AdminAuthResponse,
-} from 'mentara-commons';
+} from '../validation';
 import { AdminAuthService } from '../services/admin-auth.service';
 import { Request } from 'express';
 

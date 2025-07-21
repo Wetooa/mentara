@@ -15,12 +15,17 @@ import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  RegisterModeratorDto,
+  LoginDto,
+} from '../types';
+
+// Import validation schemas from local validation
 import {
   RegisterModeratorDtoSchema,
   LoginDtoSchema,
-  type RegisterModeratorDto,
-  type LoginDto,
-} from 'mentara-commons';
+} from '../validation';
 import { ModeratorAuthService } from '../services/moderator-auth.service';
 import { Request } from 'express';
 

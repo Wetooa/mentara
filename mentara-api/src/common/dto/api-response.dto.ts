@@ -1,4 +1,4 @@
-import { ApiResponse, PaginatedResponse, PaginationMeta } from 'mentara-commons';
+import type { ApiResponse, PaginatedResponse, PaginationMeta } from '../../types';
 
 /**
  * Standard API Response wrapper for all endpoints

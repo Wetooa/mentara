@@ -17,6 +17,20 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUserId } from './decorators/current-user-id.decorator';
 import { Public } from './decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  LoginDto,
+  RegisterUserDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+  ResendVerificationEmailDto,
+  AuthResponse,
+  UserResponse,
+  SuccessResponse,
+} from './types';
+
+// Import validation schemas from local validation
 import {
   LoginDtoSchema,
   RegisterUserDtoSchema,
@@ -24,16 +38,7 @@ import {
   ResetPasswordDtoSchema,
   VerifyEmailDtoSchema,
   ResendVerificationEmailDtoSchema,
-  type LoginDto,
-  type RegisterUserDto,
-  type RequestPasswordResetDto,
-  type ResetPasswordDto,
-  type VerifyEmailDto,
-  type ResendVerificationEmailDto,
-  type AuthResponse,
-  type UserResponse,
-  type SuccessMessageResponse,
-} from 'mentara-commons';
+} from './validation';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './services/email-verification.service';
 import { PasswordResetService } from './services/password-reset.service';
@@ -78,7 +83,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async forceLogout(
     @CurrentUserId() id: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     await this.authService.forceLogout(id);
     return new SuccessMessageDto('Successfully logged out from all devices');
   }
@@ -122,7 +127,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(
     @CurrentUserId() userId: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     await this.authService.logout(userId);
     return new SuccessMessageDto('Logged out successfully');
   }
@@ -170,7 +175,7 @@ export class AuthController {
   async requestPasswordReset(
     @Body(new ZodValidationPipe(RequestPasswordResetDtoSchema))
     requestResetDto: RequestPasswordResetDto,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     await this.passwordResetService.requestPasswordReset(requestResetDto.email);
     return new SuccessMessageDto(
       'If an account with that email exists, we will send a password reset link.',

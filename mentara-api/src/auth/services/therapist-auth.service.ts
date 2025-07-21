@@ -10,7 +10,7 @@ import { EmailVerificationService } from './email-verification.service';
 import { EmailService } from '../../email/email.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 
-import { type RegisterTherapistDto } from 'mentara-commons';
+import type { RegisterTherapistDto } from '../types';
 import {
   TherapistApplicationResponse,
   ApplicationStatusUpdateDto,

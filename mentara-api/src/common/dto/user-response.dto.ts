@@ -1,4 +1,9 @@
-import { UserResponse, UserProfileResponse, AuthResponse } from 'mentara-commons';
+import type { UserResponse, AuthResponse } from '../../auth/types';
+
+// Define UserProfileResponse locally since it's only used here
+interface UserProfileResponse extends UserResponse {
+  fullName?: string;
+}
 
 /**
  * User response DTO for public API endpoints
