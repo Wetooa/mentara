@@ -4,15 +4,12 @@
   "private": true,
   "workspaces": [
     "mentara-client",
-    "mentara-api", 
-    "mentara-commons"
+    "mentara-api"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "build:commons": "npm run build --workspace=mentara-commons",
     "build:client": "npm run build --workspace=mentara-client",
     "build:api": "npm run build --workspace=mentara-api",
-    "dev:commons": "npm run dev --workspace=mentara-commons",
     "dev:client": "npm run dev --workspace=mentara-client",
     "dev:api": "npm run start:dev --workspace=mentara-api",
     "lint": "npm run lint --workspaces",
