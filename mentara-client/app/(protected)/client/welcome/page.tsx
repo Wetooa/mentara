@@ -160,18 +160,81 @@ export default function ClientWelcomePage() {
 
   if (recommendationsLoading || currentStep === 'loading' || (currentStep === 'communities' && communityLoading)) {
     return (
-      <div className="container mx-auto py-8 space-y-6">
-        <div className="text-center space-y-4">
-          <Skeleton className="h-8 w-64 mx-auto" />
-          <Skeleton className="h-4 w-96 mx-auto" />
-          {currentStep === 'communities' && (
-            <p className="text-muted-foreground">Finding personalized community recommendations...</p>
-          )}
-        </div>
-        <div className="grid gap-6">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full" />
-          ))}
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20">
+        <div className="container mx-auto py-12 space-y-12">
+          {/* Enhanced Loading Header */}
+          <div className="text-center space-y-8">
+            <div className="flex justify-center">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-20 blur-xl animate-pulse"></div>
+                <div className="relative bg-gradient-to-br from-blue-500/10 to-purple-500/10 p-6 rounded-full border border-blue-200/50 backdrop-blur-sm shadow-lg">
+                  <Sparkles className="h-10 w-10 text-blue-600 animate-spin" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-80 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+              <Skeleton className="h-6 w-96 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+              {currentStep === 'communities' ? (
+                <p className="text-emerald-600 font-medium animate-pulse">Finding personalized community recommendations...</p>
+              ) : (
+                <p className="text-blue-600 font-medium animate-pulse">Discovering your perfect therapist matches...</p>
+              )}
+            </div>
+
+            {/* Enhanced Loading Progress */}
+            <div className="max-w-lg mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-100/50 shadow-lg">
+                <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-blue-600 animate-spin" />
+                    Processing your preferences
+                  </span>
+                  <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
+                    Please wait...
+                  </span>
+                </div>
+                <div className="relative">
+                  <div className="h-3 bg-gray-100/80 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                  </div>
+                </div>
+                <p className="text-xs text-center mt-2 text-gray-500">
+                  Analyzing your perfect matches...
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Loading Cards */}
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100/50 shadow-lg p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <Skeleton className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                    <Skeleton className="w-5 h-5 rounded bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-48 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                        <Skeleton className="h-4 w-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                        <Skeleton className="h-4 w-64 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                      </div>
+                      <Skeleton className="h-8 w-24 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {Array.from({ length: 4 }).map((_, j) => (
+                        <Skeleton key={j} className="h-10 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
