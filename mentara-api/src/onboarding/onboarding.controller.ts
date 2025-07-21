@@ -103,9 +103,13 @@ export class OnboardingController {
   }
 
   @Get('insights')
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
-  async getOnboardingInsights() {
+  async getOnboardingInsights(
+    @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
+  ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       return await this.onboardingService.getOnboardingInsights();
     } catch (error) {

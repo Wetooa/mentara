@@ -7,7 +7,6 @@ import type {
   TherapistListResponse,
   TherapistApplicationDetailsResponse,
   TherapistActionResponse,
-  TherapistApplicationMetricsResponse,
 } from "mentara-commons";
 
 /**
