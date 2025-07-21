@@ -21,7 +21,7 @@ export function createAdminService(axios: AxiosInstance) {
     async getTherapistApplications(
       params?: PendingTherapistFiltersDto
     ): Promise<TherapistListResponse> {
-      const { data } = await axios.get("/auth/therapist/applications", {
+      const { data } = await axios.get("/admin/therapists/applications", {
         params,
       });
       return data;
@@ -58,12 +58,9 @@ export function createAdminService(axios: AxiosInstance) {
       therapistId: string,
       approvalData: ApproveTherapistDto
     ): Promise<TherapistActionResponse> {
-      const { data } = await axios.put(
-        `/auth/therapist/applications/${therapistId}/status`,
-        {
-          status: "APPROVED",
-          ...approvalData,
-        }
+      const { data } = await axios.post(
+        `/admin/therapists/${therapistId}/approve`,
+        approvalData
       );
       return data;
     },
@@ -75,12 +72,9 @@ export function createAdminService(axios: AxiosInstance) {
       therapistId: string,
       rejectionData: RejectTherapistDto
     ): Promise<TherapistActionResponse> {
-      const { data } = await axios.put(
-        `/auth/therapist/applications/${therapistId}/status`,
-        {
-          status: "REJECTED",
-          ...rejectionData,
-        }
+      const { data } = await axios.post(
+        `/admin/therapists/${therapistId}/reject`,
+        rejectionData
       );
       return data;
     },
@@ -93,11 +87,8 @@ export function createAdminService(axios: AxiosInstance) {
       suspensionData: UpdateTherapistStatusDto
     ): Promise<TherapistActionResponse> {
       const { data } = await axios.put(
-        `/auth/therapist/applications/${therapistId}/status`,
-        {
-          status: "suspended",
-          ...suspensionData,
-        }
+        `/admin/therapists/${therapistId}/status`,
+        suspensionData
       );
       return data;
     },
@@ -113,7 +104,7 @@ export function createAdminService(axios: AxiosInstance) {
         applicationId: string
       ): Promise<TherapistApplicationDetailsResponse> {
         const { data } = await axios.get(
-          `/auth/therapist/applications/${applicationId}`
+          `/admin/therapists/${applicationId}/details`
         );
         return data;
       },
