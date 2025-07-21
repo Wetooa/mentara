@@ -83,12 +83,12 @@ function CommentItem({
 
   return (
     <div className="space-y-3">
-      <Card>
-        <CardHeader>
+      <Card className="bg-white/80 backdrop-blur-sm border-community-calm/20 hover:border-community-accent/30 transition-all duration-200">
+        <CardHeader className="pb-3">
           <div className="flex items-start gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={comment.user.avatarUrl} />
-              <AvatarFallback className="text-xs">
+            <Avatar className="h-8 w-8 ring-2 ring-community-calm/20 ring-offset-1 ring-offset-white">
+              <AvatarImage src={comment.user.avatarUrl} className="object-cover" />
+              <AvatarFallback className="text-xs bg-community-accent/20 text-community-accent-foreground font-medium">
                 {getUserInitials(comment.user.firstName, comment.user.lastName)}
               </AvatarFallback>
             </Avatar>
@@ -98,12 +98,12 @@ function CommentItem({
                   {comment.user.firstName} {comment.user.lastName}
                 </h4>
                 {comment.user.role === 'therapist' && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-xs bg-community-heart/20 text-community-heart-foreground border-community-heart/30">
                     <Stethoscope className="h-3 w-3 mr-1" />
                     Therapist
                   </Badge>
                 )}
-                <p className="text-xs text-neutral-500 flex items-center gap-1">
+                <p className="text-xs text-community-soothing-foreground flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                 </p>
@@ -163,32 +163,34 @@ function CommentItem({
               </div>
             </div>
           ) : (
-            <p className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-community-soothing-foreground whitespace-pre-wrap leading-relaxed">
               {comment.content}
             </p>
           )}
 
-          <Separator className="my-3" />
+          <Separator className="my-3 bg-community-calm/20" />
 
           <div className="flex items-center gap-4 text-xs">
             <button
               onClick={() => isHearted ? onUnheart(comment.id) : onHeart(comment.id)}
               className={cn(
-                "flex items-center gap-1 hover:text-red-500 transition-colors",
-                isHearted && "text-red-500"
+                "flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200",
+                isHearted 
+                  ? "text-community-heart bg-community-heart/10 border border-community-heart/20" 
+                  : "text-community-soothing-foreground hover:text-community-heart hover:bg-community-heart/5"
               )}
               disabled={isLoading}
             >
-              <Heart className={cn("h-3 w-3", isHearted && "fill-current")} />
-              <span>{comment._count?.hearts || 0}</span>
+              <Heart className={cn("h-3 w-3 transition-transform duration-200", isHearted && "fill-current scale-110")} />
+              <span className="font-medium">{comment._count?.hearts || 0}</span>
             </button>
 
             <button
               onClick={() => setIsReplying(!isReplying)}
-              className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-community-soothing-foreground hover:text-community-accent hover:bg-community-accent/5 transition-all duration-200"
             >
               <Reply className="h-3 w-3" />
-              Reply
+              <span className="font-medium">Reply</span>
             </button>
 
             {comment.children && comment.children.length > 0 && (
@@ -238,7 +240,7 @@ function CommentItem({
 
       {/* Replies */}
       {showReplies && comment.children && comment.children.length > 0 && (
-        <div className="ml-6 space-y-3 border-l-2 border-neutral-100 pl-4">
+        <div className="ml-6 space-y-3 border-l-2 border-community-calm/30 pl-4">
           {comment.children.map((nestedComment) => (
             <Card key={nestedComment.id}>
               <CardContent className="pt-4">
@@ -324,42 +326,54 @@ export default function CommentSection({ postId, className }: CommentSectionProp
         <Button
           variant="ghost"
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-community-accent hover:text-community-accent-foreground hover:bg-community-accent/10 transition-all duration-200"
         >
           <MessageCircle className="h-4 w-4" />
-          <span>{comments.length} {comments.length === 1 ? 'comment' : 'comments'}</span>
+          <span className="font-medium">{comments.length} {comments.length === 1 ? 'comment' : 'comments'}</span>
           {showComments ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
+        {comments.length > 0 && (
+          <div className="text-xs text-community-soothing-foreground">
+            Community Discussion
+          </div>
+        )}
       </div>
 
       {showComments && (
         <div className="space-y-4">
           {/* New Comment Form */}
-          <Card>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
+          <Card className="bg-white/90 backdrop-blur-sm border-community-accent/30 shadow-lg">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="h-4 w-4 text-community-accent" />
+                  <span className="text-sm font-medium text-community-calm-foreground">Join the conversation</span>
+                </div>
                 <Textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Share your thoughts..."
+                  placeholder="Share your thoughts, experiences, or offer support..."
                   rows={3}
-                  className="resize-none"
+                  className="resize-none border-community-calm/30 focus:border-community-accent/50 focus:ring-community-accent/20"
                 />
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-community-soothing-foreground">
+                    💬 Remember: This is a safe, supportive space for sharing
+                  </p>
                   <Button
                     onClick={handleCreateComment}
                     disabled={!newComment.trim() || isCreatingComment}
-                    size="sm"
+                    className="bg-community-accent hover:bg-community-accent/90 text-community-accent-foreground shadow-lg shadow-community-accent/20"
                   >
                     {isCreatingComment ? (
                       <div className="flex items-center gap-2">
                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                        Posting...
+                        Sharing...
                       </div>
                     ) : (
                       <>
-                        <Send className="h-3 w-3 mr-1" />
-                        Comment
+                        <Send className="h-3 w-3 mr-2" />
+                        Share Comment
                       </>
                     )}
                   </Button>
@@ -372,36 +386,69 @@ export default function CommentSection({ postId, className }: CommentSectionProp
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2].map(i => (
-                <Card key={i}>
+                <Card key={i} className="bg-white/80 backdrop-blur-sm border-community-calm/20">
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-8 w-8 rounded-full bg-community-calm/20" />
                       <div className="space-y-1">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-4 w-24 bg-community-soothing/30" />
+                        <Skeleton className="h-3 w-16 bg-community-warm/40" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Skeleton className="h-16 w-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full bg-community-warm/30" />
+                      <Skeleton className="h-4 w-3/4 bg-community-warm/25" />
+                      <Skeleton className="h-4 w-1/2 bg-community-warm/20" />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : error ? (
-            <Card>
-              <CardContent className="text-center py-6">
-                <p className="text-red-500 mb-2">Failed to load comments</p>
-                <Button variant="outline" size="sm">
-                  Try Again
-                </Button>
+            <Card className="bg-white/90 backdrop-blur-sm border-community-heart/30">
+              <CardContent className="text-center py-8">
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="p-3 rounded-full bg-community-heart/20">
+                    <MessageCircle className="h-6 w-6 text-community-heart" />
+                  </div>
+                  <div>
+                    <p className="text-community-heart-foreground font-medium mb-1">Comments Unavailable</p>
+                    <p className="text-community-soothing-foreground text-sm">
+                      We're having trouble loading comments right now
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-community-heart/30 text-community-heart hover:bg-community-heart/10"
+                  >
+                    <Heart className="h-3 w-3 mr-1" />
+                    Try Again
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : comments.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-6">
-                <MessageCircle className="h-8 w-8 text-neutral-400 mx-auto mb-2" />
-                <p className="text-neutral-500 text-sm">No comments yet. Be the first to share your thoughts!</p>
+            <Card className="bg-white/80 backdrop-blur-sm border-community-calm/30">
+              <CardContent className="text-center py-10">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="p-4 rounded-xl bg-community-calm/20 animate-gentle-glow">
+                    <MessageCircle className="h-6 w-6 text-community-accent" />
+                  </div>
+                  <div className="max-w-xs">
+                    <p className="text-community-calm-foreground font-medium mb-2">Start the Conversation</p>
+                    <p className="text-community-soothing-foreground text-sm leading-relaxed">
+                      Be the first to share your thoughts and connect with others in this supportive space.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-community-soothing/10 border border-community-soothing/20 max-w-sm">
+                    <p className="text-xs text-community-soothing-foreground">
+                      💭 Your voice matters in building our supportive community
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ) : (
