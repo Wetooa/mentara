@@ -23,7 +23,9 @@ import {
   Send,
   Lock,
   AlertCircle,
-  Activity
+  Activity,
+  Paperclip,
+  X
 } from "lucide-react";
 import {
   ResizableHandle,
@@ -52,6 +54,8 @@ export default function UserCommunity() {
     handleRoomSelect,
     handleCreatePost,
     handleHeartPost,
+    handleFileSelect,
+    handleFileRemove,
     retryLoadPosts,
     setIsCreatePostOpen,
     setNewPostTitle,
@@ -60,6 +64,7 @@ export default function UserCommunity() {
     getRoomBreadcrumb,
     isPostingAllowed,
     isPostHearted,
+    selectedFiles,
   } = useCommunityPage();
 
   // Enhanced community data with new hooks
@@ -242,6 +247,66 @@ export default function UserCommunity() {
                           rows={6}
                           className="mt-1 resize-none"
                         />
+                      </div>
+                      
+                      {/* File Attachments */}
+                      <div>
+                        <Label>Attachments (optional)</Label>
+                        <div className="mt-2 space-y-3">
+                          {/* File Upload Area */}
+                          <div className="relative">
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*,application/pdf,text/*,video/*,audio/*"
+                              onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              id="file-upload"
+                            />
+                            <div className="border-2 border-dashed border-community-calm/30 rounded-lg p-4 text-center hover:border-community-accent/50 hover:bg-community-warm/10 transition-colors">
+                              <Paperclip className="h-6 w-6 mx-auto text-community-soothing-foreground mb-2" />
+                              <p className="text-sm text-community-soothing-foreground">
+                                <span className="font-medium text-community-accent">Click to upload</span> or drag and drop
+                              </p>
+                              <p className="text-xs text-community-soothing-foreground/70 mt-1">
+                                Images, PDFs, documents, videos, audio (max 10MB each, 5 files total)
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Selected Files List */}
+                          {selectedFiles.length > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-community-calm-foreground">
+                                Selected files ({selectedFiles.length}/5):
+                              </p>
+                              <div className="space-y-2 max-h-32 overflow-y-auto">
+                                {selectedFiles.map((file, index) => (
+                                  <div key={index} className="flex items-center justify-between p-2 bg-community-warm/20 rounded-lg">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <Paperclip className="h-4 w-4 text-community-accent shrink-0" />
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium text-community-calm-foreground truncate">
+                                          {file.name}
+                                        </p>
+                                        <p className="text-xs text-community-soothing-foreground">
+                                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleFileRemove(index)}
+                                      className="p-1 hover:bg-community-heart/20 text-community-heart hover:text-community-heart rounded-full transition-colors"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-end gap-2">
                         <Button
