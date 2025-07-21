@@ -98,6 +98,11 @@ export default function CommunitySidebar({
     return false;
   };
 
+  // Everyone can VIEW all rooms regardless of posting permissions
+  const canViewRoom = (room: Room): boolean => {
+    return true; // All users can see all rooms
+  };
+
   // Loading state
   if (membershipsLoading || communitiesLoading) {
     return (
@@ -282,6 +287,7 @@ export default function CommunitySidebar({
                           .sort((a, b) => a.order - b.order)
                           .map(room => {
                             const canPost = canPostInRoom(room, community.id);
+                            const canView = canViewRoom(room);
                             const isSelected = selectedRoomId === room.id;
                             
                             return (
@@ -293,26 +299,23 @@ export default function CommunitySidebar({
                                   isSelected 
                                     ? "bg-community-accent/30 text-community-accent-foreground shadow-md shadow-community-accent/20 border border-community-accent/40" 
                                     : "hover:bg-community-warm/30 border border-transparent",
-                                  !canPost && "opacity-60 cursor-not-allowed"
+                                  !canView && "hidden" // Hide room if can't view (though currently all are viewable)
                                 )}
-                                title={!canPost ? "You don't have permission to post in this room" : `Join ${room.name}`}
-                                disabled={!canPost}
+                                title={!canPost ? `${room.name} (View only - moderator/admin posting required)` : `Join ${room.name}`}
+                                disabled={false} // Always allow viewing/entering rooms
                               >
                                 <div className={cn(
                                   "shrink-0 transition-colors duration-200",
-                                  room.postingRole === "moderator" || room.postingRole === "admin"
+                                  !canPost
                                     ? "text-amber-500"
                                     : isSelected 
                                       ? "text-community-accent-foreground" 
                                       : "text-community-calm-foreground group-hover:text-community-accent"
                                 )}>
-                                  {getRoomIcon(room)}
+                                  {canPost ? <Hash className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                                 </div>
                                 <span className="truncate font-medium">{room.name}</span>
-                                {!canPost && (
-                                  <Lock className="h-3 w-3 ml-auto text-amber-500" />
-                                )}
-                                {isSelected && canPost && (
+                                {isSelected && (
                                   <div className="ml-auto w-2 h-2 bg-community-accent rounded-full animate-pulse" />
                                 )}
                               </button>
