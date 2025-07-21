@@ -6,6 +6,7 @@ import {
   useEffect,
   ReactNode,
   useState,
+  useRef,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -85,8 +86,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const api = useApi();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   
+  // Ref to track if auth loading is already in progress to prevent infinite loops
+  const authLoadingRef = useRef<boolean>(false);
+  
   // Initialize global loading for authentication
-  const authLoading = useGlobalLoading('auth', {
+  const {
+    startLoading: startAuthLoading,
+    updateProgress: updateAuthProgress,
+    completeLoading: completeAuthLoading,
+    errorLoading: errorAuthLoading,
+  } = useGlobalLoading('auth', {
     message: 'Verifying authentication...',
     expectedDuration: 2000,
   });
@@ -137,33 +146,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (shouldCheckAuth && hasToken === true) {
       if (isLoading) {
-        // Start global loading when auth check begins
-        authLoading.startLoading();
-        
-        // Simulate realistic progress during auth check
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.random() * 10 + 5; // Random progress between 5-15%
-          if (progress < 85) {
-            authLoading.updateProgress(Math.min(progress, 85));
-          }
-        }, 150);
+        // Prevent starting multiple loading operations
+        if (!authLoadingRef.current) {
+          authLoadingRef.current = true;
+          startAuthLoading();
+          
+          // Simulate realistic progress during auth check
+          let progress = 0;
+          const progressInterval = setInterval(() => {
+            progress += Math.random() * 10 + 5; // Random progress between 5-15%
+            if (progress < 85) {
+              updateAuthProgress(Math.min(progress, 85));
+            }
+          }, 150);
 
-        return () => clearInterval(progressInterval);
+          return () => clearInterval(progressInterval);
+        }
       } else {
         // Complete global loading when auth check finishes
-        if (error) {
-          authLoading.errorLoading('Authentication failed');
-        } else {
-          authLoading.updateProgress(100);
-          authLoading.completeLoading();
+        if (authLoadingRef.current) {
+          authLoadingRef.current = false;
+          if (error) {
+            errorAuthLoading('Authentication failed');
+          } else {
+            updateAuthProgress(100);
+            completeAuthLoading();
+          }
         }
       }
-    } else if (!shouldCheckAuth) {
+    } else if (!shouldCheckAuth && authLoadingRef.current) {
       // Complete any auth loading for public routes
-      authLoading.completeLoading();
+      authLoadingRef.current = false;
+      completeAuthLoading();
     }
-  }, [isLoading, error, shouldCheckAuth, hasToken, authLoading]);
+  }, [isLoading, error, shouldCheckAuth, hasToken]); // Removed unstable loading function dependencies
 
   // Logout function
   const logout = () => {
