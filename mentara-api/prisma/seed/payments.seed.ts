@@ -45,8 +45,8 @@ export async function seedPaymentMethods(
         'DIGITAL_WALLET',
       ]);
       
-      let cardLast4 = null;
-      let cardBrand = null;
+      let cardLast4: string | undefined = undefined;
+      let cardBrand: string | undefined = undefined;
       
       if (methodType === 'CARD') {
         cardLast4 = faker.string.numeric(4);
@@ -110,7 +110,7 @@ export async function seedPayments(
     const amount = Math.round(baseAmount * 100) / 100; // Ensure 2 decimal places
     
     // Determine payment status with realistic distribution
-    const statusDistribution = [
+    const statusDistribution: ('COMPLETED' | 'PENDING' | 'FAILED' | 'REFUNDED')[] = [
       'COMPLETED', 'COMPLETED', 'COMPLETED', 'COMPLETED', // 80% completed
       'PENDING', // 10% pending  
       'FAILED', // 5% failed
@@ -119,9 +119,9 @@ export async function seedPayments(
     const status = faker.helpers.arrayElement(statusDistribution);
     
     // Set timestamps based on status
-    let processedAt = null;
-    let failedAt = null;
-    let failureReason = null;
+    let processedAt: Date | undefined = undefined;
+    let failedAt: Date | undefined = undefined;
+    let failureReason: string | undefined = undefined;
     
     if (status === 'COMPLETED' || status === 'REFUNDED') {
       processedAt = faker.date.between({ 
@@ -194,7 +194,7 @@ export async function seedPayments(
         therapistId: therapist.userId,
         meetingId: null, // Standalone payment
         paymentMethodId: clientMethod.id,
-        processedAt: faker.date.past({ days: 60 }),
+        processedAt: faker.date.past({ years: 0.2 }), // Within ~2 months
       },
     });
 

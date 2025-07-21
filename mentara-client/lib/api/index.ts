@@ -17,6 +17,10 @@ import {
   createCommunityService,
   type CommunityService,
 } from "./services/communities";
+import {
+  createMeetingsService,
+  type MeetingsService,
+} from "./services/meetings";
 export type { ApiResponse, ApiError } from "./types";
 
 // Export client utilities
@@ -27,12 +31,14 @@ export { createAuthService, type AuthService };
 export { createDashboardService, type DashboardService };
 export { createTherapistService, type TherapistService };
 export { createCommunityService, type CommunityService };
+export { createMeetingsService, type MeetingsService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
 const dashboardService = createDashboardService(apiClient);
 const therapistService = createTherapistService(apiClient);
 const communityService = createCommunityService(apiClient);
+const meetingsService = createMeetingsService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -41,6 +47,7 @@ export const api = {
   dashboard: dashboardService,
   therapists: therapistService,
   communities: communityService,
+  meetings: meetingsService,
 
   // Backwards compatible structure for existing hooks
   clientAuth: authService.client,
