@@ -8,7 +8,7 @@ import type {
   ApplicationListParams,
   UpdateApplicationRequest,
   CreateApplicationRequest
-} from '@/types/api/therapists';
+} from 'mentara-commons';
 
 /**
  * Hook for fetching therapist applications list (admin functionality)

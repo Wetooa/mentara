@@ -1,4 +1,11 @@
 import { AxiosInstance } from "axios";
+import type {
+  TherapistRecommendationQuery,
+  TherapistRecommendationResponse,
+  TherapistSearchParams,
+  TherapistRecommendation,
+  WelcomeRecommendationQuery,
+} from "mentara-commons";
 
 /**
  * Therapist API service for recommendations, matching, and management
@@ -8,20 +15,7 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get personalized therapist recommendations for welcome page
      */
-    async getPersonalizedRecommendations(): Promise<{
-      recommendations: Array<{
-        id: string;
-        therapist: any;
-        score: number;
-        matchExplanation?: any;
-        scoreBreakdown?: any;
-      }>;
-      averageMatchScore: number;
-      totalCount: number;
-      userConditions: string[];
-      matchCriteria: any;
-      clinicalInsights?: any;
-    }> {
+    async getPersonalizedRecommendations(params?: WelcomeRecommendationQuery): Promise<TherapistRecommendationResponse> {
       const { data } = await axios.get("/therapist-recommendations/welcome");
       return data;
     },
@@ -29,12 +23,7 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get standard therapist recommendations with filters
      */
-    async getRecommendations(params?: {
-      limit?: number;
-      includeInactive?: boolean;
-      province?: string;
-      maxHourlyRate?: number;
-    }) {
+    async getRecommendations(params?: TherapistRecommendationQuery): Promise<TherapistRecommendationResponse> {
       const { data } = await axios.get("/therapist-recommendations", { params });
       return data;
     },
@@ -72,15 +61,7 @@ export function createTherapistService(axios: AxiosInstance) {
     /**
      * Get list of therapists with filters
      */
-    async getTherapistList(params?: {
-      page?: number;
-      limit?: number;
-      specialties?: string[];
-      location?: string;
-      priceRange?: [number, number];
-      availability?: string;
-      rating?: number;
-    }) {
+    async getTherapistList(params?: TherapistSearchParams) {
       const { data } = await axios.get("/therapists", { params });
       return data;
     },

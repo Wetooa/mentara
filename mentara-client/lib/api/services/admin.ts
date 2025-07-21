@@ -1,4 +1,14 @@
 import { AxiosInstance } from "axios";
+import type {
+  PendingTherapistFiltersDto,
+  ApproveTherapistDto,
+  RejectTherapistDto,
+  UpdateTherapistStatusDto,
+  TherapistListResponse,
+  TherapistApplicationDetailsResponse,
+  TherapistActionResponse,
+  TherapistApplicationMetricsResponse
+} from "mentara-commons";
 
 /**
  * Admin API service for platform management and therapist applications
@@ -8,41 +18,7 @@ export function createAdminService(axios: AxiosInstance) {
     /**
      * Get therapist applications with filters
      */
-    async getTherapistApplications(params?: {
-      status?: "pending" | "approved" | "rejected" | "suspended";
-      page?: number;
-      limit?: number;
-      province?: string;
-      submittedAfter?: string;
-      processedBy?: string;
-      providerType?: string;
-    }): Promise<{
-      applications: Array<{
-        id: string;
-        userId: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone: string;
-        status: string;
-        submittedAt: string;
-        processedAt?: string;
-        processedBy?: string;
-        rejectionReason?: string;
-        approvalMessage?: string;
-        profileData?: Record<string, unknown>;
-        credentials?: Record<string, unknown>;
-        uploadedFiles?: Array<{
-          id: string;
-          fileName: string;
-          fileUrl: string;
-          uploadedAt: string;
-        }>;
-      }>;
-      totalCount: number;
-      page: number;
-      totalPages: number;
-    }> {
+    async getTherapistApplications(params?: PendingTherapistFiltersDto): Promise<TherapistListResponse> {
       const { data } = await axios.get("/auth/therapist/applications", {
         params,
       });
@@ -78,19 +54,8 @@ export function createAdminService(axios: AxiosInstance) {
      */
     async approveTherapist(
       therapistId: string,
-      approvalData: {
-        approvalMessage?: string;
-        notifyTherapist?: boolean;
-        sendWelcomeEmail?: boolean;
-      }
-    ): Promise<{
-      success: boolean;
-      message: string;
-      credentials?: {
-        email: string;
-        password: string;
-      };
-    }> {
+      approvalData: ApproveTherapistDto
+    ): Promise<TherapistActionResponse> {
       const { data } = await axios.put(
         `/auth/therapist/applications/${therapistId}/status`,
         {
@@ -106,16 +71,8 @@ export function createAdminService(axios: AxiosInstance) {
      */
     async rejectTherapist(
       therapistId: string,
-      rejectionData: {
-        rejectionReason: string;
-        customMessage?: string;
-        notifyTherapist?: boolean;
-        allowReapplication?: boolean;
-      }
-    ): Promise<{
-      success: boolean;
-      message: string;
-    }> {
+      rejectionData: RejectTherapistDto
+    ): Promise<TherapistActionResponse> {
       const { data } = await axios.put(
         `/auth/therapist/applications/${therapistId}/status`,
         {
@@ -131,16 +88,8 @@ export function createAdminService(axios: AxiosInstance) {
      */
     async suspendTherapist(
       therapistId: string,
-      suspensionData: {
-        suspensionReason: string;
-        customMessage?: string;
-        notifyTherapist?: boolean;
-        suspensionDuration?: number; // in days
-      }
-    ): Promise<{
-      success: boolean;
-      message: string;
-    }> {
+      suspensionData: UpdateTherapistStatusDto
+    ): Promise<TherapistActionResponse> {
       const { data } = await axios.put(
         `/auth/therapist/applications/${therapistId}/status`,
         {
@@ -158,36 +107,7 @@ export function createAdminService(axios: AxiosInstance) {
       /**
        * Get single therapist application by ID
        */
-      async getById(applicationId: string): Promise<{
-        id: string;
-        userId: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone: string;
-        status: string;
-        submittedAt: string;
-        processedAt?: string;
-        processedBy?: string;
-        rejectionReason?: string;
-        approvalMessage?: string;
-        profileData?: Record<string, unknown>;
-        credentials?: Record<string, unknown>;
-        uploadedFiles?: Array<{
-          id: string;
-          fileName: string;
-          fileUrl: string;
-          uploadedAt: string;
-        }>;
-        user?: {
-          id: string;
-          email: string;
-          firstName: string;
-          lastName: string;
-          role: string;
-          emailVerified: boolean;
-        };
-      }> {
+      async getById(applicationId: string): Promise<TherapistApplicationDetailsResponse> {
         const { data } = await axios.get(
           `/auth/therapist/applications/${applicationId}`
         );
