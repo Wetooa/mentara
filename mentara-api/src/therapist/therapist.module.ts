@@ -16,9 +16,10 @@ import { MessagingService } from '../messaging/messaging.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
 import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
+import { MessagingModule } from '../messaging/messaging.module';
 
 @Module({
-  imports: [PreAssessmentModule, EmailModule],
+  imports: [PreAssessmentModule, EmailModule, MessagingModule],
   controllers: [
     TherapistRecommendationController,
     TherapistProfileController,

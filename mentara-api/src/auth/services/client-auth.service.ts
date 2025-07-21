@@ -69,6 +69,12 @@ export class ClientAuthService {
           data: {
             clientId: user.id,
             answers: registerDto.preassessmentAnswers,
+            questionnaires: [], // Empty until processed
+            answerMatrix: [], // Empty until processed
+            scores: {}, // Empty until processed
+            severityLevels: {}, // Empty until processed
+            aiEstimate: {}, // Empty until processed
+            isProcessed: false, // Will be processed later
           },
         });
       }

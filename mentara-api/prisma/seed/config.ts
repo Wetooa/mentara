@@ -2,6 +2,7 @@
 // Centralized configuration for database seeding
 
 // Test accounts from test-accounts.md
+// ALL TEST ACCOUNTS USE PASSWORD: "password123" for easy testing
 export const TEST_ACCOUNTS = {
   CLIENTS: [
     {
@@ -163,9 +164,9 @@ export const SEED_CONFIG = {
     MODERATORS: 5, // 5 moderators for comprehensive testing
   },
   COMMUNITIES: {
-    ADDITIONAL: 3, // 3 communities total
-    POSTS_PER_COMMUNITY: 0, // Skip posts for ultra-fast seeding
-    COMMENTS_PER_POST: 0, // Skip comments for ultra-fast seeding
+    ADDITIONAL: 0, // No additional communities - only questionnaire-based ones
+    POSTS_PER_COMMUNITY: 3, // Create some posts for demo
+    COMMENTS_PER_POST: 3, // Create some comments for demo
   },
   RELATIONSHIPS: {
     CLIENT_THERAPIST_RATIO: 0.8, // 80% of clients get assigned to therapists
@@ -212,22 +213,78 @@ export const SEED_CONFIG = {
   },
 };
 
-// Illness communities configuration - ULTRA-FAST DEV VERSION
+// Illness communities configuration - Based on questionnaire disorders
+// These match the exact disorders from @mentara-commons/src/constants/questionnaire/questionnaire-mapping.ts
 export const ILLNESS_COMMUNITIES = [
   {
-    name: 'ADHD Support',
-    slug: 'adhd-support',
-    description: 'A supportive community for individuals with ADHD.',
+    name: 'Stress Support',
+    slug: 'stress-support',
+    description: 'A supportive community for individuals managing stress and overwhelm.',
   },
   {
     name: 'Anxiety Support',
     slug: 'anxiety-support',
-    description: 'A supportive community for individuals with anxiety.',
+    description: 'A supportive community for individuals with anxiety disorders.',
   },
   {
     name: 'Depression Support',
     slug: 'depression-support',
     description: 'A supportive community for individuals with depression.',
+  },
+  {
+    name: 'Insomnia Support',
+    slug: 'insomnia-support',
+    description: 'A supportive community for individuals struggling with sleep disorders.',
+  },
+  {
+    name: 'Panic Disorder Support',
+    slug: 'panic-disorder-support',
+    description: 'A supportive community for individuals with panic disorder.',
+  },
+  {
+    name: 'Bipolar Disorder Support',
+    slug: 'bipolar-disorder-support',
+    description: 'A supportive community for individuals with bipolar disorder (BD).',
+  },
+  {
+    name: 'OCD Support',
+    slug: 'ocd-support',
+    description: 'A supportive community for individuals with obsessive compulsive disorder.',
+  },
+  {
+    name: 'PTSD Support',
+    slug: 'ptsd-support',
+    description: 'A supportive community for individuals with post-traumatic stress disorder.',
+  },
+  {
+    name: 'Social Anxiety Support',
+    slug: 'social-anxiety-support',
+    description: 'A supportive community for individuals with social anxiety.',
+  },
+  {
+    name: 'Phobia Support',
+    slug: 'phobia-support',
+    description: 'A supportive community for individuals with phobias and specific fears.',
+  },
+  {
+    name: 'Burnout Support',
+    slug: 'burnout-support',
+    description: 'A supportive community for individuals experiencing burnout.',
+  },
+  {
+    name: 'Eating Disorders Support',
+    slug: 'eating-disorders-support',
+    description: 'A supportive community for individuals with binge eating and eating disorders.',
+  },
+  {
+    name: 'ADHD Support',
+    slug: 'adhd-support',
+    description: 'A supportive community for individuals with ADD/ADHD.',
+  },
+  {
+    name: 'Substance Use Support',
+    slug: 'substance-use-support',
+    description: 'A supportive community for individuals with substance or alcohol use issues.',
   },
 ];
 

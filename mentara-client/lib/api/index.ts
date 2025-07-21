@@ -37,6 +37,10 @@ import {
   createMessagingService,
   type MessagingService,
 } from "./services/messaging";
+import {
+  createFilesService,
+  type FilesService,
+} from "./services/files";
 export type { ApiResponse, ApiError } from "./types";
 
 // Export client utilities
@@ -52,6 +56,7 @@ export { createBookingService, type BookingService };
 export { createNotificationService, type NotificationService };
 export { createSearchService, type SearchService };
 export { createMessagingService, type MessagingService };
+export { createFilesService, type FilesService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -63,6 +68,7 @@ const bookingService = createBookingService(apiClient);
 const notificationService = createNotificationService(apiClient);
 const searchService = createSearchService(apiClient);
 const messagingService = createMessagingService(apiClient);
+const filesService = createFilesService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -76,6 +82,7 @@ export const api = {
   notifications: notificationService,
   search: searchService,
   messaging: messagingService,
+  files: filesService,
 
   // Backwards compatible structure for existing hooks
   clientAuth: authService.client,

@@ -3,7 +3,9 @@ import { useApi } from "@/lib/api";
 
 
 export interface TimeSlot {
+  time: string;
   startTime: string;
+  endTime: string;
   availableDurations: {
     id: string;
     name: string;
@@ -44,9 +46,10 @@ export function useAvailableSlots(therapistId: string, date: string) {
 
   const getTimeSlots = () => {
     return slots?.map(slot => ({
-      time: new Date(slot.startTime).toTimeString().slice(0, 5),
+      time: new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       startTime: slot.startTime,
-      durations: slot.availableDurations.map(d => d.duration),
+      endTime: slot.endTime || slot.startTime, // Use endTime if available, otherwise use startTime
+      availableDurations: slot.availableDurations,
     })) || [];
   };
 

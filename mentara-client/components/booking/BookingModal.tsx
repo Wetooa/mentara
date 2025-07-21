@@ -25,23 +25,43 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Video,
-  Phone,
-  MessageSquare,
   Loader2,
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
 import { useApi } from "@/lib/api";
-import {
-  AvailableSlot,
-  MeetingDuration,
-  MeetingType,
-  CreateMeetingRequest,
-} from "@/types/booking";
 import { TherapistCardData } from "@/types/therapist";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSubscriptionStatus } from "@/hooks/billing";
+import { toast } from "sonner";
+
+// Local type definitions
+interface AvailableSlot {
+  id: string;
+  startTime: string;
+  endTime: string;
+  availableDurations: MeetingDuration[];
+}
+
+interface MeetingDuration {
+  id: string;
+  name: string;
+  duration: number;
+}
+
+enum MeetingType {
+  VIDEO = "video",
+}
+
+interface CreateMeetingRequest {
+  therapistId: string;
+  startTime: string;
+  duration: number;
+  title?: string;
+  description?: string;
+  meetingType: MeetingType;
+}
 
 interface BookingModalProps {
   therapist: TherapistCardData | null;
@@ -347,18 +367,6 @@ export default function BookingModal({
                         Video Call
                       </div>
                     </SelectItem>
-                    <SelectItem value={MeetingType.AUDIO}>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        Audio Call
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={MeetingType.CHAT}>
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" />
-                        Chat Session
-                      </div>
-                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -420,11 +428,7 @@ export default function BookingModal({
               </div>
               <div>
                 <span className="text-muted-foreground">Type:</span>
-                <div className="font-medium">
-                  {meetingType === MeetingType.VIDEO && "Video Call"}
-                  {meetingType === MeetingType.AUDIO && "Audio Call"}
-                  {meetingType === MeetingType.CHAT && "Chat Session"}
-                </div>
+                <div className="font-medium">Video Call</div>
               </div>
             </div>
           </div>

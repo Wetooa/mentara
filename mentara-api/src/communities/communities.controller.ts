@@ -10,15 +10,22 @@ import {
   Put,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
+import {
+  SupabaseStorageService,
+  FileUploadResult,
+} from 'src/common/services/supabase-storage.service';
 import {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
@@ -76,6 +83,7 @@ export class CommunitiesController {
     private readonly communitiesService: CommunitiesService,
     private readonly communityAssignmentService: CommunityAssignmentService,
     private readonly prisma: PrismaService,
+    private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
   @Get()
@@ -420,16 +428,41 @@ export class CommunitiesController {
   @Post('posts')
   @Roles('client', 'therapist', 'moderator', 'admin')
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   async createPost(
     @Body() postData: { title: string; content: string; roomId: string },
     @CurrentUserId() userId: string,
+    @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ) {
     try {
+      // Validate and upload files if provided
+      const fileResults: FileUploadResult[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const validation = this.supabaseStorageService.validateFile(file);
+          if (!validation.isValid) {
+            throw new BadRequestException(
+              `File validation failed: ${validation.error}`,
+            );
+          }
+        }
+
+        // Upload files to Supabase
+        const uploadResults = await this.supabaseStorageService.uploadFiles(
+          files,
+          SupabaseStorageService.getSupportedBuckets().POST_ATTACHMENTS,
+        );
+        fileResults.push(...uploadResults);
+      }
+
       return await this.communitiesService.createPost(
         postData.title,
         postData.content,
         postData.roomId,
         userId,
+        fileResults.map((f) => f.url),
+        fileResults.map((f) => f.filename),
+        files.map((f) => f.size),
       );
     } catch (error) {
       throw new InternalServerErrorException(

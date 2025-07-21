@@ -12,6 +12,7 @@ import {
   NotificationType,
   NotificationPriority,
 } from '@prisma/client';
+import { MessagingGateway } from '../messaging/messaging.gateway';
 
 interface WebSocketServer {
   to(room: string): {
@@ -44,9 +45,16 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly messagingGateway: MessagingGateway,
   ) {}
 
   onModuleInit() {
+    // Configure WebSocket server for real-time notifications
+    // Use a slight delay to ensure MessagingGateway is fully initialized
+    setTimeout(() => {
+      this.setWebSocketServer(this.messagingGateway.server);
+    }, 1000);
+    
     this.logger.log(
       'NotificationsService initialized with real-time capabilities',
     );
@@ -973,5 +981,341 @@ export class NotificationsService implements OnModuleInit {
     this.logger.log('Scheduled notifications check completed (no scheduled fields available)');
     
     return { sent: 0 };
+  }
+
+  // ===== BOOKING & APPOINTMENT EVENT LISTENERS =====
+
+  /**
+   * Handle appointment booked events
+   */
+  @OnEvent('AppointmentBookedEvent')
+  async handleAppointmentBooked(event: any) {
+    try {
+      const { data } = event;
+      
+      // Get therapist and client details
+      const [therapist, client] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: data.therapistId },
+          select: { firstName: true, lastName: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: data.clientId },
+          select: { firstName: true, lastName: true },
+        }),
+      ]);
+
+      if (!therapist || !client) return;
+
+      // Notify client about successful booking
+      await this.create(
+        {
+          userId: data.clientId,
+          title: 'Session Booked Successfully!',
+          message: `Your ${data.meetingType} session with ${therapist.firstName} ${therapist.lastName} has been scheduled for ${new Date(data.startTime).toLocaleDateString()} at ${new Date(data.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+          type: NotificationType.APPOINTMENT_CONFIRMED,
+          priority: NotificationPriority.HIGH,
+          actionUrl: `/client/meetings/${data.appointmentId}`,
+          data: {
+            appointmentId: data.appointmentId,
+            therapistId: data.therapistId,
+            startTime: data.startTime,
+            duration: data.duration,
+            meetingType: data.meetingType,
+          },
+        },
+        {
+          realTime: true,
+          email: true,
+          push: true,
+        },
+      );
+
+      // Notify therapist about new booking
+      await this.create(
+        {
+          userId: data.therapistId,
+          title: 'New Session Booked',
+          message: `${client.firstName} ${client.lastName} has booked a ${data.duration}-minute ${data.meetingType} session with you on ${new Date(data.startTime).toLocaleDateString()} at ${new Date(data.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+          type: NotificationType.APPOINTMENT_CONFIRMED,
+          priority: NotificationPriority.HIGH,
+          actionUrl: `/therapist/meetings/${data.appointmentId}`,
+          data: {
+            appointmentId: data.appointmentId,
+            clientId: data.clientId,
+            startTime: data.startTime,
+            duration: data.duration,
+            meetingType: data.meetingType,
+          },
+        },
+        {
+          realTime: true,
+          email: true,
+          push: true,
+        },
+      );
+
+      this.logger.log(
+        `Appointment booked notifications sent for appointment ${data.appointmentId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error handling appointment booked event:`,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Handle appointment cancelled events
+   */
+  @OnEvent('AppointmentCancelledEvent')
+  async handleAppointmentCancelled(event: any) {
+    try {
+      const { data } = event;
+      
+      // Get therapist and client details
+      const [therapist, client] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: data.therapistId },
+          select: { firstName: true, lastName: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: data.clientId },
+          select: { firstName: true, lastName: true },
+        }),
+      ]);
+
+      if (!therapist || !client) return;
+
+      const isCancelledByClient = data.cancelledBy === data.clientId;
+
+      // Notify the other party about the cancellation
+      const notifyUserId = isCancelledByClient ? data.therapistId : data.clientId;
+      const cancellerName = isCancelledByClient 
+        ? `${client.firstName} ${client.lastName}`
+        : `${therapist.firstName} ${therapist.lastName}`;
+      
+      await this.create(
+        {
+          userId: notifyUserId,
+          title: 'Session Cancelled',
+          message: `Your session scheduled for ${new Date(data.originalStartTime).toLocaleDateString()} at ${new Date(data.originalStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} has been cancelled by ${cancellerName}. ${data.cancellationReason}`,
+          type: NotificationType.APPOINTMENT_CANCELLED,
+          priority: NotificationPriority.HIGH,
+          actionUrl: isCancelledByClient ? '/therapist/schedule' : '/client/booking',
+          data: {
+            appointmentId: data.appointmentId,
+            cancelledBy: data.cancelledBy,
+            cancellationReason: data.cancellationReason,
+            originalStartTime: data.originalStartTime,
+          },
+        },
+        {
+          realTime: true,
+          email: true,
+          push: true,
+        },
+      );
+
+      // Notify the canceller with confirmation
+      await this.create(
+        {
+          userId: data.cancelledBy,
+          title: 'Session Cancellation Confirmed',
+          message: `Your session with ${isCancelledByClient ? therapist.firstName + ' ' + therapist.lastName : client.firstName + ' ' + client.lastName} scheduled for ${new Date(data.originalStartTime).toLocaleDateString()} has been successfully cancelled.`,
+          type: NotificationType.APPOINTMENT_CANCELLED,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: isCancelledByClient ? '/client/booking' : '/therapist/schedule',
+          data: {
+            appointmentId: data.appointmentId,
+            originalStartTime: data.originalStartTime,
+            refundProcessed: true,
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: false,
+        },
+      );
+
+      this.logger.log(
+        `Appointment cancellation notifications sent for appointment ${data.appointmentId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error handling appointment cancelled event:`,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Handle appointment rescheduled events
+   */
+  @OnEvent('AppointmentRescheduledEvent')
+  async handleAppointmentRescheduled(event: any) {
+    try {
+      const { data } = event;
+      
+      // Get therapist and client details
+      const [therapist, client] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: data.therapistId },
+          select: { firstName: true, lastName: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: data.clientId },
+          select: { firstName: true, lastName: true },
+        }),
+      ]);
+
+      if (!therapist || !client) return;
+
+      const isRescheduledByClient = data.rescheduledBy === data.clientId;
+      
+      // Notify the other party about the reschedule
+      const notifyUserId = isRescheduledByClient ? data.therapistId : data.clientId;
+      const reschedulerName = isRescheduledByClient 
+        ? `${client.firstName} ${client.lastName}`
+        : `${therapist.firstName} ${therapist.lastName}`;
+      
+      await this.create(
+        {
+          userId: notifyUserId,
+          title: 'Session Rescheduled',
+          message: `${reschedulerName} has rescheduled your session. New time: ${new Date(data.newStartTime).toLocaleDateString()} at ${new Date(data.newStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (previously ${new Date(data.originalStartTime).toLocaleDateString()} at ${new Date(data.originalStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}).`,
+          type: NotificationType.APPOINTMENT_RESCHEDULED,
+          priority: NotificationPriority.HIGH,
+          actionUrl: `/client/meetings/${data.appointmentId}`,
+          data: {
+            appointmentId: data.appointmentId,
+            rescheduledBy: data.rescheduledBy,
+            originalStartTime: data.originalStartTime,
+            newStartTime: data.newStartTime,
+            rescheduleReason: data.rescheduleReason,
+          },
+        },
+        {
+          realTime: true,
+          email: true,
+          push: true,
+        },
+      );
+
+      // Notify the rescheduler with confirmation
+      await this.create(
+        {
+          userId: data.rescheduledBy,
+          title: 'Session Reschedule Confirmed',
+          message: `Your session has been successfully rescheduled to ${new Date(data.newStartTime).toLocaleDateString()} at ${new Date(data.newStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+          type: NotificationType.APPOINTMENT_RESCHEDULED,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/client/meetings/${data.appointmentId}`,
+          data: {
+            appointmentId: data.appointmentId,
+            originalStartTime: data.originalStartTime,
+            newStartTime: data.newStartTime,
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: false,
+        },
+      );
+
+      this.logger.log(
+        `Appointment rescheduled notifications sent for appointment ${data.appointmentId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error handling appointment rescheduled event:`,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Handle appointment completed events
+   */
+  @OnEvent('AppointmentCompletedEvent')
+  async handleAppointmentCompleted(event: any) {
+    try {
+      const { data } = event;
+      
+      // Get therapist and client details
+      const [therapist, client] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: data.therapistId },
+          select: { firstName: true, lastName: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: data.clientId },
+          select: { firstName: true, lastName: true },
+        }),
+      ]);
+
+      if (!therapist || !client) return;
+
+      // Notify client about session completion and review request
+      await this.create(
+        {
+          userId: data.clientId,
+          title: 'Session Completed - Share Your Feedback',
+          message: `Your session with ${therapist.firstName} ${therapist.lastName} has been completed. How was your experience? Your feedback helps us improve our services.`,
+          type: NotificationType.REVIEW_REQUEST,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/client/therapists/${data.therapistId}/review?session=${data.appointmentId}`,
+          data: {
+            appointmentId: data.appointmentId,
+            therapistId: data.therapistId,
+            completedAt: data.completedAt,
+            duration: data.duration,
+            attendanceStatus: data.attendanceStatus,
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: true,
+        },
+      );
+
+      // Notify therapist about session completion
+      await this.create(
+        {
+          userId: data.therapistId,
+          title: 'Session Completed',
+          message: `Your session with ${client.firstName} ${client.lastName} has been marked as completed. Duration: ${data.duration} minutes.`,
+          type: NotificationType.APPOINTMENT_CONFIRMED,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/therapist/sessions/${data.appointmentId}`,
+          data: {
+            appointmentId: data.appointmentId,
+            clientId: data.clientId,
+            completedAt: data.completedAt,
+            duration: data.duration,
+            attendanceStatus: data.attendanceStatus,
+            sessionNotes: data.sessionNotes,
+          },
+        },
+        {
+          realTime: true,
+          email: false,
+          push: false,
+        },
+      );
+
+      this.logger.log(
+        `Appointment completed notifications sent for appointment ${data.appointmentId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error handling appointment completed event:`,
+        error,
+      );
+    }
   }
 }

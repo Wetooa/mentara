@@ -320,9 +320,35 @@ export function createCommunityService(axios: AxiosInstance) {
       title: string;
       content: string;
       roomId: string;
+      files?: File[];
     }): Promise<PostData> {
-      const { data } = await axios.post('/communities/posts', postData);
-      return data.data || data; // Handle wrapped response format
+      // If files are included, use FormData for multipart submission
+      if (postData.files && postData.files.length > 0) {
+        const formData = new FormData();
+        formData.append('title', postData.title);
+        formData.append('content', postData.content);
+        formData.append('roomId', postData.roomId);
+        
+        // Append each file
+        postData.files.forEach((file) => {
+          formData.append('files', file);
+        });
+
+        const { data } = await axios.post('/communities/posts', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return data.data || data; // Handle wrapped response format
+      } else {
+        // No files, use regular JSON submission
+        const { data } = await axios.post('/communities/posts', {
+          title: postData.title,
+          content: postData.content,
+          roomId: postData.roomId,
+        });
+        return data.data || data; // Handle wrapped response format
+      }
     },
 
     /**

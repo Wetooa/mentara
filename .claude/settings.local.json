@@ -154,7 +154,9 @@
       "mcp__serena__list_memories",
       "WebFetch(domain:oklch.com)",
       "WebFetch(domain:colorconvert.dev)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(pkill:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -367,7 +367,15 @@ export class CommunitiesService {
     };
   }
 
-  async createPost(title: string, content: string, roomId: string, userId: string) {
+  async createPost(
+    title: string, 
+    content: string, 
+    roomId: string, 
+    userId: string,
+    attachmentUrls: string[] = [],
+    attachmentNames: string[] = [],
+    attachmentSizes: number[] = [],
+  ) {
     // First verify the room exists and user has access
     const room = await this.prisma.room.findUniqueOrThrow({
       where: { id: roomId },
@@ -408,6 +416,9 @@ export class CommunitiesService {
         content,
         roomId,
         userId,
+        attachmentUrls,
+        attachmentNames,
+        attachmentSizes,
       },
       include: {
         user: {

@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
+import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -83,6 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const api = useApi();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  
+  // Initialize global loading for authentication
+  const authLoading = useGlobalLoading('auth', {
+    message: 'Verifying authentication...',
+    expectedDuration: 2000,
+  });
 
   // Determine if we should check authentication based on route
   const shouldCheckAuth = !isPublicRoute(pathname);
@@ -125,6 +132,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       : null;
 
   const isAuthenticated = !!user && !!hasToken;
+
+  // Sync global loading with React Query loading state
+  useEffect(() => {
+    if (shouldCheckAuth && hasToken === true) {
+      if (isLoading) {
+        // Start global loading when auth check begins
+        authLoading.startLoading();
+        
+        // Simulate realistic progress during auth check
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 10 + 5; // Random progress between 5-15%
+          if (progress < 85) {
+            authLoading.updateProgress(Math.min(progress, 85));
+          }
+        }, 150);
+
+        return () => clearInterval(progressInterval);
+      } else {
+        // Complete global loading when auth check finishes
+        if (error) {
+          authLoading.errorLoading('Authentication failed');
+        } else {
+          authLoading.updateProgress(100);
+          authLoading.completeLoading();
+        }
+      }
+    } else if (!shouldCheckAuth) {
+      // Complete any auth loading for public routes
+      authLoading.completeLoading();
+    }
+  }, [isLoading, error, shouldCheckAuth, hasToken, authLoading]);
 
   // Logout function
   const logout = () => {
@@ -210,13 +249,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     shouldCheckAuth,
   ]);
 
-  // Show loading state during authentication check
+  // Show minimal loading state during authentication check
+  // The global loading bar will handle the visual feedback
   if ((isLoading || hasToken === null) && shouldCheckAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-gray-500">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <div className="text-sm text-muted-foreground animate-pulse">
+            Verifying authentication...
+          </div>
         </div>
       </div>
     );

@@ -2,9 +2,15 @@
 // Centralized fake data generation for seeding
 
 import { faker } from '@faker-js/faker';
+import * as bcrypt from 'bcrypt';
 
 export class SeedDataGenerator {
   static generateUserData(role: string, specificData: any = {}) {
+    // Simple dummy password for all seeded users (unless specified in specificData)
+    const defaultPassword = 'password123';
+    const password = specificData.password || defaultPassword;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    
     return {
       email: faker.internet.email(),
       firstName: faker.person.firstName(),
@@ -18,6 +24,7 @@ export class SeedDataGenerator {
       coverImageUrl: faker.image.url(),
       isActive: true,
       ...specificData,
+      password: hashedPassword, // Hashed dummy password (overrides any from specificData)
     };
   }
 
