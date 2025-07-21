@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUpdateTherapistApplicationStatus } from "@/hooks/useTherapistApplications";
+import { FilePreviewModal } from "./FilePreviewModal";
 // Backend-specific type that matches actual API response
 export interface TherapistApplicationResponse {
   id: string;
@@ -108,6 +109,12 @@ export function TherapistApplicationDetails({
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(
     null
   );
+  const [previewFile, setPreviewFile] = useState<{
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    uploadedAt: string;
+  } | null>(null);
 
   // Use the React Query hook for updating application status
   const { mutate: updateStatus, isPending } =
@@ -267,7 +274,7 @@ export function TherapistApplicationDetails({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => handleFileAccess(file.fileUrl, "view")}
+                onClick={() => setPreviewFile(file)}
               >
                 <ExternalLinkIcon className="w-4 h-4" />
                 <span>View</span>
@@ -301,7 +308,12 @@ export function TherapistApplicationDetails({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => handleFileAccess(file.fileUrl, "view")}
+                onClick={() => setPreviewFile({
+                  id: `legacy-${index}`,
+                  fileName: file.fileName,
+                  fileUrl: file.fileUrl,
+                  uploadedAt: new Date().toISOString(), // Legacy files don't have upload date
+                })}
               >
                 <ExternalLinkIcon className="w-4 h-4" />
                 <span>View</span>
@@ -706,6 +718,12 @@ export function TherapistApplicationDetails({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        file={previewFile}
+        onClose={() => setPreviewFile(null)}
+      />
     </div>
   );
 }
