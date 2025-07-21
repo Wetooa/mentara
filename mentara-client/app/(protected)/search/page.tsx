@@ -59,7 +59,7 @@ export default function SearchPage() {
   };
 
   // Handle result click
-  const handleResultClick = (result: any) => {
+  const handleResultClick = (result: { url?: string }) => {
     if (result.url) {
       router.push(result.url);
     }
@@ -75,7 +75,6 @@ export default function SearchPage() {
     setQuery(suggestion);
   };
 
-  const hasResults = results && Object.values(results).some(arr => Array.isArray(arr) && arr.length > 0);
   const hasQuery = query.trim().length > 0;
 
   return (
