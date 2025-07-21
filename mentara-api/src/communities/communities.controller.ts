@@ -517,6 +517,19 @@ export class CommunitiesController {
     }
   }
 
+  @Get('me/with-structure')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getMyCommunitiesWithStructure(@CurrentUserId() userId: string): Promise<CommunityWithRoomGroupsResponse[]> {
+    try {
+      // Use existing getJoinedCommunities which already includes full structure
+      return await this.communitiesService.getJoinedCommunities(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get communities with structure',
+      );
+    }
+  }
+
   @Get('me/recommended')
   @Roles('client', 'therapist', 'moderator', 'admin')
   async getRecommendedCommunities(@CurrentUserId() userId: string) {

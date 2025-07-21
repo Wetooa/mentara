@@ -15,7 +15,7 @@ export function useCommunityStats() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['communities', 'stats'],
+    queryKey: ['communities', 'stats', 'general'],
     queryFn: () => api.communities.getCommunityStats(),
     staleTime: 1000 * 60 * 15, // 15 minutes - stats don't change frequently
   });

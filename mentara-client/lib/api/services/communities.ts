@@ -291,6 +291,15 @@ export function createCommunityService(axios: AxiosInstance) {
     },
 
     /**
+     * Get my communities with full structure (room groups and rooms) in one batch call
+     * This replaces the need for multiple individual getCommunityWithStructure calls
+     */
+    async getMyCommunitiesWithStructure(): Promise<CommunityWithStructure[]> {
+      const { data } = await axios.get('/communities/me/with-structure');
+      return data;
+    },
+
+    /**
      * Get posts by room
      */
     async getPostsByRoom(roomId: string): Promise<{

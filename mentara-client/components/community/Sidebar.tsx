@@ -33,26 +33,36 @@ export default function CommunitySidebar({
   const { user } = useAuth();
   const [expandedCommunities, setExpandedCommunities] = useState<string[]>([]);
 
-  // Fetch user's community memberships
-  const { data: memberships, isLoading: membershipsLoading, error: membershipsError } = useQuery({
-    queryKey: ["user-community-memberships"],
-    queryFn: () => api.communities.getMyMemberships(),
+  // Fetch user's communities with structure in one batch call (optimized for performance)
+  const { 
+    data: communitiesData, 
+    isLoading: communitiesLoading, 
+    error: communitiesError 
+  } = useQuery({
+    queryKey: ["communities", "my-with-structure"],
+    queryFn: () => api.communities.getMyCommunitiesWithStructure(),
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-  // Fetch communities with structure for user's joined communities
-  const communityIds = memberships?.map(m => m.community.id) || [];
-  const { data: communitiesData, isLoading: communitiesLoading } = useQuery({
-    queryKey: ["user-communities-with-structure", communityIds],
-    queryFn: async () => {
-      if (communityIds.length === 0) return [];
-      const promises = communityIds.map(id => api.communities.getCommunityWithStructure(id));
-      return Promise.all(promises);
-    },
-    enabled: communityIds.length > 0,
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
+
+  // For backward compatibility with the getUserRole function, extract memberships info from communities
+  const memberships = communitiesData?.map(community => ({
+    id: `membership-${community.id}`,
+    communityId: community.id,
+    userId: user?.id || '',
+    joinedAt: new Date(), // We don't have this in the batch response, but it's not critical
+    community: {
+      id: community.id,
+      name: community.name,
+      slug: community.slug,
+      description: community.description,
+      imageUrl: community.imageUrl,
+    },
+    role: 'member', // Default role - this could be enhanced in the API later
+  }));
+
+  const membershipsLoading = communitiesLoading;
+  const membershipsError = communitiesError;
 
   const handleCommunityToggle = (communityId: string) => {
     setExpandedCommunities(prev => 

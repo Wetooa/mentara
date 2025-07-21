@@ -45,9 +45,9 @@ export function useCommunityPage() {
 
   // Get community stats
   const { data: communityStats } = useQuery({
-    queryKey: ['communities', 'stats'],
+    queryKey: ['communities', 'stats', 'general'],
     queryFn: () => api.communities.getCommunityStats(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes - stats don't change frequently
   });
 
   // Create post mutation
@@ -57,7 +57,7 @@ export function useCommunityPage() {
     onSuccess: () => {
       // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['communities', 'stats', 'general'] });
       setNewPostTitle("");
       setNewPostContent("");
       setIsCreatePostOpen(false);
