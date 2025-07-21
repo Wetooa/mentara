@@ -278,3 +278,19 @@
 .animate-heart-beat {
   animation: heart-beat 2s ease-in-out infinite;
 }
+
+/* Room Group Collapsible Animation using CSS Grid */
+.room-group-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms ease-in-out;
+  overflow: hidden;
+}
+
+.room-group-content--open {
+  grid-template-rows: 1fr;
+}
+
+.room-group-content > div {
+  overflow: hidden;
+}

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../common/services/prisma.service';
+import { PrismaService } from '../providers/prisma-client.provider';
 
 export interface PublicProfileResponse {
   user: {
@@ -193,11 +193,11 @@ export class ProfileService {
       user: {
         id: user.id,
         firstName: user.firstName,
-        middleName: user.middleName,
+        middleName: user.middleName ?? undefined,
         lastName: user.lastName,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        coverImageUrl: user.coverImageUrl,
+        bio: user.bio ?? undefined,
+        avatarUrl: user.avatarUrl ?? undefined,
+        coverImageUrl: user.coverImageUrl ?? undefined,
         role: user.role,
         createdAt: user.createdAt.toISOString()
       },
@@ -210,7 +210,7 @@ export class ProfileService {
     if (user.role === 'therapist' && user.therapist) {
       response.therapist = {
         specializations: user.therapist.areasOfExpertise,
-        yearsOfExperience: user.therapist.yearsOfExperience,
+        yearsOfExperience: user.therapist.yearsOfExperience ?? undefined,
         sessionLength: user.therapist.sessionLength,
         hourlyRate: user.therapist.hourlyRate ? Number(user.therapist.hourlyRate) : undefined,
         areasOfExpertise: user.therapist.areasOfExpertise,
@@ -254,11 +254,11 @@ export class ProfileService {
       user: {
         id: updatedUser.id,
         firstName: updatedUser.firstName,
-        middleName: updatedUser.middleName,
+        middleName: updatedUser.middleName ?? undefined,
         lastName: updatedUser.lastName,
-        bio: updatedUser.bio,
-        avatarUrl: updatedUser.avatarUrl,
-        coverImageUrl: updatedUser.coverImageUrl,
+        bio: updatedUser.bio ?? undefined,
+        avatarUrl: updatedUser.avatarUrl ?? undefined,
+        coverImageUrl: updatedUser.coverImageUrl ?? undefined,
         role: updatedUser.role,
         createdAt: updatedUser.createdAt.toISOString(),
         updatedAt: updatedUser.updatedAt.toISOString()

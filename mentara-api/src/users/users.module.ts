@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { ProfileController } from './profile.controller';
@@ -9,6 +10,7 @@ import { EventBusService } from '../common/events/event-bus.service';
 import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 
 @Module({
+  imports: [ConfigModule],
   controllers: [UsersController, ProfileController],
   providers: [
     UsersService,

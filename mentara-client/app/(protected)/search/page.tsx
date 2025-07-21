@@ -6,7 +6,7 @@ import { ArrowLeft, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OmniSearchBar, type EntityType, type OmniSearchFilters } from '@/components/search/OmniSearchBar';
-import { OmniSearchResults } from '@/components/search/OmniSearchResults';
+import { TabbedSearchResults } from '@/components/search/TabbedSearchResults';
 import { useOmniSearch, useTrendingSearches, useSearchSuggestions } from '@/components/search/hooks/useOmniSearch';
 import { Badge } from '@/components/ui/badge';
 
@@ -132,12 +132,13 @@ export default function SearchPage() {
 
         {/* Search Results */}
         {hasQuery && (
-          <OmniSearchResults
+          <TabbedSearchResults
             results={results || {}}
             query={query}
             isLoading={isLoading}
             onResultClick={handleResultClick}
             className="mb-8"
+            defaultTab="posts"
           />
         )}
 
