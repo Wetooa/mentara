@@ -238,19 +238,22 @@ export default function MainLayout({
 
           {/* Search Bar - Hidden on mobile */}
           <div className="relative mx-4 hidden flex-1 md:block">
-            <UserSearchBar
-              placeholder="Search users (clients, therapists, moderators)..."
-              onUserSelect={handleUserSelect}
-              showRoleFilter={false}
-              className="w-full"
-            />
+            <div className="relative">
+              <UserSearchBar
+                placeholder="Search users (clients, therapists, moderators)..."
+                onUserSelect={handleUserSelect}
+                showRoleFilter={false}
+                className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-primary/30 focus-within:shadow-xl transition-all duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-2xl pointer-events-none" />
+            </div>
           </div>
 
           {/* User Area */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="relative text-gray-700 hover:text-green-700 p-2">
+            <button className="relative p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30">
               <Bell className="h-5 w-5" />
-              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-600 text-[10px] text-white">
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-medium shadow-sm">
                 3
               </span>
             </button>
@@ -279,13 +282,16 @@ export default function MainLayout({
         </header>
 
         {/* Mobile Search Bar - Shows below header on mobile */}
-        <div className="md:hidden fixed top-[60px] left-0 right-0 z-10 bg-white border-b px-4 py-2">
-          <UserSearchBar
-            placeholder="Search users..."
-            onUserSelect={handleUserSelect}
-            showRoleFilter={false}
-            className="w-full"
-          />
+        <div className="md:hidden fixed top-[60px] left-0 right-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/50 px-4 py-3 shadow-sm">
+          <div className="relative">
+            <UserSearchBar
+              placeholder="Search users..."
+              onUserSelect={handleUserSelect}
+              showRoleFilter={false}
+              className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-md ring-1 ring-border/50 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-primary/30 focus-within:shadow-lg transition-all duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-2xl pointer-events-none" />
+          </div>
         </div>
 
         {/* Main Content - Responsive padding */}
