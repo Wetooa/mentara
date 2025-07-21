@@ -14,7 +14,7 @@ import {
   type RejectTherapistDto,
   type UpdateTherapistStatusDto,
   type PendingTherapistFiltersDto,
-} from 'mentara-commons';
+} from '../types';
 
 @Injectable()
 export class AdminTherapistService {

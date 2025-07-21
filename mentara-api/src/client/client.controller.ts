@@ -21,11 +21,8 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import {
-  UpdateClientDto,
-  User,
-  TherapistRecommendation,
-} from 'mentara-commons';
+import { User } from '../types/global';
+import type { UpdateClientDto, TherapistRecommendation } from './types';
 
 @ApiTags('clients')
 @ApiBearerAuth('JWT-auth')

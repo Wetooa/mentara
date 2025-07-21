@@ -13,10 +13,8 @@ import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
-import {
-  NotificationQuerySchema,
-  type NotificationQuery,
-} from 'mentara-commons';
+import { NotificationQuerySchema } from './validation/notification.schemas';
+import type { NotificationQuery } from './types';
 import { NotificationType, NotificationPriority } from '@prisma/client';
 
 @Controller('notifications')

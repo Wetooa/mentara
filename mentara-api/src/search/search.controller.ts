@@ -8,12 +8,14 @@ import {
   SearchCommunitiesQueryDtoSchema,
   SearchUsersQueryDtoSchema,
   GlobalSearchQueryDtoSchema,
-  type SearchTherapistsQueryDto,
-  type SearchPostsQueryDto,
-  type SearchCommunitiesQueryDto,
-  type SearchUsersQueryDto,
-  type GlobalSearchQueryDto,
-} from 'mentara-commons';
+} from './validation/search.schemas';
+import type {
+  SearchTherapistsQueryDto,
+  SearchPostsQueryDto,
+  SearchCommunitiesQueryDto,
+  SearchUsersQueryDto,
+  GlobalSearchQueryDto,
+} from './types';
 
 @Controller('search')
 @UseGuards(JwtAuthGuard)

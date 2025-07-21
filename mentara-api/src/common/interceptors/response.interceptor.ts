@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse } from 'mentara-commons';
+import { ApiResponse } from '../../types/global';
 import { ApiResponseDto } from '../dto/api-response.dto';
 
 @Injectable()

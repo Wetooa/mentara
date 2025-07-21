@@ -16,7 +16,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../../auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { AdminUserQuerySchema, type AdminUserQuery } from 'mentara-commons';
+import { AdminUserQuerySchema } from '../validation/admin.schemas';
+import type { AdminUserQuery } from '../types';
 
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard)

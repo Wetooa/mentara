@@ -19,7 +19,7 @@ import {
   UpdateAdminDtoSchema,
   type UpdateAdminDto,
   type AdminResponseDto,
-} from 'mentara-commons';
+} from '../types';
 
 @Controller('admin/accounts')
 @UseGuards(JwtAuthGuard)

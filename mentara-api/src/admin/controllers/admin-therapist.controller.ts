@@ -21,15 +21,17 @@ import {
   RejectTherapistDtoSchema,
   UpdateTherapistStatusDtoSchema,
   PendingTherapistFiltersDtoSchema,
-  type ApproveTherapistDto,
-  type RejectTherapistDto,
-  type UpdateTherapistStatusDto,
-  type PendingTherapistFiltersDto,
-  type TherapistApplicationDetailsResponse,
-  type TherapistActionResponse,
-  type TherapistApplicationMetricsResponse,
-  type TherapistListResponse,
-} from 'mentara-commons';
+} from '../validation/admin.schemas';
+import type {
+  ApproveTherapistDto,
+  RejectTherapistDto,
+  UpdateTherapistStatusDto,
+  PendingTherapistFiltersDto,
+  TherapistApplicationDetailsResponse,
+  TherapistActionResponse,
+  TherapistApplicationMetricsResponse,
+  TherapistListResponse,
+} from '../types';
 import { AdminTherapistService } from '../services/admin-therapist.service';
 
 @Controller('admin/therapists')

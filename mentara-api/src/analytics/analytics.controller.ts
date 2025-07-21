@@ -14,10 +14,12 @@ import {
   PlatformAnalyticsQueryDtoSchema,
   TherapistAnalyticsQueryDtoSchema,
   ClientAnalyticsQueryDtoSchema,
-  type PlatformAnalyticsQueryDto,
-  type TherapistAnalyticsQueryDto,
-  type ClientAnalyticsQueryDto,
-} from 'mentara-commons';
+} from './validation/analytics.schemas';
+import type {
+  PlatformAnalyticsQueryDto,
+  TherapistAnalyticsQueryDto,
+  ClientAnalyticsQueryDto,
+} from './types';
 
 @Controller('analytics')
 @UseGuards(JwtAuthGuard)

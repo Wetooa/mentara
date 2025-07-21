@@ -7,11 +7,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import {
-  User,
-  UpdateClientDto,
-  TherapistRecommendation,
-} from 'mentara-commons';
+import { User } from '../types/global';
+import type { UpdateClientDto, TherapistRecommendation } from './types';
 
 @Injectable()
 export class ClientService {

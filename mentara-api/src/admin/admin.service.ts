@@ -9,7 +9,7 @@ import {
   type CreateAdminDto,
   type UpdateAdminDto,
   type AdminResponseDto,
-} from 'mentara-commons';
+} from '../types';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
