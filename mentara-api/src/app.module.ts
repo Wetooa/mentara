@@ -45,7 +45,7 @@ import { JwtService } from '@nestjs/jwt';
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute per IP
+        limit: 300, // 300 requests per minute per IP (increased for community interactions)
       },
       {
         name: 'auth',
@@ -56,6 +56,11 @@ import { JwtService } from '@nestjs/jwt';
         name: 'upload',
         ttl: 60000, // 1 minute
         limit: 5, // 5 file uploads per minute per IP
+      },
+      {
+        name: 'community',
+        ttl: 60000, // 1 minute
+        limit: 250, // 250 community requests per minute per IP
       },
     ]),
     EventEmitterModule.forRoot({

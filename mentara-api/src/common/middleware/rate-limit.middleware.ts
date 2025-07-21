@@ -36,8 +36,14 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     this.configs.set('api', {
       windowMs: 60 * 1000, // 1 minute
-      maxRequests: 100,
+      maxRequests: 300, // Increased for better user experience
       message: 'Too many requests, please try again later',
+    });
+
+    this.configs.set('community', {
+      windowMs: 60 * 1000, // 1 minute
+      maxRequests: 250, // Higher limit for community interactions
+      message: 'Too many community requests, please try again in a moment',
     });
 
     this.configs.set('upload', {
@@ -140,6 +146,10 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     if (path.startsWith('/auth')) {
       return 'auth';
+    }
+
+    if (path.startsWith('/communities') || path.includes('/community')) {
+      return 'community';
     }
 
     if (
