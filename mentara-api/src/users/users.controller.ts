@@ -30,7 +30,6 @@ import type {
   UpdateUserRequest,
   UserDto,
 } from './types';
-import type { SuccessResponse } from '../types/global';
 import { UsersService } from './users.service';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { RoleUtils } from 'src/utils/role-utils';
@@ -237,7 +236,7 @@ export class UsersController {
   async remove(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
-  ): Promise<SuccessResponse> {
+  ): Promise<SuccessMessageDto> {
     try {
       // Users can only deactivate their own account unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -273,7 +272,7 @@ export class UsersController {
     body: DeactivateUserDto,
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
-  ): Promise<SuccessResponse> {
+  ): Promise<SuccessMessageDto> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
@@ -298,7 +297,7 @@ export class UsersController {
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
-  ): Promise<SuccessResponse> {
+  ): Promise<SuccessMessageDto> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }

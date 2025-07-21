@@ -35,7 +35,6 @@ export type {
   AdminAuthResponse,
   ModeratorAuthResponse,
   EmailResponse,
-  SuccessResponse,
   UserResponse,
   TokenPair,
   AuthUser,

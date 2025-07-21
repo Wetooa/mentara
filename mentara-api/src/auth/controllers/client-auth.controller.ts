@@ -20,9 +20,9 @@ import type {
   ClientAuthResponse,
   ClientProfileResponse,
   OnboardingStatusResponse,
-  SuccessResponse,
   EmailResponse,
 } from '../types';
+import type { SuccessResponse } from '../../types/global';
 
 // Import validation schemas from local validation
 import {

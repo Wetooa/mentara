@@ -41,7 +41,7 @@ export class BookingService {
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     const { startTime, therapistId, duration } = createMeetingDto;
-    const startTimeDate = new Date(startTime);
+    const startTimeDate = new Date(startTime || createMeetingDto.dateTime);
     const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
 
     // Use database transaction to prevent race conditions

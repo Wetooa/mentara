@@ -1,5 +1,6 @@
 import type { UserDto } from '../../users/types';
 import type { AuthResponse } from '../../auth/types';
+import { UserRole } from '../../types/global';
 
 // Define UserProfileResponse locally since it's only used here
 interface UserProfileResponse extends UserDto {
@@ -100,8 +101,10 @@ export class AuthResponseDto implements AuthResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
-    emailVerified: boolean;
+    role: UserRole;
+    isEmailVerified: boolean;
+    createdAt: Date;
+    updatedAt: Date;
   };
   token: string;
   message: string;
@@ -114,7 +117,9 @@ export class AuthResponseDto implements AuthResponse {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       role: user.role,
-      emailVerified: user.emailVerified || false,
+      isEmailVerified: user.emailVerified || user.isEmailVerified || false,
+      createdAt: user.createdAt || new Date(),
+      updatedAt: user.updatedAt || new Date(),
     };
     this.token = token;
     this.message = message;

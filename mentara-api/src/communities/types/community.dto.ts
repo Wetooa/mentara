@@ -43,6 +43,7 @@ export interface GenerateRecommendationsDto {
   excludeCommunityIds?: string[];
   basedOnActivity?: boolean;
   basedOnProfile?: boolean;
+  force?: boolean; // Force regeneration of recommendations
 }
 
 export interface RecommendationInteractionDto {
@@ -61,7 +62,9 @@ export interface RecommendationQueryDto {
   offset?: number;
   category?: string;
   includeJoined?: boolean;
-  sortBy?: 'relevance' | 'popularity' | 'recent' | 'activity';
+  sortBy?: 'relevance' | 'popularity' | 'recent' | 'activity' | 'compatibility' | 'created' | 'updated';
+  sortOrder?: 'asc' | 'desc';
+  status?: 'pending' | 'accepted' | 'rejected';
   filters?: {
     memberCount?: {
       min?: number;
@@ -81,8 +84,8 @@ export interface CommunityResponse {
   imageUrl: string;
   isPrivate?: boolean;
   memberCount?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   category?: string;
   tags?: string[];
   rules?: string[];
@@ -96,8 +99,11 @@ export interface CommunityStatsResponse {
   postCount?: number;
   activeMembers?: number;
   totalMembers?: number;
+  totalPosts?: number;
+  activeCommunities?: number;
   weeklyActivity?: number;
   monthlyGrowth?: number;
+  illnessCommunities?: any[];
 }
 
 export interface CommunityRecommendationResponse {

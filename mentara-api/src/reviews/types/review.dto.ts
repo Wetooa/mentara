@@ -82,7 +82,12 @@ export interface MeetingIdParam {
 export interface ReviewResponseDto {
   id: string;
   rating: number;
+  title?: string;
+  content?: string;
   comment?: string;
+  therapistId: string;
+  clientId: string;
+  meetingId?: string;
   isAnonymous: boolean;
   status: 'pending' | 'approved' | 'rejected' | 'flagged' | 'hidden';
   categories: {
@@ -96,7 +101,6 @@ export interface ReviewResponseDto {
   wouldRecommend?: boolean;
   helpfulCount: number;
   isHelpfulByUser?: boolean;
-  clientId: string;
   client?: {
     id: string;
     firstName?: string;
@@ -104,7 +108,6 @@ export interface ReviewResponseDto {
     avatarUrl?: string;
     isAnonymous?: boolean;
   };
-  therapistId: string;
   therapist: {
     id: string;
     user: {
@@ -113,7 +116,6 @@ export interface ReviewResponseDto {
       avatarUrl?: string;
     };
   };
-  meetingId?: string;
   moderatorNotes?: string;
   createdAt: string;
   updatedAt: string;
@@ -143,14 +145,17 @@ export interface ReviewStatsDto {
 
 export interface ReviewListResponse {
   reviews: ReviewResponseDto[];
-  stats: ReviewStatsDto;
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  averageRating: number;
+  ratingDistribution: {
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
   };
 }
 

@@ -65,6 +65,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -103,6 +104,7 @@ export class EmailService {
       this.logger.log('✅ OTP email sent successfully:', { email, subject });
 
       return {
+        success: true,
         status: 'success',
         message: 'OTP email sent successfully',
       };
@@ -112,6 +114,7 @@ export class EmailService {
       this.logger.error('❌ Failed to send OTP email:', errorMessage);
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send OTP email: ${errorMessage}`,
       };
@@ -132,6 +135,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -176,6 +180,7 @@ export class EmailService {
       });
 
       return {
+        success: true,
         status: 'success',
         message: 'Therapist registration success email sent successfully',
       };
@@ -188,6 +193,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send therapist registration success email: ${errorMessage}`,
       };
@@ -208,6 +214,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -254,6 +261,7 @@ export class EmailService {
       this.logger.log('✅ Therapist approved email sent:', { email, subject });
 
       return {
+        success: true,
         status: 'success',
         message: 'Therapist approved email sent successfully',
       };
@@ -266,6 +274,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send therapist approved email: ${errorMessage}`,
       };
@@ -286,6 +295,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -328,6 +338,7 @@ export class EmailService {
       this.logger.log('✅ Therapist denied email sent:', { email, subject });
 
       return {
+        success: true,
         status: 'success',
         message: 'Therapist denied email sent successfully',
       };
@@ -340,6 +351,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send therapist denied email: ${errorMessage}`,
       };
@@ -362,6 +374,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -399,6 +412,7 @@ export class EmailService {
       this.logger.log('✅ Password reset email sent:', { email, subject });
 
       return {
+        success: true,
         status: 'success',
         message: 'Password reset email sent successfully',
       };
@@ -411,6 +425,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send password reset email: ${errorMessage}`,
       };
@@ -431,6 +446,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -475,6 +491,7 @@ export class EmailService {
       });
 
       return {
+        success: true,
         status: 'success',
         message: 'Password reset success email sent successfully',
       };
@@ -487,6 +504,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send password reset success email: ${errorMessage}`,
       };
@@ -517,6 +535,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -591,6 +610,7 @@ export class EmailService {
       });
 
       return {
+        success: true,
         status: 'success',
         message: 'Meeting booking confirmation email sent successfully',
       };
@@ -603,6 +623,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send meeting booking confirmation email: ${errorMessage}`,
       };
@@ -633,6 +654,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -724,6 +746,7 @@ export class EmailService {
       });
 
       return {
+        success: true,
         status: 'success',
         message: 'Meeting reminder email sent successfully',
       };
@@ -736,6 +759,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send meeting reminder email: ${errorMessage}`,
       };
@@ -766,6 +790,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -840,6 +865,7 @@ export class EmailService {
       });
 
       return {
+        success: true,
         status: 'success',
         message: 'Meeting cancellation email sent successfully',
       };
@@ -852,6 +878,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send meeting cancellation email: ${errorMessage}`,
       };
@@ -880,6 +907,7 @@ export class EmailService {
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
+        success: false,
         status: 'error',
         message:
           'EmailJS not properly initialized. Check environment variables.',
@@ -948,6 +976,7 @@ export class EmailService {
       });
 
       return {
+        success: true,
         status: 'success',
         message: 'Payment confirmation email sent successfully',
       };
@@ -960,6 +989,7 @@ export class EmailService {
       );
 
       return {
+        success: false,
         status: 'error',
         message: `Failed to send payment confirmation email: ${errorMessage}`,
       };

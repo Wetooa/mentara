@@ -21,7 +21,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { User } from '../types/global';
+// Import will be resolved via service return type
 import type { UpdateClientDto, TherapistRecommendation } from './types';
 
 @ApiTags('clients')
@@ -43,7 +43,7 @@ export class ClientController {
     description: 'Retrieved successfully',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getProfile(@CurrentUserId() id: string): Promise<User> {
+  async getProfile(@CurrentUserId() id: string) {
     try {
       return await this.clientService.getProfile(id);
     } catch (error) {
@@ -68,7 +68,7 @@ export class ClientController {
   async updateProfile(
     @CurrentUserId() id: string,
     @Body() data: UpdateClientDto,
-  ): Promise<User> {
+  ) {
     try {
       return await this.clientService.updateProfile(id, data);
     } catch (error) {

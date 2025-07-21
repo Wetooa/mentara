@@ -364,6 +364,8 @@ export class MeetingsService {
 
     const videoRoomResponse: VideoRoomResponse = {
       roomId,
+      meetingId,
+      joinUrl: `https://video.mentara.app/room/${roomId}`,
       roomUrl: `https://video.mentara.app/room/${roomId}`, // Replace with actual video service URL
       accessToken,
       participantToken,
@@ -373,9 +375,18 @@ export class MeetingsService {
         enableChat: createRoomDto.enableChat,
         recordingActive: false,
       },
+      participants: [],
+      roomSettings: {
+        maxParticipants: createRoomDto.maxParticipants || 2,
+        recordingEnabled: createRoomDto.recordingEnabled || false,
+        screenShareEnabled: createRoomDto.screenShareEnabled || true,
+        chatEnabled: createRoomDto.chatEnabled || true,
+        waitingRoomEnabled: createRoomDto.waitingRoomEnabled || false,
+      },
       expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(), // 4 hours
       participantCount: 1,
       status: 'waiting',
+      createdAt: new Date().toISOString(),
     };
 
     // Emit meeting started event
@@ -426,6 +437,8 @@ export class MeetingsService {
 
     const videoRoomResponse: VideoRoomResponse = {
       roomId,
+      meetingId,
+      joinUrl: `https://video.mentara.app/room/${roomId}`,
       roomUrl: `https://video.mentara.app/room/${roomId}`,
       accessToken,
       participantToken,
@@ -435,9 +448,18 @@ export class MeetingsService {
         enableChat: true,
         recordingActive: false,
       },
+      participants: [],
+      roomSettings: {
+        maxParticipants: 2,
+        recordingEnabled: false,
+        screenShareEnabled: true,
+        chatEnabled: true,
+        waitingRoomEnabled: false,
+      },
       expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
       participantCount: 2,
       status: 'active',
+      createdAt: new Date().toISOString(),
     };
 
     this.logger.log(
@@ -460,20 +482,30 @@ export class MeetingsService {
     const videoCallStatus: VideoCallStatus = {
       meetingId,
       roomId: `room_${meetingId}`,
+      isActive: meeting.status === 'IN_PROGRESS',
+      participantCount: 2, // Client + Therapist
       status: meeting.status === 'IN_PROGRESS' ? 'active' : 'waiting',
       participants: [
         {
+          userId: meeting.clientId,
           id: meeting.clientId,
           name: 'Client', // In production, fetch actual user names
           role: 'client',
           joinedAt: meeting.startTime.toISOString(),
+          isHost: false,
+          audioEnabled: true,
+          videoEnabled: true,
           connectionStatus: 'connected',
         },
         {
+          userId: meeting.therapistId,
           id: meeting.therapistId,
           name: 'Therapist',
           role: 'therapist',
           joinedAt: meeting.startTime.toISOString(),
+          isHost: true,
+          audioEnabled: true,
+          videoEnabled: true,
           connectionStatus: 'connected',
         },
       ],
@@ -510,18 +542,19 @@ export class MeetingsService {
     });
 
     // Save session summary if provided
-    if (endCallDto.sessionSummary) {
+    if (endCallDto.duration || endCallDto.reason || endCallDto.participantFeedback) {
       await this.prisma.meetingNotes.create({
         data: {
           id: `notes_${meetingId}_${Date.now()}`,
           meetingId,
           notes: JSON.stringify({
             sessionType: 'REGULAR_THERAPY',
-            duration: endCallDto.sessionSummary.duration,
-            endReason: endCallDto.endReason,
-            connectionQuality: endCallDto.sessionSummary.connectionQuality,
-            technicalIssues: endCallDto.sessionSummary.technicalIssues,
-            nextSteps: endCallDto.nextSteps,
+            duration: endCallDto.duration,
+            endReason: endCallDto.reason,
+            audioQuality: endCallDto.participantFeedback?.audioQuality,
+            videoQuality: endCallDto.participantFeedback?.videoQuality,
+            overallExperience: endCallDto.participantFeedback?.overallExperience,
+            issues: endCallDto.participantFeedback?.issues,
             platform: 'video',
             endTime: new Date().toISOString(),
           }),
@@ -536,13 +569,13 @@ export class MeetingsService {
         clientId: meeting.clientId,
         therapistId: meeting.therapistId,
         completedAt: new Date(),
-        actualDuration: endCallDto.sessionSummary?.duration || meeting.duration,
+        actualDuration: endCallDto.duration || meeting.duration,
         scheduledDuration: meeting.duration,
       }),
     );
 
     this.logger.log(
-      `Video call ended for meeting ${meetingId}: ${endCallDto.endReason}`,
+      `Video call ended for meeting ${meetingId}: ${endCallDto.reason}`,
     );
   }
 

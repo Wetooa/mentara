@@ -27,8 +27,8 @@ import type {
   ResendVerificationEmailDto,
   AuthResponse,
   UserResponse,
-  SuccessResponse,
 } from './types';
+import type { SuccessResponse } from '../types/global';
 
 // Import validation schemas from local validation
 import {

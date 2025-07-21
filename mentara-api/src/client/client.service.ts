@@ -7,7 +7,16 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { User } from '../types/global';
+// Client profile DTO interface
+interface ClientProfileDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
 import type { UpdateClientDto, TherapistRecommendation } from './types';
 
 @Injectable()
@@ -16,7 +25,7 @@ export class ClientService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getProfile(userId: string): Promise<User> {
+  async getProfile(userId: string): Promise<ClientProfileDto> {
     try {
       const client = await this.prisma.client.findUnique({
         where: { userId },
@@ -50,7 +59,7 @@ export class ClientService {
     }
   }
 
-  async updateProfile(userId: string, data: UpdateClientDto): Promise<User> {
+  async updateProfile(userId: string, data: UpdateClientDto): Promise<ClientProfileDto> {
     try {
       const updatedClient = await this.prisma.client.update({
         where: { userId },
@@ -243,7 +252,7 @@ export class ClientService {
     });
   }
 
-  private transformPrismaUserToDTO(user: any): User {
+  private transformPrismaUserToDTO(user: any): ClientProfileDto {
     return {
       id: user.id,
       email: user.email,

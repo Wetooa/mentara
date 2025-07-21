@@ -22,5 +22,5 @@ export interface ProcessSessionPaymentDto {
   amount: number;
   currency?: string;
   description?: string;
-  therapistId?: string; // Required by billing service
+  therapistId: string; // Required by billing service
 }

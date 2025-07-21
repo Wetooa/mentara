@@ -6,12 +6,14 @@
 // Video room creation DTO
 export interface CreateVideoRoomDto {
   meetingId: string;
-  participantIds: string[];
+  participantIds?: string[];
   roomType?: 'consultation' | 'therapy' | 'group' | 'emergency';
   maxParticipants?: number;
   recordingEnabled?: boolean;
+  enableRecording?: boolean; // Alternative property name
   screenShareEnabled?: boolean;
   chatEnabled?: boolean;
+  enableChat?: boolean; // Alternative property name
   waitingRoomEnabled?: boolean;
   metadata?: {
     title?: string;
@@ -25,6 +27,7 @@ export interface CreateVideoRoomDto {
 export interface JoinVideoRoomDto {
   roomId: string;
   userType: 'host' | 'participant' | 'observer';
+  role?: 'host' | 'participant' | 'observer'; // Alternative property name
   displayName?: string;
   audioEnabled?: boolean;
   videoEnabled?: boolean;
@@ -50,7 +53,7 @@ export interface EndVideoCallDto {
 
 // Meeting status update DTO
 export interface UpdateMeetingStatusDto {
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled' | 'missed' | 'rescheduled';
+  status: 'scheduled' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'missed' | 'rescheduled';
   reason?: string;
   rescheduledTo?: string; // ISO datetime string
   notes?: string;
@@ -101,9 +104,15 @@ export interface SaveMeetingSessionDto {
 export interface VideoRoomResponse {
   roomId: string;
   meetingId: string;
-  status: 'created' | 'active' | 'ended';
+  status: 'created' | 'active' | 'ended' | 'waiting';
   joinUrl: string;
+  roomUrl?: string; // Alternative property name for joinUrl
   hostJoinUrl?: string;
+  accessToken?: string; // Access token for video room
+  participantToken?: string; // Participant token for video room
+  roomConfig?: any; // Room configuration object
+  expiresAt?: string; // Room expiration time
+  participantCount?: number; // Number of participants
   participants: {
     userId: string;
     userType: 'host' | 'participant' | 'observer';
@@ -125,18 +134,25 @@ export interface VideoRoomResponse {
 
 export interface VideoCallStatus {
   roomId: string;
+  meetingId: string;
   isActive: boolean;
   participantCount: number;
   duration?: number; // in seconds
-  status: 'waiting' | 'in_progress' | 'ended';
+  status: 'waiting' | 'in_progress' | 'ended' | 'active';
   participants: {
     userId: string;
+    id?: string; // Alternative property name for userId
     displayName?: string;
+    name?: string; // Alternative property name for displayName
+    role?: string; // User role (client, therapist, etc.)
+    joinedAt?: string; // Timestamp when user joined
     isHost: boolean;
     audioEnabled: boolean;
     videoEnabled: boolean;
     connectionStatus: 'connected' | 'connecting' | 'disconnected';
   }[];
+  startedAt?: string;
+  endedAt?: string;
   technicalInfo?: {
     averageLatency?: number;
     averageBitrate?: number;

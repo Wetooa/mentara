@@ -33,50 +33,13 @@ import {
 import type {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
+  CommunityResponse,
+  CommunityStatsResponse,
 } from './types';
-
-// Local response interfaces
-interface CommunityResponse {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  imageUrl: string;
-  isPrivate?: boolean;
-  memberCount?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface CommunityStatsResponse {
-  memberCount?: number;
-  postCount?: number;
-  activeMembers?: number;
-  totalMembers?: number;
-  totalPosts?: number;
-  activeCommunities?: number;
-  illnessCommunities?: any[];
-}
-
-interface CommunityWithMembersResponse extends CommunityResponse {
-  members: any[];
-}
-
-interface CommunityWithRoomGroupsResponse extends CommunityResponse {
-  roomGroups: Array<{
-    id: string;
-    name: string;
-    order: number;
-    communityId: string;
-    rooms: Array<{
-      id: string;
-      name: string;
-      order: number;
-      postingRole: string;
-      roomGroupId: string;
-    }>;
-  }>;
-}
+import {
+  CommunityWithMembersResponse,
+  CommunityWithRoomGroupsResponse,
+} from './communities.service';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 

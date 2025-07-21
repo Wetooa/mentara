@@ -8,31 +8,11 @@ import { RoomGroup, Room } from '@prisma/client';
 import type {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
+  CommunityResponse,
+  CommunityStatsResponse,
 } from './types';
 
-// Exported response interfaces
-export interface CommunityResponse {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  imageUrl: string;
-  isPrivate?: boolean;
-  memberCount?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CommunityStatsResponse {
-  memberCount?: number;
-  postCount?: number;
-  activeMembers?: number;
-  totalMembers?: number;
-  totalPosts?: number;
-  activeCommunities?: number;
-  illnessCommunities?: any[];
-}
-
+// Extended response interfaces for complex operations
 export interface CommunityWithMembersResponse extends CommunityResponse {
   members: any[];
 }

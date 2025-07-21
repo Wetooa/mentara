@@ -291,16 +291,14 @@ export class ReviewsService {
               lastName: review.client.user?.lastName,
             }
           : undefined,
-        therapist: review.therapist
-          ? {
-              id: review.therapistId,
-              user: {
-                firstName: review.therapist.user?.firstName || '',
-                lastName: review.therapist.user?.lastName || '',
-                avatarUrl: review.therapist.user?.avatarUrl,
-              },
-            }
-          : undefined,
+        therapist: {
+          id: review.therapistId,
+          user: {
+            firstName: review.therapist?.user?.firstName || '',
+            lastName: review.therapist?.user?.lastName || '',
+            avatarUrl: review.therapist?.user?.avatarUrl || undefined,
+          },
+        },
       })),
       totalCount,
       page,

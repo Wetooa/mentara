@@ -161,12 +161,6 @@ export interface OnboardingStatusResponse {
   nextStep?: string;
 }
 
-// Success response
-export interface SuccessResponse {
-  success: boolean;
-  message: string;
-}
-
 // User response (for user data without tokens)
 export interface UserResponse {
   user: AuthUser;

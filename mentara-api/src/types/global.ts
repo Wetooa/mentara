@@ -51,26 +51,8 @@ export interface FilterQuery {
   status?: string;
 }
 
-// API Response wrappers
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  errors?: string[];
-}
-
-export interface PaginationMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
-
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
-  meta: PaginationMeta;
-}
+// DEPRECATED: API Response types moved to src/common/dto/api-response.dto.ts
+// Import ApiResponse, PaginationMeta, PaginatedResponse from there instead
 
 // Common response types
 export interface SuccessResponse {
