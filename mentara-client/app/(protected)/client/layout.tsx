@@ -87,7 +87,7 @@ export default function MainLayout({
               <Link
                 key={item.id}
                 href={item.path}
-                className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-out ${
+                className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out ${
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-primary"
@@ -95,7 +95,7 @@ export default function MainLayout({
               >
                 {/* Discord-style bevel background */}
                 <div
-                  className={`absolute inset-0 transition-all duration-300 ease-out ${
+                  className={`absolute inset-0 transition-all duration-400 ease-in-out ${
                     isActive
                       ? "bg-primary/15 rounded-2xl scale-100"
                       : "bg-transparent rounded-full scale-75 group-hover:bg-primary/10 group-hover:rounded-2xl group-hover:scale-100"
@@ -104,7 +104,7 @@ export default function MainLayout({
 
                 {/* Left accent indicator */}
                 <div
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-out ${
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-in-out ${
                     isActive
                       ? "h-8 opacity-100"
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"

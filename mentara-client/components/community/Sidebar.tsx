@@ -304,7 +304,7 @@ export default function CommunitySidebar({
                             {roomGroup.rooms.length}
                           </span>
                         </button>
-                        {!isCollapsed && (
+                        <div className={`room-group-content ${!isCollapsed ? 'room-group-content--open' : ''}`}>
                           <div className="space-y-1">
                         {roomGroup.rooms
                           .sort((a, b) => a.order - b.order)
@@ -345,7 +345,7 @@ export default function CommunitySidebar({
                             );
                           })}
                             </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
