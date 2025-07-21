@@ -7,11 +7,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
+import type {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
-} from 'mentara-commons';
+} from './types';
 import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
 import { EventBusService } from '../common/events/event-bus.service';
 import {

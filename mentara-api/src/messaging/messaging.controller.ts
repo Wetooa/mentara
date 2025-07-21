@@ -22,7 +22,7 @@ import {
   SupabaseStorageService,
   FileUploadResult,
 } from '../common/services/supabase-storage.service';
-import {
+import type {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
@@ -30,7 +30,7 @@ import {
   BlockUserDto,
   SearchMessagesDto,
   ConversationListParams,
-} from 'mentara-commons';
+} from './types';
 
 @Controller('messaging')
 @UseGuards(JwtAuthGuard)

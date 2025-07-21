@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-import {
+import type {
   WorksheetCreateInputDto,
   WorksheetSubmissionCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'mentara-commons';
+} from './types';
 
 @Injectable()
 export class WorksheetsService {

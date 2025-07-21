@@ -2,11 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { WorksheetsService } from './worksheets.service';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
+import type {
   WorksheetCreateInputDto,
   WorksheetSubmissionCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'mentara-commons';
+} from './types';
 
 describe('WorksheetsService', () => {
   let service: WorksheetsService;
