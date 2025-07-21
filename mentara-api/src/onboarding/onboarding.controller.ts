@@ -7,12 +7,12 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { OnboardingService, OnboardingStatus } from './onboarding.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
 
 @Controller('onboarding')
 @UseGuards(JwtAuthGuard)
@@ -40,11 +40,14 @@ export class OnboardingController {
   }
 
   @Get('status/:userId')
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
   async getUserOnboardingStatus(
     @Param('userId') userId: string,
+    @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<OnboardingStatus> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       return await this.onboardingService.getOnboardingStatus(userId);
     } catch (error) {

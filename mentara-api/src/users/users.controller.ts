@@ -16,9 +16,8 @@ import {
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from 'src/auth/guards/admin-auth.guard';
-import { AdminOnly } from 'src/auth/decorators/admin-only.decorator';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
 import {
   UserIdParamSchema,
@@ -47,9 +46,13 @@ export class UsersController {
   ) {}
 
   @Get()
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
-  async findAll(@CurrentUserId() currentUserId: string): Promise<UserResponse[]> {
+  async findAll(
+    @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
+  ): Promise<UserResponse[]> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving all users`);
       const users = await this.usersService.findAll();
@@ -64,11 +67,13 @@ export class UsersController {
   }
 
   @Get('all-including-inactive')
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
   async findAllIncludeInactive(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<UserResponse[]> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(
         `Admin ${currentUserId} retrieving all users including inactive`,
@@ -260,14 +265,16 @@ export class UsersController {
   }
 
   @Post(':id/deactivate')
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
   async deactivateUser(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @Body(new ZodValidationPipe(DeactivateUserDtoSchema))
     body: DeactivateUserDto,
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<SuccessMessageResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(
         `Admin ${currentUserId} deactivating user ${params.id} with reason: ${body.reason}`,
@@ -285,12 +292,14 @@ export class UsersController {
   }
 
   @Post(':id/reactivate')
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
   async reactivateUser(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
   ): Promise<SuccessMessageResponse> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} reactivating user ${params.id}`);
       await this.usersService.reactivate(params.id);
