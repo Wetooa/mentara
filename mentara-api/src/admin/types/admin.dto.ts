@@ -59,6 +59,33 @@ export interface CreateAdminAccountDto {
   role: 'admin' | 'moderator';
 }
 
+export interface CreateAdminDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: 'admin' | 'moderator';
+}
+
+export interface UpdateAdminDto {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: 'admin' | 'moderator';
+  isActive?: boolean;
+}
+
+export interface AdminResponseDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'admin' | 'moderator';
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AdminAccountQuery {
   search?: string;
   role?: 'admin' | 'moderator';

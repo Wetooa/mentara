@@ -56,7 +56,10 @@ export interface WelcomeRecommendationQuery {
 
 export interface TherapistRecommendationRequest {
   userId: string;
-  query: TherapistRecommendationQuery;
+  limit?: number;
+  province?: string;
+  maxHourlyRate?: number;
+  query?: TherapistRecommendationQuery;
 }
 
 export interface TherapistRecommendationResponse {
