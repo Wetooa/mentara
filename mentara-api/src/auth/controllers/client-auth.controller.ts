@@ -53,8 +53,10 @@ export class ClientAuthController {
         email: result.user.email,
         firstName: result.user.firstName || '',
         lastName: result.user.lastName || '',
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
+        role: result.user.role as any,
+        isEmailVerified: result.user.emailVerified ?? false,
+        createdAt: result.user.createdAt,
+        updatedAt: result.user.updatedAt,
       },
       token: result.tokens.accessToken, // Single JWT token
       message: result.message,

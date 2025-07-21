@@ -18,6 +18,7 @@ export interface AdminUserQuery {
   search?: string;
   role?: UserRole;
   isActive?: boolean;
+  status?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   page?: number;
@@ -92,11 +93,15 @@ export interface AdminAccountQuery {
 export interface ApproveTherapistDto {
   reason?: string;
   welcomeMessage?: string;
+  verifyLicense?: boolean;
+  approvalMessage?: string;
 }
 
 export interface RejectTherapistDto {
   reason: string;
   rejectionMessage?: string;
+  allowReapplication?: boolean;
+  rejectionReason?: string;
 }
 
 export interface UpdateTherapistStatusDto {
@@ -107,6 +112,11 @@ export interface UpdateTherapistStatusDto {
 
 export interface PendingTherapistFiltersDto {
   search?: string;
+  status?: string;
+  province?: string;
+  submittedAfter?: string;
+  processedBy?: string;
+  providerType?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   page?: number;

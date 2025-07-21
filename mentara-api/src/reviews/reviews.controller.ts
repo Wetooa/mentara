@@ -142,7 +142,7 @@ export class ReviewsController {
 
     return this.reviewsService.getReviews({
       ...query,
-      status: 'PENDING',
+      status: 'pending',
     });
   }
 }

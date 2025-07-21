@@ -1,5 +1,5 @@
 export interface CreatePaymentMethodDto {
-  type: 'card' | 'bank_account';
+  type: 'CARD' | 'BANK_ACCOUNT' | 'DIGITAL_WALLET';
   cardNumber?: string;
   expiryDate?: string;
   cvv?: string;
@@ -22,4 +22,5 @@ export interface ProcessSessionPaymentDto {
   amount: number;
   currency?: string;
   description?: string;
+  therapistId?: string; // Required by billing service
 }

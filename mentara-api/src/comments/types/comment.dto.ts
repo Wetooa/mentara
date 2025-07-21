@@ -8,6 +8,7 @@ export interface CommentCreateInputDto {
   content: string;
   postId: string;
   parentCommentId?: string; // For nested/reply comments
+  parentId?: string; // Alternative property name for parentCommentId
   attachments?: string[];
   isAnonymous?: boolean;
   metadata?: {

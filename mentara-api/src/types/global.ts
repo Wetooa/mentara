@@ -1,5 +1,8 @@
 import { User } from '@prisma/client';
 
+// Re-export User for external modules
+export type { User };
+
 /**
  * Global types used across multiple modules in the application
  */
@@ -26,6 +29,9 @@ declare global {
 
 // Import UserRole from enums
 import { UserRole } from './enums';
+
+// Re-export UserRole for external modules
+export type { UserRole };
 
 // Common query parameters
 export interface PaginationQuery {

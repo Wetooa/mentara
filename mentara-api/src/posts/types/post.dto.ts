@@ -8,6 +8,7 @@ export interface PostCreateInputDto {
   title: string;
   content: string;
   communityId: string;
+  roomId?: string; // Support for room-based posts (same as communityId)
   tags?: string[];
   attachments?: string[];
   isAnonymous?: boolean;

@@ -215,6 +215,7 @@ export class ClientAuthService {
       therapistId:
         user.client?.assignedTherapists?.[0]?.therapist?.user?.id || undefined,
       createdAt: user.createdAt.toISOString(),
+      hasSeenTherapistRecommendations: user.client?.hasSeenTherapistRecommendations || false,
     };
   }
 
@@ -235,11 +236,22 @@ export class ClientAuthService {
     }
 
     // Return in the expected OnboardingStatusResponse format
+    const profileCompleted = !!(user.firstName && user.lastName && user.birthDate);
+    const assessmentCompleted = false; // TODO: implement assessment completion check
+    const completedSteps: string[] = [];
+    
+    if (profileCompleted) completedSteps.push('profile');
+    if (user.client.hasSeenTherapistRecommendations) completedSteps.push('recommendations');
+    if (assessmentCompleted) completedSteps.push('assessment');
+    
     return {
       isFirstSignIn: !user.lastLoginAt,
       hasSeenRecommendations: user.client.hasSeenTherapistRecommendations,
-      profileCompleted: !!(user.firstName && user.lastName && user.birthDate),
-      assessmentCompleted: false, // TODO: implement assessment completion check
+      profileCompleted,
+      assessmentCompleted,
+      isOnboardingComplete: profileCompleted && user.client.hasSeenTherapistRecommendations && assessmentCompleted,
+      completedSteps,
+      nextStep: !profileCompleted ? 'profile' : !user.client.hasSeenTherapistRecommendations ? 'recommendations' : !assessmentCompleted ? 'assessment' : undefined,
     };
   }
 
@@ -300,6 +312,7 @@ export class ClientAuthService {
     }
 
     return {
+      success: result.success,
       status: result.success ? 'success' : 'error',
       message: result.message,
     };
@@ -327,6 +340,7 @@ export class ClientAuthService {
     if (!user) {
       // Don't reveal if email exists for security, but return success
       return {
+        success: true,
         status: 'success',
         message:
           'If an account with this email exists, a new verification code has been sent.',
@@ -341,6 +355,7 @@ export class ClientAuthService {
     await this.emailVerificationService.resendVerificationEmail(email);
 
     return {
+      success: true,
       status: 'success',
       message: 'A new verification code has been sent to your email.',
     };

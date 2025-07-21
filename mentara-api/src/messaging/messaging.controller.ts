@@ -217,7 +217,7 @@ export class MessagingController {
     const limitNum = limit ? Number(limit) : 20;
     return this.messagingService.searchMessages(
       userId,
-      query,
+      query || '',
       conversationId,
       pageNum,
       limitNum,

@@ -84,6 +84,17 @@ export interface SaveMeetingSessionDto {
     connectionIssues?: number;
     reconnections?: number;
   };
+  // Additional properties used by service
+  sessionData?: {
+    duration?: number;
+    quality?: number;
+    issues?: string[];
+    startedAt?: string;
+    endedAt?: string;
+  };
+  sessionNotes?: string;
+  clientProgress?: string;
+  followUpActions?: string[];
 }
 
 // Meeting response DTOs

@@ -40,8 +40,8 @@ export class AdminUserController {
 
       return await this.adminService.getAllUsers({
         role: query.role,
-        page: query.page,
-        limit: query.limit,
+        page: query.page || 1,
+        limit: query.limit || 10,
         search: query.search,
         status: query.status,
         sortBy: query.sortBy,

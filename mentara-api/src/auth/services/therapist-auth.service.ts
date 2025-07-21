@@ -175,13 +175,13 @@ export class TherapistAuthService {
         data: {
           userId: user.id,
           status: 'PENDING',
-          mobile: registerData.mobile,
-          province: registerData.province,
-          providerType: registerData.providerType,
+          mobile: registerData.mobile || '',
+          province: registerData.province || '',
+          providerType: registerData.providerType || '',
           professionalLicenseType:
             registerData.professionalLicenseType_specify ||
             registerData.professionalLicenseType,
-          isPRCLicensed: registerData.isPRCLicensed,
+          isPRCLicensed: registerData.isPRCLicensed || '',
           prcLicenseNumber: registerData.prcLicenseNumber || '',
           expirationDateOfLicense: registerData.expirationDateOfLicense
             ? new Date(registerData.expirationDateOfLicense)
@@ -219,7 +219,9 @@ export class TherapistAuthService {
                   ...registerData.therapeuticApproachesUsedList.filter(
                     (t) => t !== 'other',
                   ),
-                  registerData.therapeuticApproachesUsedList_specify,
+                  ...(Array.isArray(registerData.therapeuticApproachesUsedList_specify) 
+                    ? registerData.therapeuticApproachesUsedList_specify
+                    : [registerData.therapeuticApproachesUsedList_specify]),
                 ]
               : registerData.therapeuticApproachesUsedList,
           languagesOffered: registerData.languagesOffered_specify
@@ -242,7 +244,9 @@ export class TherapistAuthService {
                 ...registerData.therapeuticApproachesUsedList.filter(
                   (t) => t !== 'other',
                 ),
-                registerData.therapeuticApproachesUsedList_specify,
+                ...(Array.isArray(registerData.therapeuticApproachesUsedList_specify) 
+                  ? registerData.therapeuticApproachesUsedList_specify
+                  : [registerData.therapeuticApproachesUsedList_specify]),
               ]
             : registerData.therapeuticApproachesUsedList,
           languages: registerData.languagesOffered_specify

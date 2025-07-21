@@ -145,6 +145,7 @@ export class ReviewsService {
               select: {
                 firstName: true,
                 lastName: true,
+                avatarUrl: true,
               },
             },
           },
@@ -225,6 +226,7 @@ export class ReviewsService {
                 select: {
                   firstName: true,
                   lastName: true,
+                  avatarUrl: true,
                 },
               },
             },
@@ -269,7 +271,16 @@ export class ReviewsService {
         clientId: review.clientId,
         meetingId: review.meetingId || undefined,
         isAnonymous: review.isAnonymous,
-        status: 'APPROVED' as const, // Default status since Review model doesn't have this field
+        status: 'approved' as const, // Default status since Review model doesn't have this field
+        categories: {
+          communication: undefined,
+          professionalism: undefined,
+          helpfulness: undefined,
+          availability: undefined,
+          overall: review.rating, // Use overall rating as fallback
+        },
+        tags: [], // Default empty array since tags are not in current Review model
+        wouldRecommend: review.rating >= 4, // Infer recommendation from rating
         helpfulCount: 0, // Default count since Review model doesn't have this field
         createdAt: review.createdAt.toISOString(),
         updatedAt: review.updatedAt.toISOString(),
@@ -283,8 +294,11 @@ export class ReviewsService {
         therapist: review.therapist
           ? {
               id: review.therapistId,
-              firstName: review.therapist.user?.firstName || '',
-              lastName: review.therapist.user?.lastName || '',
+              user: {
+                firstName: review.therapist.user?.firstName || '',
+                lastName: review.therapist.user?.lastName || '',
+                avatarUrl: review.therapist.user?.avatarUrl,
+              },
             }
           : undefined,
       })),
@@ -304,7 +318,7 @@ export class ReviewsService {
     return this.getReviews({ ...query, therapistId });
   }
 
-  async getReviewStats(therapistId: string): Promise<ReviewStats> {
+  async getReviewStats(therapistId: string): Promise<ReviewStatsDto> {
     const stats = await this.prisma.review.groupBy({
       by: ['rating'],
       where: {
@@ -406,7 +420,16 @@ export class ReviewsService {
       totalReviews,
       averageRating: Math.round(averageRating * 100) / 100,
       ratingDistribution,
-      monthlyReviews: monthlyReviewsArray,
+      categoryAverages: {
+        communication: undefined,
+        professionalism: undefined,
+        helpfulness: undefined,
+        availability: undefined,
+        overall: averageRating,
+      },
+      recommendationRate: totalReviews > 0 ? 
+        (stats.filter(s => s.rating >= 4).reduce((sum, s) => sum + s._count.rating, 0) / totalReviews) * 100 : 0,
+      totalHelpfulVotes: 0, // Default since Review model doesn't have helpful votes
       recentReviews: recentReviews.map((review) => ({
         id: review.id,
         rating: review.rating,
@@ -416,7 +439,16 @@ export class ReviewsService {
         clientId: review.clientId,
         meetingId: review.meetingId || undefined,
         isAnonymous: review.isAnonymous,
-        status: 'APPROVED' as const, // Default status since Review model doesn't have this field
+        status: 'approved' as const, // Default status since Review model doesn't have this field
+        categories: {
+          communication: undefined,
+          professionalism: undefined,
+          helpfulness: undefined,
+          availability: undefined,
+          overall: review.rating, // Use overall rating as fallback
+        },
+        tags: [], // Default empty array since tags are not in current Review model
+        wouldRecommend: review.rating >= 4, // Infer recommendation from rating
         helpfulCount: 0, // Default count since Review model doesn't have this field
         createdAt: review.createdAt.toISOString(),
         updatedAt: review.updatedAt.toISOString(),
@@ -429,8 +461,11 @@ export class ReviewsService {
           : undefined,
         therapist: {
           id: review.therapistId,
-          firstName: '',
-          lastName: '',
+          user: {
+            firstName: '',
+            lastName: '',
+            avatarUrl: undefined,
+          },
         },
       })),
     };
@@ -476,7 +511,7 @@ export class ReviewsService {
       reviewId,
       moderatedBy: moderatorId,
       status: moderateReviewDto.status || 'APPROVED',
-      moderationNote: moderateReviewDto.moderationNote,
+      moderationNote: moderateReviewDto.moderatorNotes,
     };
   }
 }

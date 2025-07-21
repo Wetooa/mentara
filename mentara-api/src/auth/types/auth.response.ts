@@ -20,13 +20,16 @@ export interface AuthUser {
   isEmailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+  client?: any; // Optional client data for client role users
 }
 
 // Auth response wrapper
 export interface AuthResponse<T = AuthUser> {
   user: T;
-  tokens: TokenPair;
+  token: string; // Simplified single token approach
+  tokens?: TokenPair; // Optional for backward compatibility
   isFirstLogin?: boolean;
+  message?: string;
 }
 
 // Role-specific auth responses
@@ -70,16 +73,23 @@ export interface ModeratorAuthResponse extends AuthResponse {
 
 // Profile responses
 export interface ClientProfileResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'client';
+  dateOfBirth?: string;
+  phoneNumber?: string;
+  profileComplete: boolean;
+  therapistId?: string;
+  createdAt: string;
   hasSeenTherapistRecommendations: boolean;
-  preAssessment?: {
-    isCompleted: boolean;
-    completedAt?: Date;
-  };
 }
 
 // Email responses
 export interface EmailResponse {
   success: boolean;
+  status?: 'success' | 'error'; // Optional status for compatibility
   message: string;
   sentTo?: string;
 }
@@ -142,6 +152,10 @@ export interface CheckUserExistsResponse {
 
 // Onboarding response
 export interface OnboardingStatusResponse {
+  isFirstSignIn: boolean;
+  hasSeenRecommendations: boolean;
+  profileCompleted: boolean;
+  assessmentCompleted: boolean;
   isOnboardingComplete: boolean;
   completedSteps: string[];
   nextStep?: string;

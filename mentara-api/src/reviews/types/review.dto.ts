@@ -6,7 +6,9 @@
 // Review creation DTO
 export interface CreateReviewDto {
   rating: number;
+  title?: string; // Review title
   comment?: string;
+  content?: string; // Alternative to comment
   isAnonymous?: boolean;
   categories?: {
     communication?: number;
@@ -38,6 +40,7 @@ export interface UpdateReviewDto {
 // Review moderation DTO
 export interface ModerateReviewDto {
   action: 'approve' | 'reject' | 'flag' | 'hide';
+  status?: string; // Status to set for the review
   reason?: string;
   moderatorNotes?: string;
 }
@@ -55,6 +58,7 @@ export interface GetReviewsDto {
   sortOrder?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
+  page?: number; // Page number for pagination
   includeModerated?: boolean;
   dateFrom?: string;
   dateTo?: string;
@@ -134,6 +138,7 @@ export interface ReviewStatsDto {
   };
   recommendationRate: number;
   totalHelpfulVotes: number;
+  recentReviews?: any[]; // Support for recent reviews in stats
 }
 
 export interface ReviewListResponse {

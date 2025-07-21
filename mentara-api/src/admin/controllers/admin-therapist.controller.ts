@@ -33,6 +33,7 @@ import type {
   TherapistListResponse,
 } from '../types';
 import { AdminTherapistService } from '../services/admin-therapist.service';
+import { AdminResponseTransformer } from '../transformers/admin-response.transformer';
 
 @Controller('admin/therapists')
 @UseGuards(JwtAuthGuard)
@@ -53,7 +54,8 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} fetching pending therapist applications`);
-    return this.adminTherapistService.getPendingApplications(filters);
+    const serviceResponse = await this.adminTherapistService.getPendingApplications(filters);
+    return AdminResponseTransformer.transformTherapistList(serviceResponse);
   }
 
   @Get('applications')
@@ -68,7 +70,8 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} fetching all therapist applications`);
-    return this.adminTherapistService.getPendingApplications(filters);
+    const serviceResponse = await this.adminTherapistService.getPendingApplications(filters);
+    return AdminResponseTransformer.transformTherapistList(serviceResponse);
   }
 
   @Get(':id/details')
@@ -84,7 +87,8 @@ export class AdminTherapistController {
     this.logger.log(
       `Admin ${adminId} viewing therapist application ${therapistId}`,
     );
-    return this.adminTherapistService.getApplicationDetails(therapistId);
+    const serviceResponse = await this.adminTherapistService.getApplicationDetails(therapistId);
+    return AdminResponseTransformer.transformApplicationDetails(serviceResponse);
   }
 
   @Post(':id/approve')
@@ -100,11 +104,12 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} approving therapist ${therapistId}`);
-    return this.adminTherapistService.approveTherapist(
+    const serviceResponse = await this.adminTherapistService.approveTherapist(
       therapistId,
       adminId,
       approvalDto,
     );
+    return AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
   }
 
   @Post(':id/reject')
@@ -120,11 +125,12 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} rejecting therapist ${therapistId}`);
-    return this.adminTherapistService.rejectTherapist(
+    const serviceResponse = await this.adminTherapistService.rejectTherapist(
       therapistId,
       adminId,
       rejectionDto,
     );
+    return AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
   }
 
   @Put(':id/status')
@@ -142,11 +148,12 @@ export class AdminTherapistController {
     this.logger.log(
       `Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`,
     );
-    return this.adminTherapistService.updateTherapistStatus(
+    const serviceResponse = await this.adminTherapistService.updateTherapistStatus(
       therapistId,
       adminId,
       statusDto,
     );
+    return AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
   }
 
   @Get('metrics')
@@ -161,9 +168,10 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} fetching therapist application metrics`);
-    return this.adminTherapistService.getTherapistApplicationMetrics(
+    const serviceResponse = await this.adminTherapistService.getTherapistApplicationMetrics(
       startDate,
       endDate,
     );
+    return AdminResponseTransformer.transformApplicationMetrics(serviceResponse);
   }
 }

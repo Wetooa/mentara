@@ -67,14 +67,38 @@ export class AuthController {
   @Get('me')
   async getMe(@CurrentUserId() id: string): Promise<UserResponse> {
     const user = await this.authService.getUser(id);
-    return UserResponseDto.fromPrismaUser(user);
+    return { 
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: user.emailVerified ?? false,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: user.client || undefined,
+      }
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('users')
   async getAllUsers(): Promise<UserResponse[]> {
     const users = await this.authService.getUsers();
-    return UserResponseDto.fromPrismaUsers(users);
+    return users.map(user => ({
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: user.emailVerified ?? false,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: user.client || undefined,
+      }
+    }));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -113,7 +137,9 @@ export class AuthController {
         firstName: result.user.firstName || '',
         lastName: result.user.lastName || '',
         role: result.user.role,
-        emailVerified: result.user.emailVerified,
+        isEmailVerified: result.user.emailVerified ?? false,
+        createdAt: result.user.createdAt,
+        updatedAt: result.user.updatedAt,
         client: result.user.client,
       },
       token: result.token,
@@ -139,7 +165,19 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    return UserResponseDto.fromPrismaUser(user);
+    return { 
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: user.emailVerified ?? false,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: user.client || undefined,
+      }
+    };
   }
 
   // ===== SECURE ROLE CHECKING ENDPOINT =====

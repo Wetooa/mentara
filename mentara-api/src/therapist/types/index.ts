@@ -7,7 +7,6 @@ export * from './therapist.dto';
 
 // Re-export commonly used types for convenience
 export type {
-  WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
   TherapistRecommendationQuery,
   WelcomeRecommendationQuery,
@@ -15,3 +14,6 @@ export type {
   TherapistRecommendationResponse,
   TherapistRecommendationResponseDto,
 } from './therapist.dto';
+
+// Import WorksheetCreateInputDto from canonical worksheets module to avoid duplication
+export type { WorksheetCreateInputDto } from '../../worksheets/types/worksheet.dto';

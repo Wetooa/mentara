@@ -97,6 +97,12 @@ export interface RegisterClientDto {
   password: string;
   firstName: string;
   lastName: string;
+  middleName?: string;
+  birthDate?: string; // ISO date string
+  address?: string;
+  avatarUrl?: string;
+  hasSeenTherapistRecommendations?: boolean;
+  preassessmentAnswers?: any; // Pre-assessment responses
 }
 
 export interface RegisterAdminDto {
@@ -127,6 +133,31 @@ export interface RegisterTherapistDto {
   experience: number;
   languages: string[];
   hourlyRate?: number;
+  mobile: string;
+  province: string;
+  providerType: string;
+  professionalLicenseType_specify?: string;
+  professionalLicenseType: string;
+  isPRCLicensed: string; // Changed to string to match usage
+  prcLicenseNumber?: string;
+  expirationDateOfLicense: string; // ISO date string
+  practiceStartDate: string; // ISO date string
+  preferredSessionLength_specify?: string;
+  preferredSessionLength: string;
+  providedOnlineTherapyBefore: string; // Changed to string to match usage
+  comfortableUsingVideoConferencing: string; // Changed to string to match usage
+  compliesWithDataPrivacyAct: string; // Changed to string to match usage
+  willingToAbideByPlatformGuidelines: string; // Changed to string to match usage
+  areasOfExpertise: string[];
+  assessmentTools: string[];
+  therapeuticApproachesUsedList: string[];
+  therapeuticApproachesUsedList_specify?: string[];
+  languagesOffered: string[];
+  languagesOffered_specify?: string;
+  privateConfidentialSpace: string;
+  professionalLiabilityInsurance: string;
+  complaintsOrDisciplinaryActions: string;
+  accepts?: string[];
 }
 
 // Session management DTOs

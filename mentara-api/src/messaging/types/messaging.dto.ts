@@ -21,9 +21,14 @@ export interface CreateConversationDto {
 // Message sending DTO
 export interface SendMessageDto {
   content: string;
-  type: 'text' | 'image' | 'file' | 'audio' | 'video' | 'system';
+  type?: 'text' | 'image' | 'file' | 'audio' | 'video' | 'system';
+  messageType?: 'text' | 'image' | 'file' | 'audio' | 'video' | 'system';
   replyToMessageId?: string;
+  replyToId?: string;
   attachments?: string[];
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
   metadata?: {
     mentions?: string[];
     links?: string[];
@@ -53,6 +58,7 @@ export interface AddReactionDto {
 
 // Block user DTO
 export interface BlockUserDto {
+  userId: string; // ID of user to block
   reason?: 'spam' | 'harassment' | 'inappropriate' | 'other';
   description?: string;
 }
@@ -70,6 +76,7 @@ export interface SearchMessagesDto {
   sortOrder?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
+  page?: number;
 }
 
 // Conversation list parameters DTO
@@ -83,6 +90,7 @@ export interface ConversationListParams {
   sortOrder?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
+  page?: number; // Alternative to offset-based pagination
   includeMetadata?: boolean;
 }
 

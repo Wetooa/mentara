@@ -79,8 +79,15 @@ export class TherapistWorksheetController {
     @CurrentUserId() therapistId: string,
     @Body() createWorksheetDto: WorksheetCreateInputDto & { clientId: string },
   ) {
+    // Transform to canonical WorksheetCreateInputDto format
+    const canonicalDto: WorksheetCreateInputDto = {
+      ...createWorksheetDto,
+      category: createWorksheetDto.category || 'therapy-assignment', // Default category
+      clientIds: [createWorksheetDto.clientId], // Transform single clientId to array
+    };
+    
     return this.worksheetsService.create(
-      createWorksheetDto,
+      canonicalDto,
       createWorksheetDto.clientId,
       therapistId,
     );
@@ -164,9 +171,16 @@ export class TherapistWorksheetController {
       throw new BadRequestException('Worksheet instructions are required');
     }
 
+    // Transform to canonical WorksheetCreateInputDto format
+    const canonicalDto: WorksheetCreateInputDto = {
+      ...createWorksheetDto,
+      category: createWorksheetDto.category || 'therapy-assignment', // Default category
+      clientIds: [clientId], // Set clientIds array for assignment
+    };
+
     // Create the worksheet
     const worksheet = await this.worksheetsService.create(
-      createWorksheetDto,
+      canonicalDto,
       clientId,
       therapistId,
     );

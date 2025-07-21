@@ -3,20 +3,7 @@
  * These are pure TypeScript interfaces without validation logic
  */
 
-// Worksheet DTOs (for therapist-worksheet controller)
-export interface WorksheetCreateInputDto {
-  title: string;
-  description: string;
-  content: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  type: 'assignment' | 'exercise' | 'reflection' | 'assessment';
-  estimatedDuration?: number; // in minutes
-  tags?: string[];
-  clientIds: string[]; // Array of client IDs to assign to
-  dueDate?: string; // ISO string
-  isTemplate?: boolean;
-  templateCategory?: string;
-}
+// Note: WorksheetCreateInputDto is now imported from worksheets module to avoid duplication
 
 export interface WorksheetUpdateInputDto {
   title?: string;
@@ -64,6 +51,7 @@ export interface TherapistRecommendationRequest {
   limit?: number;
   province?: string;
   maxHourlyRate?: number;
+  includeInactive?: boolean; // Include inactive therapists in recommendations
   query?: TherapistRecommendationQuery;
 }
 
