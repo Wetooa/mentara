@@ -25,7 +25,7 @@ import {
 } from 'src/common/services/supabase-storage.service';
 import { CommentsService } from './comments.service';
 import { Comment } from '@prisma/client';
-import { CommentCreateInputDto, CommentUpdateInputDto } from 'mentara-commons';
+import type { CommentCreateInputDto, CommentUpdateInputDto } from './types';
 
 @Controller('comments')
 @UseGuards(JwtAuthGuard, CommunityAccessGuard)

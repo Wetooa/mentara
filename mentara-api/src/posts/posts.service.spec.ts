@@ -3,7 +3,7 @@ import { NotFoundException, ForbiddenException, InternalServerErrorException } f
 import { PostsService } from './posts.service';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { Post, User, Prisma } from '@prisma/client';
-import { PostUpdateInputDto } from 'mentara-commons';
+import type { PostUpdateInputDto } from './types';
 
 describe('PostsService', () => {
   let service: PostsService;
