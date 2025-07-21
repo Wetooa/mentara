@@ -194,7 +194,6 @@ export class AvailabilityValidatorService {
       where: {
         clientId,
         therapistId,
-        status: 'ACTIVE', // Assuming there's a status field
       },
     });
 

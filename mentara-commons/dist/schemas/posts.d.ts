@@ -15,13 +15,13 @@ export declare const PostSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    type: "video" | "image" | "text" | "link" | "poll";
     id: string;
-    createdAt: string;
-    updatedAt: string;
-    title: string;
-    content: string;
+    type: "image" | "video" | "text" | "link" | "poll";
     isDeleted: boolean;
+    content: string;
+    createdAt: string;
+    title: string;
+    updatedAt: string;
     communityId: string;
     authorId: string;
     isEdited: boolean;
@@ -30,13 +30,13 @@ export declare const PostSchema: z.ZodObject<{
     likeCount: number;
     commentCount: number;
 }, {
-    type: "video" | "image" | "text" | "link" | "poll";
     id: string;
-    createdAt: string;
-    updatedAt: string;
-    title: string;
-    content: string;
+    type: "image" | "video" | "text" | "link" | "poll";
     isDeleted: boolean;
+    content: string;
+    createdAt: string;
+    title: string;
+    updatedAt: string;
     communityId: string;
     authorId: string;
     isEdited: boolean;
@@ -55,19 +55,19 @@ export declare const CreatePostDtoSchema: z.ZodObject<{
     pollOptions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     linkUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "video" | "image" | "text" | "link" | "poll";
-    title: string;
+    type: "image" | "video" | "text" | "link" | "poll";
     content: string;
+    title: string;
     communityId: string;
     attachments?: string[] | undefined;
     tags?: string[] | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
 }, {
-    title: string;
     content: string;
+    title: string;
     communityId: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     attachments?: string[] | undefined;
     tags?: string[] | undefined;
     pollOptions?: string[] | undefined;
@@ -79,13 +79,13 @@ export declare const UpdatePostDtoSchema: z.ZodObject<{
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     isPinned: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    title?: string | undefined;
     content?: string | undefined;
+    title?: string | undefined;
     tags?: string[] | undefined;
     isPinned?: boolean | undefined;
 }, {
-    title?: string | undefined;
     content?: string | undefined;
+    title?: string | undefined;
     tags?: string[] | undefined;
     isPinned?: boolean | undefined;
 }>;
@@ -96,16 +96,16 @@ export declare const PostReactionSchema: z.ZodObject<{
     type: z.ZodEnum<["like", "dislike", "heart", "laugh", "angry"]>;
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    type: "like" | "dislike" | "heart" | "laugh" | "angry";
     id: string;
-    createdAt: string;
+    type: "like" | "dislike" | "heart" | "laugh" | "angry";
     userId: string;
+    createdAt: string;
     postId: string;
 }, {
-    type: "like" | "dislike" | "heart" | "laugh" | "angry";
     id: string;
-    createdAt: string;
+    type: "like" | "dislike" | "heart" | "laugh" | "angry";
     userId: string;
+    createdAt: string;
     postId: string;
 }>;
 export declare const CreatePostReactionDtoSchema: z.ZodObject<{
@@ -119,10 +119,10 @@ export declare const ReportPostDtoSchema: z.ZodObject<{
     reason: z.ZodEnum<["spam", "harassment", "inappropriate", "misinformation", "copyright", "other"]>;
     description: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation" | "copyright";
+    reason: "spam" | "harassment" | "inappropriate" | "misinformation" | "other" | "copyright";
     description?: string | undefined;
 }, {
-    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation" | "copyright";
+    reason: "spam" | "harassment" | "inappropriate" | "misinformation" | "other" | "copyright";
     description?: string | undefined;
 }>;
 export declare const PollVoteDtoSchema: z.ZodObject<{
@@ -145,7 +145,7 @@ export declare const PostQuerySchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodEnum<["createdAt", "updatedAt", "likeCount", "commentCount", "viewCount"]>>;
     sortOrder: z.ZodOptional<z.ZodEnum<["asc", "desc"]>>;
 }, "strip", z.ZodTypeAny, {
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
@@ -157,7 +157,7 @@ export declare const PostQuerySchema: z.ZodObject<{
     authorId?: string | undefined;
     isPinned?: boolean | undefined;
 }, {
-    type?: "video" | "image" | "text" | "link" | "poll" | undefined;
+    type?: "image" | "video" | "text" | "link" | "poll" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
     sortBy?: "createdAt" | "updatedAt" | "viewCount" | "likeCount" | "commentCount" | undefined;
@@ -231,57 +231,57 @@ export declare const PostCreateInputDtoSchema: z.ZodEffects<z.ZodObject<{
     pollOptions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     linkUrl: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "video" | "image" | "text" | "link" | "poll" | "announcement";
-    title: string;
+    type: "image" | "video" | "text" | "link" | "poll" | "announcement";
     content: string;
+    title: string;
     isAnonymous: boolean;
     allowComments: boolean;
-    roomId?: string | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    scheduledAt?: string | undefined;
+    roomId?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
+    scheduledAt?: string | undefined;
 }, {
-    title: string;
     content: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | "announcement" | undefined;
-    isAnonymous?: boolean | undefined;
-    roomId?: string | undefined;
+    title: string;
+    type?: "image" | "video" | "text" | "link" | "poll" | "announcement" | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    scheduledAt?: string | undefined;
+    roomId?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
+    isAnonymous?: boolean | undefined;
     allowComments?: boolean | undefined;
+    scheduledAt?: string | undefined;
 }>, {
-    type: "video" | "image" | "text" | "link" | "poll" | "announcement";
-    title: string;
+    type: "image" | "video" | "text" | "link" | "poll" | "announcement";
     content: string;
+    title: string;
     isAnonymous: boolean;
     allowComments: boolean;
-    roomId?: string | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    scheduledAt?: string | undefined;
+    roomId?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
+    scheduledAt?: string | undefined;
 }, {
-    title: string;
     content: string;
-    type?: "video" | "image" | "text" | "link" | "poll" | "announcement" | undefined;
-    isAnonymous?: boolean | undefined;
-    roomId?: string | undefined;
+    title: string;
+    type?: "image" | "video" | "text" | "link" | "poll" | "announcement" | undefined;
     attachments?: string[] | undefined;
     communityId?: string | undefined;
     tags?: string[] | undefined;
-    scheduledAt?: string | undefined;
+    roomId?: string | undefined;
     pollOptions?: string[] | undefined;
     linkUrl?: string | undefined;
+    isAnonymous?: boolean | undefined;
     allowComments?: boolean | undefined;
+    scheduledAt?: string | undefined;
 }>;
 export declare const PostUpdateInputDtoSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -291,19 +291,19 @@ export declare const PostUpdateInputDtoSchema: z.ZodObject<{
     allowComments: z.ZodOptional<z.ZodBoolean>;
     scheduledAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    title?: string | undefined;
     content?: string | undefined;
+    title?: string | undefined;
     tags?: string[] | undefined;
-    scheduledAt?: string | undefined;
     isPinned?: boolean | undefined;
     allowComments?: boolean | undefined;
+    scheduledAt?: string | undefined;
 }, {
-    title?: string | undefined;
     content?: string | undefined;
+    title?: string | undefined;
     tags?: string[] | undefined;
-    scheduledAt?: string | undefined;
     isPinned?: boolean | undefined;
     allowComments?: boolean | undefined;
+    scheduledAt?: string | undefined;
 }>;
 export declare const PostRoomParamsDtoSchema: z.ZodObject<{
     roomId: z.ZodString;
@@ -393,18 +393,18 @@ export declare const PostListParamsDtoSchema: z.ZodObject<{
     limit: number;
     sortBy: "newest" | "oldest" | "popular";
     offset: number;
-    isAnonymous?: boolean | undefined;
-    roomId?: string | undefined;
     tags?: string[] | undefined;
+    roomId?: string | undefined;
     authorId?: string | undefined;
+    isAnonymous?: boolean | undefined;
 }, {
     limit?: number | undefined;
-    isAnonymous?: boolean | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
-    roomId?: string | undefined;
     offset?: number | undefined;
     tags?: string[] | undefined;
+    roomId?: string | undefined;
     authorId?: string | undefined;
+    isAnonymous?: boolean | undefined;
 }>;
 export declare const PostByUserParamsDtoSchema: z.ZodObject<{
     userId: z.ZodString;
@@ -419,17 +419,17 @@ export declare const PostByUserParamsDtoSchema: z.ZodObject<{
     limit: number;
     sortBy: "newest" | "oldest" | "popular";
     offset: number;
-    isAnonymous?: boolean | undefined;
-    roomId?: string | undefined;
     tags?: string[] | undefined;
+    roomId?: string | undefined;
+    isAnonymous?: boolean | undefined;
 }, {
     userId: string;
     limit?: number | undefined;
-    isAnonymous?: boolean | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
-    roomId?: string | undefined;
     offset?: number | undefined;
     tags?: string[] | undefined;
+    roomId?: string | undefined;
+    isAnonymous?: boolean | undefined;
 }>;
 export declare const PostByRoomParamsDtoSchema: z.ZodObject<{
     roomId: z.ZodString;
@@ -442,19 +442,19 @@ export declare const PostByRoomParamsDtoSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     limit: number;
     sortBy: "newest" | "oldest" | "popular";
-    roomId: string;
     offset: number;
-    isAnonymous?: boolean | undefined;
+    roomId: string;
     tags?: string[] | undefined;
     authorId?: string | undefined;
+    isAnonymous?: boolean | undefined;
 }, {
     roomId: string;
     limit?: number | undefined;
-    isAnonymous?: boolean | undefined;
     sortBy?: "newest" | "oldest" | "popular" | undefined;
     offset?: number | undefined;
     tags?: string[] | undefined;
     authorId?: string | undefined;
+    isAnonymous?: boolean | undefined;
 }>;
 export type PostListParamsDto = z.infer<typeof PostListParamsDtoSchema>;
 export type PostByUserParamsDto = z.infer<typeof PostByUserParamsDtoSchema>;
@@ -469,38 +469,38 @@ export declare const PostHeartSchema: z.ZodObject<{
         lastName: z.ZodString;
         avatarUrl: z.ZodString;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     }, {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     }>;
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
+    userId: string;
     createdAt: string;
     user: {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     };
-    userId: string;
     postId: string;
 }, {
     id: string;
+    userId: string;
     createdAt: string;
     user: {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     };
-    userId: string;
     postId: string;
 }>;
 export declare const PostCommentSchema: z.ZodType<any>;
@@ -525,14 +525,14 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
         lastName: z.ZodString;
         avatarUrl: z.ZodString;
     }, "strip", z.ZodTypeAny, {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     }, {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     }>;
     room: z.ZodObject<{
@@ -558,38 +558,38 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
             lastName: z.ZodString;
             avatarUrl: z.ZodString;
         }, "strip", z.ZodTypeAny, {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         }, {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         }>;
         createdAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         id: string;
+        userId: string;
         createdAt: string;
         user: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
-        userId: string;
         postId: string;
     }, {
         id: string;
+        userId: string;
         createdAt: string;
         user: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
-        userId: string;
         postId: string;
     }>, "many">;
     heartCount: z.ZodNumber;
@@ -597,25 +597,25 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
     comments: z.ZodArray<z.ZodType<any, z.ZodTypeDef, any>, "many">;
     commentCount: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    type: "video" | "image" | "text" | "link" | "poll";
     id: string;
-    createdAt: string;
-    updatedAt: string;
-    title: string;
-    content: string;
+    type: "image" | "video" | "text" | "link" | "poll";
     isDeleted: boolean;
+    content: string;
+    createdAt: string;
+    title: string;
+    updatedAt: string;
     communityId: string;
     comments: any[];
     hearts: {
         id: string;
+        userId: string;
         createdAt: string;
         user: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
-        userId: string;
         postId: string;
     }[];
     authorId: string;
@@ -625,9 +625,9 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
     likeCount: number;
     commentCount: number;
     author: {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     };
     heartCount: number;
@@ -638,25 +638,25 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
     };
     isHearted?: boolean | undefined;
 }, {
-    type: "video" | "image" | "text" | "link" | "poll";
     id: string;
-    createdAt: string;
-    updatedAt: string;
-    title: string;
-    content: string;
+    type: "image" | "video" | "text" | "link" | "poll";
     isDeleted: boolean;
+    content: string;
+    createdAt: string;
+    title: string;
+    updatedAt: string;
     communityId: string;
     comments: any[];
     hearts: {
         id: string;
+        userId: string;
         createdAt: string;
         user: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
-        userId: string;
         postId: string;
     }[];
     authorId: string;
@@ -666,9 +666,9 @@ export declare const PostWithDetailsSchema: z.ZodObject<{
     likeCount: number;
     commentCount: number;
     author: {
+        id: string;
         firstName: string;
         lastName: string;
-        id: string;
         avatarUrl: string;
     };
     heartCount: number;
@@ -701,14 +701,14 @@ export declare const PostListResponseSchema: z.ZodObject<{
             lastName: z.ZodString;
             avatarUrl: z.ZodString;
         }, "strip", z.ZodTypeAny, {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         }, {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         }>;
         room: z.ZodObject<{
@@ -734,38 +734,38 @@ export declare const PostListResponseSchema: z.ZodObject<{
                 lastName: z.ZodString;
                 avatarUrl: z.ZodString;
             }, "strip", z.ZodTypeAny, {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             }, {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             }>;
             createdAt: z.ZodString;
         }, "strip", z.ZodTypeAny, {
             id: string;
+            userId: string;
             createdAt: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             };
-            userId: string;
             postId: string;
         }, {
             id: string;
+            userId: string;
             createdAt: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             };
-            userId: string;
             postId: string;
         }>, "many">;
         heartCount: z.ZodNumber;
@@ -773,25 +773,25 @@ export declare const PostListResponseSchema: z.ZodObject<{
         comments: z.ZodArray<z.ZodType<any, z.ZodTypeDef, any>, "many">;
         commentCount: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        type: "video" | "image" | "text" | "link" | "poll";
         id: string;
-        createdAt: string;
-        updatedAt: string;
-        title: string;
-        content: string;
+        type: "image" | "video" | "text" | "link" | "poll";
         isDeleted: boolean;
+        content: string;
+        createdAt: string;
+        title: string;
+        updatedAt: string;
         communityId: string;
         comments: any[];
         hearts: {
             id: string;
+            userId: string;
             createdAt: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             };
-            userId: string;
             postId: string;
         }[];
         authorId: string;
@@ -801,9 +801,9 @@ export declare const PostListResponseSchema: z.ZodObject<{
         likeCount: number;
         commentCount: number;
         author: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
         heartCount: number;
@@ -814,25 +814,25 @@ export declare const PostListResponseSchema: z.ZodObject<{
         };
         isHearted?: boolean | undefined;
     }, {
-        type: "video" | "image" | "text" | "link" | "poll";
         id: string;
-        createdAt: string;
-        updatedAt: string;
-        title: string;
-        content: string;
+        type: "image" | "video" | "text" | "link" | "poll";
         isDeleted: boolean;
+        content: string;
+        createdAt: string;
+        title: string;
+        updatedAt: string;
         communityId: string;
         comments: any[];
         hearts: {
             id: string;
+            userId: string;
             createdAt: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             };
-            userId: string;
             postId: string;
         }[];
         authorId: string;
@@ -842,9 +842,9 @@ export declare const PostListResponseSchema: z.ZodObject<{
         likeCount: number;
         commentCount: number;
         author: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
         heartCount: number;
@@ -858,28 +858,27 @@ export declare const PostListResponseSchema: z.ZodObject<{
     total: z.ZodNumber;
     hasMore: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
-    total: number;
     hasMore: boolean;
     posts: {
-        type: "video" | "image" | "text" | "link" | "poll";
         id: string;
-        createdAt: string;
-        updatedAt: string;
-        title: string;
-        content: string;
+        type: "image" | "video" | "text" | "link" | "poll";
         isDeleted: boolean;
+        content: string;
+        createdAt: string;
+        title: string;
+        updatedAt: string;
         communityId: string;
         comments: any[];
         hearts: {
             id: string;
+            userId: string;
             createdAt: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             };
-            userId: string;
             postId: string;
         }[];
         authorId: string;
@@ -889,9 +888,9 @@ export declare const PostListResponseSchema: z.ZodObject<{
         likeCount: number;
         commentCount: number;
         author: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
         heartCount: number;
@@ -902,29 +901,29 @@ export declare const PostListResponseSchema: z.ZodObject<{
         };
         isHearted?: boolean | undefined;
     }[];
+    total: number;
 }, {
-    total: number;
     hasMore: boolean;
     posts: {
-        type: "video" | "image" | "text" | "link" | "poll";
         id: string;
-        createdAt: string;
-        updatedAt: string;
-        title: string;
-        content: string;
+        type: "image" | "video" | "text" | "link" | "poll";
         isDeleted: boolean;
+        content: string;
+        createdAt: string;
+        title: string;
+        updatedAt: string;
         communityId: string;
         comments: any[];
         hearts: {
             id: string;
+            userId: string;
             createdAt: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
-                id: string;
                 avatarUrl: string;
             };
-            userId: string;
             postId: string;
         }[];
         authorId: string;
@@ -934,9 +933,9 @@ export declare const PostListResponseSchema: z.ZodObject<{
         likeCount: number;
         commentCount: number;
         author: {
+            id: string;
             firstName: string;
             lastName: string;
-            id: string;
             avatarUrl: string;
         };
         heartCount: number;
@@ -947,6 +946,7 @@ export declare const PostListResponseSchema: z.ZodObject<{
         };
         isHearted?: boolean | undefined;
     }[];
+    total: number;
 }>;
 export declare const HeartPostResponseSchema: z.ZodObject<{
     isHearted: z.ZodBoolean;

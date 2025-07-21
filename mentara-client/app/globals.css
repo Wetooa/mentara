@@ -44,6 +44,18 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --color-tertiary: var(--tertiary);
+  
+  /* Mental Health Community Colors */
+  --color-community-calm: var(--community-calm);
+  --color-community-calm-foreground: var(--community-calm-foreground);
+  --color-community-warm: var(--community-warm);
+  --color-community-warm-foreground: var(--community-warm-foreground);
+  --color-community-soothing: var(--community-soothing);
+  --color-community-soothing-foreground: var(--community-soothing-foreground);
+  --color-community-heart: var(--community-heart);
+  --color-community-heart-foreground: var(--community-heart-foreground);
+  --color-community-accent: var(--community-accent);
+  --color-community-accent-foreground: var(--community-accent-foreground);
 }
 
 :root {
@@ -91,6 +103,27 @@
 
   --tertiary: oklch(0.98 0.0464 124.31);
 
+  /* Mental Health Community Colors */
+  /* Calm blue-green for peaceful interactions */
+  --community-calm: oklch(0.85 0.05 180);
+  --community-calm-foreground: oklch(0.25 0.08 180);
+  
+  /* Warm, gentle color for supportive elements */
+  --community-warm: oklch(0.92 0.03 60);
+  --community-warm-foreground: oklch(0.35 0.06 60);
+  
+  /* Soothing lavender for stress relief areas */
+  --community-soothing: oklch(0.88 0.04 280);
+  --community-soothing-foreground: oklch(0.3 0.07 280);
+  
+  /* Gentle pink for heart/like interactions */
+  --community-heart: oklch(0.82 0.06 350);
+  --community-heart-foreground: oklch(0.4 0.1 350);
+  
+  /* Soft accent for community features */
+  --community-accent: oklch(0.75 0.08 160);
+  --community-accent-foreground: oklch(0.98 0.01 160);
+
   /* Text colors */
   --text-white-background: oklch(0.6 0 0);
 }
@@ -129,6 +162,23 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   --tertiary: oklch(0.98 0.0464 124.31);
+  
+  /* Mental Health Community Colors - Dark Mode */
+  /* Darker but still calming variations */
+  --community-calm: oklch(0.3 0.08 180);
+  --community-calm-foreground: oklch(0.85 0.04 180);
+  
+  --community-warm: oklch(0.35 0.06 60);
+  --community-warm-foreground: oklch(0.9 0.03 60);
+  
+  --community-soothing: oklch(0.32 0.07 280);
+  --community-soothing-foreground: oklch(0.88 0.04 280);
+  
+  --community-heart: oklch(0.4 0.1 350);
+  --community-heart-foreground: oklch(0.82 0.06 350);
+  
+  --community-accent: oklch(0.45 0.12 160);
+  --community-accent-foreground: oklch(0.95 0.02 160);
 }
 
 @layer base {

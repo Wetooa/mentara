@@ -150,7 +150,13 @@
       "Bash(timeout 30s npm run build:*)",
       "Bash(timeout 15s npx tsc:*)",
       "mcp__brave-search__sequentialthinking",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "mcp__serena__list_memories",
+      "WebFetch(domain:oklch.com)",
+      "WebFetch(domain:colorconvert.dev)",
+      "Bash(curl:*)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(pkill:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

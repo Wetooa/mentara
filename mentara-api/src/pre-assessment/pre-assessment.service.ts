@@ -277,18 +277,18 @@ export class PreAssessmentService {
         // Continue without AI estimate - don't fail the entire assessment
       }
 
-      // Create pre-assessment with validated data (all data stored in answers JSON field)
+      // Create pre-assessment with validated data (flattened structure to match Prisma schema)
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          answers: {
-            questionnaires: data.questionnaires,
-            rawAnswers: data.answers,
-            answerMatrix: data.answerMatrix,
-            scores,
-            severityLevels,
-            aiEstimate,
-          },
+          answers: data.answers, // Raw user answers
+          questionnaires: data.questionnaires, // Questionnaire metadata
+          answerMatrix: data.answerMatrix || [], // Processed matrix for AI (default to empty array if undefined)
+          scores, // Assessment scale scores
+          severityLevels, // Severity classifications
+          aiEstimate, // AI analysis results
+          isProcessed: true, // Mark as processed
+          processedAt: new Date(), // Set processing timestamp
         },
       });
 

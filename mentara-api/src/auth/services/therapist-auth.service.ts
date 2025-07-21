@@ -275,6 +275,20 @@ export class TherapistAuthService {
       userResult.user.id,
     );
 
+    // Send therapist registration success email
+    try {
+      await this.emailService.sendTherapistRegistrationSuccess(
+        userResult.user.email,
+        `${userResult.user.firstName || ''} ${userResult.user.lastName || ''}`.trim() ||
+          'Therapist',
+        'Welcome to Mentara - Your Therapist Application Has Been Submitted'
+      );
+      console.log('Therapist registration success email sent successfully');
+    } catch (error) {
+      console.error('Failed to send therapist registration success email:', error);
+      // Don't fail the entire operation if email fails
+    }
+
     return {
       user: userResult.user,
       token,
@@ -351,6 +365,20 @@ export class TherapistAuthService {
 
     // Send verification email
     await this.emailVerificationService.sendVerificationEmail(result.user.id);
+
+    // Send therapist registration success email
+    try {
+      await this.emailService.sendTherapistRegistrationSuccess(
+        result.user.email,
+        `${result.user.firstName || ''} ${result.user.lastName || ''}`.trim() ||
+          'Therapist',
+        'Welcome to Mentara - Your Therapist Registration Was Successful'
+      );
+      console.log('Therapist registration success email sent successfully');
+    } catch (error) {
+      console.error('Failed to send therapist registration success email:', error);
+      // Don't fail the entire operation if email fails
+    }
 
     return {
       user: result.user,
@@ -704,13 +732,13 @@ export class TherapistAuthService {
           credentials,
         };
 
-        // Send approval email notification with credentials
+        // Send approval email notification
         try {
-          await this.emailService.sendTherapistWelcomeEmail(
+          await this.emailService.sendTherapistApproved(
             application.user.email,
             `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() ||
               'Therapist',
-            credentials,
+            'Congratulations! Your Therapist Application Has Been Approved'
           );
           console.log('Approval email notification sent successfully');
         } catch (error) {
@@ -720,11 +748,11 @@ export class TherapistAuthService {
       } else if (updateData.status === 'REJECTED') {
         // Send rejection email notification
         try {
-          await this.emailService.sendTherapistRejectionEmail(
+          await this.emailService.sendTherapistDenied(
             application.user.email,
             `${application.user.firstName || ''} ${application.user.lastName || ''}`.trim() ||
               'Therapist',
-            updateData.adminNotes,
+            'Update on Your Therapist Application'
           );
           console.log('Rejection email notification sent successfully');
         } catch (error) {

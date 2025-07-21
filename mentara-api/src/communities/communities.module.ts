@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { CommunitiesController } from './communities.controller';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
@@ -9,8 +10,10 @@ import { CommunityRecommendationController } from './controllers/community-recom
 import { ModerationController } from './controllers/moderation.controller';
 import { EnhancedCommunityController } from './controllers/enhanced-community.controller';
 import { PrismaService } from 'src/providers/prisma-client.provider';
+import { AiServiceClient } from '../pre-assessment/services/ai-service.client';
 
 @Module({
+  imports: [ConfigModule],
   controllers: [
     CommunitiesController,
     CommunityRecommendationController,
@@ -24,6 +27,7 @@ import { PrismaService } from 'src/providers/prisma-client.provider';
     CommunityRecommendationService,
     EnhancedCommunityService,
     PrismaService,
+    AiServiceClient,
   ],
   exports: [
     CommunitiesService,

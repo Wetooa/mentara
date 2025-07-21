@@ -156,7 +156,7 @@ export class DashboardService {
       });
 
       const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId, status: 'ACTIVE' },
+        where: { therapistId: userId },
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({

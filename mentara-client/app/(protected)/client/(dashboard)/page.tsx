@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   useDashboardData,
   useNotifications,
@@ -14,6 +15,7 @@ import type { UserDashboardData } from "@/lib/api/types/dashboard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
+import UpcomingSessionsCalendar from "@/components/dashboard/UpcomingSessionsCalendar";
 import WorksheetStatus from "@/components/dashboard/WorksheetStatus";
 import ProgressTracking from "@/components/dashboard/ProgressTracking";
 import NotificationsCenter from "@/components/dashboard/NotificationsCenter";
@@ -25,6 +27,8 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   // Fetch data from backend APIs
   const {
     data: dashboardApiData,
@@ -83,6 +87,28 @@ export default function DashboardPage() {
 
   const handleRetry = () => {
     refetchDashboard();
+  };
+
+  // Navigation handlers for clickable dashboard cards
+  const handleUpcomingSessionsClick = () => {
+    router.push('/client/booking');
+  };
+
+  const handlePendingWorksheetsClick = () => {
+    router.push('/client/worksheets');
+  };
+
+  const handleCompletedSessionsClick = () => {
+    // Could navigate to a sessions history page in the future
+    console.log('Navigate to completed sessions');
+  };
+
+  const handleCompletedWorksheetsClick = () => {
+    router.push('/client/worksheets?filter=completed');
+  };
+
+  const handleTherapistsClick = () => {
+    router.push('/client/therapist');
   };
 
   // Show error state
@@ -155,13 +181,23 @@ export default function DashboardPage() {
       />
 
       {/* Stats Overview */}
-      <StatsOverview stats={dashboardData.stats} />
+      <StatsOverview 
+        stats={dashboardData.stats}
+        onUpcomingSessionsClick={handleUpcomingSessionsClick}
+        onPendingWorksheetsClick={handlePendingWorksheetsClick}
+        onCompletedSessionsClick={handleCompletedSessionsClick}
+        onCompletedWorksheetsClick={handleCompletedWorksheetsClick}
+        onTherapistsClick={handleTherapistsClick}
+      />
 
       {/* Main Dashboard Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          <UpcomingSessions sessions={dashboardData.upcomingSessions} />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <UpcomingSessions sessions={dashboardData.upcomingSessions} />
+            <UpcomingSessionsCalendar />
+          </div>
           <WorksheetStatus worksheets={dashboardData.worksheets} />
         </div>
 

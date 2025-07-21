@@ -413,4 +413,39 @@ export class CommunityRecommendationController {
       throw error;
     }
   }
+
+  @Post('join')
+  @Roles('client', 'therapist', 'moderator', 'admin') 
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Join recommended communities immediately',
+    description: 'Allows users to join multiple recommended communities at once',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully joined communities',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid community slugs provided',
+  })
+  async joinRecommendedCommunities(
+    @GetUser() user: any,
+    @Body() dto: { communitySlugs: string[] },
+  ) {
+    try {
+      const joinResults = await this.communityRecommendationService.joinRecommendedCommunities(
+        user.id,
+        dto.communitySlugs,
+      );
+
+      return {
+        success: true,
+        data: joinResults,
+        message: `Successfully joined ${joinResults.successfulJoins.length} communities`,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

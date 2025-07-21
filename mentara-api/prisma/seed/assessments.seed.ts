@@ -60,6 +60,8 @@ export async function seedPreAssessments(
   );
 
   for (const client of clientsWithAssessments) {
+    const isProcessed = faker.datatype.boolean({ probability: 0.9 }); // 90% are processed
+    
     const assessment = await prisma.preAssessment.create({
       data: {
         clientId: client.user.id,
@@ -69,10 +71,14 @@ export async function seedPreAssessments(
         scores: SeedDataGenerator.generateAssessmentScores(),
         severityLevels: SeedDataGenerator.generateSeverityLevels(),
         aiEstimate: SeedDataGenerator.generateAiEstimate(),
+        isProcessed,
+        processedAt: isProcessed ? faker.date.past({ years: 0.1 }) : null, // Within ~1 month
       },
     });
     assessments.push(assessment);
-    console.log(`✅ Created pre-assessment for ${client.user.firstName}`);
+    
+    const status = isProcessed ? '🔄 processed' : '⏳ pending';
+    console.log(`✅ Created pre-assessment for ${client.user.firstName} (${status})`);
   }
 
   console.log(`✅ Successfully created ${assessments.length} pre-assessments`);

@@ -11,19 +11,17 @@ import {
   Calendar,
   Clock,
   Video,
-  Phone,
-  MessageSquare,
   User,
-
   Settings,
   Eye,
   Edit,
   Trash2,
 } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
 import { useBooking, useMeetings } from "@/hooks/useBooking";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { MeetingStatus, MeetingType } from "@/types/booking";
+import { MeetingStatus } from "@/types/booking";
 import { toast } from "sonner";
 
 export default function TherapistSchedulePage() {
@@ -88,17 +86,9 @@ export default function TherapistSchedulePage() {
     }
   };
 
-  const getMeetingTypeIcon = (type?: MeetingType) => {
-    switch (type) {
-      case MeetingType.VIDEO:
-        return <Video className="h-4 w-4" />;
-      case MeetingType.AUDIO:
-        return <Phone className="h-4 w-4" />;
-      case MeetingType.CHAT:
-        return <MessageSquare className="h-4 w-4" />;
-      default:
-        return <Video className="h-4 w-4" />;
-    }
+  const getMeetingTypeIcon = () => {
+    // All meetings are video-only now
+    return <Video className="h-4 w-4" />;
   };
 
 
@@ -125,15 +115,16 @@ export default function TherapistSchedulePage() {
             Manage your therapy sessions and availability
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setActiveTab("availability")}>
           <Settings className="h-4 w-4 mr-2" />
           Manage Availability
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="schedule">Today&apos;s Schedule</TabsTrigger>
+          <TabsTrigger value="availability">Manage Availability</TabsTrigger>
           <TabsTrigger value="calendar">Calendar View</TabsTrigger>
           <TabsTrigger value="upcoming">All Upcoming</TabsTrigger>
         </TabsList>
@@ -212,7 +203,7 @@ export default function TherapistSchedulePage() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                  {getMeetingTypeIcon(meeting.meetingType as unknown as MeetingType)}
+                                  {getMeetingTypeIcon()}
                                   <div>
                                     <h3 className="font-medium">
                                       {meeting.title || "Therapy Session"}
@@ -296,6 +287,11 @@ export default function TherapistSchedulePage() {
           </div>
         </TabsContent>
 
+        {/* Availability Management Tab */}
+        <TabsContent value="availability" className="space-y-6">
+          <TherapistAvailabilityCalendar />
+        </TabsContent>
+
         {/* Calendar View Tab */}
         <TabsContent value="calendar" className="space-y-6">
           <Card>
@@ -338,7 +334,7 @@ export default function TherapistSchedulePage() {
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            {getMeetingTypeIcon(meeting.meetingType as unknown as MeetingType)}
+                            {getMeetingTypeIcon()}
                             <div>
                               <div className="font-medium">
                                 {meeting.title || "Therapy Session"}

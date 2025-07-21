@@ -3,7 +3,6 @@ import { Logger } from '@nestjs/common';
 export interface RequiredEnvVars {
   DATABASE_URL: string;
   JWT_SECRET: string;
-  MESSAGE_ENCRYPTION_KEY: string;
   NODE_ENV: 'development' | 'production' | 'test';
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
@@ -43,7 +42,6 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
   const requiredVars: (keyof RequiredEnvVars)[] = [
     'DATABASE_URL',
     'JWT_SECRET',
-    'MESSAGE_ENCRYPTION_KEY',
     'NODE_ENV',
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
@@ -183,7 +181,6 @@ export function validateEnvironmentVariables(): RequiredEnvVars {
   return {
     DATABASE_URL: process.env.DATABASE_URL!,
     JWT_SECRET: process.env.JWT_SECRET!,
-    MESSAGE_ENCRYPTION_KEY: process.env.MESSAGE_ENCRYPTION_KEY!,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
     MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID!,

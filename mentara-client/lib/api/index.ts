@@ -9,6 +9,38 @@ import {
   createDashboardService,
   type DashboardService,
 } from "./services/dashboard";
+import {
+  createTherapistService,
+  type TherapistService,
+} from "./services/therapists";
+import {
+  createCommunityService,
+  type CommunityService,
+} from "./services/communities";
+import {
+  createMeetingsService,
+  type MeetingsService,
+} from "./services/meetings";
+import {
+  createBookingService,
+  type BookingService,
+} from "./services/booking";
+import {
+  createNotificationService,
+  type NotificationService,
+} from "./services/notifications";
+import {
+  createSearchService,
+  type SearchService,
+} from "./services/search";
+import {
+  createMessagingService,
+  type MessagingService,
+} from "./services/messaging";
+import {
+  createFilesService,
+  type FilesService,
+} from "./services/files";
 export type { ApiResponse, ApiError } from "./types";
 
 // Export client utilities
@@ -17,16 +49,40 @@ export { apiClient, createApiClient };
 // Export service creators
 export { createAuthService, type AuthService };
 export { createDashboardService, type DashboardService };
+export { createTherapistService, type TherapistService };
+export { createCommunityService, type CommunityService };
+export { createMeetingsService, type MeetingsService };
+export { createBookingService, type BookingService };
+export { createNotificationService, type NotificationService };
+export { createSearchService, type SearchService };
+export { createMessagingService, type MessagingService };
+export { createFilesService, type FilesService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
 const dashboardService = createDashboardService(apiClient);
+const therapistService = createTherapistService(apiClient);
+const communityService = createCommunityService(apiClient);
+const meetingsService = createMeetingsService(apiClient);
+const bookingService = createBookingService(apiClient);
+const notificationService = createNotificationService(apiClient);
+const searchService = createSearchService(apiClient);
+const messagingService = createMessagingService(apiClient);
+const filesService = createFilesService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
   // New unified structure
   auth: authService,
   dashboard: dashboardService,
+  therapists: therapistService,
+  communities: communityService,
+  meetings: meetingsService,
+  booking: bookingService,
+  notifications: notificationService,
+  search: searchService,
+  messaging: messagingService,
+  files: filesService,
 
   // Backwards compatible structure for existing hooks
   clientAuth: authService.client,

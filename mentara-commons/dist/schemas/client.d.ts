@@ -34,40 +34,40 @@ export declare const ClientProfileSchema: z.ZodObject<{
             relationship: z.ZodString;
             phone: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         }, {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         }>>;
     }, "strip", z.ZodTypeAny, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     }, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: "client" | "therapist" | "moderator" | "admin";
     id: string;
     createdAt: string;
+    role: "client" | "therapist" | "admin" | "moderator";
     isActive: boolean;
     updatedAt: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     isOnboardingComplete: boolean;
     therapistId?: string | undefined;
     preferences?: {
@@ -80,20 +80,20 @@ export declare const ClientProfileSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     } | undefined;
 }, {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: "client" | "therapist" | "moderator" | "admin";
     id: string;
     createdAt: string;
+    role: "client" | "therapist" | "admin" | "moderator";
     isActive: boolean;
     updatedAt: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     isOnboardingComplete: boolean;
     therapistId?: string | undefined;
     preferences?: {
@@ -106,9 +106,9 @@ export declare const ClientProfileSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     } | undefined;
 }>;
@@ -150,14 +150,14 @@ export declare const ClientProgressSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     totalSessions: number;
     completedSessions: number;
+    currentGoals: string[];
+    achievedGoals: string[];
+    overallProgress: number;
     recentActivity: {
         type: string;
         date: string;
         description: string;
     }[];
-    currentGoals: string[];
-    achievedGoals: string[];
-    overallProgress: number;
     wellnessScores: {
         mood: number;
         anxiety: number;
@@ -167,14 +167,14 @@ export declare const ClientProgressSchema: z.ZodObject<{
 }, {
     totalSessions: number;
     completedSessions: number;
+    currentGoals: string[];
+    achievedGoals: string[];
+    overallProgress: number;
     recentActivity: {
         type: string;
         date: string;
         description: string;
     }[];
-    currentGoals: string[];
-    achievedGoals: string[];
-    overallProgress: number;
     wellnessScores: {
         mood: number;
         anxiety: number;
@@ -193,22 +193,22 @@ export declare const AssignedTherapistSchema: z.ZodObject<{
     nextAvailableSlot: z.ZodOptional<z.ZodString>;
     isActive: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
+    id: string;
+    isActive: boolean;
     firstName: string;
     lastName: string;
-    id: string;
-    bio: string;
-    isActive: boolean;
     specialties: string[];
+    bio: string;
     experience: number;
     profileImage?: string | undefined;
     nextAvailableSlot?: string | undefined;
 }, {
+    id: string;
+    isActive: boolean;
     firstName: string;
     lastName: string;
-    id: string;
-    bio: string;
-    isActive: boolean;
     specialties: string[];
+    bio: string;
     experience: number;
     profileImage?: string | undefined;
     nextAvailableSlot?: string | undefined;
@@ -250,18 +250,18 @@ export declare const AssessmentResultsSchema: z.ZodObject<{
     followUpRequired: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    followUpRequired: boolean;
-    recommendations: string[];
     scores: Record<string, number>;
     overallScore: number;
-    riskLevel: "high" | "medium" | "low";
+    recommendations: string[];
+    riskLevel: "low" | "medium" | "high";
+    followUpRequired: boolean;
 }, {
     id: string;
-    followUpRequired: boolean;
-    recommendations: string[];
     scores: Record<string, number>;
     overallScore: number;
-    riskLevel: "high" | "medium" | "low";
+    recommendations: string[];
+    riskLevel: "low" | "medium" | "high";
+    followUpRequired: boolean;
 }>;
 export declare const OnboardingDataSchema: z.ZodObject<{
     personalInfo: z.ZodObject<{
@@ -272,13 +272,13 @@ export declare const OnboardingDataSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         firstName: string;
         lastName: string;
-        phoneNumber: string;
         birthDate: string;
+        phoneNumber: string;
     }, {
         firstName: string;
         lastName: string;
-        phoneNumber: string;
         birthDate: string;
+        phoneNumber: string;
     }>;
     preferences: z.ZodObject<{
         therapistGender: z.ZodOptional<z.ZodString>;
@@ -304,39 +304,38 @@ export declare const OnboardingDataSchema: z.ZodObject<{
             relationship: z.ZodString;
             phone: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         }, {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         }>>;
     }, "strip", z.ZodTypeAny, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     }, {
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     }>;
     goals: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
-    goals: string[];
     personalInfo: {
         firstName: string;
         lastName: string;
-        phoneNumber: string;
         birthDate: string;
+        phoneNumber: string;
     };
     preferences: {
         sessionType?: string | undefined;
@@ -348,18 +347,18 @@ export declare const OnboardingDataSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     };
+    goals: string[];
 }, {
-    goals: string[];
     personalInfo: {
         firstName: string;
         lastName: string;
-        phoneNumber: string;
         birthDate: string;
+        phoneNumber: string;
     };
     preferences: {
         sessionType?: string | undefined;
@@ -371,11 +370,12 @@ export declare const OnboardingDataSchema: z.ZodObject<{
         previousTherapy?: boolean | undefined;
         currentMedications?: string[] | undefined;
         emergencyContact?: {
-            phone: string;
             name: string;
             relationship: string;
+            phone: string;
         } | undefined;
     };
+    goals: string[];
 }>;
 export type ClientProfile = z.infer<typeof ClientProfileSchema>;
 export type ClientProgress = z.infer<typeof ClientProgressSchema>;

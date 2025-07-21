@@ -112,7 +112,7 @@ export class StandardErrorHandler {
     this.trackError(errorKey);
 
     // Handle specific error types
-    this.handleSpecificErrors(error);
+    this.handleSpecificErrors(error, config);
   }
 
   // Determine error severity
@@ -227,23 +227,23 @@ export class StandardErrorHandler {
   }
 
   // Handle specific error types
-  private handleSpecificErrors(error: MentaraApiError | Error): void {
+  private handleSpecificErrors(error: MentaraApiError | Error, config: ErrorHandlerConfig): void {
     if (error instanceof MentaraApiError) {
       switch (error.status) {
         case 401:
-          this.handleUnauthorizedError();
+          this.handleUnauthorizedError(error, config);
           break;
         case 403:
-          this.handleForbiddenError();
+          this.handleForbiddenError(error, config);
           break;
         case 429:
-          this.handleRateLimitError();
+          this.handleRateLimitError(error, config);
           break;
         case 500:
         case 502:
         case 503:
         case 504:
-          this.handleServerError();
+          this.handleServerError(error, config);
           break;
       }
     }

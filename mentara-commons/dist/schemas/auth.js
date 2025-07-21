@@ -4,85 +4,103 @@ exports.SuccessResponseSchema = exports.OnboardingStatusResponseSchema = exports
 const zod_1 = require("zod");
 // Authentication Core Schemas
 exports.LoginDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    password: zod_1.z.string().min(1, 'Password is required'),
+    email: zod_1.z.string().email("Invalid email format"),
+    password: zod_1.z.string().min(1, "Password is required"),
 });
 exports.RefreshTokenDtoSchema = zod_1.z.object({
-    refreshToken: zod_1.z.string().min(1, 'Refresh token is required'),
+    refreshToken: zod_1.z.string().min(1, "Refresh token is required"),
 });
 exports.LogoutDtoSchema = zod_1.z.object({
     refreshToken: zod_1.z.string().optional(),
 });
 exports.RegisterUserDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
-    firstName: zod_1.z.string().min(1, 'First name is required'),
-    lastName: zod_1.z.string().min(1, 'Last name is required'),
+    email: zod_1.z.string().email("Invalid email format"),
+    password: zod_1.z.string().min(8, "Password must be at least 8 characters long"),
+    firstName: zod_1.z.string().min(1, "First name is required"),
+    lastName: zod_1.z.string().min(1, "Last name is required"),
     role: zod_1.z.string(),
 });
-exports.ChangePasswordDtoSchema = zod_1.z.object({
-    currentPassword: zod_1.z.string().min(1, 'Current password is required'),
-    newPassword: zod_1.z.string().min(8, 'New password must be at least 8 characters long'),
-    confirmPassword: zod_1.z.string().min(8, 'Password confirmation is required'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
+exports.ChangePasswordDtoSchema = zod_1.z
+    .object({
+    currentPassword: zod_1.z.string().min(1, "Current password is required"),
+    newPassword: zod_1.z
+        .string()
+        .min(8, "New password must be at least 8 characters long"),
+    confirmPassword: zod_1.z.string().min(8, "Password confirmation is required"),
+})
+    .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
 });
 // Password Reset Schemas
 exports.RequestPasswordResetDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
+    email: zod_1.z.string().email("Invalid email format"),
 });
-exports.ResetPasswordDtoSchema = zod_1.z.object({
-    token: zod_1.z.string().min(1, 'Reset token is required'),
-    newPassword: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
-    confirmPassword: zod_1.z.string().min(8, 'Password confirmation is required'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
+exports.ResetPasswordDtoSchema = zod_1.z
+    .object({
+    token: zod_1.z.string().min(1, "Reset token is required"),
+    newPassword: zod_1.z
+        .string()
+        .min(8, "Password must be at least 8 characters long"),
+    confirmPassword: zod_1.z.string().min(8, "Password confirmation is required"),
+})
+    .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
 });
 // Email Verification Schemas
 exports.SendVerificationEmailDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format').optional(),
+    email: zod_1.z.string().email("Invalid email format").optional(),
 });
 exports.ResendVerificationEmailDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
+    email: zod_1.z.string().email("Invalid email format"),
 });
 exports.VerifyEmailDtoSchema = zod_1.z.object({
-    token: zod_1.z.string().min(1, 'Verification token is required'),
+    token: zod_1.z.string().min(1, "Verification token is required"),
 });
 // OTP Type Enum Schema
-exports.OtpTypeSchema = zod_1.z.enum(['registration', 'password_reset', 'login_verification']);
+exports.OtpTypeSchema = zod_1.z.enum([
+    "registration",
+    "password_reset",
+    "login_verification",
+]);
 // OTP Verification Schemas (Updated)
 exports.SendOtpDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    type: exports.OtpTypeSchema.default('registration'),
+    email: zod_1.z.string().email("Invalid email format"),
+    type: exports.OtpTypeSchema.default("registration"),
 });
 exports.VerifyOtpDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    otpCode: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
-    type: exports.OtpTypeSchema.default('registration'),
+    email: zod_1.z.string().email("Invalid email format"),
+    otpCode: zod_1.z
+        .string()
+        .min(6, "OTP code must be 6 digits")
+        .max(6, "OTP code must be 6 digits"),
+    type: exports.OtpTypeSchema.default("registration"),
 });
 exports.ResendOtpDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    type: exports.OtpTypeSchema.default('registration'),
+    email: zod_1.z.string().email("Invalid email format"),
+    type: exports.OtpTypeSchema.default("registration"),
 });
 // Client Registration OTP Verification Schemas
 exports.VerifyRegistrationOtpDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    otpCode: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+    email: zod_1.z.string().email("Invalid email format"),
+    otpCode: zod_1.z
+        .string()
+        .min(6, "OTP code must be 6 digits")
+        .max(6, "OTP code must be 6 digits"),
 });
 exports.ResendRegistrationOtpDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
+    email: zod_1.z.string().email("Invalid email format"),
 });
 // Email Service Response Schemas
 exports.EmailResponseSchema = zod_1.z.object({
-    status: zod_1.z.enum(['success', 'error']),
+    status: zod_1.z.enum(["success", "error"]),
     message: zod_1.z.string(),
     emailId: zod_1.z.string().optional(),
     otp_code: zod_1.z.string().optional(), // Only in development
 });
 exports.EmailStatusResponseSchema = zod_1.z.object({
-    status: zod_1.z.enum(['success', 'error']),
+    status: zod_1.z.enum(["success", "error"]),
     configuration: zod_1.z.object({
         isInitialized: zod_1.z.boolean(),
         hasServiceId: zod_1.z.boolean(),
@@ -93,66 +111,76 @@ exports.EmailStatusResponseSchema = zod_1.z.object({
 });
 // OTP Email Data Schema
 exports.OtpEmailDataSchema = zod_1.z.object({
-    to_email: zod_1.z.string().email('Invalid email format'),
-    to_name: zod_1.z.string().min(1, 'Recipient name is required'),
-    otp_code: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
-    expires_in: zod_1.z.string().min(1, 'Expiry time is required'),
+    to_email: zod_1.z.string().email("Invalid email format"),
+    to_name: zod_1.z.string().min(1, "Recipient name is required"),
+    otp_code: zod_1.z
+        .string()
+        .min(6, "OTP code must be 6 digits")
+        .max(6, "OTP code must be 6 digits"),
+    expires_in: zod_1.z.string().min(1, "Expiry time is required"),
     type: exports.OtpTypeSchema,
 });
 // Auto OTP Email Request Schema
 exports.AutoOtpEmailRequestSchema = zod_1.z.object({
-    to_email: zod_1.z.string().email('Invalid email format'),
-    to_name: zod_1.z.string().min(1, 'Recipient name is required'),
+    to_email: zod_1.z.string().email("Invalid email format"),
+    to_name: zod_1.z.string().min(1, "Recipient name is required"),
     type: exports.OtpTypeSchema,
     expires_in_minutes: zod_1.z.number().int().min(1).max(60).default(10),
 });
 // Registration with OTP Schemas
 exports.RegisterWithOtpDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
-    firstName: zod_1.z.string().min(1, 'First name is required'),
-    lastName: zod_1.z.string().min(1, 'Last name is required'),
-    role: zod_1.z.string().default('client'),
-    otpCode: zod_1.z.string().min(6, 'OTP code must be 6 digits').max(6, 'OTP code must be 6 digits'),
+    email: zod_1.z.string().email("Invalid email format"),
+    password: zod_1.z.string().min(8, "Password must be at least 8 characters long"),
+    firstName: zod_1.z.string().min(1, "First name is required"),
+    lastName: zod_1.z.string().min(1, "Last name is required"),
+    role: zod_1.z.string().default("client"),
+    otpCode: zod_1.z
+        .string()
+        .min(6, "OTP code must be 6 digits")
+        .max(6, "OTP code must be 6 digits"),
 });
 // User ID and Email Param Schemas
 exports.UserIdParamSchema = zod_1.z.object({
-    id: zod_1.z.string().min(1, 'User ID is required'),
+    id: zod_1.z.string().min(1, "User ID is required"),
 });
-exports.UserIdSchema = zod_1.z.string().min(1, 'User ID is required');
-exports.EmailSchema = zod_1.z.string().email('Invalid email format');
+exports.UserIdSchema = zod_1.z.string().min(1, "User ID is required");
+exports.EmailSchema = zod_1.z.string().email("Invalid email format");
 // Admin-specific Registration Schemas
 exports.RegisterAdminDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
-    firstName: zod_1.z.string().min(1, 'First name is required'),
-    lastName: zod_1.z.string().min(1, 'Last name is required'),
-    permissions: zod_1.z.object({
+    email: zod_1.z.string().email("Invalid email format"),
+    password: zod_1.z.string().min(8, "Password must be at least 8 characters long"),
+    firstName: zod_1.z.string().min(1, "First name is required"),
+    lastName: zod_1.z.string().min(1, "Last name is required"),
+    permissions: zod_1.z
+        .object({
         canAccessAdminPanel: zod_1.z.boolean().default(true),
         canManageUsers: zod_1.z.boolean().default(true),
         canManageTherapists: zod_1.z.boolean().default(true),
         canModerateContent: zod_1.z.boolean().default(true),
         canCreateWorksheets: zod_1.z.boolean().default(true),
         canAssignWorksheets: zod_1.z.boolean().default(true),
-    }).optional(),
+    })
+        .optional(),
 });
 exports.RegisterModeratorDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
-    password: zod_1.z.string().min(8, 'Password must be at least 8 characters long'),
-    firstName: zod_1.z.string().min(1, 'First name is required'),
-    lastName: zod_1.z.string().min(1, 'Last name is required'),
-    permissions: zod_1.z.object({
+    email: zod_1.z.string().email("Invalid email format"),
+    password: zod_1.z.string().min(8, "Password must be at least 8 characters long"),
+    firstName: zod_1.z.string().min(1, "First name is required"),
+    lastName: zod_1.z.string().min(1, "Last name is required"),
+    permissions: zod_1.z
+        .object({
         canAccessAdminPanel: zod_1.z.boolean().default(false),
         canManageUsers: zod_1.z.boolean().default(false),
         canManageTherapists: zod_1.z.boolean().default(false),
         canModerateContent: zod_1.z.boolean().default(true),
         canCreateWorksheets: zod_1.z.boolean().default(false),
         canAssignWorksheets: zod_1.z.boolean().default(false),
-    }).optional(),
+    })
+        .optional(),
 });
 // Session Management Schemas
 exports.TerminateSessionDtoSchema = zod_1.z.object({
-    sessionId: zod_1.z.string().min(1, 'Session ID is required'),
+    sessionId: zod_1.z.string().min(1, "Session ID is required"),
 });
 exports.SessionInfoResponseSchema = zod_1.z.object({
     sessionId: zod_1.z.string(),
@@ -192,7 +220,7 @@ exports.UniversalLogoutResponseSchema = zod_1.z.object({
 exports.UserRoleSchema = zod_1.z.string();
 // Check User Existence Schema
 exports.CheckUserExistsDtoSchema = zod_1.z.object({
-    email: zod_1.z.string().email('Invalid email format'),
+    email: zod_1.z.string().email("Invalid email format"),
 });
 exports.CheckUserExistsResponseSchema = zod_1.z.object({
     exists: zod_1.z.boolean(),
@@ -207,6 +235,9 @@ exports.AuthUserSchema = zod_1.z.object({
     lastName: zod_1.z.string(),
     role: exports.UserRoleSchema,
     emailVerified: zod_1.z.boolean(),
+    client: zod_1.z.object({
+        hasSeenTherapistRecommendations: zod_1.z.boolean(),
+    }).optional(),
 });
 exports.TokensSchema = zod_1.z.object({
     accessToken: zod_1.z.string(),
@@ -230,7 +261,7 @@ exports.ClientProfileResponseSchema = zod_1.z.object({
     email: zod_1.z.string(),
     firstName: zod_1.z.string(),
     lastName: zod_1.z.string(),
-    role: zod_1.z.literal('client'),
+    role: zod_1.z.literal("client"),
     dateOfBirth: zod_1.z.string().optional(),
     phoneNumber: zod_1.z.string().optional(),
     profileComplete: zod_1.z.boolean(),

@@ -10,16 +10,14 @@ import {
   Calendar,
   Clock,
   Video,
-  Phone,
-  MessageSquare,
   User,
   AlertCircle,
 } from "lucide-react";
 import BookingCalendar from "@/components/booking/BookingCalendar";
-import BookingModal from "@/components/booking/BookingModal";
+import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
 import { useBooking, useMeetings } from "@/hooks/useBooking";
 import { useTherapist } from "@/hooks/useTherapist";
-import { MeetingStatus, MeetingType } from "@/types/booking";
+import { MeetingStatus } from "@/types/booking";
 import { TimeSlot } from "@/hooks/useAvailableSlots";
 import { toast } from "sonner";
 
@@ -61,8 +59,6 @@ export default function BookingPage() {
     }
   };
 
-  const selectedTherapist = therapists.find(t => t.id === selectedTherapistId);
-
   const getStatusBadge = (status: MeetingStatus) => {
     switch (status) {
       case MeetingStatus.SCHEDULED:
@@ -80,17 +76,9 @@ export default function BookingPage() {
     }
   };
 
-  const getMeetingTypeIcon = (type?: MeetingType) => {
-    switch (type) {
-      case MeetingType.VIDEO:
-        return <Video className="h-4 w-4" />;
-      case MeetingType.AUDIO:
-        return <Phone className="h-4 w-4" />;
-      case MeetingType.CHAT:
-        return <MessageSquare className="h-4 w-4" />;
-      default:
-        return <Video className="h-4 w-4" />;
-    }
+  const getMeetingTypeIcon = () => {
+    // All meetings are video-only now
+    return <Video className="h-4 w-4" />;
   };
 
   return (
@@ -187,7 +175,7 @@ export default function BookingPage() {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              {getMeetingTypeIcon(meeting.meetingType as unknown as MeetingType)}
+                              {getMeetingTypeIcon()}
                               <span className="font-medium text-sm">
                                 {meeting.title || "Therapy Session"}
                               </span>
@@ -252,22 +240,9 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* Booking Modal */}
-      <BookingModal
-        therapist={selectedTherapist ? {
-          id: selectedTherapist.id,
-          name: `${selectedTherapist.firstName} ${selectedTherapist.lastName}`,
-          title: selectedTherapist.specialties?.[0] || "General Therapy",
-          availableTimes: [],
-          imageUrl: selectedTherapist.profileImage || "/icons/user-avatar.png",
-          rating: 4.8,
-          experience: selectedTherapist.experience,
-          bio: selectedTherapist.bio,
-          specialties: selectedTherapist.specialties,
-          isActive: selectedTherapist.isActive,
-          sessionPrice: 150,
-          sessionDuration: 50
-        } : null}
+      {/* Booking Interface */}
+      <ClientBookingInterface
+        therapistId={selectedTherapistId}
         isOpen={showBookingModal}
         onClose={() => {
           setShowBookingModal(false);

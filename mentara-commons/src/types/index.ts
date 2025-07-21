@@ -9,10 +9,57 @@ export type {
   RolePermissions,
   RegisterClientDto,
   UpdateClientDto,
-  // Note: RegisterTherapistDto and UpdateTherapistDto are now in therapist.ts
   DeactivateUserDto,
-  UserDeactivationResponseDto
+  UserDeactivationResponseDto,
+  UserIdParam,
+  UserResponse,
+  SuccessMessageResponse
 } from '../schemas/user';
+
+export type {
+  // Auth types
+  LoginDto,
+  RefreshTokenDto,
+  LogoutDto,
+  RegisterUserDto,
+  ChangePasswordDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+  SendVerificationEmailDto,
+  ResendVerificationEmailDto,
+  VerifyEmailDto,
+  OtpType,
+  SendOtpDto,
+  VerifyOtpDto,
+  ResendOtpDto,
+  VerifyRegistrationOtpDto,
+  ResendRegistrationOtpDto,
+  EmailResponse,
+  EmailStatusResponse,
+  OtpEmailData,
+  AutoOtpEmailRequest,
+  RegisterWithOtpDto,
+  RegisterAdminDto,
+  RegisterModeratorDto,
+  TerminateSessionDto,
+  SessionInfoResponse,
+  ActiveSessionsResponse,
+  TerminateSessionResponse,
+  TerminateOtherSessionsResponse,
+  UniversalLogoutResponse,
+  CheckUserExistsDto,
+  CheckUserExistsResponse,
+  AuthUser,
+  Tokens,
+  AuthResponse,
+  ClientAuthResponse,
+  TherapistAuthResponse,
+  AdminAuthResponse,
+  ModeratorAuthResponse,
+  ClientProfileResponse,
+  OnboardingStatusResponse,
+  SuccessResponse
+} from '../schemas/auth';
 
 export type {
   // Therapist types
@@ -62,7 +109,14 @@ export type {
   SlotGenerationConfig,
   TimeSlot,
   ValidationConfig,
-  BookingStats
+  BookingStats,
+  MeetingCreateDto,
+  MeetingUpdateDto,
+  BookingMeetingParamsDto,
+  TherapistAvailabilityCreateDto,
+  TherapistAvailabilityUpdateDto,
+  AvailabilityParamsDto,
+  GetAvailableSlotsQueryDto
 } from '../schemas/booking';
 
 export type {
@@ -117,3 +171,41 @@ export type {
   MessageAnalytics,
   MessageNotificationPreferences
 } from '../schemas/messaging';
+
+export type {
+  // Admin types
+  CreateAdminDto,
+  UpdateAdminDto,
+  AdminResponseDto,
+  AdminQuery,
+  AdminUserQuery,
+  AdminIdParam,
+  ApproveTherapistDto,
+  RejectTherapistDto,
+  UpdateTherapistStatusDto,
+  PendingTherapistFiltersDto,
+  AdminAnalyticsQuery,
+  AdminUserListParamsDto,
+  AdminUserGrowthParamsDto,
+  AdminEngagementParamsDto,
+  AdminModerationReportParamsDto,
+  AdminTherapistApplicationParamsDto,
+  AdminTherapistApplicationFiltersDto,
+  AdminMatchingPerformanceParamsDto,
+  AdminFlaggedContentParamsDto,
+  UserGrowthData,
+  EngagementData,
+  AdminModerationReport,
+  UpdateModerationReportRequest,
+  SystemConfig,
+  FeatureFlag,
+  UpdateFeatureFlagRequest,
+  AdminUserCreateRequest,
+  AdminUserUpdateRequest,
+  UserRoleUpdateRequest,
+  UserSuspendRequest,
+  TherapistApplicationDetailsResponse,
+  TherapistActionResponse,
+  TherapistApplicationMetricsResponse,
+  TherapistListResponse
+} from '../schemas/admin';

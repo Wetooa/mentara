@@ -161,3 +161,81 @@ export function getAllIllnessTypes(): string[] {
     ),
   ] as string[];
 }
+
+/**
+ * Mapping between AI disorder predictions and community slugs
+ * Used for automatic community recommendations based on assessment results
+ */
+export const AI_DISORDER_TO_COMMUNITY_MAPPING: Record<string, string[]> = {
+  Has_Depression: ['depression-support'],
+  Has_Anxiety: ['anxiety-warriors'],
+  Has_Social_Anxiety: ['social-anxiety-support', 'anxiety-warriors'],
+  Has_PTSD: ['ptsd-support'],
+  Has_Panic_Disorder: ['panic-disorder-support', 'anxiety-warriors'],
+  Has_Bipolar: ['bipolar-support'],
+  Has_OCD: ['ocd-support'],
+  Has_Insomnia: ['insomnia-support'],
+  Has_High_Stress: ['stress-support', 'burnout-recovery'],
+  Has_Burnout: ['burnout-recovery', 'stress-support'],
+  Has_Binge_Eating: ['eating-disorder-recovery'],
+  Has_ADHD: ['adhd-support'],
+  Has_Alcohol_Problem: ['substance-recovery-support'],
+  Has_Drug_Problem: ['substance-recovery-support'],
+  Has_Phobia: ['phobia-support'],
+  Has_Agoraphobia: ['phobia-support', 'social-anxiety-support'],
+  Has_BloodPhobia: ['phobia-support'],
+  Has_SocialPhobia: ['social-anxiety-support', 'phobia-support'],
+  Has_Hoarding: ['ocd-support'], // Hoarding is often OCD-related
+};
+
+/**
+ * Helper function to get recommended communities based on AI disorder predictions
+ * @param disorderPredictions - Object with disorder predictions (boolean values)
+ * @returns Array of recommended community slugs
+ */
+export function getRecommendedCommunitiesFromAI(
+  disorderPredictions: Record<string, boolean>
+): string[] {
+  const recommendedSlugs = new Set<string>();
+  
+  Object.entries(disorderPredictions).forEach(([disorder, hasCondition]) => {
+    if (hasCondition && AI_DISORDER_TO_COMMUNITY_MAPPING[disorder]) {
+      AI_DISORDER_TO_COMMUNITY_MAPPING[disorder].forEach(slug => {
+        recommendedSlugs.add(slug);
+      });
+    }
+  });
+  
+  return Array.from(recommendedSlugs);
+}
+
+/**
+ * Helper function to get community recommendations with scores based on AI predictions
+ * @param disorderPredictions - Object with disorder predictions (boolean values)
+ * @returns Array of communities with compatibility scores
+ */
+export function getCommunityRecommendationsWithScores(
+  disorderPredictions: Record<string, boolean>
+): Array<{ slug: string; community: CommunityConfig; score: number }> {
+  const scoreMap = new Map<string, number>();
+  
+  // Calculate scores based on disorder matches
+  Object.entries(disorderPredictions).forEach(([disorder, hasCondition]) => {
+    if (hasCondition && AI_DISORDER_TO_COMMUNITY_MAPPING[disorder]) {
+      AI_DISORDER_TO_COMMUNITY_MAPPING[disorder].forEach((slug, index) => {
+        // First community for a disorder gets higher score
+        const baseScore = index === 0 ? 0.9 : 0.7;
+        const currentScore = scoreMap.get(slug) || 0;
+        scoreMap.set(slug, Math.max(currentScore, baseScore));
+      });
+    }
+  });
+  
+  return Array.from(scoreMap.entries())
+    .map(([slug, score]) => {
+      const community = getCommunityBySlug(slug);
+      return community ? { slug, community, score } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => b!.score - a!.score) as Array<{ slug: string; community: CommunityConfig; score: number }>;
+}

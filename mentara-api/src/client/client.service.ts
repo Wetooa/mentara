@@ -147,7 +147,6 @@ export class ClientService {
     const assignment = await this.prisma.clientTherapist.findFirst({
       where: {
         clientId: userId,
-        status: 'ACTIVE',
       },
       include: {
         therapist: {
@@ -199,13 +198,11 @@ export class ClientService {
       throw new NotFoundException('Therapist not found');
     }
 
-    // Deactivate any existing assignments
-    await this.prisma.clientTherapist.updateMany({
+    // Delete any existing assignments
+    await this.prisma.clientTherapist.deleteMany({
       where: {
         clientId: userId,
-        status: 'ACTIVE',
       },
-      data: { status: 'INACTIVE' },
     });
 
     // Create new assignment
@@ -213,7 +210,6 @@ export class ClientService {
       data: {
         clientId: userId,
         therapistId: therapistId,
-        status: 'ACTIVE',
       },
     });
 
@@ -242,13 +238,11 @@ export class ClientService {
       throw new NotFoundException('Client not found');
     }
 
-    // Deactivate any existing assignments
-    await this.prisma.clientTherapist.updateMany({
+    // Delete any existing assignments
+    await this.prisma.clientTherapist.deleteMany({
       where: {
         clientId: userId,
-        status: 'ACTIVE',
       },
-      data: { status: 'INACTIVE' },
     });
   }
 

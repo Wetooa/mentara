@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterTherapistWithDocumentsRequestSchema = exports.DocumentUploadSchema = exports.FileValidationSchema = exports.DOCUMENT_TYPE_MAPPING = exports.ALL_DOCUMENT_TYPES = exports.OPTIONAL_DOCUMENT_TYPES = exports.REQUIRED_DOCUMENT_TYPES = exports.MAX_DOCUMENT_SIZE = exports.ALLOWED_DOCUMENT_MIME_TYPES = exports.TherapistApplicationListDtoSchema = exports.TherapistClientRequestQueryDtoSchema = exports.TherapistMeetingQueryDtoSchema = exports.TherapistWorksheetQueryDtoSchema = exports.ApplicationStatusUpdateResponseSchema = exports.SubmitApplicationResponseSchema = exports.SubmitApplicationWithDocumentsRequestSchema = exports.ApplicationListResponseSchema = exports.TherapistRecommendationQuerySchema = exports.WelcomeRecommendationQuerySchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistDashboardDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchemaLegacy = exports.TherapistRecommendationRequestSchemaLegacy = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
-exports.DocumentValidationUtils = void 0;
+exports.DocumentValidationUtils = exports.RegisterTherapistWithDocumentsRequestSchema = exports.DocumentUploadSchema = exports.FileValidationSchema = exports.DOCUMENT_TYPE_MAPPING = exports.ALL_DOCUMENT_TYPES = exports.OPTIONAL_DOCUMENT_TYPES = exports.REQUIRED_DOCUMENT_TYPES = exports.MAX_DOCUMENT_SIZE = exports.ALLOWED_DOCUMENT_MIME_TYPES = exports.TherapistApplicationListDtoSchema = exports.TherapistClientRequestQueryDtoSchema = exports.TherapistMeetingQueryDtoSchema = exports.TherapistWorksheetQueryDtoSchema = exports.ApplicationStatusUpdateResponseSchema = exports.SubmitApplicationResponseSchema = exports.SubmitApplicationWithDocumentsRequestSchema = exports.ApplicationListResponseSchema = exports.TherapistRecommendationQuerySchema = exports.WelcomeRecommendationQuerySchema = exports.TherapistRecommendationResponseDtoSchema = exports.TherapistRecommendationRequestSchema = exports.TherapistCredentialsSchema = exports.TherapistWorksheetAssignmentSchema = exports.ApplicationListParamsSchema = exports.UpdateApplicationRequestSchema = exports.CreateApplicationRequestSchema = exports.ApplicationStatusUpdateDtoSchema = exports.TherapistApplicationSchema = exports.ApplicationDocumentSchema = exports.ApplicationStatusSchema = exports.TherapistApplicationDtoSchema = exports.PracticeInfoSchema = exports.SessionFormatSchema = exports.ProfessionalInfoSchema = exports.CertificationSchema = exports.EducationSchema = exports.PersonalInfoSchema = exports.PatientDataSchema = exports.TherapistRecommendationResponseSchema = exports.TherapistSearchParamsSchema = exports.MatchCriteriaSchema = exports.TherapistRecommendationSchema = exports.TherapistApplicationIdParamSchema = exports.TherapistIdParamSchema = exports.TherapistApplicationCreateDtoSchema = exports.TherapistRecommendationResponseDtoSchemaLegacy = exports.TherapistRecommendationRequestSchemaLegacy = exports.UpdateTherapistDtoSchema = exports.RegisterTherapistDtoSchema = void 0;
+exports.TherapistDashboardDataSchema = void 0;
 const zod_1 = require("zod");
 // Enhanced Therapist Registration Schema (unified with document requirements)
 exports.RegisterTherapistDtoSchema = zod_1.z.object({
@@ -195,38 +195,6 @@ exports.TherapistRecommendationResponseSchema = zod_1.z.object({
     matchCriteria: exports.MatchCriteriaSchema,
     page: zod_1.z.number().min(1),
     pageSize: zod_1.z.number().min(1)
-});
-// Therapist Dashboard Data Schema
-exports.TherapistDashboardDataSchema = zod_1.z.object({
-    therapist: zod_1.z.object({
-        id: zod_1.z.string().min(1),
-        name: zod_1.z.string().min(1),
-        avatar: zod_1.z.string().url()
-    }),
-    stats: zod_1.z.object({
-        activePatients: zod_1.z.number().min(0),
-        rescheduled: zod_1.z.number().min(0),
-        cancelled: zod_1.z.number().min(0),
-        income: zod_1.z.number().min(0),
-        patientStats: zod_1.z.object({
-            total: zod_1.z.number().min(0),
-            percentage: zod_1.z.number().min(0).max(100),
-            months: zod_1.z.number().min(0),
-            chartData: zod_1.z.array(zod_1.z.object({
-                month: zod_1.z.string().min(1),
-                value: zod_1.z.number().min(0)
-            }))
-        })
-    }),
-    upcomingAppointments: zod_1.z.array(zod_1.z.object({
-        id: zod_1.z.string().min(1),
-        patientId: zod_1.z.string().min(1),
-        patientName: zod_1.z.string().min(1),
-        time: zod_1.z.string().min(1),
-        date: zod_1.z.string().datetime(),
-        type: zod_1.z.string().min(1),
-        status: zod_1.z.enum(['scheduled', 'confirmed', 'cancelled', 'completed'])
-    }))
 });
 // Patient Data Schema
 exports.PatientDataSchema = zod_1.z.object({
@@ -585,4 +553,56 @@ exports.DocumentValidationUtils = {
         return exports.ALL_DOCUMENT_TYPES[documentType];
     },
 };
+// Therapist Dashboard Data Schema - Module 2
+exports.TherapistDashboardDataSchema = zod_1.z.object({
+    pendingRequests: zod_1.z.array(zod_1.z.object({
+        relationshipId: zod_1.z.string(),
+        client: zod_1.z.object({
+            id: zod_1.z.string(),
+            firstName: zod_1.z.string(),
+            lastName: zod_1.z.string(),
+            email: zod_1.z.string(),
+            profilePicture: zod_1.z.string().optional(),
+            joinedAt: zod_1.z.string(),
+        }),
+        matchInfo: zod_1.z.object({
+            assignedAt: zod_1.z.string(),
+            status: zod_1.z.enum(['PENDING', 'ACTIVE']),
+            daysSinceMatch: zod_1.z.number(),
+        }),
+        assessmentInfo: zod_1.z.object({
+            hasAssessment: zod_1.z.boolean(),
+            completedAt: zod_1.z.string().optional(),
+            assessmentType: zod_1.z.string().optional(),
+            daysSinceAssessment: zod_1.z.number().optional(),
+        }),
+    })),
+    recentMatches: zod_1.z.array(zod_1.z.object({
+        relationshipId: zod_1.z.string(),
+        client: zod_1.z.object({
+            id: zod_1.z.string(),
+            firstName: zod_1.z.string(),
+            lastName: zod_1.z.string(),
+            email: zod_1.z.string(),
+            profilePicture: zod_1.z.string().optional(),
+            joinedAt: zod_1.z.string(),
+        }),
+        matchInfo: zod_1.z.object({
+            assignedAt: zod_1.z.string(),
+            status: zod_1.z.enum(['PENDING', 'ACTIVE']),
+            daysSinceMatch: zod_1.z.number(),
+        }),
+        assessmentInfo: zod_1.z.object({
+            hasAssessment: zod_1.z.boolean(),
+            completedAt: zod_1.z.string().optional(),
+            assessmentType: zod_1.z.string().optional(),
+            daysSinceAssessment: zod_1.z.number().optional(),
+        }),
+    })),
+    summary: zod_1.z.object({
+        totalPendingRequests: zod_1.z.number(),
+        totalRecentMatches: zod_1.z.number(),
+        totalMatches: zod_1.z.number(),
+    }),
+});
 //# sourceMappingURL=therapist.js.map

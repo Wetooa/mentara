@@ -354,7 +354,11 @@ export class AuthService {
         deactivatedAt: true,
         lockoutUntil: true,
         failedLoginCount: true,
-        client: true,
+        client: {
+          select: {
+            hasSeenTherapistRecommendations: true,
+          },
+        },
         therapist: true,
       },
     });

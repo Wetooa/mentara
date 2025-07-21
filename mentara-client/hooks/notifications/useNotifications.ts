@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { io, Socket } from "socket.io-client";
 
 interface Notification {
   id: string;
@@ -61,7 +62,7 @@ export function useNotifications(params: {
     lastConnected: null,
   });
   
-  const wsRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
@@ -121,20 +122,25 @@ export function useNotifications(params: {
     },
   });
 
-  // WebSocket connection management
+  // Socket.io connection management
   const connectWebSocket = useCallback(() => {
     if (!accessToken || !user || !config.enableRealtime) return;
-    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (socketRef.current?.connected) return;
 
     try {
       setConnectionState(prev => ({ ...prev, isReconnecting: true, error: null }));
       
-      // Build WebSocket URL with authentication
-      const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL}/notifications?token=${accessToken}`;
-      const ws = new WebSocket(wsUrl);
+      // Connect to messaging namespace with authentication
+      const socket = io(`${process.env.NEXT_PUBLIC_WS_URL}/messaging`, {
+        auth: {
+          token: accessToken,
+        },
+        transports: ['websocket', 'polling'],
+        timeout: 10000,
+      });
       
-      ws.onopen = () => {
-        console.log('Notifications WebSocket connected');
+      socket.on('connect', () => {
+        console.log('Notifications Socket.io connected');
         setConnectionState({
           isConnected: true,
           isReconnecting: false,
@@ -142,45 +148,50 @@ export function useNotifications(params: {
           lastConnected: new Date(),
         });
         reconnectAttemptsRef.current = 0;
-      };
+        
+        // Join user room for notifications
+        socket.emit('join_user_room', { userId: user.id });
+      });
 
-      ws.onmessage = (event) => {
-        try {
-          const eventData: NotificationWebSocketEvent = JSON.parse(event.data);
-          handleWebSocketEvent(eventData);
-        } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
-        }
-      };
+      // Listen for notification events
+      socket.on('notification', (data) => {
+        handleWebSocketEvent({ type: 'notification', data });
+      });
 
-      ws.onclose = (event) => {
-        console.log('Notifications WebSocket disconnected:', event.code, event.reason);
+      socket.on('unreadCount', (data) => {
+        handleWebSocketEvent({ type: 'unread_count_updated', data });
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.log('Notifications Socket.io disconnected:', reason);
         setConnectionState(prev => ({ 
           ...prev, 
           isConnected: false, 
           isReconnecting: false 
         }));
-        wsRef.current = null;
 
-        // Auto-reconnect if not intentionally closed
-        if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          scheduleReconnect();
+        // Auto-reconnect on unexpected disconnection
+        if (reason === 'io server disconnect' || reason === 'transport error') {
+          if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+            scheduleReconnect();
+          }
         }
-      };
+      });
 
-      ws.onerror = (error) => {
-        console.error('Notifications WebSocket error:', error);
+      socket.on('connect_error', (error) => {
+        console.error('Notifications Socket.io connection error:', error);
         setConnectionState(prev => ({ 
           ...prev, 
           error: 'Connection error',
           isReconnecting: false 
         }));
-      };
+        scheduleReconnect();
+      });
 
-      wsRef.current = ws;
+      socketRef.current = socket;
 
     } catch (error) {
-      console.error('Failed to connect to notifications WebSocket:', error);
+      console.error('Failed to connect to notifications Socket.io:', error);
       setConnectionState(prev => ({ 
         ...prev, 
         error: 'Failed to connect',
@@ -196,9 +207,9 @@ export function useNotifications(params: {
       reconnectTimeoutRef.current = null;
     }
     
-    if (wsRef.current) {
-      wsRef.current.close(1000, 'Intentional disconnect');
-      wsRef.current = null;
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
     }
     
     setConnectionState({

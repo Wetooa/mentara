@@ -10,9 +10,10 @@ import { PrismaService } from '../providers/prisma-client.provider';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RoleUtils } from '../utils/role-utils';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
+import { MessagingModule } from '../messaging/messaging.module';
 
 @Module({
-  imports: [],
+  imports: [MessagingModule],
   controllers: [
     AdminController,
     AdminAccountController,

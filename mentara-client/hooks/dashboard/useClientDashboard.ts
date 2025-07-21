@@ -66,3 +66,39 @@ export function useClientWellness() {
     enabled: !!api.dashboard?.getClientWellness,
   });
 }
+
+/**
+ * Hook for fetching dashboard data (alias for useClientDashboard)
+ * This is the main dashboard data hook used by the dashboard page
+ */
+export function useDashboardData() {
+  return useClientDashboard();
+}
+
+/**
+ * Hook for fetching user notifications
+ */
+export function useNotifications(options?: { limit?: number; isRead?: boolean }) {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: ["notifications", options?.limit, options?.isRead],
+    queryFn: () => api.notifications?.getNotifications?.(options) || Promise.resolve([]),
+    staleTime: 1000 * 60 * 1, // Notifications are time-sensitive
+    enabled: !!api.notifications?.getNotifications,
+  });
+}
+
+/**
+ * Hook for fetching recent communications
+ */
+export function useRecentCommunications() {
+  const api = useApi();
+
+  return useQuery({
+    queryKey: ["dashboard", "communications", "recent"],
+    queryFn: () => api.messaging?.getRecentCommunications?.() || Promise.resolve([]),
+    staleTime: 1000 * 60 * 2, // Communications change moderately
+    enabled: !!api.messaging?.getRecentCommunications,
+  });
+}

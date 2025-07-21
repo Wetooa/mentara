@@ -12,10 +12,10 @@ export declare const CommentSchema: z.ZodObject<{
     attachmentSizes: z.ZodOptional<z.ZodArray<z.ZodNumber, "many">>;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    createdAt: string;
-    updatedAt: string;
     userId: string;
     content: string;
+    createdAt: string;
+    updatedAt: string;
     postId: string;
     parentId?: string | undefined;
     attachmentUrls?: string[] | undefined;
@@ -23,10 +23,10 @@ export declare const CommentSchema: z.ZodObject<{
     attachmentSizes?: number[] | undefined;
 }, {
     id: string;
-    createdAt: string;
-    updatedAt: string;
     userId: string;
     content: string;
+    createdAt: string;
+    updatedAt: string;
     postId: string;
     parentId?: string | undefined;
     attachmentUrls?: string[] | undefined;
@@ -60,13 +60,13 @@ export declare const CommentHeartSchema: z.ZodObject<{
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    createdAt: string;
     userId: string;
+    createdAt: string;
     commentId: string;
 }, {
     id: string;
-    createdAt: string;
     userId: string;
+    createdAt: string;
     commentId: string;
 }>;
 export declare const HeartToggleResponseSchema: z.ZodObject<{
@@ -80,10 +80,10 @@ export declare const ReportCommentDtoSchema: z.ZodObject<{
     reason: z.ZodEnum<["spam", "harassment", "inappropriate", "misinformation", "other"]>;
     description: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation";
+    reason: "spam" | "harassment" | "inappropriate" | "misinformation" | "other";
     description?: string | undefined;
 }, {
-    reason: "spam" | "harassment" | "other" | "inappropriate" | "misinformation";
+    reason: "spam" | "harassment" | "inappropriate" | "misinformation" | "other";
     description?: string | undefined;
 }>;
 export declare const CommentQuerySchema: z.ZodObject<{

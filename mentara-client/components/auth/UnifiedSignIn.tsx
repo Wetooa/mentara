@@ -24,6 +24,7 @@ import { ContinueWithGoogle } from "@/components/auth/ContinueWithGoogle";
 import { ContinueWithMicrosoft } from "@/components/auth/ContinueWithMicrosoft";
 import { useLogin } from "@/hooks/auth/useLogin";
 import { toast } from "sonner";
+import { mapLoginError } from "@/lib/utils/loginErrors";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -49,19 +50,29 @@ export function UnifiedSignIn() {
   const onSubmit = useCallback(
     async (data: SignInForm) => {
       try {
+        // Clear any previous form errors
+        form.clearErrors();
+        
         // Use simple login hook that handles token storage and redirect
         await login({ email: data.email, password: data.password });
-        toast.success("Successfully signed in!");
+        toast.success("Welcome back!");
       } catch (err) {
         console.error("Login error:", err);
-        toast.error(
-          err instanceof Error
-            ? err.message
-            : "Sign in failed. Please try again."
-        );
+        
+        // Map error to user-friendly message and display in form
+        const errorResult = mapLoginError(err);
+        
+        // Set form error that will display below the form
+        form.setError("root", {
+          type: "manual",
+          message: errorResult.message,
+        });
+        
+        // Show minimal toast for additional feedback
+        toast.error("Sign in failed");
       }
     },
-    [login]
+    [login, form]
   );
 
   return (
@@ -107,6 +118,13 @@ export function UnifiedSignIn() {
                       placeholder="Enter your email"
                       {...field}
                       disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        // Clear form errors when user starts typing
+                        if (form.formState.errors.root) {
+                          form.clearErrors("root");
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -127,6 +145,13 @@ export function UnifiedSignIn() {
                         placeholder="Enter your password"
                         {...field}
                         disabled={isLoading}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          // Clear form errors when user starts typing
+                          if (form.formState.errors.root) {
+                            form.clearErrors("root");
+                          }
+                        }}
                       />
                       <Button
                         type="button"
@@ -148,6 +173,13 @@ export function UnifiedSignIn() {
                 </FormItem>
               )}
             />
+
+            {/* Display form-level errors */}
+            {form.formState.errors.root && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                {form.formState.errors.root.message}
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (

@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Post,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -15,11 +14,9 @@ import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   RegisterClientDtoSchema,
-  LoginDtoSchema,
   VerifyRegistrationOtpDtoSchema,
   ResendRegistrationOtpDtoSchema,
   type RegisterClientDto,
-  type LoginDto,
   type VerifyRegistrationOtpDto,
   type ResendRegistrationOtpDto,
   type ClientAuthResponse,
@@ -56,38 +53,6 @@ export class ClientAuthController {
       },
       token: result.tokens.accessToken, // Single JWT token
       message: result.message,
-    };
-  }
-
-  @Public()
-  @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(
-    @Body(new ZodValidationPipe(LoginDtoSchema)) loginDto: LoginDto,
-    @Req() req: Request,
-  ): Promise<ClientAuthResponse> {
-    const ipAddress = req.ip;
-    const userAgent = req.get('User-Agent');
-
-    const result = await this.clientAuthService.loginClient(
-      loginDto.email,
-      loginDto.password,
-      ipAddress,
-      userAgent,
-    );
-
-    return {
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName || '',
-        lastName: result.user.lastName || '',
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
-      },
-      token: result.tokens.accessToken, // This is now the single token
-      message: 'Client login successful',
     };
   }
 

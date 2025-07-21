@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TherapistListResponseSchema = exports.TherapistApplicationMetricsResponseSchema = exports.TherapistActionResponseSchema = exports.TherapistApplicationDetailsResponseSchema = exports.UserSuspendRequestSchema = exports.UserRoleUpdateRequestSchema = exports.AdminUserUpdateRequestSchema = exports.AdminUserCreateRequestSchema = exports.UpdateFeatureFlagRequestSchema = exports.FeatureFlagSchema = exports.SystemConfigSchema = exports.UpdateModerationReportRequestSchema = exports.AdminModerationReportSchema = exports.EngagementDataSchema = exports.UserGrowthDataSchema = exports.SystemStatsSchema = exports.AdminFlaggedContentParamsDtoSchema = exports.AdminMatchingPerformanceParamsDtoSchema = exports.AdminTherapistApplicationFiltersDtoSchema = exports.AdminTherapistApplicationParamsDtoSchema = exports.AdminModerationReportParamsDtoSchema = exports.AdminEngagementParamsDtoSchema = exports.AdminUserGrowthParamsDtoSchema = exports.AdminUserListParamsDtoSchema = exports.AdminAnalyticsQuerySchema = exports.PendingTherapistFiltersDtoSchema = exports.UpdateTherapistStatusDtoSchema = exports.RejectTherapistDtoSchema = exports.ApproveTherapistDtoSchema = exports.AdminIdParamSchema = exports.AdminUserQuerySchema = exports.AdminQuerySchema = exports.AdminResponseDtoSchema = exports.UpdateAdminDtoSchema = exports.CreateAdminDtoSchema = void 0;
+exports.TherapistListResponseSchema = exports.TherapistApplicationMetricsResponseSchema = exports.TherapistActionResponseSchema = exports.TherapistApplicationDetailsResponseSchema = exports.UserSuspendRequestSchema = exports.UserRoleUpdateRequestSchema = exports.AdminUserUpdateRequestSchema = exports.AdminUserCreateRequestSchema = exports.UpdateFeatureFlagRequestSchema = exports.FeatureFlagSchema = exports.SystemConfigSchema = exports.UpdateModerationReportRequestSchema = exports.AdminModerationReportSchema = exports.EngagementDataSchema = exports.UserGrowthDataSchema = exports.AdminFlaggedContentParamsDtoSchema = exports.AdminMatchingPerformanceParamsDtoSchema = exports.AdminTherapistApplicationFiltersDtoSchema = exports.AdminTherapistApplicationParamsDtoSchema = exports.AdminModerationReportParamsDtoSchema = exports.AdminEngagementParamsDtoSchema = exports.AdminUserGrowthParamsDtoSchema = exports.AdminUserListParamsDtoSchema = exports.AdminAnalyticsQuerySchema = exports.PendingTherapistFiltersDtoSchema = exports.UpdateTherapistStatusDtoSchema = exports.RejectTherapistDtoSchema = exports.ApproveTherapistDtoSchema = exports.AdminIdParamSchema = exports.AdminUserQuerySchema = exports.AdminQuerySchema = exports.AdminResponseDtoSchema = exports.UpdateAdminDtoSchema = exports.CreateAdminDtoSchema = void 0;
 const zod_1 = require("zod");
 // Admin Creation and Update Schemas
 exports.CreateAdminDtoSchema = zod_1.z.object({
@@ -138,22 +138,6 @@ exports.AdminFlaggedContentParamsDtoSchema = zod_1.z.object({
     type: zod_1.z.string().optional(),
     page: zod_1.z.number().min(1).default(1),
     limit: zod_1.z.number().min(1).max(100).default(50),
-});
-// Additional admin types moved from frontend services
-exports.SystemStatsSchema = zod_1.z.object({
-    totalUsers: zod_1.z.number().min(0),
-    totalClients: zod_1.z.number().min(0),
-    totalTherapists: zod_1.z.number().min(0),
-    pendingApplications: zod_1.z.number().min(0),
-    totalCommunities: zod_1.z.number().min(0),
-    totalPosts: zod_1.z.number().min(0),
-    totalSessions: zod_1.z.number().min(0),
-    growth: zod_1.z.object({
-        usersGrowth: zod_1.z.number(),
-        clientsGrowth: zod_1.z.number(),
-        therapistsGrowth: zod_1.z.number(),
-        sessionsGrowth: zod_1.z.number(),
-    }),
 });
 exports.UserGrowthDataSchema = zod_1.z.object({
     date: zod_1.z.string().datetime(),
