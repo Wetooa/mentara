@@ -94,12 +94,44 @@ export default function AdminTherapistManagementPage() {
       therapistId: string;
       data: TherapistApprovalData;
     }) => api.admin.approveTherapist(therapistId, data),
+    onMutate: async ({ therapistId }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["admin", "therapists"] });
+      
+      // Snapshot the previous value
+      const previousApplications = queryClient.getQueryData(["admin", "therapists", "applications", filters]);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(
+        ["admin", "therapists", "applications", filters],
+        (old: any) => {
+          if (!old?.applications) return old;
+          return {
+            ...old,
+            applications: old.applications.map((app: any) =>
+              app.id === therapistId
+                ? { ...app, status: "approved", processingDate: new Date().toISOString() }
+                : app
+            ),
+          };
+        }
+      );
+      
+      return { previousApplications, therapistId };
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic update
+      if (context?.previousApplications) {
+        queryClient.setQueryData(
+          ["admin", "therapists", "applications", filters],
+          context.previousApplications
+        );
+      }
+      toast.error("Failed to approve therapist");
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "therapists"] });
       toast.success("Therapist approved successfully");
-    },
-    onError: () => {
-      toast.error("Failed to approve therapist");
     },
   });
 
@@ -112,12 +144,44 @@ export default function AdminTherapistManagementPage() {
       therapistId: string;
       data: TherapistRejectionData;
     }) => api.admin.rejectTherapist(therapistId, data),
+    onMutate: async ({ therapistId }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["admin", "therapists"] });
+      
+      // Snapshot the previous value
+      const previousApplications = queryClient.getQueryData(["admin", "therapists", "applications", filters]);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(
+        ["admin", "therapists", "applications", filters],
+        (old: any) => {
+          if (!old?.applications) return old;
+          return {
+            ...old,
+            applications: old.applications.map((app: any) =>
+              app.id === therapistId
+                ? { ...app, status: "rejected", processingDate: new Date().toISOString() }
+                : app
+            ),
+          };
+        }
+      );
+      
+      return { previousApplications, therapistId };
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic update
+      if (context?.previousApplications) {
+        queryClient.setQueryData(
+          ["admin", "therapists", "applications", filters],
+          context.previousApplications
+        );
+      }
+      toast.error("Failed to reject therapist");
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "therapists"] });
       toast.success("Therapist application rejected");
-    },
-    onError: () => {
-      toast.error("Failed to reject therapist");
     },
   });
 
@@ -129,23 +193,109 @@ export default function AdminTherapistManagementPage() {
   };
 
   const handleBulkApprove = async () => {
-    for (const therapistId of selectedTherapists) {
-      await approveMutation.mutateAsync({
-        therapistId,
-        data: { approvalMessage: "Bulk approval processed" },
-      });
+    // Optimistically update all selected applications
+    const previousApplications = queryClient.getQueryData(["admin", "therapists", "applications", filters]);
+    
+    try {
+      // Immediately update UI for better UX
+      queryClient.setQueryData(
+        ["admin", "therapists", "applications", filters],
+        (old: any) => {
+          if (!old?.applications) return old;
+          return {
+            ...old,
+            applications: old.applications.map((app: any) =>
+              selectedTherapists.includes(app.id)
+                ? { ...app, status: "approved", processingDate: new Date().toISOString() }
+                : app
+            ),
+          };
+        }
+      );
+      
+      const promises = selectedTherapists.map(therapistId =>
+        approveMutation.mutateAsync({
+          therapistId,
+          data: { approvalMessage: "Bulk approval processed" },
+        })
+      );
+      
+      const results = await Promise.allSettled(promises);
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      
+      if (failed === 0) {
+        toast.success(`Successfully approved ${successful} therapist applications`);
+      } else {
+        toast.warning(`Approved ${successful} applications, ${failed} failed`);
+        // If some failed, refresh to get accurate state
+        queryClient.invalidateQueries({ queryKey: ["admin", "therapists"] });
+      }
+      
+      setSelectedTherapists([]);
+    } catch (error) {
+      // Rollback optimistic update on error
+      if (previousApplications) {
+        queryClient.setQueryData(
+          ["admin", "therapists", "applications", filters],
+          previousApplications
+        );
+      }
+      toast.error('Bulk approval failed. Please try again.');
     }
-    setSelectedTherapists([]);
   };
 
   const handleBulkReject = async () => {
-    for (const therapistId of selectedTherapists) {
-      await rejectMutation.mutateAsync({
-        therapistId,
-        data: { rejectionReason: "incomplete_documentation" },
-      });
+    // Optimistically update all selected applications
+    const previousApplications = queryClient.getQueryData(["admin", "therapists", "applications", filters]);
+    
+    try {
+      // Immediately update UI for better UX
+      queryClient.setQueryData(
+        ["admin", "therapists", "applications", filters],
+        (old: any) => {
+          if (!old?.applications) return old;
+          return {
+            ...old,
+            applications: old.applications.map((app: any) =>
+              selectedTherapists.includes(app.id)
+                ? { ...app, status: "rejected", processingDate: new Date().toISOString() }
+                : app
+            ),
+          };
+        }
+      );
+      
+      const promises = selectedTherapists.map(therapistId =>
+        rejectMutation.mutateAsync({
+          therapistId,
+          data: { rejectionReason: "incomplete_documentation" },
+        })
+      );
+      
+      const results = await Promise.allSettled(promises);
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      
+      if (failed === 0) {
+        toast.success(`Successfully rejected ${successful} therapist applications`);
+      } else {
+        toast.warning(`Rejected ${successful} applications, ${failed} failed`);
+        // If some failed, refresh to get accurate state
+        queryClient.invalidateQueries({ queryKey: ["admin", "therapists"] });
+      }
+      
+      setSelectedTherapists([]);
+    } catch (error) {
+      // Rollback optimistic update on error
+      if (previousApplications) {
+        queryClient.setQueryData(
+          ["admin", "therapists", "applications", filters],
+          previousApplications
+        );
+      }
+      toast.error('Bulk rejection failed. Please try again.');
     }
-    setSelectedTherapists([]);
   };
 
   if (isLoading) {
