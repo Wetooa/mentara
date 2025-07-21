@@ -490,20 +490,23 @@ export default function UserCommunity() {
                       const hasUserHearted = isPostHearted(post as unknown as Post);
                       
                       return (
-                        <Card key={index} className="group bg-white/90 backdrop-blur-sm border-community-calm/30 shadow-lg hover:shadow-xl hover:border-community-accent/40 transition-all duration-300 overflow-hidden">
-                          {/* Subtle gradient background */}
-                          <div className="absolute inset-0 bg-community-warm-gradient opacity-30 group-hover:opacity-40 transition-opacity duration-300" />
+                        <Card key={index} className="group bg-white/95 backdrop-blur-sm border-community-calm/20 shadow-lg hover:shadow-2xl hover:border-community-accent/30 transition-all duration-300 overflow-hidden relative">
+                          {/* Enhanced gradient background */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-community-warm/20 via-community-soothing/10 to-community-calm/20 opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
+                          
+                          {/* Subtle border accent */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-community-accent/60 via-community-heart/40 to-community-soothing/60 opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
                           
                           <CardHeader className="relative pb-3">
                             <div className="flex items-start gap-4">
                               <div className="relative">
-                                <Avatar className="h-12 w-12 ring-2 ring-community-calm/20 ring-offset-2 ring-offset-white">
+                                <Avatar className="h-14 w-14 ring-2 ring-community-accent/30 ring-offset-3 ring-offset-white shadow-lg">
                                   <AvatarImage src={post.user.avatarUrl} className="object-cover" />
-                                  <AvatarFallback className="bg-community-accent/20 text-community-accent-foreground font-semibold text-sm">
+                                  <AvatarFallback className="bg-gradient-to-br from-community-accent/30 to-community-heart/20 text-community-calm-foreground font-bold text-base">
                                     {getUserInitials(post.user.firstName, post.user.lastName)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-community-heart rounded-full border-2 border-white animate-heart-beat" />
+                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-community-heart to-community-heart/80 rounded-full border-3 border-white animate-heart-beat shadow-md" />
                               </div>
                               
                               <div className="flex-1 min-w-0">
@@ -511,8 +514,8 @@ export default function UserCommunity() {
                                   <h3 className="font-semibold text-community-calm-foreground truncate">
                                     {post.user.firstName} {post.user.lastName}
                                   </h3>
-                                  <div className="px-2 py-1 rounded-full bg-community-accent/15 border border-community-accent/20">
-                                    <span className="text-xs font-medium text-community-accent-foreground">Community Member</span>
+                                  <div className="px-3 py-1 rounded-full bg-gradient-to-r from-community-accent/20 to-community-soothing/20 border border-community-accent/30 shadow-sm">
+                                    <span className="text-xs font-semibold text-community-calm-foreground">Community Member</span>
                                   </div>
                                 </div>
                                 <p className="text-sm text-community-soothing-foreground flex items-center gap-1">
@@ -522,16 +525,18 @@ export default function UserCommunity() {
                               </div>
                             </div>
                             
-                            <CardTitle className="mt-4 text-xl text-community-calm-foreground leading-relaxed">
+                            <CardTitle className="mt-6 text-2xl font-bold text-community-calm-foreground leading-relaxed group-hover:text-community-accent transition-colors duration-300">
                               {(post as unknown as {title?: string}).title || 'Community Post'}
                             </CardTitle>
                           </CardHeader>
                           
                           <CardContent className="relative pt-0">
-                            <div className="prose prose-sm max-w-none">
-                              <p className="text-community-soothing-foreground whitespace-pre-wrap leading-relaxed text-base">
-                                {(post as unknown as {content?: string}).content || 'Post content'}
-                              </p>
+                            <div className="prose prose-base max-w-none">
+                              <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-community-calm/20 shadow-sm group-hover:bg-white/70 group-hover:border-community-accent/20 transition-all duration-300">
+                                <p className="text-community-calm-foreground whitespace-pre-wrap leading-relaxed text-lg font-medium">
+                                  {(post as unknown as {content?: string}).content || 'Post content'}
+                                </p>
+                              </div>
                             </div>
                             
                             <Separator className="my-6 bg-community-calm/20" />
@@ -541,39 +546,39 @@ export default function UserCommunity() {
                                 <button
                                   onClick={() => handleHeartPost(post as unknown as Post)}
                                   className={cn(
-                                    "group/heart flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200",
+                                    "group/heart flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md",
                                     hasUserHearted 
-                                      ? "bg-community-heart/20 text-community-heart border border-community-heart/30" 
-                                      : "hover:bg-community-heart/10 text-community-soothing-foreground hover:text-community-heart border border-transparent hover:border-community-heart/20"
+                                      ? "bg-gradient-to-r from-community-heart/30 to-community-heart/20 text-community-heart border-2 border-community-heart/40 shadow-community-heart/20" 
+                                      : "bg-white/60 hover:bg-community-heart/10 text-community-soothing-foreground hover:text-community-heart border-2 border-transparent hover:border-community-heart/30 backdrop-blur-sm"
                                   )}
                                   disabled={heartPostMutation.isPending}
                                 >
                                   <Heart className={cn(
-                                    "h-4 w-4 transition-all duration-200",
+                                    "h-5 w-5 transition-all duration-200",
                                     hasUserHearted 
-                                      ? "fill-current scale-110" 
+                                      ? "fill-current scale-110 drop-shadow-sm" 
                                       : "group-hover/heart:scale-110"
                                   )} />
-                                  <span className="font-medium text-sm">{heartCount}</span>
+                                  <span className="font-bold text-base">{heartCount}</span>
                                   {heartCount > 0 && (
-                                    <span className="text-xs text-community-heart/70">
+                                    <span className="text-sm font-medium opacity-80">
                                       {heartCount === 1 ? 'heart' : 'hearts'}
                                     </span>
                                   )}
                                 </button>
                                 
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-community-accent/10 border border-community-accent/20">
-                                  <MessageCircle className="h-4 w-4 text-community-accent" />
-                                  <span className="font-medium text-sm text-community-accent-foreground">{commentCount}</span>
-                                  <span className="text-xs text-community-accent/70">
+                                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-community-accent/20 to-community-soothing/15 border-2 border-community-accent/30 shadow-sm backdrop-blur-sm">
+                                  <MessageCircle className="h-5 w-5 text-community-accent" />
+                                  <span className="font-bold text-base text-community-accent-foreground">{commentCount}</span>
+                                  <span className="text-sm font-medium text-community-accent/80">
                                     {commentCount === 1 ? 'comment' : 'comments'}
                                   </span>
                                 </div>
                               </div>
                               
-                              <div className="flex items-center gap-2 text-xs text-community-soothing-foreground">
-                                <Activity className="h-3 w-3" />
-                                <span>Mental Health Community</span>
+                              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-community-soothing/20 border border-community-soothing/30">
+                                <Activity className="h-4 w-4 text-community-soothing" />
+                                <span className="text-sm font-semibold text-community-soothing-foreground">Mental Health Community</span>
                               </div>
                             </div>
                             
