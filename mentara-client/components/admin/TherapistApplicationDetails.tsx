@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -362,28 +361,25 @@ export function TherapistApplicationDetails({
   };
 
   return (
-    <Card className="w-full shadow-sm">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">Application Details</CardTitle>
-          <Badge
-            className={
-              application.status === "APPROVED"
-                ? "bg-green-100 text-green-700 hover:bg-green-100"
-                : application.status === "REJECTED"
-                  ? "bg-red-100 text-red-700 hover:bg-red-100"
-                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-            }
-          >
-            {application.status?.charAt(0).toUpperCase() +
-              application.status?.slice(1) || "Unknown"}
-          </Badge>
-        </div>
+    <div className="w-full">
+      <div className="flex justify-between items-center mb-4">
+        <Badge
+          className={
+            application.status === "APPROVED"
+              ? "bg-green-100 text-green-700 hover:bg-green-100"
+              : application.status === "REJECTED"
+                ? "bg-red-100 text-red-700 hover:bg-red-100"
+                : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+          }
+        >
+          {application.status?.charAt(0).toUpperCase() +
+            application.status?.slice(1) || "Unknown"}
+        </Badge>
         <p className="text-sm text-gray-500">
           Submitted on {formatDate(application.submissionDate)}
         </p>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div>
         <Tabs defaultValue="personal">
           <TabsList className="w-full">
             <TabsTrigger value="personal" className="flex-1">
@@ -618,11 +614,11 @@ export function TherapistApplicationDetails({
             </TabsContent>
           </ScrollArea>
         </Tabs>
-      </CardContent>
+      </div>
 
-      {/* Add Card Footer with approval/rejection buttons */}
+      {/* Add Footer with approval/rejection buttons */}
       {application.status === "PENDING" && onStatusChange && (
-        <div className="border-t pt-4 px-6 pb-6">
+        <div className="border-t pt-4 mt-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">
               <p>
@@ -710,6 +706,6 @@ export function TherapistApplicationDetails({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </div>
   );
 }

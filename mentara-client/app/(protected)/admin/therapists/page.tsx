@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// Removed unused imports: Badge, Tabs, TabsContent, TabsList, TabsTrigger
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -14,6 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { TherapistApplicationCard } from "@/components/admin/TherapistApplicationCard";
 import { TherapistApplicationDetails } from "@/components/admin/TherapistApplicationDetails";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
@@ -475,25 +480,41 @@ export default function AdminTherapistManagementPage() {
       </div>
 
       {/* Application Details Modal */}
-      {detailsTherapistId && selectedApplication && (
-        <TherapistApplicationDetails
-          application={selectedApplication}
-          onStatusChange={(id, status) => {
-            if (status === "approved") {
-              approveMutation.mutate({
-                therapistId: id,
-                data: { approvalMessage: "Application approved" },
-              });
-            } else if (status === "rejected") {
-              rejectMutation.mutate({
-                therapistId: id,
-                data: { rejectionReason: "incomplete_documentation" },
-              });
-            }
-            setDetailsTherapistId(null);
-          }}
-        />
-      )}
+      <Dialog 
+        open={!!detailsTherapistId} 
+        onOpenChange={(open) => !open && setDetailsTherapistId(null)}
+      >
+        <DialogContent className="w-[95vw] max-w-[1200px] h-[90vh] max-h-[900px] p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-2 border-b">
+            <DialogTitle className="text-xl font-semibold">
+              {selectedApplication && 
+                `${selectedApplication.firstName} ${selectedApplication.lastName} - Application Details`
+              }
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto p-6">
+            {detailsTherapistId && selectedApplication && (
+              <TherapistApplicationDetails
+                application={selectedApplication}
+                onStatusChange={(id, status) => {
+                  if (status === "approved") {
+                    approveMutation.mutate({
+                      therapistId: id,
+                      data: { approvalMessage: "Application approved" },
+                    });
+                  } else if (status === "rejected") {
+                    rejectMutation.mutate({
+                      therapistId: id,
+                      data: { rejectionReason: "incomplete_documentation" },
+                    });
+                  }
+                  setDetailsTherapistId(null);
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
