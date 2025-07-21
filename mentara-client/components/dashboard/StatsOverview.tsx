@@ -5,6 +5,11 @@ import type { UserDashboardData } from "@/lib/api/types/dashboard";
 
 interface StatsOverviewProps {
   stats: UserDashboardData["stats"];
+  onUpcomingSessionsClick?: () => void;
+  onPendingWorksheetsClick?: () => void;
+  onCompletedSessionsClick?: () => void;
+  onCompletedWorksheetsClick?: () => void;
+  onTherapistsClick?: () => void;
 }
 
 // Animation variants
@@ -40,7 +45,14 @@ const iconVariants = {
   }
 };
 
-export default function StatsOverview({ stats }: StatsOverviewProps) {
+export default function StatsOverview({ 
+  stats, 
+  onUpcomingSessionsClick,
+  onPendingWorksheetsClick,
+  onCompletedSessionsClick,
+  onCompletedWorksheetsClick,
+  onTherapistsClick 
+}: StatsOverviewProps) {
   const statItems = [
     {
       title: "Completed Sessions",
@@ -50,6 +62,8 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
       iconColor: "text-primary",
       accentColor: "bg-primary",
       trend: "+12%",
+      onClick: onCompletedSessionsClick,
+      clickable: !!onCompletedSessionsClick,
     },
     {
       title: "Upcoming Sessions",
@@ -59,6 +73,8 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
       iconColor: "text-secondary",
       accentColor: "bg-secondary",
       trend: "+3",
+      onClick: onUpcomingSessionsClick,
+      clickable: !!onUpcomingSessionsClick,
     },
     {
       title: "Completed Worksheets",
@@ -68,6 +84,8 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
       iconColor: "text-primary",
       accentColor: "bg-primary",
       trend: "+8%",
+      onClick: onCompletedWorksheetsClick,
+      clickable: !!onCompletedWorksheetsClick,
     },
     {
       title: "Pending Worksheets",
@@ -77,6 +95,8 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
       iconColor: "text-muted-foreground",
       accentColor: "bg-muted-foreground",
       trend: "2 new",
+      onClick: onPendingWorksheetsClick,
+      clickable: !!onPendingWorksheetsClick,
     },
     {
       title: "Therapists Connected",
@@ -86,6 +106,8 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
       iconColor: "text-primary",
       accentColor: "bg-primary",
       trend: "Active",
+      onClick: onTherapistsClick,
+      clickable: !!onTherapistsClick,
     },
   ];
 
@@ -102,8 +124,13 @@ export default function StatsOverview({ stats }: StatsOverviewProps) {
           variants={itemVariants}
           whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3 } }}
           whileTap={{ scale: 0.98 }}
+          onClick={stat.clickable ? stat.onClick : undefined}
         >
-          <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm cursor-pointer group">
+          <Card className={`relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm group ${
+            stat.clickable 
+              ? 'cursor-pointer hover:ring-2 hover:ring-primary/20' 
+              : 'cursor-default'
+          }`}>
             {/* Accent line */}
             <div className={`absolute top-0 left-0 right-0 h-1 ${stat.accentColor}`} />
             

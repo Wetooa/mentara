@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   useDashboardData,
   useNotifications,
@@ -25,6 +26,8 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   // Fetch data from backend APIs
   const {
     data: dashboardApiData,
@@ -83,6 +86,28 @@ export default function DashboardPage() {
 
   const handleRetry = () => {
     refetchDashboard();
+  };
+
+  // Navigation handlers for clickable dashboard cards
+  const handleUpcomingSessionsClick = () => {
+    router.push('/client/booking');
+  };
+
+  const handlePendingWorksheetsClick = () => {
+    router.push('/client/worksheets');
+  };
+
+  const handleCompletedSessionsClick = () => {
+    // Could navigate to a sessions history page in the future
+    console.log('Navigate to completed sessions');
+  };
+
+  const handleCompletedWorksheetsClick = () => {
+    router.push('/client/worksheets?filter=completed');
+  };
+
+  const handleTherapistsClick = () => {
+    router.push('/client/therapist');
   };
 
   // Show error state
@@ -155,7 +180,14 @@ export default function DashboardPage() {
       />
 
       {/* Stats Overview */}
-      <StatsOverview stats={dashboardData.stats} />
+      <StatsOverview 
+        stats={dashboardData.stats}
+        onUpcomingSessionsClick={handleUpcomingSessionsClick}
+        onPendingWorksheetsClick={handlePendingWorksheetsClick}
+        onCompletedSessionsClick={handleCompletedSessionsClick}
+        onCompletedWorksheetsClick={handleCompletedWorksheetsClick}
+        onTherapistsClick={handleTherapistsClick}
+      />
 
       {/* Main Dashboard Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
