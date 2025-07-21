@@ -205,3 +205,76 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* Global Loading Bar Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+/* Mentara Community Scrollbar Styling */
+.mentara-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--community-accent) var(--community-warm);
+}
+
+.mentara-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.mentara-scrollbar::-webkit-scrollbar-track {
+  background: var(--community-warm);
+  border-radius: 10px;
+}
+
+.mentara-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--community-accent);
+  border-radius: 10px;
+  border: 1px solid var(--community-warm);
+}
+
+.mentara-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--community-calm);
+}
+
+/* Remove underlines from hover states globally for community components */
+.no-underline-hover:hover {
+  text-decoration: none !important;
+}
+
+/* Gentle glow animation for mental health theming */
+@keyframes gentle-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--community-heart);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--community-heart), 0 0 30px var(--community-heart);
+  }
+}
+
+.animate-gentle-glow {
+  animation: gentle-glow 3s ease-in-out infinite;
+}
+
+/* Heart beat animation for community interactions */
+@keyframes heart-beat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-heart-beat {
+  animation: heart-beat 2s ease-in-out infinite;
+}

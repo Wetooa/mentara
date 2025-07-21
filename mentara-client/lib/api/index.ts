@@ -45,6 +45,12 @@ import {
   createAdminService,
   type AdminService,
 } from "./services/admin";
+import {
+  createProfileService,
+  type PublicProfileResponse,
+  type UpdateProfileRequest,
+  type UpdateProfileResponse,
+} from "./services/profile";
 export type { ApiResponse, ApiError } from "./types";
 
 // Export client utilities
@@ -62,6 +68,7 @@ export { createSearchService, type SearchService };
 export { createMessagingService, type MessagingService };
 export { createFilesService, type FilesService };
 export { createAdminService, type AdminService };
+export { createProfileService, type PublicProfileResponse, type UpdateProfileRequest, type UpdateProfileResponse };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -75,6 +82,7 @@ const searchService = createSearchService(apiClient);
 const messagingService = createMessagingService(apiClient);
 const filesService = createFilesService(apiClient);
 const adminService = createAdminService(apiClient);
+const profileService = createProfileService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -90,6 +98,7 @@ export const api = {
   messaging: messagingService,
   files: filesService,
   admin: adminService,
+  profile: profileService,
 
   // Backwards compatible structure for existing hooks
   clientAuth: authService.client,

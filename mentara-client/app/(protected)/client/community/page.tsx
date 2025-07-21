@@ -23,11 +23,19 @@ import {
   Send,
   Lock,
   AlertCircle,
-  Activity
+  Activity,
+  Paperclip,
+  X
 } from "lucide-react";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { useCommunityPage } from "@/hooks/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
 import { cn } from "@/lib/utils";
+import type { Post } from "@/types/api/communities";
 
 export default function UserCommunity() {
   const {
@@ -45,6 +53,9 @@ export default function UserCommunity() {
     handleCommunitySelect,
     handleRoomSelect,
     handleCreatePost,
+    handleHeartPost,
+    handleFileSelect,
+    handleFileRemove,
     retryLoadPosts,
     setIsCreatePostOpen,
     setNewPostTitle,
@@ -52,15 +63,17 @@ export default function UserCommunity() {
     getUserInitials,
     getRoomBreadcrumb,
     isPostingAllowed,
+    isPostHearted,
+    selectedFiles,
   } = useCommunityPage();
 
   // Enhanced community data with new hooks
-  const { stats: communityStats } = useCommunityStats();
+  // const { stats: communityStats } = useCommunityStats();
 
   const breadcrumb = getRoomBreadcrumb();
 
   return (
-    <main className="w-full flex h-full">
+    <main className="w-full h-full">
       {/* Mobile overlay for sidebar */}
       <div className="lg:hidden">
         {selectedCommunityId && (
@@ -78,48 +91,29 @@ export default function UserCommunity() {
         )}
       </div>
       
-      {/* Desktop sidebar */}
-      <div className="hidden lg:block">
-        <CommunitySidebar
-          selectedCommunityId={selectedCommunityId}
-          selectedRoomId={selectedRoomId}
-          onCommunitySelect={handleCommunitySelect}
-          onRoomSelect={handleRoomSelect}
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col h-full">
-        {/* Mobile header */}
-        <div className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
-              className="border-community-accent/30 text-community-accent"
-            >
-              <Hash className="h-4 w-4 mr-1" />
-              Communities
-            </Button>
-            {selectedRoom && (
-              <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
-                <span>/</span>
-                <span className="font-medium text-community-accent-foreground">{selectedRoom.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Main Content Area */}
-        {!selectedRoomId ? (
-          // Welcome/No Room Selected State
-          <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
-            {/* Background decoration */}
-            <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-community-heart/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-community-accent/15 rounded-full blur-2xl" />
-            
-            <div className="relative text-center max-w-lg p-4 lg:p-8">
+      {/* Desktop resizable layout */}
+      <div className="hidden lg:block h-full">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={35} className="min-w-[240px]">
+            <CommunitySidebar
+              selectedCommunityId={selectedCommunityId}
+              selectedRoomId={selectedRoomId}
+              onCommunitySelect={handleCommunitySelect}
+              onRoomSelect={handleRoomSelect}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle className="w-1.5 bg-community-calm/20 hover:bg-community-accent/40 transition-colors duration-200" />
+          <ResizablePanel defaultSize={80}>
+            {/* Desktop Main Content Area */}
+            {!selectedRoomId ? (
+              // Welcome/No Room Selected State
+              <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
+                {/* Background decoration */}
+                <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-community-heart/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-community-accent/15 rounded-full blur-2xl" />
+                
+                <div className="relative text-center max-w-lg p-4 lg:p-8">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-community-calm/20 animate-gentle-glow">
                 <Heart className="h-8 w-8 lg:h-10 lg:w-10 text-community-heart" />
               </div>
@@ -139,7 +133,7 @@ export default function UserCommunity() {
                   </div>
                   <p className="font-semibold text-community-calm-foreground text-xs lg:text-sm">Active Communities</p>
                   <p className="text-xl lg:text-2xl font-bold text-community-accent mt-1">
-                    {communityStats?.totalCommunities || 0}
+                    {0}
                   </p>
                 </div>
                 
@@ -149,7 +143,7 @@ export default function UserCommunity() {
                   </div>
                   <p className="font-semibold text-community-calm-foreground text-xs lg:text-sm">Community Posts</p>
                   <p className="text-xl lg:text-2xl font-bold text-community-heart mt-1">
-                    {communityStats?.totalPosts || 0}
+                    {0}
                   </p>
                 </div>
               </div>
@@ -159,13 +153,13 @@ export default function UserCommunity() {
                   💭 Start meaningful conversations, share experiences, and find support in our safe community spaces.
                 </p>
               </div>
-            </div>
-          </div>
-        ) : (
-          // Room Content
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Room Header */}
-            <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 lg:p-6 shadow-sm">
+                </div>
+              </div>
+            ) : (
+              // Room Content
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Room Header */}
+                <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 lg:p-6 shadow-sm">
               {breadcrumb && (
                 <div className="hidden lg:flex items-center gap-2 text-sm text-community-soothing-foreground mb-4">
                   <span className="font-semibold text-community-calm-foreground">{breadcrumb.communityName}</span>
@@ -253,6 +247,66 @@ export default function UserCommunity() {
                           rows={6}
                           className="mt-1 resize-none"
                         />
+                      </div>
+                      
+                      {/* File Attachments */}
+                      <div>
+                        <Label>Attachments (optional)</Label>
+                        <div className="mt-2 space-y-3">
+                          {/* File Upload Area */}
+                          <div className="relative">
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*,application/pdf,text/*,video/*,audio/*"
+                              onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              id="file-upload"
+                            />
+                            <div className="border-2 border-dashed border-community-calm/30 rounded-lg p-4 text-center hover:border-community-accent/50 hover:bg-community-warm/10 transition-colors">
+                              <Paperclip className="h-6 w-6 mx-auto text-community-soothing-foreground mb-2" />
+                              <p className="text-sm text-community-soothing-foreground">
+                                <span className="font-medium text-community-accent">Click to upload</span> or drag and drop
+                              </p>
+                              <p className="text-xs text-community-soothing-foreground/70 mt-1">
+                                Images, PDFs, documents, videos, audio (max 10MB each, 5 files total)
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Selected Files List */}
+                          {selectedFiles.length > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-community-calm-foreground">
+                                Selected files ({selectedFiles.length}/5):
+                              </p>
+                              <div className="space-y-2 max-h-32 overflow-y-auto">
+                                {selectedFiles.map((file, index) => (
+                                  <div key={index} className="flex items-center justify-between p-2 bg-community-warm/20 rounded-lg">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <Paperclip className="h-4 w-4 text-community-accent shrink-0" />
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium text-community-calm-foreground truncate">
+                                          {file.name}
+                                        </p>
+                                        <p className="text-xs text-community-soothing-foreground">
+                                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleFileRemove(index)}
+                                      className="p-1 hover:bg-community-heart/20 text-community-heart hover:text-community-heart rounded-full transition-colors"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-end gap-2">
                         <Button
@@ -433,23 +487,26 @@ export default function UserCommunity() {
                     {postsData.posts.map((post, index) => {
                       const heartCount = (post as unknown as {_count?: {hearts?: number}})?._count?.hearts || 0;
                       const commentCount = (post as unknown as {_count?: {comments?: number}})?._count?.comments || 0;
-                      const hasUserHearted = false; // TODO: Add user heart status logic
+                      const hasUserHearted = isPostHearted(post as unknown as Post);
                       
                       return (
-                        <Card key={index} className="group bg-white/90 backdrop-blur-sm border-community-calm/30 shadow-lg hover:shadow-xl hover:border-community-accent/40 transition-all duration-300 overflow-hidden">
-                          {/* Subtle gradient background */}
-                          <div className="absolute inset-0 bg-community-warm-gradient opacity-30 group-hover:opacity-40 transition-opacity duration-300" />
+                        <Card key={index} className="group bg-white/95 backdrop-blur-sm border-community-calm/20 shadow-lg hover:shadow-2xl hover:border-community-accent/30 transition-all duration-300 overflow-hidden relative">
+                          {/* Enhanced gradient background */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-community-warm/20 via-community-soothing/10 to-community-calm/20 opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
+                          
+                          {/* Subtle border accent */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-community-accent/60 via-community-heart/40 to-community-soothing/60 opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
                           
                           <CardHeader className="relative pb-3">
                             <div className="flex items-start gap-4">
                               <div className="relative">
-                                <Avatar className="h-12 w-12 ring-2 ring-community-calm/20 ring-offset-2 ring-offset-white">
+                                <Avatar className="h-14 w-14 ring-2 ring-community-accent/30 ring-offset-3 ring-offset-white shadow-lg">
                                   <AvatarImage src={post.user.avatarUrl} className="object-cover" />
-                                  <AvatarFallback className="bg-community-accent/20 text-community-accent-foreground font-semibold text-sm">
+                                  <AvatarFallback className="bg-gradient-to-br from-community-accent/30 to-community-heart/20 text-community-calm-foreground font-bold text-base">
                                     {getUserInitials(post.user.firstName, post.user.lastName)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-community-heart rounded-full border-2 border-white animate-heart-beat" />
+                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-community-heart to-community-heart/80 rounded-full border-3 border-white animate-heart-beat shadow-md" />
                               </div>
                               
                               <div className="flex-1 min-w-0">
@@ -457,8 +514,8 @@ export default function UserCommunity() {
                                   <h3 className="font-semibold text-community-calm-foreground truncate">
                                     {post.user.firstName} {post.user.lastName}
                                   </h3>
-                                  <div className="px-2 py-1 rounded-full bg-community-accent/15 border border-community-accent/20">
-                                    <span className="text-xs font-medium text-community-accent-foreground">Community Member</span>
+                                  <div className="px-3 py-1 rounded-full bg-gradient-to-r from-community-accent/20 to-community-soothing/20 border border-community-accent/30 shadow-sm">
+                                    <span className="text-xs font-semibold text-community-calm-foreground">Community Member</span>
                                   </div>
                                 </div>
                                 <p className="text-sm text-community-soothing-foreground flex items-center gap-1">
@@ -468,16 +525,18 @@ export default function UserCommunity() {
                               </div>
                             </div>
                             
-                            <CardTitle className="mt-4 text-xl text-community-calm-foreground leading-relaxed">
+                            <CardTitle className="mt-6 text-2xl font-bold text-community-calm-foreground leading-relaxed group-hover:text-community-accent transition-colors duration-300">
                               {(post as unknown as {title?: string}).title || 'Community Post'}
                             </CardTitle>
                           </CardHeader>
                           
                           <CardContent className="relative pt-0">
-                            <div className="prose prose-sm max-w-none">
-                              <p className="text-community-soothing-foreground whitespace-pre-wrap leading-relaxed text-base">
-                                {(post as unknown as {content?: string}).content || 'Post content'}
-                              </p>
+                            <div className="prose prose-base max-w-none">
+                              <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-community-calm/20 shadow-sm group-hover:bg-white/70 group-hover:border-community-accent/20 transition-all duration-300">
+                                <p className="text-community-calm-foreground whitespace-pre-wrap leading-relaxed text-lg font-medium">
+                                  {(post as unknown as {content?: string}).content || 'Post content'}
+                                </p>
+                              </div>
                             </div>
                             
                             <Separator className="my-6 bg-community-calm/20" />
@@ -485,41 +544,41 @@ export default function UserCommunity() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-6">
                                 <button
-                                  onClick={() => console.log('Heart post clicked')}
+                                  onClick={() => handleHeartPost(post as unknown as Post)}
                                   className={cn(
-                                    "group/heart flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200",
+                                    "group/heart flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md",
                                     hasUserHearted 
-                                      ? "bg-community-heart/20 text-community-heart border border-community-heart/30" 
-                                      : "hover:bg-community-heart/10 text-community-soothing-foreground hover:text-community-heart border border-transparent hover:border-community-heart/20"
+                                      ? "bg-gradient-to-r from-community-heart/30 to-community-heart/20 text-community-heart border-2 border-community-heart/40 shadow-community-heart/20" 
+                                      : "bg-white/60 hover:bg-community-heart/10 text-community-soothing-foreground hover:text-community-heart border-2 border-transparent hover:border-community-heart/30 backdrop-blur-sm"
                                   )}
                                   disabled={heartPostMutation.isPending}
                                 >
                                   <Heart className={cn(
-                                    "h-4 w-4 transition-all duration-200",
+                                    "h-5 w-5 transition-all duration-200",
                                     hasUserHearted 
-                                      ? "fill-current scale-110" 
+                                      ? "fill-current scale-110 drop-shadow-sm" 
                                       : "group-hover/heart:scale-110"
                                   )} />
-                                  <span className="font-medium text-sm">{heartCount}</span>
+                                  <span className="font-bold text-base">{heartCount}</span>
                                   {heartCount > 0 && (
-                                    <span className="text-xs text-community-heart/70">
+                                    <span className="text-sm font-medium opacity-80">
                                       {heartCount === 1 ? 'heart' : 'hearts'}
                                     </span>
                                   )}
                                 </button>
                                 
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-community-accent/10 border border-community-accent/20">
-                                  <MessageCircle className="h-4 w-4 text-community-accent" />
-                                  <span className="font-medium text-sm text-community-accent-foreground">{commentCount}</span>
-                                  <span className="text-xs text-community-accent/70">
+                                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-community-accent/20 to-community-soothing/15 border-2 border-community-accent/30 shadow-sm backdrop-blur-sm">
+                                  <MessageCircle className="h-5 w-5 text-community-accent" />
+                                  <span className="font-bold text-base text-community-accent-foreground">{commentCount}</span>
+                                  <span className="text-sm font-medium text-community-accent/80">
                                     {commentCount === 1 ? 'comment' : 'comments'}
                                   </span>
                                 </div>
                               </div>
                               
-                              <div className="flex items-center gap-2 text-xs text-community-soothing-foreground">
-                                <Activity className="h-3 w-3" />
-                                <span>Mental Health Community</span>
+                              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-community-soothing/20 border border-community-soothing/30">
+                                <Activity className="h-4 w-4 text-community-soothing" />
+                                <span className="text-sm font-semibold text-community-soothing-foreground">Mental Health Community</span>
                               </div>
                             </div>
                             
@@ -536,6 +595,69 @@ export default function UserCommunity() {
             </div>
           </div>
         )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+      
+      {/* Mobile layout */}
+      <div className="lg:hidden flex flex-col h-full">
+        {/* Mobile header */}
+        <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
+              className="border-community-accent/30 text-community-accent"
+            >
+              <Hash className="h-4 w-4 mr-1" />
+              Communities
+            </Button>
+            {selectedRoom && (
+              <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
+                <span>/</span>
+                <span className="font-medium text-community-accent-foreground">{selectedRoom.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile Main Content */}
+        <div className="flex-1 flex flex-col h-full">
+          {!selectedRoomId ? (
+            // Mobile Welcome State
+            <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
+              <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
+              <div className="relative text-center max-w-lg p-4">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-community-calm/20 animate-gentle-glow">
+                  <Heart className="h-8 w-8 text-community-heart" />
+                </div>
+                <h2 className="text-2xl font-bold text-community-calm-foreground mb-3">
+                  Welcome to Your Community Space
+                </h2>
+                <p className="text-community-soothing-foreground mb-6 text-base leading-relaxed">
+                  Tap Communities above to connect with others who understand your journey.
+                </p>
+              </div>
+            </div>
+          ) : (
+            // Mobile Room Content (simplified)
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 shadow-sm">
+                <h1 className="text-xl font-bold text-community-calm-foreground truncate">
+                  {selectedRoom?.name}
+                </h1>
+              </div>
+              <div className="flex-1 overflow-y-auto bg-community-warm/10">
+                <div className="p-4">
+                  <div className="text-center py-8">
+                    <p className="text-community-soothing-foreground">Mobile room content loading...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

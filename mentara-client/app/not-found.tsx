@@ -1,30 +1,30 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Home, ArrowLeft, Search, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { Home, ArrowLeft, Search, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
   const { user } = useAuth();
   const router = useRouter();
 
   const getRoleBasedHomePath = () => {
-    if (!user) return '/';
-    
+    if (!user) return "/";
+
     switch (user.role) {
-      case 'client':
-        return '/client/dashboard';
-      case 'therapist':
-        return '/therapist/dashboard';
-      case 'moderator':
-        return '/moderator/dashboard';
-      case 'admin':
-        return '/admin/dashboard';
+      case "client":
+        return "/client";
+      case "therapist":
+        return "/therapist";
+      case "moderator":
+        return "/moderator";
+      case "admin":
+        return "/admin";
       default:
-        return '/';
+        return "/";
     }
   };
 
@@ -32,15 +32,15 @@ export default function NotFound() {
     if (!user) {
       return "The page you're looking for doesn't exist. Let's get you back to our homepage where you can explore our mental health support services.";
     }
-    
+
     switch (user.role) {
-      case 'client':
+      case "client":
         return "Don't worry, let's get you back to your dashboard where you can access your sessions, worksheets, and support resources.";
-      case 'therapist':
+      case "therapist":
         return "Let's get you back to your therapist dashboard where you can manage your clients and appointments.";
-      case 'moderator':
+      case "moderator":
         return "Let's get you back to your moderation panel where you can oversee community activities.";
-      case 'admin':
+      case "admin":
         return "Let's get you back to your admin dashboard where you can manage the platform.";
       default:
         return "Let's get you back to a place where you can find what you need.";
@@ -70,29 +70,32 @@ export default function NotFound() {
             {getRoleBasedMessage()}
           </p>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           {/* Supportive Message */}
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 text-center">
             <Heart className="h-5 w-5 text-primary mx-auto mb-2" />
             <p className="text-sm text-primary/80">
-              Taking care of your mental health is a journey, and we're here to support you every step of the way.
+              Taking care of your mental health is a journey, and we're here to
+              support you every step of the way.
             </p>
           </div>
-          
+
           {/* Navigation Actions */}
           <div className="space-y-3">
-            <Button 
-              onClick={handleGoHome} 
+            <Button
+              onClick={handleGoHome}
               className="w-full bg-primary hover:bg-primary/90 text-white"
               size="lg"
             >
               <Home className="h-4 w-4 mr-2" />
-              {user ? `Go to ${user.role === 'client' ? 'My' : ''} Dashboard` : 'Go to Homepage'}
+              {user
+                ? `Go to ${user.role === "client" ? "My" : ""} Dashboard`
+                : "Go to Homepage"}
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={handleGoBack}
               className="w-full border-primary/20 text-primary hover:bg-primary/5"
               size="lg"
@@ -109,48 +112,48 @@ export default function NotFound() {
                 Need help finding something?
               </p>
               <div className="grid grid-cols-1 gap-2">
-                {user.role === 'client' && (
+                {user.role === "client" && (
                   <>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => router.push('/client/worksheets')}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push("/client/worksheets")}
                       className="justify-start text-primary hover:bg-primary/5"
                     >
                       My Worksheets
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => router.push('/client/therapists')}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push("/client/therapists")}
                       className="justify-start text-primary hover:bg-primary/5"
                     >
                       Find Therapists
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => router.push('/client/communities')}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push("/client/communities")}
                       className="justify-start text-primary hover:bg-primary/5"
                     >
                       Support Communities
                     </Button>
                   </>
                 )}
-                {user.role === 'therapist' && (
+                {user.role === "therapist" && (
                   <>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => router.push('/therapist/clients')}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push("/therapist/clients")}
                       className="justify-start text-primary hover:bg-primary/5"
                     >
                       My Clients
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => router.push('/therapist/schedule')}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push("/therapist/schedule")}
                       className="justify-start text-primary hover:bg-primary/5"
                     >
                       My Schedule

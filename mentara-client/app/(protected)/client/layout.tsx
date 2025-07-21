@@ -94,23 +94,23 @@ export default function MainLayout({
                 }`}
               >
                 {/* Discord-style bevel background */}
-                <div 
+                <div
                   className={`absolute inset-0 transition-all duration-300 ease-out ${
                     isActive
                       ? "bg-primary/15 rounded-2xl scale-100"
                       : "bg-transparent rounded-full scale-75 group-hover:bg-primary/10 group-hover:rounded-2xl group-hover:scale-100"
                   }`}
                 />
-                
+
                 {/* Left accent indicator */}
-                <div 
+                <div
                   className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-out ${
                     isActive
                       ? "h-8 opacity-100"
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
                   }`}
                 />
-                
+
                 <div className="relative z-10 flex flex-col items-center justify-center">
                   <Image
                     src={item.icon}
@@ -118,15 +118,15 @@ export default function MainLayout({
                     width={24}
                     height={24}
                     className={`transition-all duration-300 ${
-                      isActive 
-                        ? "text-primary scale-110" 
+                      isActive
+                        ? "text-primary scale-110"
                         : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
                     }`}
                   />
-                  <span 
+                  <span
                     className={`mt-1 text-center text-[9px] font-medium transition-all duration-300 ${
-                      isActive 
-                        ? "text-primary opacity-100" 
+                      isActive
+                        ? "text-primary opacity-100"
                         : "text-muted-foreground opacity-75 group-hover:text-primary group-hover:opacity-100"
                     }`}
                   >
@@ -184,16 +184,18 @@ export default function MainLayout({
                         width={20}
                         height={20}
                         className={`transition-all duration-300 ${
-                          isActive 
-                            ? "text-primary scale-110" 
+                          isActive
+                            ? "text-primary scale-110"
                             : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
                         }`}
                       />
-                      <span className={`font-medium transition-all duration-300 ${
-                        isActive 
-                          ? "text-primary" 
-                          : "text-muted-foreground group-hover:text-primary"
-                      }`}>
+                      <span
+                        className={`font-medium transition-all duration-300 ${
+                          isActive
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-primary"
+                        }`}
+                      >
                         {item.name}
                       </span>
                     </Link>
@@ -263,28 +265,27 @@ export default function MainLayout({
                 <span className="text-sm font-medium text-foreground">
                   John Doe
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  Client
-                </span>
+                <span className="text-xs text-muted-foreground">Client</span>
               </div>
-              
+
               <div className="relative group">
                 <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
                   <Image
-                    src="/avatar-placeholder.png"
+                    src="/avatar-placeholder.png" // FIX: placeholder
                     alt="User Avatar"
                     width={36}
                     height={36}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                     onError={(e) => {
-                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+                      e.currentTarget.src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
                     }}
                   />
                 </div>
                 {/* Online status indicator */}
                 <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
               </div>
-              
+
               <button
                 onClick={handleLogout}
                 className="hidden md:flex items-center justify-center p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-red-200"
@@ -326,7 +327,9 @@ export default function MainLayout({
                   key={item.id}
                   href={item.path}
                   className={`relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0 ${
-                    isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-primary"
                   }`}
                 >
                   <Image
@@ -335,16 +338,18 @@ export default function MainLayout({
                     width={20}
                     height={20}
                     className={`transition-all duration-300 ${
-                      isActive 
-                        ? "text-primary scale-110" 
+                      isActive
+                        ? "text-primary scale-110"
                         : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
                     }`}
                   />
-                  <span className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${
-                    isActive 
-                      ? "text-primary font-medium" 
-                      : "text-muted-foreground group-hover:text-primary"
-                  }`}>
+                  <span
+                    className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${
+                      isActive
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground group-hover:text-primary"
+                    }`}
+                  >
                     {item.name}
                   </span>
                 </Link>

@@ -19,6 +19,7 @@ export function useCommunityPage() {
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Get selected community and room info
   const { data: selectedCommunity } = useQuery({
@@ -45,21 +46,22 @@ export function useCommunityPage() {
 
   // Get community stats
   const { data: communityStats } = useQuery({
-    queryKey: ['communities', 'stats'],
+    queryKey: ['communities', 'stats', 'general'],
     queryFn: () => api.communities.getCommunityStats(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes - stats don't change frequently
   });
 
   // Create post mutation
   const createPostMutation = useMutation({
-    mutationFn: (data: { title: string; content: string; roomId: string }) =>
+    mutationFn: (data: { title: string; content: string; roomId: string; files?: File[] }) =>
       api.communities.createPost(data),
     onSuccess: () => {
       // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
-      queryClient.invalidateQueries({ queryKey: ['communities', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['communities', 'stats', 'general'] });
       setNewPostTitle("");
       setNewPostContent("");
+      setSelectedFiles([]);
       setIsCreatePostOpen(false);
       toast.success("Post created successfully!");
     },
@@ -105,7 +107,35 @@ export function useCommunityPage() {
       title: newPostTitle.trim(),
       content: newPostContent.trim(),
       roomId: selectedRoomId,
+      files: selectedFiles.length > 0 ? selectedFiles : undefined,
     });
+  };
+
+  const handleFileSelect = (files: FileList) => {
+    const newFiles = Array.from(files);
+    const validFiles = newFiles.filter(file => {
+      // Basic file validation
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      const allowedTypes = ['image/', 'application/pdf', 'text/', 'video/', 'audio/'];
+      
+      if (file.size > maxSize) {
+        toast.error(`File ${file.name} is too large. Max size is 10MB.`);
+        return false;
+      }
+      
+      if (!allowedTypes.some(type => file.type.startsWith(type))) {
+        toast.error(`File ${file.name} has an unsupported format.`);
+        return false;
+      }
+      
+      return true;
+    });
+
+    setSelectedFiles(prev => [...prev, ...validFiles].slice(0, 5)); // Max 5 files
+  };
+
+  const handleFileRemove = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleHeartPost = (post: Post) => {
@@ -185,6 +215,7 @@ export function useCommunityPage() {
     isCreatePostOpen,
     newPostTitle,
     newPostContent,
+    selectedFiles,
     
     // Data
     postsData,
@@ -201,6 +232,8 @@ export function useCommunityPage() {
     handleRoomSelect,
     handleCreatePost,
     handleHeartPost,
+    handleFileSelect,
+    handleFileRemove,
     retryLoadPosts,
     
     // Setters

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
 
 import { toast } from 'sonner';
@@ -70,6 +70,7 @@ interface RecentActivity {
 
 export function CommunityDashboard() {
   const api = useApi();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'overview' | 'discover' | 'activity'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -98,9 +99,9 @@ export function CommunityDashboard() {
 
   // Fetch community stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['communities', 'stats'],
+    queryKey: ['communities', 'stats', 'general'],
     queryFn: () => api.communities.getStats(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 15 * 60 * 1000, // 15 minutes - stats don't change frequently
   });
 
   const handleJoinCommunity = async (communityId: string) => {

@@ -39,15 +39,15 @@ export function useModerationQueue() {
 }
 
 /**
- * Hook for fetching community stats and health
+ * Hook for fetching moderator-specific community stats and health
  */
-export function useCommunityStats() {
+export function useModeratorCommunityStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: ['dashboard', 'moderator', 'communities'],
+    queryKey: ['dashboard', 'moderator', 'communities', 'stats'],
     queryFn: () => api.dashboard?.getCommunityStats?.() || Promise.resolve({}),
-    staleTime: 1000 * 60 * 5, // Community stats change less frequently
+    staleTime: 1000 * 60 * 15, // Community stats change less frequently
     enabled: !!api.dashboard?.getCommunityStats,
   });
 }
