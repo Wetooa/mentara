@@ -18,18 +18,20 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
-  CreateReviewDto,
   CreateReviewDtoSchema,
-  UpdateReviewDto,
   UpdateReviewDtoSchema,
-  ModerateReviewDto,
   ModerateReviewDtoSchema,
-  GetReviewsDto,
   GetReviewsDtoSchema,
-  ReviewIdParam,
   ReviewIdParamSchema,
+} from './validation';
+import type {
+  CreateReviewDto,
+  UpdateReviewDto,
+  ModerateReviewDto,
+  GetReviewsDto,
+  ReviewIdParam,
   ReviewListResponse,
-} from 'mentara-commons';
+} from './types';
 
 @Controller('reviews')
 @UseGuards(JwtAuthGuard)

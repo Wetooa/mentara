@@ -16,19 +16,21 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
-  CreateVideoRoomDto,
   CreateVideoRoomDtoSchema,
-  JoinVideoRoomDto,
   JoinVideoRoomDtoSchema,
-  EndVideoCallDto,
   EndVideoCallDtoSchema,
+  UpdateMeetingStatusDtoSchema,
+  SaveMeetingSessionDtoSchema,
+} from './validation';
+import type {
+  CreateVideoRoomDto,
+  JoinVideoRoomDto,
+  EndVideoCallDto,
   VideoRoomResponse,
   VideoCallStatus,
   UpdateMeetingStatusDto,
-  UpdateMeetingStatusDtoSchema,
   SaveMeetingSessionDto,
-  SaveMeetingSessionDtoSchema,
-} from 'mentara-commons';
+} from './types';
 
 @Controller('meetings')
 @UseGuards(JwtAuthGuard)

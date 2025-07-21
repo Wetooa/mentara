@@ -6,14 +6,14 @@ import {
 } from '@nestjs/common';
 import { MeetingStatus } from '@prisma/client';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
+import type {
   CreateReviewDto,
   UpdateReviewDto,
   GetReviewsDto,
   ModerateReviewDto,
   ReviewListResponse,
-  ReviewStats,
-} from 'mentara-commons';
+  ReviewStatsDto,
+} from './types';
 
 @Injectable()
 export class ReviewsService {

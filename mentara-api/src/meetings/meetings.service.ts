@@ -15,7 +15,7 @@ import {
   MeetingCancelledEvent,
   MeetingEmergencyTerminatedEvent,
 } from '../common/events/booking-events';
-import {
+import type {
   CreateVideoRoomDto,
   JoinVideoRoomDto,
   EndVideoCallDto,
@@ -23,7 +23,7 @@ import {
   VideoCallStatus,
   UpdateMeetingStatusDto,
   SaveMeetingSessionDto,
-} from 'mentara-commons';
+} from './types';
 
 export interface MeetingSessionData {
   meetingId: string;
