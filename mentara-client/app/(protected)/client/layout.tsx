@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut } from "lucide-react";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { UserSearchBar, User } from "@/components/search";
 
 export default function MainLayout({
@@ -253,12 +253,12 @@ export default function MainLayout({
 
           {/* User Area */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="relative p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-medium shadow-sm">
-                3
-              </span>
-            </button>
+            <NotificationDropdown 
+              variant="default" 
+              maxNotifications={5} 
+              showConnectionStatus={true}
+              className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30"
+            />
 
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex flex-col items-end">

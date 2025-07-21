@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 
 
 export default function TherapistLayout({
@@ -346,12 +347,12 @@ export default function TherapistLayout({
 
           {/* User Area */}
           <div className="flex items-center space-x-4">
-            <button className="relative text-white">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-                2
-              </span>
-            </button>
+            <NotificationDropdown 
+              variant="default" 
+              maxNotifications={5} 
+              showConnectionStatus={true}
+              className="text-white hover:bg-white/10 p-2 rounded-lg transition-all duration-200"
+            />
 
             {/* Profile Dropdown */}
             <div className="relative">
