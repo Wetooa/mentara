@@ -234,12 +234,12 @@ export default function CommunitySidebar({
   }
 
   return (
-    <div className="w-60 lg:w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm overflow-y-auto">
+    <div className="w-60 lg:w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm overflow-y-auto shadow-lg shadow-community-calm/10 mentara-scrollbar">
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-semibold text-sm text-community-calm-foreground">Your Communities</h2>
         <Badge 
           variant="secondary" 
-          className="text-xs bg-community-accent/30 text-community-accent-foreground border-community-accent/40 hover:bg-community-accent/40 transition-colors"
+          className="text-xs bg-community-accent/20 text-community-accent-foreground border-community-accent/30 hover:bg-community-accent/30 transition-colors"
         >
           {communitiesData.length}
         </Badge>
@@ -250,7 +250,7 @@ export default function CommunitySidebar({
           <AccordionItem key={community.id} value={community.id} className="border-none mb-2">
             <AccordionTrigger
               className={cn(
-                "group font-medium bg-white/70 hover:bg-community-calm/20 rounded-xl px-4 py-3 text-sm no-underline transition-all duration-200 backdrop-blur-sm border border-white/40",
+                "group font-medium bg-white/70 hover:bg-community-calm/20 rounded-xl px-4 py-3 text-sm no-underline transition-all duration-200 backdrop-blur-sm border border-white/40 no-underline-hover",
                 selectedCommunityId === community.id && 
                 "bg-community-accent/20 text-community-accent-foreground hover:bg-community-accent/30 border-community-accent/40 shadow-lg shadow-community-accent/10"
               )}
@@ -295,10 +295,10 @@ export default function CommunitySidebar({
                                 key={room.id}
                                 onClick={() => handleRoomClick(room, community.id)}
                                 className={cn(
-                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left backdrop-blur-sm",
+                                  "group w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 text-left backdrop-blur-sm no-underline-hover",
                                   isSelected 
-                                    ? "bg-community-accent/30 text-community-accent-foreground shadow-md shadow-community-accent/20 border border-community-accent/40" 
-                                    : "hover:bg-community-warm/30 border border-transparent",
+                                    ? "bg-community-accent/20 text-community-calm-foreground shadow-md shadow-community-accent/20 border border-community-accent/30" 
+                                    : "hover:bg-community-warm/30 border border-transparent text-community-calm-foreground",
                                   !canView && "hidden" // Hide room if can't view (though currently all are viewable)
                                 )}
                                 title={!canPost ? `${room.name} (View only - moderator/admin posting required)` : `Join ${room.name}`}
