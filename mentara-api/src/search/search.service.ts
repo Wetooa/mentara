@@ -201,24 +201,135 @@ export class SearchService {
     }
   }
 
+  async searchWorksheets(query: string, userId?: string, role?: 'client' | 'therapist') {
+    try {
+      const where: any = {
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { instructions: { contains: query, mode: 'insensitive' } },
+        ],
+      };
+
+      // Filter by user role (client can only see their own worksheets)
+      if (role === 'client' && userId) {
+        where.clientId = userId;
+      } else if (role === 'therapist' && userId) {
+        where.therapistId = userId;
+      }
+
+      return this.prisma.worksheet.findMany({
+        where,
+        include: {
+          client: {
+            select: {
+              userId: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+          therapist: {
+            select: {
+              userId: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+          submission: {
+            select: {
+              id: true,
+              submittedAt: true,
+              feedback: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to search worksheets: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async searchMessages(query: string, userId: string) {
+    try {
+      const whereClause: any = {
+        AND: [
+          {
+            content: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            isDeleted: false,
+          },
+          {
+            conversation: {
+              participants: {
+                some: {
+                  userId,
+                  isActive: true,
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      return this.prisma.message.findMany({
+        where: whereClause,
+        include: {
+          sender: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+          conversation: {
+            select: {
+              id: true,
+              type: true,
+              title: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to search messages: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   async globalSearch(
     query: string,
     types?:
-      | ('therapists' | 'posts' | 'communities' | 'users')[]
-      | 'therapists'
-      | 'posts'
-      | 'communities'
-      | 'users',
+      | ('therapists' | 'posts' | 'communities' | 'users' | 'worksheets' | 'messages')[],
+    userId?: string,
+    userRole?: 'client' | 'therapist' | 'moderator' | 'admin',
   ) {
     try {
       const results: any = {};
 
-      // Handle both single type and array of types
-      const typesArray = Array.isArray(types)
-        ? types
-        : types
-          ? [types]
-          : ['therapists', 'posts', 'communities', 'users'];
+      // Default to all types if none specified
+      const defaultTypes = ['therapists', 'posts', 'communities', 'users', 'worksheets', 'messages'];
+      const typesArray = types && types.length > 0 ? types : defaultTypes;
 
       if (typesArray.includes('therapists')) {
         results.therapists = await this.searchTherapists(query);
@@ -234,6 +345,21 @@ export class SearchService {
 
       if (typesArray.includes('users')) {
         results.users = await this.searchUsers(query);
+      }
+
+      if (typesArray.includes('worksheets')) {
+        // Only search worksheets if user has appropriate permissions
+        if (userRole === 'client' || userRole === 'therapist') {
+          results.worksheets = await this.searchWorksheets(query, userId, userRole);
+        } else if (userRole === 'moderator' || userRole === 'admin') {
+          // Admins and moderators can see all worksheets
+          results.worksheets = await this.searchWorksheets(query);
+        }
+      }
+
+      if (typesArray.includes('messages') && userId) {
+        // Messages are always private to the user
+        results.messages = await this.searchMessages(query, userId);
       }
 
       return results;
