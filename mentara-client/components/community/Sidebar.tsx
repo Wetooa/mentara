@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { Hash, Lock, Users, AlertCircle, Heart, MessageCircle } from "lucide-react";
+import { Hash, Lock, Users, AlertCircle, Heart, MessageCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { CommunityWithStructure, Room } from "@/lib/api/services/communities";
@@ -32,6 +32,7 @@ export default function CommunitySidebar({
   const api = useApi();
   const { user } = useAuth();
   const [expandedCommunities, setExpandedCommunities] = useState<string[]>([]);
+  const [collapsedRoomGroups, setCollapsedRoomGroups] = useState<string[]>([]); // Track collapsed room groups
 
   // Fetch user's communities with structure in one batch call (optimized for performance)
   const { 
@@ -69,6 +70,14 @@ export default function CommunitySidebar({
       prev.includes(communityId) 
         ? prev.filter(id => id !== communityId)
         : [...prev, communityId]
+    );
+  };
+
+  const handleRoomGroupToggle = (roomGroupId: string) => {
+    setCollapsedRoomGroups(prev => 
+      prev.includes(roomGroupId)
+        ? prev.filter(id => id !== roomGroupId)
+        : [...prev, roomGroupId]
     );
   };
 
@@ -277,12 +286,26 @@ export default function CommunitySidebar({
               <div className="space-y-3 ml-3">
                 {community.roomGroups
                   .sort((a, b) => a.order - b.order)
-                  .map(roomGroup => (
-                    <div key={roomGroup.id} className="space-y-2">
-                      <h4 className="text-xs font-semibold text-community-soothing-foreground uppercase tracking-wider px-3 py-1 bg-community-soothing/10 rounded-lg border border-community-soothing/20">
-                        {roomGroup.name}
-                      </h4>
-                      <div className="space-y-1">
+                  .map(roomGroup => {
+                    const isCollapsed = collapsedRoomGroups.includes(roomGroup.id);
+                    return (
+                      <div key={roomGroup.id} className="space-y-2">
+                        <button
+                          onClick={() => handleRoomGroupToggle(roomGroup.id)}
+                          className="w-full text-left group flex items-center gap-2 text-xs font-semibold text-community-soothing-foreground uppercase tracking-wider px-3 py-1 bg-community-soothing/10 rounded-lg border border-community-soothing/20 hover:bg-community-soothing/20 transition-colors duration-200 no-underline-hover"
+                        >
+                          {isCollapsed ? (
+                            <ChevronRight className="h-3 w-3 text-community-soothing-foreground group-hover:text-community-accent transition-colors" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3 text-community-soothing-foreground group-hover:text-community-accent transition-colors" />
+                          )}
+                          {roomGroup.name}
+                          <span className="ml-auto text-xs text-community-soothing-foreground/60 group-hover:text-community-accent/80">
+                            {roomGroup.rooms.length}
+                          </span>
+                        </button>
+                        {!isCollapsed && (
+                          <div className="space-y-1">
                         {roomGroup.rooms
                           .sort((a, b) => a.order - b.order)
                           .map(room => {
@@ -321,9 +344,11 @@ export default function CommunitySidebar({
                               </button>
                             );
                           })}
+                            </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </AccordionContent>
           </AccordionItem>
