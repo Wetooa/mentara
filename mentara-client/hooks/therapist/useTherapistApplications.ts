@@ -11,6 +11,30 @@ import type {
 } from 'mentara-commons';
 
 /**
+ * Shared retry logic for authentication and error handling
+ */
+const getApplicationsRetryConfig = (failureCount: number, error: MentaraApiError) => {
+  // Don't retry on auth errors (401, 403)
+  if (error?.status === 401 || error?.status === 403) {
+    return false;
+  }
+  // Retry up to 2 times for other errors
+  return failureCount < 2;
+};
+
+/**
+ * Enhanced retry logic for application details that also excludes 404 errors
+ */
+const getApplicationDetailRetryConfig = (failureCount: number, error: MentaraApiError) => {
+  // Don't retry on auth errors or if application doesn't exist
+  if (error?.status === 401 || error?.status === 403 || error?.status === 404) {
+    return false;
+  }
+  // Retry up to 2 times for other errors
+  return failureCount < 2;
+};
+
+/**
  * Hook for fetching therapist applications list (admin functionality)
  * Uses the admin endpoint for comprehensive application data
  */
@@ -25,6 +49,7 @@ export function useTherapistApplications(params: ApplicationListParams = {}) {
       return response.data?.applications || [];
     },
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (admin data changes frequently)
+    retry: getApplicationsRetryConfig,
   });
 }
 
@@ -43,6 +68,7 @@ export function useTherapistApplicationsWithMetadata(params: ApplicationListPara
       return response.data || { applications: [], totalCount: 0, page: 1, totalPages: 1 };
     },
     staleTime: 1000 * 60 * 2,
+    retry: getApplicationsRetryConfig,
   });
 }
 
@@ -57,6 +83,7 @@ export function useTherapistApplication(applicationId: string | null) {
     queryFn: () => api.therapists.application.getById(applicationId!),
     enabled: !!applicationId,
     staleTime: 1000 * 60 * 5, // Application details are more stable
+    retry: getApplicationDetailRetryConfig,
   });
 }
 
@@ -70,13 +97,7 @@ export function useMyTherapistApplication() {
     queryKey: ['therapists', 'applications', 'detail', 'me'],
     queryFn: () => api.therapists.application.getMy(),
     staleTime: 1000 * 60 * 10, // My application doesn't change often
-    retry: (failureCount, error: MentaraApiError) => {
-      // Don't retry if application doesn't exist (404)
-      if (error?.status === 404) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    retry: getApplicationDetailRetryConfig,
   });
 }
 
