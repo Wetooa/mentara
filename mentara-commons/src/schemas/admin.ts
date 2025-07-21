@@ -88,7 +88,7 @@ export const PendingTherapistFiltersDtoSchema = z.object({
   submittedAfter: z.string().datetime().optional(),
   processedBy: z.string().optional(),
   providerType: z.string().optional(),
-  limit: z.number().min(1).max(100).default(50),
+  limit: z.coerce.number().min(1).max(100).default(50),
 });
 
 // Export type inference helpers
@@ -109,8 +109,8 @@ export const AdminAnalyticsQuerySchema = z.object({
 export const AdminUserListParamsDtoSchema = z.object({
   role: z.enum(["client", "therapist", "moderator", "admin"]).optional(),
   status: z.enum(["active", "inactive", "suspended"]).optional(),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
   search: z.string().optional(),
   sortBy: z
     .enum(["createdAt", "firstName", "lastName", "email", "role"])
@@ -134,14 +134,14 @@ export const AdminModerationReportParamsDtoSchema = z.object({
   type: z.string().optional(),
   status: z.enum(["pending", "resolved", "dismissed"]).optional(),
   assignedTo: z.string().optional(),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
 });
 
 export const AdminTherapistApplicationParamsDtoSchema = z.object({
   status: z.enum(["pending", "approved", "rejected", "suspended"]).optional(),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
 });
 
 export const AdminTherapistApplicationFiltersDtoSchema = z.object({
@@ -150,7 +150,7 @@ export const AdminTherapistApplicationFiltersDtoSchema = z.object({
   submittedAfter: z.string().datetime().optional(),
   processedBy: z.string().optional(),
   providerType: z.string().optional(),
-  limit: z.number().min(1).max(100).default(50),
+  limit: z.coerce.number().min(1).max(100).default(50),
 });
 
 export const AdminMatchingPerformanceParamsDtoSchema = z.object({
@@ -160,8 +160,8 @@ export const AdminMatchingPerformanceParamsDtoSchema = z.object({
 
 export const AdminFlaggedContentParamsDtoSchema = z.object({
   type: z.string().optional(),
-  page: z.number().min(1).default(1),
-  limit: z.number().min(1).max(100).default(50),
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(50),
 });
 
 // Admin Therapist Management Types

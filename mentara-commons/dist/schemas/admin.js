@@ -81,7 +81,7 @@ exports.PendingTherapistFiltersDtoSchema = zod_1.z.object({
     submittedAfter: zod_1.z.string().datetime().optional(),
     processedBy: zod_1.z.string().optional(),
     providerType: zod_1.z.string().optional(),
-    limit: zod_1.z.number().min(1).max(100).default(50),
+    limit: zod_1.z.coerce.number().min(1).max(100).default(50),
 });
 // Admin Analytics Query Schema
 exports.AdminAnalyticsQuerySchema = zod_1.z.object({
@@ -92,8 +92,8 @@ exports.AdminAnalyticsQuerySchema = zod_1.z.object({
 exports.AdminUserListParamsDtoSchema = zod_1.z.object({
     role: zod_1.z.enum(["client", "therapist", "moderator", "admin"]).optional(),
     status: zod_1.z.enum(["active", "inactive", "suspended"]).optional(),
-    limit: zod_1.z.number().min(1).max(100).default(50),
-    offset: zod_1.z.number().min(0).default(0),
+    limit: zod_1.z.coerce.number().min(1).max(100).default(50),
+    offset: zod_1.z.coerce.number().min(0).default(0),
     search: zod_1.z.string().optional(),
     sortBy: zod_1.z
         .enum(["createdAt", "firstName", "lastName", "email", "role"])
@@ -114,13 +114,13 @@ exports.AdminModerationReportParamsDtoSchema = zod_1.z.object({
     type: zod_1.z.string().optional(),
     status: zod_1.z.enum(["pending", "resolved", "dismissed"]).optional(),
     assignedTo: zod_1.z.string().optional(),
-    limit: zod_1.z.number().min(1).max(100).default(50),
-    offset: zod_1.z.number().min(0).default(0),
+    limit: zod_1.z.coerce.number().min(1).max(100).default(50),
+    offset: zod_1.z.coerce.number().min(0).default(0),
 });
 exports.AdminTherapistApplicationParamsDtoSchema = zod_1.z.object({
     status: zod_1.z.enum(["pending", "approved", "rejected", "suspended"]).optional(),
-    limit: zod_1.z.number().min(1).max(100).default(50),
-    offset: zod_1.z.number().min(0).default(0),
+    limit: zod_1.z.coerce.number().min(1).max(100).default(50),
+    offset: zod_1.z.coerce.number().min(0).default(0),
 });
 exports.AdminTherapistApplicationFiltersDtoSchema = zod_1.z.object({
     status: zod_1.z.enum(["pending", "approved", "rejected", "suspended"]).optional(),
@@ -128,7 +128,7 @@ exports.AdminTherapistApplicationFiltersDtoSchema = zod_1.z.object({
     submittedAfter: zod_1.z.string().datetime().optional(),
     processedBy: zod_1.z.string().optional(),
     providerType: zod_1.z.string().optional(),
-    limit: zod_1.z.number().min(1).max(100).default(50),
+    limit: zod_1.z.coerce.number().min(1).max(100).default(50),
 });
 exports.AdminMatchingPerformanceParamsDtoSchema = zod_1.z.object({
     startDate: zod_1.z.string().datetime().optional(),
@@ -136,8 +136,8 @@ exports.AdminMatchingPerformanceParamsDtoSchema = zod_1.z.object({
 });
 exports.AdminFlaggedContentParamsDtoSchema = zod_1.z.object({
     type: zod_1.z.string().optional(),
-    page: zod_1.z.number().min(1).default(1),
-    limit: zod_1.z.number().min(1).max(100).default(50),
+    page: zod_1.z.coerce.number().min(1).default(1),
+    limit: zod_1.z.coerce.number().min(1).max(100).default(50),
 });
 exports.UserGrowthDataSchema = zod_1.z.object({
     date: zod_1.z.string().datetime(),
