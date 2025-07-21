@@ -181,7 +181,7 @@ export function useMeetings(filters: { status?: string; limit?: number; offset?:
     refetch,
   } = useQuery({
     queryKey: ['booking', 'meetings', 'list', filters],
-    queryFn: () => api.booking.meetings.getList(filters),
+    queryFn: () => api.booking.meetings.getAll(filters),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 

@@ -20,7 +20,7 @@ export function useTherapistDashboard() {
   
   return useQuery({
     queryKey: ['therapists', 'dashboard'],
-    queryFn: () => api.therapists.dashboard.getData(),
+    queryFn: () => api.dashboard.getTherapistDashboard(),
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (dashboard data changes frequently)
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry if not authorized to access therapist data
@@ -40,7 +40,7 @@ export function useTherapistStats() {
   
   return useQuery({
     queryKey: ['therapists', 'dashboard', 'stats'],
-    queryFn: () => api.therapists.dashboard.getStats(),
+    queryFn: () => api.dashboard.getTherapistMetrics(),
     staleTime: 1000 * 60 * 5, // Stats change less frequently
   });
 }
@@ -53,7 +53,7 @@ export function useTherapistUpcomingAppointments() {
   
   return useQuery({
     queryKey: ['therapists', 'dashboard', 'appointments'],
-    queryFn: () => api.therapists.dashboard.getUpcomingAppointments(),
+    queryFn: () => api.meetings.getUpcomingMeetings(10),
     staleTime: 1000 * 60 * 1, // Appointments change frequently, refresh every minute
     refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes
   });
@@ -71,7 +71,7 @@ export function useTherapistMeetings(params: {
   
   return useQuery({
     queryKey: ['therapists', 'meetings', params],
-    queryFn: () => api.therapists.meetings.getList(params),
+    queryFn: () => api.booking.meetings.getAll(params),
     staleTime: 1000 * 60 * 2,
   });
 }
@@ -84,7 +84,7 @@ export function useTherapistMeeting(meetingId: string | null) {
   
   return useQuery({
     queryKey: ['therapists', 'meetings', meetingId || ''],
-    queryFn: () => api.therapists.meetings.getById(meetingId!),
+    queryFn: () => api.meetings.getById(meetingId!),
     enabled: !!meetingId,
     staleTime: 1000 * 60 * 5,
   });
@@ -104,7 +104,7 @@ export function useUpdateMeetingStatus() {
     }: { 
       meetingId: string; 
       status: 'scheduled' | 'started' | 'completed' | 'cancelled' 
-    }) => api.therapists.meetings.updateStatus(meetingId, status),
+    }) => api.meetings.updateMeetingStatus(meetingId, status),
     onMutate: async ({ meetingId, status }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
@@ -166,7 +166,7 @@ export function useStartMeeting() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (meetingId: string) => api.therapists.meetings.start(meetingId),
+    mutationFn: (meetingId: string) => api.meetings.start(meetingId),
     onSuccess: (data, meetingId) => {
       toast.success('Meeting started successfully!');
       
@@ -224,7 +224,7 @@ export function usePrefetchMeeting() {
   return (meetingId: string) => {
     queryClient.prefetchQuery({
       queryKey: ['therapists', 'meetings', meetingId],
-      queryFn: () => api.therapists.meetings.getById(meetingId),
+      queryFn: () => api.meetings.getById(meetingId),
       staleTime: 1000 * 60 * 5,
     });
   };
