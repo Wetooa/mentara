@@ -3,14 +3,10 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Param,
-  Query,
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
   NotFoundException,
-  ForbiddenException,
   InternalServerErrorException,
   UseGuards,
   HttpCode,
@@ -295,129 +291,5 @@ export class TherapistAuthController {
   @Get('profile')
   async getProfile(@CurrentUserId() userId: string) {
     return this.therapistAuthService.getTherapistProfile(userId);
-  }
-
-  // Admin-only endpoints for managing therapist applications
-  @Get('applications')
-  @UseGuards(JwtAuthGuard)
-  async getAllApplications(
-    @CurrentUserRole() role: string,
-    @Query('status') status?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ): Promise<{
-    applications: TherapistApplicationResponse[];
-    totalCount: number;
-    page: number;
-    totalPages: number;
-  }> {
-    if (role !== 'admin') {
-      throw new ForbiddenException('Admin access required');
-    }
-    try {
-      const pageNum = page ? Math.max(1, page) : 1;
-      const limitNum = limit ? Math.min(Math.max(1, limit), 100) : 10;
-
-      const result = await this.therapistAuthService.getAllApplications({
-        status,
-        page: pageNum,
-        limit: limitNum,
-      });
-
-      return result;
-    } catch (error) {
-      console.error('Error fetching applications:', error);
-      throw new InternalServerErrorException('Failed to fetch applications');
-    }
-  }
-
-  @Get('applications/:id')
-  @UseGuards(JwtAuthGuard)
-  async getApplicationById(
-    @CurrentUserRole() role: string,
-    @Param('id') id: string,
-  ): Promise<TherapistApplicationResponse> {
-    if (role !== 'admin') {
-      throw new ForbiddenException('Admin access required');
-    }
-    try {
-      const application =
-        await this.therapistAuthService.getApplicationById(id);
-
-      if (!application) {
-        throw new NotFoundException('Application not found');
-      }
-
-      return application;
-    } catch (error) {
-      console.error('Error fetching application:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to fetch application');
-    }
-  }
-
-  @Put('applications/:id/status')
-  @UseGuards(JwtAuthGuard)
-  async updateApplicationStatus(
-    @CurrentUserRole() role: string,
-    @Param('id') id: string,
-    @Body() updateData: ApplicationStatusUpdateDto,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    credentials?: { email: string; password: string };
-  }> {
-    if (role !== 'admin') {
-      throw new ForbiddenException('Admin access required');
-    }
-    try {
-      const result = await this.therapistAuthService.updateApplicationStatus(
-        id,
-        updateData,
-      );
-
-      return result;
-    } catch (error) {
-      console.error('Error updating application status:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        'Failed to update application status',
-      );
-    }
-  }
-
-  @Get('applications/:id/files')
-  @UseGuards(JwtAuthGuard)
-  async getApplicationFiles(
-    @CurrentUserRole() role: string,
-    @Param('id') applicationId: string,
-  ): Promise<
-    Array<{
-      id: string;
-      fileName: string;
-      fileUrl: string;
-      uploadedAt: string;
-    }>
-  > {
-    if (role !== 'admin') {
-      throw new ForbiddenException('Admin access required');
-    }
-    try {
-      const files =
-        await this.therapistAuthService.getApplicationFiles(applicationId);
-      return files;
-    } catch (error) {
-      console.error('Error fetching application files:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        'Failed to fetch application files',
-      );
-    }
   }
 }
