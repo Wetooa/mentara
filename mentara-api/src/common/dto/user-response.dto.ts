@@ -1,22 +1,23 @@
-import type { UserResponse, AuthResponse } from '../../auth/types';
+import type { UserDto } from '../../users/types';
+import type { AuthResponse } from '../../auth/types';
 
 // Define UserProfileResponse locally since it's only used here
-interface UserProfileResponse extends UserResponse {
+interface UserProfileResponse extends UserDto {
   fullName?: string;
 }
 
 /**
  * User response DTO for public API endpoints
  */
-export class UserResponseDto implements UserResponse {
+export class UserResponseDto implements UserDto {
   id: string;
   email: string;
-  firstName?: string;
+  firstName: string;
   middleName?: string;
-  lastName?: string;
+  lastName: string;
   birthDate?: string;
   address?: string;
-  role: 'client' | 'therapist' | 'moderator' | 'admin';
+  role: string;
   bio?: string;
   avatarUrl?: string;
   coverImageUrl?: string;
@@ -24,19 +25,17 @@ export class UserResponseDto implements UserResponse {
   timezone?: string;
   language?: string;
   theme?: string;
-  isActive?: boolean;
-  isVerified?: boolean;
-  emailVerified?: boolean;
-  lastLoginAt?: string;
+  isActive: boolean;
+  isEmailVerified: boolean;
   createdAt: string;
   updatedAt: string;
 
   constructor(user: any) {
     this.id = user.id;
     this.email = user.email;
-    this.firstName = user.firstName;
+    this.firstName = user.firstName || '';
     this.middleName = user.middleName;
-    this.lastName = user.lastName;
+    this.lastName = user.lastName || '';
     this.birthDate = user.birthDate?.toISOString();
     this.address = user.address;
     this.role = user.role;
@@ -47,10 +46,8 @@ export class UserResponseDto implements UserResponse {
     this.timezone = user.timezone;
     this.language = user.language;
     this.theme = user.theme;
-    this.isActive = user.isActive;
-    this.isVerified = user.isVerified;
-    this.emailVerified = user.emailVerified;
-    this.lastLoginAt = user.lastLoginAt?.toISOString();
+    this.isActive = user.isActive ?? true;
+    this.isEmailVerified = user.isEmailVerified ?? user.emailVerified ?? false;
     this.createdAt = user.createdAt.toISOString();
     this.updatedAt = user.updatedAt.toISOString();
   }

@@ -2,7 +2,8 @@ import { Controller, Get, Put, Param, Body, HttpCode, HttpStatus, UseGuards, For
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { UserIdParamSchema, type UserIdParam } from 'mentara-commons';
+import { UserIdParamSchema } from './validation';
+import type { UserIdParam } from './types';
 import { ProfileService } from './profile.service';
 
 /**

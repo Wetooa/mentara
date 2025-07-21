@@ -23,12 +23,14 @@ import {
   UserIdParamSchema,
   DeactivateUserDtoSchema,
   UpdateUserRequestSchema,
-  type UserIdParam,
-  type DeactivateUserDto,
-  type UpdateUserRequest,
-  type UserResponse,
-  type SuccessMessageResponse,
-} from 'mentara-commons';
+} from './validation';
+import type {
+  UserIdParam,
+  DeactivateUserDto,
+  UpdateUserRequest,
+  UserDto,
+} from './types';
+import type { SuccessResponse } from '../types/global';
 import { UsersService } from './users.service';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { RoleUtils } from 'src/utils/role-utils';
@@ -49,7 +51,7 @@ export class UsersController {
   async findAll(
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
-  ): Promise<UserResponse[]> {
+  ): Promise<UserDto[]> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
@@ -70,7 +72,7 @@ export class UsersController {
   async findAllIncludeInactive(
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
-  ): Promise<UserResponse[]> {
+  ): Promise<UserDto[]> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
@@ -93,7 +95,7 @@ export class UsersController {
   async findOne(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
-  ): Promise<UserResponse> {
+  ): Promise<UserDto> {
     try {
       // Users can only view their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -139,7 +141,7 @@ export class UsersController {
     @CurrentUserId() currentUserId: string,
     @UploadedFiles()
     files?: { avatar?: Express.Multer.File[]; cover?: Express.Multer.File[] },
-  ): Promise<UserResponse> {
+  ): Promise<UserDto> {
     try {
       // Users can only update their own profile unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -235,7 +237,7 @@ export class UsersController {
   async remove(
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     try {
       // Users can only deactivate their own account unless they're admin
       const isAdmin = await this.roleUtils.isUserAdmin(currentUserId);
@@ -271,7 +273,7 @@ export class UsersController {
     body: DeactivateUserDto,
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }
@@ -296,7 +298,7 @@ export class UsersController {
     @Param(new ZodValidationPipe(UserIdParamSchema)) params: UserIdParam,
     @CurrentUserId() currentUserId: string,
     @CurrentUserRole() role: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     if (role !== 'admin') {
       throw new ForbiddenException('Admin access required');
     }

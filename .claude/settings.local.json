@@ -157,7 +157,8 @@
       "Bash(curl:*)",
       "Bash(timeout 15 npm run dev)",
       "Bash(pkill:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "mcp__zen__chat"
     ]
   },
   "enableAllProjectMcpServers": true,

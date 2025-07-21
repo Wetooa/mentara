@@ -24,13 +24,8 @@ declare global {
   }
 }
 
-// User roles enum
-export enum UserRole {
-  CLIENT = 'client',
-  THERAPIST = 'therapist',
-  MODERATOR = 'moderator',
-  ADMIN = 'admin',
-}
+// Import UserRole from enums
+import { UserRole } from './enums';
 
 // Common query parameters
 export interface PaginationQuery {
