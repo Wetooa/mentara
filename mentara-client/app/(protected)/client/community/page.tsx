@@ -25,6 +25,11 @@ import {
   AlertCircle,
   Activity
 } from "lucide-react";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { useCommunityPage } from "@/hooks/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
 import { cn } from "@/lib/utils";
@@ -60,7 +65,7 @@ export default function UserCommunity() {
   const breadcrumb = getRoomBreadcrumb();
 
   return (
-    <main className="w-full flex h-full">
+    <main className="w-full h-full">
       {/* Mobile overlay for sidebar */}
       <div className="lg:hidden">
         {selectedCommunityId && (
@@ -78,39 +83,20 @@ export default function UserCommunity() {
         )}
       </div>
       
-      {/* Desktop sidebar */}
-      <div className="hidden lg:block">
-        <CommunitySidebar
-          selectedCommunityId={selectedCommunityId}
-          selectedRoomId={selectedRoomId}
-          onCommunitySelect={handleCommunitySelect}
-          onRoomSelect={handleRoomSelect}
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col h-full">
-        {/* Mobile header */}
-        <div className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
-              className="border-community-accent/30 text-community-accent"
-            >
-              <Hash className="h-4 w-4 mr-1" />
-              Communities
-            </Button>
-            {selectedRoom && (
-              <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
-                <span>/</span>
-                <span className="font-medium text-community-accent-foreground">{selectedRoom.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Main Content Area */}
+      {/* Desktop resizable layout */}
+      <div className="hidden lg:block h-full">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={35} className="min-w-[240px]">
+            <CommunitySidebar
+              selectedCommunityId={selectedCommunityId}
+              selectedRoomId={selectedRoomId}
+              onCommunitySelect={handleCommunitySelect}
+              onRoomSelect={handleRoomSelect}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle className="w-1.5 bg-community-calm/20 hover:bg-community-accent/40 transition-colors duration-200" />
+          <ResizablePanel defaultSize={80}>
+            {/* Desktop Main Content Area */}
         {!selectedRoomId ? (
           // Welcome/No Room Selected State
           <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
@@ -529,13 +515,67 @@ export default function UserCommunity() {
                           </CardContent>
                         </Card>
                       );
-                    })}
-                  </div>
-                )}
+                    }
+      
+      {/* Mobile layout */}
+      <div className="lg:hidden flex flex-col h-full">
+        {/* Mobile header */}
+        <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
+              className="border-community-accent/30 text-community-accent"
+            >
+              <Hash className="h-4 w-4 mr-1" />
+              Communities
+            </Button>
+            {selectedRoom && (
+              <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
+                <span>/</span>
+                <span className="font-medium text-community-accent-foreground">{selectedRoom.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile Main Content */}
+        <div className="flex-1 flex flex-col h-full">
+          {!selectedRoomId ? (
+            // Mobile Welcome State
+            <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
+              <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
+              <div className="relative text-center max-w-lg p-4">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-community-calm/20 animate-gentle-glow">
+                  <Heart className="h-8 w-8 text-community-heart" />
+                </div>
+                <h2 className="text-2xl font-bold text-community-calm-foreground mb-3">
+                  Welcome to Your Community Space
+                </h2>
+                <p className="text-community-soothing-foreground mb-6 text-base leading-relaxed">
+                  Tap Communities above to connect with others who understand your journey.
+                </p>
               </div>
             </div>
-          </div>
-        )}
+          ) : (
+            // Mobile Room Content (simplified)
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 shadow-sm">
+                <h1 className="text-xl font-bold text-community-calm-foreground truncate">
+                  {selectedRoom?.name}
+                </h1>
+              </div>
+              <div className="flex-1 overflow-y-auto bg-community-warm/10">
+                <div className="p-4">
+                  <div className="text-center py-8">
+                    <p className="text-community-soothing-foreground">Mobile room content loading...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
