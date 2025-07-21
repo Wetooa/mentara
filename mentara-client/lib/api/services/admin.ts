@@ -9,7 +9,7 @@ export function createAdminService(axios: AxiosInstance) {
      * Get therapist applications with filters
      */
     async getTherapistApplications(params?: {
-      status?: 'pending' | 'approved' | 'rejected' | 'suspended';
+      status?: "pending" | "approved" | "rejected" | "suspended";
       page?: number;
       limit?: number;
       province?: string;
@@ -43,7 +43,9 @@ export function createAdminService(axios: AxiosInstance) {
       page: number;
       totalPages: number;
     }> {
-      const { data } = await axios.get("/auth/therapist/applications", { params });
+      const { data } = await axios.get("/auth/therapist/applications", {
+        params,
+      });
       return data;
     },
 
@@ -74,60 +76,78 @@ export function createAdminService(axios: AxiosInstance) {
     /**
      * Approve therapist application
      */
-    async approveTherapist(therapistId: string, approvalData: {
-      approvalMessage?: string;
-      notifyTherapist?: boolean;
-      sendWelcomeEmail?: boolean;
-    }): Promise<{
+    async approveTherapist(
+      therapistId: string,
+      approvalData: {
+        approvalMessage?: string;
+        notifyTherapist?: boolean;
+        sendWelcomeEmail?: boolean;
+      }
+    ): Promise<{
       success: boolean;
       message: string;
-      credentials?: { 
-        email: string; 
-        password: string; 
+      credentials?: {
+        email: string;
+        password: string;
       };
     }> {
-      const { data } = await axios.put(`/auth/therapist/applications/${therapistId}/status`, {
-        status: 'approved',
-        ...approvalData,
-      });
+      const { data } = await axios.put(
+        `/auth/therapist/applications/${therapistId}/status`,
+        {
+          status: "approved",
+          ...approvalData,
+        }
+      );
       return data;
     },
 
     /**
      * Reject therapist application
      */
-    async rejectTherapist(therapistId: string, rejectionData: {
-      rejectionReason: string;
-      customMessage?: string;
-      notifyTherapist?: boolean;
-      allowReapplication?: boolean;
-    }): Promise<{
+    async rejectTherapist(
+      therapistId: string,
+      rejectionData: {
+        rejectionReason: string;
+        customMessage?: string;
+        notifyTherapist?: boolean;
+        allowReapplication?: boolean;
+      }
+    ): Promise<{
       success: boolean;
       message: string;
     }> {
-      const { data } = await axios.put(`/auth/therapist/applications/${therapistId}/status`, {
-        status: 'rejected',
-        ...rejectionData,
-      });
+      const { data } = await axios.put(
+        `/auth/therapist/applications/${therapistId}/status`,
+        {
+          status: "rejected",
+          ...rejectionData,
+        }
+      );
       return data;
     },
 
     /**
      * Suspend therapist account
      */
-    async suspendTherapist(therapistId: string, suspensionData: {
-      suspensionReason: string;
-      customMessage?: string;
-      notifyTherapist?: boolean;
-      suspensionDuration?: number; // in days
-    }): Promise<{
+    async suspendTherapist(
+      therapistId: string,
+      suspensionData: {
+        suspensionReason: string;
+        customMessage?: string;
+        notifyTherapist?: boolean;
+        suspensionDuration?: number; // in days
+      }
+    ): Promise<{
       success: boolean;
       message: string;
     }> {
-      const { data } = await axios.put(`/auth/therapist/applications/${therapistId}/status`, {
-        status: 'suspended',
-        ...suspensionData,
-      });
+      const { data } = await axios.put(
+        `/auth/therapist/applications/${therapistId}/status`,
+        {
+          status: "suspended",
+          ...suspensionData,
+        }
+      );
       return data;
     },
 
@@ -168,20 +188,26 @@ export function createAdminService(axios: AxiosInstance) {
           emailVerified: boolean;
         };
       }> {
-        const { data } = await axios.get(`/auth/therapist/applications/${applicationId}`);
+        const { data } = await axios.get(
+          `/auth/therapist/applications/${applicationId}`
+        );
         return data;
       },
 
       /**
        * Get application files
        */
-      async getFiles(applicationId: string): Promise<Array<{
-        id: string;
-        fileName: string;
-        fileUrl: string;
-        uploadedAt: string;
-      }>> {
-        const { data } = await axios.get(`/auth/therapist/applications/${applicationId}/files`);
+      async getFiles(applicationId: string): Promise<
+        Array<{
+          id: string;
+          fileName: string;
+          fileUrl: string;
+          uploadedAt: string;
+        }>
+      > {
+        const { data } = await axios.get(
+          `/auth/therapist/applications/${applicationId}/files`
+        );
         return data;
       },
     },
@@ -238,10 +264,10 @@ export function createAdminService(axios: AxiosInstance) {
      * Get system health status
      */
     async getSystemHealth(): Promise<{
-      status: 'healthy' | 'degraded' | 'down';
+      status: "healthy" | "degraded" | "down";
       services: Array<{
         name: string;
-        status: 'up' | 'down' | 'degraded';
+        status: "up" | "down" | "degraded";
         responseTime: number;
         lastCheck: string;
       }>;
