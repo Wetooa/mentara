@@ -1,0 +1,97 @@
+/**
+ * Therapist Module DTOs - Data Transfer Objects for therapist operations
+ * These are pure TypeScript interfaces without validation logic
+ */
+
+// Worksheet DTOs (for therapist-worksheet controller)
+export interface WorksheetCreateInputDto {
+  title: string;
+  description: string;
+  content: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  type: 'assignment' | 'exercise' | 'reflection' | 'assessment';
+  estimatedDuration?: number; // in minutes
+  tags?: string[];
+  clientIds: string[]; // Array of client IDs to assign to
+  dueDate?: string; // ISO string
+  isTemplate?: boolean;
+  templateCategory?: string;
+}
+
+export interface WorksheetUpdateInputDto {
+  title?: string;
+  description?: string;
+  content?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  type?: 'assignment' | 'exercise' | 'reflection' | 'assessment';
+  estimatedDuration?: number; // in minutes
+  tags?: string[];
+  dueDate?: string; // ISO string
+  isTemplate?: boolean;
+  templateCategory?: string;
+  isActive?: boolean;
+}
+
+// Therapist Recommendation DTOs
+export interface TherapistRecommendationQuery {
+  limit?: number;
+  offset?: number;
+  includeUnavailable?: boolean;
+  specialties?: string[];
+  sessionFormats?: string[];
+  minRating?: number;
+  maxDistance?: number;
+  languages?: string[];
+  genderPreference?: 'male' | 'female' | 'any';
+  ageRangePreference?: {
+    min?: number;
+    max?: number;
+  };
+}
+
+export interface WelcomeRecommendationQuery {
+  limit?: number;
+  includePreferences?: boolean;
+}
+
+export interface TherapistRecommendationRequest {
+  userId: string;
+  query: TherapistRecommendationQuery;
+}
+
+export interface TherapistRecommendationResponse {
+  therapists: Array<{
+    id: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl?: string;
+    };
+    specialties: string[];
+    sessionFormats: string[];
+    languages: string[];
+    rating: number;
+    reviewCount: number;
+    yearsOfExperience: number;
+    hourlyRate: number;
+    bio: string;
+    isAvailable: boolean;
+    matchScore: number;
+    matchReasons: string[];
+    nextAvailableSlot?: string;
+  }>;
+  total: number;
+  hasMore: boolean;
+  recommendations: {
+    featured: string[]; // therapist IDs
+    bestMatch: string[]; // therapist IDs  
+    newTherapists: string[]; // therapist IDs
+  };
+}
+
+export interface TherapistRecommendationResponseDto {
+  success: boolean;
+  data: TherapistRecommendationResponse;
+  message?: string;
+}

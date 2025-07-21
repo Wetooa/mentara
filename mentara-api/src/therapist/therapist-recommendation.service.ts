@@ -7,10 +7,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PreAssessment, Therapist, User, Review, Prisma } from '@prisma/client';
-import {
+import type {
   TherapistRecommendationRequest,
   TherapistRecommendationResponse,
-} from 'mentara-commons';
+} from './types';
 import {
   AdvancedMatchingService,
   TherapistScore,

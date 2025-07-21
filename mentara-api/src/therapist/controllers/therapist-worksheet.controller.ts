@@ -21,9 +21,13 @@ import { WorksheetsService } from '../../worksheets/worksheets.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../providers/prisma-client.provider';
 import {
+  WorksheetCreateInputDtoSchema,
+  WorksheetUpdateInputDtoSchema,
+} from '../validation';
+import type {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
-} from 'mentara-commons';
+} from '../types';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('therapist-worksheets')

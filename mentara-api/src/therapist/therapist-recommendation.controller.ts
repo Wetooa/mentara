@@ -25,11 +25,13 @@ import {
 import {
   TherapistRecommendationQuerySchema,
   WelcomeRecommendationQuerySchema,
-  type TherapistRecommendationRequest,
-  type TherapistRecommendationResponseDto,
-  type TherapistRecommendationQuery,
-  type WelcomeRecommendationQuery,
-} from 'mentara-commons';
+} from './validation';
+import type {
+  TherapistRecommendationRequest,
+  TherapistRecommendationResponseDto,
+  TherapistRecommendationQuery,
+  WelcomeRecommendationQuery,
+} from './types';
 
 @ApiTags('therapist-recommendation')
 @ApiBearerAuth('JWT-auth')
