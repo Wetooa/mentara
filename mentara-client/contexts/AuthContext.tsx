@@ -154,8 +154,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           authLoadingRef.current = true;
           startAuthLoading();
 
-          if (process.env.NODE_ENV === 'development') {
-            console.log('🔐 Auth loading started - checking user role');
+          if (process.env.NODE_ENV === "development") {
+            console.log("🔐 Auth loading started - checking user role");
           }
 
           // Simulate realistic progress during auth check
@@ -171,24 +171,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Complete global loading when auth check finishes
         if (authLoadingRef.current) {
           authLoadingRef.current = false;
-          
+
           // Clear progress interval
           if (progressIntervalRef.current) {
             clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = null;
           }
-          
+
           if (error) {
             errorAuthLoading("Authentication failed");
-            if (process.env.NODE_ENV === 'development') {
-              console.error('❌ Auth loading failed:', error);
+            if (process.env.NODE_ENV === "development") {
+              console.error("❌ Auth loading failed:", error);
             }
           } else {
             updateAuthProgress(100);
             setTimeout(() => {
               completeAuthLoading();
-              if (process.env.NODE_ENV === 'development') {
-                console.log('✅ Auth loading completed - user role verified');
+              if (process.env.NODE_ENV === "development") {
+                console.log("✅ Auth loading completed - user role verified");
               }
             }, 100);
           }
@@ -197,13 +197,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else if (!shouldCheckAuth && authLoadingRef.current) {
       // Complete any auth loading for public routes
       authLoadingRef.current = false;
-      
+
       // Clear progress interval
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      
+
       completeAuthLoading();
     }
 
@@ -214,7 +214,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         progressIntervalRef.current = null;
       }
     };
-  }, [isLoading, error, shouldCheckAuth, hasToken, startAuthLoading, updateAuthProgress, completeAuthLoading, errorAuthLoading]);
+  }, [
+    isLoading,
+    error,
+    shouldCheckAuth,
+    hasToken,
+    startAuthLoading,
+    updateAuthProgress,
+    completeAuthLoading,
+    errorAuthLoading,
+  ]);
 
   // Logout function
   const logout = () => {

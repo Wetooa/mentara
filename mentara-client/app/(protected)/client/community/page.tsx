@@ -68,7 +68,7 @@ export default function UserCommunity() {
   } = useCommunityPage();
 
   // Enhanced community data with new hooks
-  const { stats: communityStats } = useCommunityStats();
+  // const { stats: communityStats } = useCommunityStats();
 
   const breadcrumb = getRoomBreadcrumb();
 
@@ -105,15 +105,15 @@ export default function UserCommunity() {
           <ResizableHandle withHandle className="w-1.5 bg-community-calm/20 hover:bg-community-accent/40 transition-colors duration-200" />
           <ResizablePanel defaultSize={80}>
             {/* Desktop Main Content Area */}
-        {!selectedRoomId ? (
-          // Welcome/No Room Selected State
-          <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
-            {/* Background decoration */}
-            <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-community-heart/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-community-accent/15 rounded-full blur-2xl" />
-            
-            <div className="relative text-center max-w-lg p-4 lg:p-8">
+            {!selectedRoomId ? (
+              // Welcome/No Room Selected State
+              <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
+                {/* Background decoration */}
+                <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-community-heart/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-community-accent/15 rounded-full blur-2xl" />
+                
+                <div className="relative text-center max-w-lg p-4 lg:p-8">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-community-calm/20 animate-gentle-glow">
                 <Heart className="h-8 w-8 lg:h-10 lg:w-10 text-community-heart" />
               </div>
@@ -133,7 +133,7 @@ export default function UserCommunity() {
                   </div>
                   <p className="font-semibold text-community-calm-foreground text-xs lg:text-sm">Active Communities</p>
                   <p className="text-xl lg:text-2xl font-bold text-community-accent mt-1">
-                    {communityStats?.totalCommunities || 0}
+                    {0}
                   </p>
                 </div>
                 
@@ -143,7 +143,7 @@ export default function UserCommunity() {
                   </div>
                   <p className="font-semibold text-community-calm-foreground text-xs lg:text-sm">Community Posts</p>
                   <p className="text-xl lg:text-2xl font-bold text-community-heart mt-1">
-                    {communityStats?.totalPosts || 0}
+                    {0}
                   </p>
                 </div>
               </div>
@@ -153,13 +153,13 @@ export default function UserCommunity() {
                   💭 Start meaningful conversations, share experiences, and find support in our safe community spaces.
                 </p>
               </div>
-            </div>
-          </div>
-        ) : (
-          // Room Content
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Room Header */}
-            <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 lg:p-6 shadow-sm">
+                </div>
+              </div>
+            ) : (
+              // Room Content
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Room Header */}
+                <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 lg:p-6 shadow-sm">
               {breadcrumb && (
                 <div className="hidden lg:flex items-center gap-2 text-sm text-community-soothing-foreground mb-4">
                   <span className="font-semibold text-community-calm-foreground">{breadcrumb.communityName}</span>
@@ -588,7 +588,16 @@ export default function UserCommunity() {
                           </CardContent>
                         </Card>
                       );
-                    }
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
       
       {/* Mobile layout */}
       <div className="lg:hidden flex flex-col h-full">

@@ -156,7 +156,8 @@
       "WebFetch(domain:colorconvert.dev)",
       "Bash(curl:*)",
       "Bash(timeout 15 npm run dev)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(tail:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
