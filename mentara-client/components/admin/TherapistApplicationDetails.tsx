@@ -9,47 +9,48 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  useUpdateTherapistApplicationStatus,
-} from "@/hooks/useTherapistApplications";
+import { useUpdateTherapistApplicationStatus } from "@/hooks/useTherapistApplications";
 // Backend-specific type that matches actual API response
-interface BackendTherapistApplication {
+export interface TherapistApplicationResponse {
   id: string;
-  userId: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: string;
   submissionDate: string;
   processingDate?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   mobile: string;
   province: string;
   providerType: string;
-  professionalLicenseType?: string;
-  isPRCLicensed?: string;
-  prcLicenseNumber?: string;
-  expirationDateOfLicense?: string;
-  isLicenseActive?: string;
-  yearsOfExperience?: number;
+  professionalLicenseType: string;
+  isPRCLicensed: string;
+  prcLicenseNumber: string;
+  expirationDateOfLicense: string;
+  isLicenseActive: string;
+  practiceStartDate: string;
+  yearsOfExperience: string;
   areasOfExpertise: string[];
+  assessmentTools: string[];
+  therapeuticApproachesUsedList: string[];
   languagesOffered: string[];
-  assessmentTools?: string[];
-  therapeuticApproachesUsedList?: string[];
-  providedOnlineTherapyBefore?: string;
-  comfortableUsingVideoConferencing?: string;
-  weeklyAvailability?: string;
-  preferredSessionLength?: string;
-  accepts?: string[];
-  privateConfidentialSpace?: string;
-  compliesWithDataPrivacyAct?: string;
-  professionalLiabilityInsurance?: string;
-  complaintsOrDisciplinaryActions?: string;
-  willingToAbideByPlatformGuidelines?: string;
-  createdAt: string;
-  user: {
+  providedOnlineTherapyBefore: string;
+  comfortableUsingVideoConferencing: string;
+  weeklyAvailability: string;
+  preferredSessionLength: string;
+  accepts: string[];
+  privateConfidentialSpace: string;
+  compliesWithDataPrivacyAct: string;
+  professionalLiabilityInsurance: string;
+  complaintsOrDisciplinaryActions: string;
+  willingToAbideByPlatformGuidelines: string;
+  bio?: string;
+  hourlyRate?: number;
+  files?: Array<{
     id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    createdAt: string;
-  };
+    fileUrl: string;
+    fileName: string;
+    uploadedAt: string;
+  }>;
 }
 import {
   AlertDialog,
@@ -82,7 +83,7 @@ interface ApplicationFile {
 }
 
 interface TherapistApplicationDetailsProps {
-  application: BackendTherapistApplication & {
+  application: TherapistApplicationResponse & {
     files?: ApplicationFile[];
     uploadedDocuments?: Array<{
       fileName: string;
@@ -109,9 +110,9 @@ export function TherapistApplicationDetails({
     null
   );
 
-
   // Use the React Query hook for updating application status
-  const { mutate: updateStatus, isPending } = useUpdateTherapistApplicationStatus();
+  const { mutate: updateStatus, isPending } =
+    useUpdateTherapistApplicationStatus();
 
   const formatDate = (dateString: string) => {
     try {
@@ -334,27 +335,30 @@ export function TherapistApplicationDetails({
     if (!actionType || !onStatusChange) return;
 
     // Use the React Query hook to update application status
-    updateStatus({
-      applicationId: application.id,
-      data: {
-        status: actionType === "approve" ? "approved" : "rejected",
+    updateStatus(
+      {
+        applicationId: application.id,
+        data: {
+          status: actionType === "approve" ? "approved" : "rejected",
+        },
       },
-    }, {
-      onSuccess: () => {
-        // Update the UI via the callback
-        if (onStatusChange) {
-          onStatusChange(
-            application.id,
-            actionType === "approve" ? "approved" : "rejected"
-          );
-        }
-      },
-      onSettled: () => {
-        // Reset form state after mutation completes (success or error)
-        setConfirmationOpen(false);
-        setActionType(null);
-      },
-    });
+      {
+        onSuccess: () => {
+          // Update the UI via the callback
+          if (onStatusChange) {
+            onStatusChange(
+              application.id,
+              actionType === "approve" ? "approved" : "rejected"
+            );
+          }
+        },
+        onSettled: () => {
+          // Reset form state after mutation completes (success or error)
+          setConfirmationOpen(false);
+          setActionType(null);
+        },
+      }
+    );
   };
 
   return (
@@ -364,9 +368,9 @@ export function TherapistApplicationDetails({
           <CardTitle className="text-xl">Application Details</CardTitle>
           <Badge
             className={
-              application.status === "approved"
+              application.status === "APPROVED"
                 ? "bg-green-100 text-green-700 hover:bg-green-100"
-                : application.status === "rejected"
+                : application.status === "REJECTED"
                   ? "bg-red-100 text-red-700 hover:bg-red-100"
                   : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
             }
@@ -376,7 +380,7 @@ export function TherapistApplicationDetails({
           </Badge>
         </div>
         <p className="text-sm text-gray-500">
-          Submitted on {formatDate(application.createdAt)}
+          Submitted on {formatDate(application.submissionDate)}
         </p>
       </CardHeader>
       <CardContent>
@@ -406,17 +410,17 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     First Name
                   </h3>
-                  <p className="mt-1">{application.user.firstName}</p>
+                  <p className="mt-1">{application.firstName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Last Name
                   </h3>
-                  <p className="mt-1">{application.user.lastName}</p>
+                  <p className="mt-1">{application.lastName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="mt-1">{application.user.email}</p>
+                  <p className="mt-1">{application.email}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Mobile</h3>
@@ -437,13 +441,17 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     Provider Type
                   </h3>
-                  <p className="mt-1">{application.providerType || 'Not specified'}</p>
+                  <p className="mt-1">
+                    {application.providerType || "Not specified"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Professional License Type
                   </h3>
-                  <p className="mt-1">{application.professionalLicenseType || 'Not specified'}</p>
+                  <p className="mt-1">
+                    {application.professionalLicenseType || "Not specified"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
@@ -457,7 +465,9 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC License Number
                   </h3>
-                  <p className="mt-1">{application.prcLicenseNumber || 'Not provided'}</p>
+                  <p className="mt-1">
+                    {application.prcLicenseNumber || "Not provided"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
@@ -611,7 +621,7 @@ export function TherapistApplicationDetails({
       </CardContent>
 
       {/* Add Card Footer with approval/rejection buttons */}
-      {application.status === "pending" && onStatusChange && (
+      {application.status === "PENDING" && onStatusChange && (
         <div className="border-t pt-4 px-6 pb-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">
@@ -654,14 +664,12 @@ export function TherapistApplicationDetails({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "approve"
-                ? `Are you sure you want to approve ${application.user.firstName} ${application.user.lastName}'s application? This will allow them to start using the platform as a therapist.`
-                : `Are you sure you want to reject ${application.user.firstName} ${application.user.lastName}'s application? They will be notified via email.`}
+                ? `Are you sure you want to approve ${application.firstName} ${application.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.firstName} ${application.lastName}'s application? They will be notified via email.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmAction}
               disabled={isPending}

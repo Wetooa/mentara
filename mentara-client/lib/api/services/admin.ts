@@ -7,7 +7,7 @@ import type {
   TherapistListResponse,
   TherapistApplicationDetailsResponse,
   TherapistActionResponse,
-  TherapistApplicationMetricsResponse
+  TherapistApplicationMetricsResponse,
 } from "mentara-commons";
 
 /**
@@ -18,7 +18,9 @@ export function createAdminService(axios: AxiosInstance) {
     /**
      * Get therapist applications with filters
      */
-    async getTherapistApplications(params?: PendingTherapistFiltersDto): Promise<TherapistListResponse> {
+    async getTherapistApplications(
+      params?: PendingTherapistFiltersDto
+    ): Promise<TherapistListResponse> {
       const { data } = await axios.get("/auth/therapist/applications", {
         params,
       });
@@ -59,7 +61,7 @@ export function createAdminService(axios: AxiosInstance) {
       const { data } = await axios.put(
         `/auth/therapist/applications/${therapistId}/status`,
         {
-          status: "approved",
+          status: "APPROVED",
           ...approvalData,
         }
       );
@@ -76,7 +78,7 @@ export function createAdminService(axios: AxiosInstance) {
       const { data } = await axios.put(
         `/auth/therapist/applications/${therapistId}/status`,
         {
-          status: "rejected",
+          status: "REJECTED",
           ...rejectionData,
         }
       );
@@ -107,7 +109,9 @@ export function createAdminService(axios: AxiosInstance) {
       /**
        * Get single therapist application by ID
        */
-      async getById(applicationId: string): Promise<TherapistApplicationDetailsResponse> {
+      async getById(
+        applicationId: string
+      ): Promise<TherapistApplicationDetailsResponse> {
         const { data } = await axios.get(
           `/auth/therapist/applications/${applicationId}`
         );
