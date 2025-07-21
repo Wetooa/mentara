@@ -1,0 +1,28 @@
+{
+  "name": "@mentara/shared-constants",
+  "version": "1.0.0",
+  "description": "Shared constants and data for Mentara platform - questionnaire mappings and thresholds",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "echo 'No build step needed - pure TypeScript'",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "*.ts",
+    "questionnaires/"
+  ],
+  "keywords": [
+    "mentara",
+    "questionnaire",
+    "mental-health",
+    "constants"
+  ],
+  "private": true,
+  "author": "Mentara Team",
+  "license": "UNLICENSED"
+}
