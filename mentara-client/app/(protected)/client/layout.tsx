@@ -202,12 +202,12 @@ export default function MainLayout({
               </div>
             </div>
 
-            <div className="border-t p-4">
+            <div className="border-t border-border/50 p-4">
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full"
+                className="flex items-center gap-3 px-3 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 w-full shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-red-200 group"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
                 <span className="font-medium">Sign Out</span>
               </button>
             </div>
@@ -258,21 +258,36 @@ export default function MainLayout({
               </span>
             </button>
 
-            <div className="flex items-center gap-2">
-              <span className="hidden text-sm font-medium text-gray-700 sm:block">
-                User
-              </span>
-              <div className="h-8 w-8 overflow-hidden rounded-full bg-gray-200">
-                <Image
-                  src="/avatar-placeholder.png"
-                  alt="User Avatar"
-                  width={32}
-                  height={32}
-                />
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex flex-col items-end">
+                <span className="text-sm font-medium text-foreground">
+                  John Doe
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Client
+                </span>
               </div>
+              
+              <div className="relative group">
+                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
+                  <Image
+                    src="/avatar-placeholder.png"
+                    alt="User Avatar"
+                    width={36}
+                    height={36}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+                    }}
+                  />
+                </div>
+                {/* Online status indicator */}
+                <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
+              </div>
+              
               <button
                 onClick={handleLogout}
-                className="hidden md:block p-2 text-gray-700 hover:text-red-600 transition-colors"
+                className="hidden md:flex items-center justify-center p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-red-200"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
