@@ -473,6 +473,7 @@ export default function ClientWelcomePage() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     );
   }
@@ -662,6 +663,7 @@ export default function ClientWelcomePage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }
