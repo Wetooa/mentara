@@ -58,9 +58,17 @@ export function createMeetingsService(axios: AxiosInstance) {
      * Get a specific meeting by ID
      * @param meetingId - The meeting ID
      */
-    async getMeeting(meetingId: string): Promise<Meeting> {
+    async getById(meetingId: string): Promise<Meeting> {
       const { data } = await axios.get(`/meetings/${meetingId}`);
       return data;
+    },
+
+    /**
+     * Get a specific meeting by ID (alias for compatibility)
+     * @param meetingId - The meeting ID
+     */
+    async getMeeting(meetingId: string): Promise<Meeting> {
+      return this.getById(meetingId);
     },
 
     /**
@@ -86,6 +94,34 @@ export function createMeetingsService(axios: AxiosInstance) {
     },
 
     /**
+     * Start a meeting
+     * @param meetingId - The meeting ID
+     */
+    async start(meetingId: string): Promise<Meeting> {
+      const { data } = await axios.post(`/meetings/${meetingId}/start`);
+      return data;
+    },
+
+    /**
+     * End a meeting
+     * @param meetingId - The meeting ID
+     */
+    async end(meetingId: string): Promise<Meeting> {
+      const { data } = await axios.post(`/meetings/${meetingId}/end`);
+      return data;
+    },
+
+    /**
+     * Save meeting notes
+     * @param meetingId - The meeting ID
+     * @param notes - Meeting notes content
+     */
+    async saveNotes(meetingId: string, notes: string): Promise<Meeting> {
+      const { data } = await axios.put(`/meetings/${meetingId}/notes`, { notes });
+      return data;
+    },
+
+    /**
      * Create a video room for a meeting
      * @param meetingId - The meeting ID
      * @param roomConfig - Configuration for the video room
@@ -95,7 +131,7 @@ export function createMeetingsService(axios: AxiosInstance) {
       maxParticipants?: number;
       enableRecording?: boolean;
       enableChat?: boolean;
-    }) {
+    } = {}) {
       const { data } = await axios.post(`/meetings/${meetingId}/video-room`, {
         meetingId,
         ...roomConfig,
@@ -112,7 +148,7 @@ export function createMeetingsService(axios: AxiosInstance) {
       displayName?: string;
       audioEnabled?: boolean;
       videoEnabled?: boolean;
-    }) {
+    } = {}) {
       const { data } = await axios.post(`/meetings/${meetingId}/join-video`, {
         meetingId,
         ...joinConfig,
@@ -129,6 +165,15 @@ export function createMeetingsService(axios: AxiosInstance) {
       await axios.delete(`/meetings/${meetingId}/video-room`, {
         data: { reason },
       });
+    },
+
+    /**
+     * End video room (alias for endVideoCall)
+     * @param meetingId - The meeting ID
+     * @param reason - Reason for ending the call
+     */
+    async endVideoRoom(meetingId: string, reason?: string) {
+      return this.endVideoCall(meetingId, reason);
     },
   };
 }
