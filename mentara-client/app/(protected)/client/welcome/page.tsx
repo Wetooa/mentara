@@ -297,38 +297,38 @@ export default function ClientWelcomePage() {
         {/* Community Recommendations */}
         {(communityRecommendations?.data?.length ?? 0) > 0 ? (
           <div className="space-y-6">
-            {/* Match Summary */}
-            <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-green-100 p-2 rounded-full">
-                      <Users className="h-5 w-5 text-green-600" />
+            {/* Enhanced Community Match Summary */}
+            <Card className="bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/80 border-emerald-200/50 shadow-xl backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-gradient-to-br from-emerald-500 to-blue-500 p-3 rounded-xl shadow-lg">
+                      <Users className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Personalized Community Matches</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Found {communityRecommendations?.data?.length || 0} communities based on your assessment
+                      <h3 className="text-xl font-bold text-gray-900">Personalized Community Matches</h3>
+                      <p className="text-gray-600 font-medium">
+                        Found {communityRecommendations?.data?.length || 0} meaningful communities based on your unique assessment
                       </p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-2 text-sm font-bold shadow-lg">
                     AI-Powered Matching
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Assessment-based matching</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-gray-700">Smart assessment matching</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-green-600" />
-                    <span>Supportive communities</span>
+                  <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
+                    <Users className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-gray-700">Supportive communities</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Instant joining (no approval needed)</span>
+                  <div className="flex items-center gap-3 p-3 bg-white/70 rounded-xl border border-green-100">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-gray-700">Instant joining available</span>
                   </div>
                 </div>
               </CardContent>
