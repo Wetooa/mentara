@@ -91,7 +91,7 @@ export default function CommunitySidebar({
   // Loading state
   if (membershipsLoading || communitiesLoading) {
     return (
-      <div className="w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm">
+      <div className="w-60 lg:w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm">
         <div className="space-y-4">
           {/* Header skeleton */}
           <div className="flex items-center justify-between">
@@ -136,7 +136,7 @@ export default function CommunitySidebar({
   // Error state
   if (membershipsError || !communitiesData) {
     return (
-      <div className="w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm">
+      <div className="w-60 lg:w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm">
         <div className="text-center space-y-4">
           <div className="flex flex-col items-center space-y-2">
             <div className="p-3 rounded-full bg-community-heart/20">
@@ -170,7 +170,7 @@ export default function CommunitySidebar({
   // No communities state
   if (!communitiesData || communitiesData.length === 0) {
     return (
-      <div className="w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm">
+      <div className="w-60 lg:w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-semibold text-sm text-community-calm-foreground">Your Communities</h2>
           <Badge variant="secondary" className="text-xs bg-community-calm/20 text-community-calm-foreground border-community-calm/30">
@@ -219,7 +219,7 @@ export default function CommunitySidebar({
   }
 
   return (
-    <div className="w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm overflow-y-auto">
+    <div className="w-60 lg:w-60 p-4 bg-community-warm/20 h-full border border-community-calm/30 backdrop-blur-sm overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-semibold text-sm text-community-calm-foreground">Your Communities</h2>
         <Badge 

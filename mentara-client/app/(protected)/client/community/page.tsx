@@ -62,52 +62,94 @@ export default function UserCommunity() {
 
   return (
     <main className="w-full flex h-full">
-      <CommunitySidebar
-        selectedCommunityId={selectedCommunityId}
-        selectedRoomId={selectedRoomId}
-        onCommunitySelect={handleCommunitySelect}
-        onRoomSelect={handleRoomSelect}
-      />
+      {/* Mobile overlay for sidebar */}
+      <div className="lg:hidden">
+        {selectedCommunityId && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="fixed inset-0 bg-black/50" onClick={() => handleCommunitySelect('')} />
+            <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
+              <CommunitySidebar
+                selectedCommunityId={selectedCommunityId}
+                selectedRoomId={selectedRoomId}
+                onCommunitySelect={handleCommunitySelect}
+                onRoomSelect={handleRoomSelect}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Desktop sidebar */}
+      <div className="hidden lg:block">
+        <CommunitySidebar
+          selectedCommunityId={selectedCommunityId}
+          selectedRoomId={selectedRoomId}
+          onCommunitySelect={handleCommunitySelect}
+          onRoomSelect={handleRoomSelect}
+        />
+      </div>
 
       <div className="flex-1 flex flex-col h-full">
+        {/* Mobile header */}
+        <div className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
+              className="border-community-accent/30 text-community-accent"
+            >
+              <Hash className="h-4 w-4 mr-1" />
+              Communities
+            </Button>
+            {selectedRoom && (
+              <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">
+                <span>/</span>
+                <span className="font-medium text-community-accent-foreground">{selectedRoom.name}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
         {/* Main Content Area */}
         {!selectedRoomId ? (
           // Welcome/No Room Selected State
-          <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden">
+          <div className="flex-1 flex items-center justify-center bg-community-gradient relative overflow-hidden px-4">
             {/* Background decoration */}
             <div className="absolute inset-0 bg-community-soothing-gradient opacity-30" />
             <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-community-heart/10 rounded-full blur-3xl" />
             <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-community-accent/15 rounded-full blur-2xl" />
             
-            <div className="relative text-center max-w-lg p-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl w-20 h-20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-community-calm/20 animate-gentle-glow">
-                <Heart className="h-10 w-10 text-community-heart" />
+            <div className="relative text-center max-w-lg p-4 lg:p-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-community-calm/20 animate-gentle-glow">
+                <Heart className="h-8 w-8 lg:h-10 lg:w-10 text-community-heart" />
               </div>
               
-              <h2 className="text-3xl font-bold text-community-calm-foreground mb-3">
+              <h2 className="text-2xl lg:text-3xl font-bold text-community-calm-foreground mb-3">
                 Welcome to Your Community Space
               </h2>
-              <p className="text-community-soothing-foreground mb-8 text-lg leading-relaxed">
-                Select a community and room from the sidebar to connect with others who understand your journey.
+              <p className="text-community-soothing-foreground mb-6 lg:mb-8 text-base lg:text-lg leading-relaxed">
+                <span className="lg:hidden">Tap Communities above to connect with others who understand your journey.</span>
+                <span className="hidden lg:inline">Select a community and room from the sidebar to connect with others who understand your journey.</span>
               </p>
               
-              <div className="grid grid-cols-2 gap-6 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 text-sm">
                 <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl shadow-md border border-community-calm/20 hover:shadow-lg transition-all duration-200">
                   <div className="p-2 rounded-full bg-community-accent/20 w-fit mx-auto mb-2">
-                    <Activity className="h-6 w-6 text-community-accent" />
+                    <Activity className="h-5 w-5 lg:h-6 lg:w-6 text-community-accent" />
                   </div>
-                  <p className="font-semibold text-community-calm-foreground">Active Communities</p>
-                  <p className="text-2xl font-bold text-community-accent mt-1">
+                  <p className="font-semibold text-community-calm-foreground text-xs lg:text-sm">Active Communities</p>
+                  <p className="text-xl lg:text-2xl font-bold text-community-accent mt-1">
                     {communityStats?.totalCommunities || 0}
                   </p>
                 </div>
                 
                 <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl shadow-md border border-community-calm/20 hover:shadow-lg transition-all duration-200">
                   <div className="p-2 rounded-full bg-community-heart/20 w-fit mx-auto mb-2">
-                    <MessageCircle className="h-6 w-6 text-community-heart" />
+                    <MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 text-community-heart" />
                   </div>
-                  <p className="font-semibold text-community-calm-foreground">Community Posts</p>
-                  <p className="text-2xl font-bold text-community-heart mt-1">
+                  <p className="font-semibold text-community-calm-foreground text-xs lg:text-sm">Community Posts</p>
+                  <p className="text-xl lg:text-2xl font-bold text-community-heart mt-1">
                     {communityStats?.totalPosts || 0}
                   </p>
                 </div>
@@ -124,9 +166,9 @@ export default function UserCommunity() {
           // Room Content
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Room Header */}
-            <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-6 shadow-sm">
+            <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 lg:p-6 shadow-sm">
               {breadcrumb && (
-                <div className="flex items-center gap-2 text-sm text-community-soothing-foreground mb-4">
+                <div className="hidden lg:flex items-center gap-2 text-sm text-community-soothing-foreground mb-4">
                   <span className="font-semibold text-community-calm-foreground">{breadcrumb.communityName}</span>
                   <span className="text-community-calm/60">/</span>
                   <span className="text-community-soothing-foreground">{breadcrumb.roomGroupName}</span>
@@ -142,26 +184,26 @@ export default function UserCommunity() {
                 </div>
               )}
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 lg:gap-4 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className={cn(
-                      "p-2 rounded-xl",
+                      "p-2 rounded-xl shrink-0",
                       selectedRoom?.postingRole === "moderator" || selectedRoom?.postingRole === "admin"
                         ? "bg-amber-50 border border-amber-200"
                         : "bg-community-accent/10 border border-community-accent/20"
                     )}>
                       {selectedRoom?.postingRole === "moderator" || selectedRoom?.postingRole === "admin" ? (
-                        <Lock className="h-5 w-5 text-amber-500" />
+                        <Lock className="h-4 w-4 lg:h-5 lg:w-5 text-amber-500" />
                       ) : (
-                        <Hash className="h-5 w-5 text-community-accent" />
+                        <Hash className="h-4 w-4 lg:h-5 lg:w-5 text-community-accent" />
                       )}
                     </div>
-                    <div>
-                      <h1 className="text-2xl font-bold text-community-calm-foreground">
+                    <div className="min-w-0 flex-1">
+                      <h1 className="text-xl lg:text-2xl font-bold text-community-calm-foreground truncate">
                         {selectedRoom?.name}
                       </h1>
-                      <p className="text-sm text-community-soothing-foreground mt-1">
+                      <p className="text-xs lg:text-sm text-community-soothing-foreground mt-1">
                         Safe space for meaningful conversations
                       </p>
                     </div>
@@ -169,7 +211,7 @@ export default function UserCommunity() {
                   {selectedRoom?.postingRole !== "member" && (
                     <Badge 
                       variant="outline" 
-                      className="text-xs bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                      className="text-xs bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 shrink-0"
                     >
                       {selectedRoom?.postingRole === "moderator" ? "Moderators Only" : "Admins Only"}
                     </Badge>
@@ -179,11 +221,12 @@ export default function UserCommunity() {
                 <Dialog open={isCreatePostOpen} onOpenChange={setIsCreatePostOpen}>
                   <DialogTrigger asChild>
                     <Button 
-                      className="flex items-center gap-2 bg-community-accent hover:bg-community-accent/90 text-community-accent-foreground shadow-lg shadow-community-accent/20 border-0 px-6 py-2"
+                      className="flex items-center gap-2 bg-community-accent hover:bg-community-accent/90 text-community-accent-foreground shadow-lg shadow-community-accent/20 border-0 px-4 lg:px-6 py-2 w-full lg:w-auto"
                       disabled={!isPostingAllowed()}
                     >
                       <PenSquare className="h-4 w-4" />
-                      Share Your Thoughts
+                      <span className="hidden sm:inline">Share Your Thoughts</span>
+                      <span className="sm:hidden">New Post</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
@@ -246,7 +289,7 @@ export default function UserCommunity() {
             <div className="flex-1 overflow-y-auto bg-community-warm/10 relative">
               {/* Background decoration */}
               <div className="absolute inset-0 bg-community-gradient opacity-20" />
-              <div className="relative max-w-4xl mx-auto p-6">
+              <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
                 {postsLoading ? (
                   // Loading state
                   <div className="space-y-6">
