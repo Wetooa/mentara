@@ -28,4 +28,13 @@ export const queryKeys = {
     recommended: [...queryKeys.communities.all, 'recommended'] as const,
     activity: [...queryKeys.communities.all, 'activity'] as const,
   },
+  messaging: {
+    all: ['messaging'] as const,
+    conversations: ['messaging', 'conversations'] as const,
+    conversation: (id: string) => [...queryKeys.messaging.all, 'conversation', id] as const,
+    messages: (conversationId: string) => [...queryKeys.messaging.all, 'messages', conversationId] as const,
+    search: (query: string, conversationId?: string) => 
+      [...queryKeys.messaging.all, 'search', query, conversationId] as const,
+    blockedUsers: [...queryKeys.messaging.all, 'blocked'] as const,
+  },
 } as const;
