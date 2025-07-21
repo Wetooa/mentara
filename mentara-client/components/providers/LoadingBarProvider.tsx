@@ -1,7 +1,7 @@
 "use client";
 
-import React, { ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { ReactNode, useEffect, useRef } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import GlobalLoadingBar from '@/components/ui/global-loading-bar';
 import { useGlobalLoadingStore } from '@/store/loading/globalLoadingStore';
 
@@ -23,75 +23,126 @@ export const LoadingBarProvider: React.FC<LoadingBarProviderProps> = ({
   loadingBarProps = {},
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { startLoading, completeLoading, updateProgress } = useGlobalLoadingStore();
+  
+  // Refs to track navigation state
+  const navigationId = useRef<string | null>(null);
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
+  const isNavigating = useRef<boolean>(false);
+  const lastPath = useRef<string>(pathname);
 
-  // Track navigation loading
-  useEffect(() => {
-    let navigationId: string | null = null;
-    let progressInterval: NodeJS.Timeout | null = null;
+  // Helper functions for navigation loading
+  const startNavigationLoading = () => {
+    if (isNavigating.current) return;
+    
+    isNavigating.current = true;
+    navigationId.current = `navigation-${Date.now()}`;
+    
+    startLoading(navigationId.current, 'navigation', {
+      message: 'Loading page...',
+      expectedDuration: 1500,
+    });
 
-    const handleRouteChangeStart = () => {
-      // Clear any existing navigation loading
-      if (navigationId) {
-        completeLoading(navigationId);
+    // Simulate realistic progress during navigation
+    let progress = 0;
+    progressInterval.current = setInterval(() => {
+      progress += Math.random() * 12 + 8; // Random progress between 8-20%
+      if (progress < 85) {
+        updateProgress(navigationId.current!, Math.min(progress, 85));
       }
-      
-      navigationId = `navigation-${Date.now()}`;
-      startLoading(navigationId, 'navigation', {
-        message: 'Loading page...',
-        expectedDuration: 2000, // 2 seconds expected navigation time
-      });
+    }, 120);
 
-      // Simulate realistic progress during navigation
-      let progress = 0;
-      progressInterval = setInterval(() => {
-        progress += Math.random() * 15 + 5; // Random progress between 5-20%
-        if (progress < 80) {
-          updateProgress(navigationId!, Math.min(progress, 80));
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 Navigation loading started:', navigationId.current);
+    }
+  };
+
+  const completeNavigationLoading = () => {
+    if (!isNavigating.current || !navigationId.current) return;
+    
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+    
+    // Complete with 100% progress
+    updateProgress(navigationId.current, 100);
+    
+    // Small delay for visual feedback, then complete
+    setTimeout(() => {
+      if (navigationId.current) {
+        completeLoading(navigationId.current);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Navigation loading completed:', navigationId.current);
         }
-      }, 100);
-    };
-
-    const handleRouteChangeComplete = () => {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
+        navigationId.current = null;
       }
+      isNavigating.current = false;
+    }, 150);
+  };
+
+  const errorNavigationLoading = (error?: string) => {
+    if (!isNavigating.current || !navigationId.current) return;
+    
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+    
+    useGlobalLoadingStore.getState().errorLoading(
+      navigationId.current, 
+      error || 'Navigation failed'
+    );
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Navigation loading failed:', navigationId.current, error);
+    }
+    
+    navigationId.current = null;
+    isNavigating.current = false;
+  };
+
+  // Monitor pathname changes for navigation loading
+  useEffect(() => {
+    const currentPath = pathname + searchParams.toString();
+    
+    // Skip initial mount
+    if (lastPath.current === pathname) {
+      lastPath.current = currentPath;
+      return;
+    }
+    
+    // Route change detected
+    if (lastPath.current !== currentPath) {
+      startNavigationLoading();
       
-      if (navigationId) {
-        // Complete navigation loading
-        updateProgress(navigationId, 100);
-        completeLoading(navigationId);
-        navigationId = null;
-      }
-    };
-
-    const handleRouteChangeError = () => {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-      }
+      // Update last path
+      lastPath.current = currentPath;
       
-      if (navigationId) {
-        // Mark navigation as error
-        useGlobalLoadingStore.getState().errorLoading(navigationId, 'Failed to load page');
-        navigationId = null;
-      }
-    };
+      // Complete loading after a short delay (simulating page load)
+      const completeTimer = setTimeout(() => {
+        completeNavigationLoading();
+      }, 800 + Math.random() * 400); // 800-1200ms
+      
+      return () => {
+        clearTimeout(completeTimer);
+      };
+    }
+  }, [pathname, searchParams]);
 
-    // Note: Next.js 13+ App Router doesn't have built-in route change events
-    // We'll need to implement this differently or hook into the specific navigation triggers
-    // For now, we'll set up the infrastructure
-
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      if (progressInterval) {
-        clearInterval(progressInterval);
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
       }
-      if (navigationId) {
-        completeLoading(navigationId);
+      if (navigationId.current) {
+        completeLoading(navigationId.current);
       }
     };
-  }, [router, startLoading, completeLoading, updateProgress]);
+  }, [completeLoading]);
 
   // Handle window focus/blur for pause/resume functionality
   useEffect(() => {

@@ -85,18 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const api = useApi();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
-  
+
   // Ref to track if auth loading is already in progress to prevent infinite loops
   const authLoadingRef = useRef<boolean>(false);
-  
+
   // Initialize global loading for authentication
   const {
     startLoading: startAuthLoading,
     updateProgress: updateAuthProgress,
     completeLoading: completeAuthLoading,
     errorLoading: errorAuthLoading,
-  } = useGlobalLoading('auth', {
-    message: 'Verifying authentication...',
+  } = useGlobalLoading("auth", {
+    message: "Verifying authentication...",
     expectedDuration: 2000,
   });
 
@@ -142,6 +142,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAuthenticated = !!user && !!hasToken;
 
+  // Track progress interval for cleanup
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Sync global loading with React Query loading state
   useEffect(() => {
     if (shouldCheckAuth && hasToken === true) {
@@ -150,36 +153,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!authLoadingRef.current) {
           authLoadingRef.current = true;
           startAuthLoading();
-          
+
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🔐 Auth loading started - checking user role');
+          }
+
           // Simulate realistic progress during auth check
           let progress = 0;
-          const progressInterval = setInterval(() => {
+          progressIntervalRef.current = setInterval(() => {
             progress += Math.random() * 10 + 5; // Random progress between 5-15%
             if (progress < 85) {
               updateAuthProgress(Math.min(progress, 85));
             }
           }, 150);
-
-          return () => clearInterval(progressInterval);
         }
       } else {
         // Complete global loading when auth check finishes
         if (authLoadingRef.current) {
           authLoadingRef.current = false;
+          
+          // Clear progress interval
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = null;
+          }
+          
           if (error) {
-            errorAuthLoading('Authentication failed');
+            errorAuthLoading("Authentication failed");
+            if (process.env.NODE_ENV === 'development') {
+              console.error('❌ Auth loading failed:', error);
+            }
           } else {
             updateAuthProgress(100);
-            completeAuthLoading();
+            setTimeout(() => {
+              completeAuthLoading();
+              if (process.env.NODE_ENV === 'development') {
+                console.log('✅ Auth loading completed - user role verified');
+              }
+            }, 100);
           }
         }
       }
     } else if (!shouldCheckAuth && authLoadingRef.current) {
       // Complete any auth loading for public routes
       authLoadingRef.current = false;
+      
+      // Clear progress interval
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
       completeAuthLoading();
     }
-  }, [isLoading, error, shouldCheckAuth, hasToken]); // Removed unstable loading function dependencies
+
+    // Cleanup function for the useEffect
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    };
+  }, [isLoading, error, shouldCheckAuth, hasToken, startAuthLoading, updateAuthProgress, completeAuthLoading, errorAuthLoading]);
 
   // Logout function
   const logout = () => {
