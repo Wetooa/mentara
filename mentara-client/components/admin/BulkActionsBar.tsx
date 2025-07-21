@@ -40,33 +40,35 @@ export function BulkActionsBar({
 }: BulkActionsBarProps) {
   return (
     <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <CardContent className="py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          {/* Selection Info - Mobile Optimized */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <span className="font-medium">
-                <Badge variant="secondary" className="mr-2">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span className="font-medium text-sm sm:text-base">
+                <Badge variant="secondary" className="mr-1 sm:mr-2">
                   {selectedCount}
                 </Badge>
                 {selectedCount === 1 ? 'therapist' : 'therapists'} selected
               </span>
             </div>
             
-            <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="hidden sm:block h-6" />
             
             <Button
               variant="ghost"
               size="sm"
               onClick={onClearSelection}
               disabled={isLoading}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground self-start sm:self-auto"
             >
               Clear selection
             </Button>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Action Buttons - Mobile Optimized */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Bulk Approve */}
             <AlertDialog>
               <AlertDialogTrigger asChild>

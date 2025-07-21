@@ -73,16 +73,18 @@ export function TherapistApplicationCard({
   return (
     <>
       <Card className={`transition-all ${isSelected ? 'ring-2 ring-primary' : ''} ${isProcessing ? 'opacity-60' : ''}`}>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4">
+        <CardHeader className="pb-3 sm:pb-6">
+          {/* Mobile-first responsive layout */}
+          <div className="space-y-3 sm:space-y-0">
+            {/* Header Row with Checkbox, Avatar, and Basic Info */}
+            <div className="flex items-start gap-3 sm:gap-4">
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={(checked) => onSelect(therapist.id as string, !!(checked as boolean))}
                 disabled={isProcessing}
               />
               
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <AvatarImage src={(therapist.user as any)?.avatarUrl} />
                 <AvatarFallback>
@@ -91,9 +93,9 @@ export function TherapistApplicationCard({
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                  <h3 className="font-semibold text-base sm:text-lg leading-tight">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {(therapist.user as any)?.firstName} {(therapist.user as any)?.lastName}
                   </h3>
@@ -102,37 +104,39 @@ export function TherapistApplicationCard({
                   </Badge>
                 </div>
                 
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-3 sm:mb-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <span className="text-sm text-muted-foreground">{(therapist.user as any)?.email}</span>
-                </div>
-                
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {(therapist.province as string) || 'Not specified'}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <GraduationCap className="h-4 w-4" />
-                    {(therapist.providerType as string) || 'Not specified'}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {yearsOfExperience} years experience
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CalendarDays className="h-4 w-4" />
-                    Applied {formatDistanceToNow(new Date((therapist.submissionDate || therapist.createdAt) as string), { addSuffix: true })}
-                  </div>
+                  <span className="text-sm text-muted-foreground truncate">{(therapist.user as any)?.email}</span>
                 </div>
               </div>
             </div>
             
-            <div className="flex gap-2">
+            {/* Info Grid - Responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground ml-0 sm:ml-16">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{(therapist.province as string) || 'Not specified'}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <GraduationCap className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{(therapist.providerType as string) || 'Not specified'}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{yearsOfExperience} years experience</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CalendarDays className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Applied {formatDistanceToNow(new Date((therapist.submissionDate || therapist.createdAt) as string), { addSuffix: true })}</span>
+              </div>
+            </div>
+            
+            {/* Action Buttons - Mobile optimized */}
+            <div className="flex flex-wrap gap-2 justify-end">
               <Button variant="outline" size="sm" onClick={onViewDetails} disabled={isProcessing}>
-                <Eye className="h-4 w-4 mr-1" />
-                Details
+                <Eye className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Details</span>
               </Button>
               
               {therapist.status === 'pending' && (
@@ -144,8 +148,8 @@ export function TherapistApplicationCard({
                     className="text-green-600 hover:text-green-700 hover:bg-green-50"
                     disabled={isProcessing}
                   >
-                    <Check className="h-4 w-4 mr-1" />
-                    Approve
+                    <Check className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Approve</span>
                   </Button>
                   
                   <Button 
@@ -155,8 +159,8 @@ export function TherapistApplicationCard({
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     disabled={isProcessing}
                   >
-                    <X className="h-4 w-4 mr-1" />
-                    Reject
+                    <X className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Reject</span>
                   </Button>
                 </>
               )}
