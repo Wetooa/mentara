@@ -7,7 +7,7 @@ import type {
   TherapistListResponse,
   TherapistApplicationDetailsResponse,
   TherapistActionResponse,
-} from "mentara-commons";
+} from "@/types/api/admin";
 
 /**
  * Admin API service for platform management and therapist applications

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import type { ClientDashboardResponseDto } from "mentara-commons";
+import type { ClientDashboardResponseDto } from "@/types/api/dashboard";
 
 /**
  * Hook for fetching client-specific dashboard data

@@ -37,6 +37,7 @@ export interface TherapistRecommendationQuery {
   limit?: number;
   offset?: number;
   includeUnavailable?: boolean;
+  includeInactive?: boolean;
   specialties?: string[];
   sessionFormats?: string[];
   minRating?: number;
@@ -47,11 +48,15 @@ export interface TherapistRecommendationQuery {
     min?: number;
     max?: number;
   };
+  province?: string;
+  maxHourlyRate?: number;
 }
 
 export interface WelcomeRecommendationQuery {
   limit?: number;
   includePreferences?: boolean;
+  forceRefresh?: boolean;
+  province?: string;
 }
 
 export interface TherapistRecommendationRequest {

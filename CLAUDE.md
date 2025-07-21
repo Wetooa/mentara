@@ -6,11 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Mentara is a comprehensive mental health platform that connects patients with therapists. The platform includes therapy sessions, community support, worksheets, mental health assessments, and AI-driven patient evaluation.
 
-**Architecture**: Monorepo with four main components:
-- `mentara-client/` - Next.js 15.2.4 frontend with TypeScript
-- `mentara-api/` - NestJS 11.x backend with Prisma ORM
+**Architecture**: Monorepo with three main components:
+- `mentara-client/` - Next.js 15.2.4 frontend with TypeScript (isolated island)
+- `mentara-api/` - NestJS 11.x backend with Prisma ORM (isolated island)
 - `ai-patient-evaluation/` - Python Flask service with PyTorch ML models
-- `mentara-commons/` - Shared TypeScript types and Zod validation schemas
+
+**Note**: Each component maintains its own types and constants with no shared dependencies.
 
 ## Development Commands
 
@@ -40,8 +41,7 @@ make test            # Run tests for all services
 make setup-dev       # Complete development setup
 make ports           # Check port availability
 
-# Shared library commands
-npm run build:commons # Build mentara-commons shared library (required first)
+# Both services are now independent - no shared libraries required
 ```
 
 ### Client Development (mentara-client/)
@@ -93,16 +93,11 @@ python api.py                     # Start Flask development server
 # using PyTorch neural networks for patient evaluation
 ```
 
-### Commons Library Development (mentara-commons/)
-```bash
-npm run build    # Build shared types and schemas
-npm run dev      # Build in watch mode
-npm run clean    # Clean build artifacts
+### Type Organization
+**Client Types**: Located in `mentara-client/types/` for frontend-specific types
+**Server Types**: Located in `mentara-api/src/types/` for backend-specific types
 
-# The commons library provides shared TypeScript types and Zod validation schemas
-# Both mentara-client and mentara-api depend on this library
-# Always build commons first before other services
-```
+Each service maintains its own type definitions with no cross-dependencies.
 
 ## Architecture & Technology Stack
 
@@ -132,12 +127,12 @@ npm run clean    # Clean build artifacts
 - **Input**: 201-item questionnaire responses across 13 assessment scales
 - **Output**: Processed mental health evaluation results
 
-### Shared Commons Library (mentara-commons/)
-- **Framework**: TypeScript with Zod validation
-- **Purpose**: Single source of truth for types and validation schemas
-- **Build Tool**: Native TypeScript compiler with watch mode
-- **Exports**: Types, schemas, constants, and validation utilities
-- **Dependencies**: Used by both frontend and backend services
+### Type Architecture (Island Pattern)
+- **Client Types**: `mentara-client/types/` - Frontend-specific interfaces and types
+- **Server Types**: `mentara-api/src/types/` - Backend DTOs and global types
+- **Module Types**: Feature-specific types in respective module directories
+- **No Shared Dependencies**: Each service maintains complete type independence
+- **ESLint Protection**: Rules prevent accidental cross-service imports
 
 ### Database Schema Structure
 Prisma uses a multi-file schema approach in `prisma/models/`:
@@ -232,11 +227,11 @@ NestJS modules organized by feature:
 3. Run `npm run db:generate` to update Prisma client
 4. Update seed data in `prisma/seed.ts` if needed
 
-### Shared Library Development
-1. Modify types or schemas in `mentara-commons/src/`
-2. Run `npm run build:commons` to build the library
-3. Other services will automatically pick up changes
-4. Use `npm run dev` in commons for watch mode during development
+### Type Development Workflow
+1. **Client Types**: Add/modify types in `mentara-client/types/`
+2. **Server Types**: Add/modify types in `mentara-api/src/types/` or module-specific `types/` directories
+3. **No Build Step**: Types are used directly by TypeScript compiler
+4. **ESLint Enforcement**: Automatic prevention of cross-service type imports
 
 ## Special Considerations
 
@@ -274,8 +269,9 @@ Comprehensive mock data in `data/` directory:
   - Client: `npm run lint` (in mentara-client/)
   - API: `npm run lint` (in mentara-api/)
 - Always generate Prisma client after schema changes: `npm run db:generate`
-- Build mentara-commons before other services: `npm run build:commons`
+- Each service builds independently - no shared library dependencies
 - Use existing mock data patterns when adding new features
+- ESLint rules prevent accidental shared imports between services
 
 ### React Query + Axios Development Guidelines
 
@@ -334,9 +330,9 @@ Comprehensive mock data in `data/` directory:
 - Health check all services: `make status` or `make health`
 - Common setup issues:
   - `Cannot find module 'nest'` → Run `npm install` in mentara-api
-  - `Cannot find module 'mentara-commons'` → Build mentara-commons first: `npm run build:commons`
+  - Type errors → Check service-specific types in `types/` directories
   - Environment validation errors → Configure `.env` file with required variables
-  - Build errors → Ensure mentara-commons is built first: `npm run build:commons`
+  - Build errors → Each service builds independently, no shared dependencies needed
 
 ### Working Directory Context
 - Always specify which directory commands should run in

@@ -5,7 +5,7 @@ import type {
   TherapistSearchParams,
   TherapistRecommendation,
   WelcomeRecommendationQuery,
-} from "mentara-commons";
+} from "@/types/api/therapist";
 
 /**
  * Therapist API service for recommendations, matching, and management

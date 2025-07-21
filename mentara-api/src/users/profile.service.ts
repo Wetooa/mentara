@@ -193,11 +193,11 @@ export class ProfileService {
       user: {
         id: user.id,
         firstName: user.firstName,
-        middleName: user.middleName,
+        middleName: user.middleName ?? undefined,
         lastName: user.lastName,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        coverImageUrl: user.coverImageUrl,
+        bio: user.bio ?? undefined,
+        avatarUrl: user.avatarUrl ?? undefined,
+        coverImageUrl: user.coverImageUrl ?? undefined,
         role: user.role,
         createdAt: user.createdAt.toISOString()
       },
@@ -210,7 +210,7 @@ export class ProfileService {
     if (user.role === 'therapist' && user.therapist) {
       response.therapist = {
         specializations: user.therapist.areasOfExpertise,
-        yearsOfExperience: user.therapist.yearsOfExperience,
+        yearsOfExperience: user.therapist.yearsOfExperience ?? undefined,
         sessionLength: user.therapist.sessionLength,
         hourlyRate: user.therapist.hourlyRate ? Number(user.therapist.hourlyRate) : undefined,
         areasOfExpertise: user.therapist.areasOfExpertise,

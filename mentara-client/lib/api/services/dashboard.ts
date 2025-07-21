@@ -1,5 +1,10 @@
 import { AxiosInstance } from "axios";
-import {} from "mentara-commons";
+import type {
+  ClientDashboardResponseDto,
+  TherapistDashboardResponseDto,
+  AdminDashboardResponseDto,
+  ModeratorDashboardResponseDto,
+} from "@/types/api/dashboard";
 
 /**
  * Dashboard API service with role-specific methods

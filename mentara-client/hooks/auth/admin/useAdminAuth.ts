@@ -11,7 +11,7 @@ import type {
   AdminAuthResponse,
 } from "@/lib/api";
 
-// Temporary type - should come from mentara-commons
+// Local type definitions for admin auth
 interface AdminUser {
   id: string;
   email: string;

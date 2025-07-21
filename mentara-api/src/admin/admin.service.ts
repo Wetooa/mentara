@@ -9,7 +9,7 @@ import {
   type CreateAdminDto,
   type UpdateAdminDto,
   type AdminResponseDto,
-} from '../types';
+} from './types/admin.dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

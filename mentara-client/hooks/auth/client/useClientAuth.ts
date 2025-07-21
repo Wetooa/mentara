@@ -11,7 +11,7 @@ import type {
   ClientAuthResponse
 } from "@/lib/api";
 
-// Temporary type - should come from mentara-commons
+// Local type definitions for client auth
 interface ClientUser {
   id: string;
   email: string;

@@ -13,7 +13,7 @@ import {
   EmailResponse,
   SuccessMessageResponse,
 } from "./types";
-import { AuthResponse } from "mentara-commons";
+import { AuthResponse } from "@/types/api/auth-extensions";
 
 /**
  * Unified Authentication Service

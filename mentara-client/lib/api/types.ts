@@ -48,7 +48,7 @@ export interface ApiError {
   details?: any;
 }
 
-// Basic User types for Module 1 (temporary - should come from mentara-commons)
+// Basic User types for Module 1 - defined locally
 export interface ClientUser {
   id: string;
   email: string;

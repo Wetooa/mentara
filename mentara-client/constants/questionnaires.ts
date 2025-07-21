@@ -1,10 +1,9 @@
-// Import questionnaire functionality from mentara-commons
-// This replaces the individual questionnaire imports with the centralized commons package
+// Local questionnaire definitions - migrated from mentara-commons
 import {
   LIST_OF_QUESTIONNAIRES,
   QUESTIONNAIRE_MAP,
   type ListOfQuestionnaires,
-} from "mentara-commons";
+} from "@/types/api/questionnaires";
 
-// Re-export the commons functionality for backward compatibility
+// Re-export for backward compatibility
 export { LIST_OF_QUESTIONNAIRES, QUESTIONNAIRE_MAP, type ListOfQuestionnaires };

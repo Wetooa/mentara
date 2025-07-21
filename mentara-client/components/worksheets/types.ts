@@ -1,4 +1,4 @@
-import { WorksheetAssignment, WorksheetSubmission } from "mentara-commons";
+import type { Worksheet, WorksheetSubmission } from "@/types/api/worksheets";
 
 export interface TaskFile {
   id?: string;
@@ -31,27 +31,22 @@ export interface Task {
 
 // Utility function to transform API types to Task types
 export function transformWorksheetAssignmentToTask(
-  assignment: WorksheetAssignment & { 
-    worksheet?: { title: string; content?: string }; 
-    submissions?: WorksheetSubmission[];
-    therapist?: { name: string };
-    client?: { name: string };
-  }
+  assignment: Worksheet
 ): Task {
   const latestSubmission = assignment.submissions?.[0];
   
   return {
     id: assignment.id,
-    title: assignment.worksheet?.title || 'Untitled Worksheet',
-    therapistName: assignment.therapist?.name,
-    patientName: assignment.client?.name,
-    date: assignment.dueDate || assignment.assignedAt,
-    status: assignment.status,
-    isCompleted: assignment.status === 'completed',
-    instructions: assignment.worksheet?.content,
-    materials: [], // Would need to be populated from related data
+    title: assignment.title || 'Untitled Worksheet',
+    therapistName: `${assignment.therapist.firstName} ${assignment.therapist.lastName}`,
+    patientName: `${assignment.user.firstName} ${assignment.user.lastName}`,
+    date: assignment.dueDate,
+    status: assignment.isCompleted ? 'completed' : 'in_progress',
+    isCompleted: assignment.isCompleted,
+    instructions: assignment.instructions,
+    materials: [], // Would need to be populated from assignment.materials
     myWork: [], // Would need to be populated from submissions
     submittedAt: latestSubmission?.submittedAt,
-    feedback: latestSubmission?.feedback,
+    feedback: assignment.feedback,
   };
 }

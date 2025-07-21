@@ -40,7 +40,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 
 
-// Using AuditLog type from mentara-commons via service
+// Using AuditLog type from local API types via service
 interface DisplayAuditLog {
   id: string;
   action: string;

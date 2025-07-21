@@ -1,0 +1,16 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["mentara-commons", "mentara-commons/*"],
+            "message": "mentara-commons has been deprecated. Use local types from @/types/ instead."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -120,7 +120,7 @@ export function createAuthServiceInstance() {
   return createAuthService(apiClient);
 }
 
-// Re-export commonly used types from mentara-commons and local types
+// Re-export commonly used types from local type definitions
 export type {
   LoginDto,
   RegisterClientDto,

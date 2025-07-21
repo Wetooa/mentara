@@ -10,7 +10,7 @@ import type {
   LoginDto as ModeratorLoginDto, 
 } from "@/lib/api";
 
-// Temporary types - should come from mentara-commons
+// Local type definitions for moderator auth
 interface ModeratorUser {
   id: string;
   email: string;

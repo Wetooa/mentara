@@ -60,30 +60,22 @@ export interface CreateAdminAccountDto {
 }
 
 export interface CreateAdminDto {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'moderator';
+  userId: string;
+  permissions: string[];
+  adminLevel?: string;
 }
 
 export interface UpdateAdminDto {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  role?: 'admin' | 'moderator';
-  isActive?: boolean;
+  permissions?: string[];
+  adminLevel?: string;
 }
 
 export interface AdminResponseDto {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'moderator';
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  userId: string;
+  permissions: string[];
+  adminLevel: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AdminAccountQuery {

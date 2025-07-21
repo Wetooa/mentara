@@ -11,7 +11,7 @@ import type {
   TherapistAuthResponse
 } from "@/lib/api";
 
-// Temporary type - should come from mentara-commons
+// Local type definitions for therapist auth
 interface TherapistUser {
   id: string;
   email: string;

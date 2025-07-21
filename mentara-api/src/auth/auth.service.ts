@@ -6,7 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
-// Remove unused imports - these DTOs don't exist in mentara-commons
+// Event bus and token services for auth operations
 import { EventBusService } from '../common/events/event-bus.service';
 import { UserRegisteredEvent } from '../common/events/user-events';
 import { TokenService, SimpleToken } from './services/token.service';

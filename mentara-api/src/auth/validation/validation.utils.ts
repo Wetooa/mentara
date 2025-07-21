@@ -1,6 +1,6 @@
 /**
  * Validation utilities for auth module
- * Simple validation functions without dependency on mentara-commons
+ * Simple validation functions for auth operations
  */
 
 import { z } from 'zod';

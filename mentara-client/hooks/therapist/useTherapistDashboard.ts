@@ -5,12 +5,10 @@ import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { TherapistDashboardData } from '../../types/domain';
 
-// TODO: Add MeetingData to mentara-commons or define locally
-interface MeetingData {
-  id: string;
-  status: 'scheduled' | 'started' | 'completed' | 'cancelled';
-  [key: string]: any;
-}
+import type { Meeting } from "@/types/api/meetings";
+
+// Use Meeting type from local API types
+type MeetingData = Meeting;
 
 /**
  * Hook for fetching complete therapist dashboard data
