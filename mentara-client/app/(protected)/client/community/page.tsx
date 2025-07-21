@@ -33,6 +33,7 @@ import {
 import { useCommunityPage } from "@/hooks/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
 import { cn } from "@/lib/utils";
+import type { Post } from "@/types/api/communities";
 
 export default function UserCommunity() {
   const {
@@ -50,6 +51,7 @@ export default function UserCommunity() {
     handleCommunitySelect,
     handleRoomSelect,
     handleCreatePost,
+    handleHeartPost,
     retryLoadPosts,
     setIsCreatePostOpen,
     setNewPostTitle,
@@ -57,6 +59,7 @@ export default function UserCommunity() {
     getUserInitials,
     getRoomBreadcrumb,
     isPostingAllowed,
+    isPostHearted,
   } = useCommunityPage();
 
   // Enhanced community data with new hooks
@@ -419,7 +422,7 @@ export default function UserCommunity() {
                     {postsData.posts.map((post, index) => {
                       const heartCount = (post as unknown as {_count?: {hearts?: number}})?._count?.hearts || 0;
                       const commentCount = (post as unknown as {_count?: {comments?: number}})?._count?.comments || 0;
-                      const hasUserHearted = false; // TODO: Add user heart status logic
+                      const hasUserHearted = isPostHearted(post as unknown as Post);
                       
                       return (
                         <Card key={index} className="group bg-white/90 backdrop-blur-sm border-community-calm/30 shadow-lg hover:shadow-xl hover:border-community-accent/40 transition-all duration-300 overflow-hidden">
@@ -471,7 +474,7 @@ export default function UserCommunity() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-6">
                                 <button
-                                  onClick={() => console.log('Heart post clicked')}
+                                  onClick={() => handleHeartPost(post as unknown as Post)}
                                   className={cn(
                                     "group/heart flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200",
                                     hasUserHearted 
