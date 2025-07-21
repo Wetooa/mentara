@@ -27,9 +27,13 @@ import {
   FileUploadResult,
 } from 'src/common/services/supabase-storage.service';
 import {
+  CommunityCreateInputDtoSchema,
+  CommunityUpdateInputDtoSchema,
+} from './validation';
+import type {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from 'mentara-commons';
+} from './types';
 
 // Local response interfaces
 interface CommunityResponse {

@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoomGroup, Room } from '@prisma/client';
-import {
+import type {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from 'mentara-commons';
+} from './types';
 
 // Exported response interfaces
 export interface CommunityResponse {

@@ -32,10 +32,12 @@ import {
   GenerateRecommendationsDtoSchema,
   RecommendationInteractionDtoSchema,
   RecommendationQueryDtoSchema,
-  type GenerateRecommendationsDto,
-  type RecommendationInteractionDto,
-  type RecommendationQueryDto,
-} from 'mentara-commons';
+} from '../validation';
+import type {
+  GenerateRecommendationsDto,
+  RecommendationInteractionDto,
+  RecommendationQueryDto,
+} from '../types';
 
 @ApiTags('Community Recommendations')
 @ApiTags('community-recommendation')
