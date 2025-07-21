@@ -74,6 +74,15 @@ export default function AdminTherapistManagementPage() {
         limit: filters.limit || 50,
       }),
     refetchInterval: 30000, // Refresh every 30 seconds
+    retry: (failureCount, error: any) => {
+      // Don't retry on auth errors (401, 403)
+      if (error?.status === 401 || error?.status === 403) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
   });
 
   // Fetch statistics
@@ -81,6 +90,13 @@ export default function AdminTherapistManagementPage() {
     queryKey: ["admin", "therapists", "statistics"],
     queryFn: () => api.admin.getTherapistStatistics(),
     refetchInterval: 60000, // Refresh every minute
+    retry: (failureCount, error: any) => {
+      if (error?.status === 401 || error?.status === 403) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    staleTime: 1000 * 60 * 10, // Statistics don't change as frequently
   });
 
   // Fetch therapist application details for modal
@@ -88,6 +104,13 @@ export default function AdminTherapistManagementPage() {
     queryKey: ["admin", "therapists", "application", detailsTherapistId],
     queryFn: () => api.admin.therapistApplications.getById(detailsTherapistId!),
     enabled: !!detailsTherapistId,
+    retry: (failureCount, error: any) => {
+      if (error?.status === 401 || error?.status === 403 || error?.status === 404) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    staleTime: 1000 * 60 * 15, // Application details are quite static
   });
 
   // Approve therapist mutation
