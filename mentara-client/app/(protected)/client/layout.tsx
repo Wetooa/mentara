@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getProfileUrl } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { UserSearchBar, User } from "@/components/search";
-import { DashboardNotificationMetadata } from "@/components/metadata/NotificationMetadata";
+import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata";
 
 export default function MainLayout({
   children,
@@ -72,7 +72,7 @@ export default function MainLayout({
 
   return (
     <>
-      <DashboardNotificationMetadata role="client" />
+      <DashboardPageMetadata role="client" />
       <div className="flex h-screen w-full bg-white">
         <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
           <Link href="/client" className="mb-8 px-2">

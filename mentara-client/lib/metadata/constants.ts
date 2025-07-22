@@ -124,40 +124,34 @@ export const DEFAULT_METADATA = {
   },
 } as const;
 
-// Role-specific metadata configurations
+// Role-specific metadata configurations (simplified)
 export const ROLE_METADATA = {
   client: {
-    title: "Client Dashboard - Mentara",
+    title: "Mentara | Dashboard",
     description: "Access your therapy sessions, worksheets, and wellness journey progress on Mentara's secure client dashboard.",
     keywords: ["client dashboard", "therapy sessions", "mental health tracking", "wellness progress"],
   },
   therapist: {
-    title: "Therapist Portal - Mentara", 
+    title: "Mentara | Portal", 
     description: "Manage your practice, connect with clients, and provide expert mental health care through Mentara's professional therapist portal.",
     keywords: ["therapist portal", "mental health practice", "client management", "professional therapy"],
   },
   admin: {
-    title: "Admin Dashboard - Mentara",
+    title: "Mentara | Admin",
     description: "Administrative control panel for managing users, therapists, and platform operations.",
     keywords: ["admin dashboard", "platform management", "user administration"],
   },
   moderator: {
-    title: "Moderator Panel - Mentara",
+    title: "Mentara | Moderator",
     description: "Content moderation and community management tools for maintaining a safe mental health environment.",
     keywords: ["content moderation", "community management", "safety tools"],
   },
 } as const;
 
-// Notification types for metadata enhancement
-export const NOTIFICATION_METADATA = {
-  APPOINTMENT_REMINDER: "📅",
-  APPOINTMENT_CONFIRMED: "✅", 
-  APPOINTMENT_CANCELLED: "❌",
-  MESSAGE_RECEIVED: "💬",
-  WORKSHEET_ASSIGNED: "📝",
-  REVIEW_REQUEST: "⭐",
-  COMMUNITY_POST: "👥",
-  URGENT: "🚨",
+// Simplified notification metadata (removed complex emoji mappings)
+export const SIMPLE_NOTIFICATION_CONFIG = {
+  FAVICON_DEFAULT: "/favicon.ico",
+  FAVICON_WITH_NOTIFICATION: "/favicon-notification.ico",
 } as const;
 
 export const IMAGE_DIMENSIONS = {

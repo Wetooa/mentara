@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
@@ -16,12 +16,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onModuleInit() {
-    this.$on('query', (event: any) => {
-      console.log('🔍 [PRISMA QUERY]', event.query);
-      console.log('⏱️  [DURATION]', event.duration + 'ms');
-      console.log('📊 [PARAMS]', event.params);
-      console.log('---');
-    });
+    // Enable query logging only in development
+    if (process.env.NODE_ENV === 'development') {
+      (this as any).$on('query', (event: any) => {
+        console.log('🔍 [PRISMA QUERY]', event.query);
+        console.log('⏱️  [DURATION]', event.duration + 'ms');
+        console.log('📊 [PARAMS]', event.params);
+        console.log('---');
+      });
+    }
     await this.$connect();
   }
 }

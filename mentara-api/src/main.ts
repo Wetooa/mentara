@@ -87,8 +87,6 @@ async function bootstrap() {
       'x-clerk-auth-token',
     ],
     optionsSuccessStatus: 200,
-    // Additional settings for WebSocket connections
-    transports: ['websocket', 'polling'],
   });
 
   // Ensure uploads directory exists
