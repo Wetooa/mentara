@@ -3,7 +3,9 @@
 This document contains test account credentials for development and testing purposes. These accounts are created by the ultra-fast seed script (`npm run db:seed`).
 
 ## 🔑 Universal Password
+
 All test accounts use the same password for development convenience:
+
 ```
 password123
 ```
@@ -11,6 +13,7 @@ password123
 ## 👤 Client Accounts
 
 ### Client 1
+
 - **Email:** `client1@mentaratest.dev`
 - **Name:** Client 1
 - **Role:** Client
@@ -18,6 +21,7 @@ password123
 - **Features:** Full client access, community memberships, can book therapy sessions
 
 ### Client 2
+
 - **Email:** `client2@mentaratest.dev`
 - **Name:** Client 2
 - **Role:** Client
@@ -25,6 +29,7 @@ password123
 - **Features:** Full client access, community memberships, can book therapy sessions
 
 ### Client 3
+
 - **Email:** `client3@mentaratest.dev`
 - **Name:** Client 3
 - **Role:** Client
@@ -34,6 +39,7 @@ password123
 ## 👨‍⚕️ Therapist Accounts
 
 ### Therapist 1
+
 - **Email:** `therapist1@mentaratest.dev`
 - **Name:** Dr. Therapist 1
 - **Role:** Therapist
@@ -44,6 +50,7 @@ password123
 - **Features:** Can view assigned clients, conduct sessions, manage availability
 
 ### Therapist 2
+
 - **Email:** `therapist2@mentaratest.dev`
 - **Name:** Dr. Therapist 2
 - **Role:** Therapist
@@ -54,6 +61,7 @@ password123
 - **Features:** Can view assigned clients, conduct sessions, manage availability
 
 ### Therapist 3
+
 - **Email:** `therapist3@mentaratest.dev`
 - **Name:** Dr. Therapist 3
 - **Role:** Therapist
@@ -66,6 +74,7 @@ password123
 ## 👑 Admin Accounts
 
 ### Admin 1
+
 - **Email:** `admin1@mentaratest.dev`
 - **Name:** Admin 1
 - **Role:** Admin
@@ -74,6 +83,7 @@ password123
 - **Features:** Full platform administration, user management, therapist approval
 
 ### Admin 2
+
 - **Email:** `admin2@mentaratest.dev`
 - **Name:** Admin 2
 - **Role:** Admin
@@ -82,6 +92,7 @@ password123
 - **Features:** Full platform administration, user management, therapist approval
 
 ### Admin 3
+
 - **Email:** `admin3@mentaratest.dev`
 - **Name:** Admin 3
 - **Role:** Admin
@@ -92,6 +103,7 @@ password123
 ## 👮 Moderator Accounts
 
 ### Moderator 1
+
 - **Email:** `moderator1@mentaratest.dev`
 - **Name:** Moderator 1
 - **Role:** Moderator
@@ -101,6 +113,7 @@ password123
 - **Features:** Content moderation, community management
 
 ### Moderator 2
+
 - **Email:** `moderator2@mentaratest.dev`
 - **Name:** Moderator 2
 - **Role:** Moderator
@@ -110,6 +123,7 @@ password123
 - **Features:** Content moderation, community management
 
 ### Moderator 3
+
 - **Email:** `moderator3@mentaratest.dev`
 - **Name:** Moderator 3
 - **Role:** Moderator
@@ -121,18 +135,21 @@ password123
 ## 🏘️ Communities
 
 ### ADHD Support
+
 - **Name:** ADHD Support
 - **Slug:** `adhd-support`
 - **ID:** `dev_comm_adhd-support`
 - **Description:** A supportive community for individuals with ADHD.
 
 ### Anxiety Support
+
 - **Name:** Anxiety Support
 - **Slug:** `anxiety-support`
 - **ID:** `dev_comm_anxiety-support`
 - **Description:** A supportive community for individuals with anxiety.
 
 ### Depression Support
+
 - **Name:** Depression Support
 - **Slug:** `depression-support`
 - **ID:** `dev_comm_depression-support`
@@ -141,6 +158,7 @@ password123
 ## 📊 Database Tables Populated
 
 The seed script creates entries in the following tables:
+
 - ✅ **User** - Base user accounts for all roles
 - ✅ **Client** - Client-specific data and relationships
 - ✅ **Therapist** - Therapist profiles with full professional details
@@ -153,12 +171,14 @@ The seed script creates entries in the following tables:
 ## 🚀 Quick Start
 
 1. **Seed the database:**
+
    ```bash
    cd mentara-api
    npm run db:seed
    ```
 
 2. **Login to the application:**
+
    - Use any email from above with password `password123`
    - Test different role-specific features
 

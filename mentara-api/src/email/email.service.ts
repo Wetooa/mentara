@@ -211,6 +211,7 @@ export class EmailService {
     email: string,
     name: string,
     subject: string,
+    password: string = '',
   ): Promise<EmailResponse> {
     if (!this.isInitialized) {
       return {
@@ -224,26 +225,41 @@ export class EmailService {
     try {
       const appUrl = process.env.APP_URL ?? 'https://mentara.com';
       const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-      <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">🎉 Congratulations! You're Approved!</h1>
-        <p style="color: #1F2937; font-size: 16px;">Great news, ${name}! Your therapist application has been approved.</p>
-        <p style="color: #4B5563;">You can now start accepting clients and providing mental health services through the Mentara platform.</p>
-        <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
-          <p style="color: #065F46; margin: 0; font-weight: 500;">You can now:</p>
-          <ul style="color: #065F46; margin: 10px 0;">
-            <li>Complete your therapist profile</li>
-            <li>Set your availability</li>
-            <li>Start accepting client bookings</li>
-            <li>Access the therapist dashboard</li>
-          </ul>
-        </div>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${appUrl}/therapist/dashboard" style="background-color: #436B00; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Go to Dashboard</a>
-        </div>
-        <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Welcome to the Mentara therapist community!</p>
-      </div>
-    </div>`;
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+  <div style="background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h1 style="color: #10B981; text-align: center; margin-bottom: 30px;">🎉 Congratulations! You're Approved!</h1>
+    <p style="color: #1F2937; font-size: 16px;">Great news, ${name}! Your therapist application has been approved.</p>
+    <p style="color: #4B5563;">You can now start accepting clients and providing mental health services through the Mentara platform.</p>
+    
+    ${
+      password
+        ? `
+    <div style="background-color: #FEF3C7; border-left: 4px solid #F59E0B; padding: 16px; margin: 20px 0; border-radius: 6px;">
+      <p style="color: #92400E; margin: 0; font-weight: 500;">🔐 Your Login Credentials:</p>
+      <p style="color: #92400E; margin: 10px 0 5px 0;"><strong>Email:</strong> ${email}</p>
+      <p style="color: #92400E; margin: 5px 0;"><strong>Password:</strong> <code style="background-color: #FEF3C7; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${password}</code></p>
+      <p style="color: #92400E; margin: 10px 0 0 0; font-size: 14px;">⚠️ Please change your password after your first login for security.</p>
+    </div>
+    `
+        : ''
+    }
+    
+    <div style="background-color: #F0FDF4; border-left: 4px solid #10B981; padding: 16px; margin: 20px 0;">
+      <p style="color: #065F46; margin: 0; font-weight: 500;">You can now:</p>
+      <ul style="color: #065F46; margin: 10px 0;">
+        <li>Complete your therapist profile</li>
+        <li>Set your availability</li>
+        <li>Start accepting client bookings</li>
+        <li>Access the therapist dashboard</li>
+      </ul>
+    </div>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${appUrl}/auth/sign-in" style="background-color: #436B00; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; margin-right: 10px;">Login Now</a>
+      <a href="${appUrl}/therapist/dashboard" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Go to Dashboard</a>
+    </div>
+    <p style="color: #6B7280; font-size: 14px; text-align: center; margin-top: 30px;">Welcome to the Mentara therapist community!</p>
+  </div>
+</div>`;
 
       const templateParams = {
         email,
@@ -543,18 +559,23 @@ export class EmailService {
     }
 
     try {
-      const startTimeFormatted = meetingDetails.startTime.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZoneName: 'short',
-      });
+      const startTimeFormatted = meetingDetails.startTime.toLocaleString(
+        'en-US',
+        {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short',
+        },
+      );
 
       const appUrl = process.env.APP_URL || 'https://mentara.com';
-      const meetingUrl = meetingDetails.meetingUrl || `${appUrl}/meeting/${meetingDetails.meetingId}`;
+      const meetingUrl =
+        meetingDetails.meetingUrl ||
+        `${appUrl}/meeting/${meetingDetails.meetingId}`;
 
       const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
@@ -662,15 +683,18 @@ export class EmailService {
     }
 
     try {
-      const startTimeFormatted = meetingDetails.startTime.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZoneName: 'short',
-      });
+      const startTimeFormatted = meetingDetails.startTime.toLocaleString(
+        'en-US',
+        {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short',
+        },
+      );
 
       const reminderText = {
         '24h': 'tomorrow',
@@ -685,7 +709,9 @@ export class EmailService {
       }[reminderType];
 
       const appUrl = process.env.APP_URL || 'https://mentara.com';
-      const meetingUrl = meetingDetails.meetingUrl || `${appUrl}/meeting/${meetingDetails.meetingId}`;
+      const meetingUrl =
+        meetingDetails.meetingUrl ||
+        `${appUrl}/meeting/${meetingDetails.meetingId}`;
 
       const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
@@ -798,15 +824,18 @@ export class EmailService {
     }
 
     try {
-      const startTimeFormatted = meetingDetails.startTime.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        timeZoneName: 'short',
-      });
+      const startTimeFormatted = meetingDetails.startTime.toLocaleString(
+        'en-US',
+        {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short',
+        },
+      );
 
       const appUrl = process.env.APP_URL || 'https://mentara.com';
 
@@ -915,14 +944,17 @@ export class EmailService {
     }
 
     try {
-      const meetingDateFormatted = paymentDetails.meetingDate?.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      });
+      const meetingDateFormatted = paymentDetails.meetingDate?.toLocaleString(
+        'en-US',
+        {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        },
+      );
 
       const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">

@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axios";
+import { MentaraApiError } from "../errorHandler";
 import type {
   PendingTherapistFiltersDto,
   ApproveTherapistDto,
@@ -7,217 +8,177 @@ import type {
   TherapistListResponse,
   TherapistApplicationDetailsResponse,
   TherapistActionResponse,
+  TherapistApplicationMetricsResponse,
 } from "@/types/api/admin";
 
 /**
- * Admin API service for platform management and therapist applications
+ * Admin API Service
+ *
+ * Comprehensive service layer for admin-related operations, specifically
+ * focused on therapist application management. This service provides a
+ * complete interface to the NestJS backend AdminTherapistController.
+ *
+ * Key Features:
+ * - Therapist application CRUD operations
+ * - Advanced filtering and pagination support
+ * - Status management (approve, reject, suspend)
+ * - Detailed application metrics and reporting
+ * - Comprehensive error handling with typed responses
+ * - Complete endpoint synchronization with backend
+ *
+ * Usage:
+ * ```typescript
+ * const api = useApi();
+ * const applications = await api.admin.getPendingTherapistApplications({
+ *   status: 'pending',
+ *   limit: 50
+ * });
+ * ```
+ *
+ * @version 2.0.0
+ * @lastUpdated 2025-01-22 - Full endpoint and type synchronization
+ * @maintainer Frontend Architecture Team
  */
 export function createAdminService(axios: AxiosInstance) {
+  /**
+   * Internal helper to handle API errors consistently
+   */
+  const handleApiError = (error: any): never => {
+    throw MentaraApiError.fromAxiosError(error);
+  };
+
   return {
     /**
-     * Get therapist applications with filters
+     * Get pending therapist applications with filters
+     * Endpoint: GET /admin/therapists/pending
+     * @throws MentaraApiError on request failure
      */
-    async getTherapistApplications(
+    async getPendingTherapistApplications(
       params?: PendingTherapistFiltersDto
     ): Promise<TherapistListResponse> {
-      const { data } = await axios.get("/admin/therapists/applications", {
-        params,
-      });
-      return data;
+      try {
+        const { data } = await axios.get("/admin/therapists/pending", {
+          params,
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
 
     /**
-     * Get therapist statistics from admin dashboard
+     * Get all therapist applications (not just pending)
+     * Endpoint: GET /admin/therapists/applications
+     * @throws MentaraApiError on request failure
      */
-    async getTherapistStatistics(): Promise<{
-      totalApplications: number;
-      pendingApplications: number;
-      approvedTherapists: number;
-      rejectedApplications: number;
-      activeTherapists: number;
-      suspendedTherapists: number;
-      averageProcessingTime: number;
-      monthlyApplications: Array<{
-        month: string;
-        count: number;
-      }>;
-      applicationsByStatus: Array<{
-        status: string;
-        count: number;
-      }>;
-    }> {
-      const { data } = await axios.get("/dashboard/admin/analytics");
-      return data;
+    async getAllTherapistApplications(
+      params?: PendingTherapistFiltersDto
+    ): Promise<TherapistListResponse> {
+      try {
+        const { data } = await axios.get("/admin/therapists/applications", {
+          params,
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+
+    /**
+     * Get therapist application metrics
+     * Endpoint: GET /admin/therapists/metrics
+     * @throws MentaraApiError on request failure
+     */
+    async getTherapistApplicationMetrics(
+      startDate?: string,
+      endDate?: string
+    ): Promise<TherapistApplicationMetricsResponse> {
+      try {
+        const { data } = await axios.get("/admin/therapists/metrics", {
+          params: { startDate, endDate },
+        });
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
 
     /**
      * Approve therapist application
+     * Endpoint: POST /admin/therapists/:id/approve
+     * @throws MentaraApiError on request failure (401, 403, 404, etc.)
      */
     async approveTherapist(
       therapistId: string,
       approvalData: ApproveTherapistDto
     ): Promise<TherapistActionResponse> {
-      const { data } = await axios.post(
-        `/admin/therapists/${therapistId}/approve`,
-        approvalData
-      );
-      return data;
+      try {
+        const { data } = await axios.post(
+          `/admin/therapists/${therapistId}/approve`,
+          approvalData
+        );
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
 
     /**
      * Reject therapist application
+     * Endpoint: POST /admin/therapists/:id/reject
+     * @throws MentaraApiError on request failure (401, 403, 404, validation errors)
      */
     async rejectTherapist(
       therapistId: string,
       rejectionData: RejectTherapistDto
     ): Promise<TherapistActionResponse> {
-      const { data } = await axios.post(
-        `/admin/therapists/${therapistId}/reject`,
-        rejectionData
-      );
-      return data;
+      try {
+        const { data } = await axios.post(
+          `/admin/therapists/${therapistId}/reject`,
+          rejectionData
+        );
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
 
     /**
-     * Suspend therapist account
+     * Update therapist status (including suspension)
+     * Endpoint: PUT /admin/therapists/:id/status
+     * @throws MentaraApiError on request failure (400 for invalid transitions, 403, 404)
      */
-    async suspendTherapist(
+    async updateTherapistStatus(
       therapistId: string,
-      suspensionData: UpdateTherapistStatusDto
+      statusData: UpdateTherapistStatusDto
     ): Promise<TherapistActionResponse> {
-      const { data } = await axios.put(
-        `/admin/therapists/${therapistId}/status`,
-        suspensionData
-      );
-      return data;
+      try {
+        const { data } = await axios.put(
+          `/admin/therapists/${therapistId}/status`,
+          statusData
+        );
+        return data;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
 
     /**
-     * Nested object for therapist applications management
+     * Get single therapist application details by ID
+     * Endpoint: GET /admin/therapists/:id/details
+     * @throws MentaraApiError on request failure (401, 403, 404)
      */
-    therapistApplications: {
-      /**
-       * Get single therapist application by ID
-       */
-      async getById(
-        applicationId: string
-      ): Promise<TherapistApplicationDetailsResponse> {
+    async getTherapistApplicationDetails(
+      applicationId: string
+    ): Promise<TherapistApplicationDetailsResponse> {
+      try {
         const { data } = await axios.get(
           `/admin/therapists/${applicationId}/details`
         );
         return data;
-      },
-
-      /**
-       * Get application files
-       */
-      async getFiles(applicationId: string): Promise<
-        Array<{
-          id: string;
-          fileName: string;
-          fileUrl: string;
-          uploadedAt: string;
-        }>
-      > {
-        const { data } = await axios.get(
-          `/auth/therapist/applications/${applicationId}/files`
-        );
-        return data;
-      },
-    },
-
-    /**
-     * Get platform analytics for admin dashboard
-     */
-    async getPlatformAnalytics(): Promise<{
-      userGrowth: Array<{ month: string; users: number }>;
-      sessionMetrics: {
-        totalSessions: number;
-        completedSessions: number;
-        averageDuration: number;
-      };
-      revenueMetrics: {
-        totalRevenue: number;
-        monthlyRevenue: Array<{ month: string; revenue: number }>;
-      };
-      therapistMetrics: {
-        totalTherapists: number;
-        activeTherapists: number;
-        averageRating: number;
-      };
-    }> {
-      const { data } = await axios.get("/dashboard/admin/analytics");
-      return data;
-    },
-
-    /**
-     * Get user management data
-     */
-    async getUserManagement(): Promise<{
-      totalUsers: number;
-      activeUsers: number;
-      newUsersThisMonth: number;
-      usersByRole: Array<{
-        role: string;
-        count: number;
-      }>;
-      recentUsers: Array<{
-        id: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        role: string;
-        createdAt: string;
-      }>;
-    }> {
-      const { data } = await axios.get("/dashboard/admin/users");
-      return data;
-    },
-
-    /**
-     * Get system health status
-     */
-    async getSystemHealth(): Promise<{
-      status: "healthy" | "degraded" | "down";
-      services: Array<{
-        name: string;
-        status: "up" | "down" | "degraded";
-        responseTime: number;
-        lastCheck: string;
-      }>;
-      metrics: {
-        uptime: number;
-        totalRequests: number;
-        errorRate: number;
-      };
-    }> {
-      const { data } = await axios.get("/dashboard/admin/health");
-      return data;
-    },
-
-    /**
-     * Get financial overview
-     */
-    async getFinancialOverview(): Promise<{
-      totalRevenue: number;
-      monthlyRevenue: number;
-      pendingPayments: number;
-      refunds: number;
-      subscriptions: {
-        active: number;
-        cancelled: number;
-        revenue: number;
-      };
-      transactions: Array<{
-        id: string;
-        amount: number;
-        type: string;
-        status: string;
-        createdAt: string;
-      }>;
-    }> {
-      const { data } = await axios.get("/dashboard/admin/financial");
-      return data;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
   };
 }

@@ -10,6 +10,7 @@ import { PrismaService } from '../providers/prisma-client.provider';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RoleUtils } from '../utils/role-utils';
 import { MessagingModule } from '../messaging/messaging.module';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
   imports: [MessagingModule],
@@ -26,6 +27,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     PrismaService,
     NotificationsService,
     RoleUtils,
+    EmailService,
   ],
   exports: [AdminService],
 })
