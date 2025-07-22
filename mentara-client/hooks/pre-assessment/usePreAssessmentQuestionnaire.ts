@@ -1,5 +1,5 @@
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
-import { useQuestionnaireQuestions } from "./useQuestionnaires";
+import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mapping";
 
 export interface UsePreAssessmentQuestionnaireReturn {
   // Question data
@@ -31,26 +31,26 @@ export function usePreAssessmentQuestionnaire(): UsePreAssessmentQuestionnaireRe
   const formIndex = step - 1;
   const questionIndex = miniStep;
 
-  // Get questionnaire ID from store
-  const questionnaireId = questionnaires[formIndex];
+  // Get questionnaire name from store
+  const questionnaireName = questionnaires[formIndex];
   
-  // Fetch questions from API
-  const { 
-    data: questions, 
-    isLoading, 
-    error,
-    questionnaire 
-  } = useQuestionnaireQuestions(questionnaireId || "");
-
-  // Get current question
-  const rawQuestion = questions && questions.length > questionIndex ? questions[questionIndex] : null;
+  // Get questionnaire data from static mapping
+  const questionnaireData = questionnaireName ? QUESTIONNAIRE_MAP[questionnaireName] : null;
+  const questions = questionnaireData?.questions || [];
+  
+  // Get current question directly
+  const rawQuestion = questions.length > questionIndex ? questions[questionIndex] : null;
   
   // Transform question to expected format
   const question = rawQuestion ? {
-    prefix: questionnaire?.name || "Assessment",
-    question: rawQuestion.text,
-    options: rawQuestion.options.map(option => option.label)
+    prefix: rawQuestion.prefix || questionnaireData?.title || "Assessment", 
+    question: rawQuestion.question,
+    options: rawQuestion.options
   } : null;
+
+  // No loading or error states needed for static data
+  const isLoading = false;
+  const error = null;
 
   const currentAnswer = answers[formIndex]?.[questionIndex] ?? -1;
   const isLastQuestion = questions ? questions.length - 1 === questionIndex : false;
