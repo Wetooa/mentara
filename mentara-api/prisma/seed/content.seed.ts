@@ -396,9 +396,13 @@ export async function seedCommunityContent(
 }
 
 async function seedPostsWithTemplates(prisma: PrismaClient, rooms: any[], memberships: any[]) {
-  console.log('📄 Creating posts using predefined templates...');
+  console.log('📄 Creating posts using predefined templates with bulk operations...');
 
   const posts: any[] = [];
+  const postsToCreate: any[] = [];
+
+  // Import bulk operations utilities
+  const { chunkedBulkInsert } = await import('./scripts/bulk-operations');
 
   for (const room of rooms) {
     // Get members of this room's community
@@ -411,61 +415,93 @@ async function seedPostsWithTemplates(prisma: PrismaClient, rooms: any[], member
     // Get appropriate templates for this room
     const roomTemplates = POST_TEMPLATES[room.name] || POST_TEMPLATES['General Chat'];
     
-    // Create 1-3 posts per room using templates
-    const postsToCreate = Math.min(
-      faker.number.int({ min: 1, max: 3 }),
-      roomTemplates.length
+    // Create posts data (increased from 1-3 to 5-15 based on SEED_CONFIG)
+    const postsToCreateCount = Math.min(
+      faker.number.int({ min: 5, max: 15 }),
+      roomTemplates.length * 3  // Allow template reuse for more content
     );
     
-    for (let i = 0; i < postsToCreate; i++) {
+    for (let i = 0; i < postsToCreateCount; i++) {
       // Select eligible members (respect posting roles in real app, but seed content for demo)
       const eligibleMembers = communityMembers;
       if (eligibleMembers.length === 0) continue;
 
       const author = faker.helpers.arrayElement(eligibleMembers);
-      const template = roomTemplates[i] || faker.helpers.arrayElement(roomTemplates);
+      const template = faker.helpers.arrayElement(roomTemplates);
 
-      try {
-        const post = await prisma.post.create({
-          data: {
-            title: template.title,
-            content: template.content,
-            userId: author.userId,
-            roomId: room.id,
-            createdAt: faker.date.past({ years: 0.5 }), // Posts from last 6 months
-          },
-        });
+      // Add some variation to template content for reused templates
+      const titleVariation = i > roomTemplates.length ? 
+        ` (${faker.helpers.arrayElement(['Update', 'Follow-up', 'Question', 'Experience'])})` : '';
+      
+      const postData = {
+        title: template.title + titleVariation,
+        content: template.content,
+        userId: author.userId,
+        roomId: room.id,
+        createdAt: faker.date.past({ years: 0.5 }), // Posts from last 6 months
+      };
 
-        posts.push(post);
-        console.log(`  ✅ Created post "${template.title.slice(0, 40)}..." in ${room.roomGroup.community.name}/${room.name}`);
-      } catch (error) {
-        console.log(`  ⚠️ Skipped duplicate post in ${room.name}`);
-      }
+      postsToCreate.push(postData);
     }
   }
 
-  console.log(`✅ Created ${posts.length} posts using predefined templates`);
+  if (postsToCreate.length > 0) {
+    // Use bulk insert for better performance
+    const result = await chunkedBulkInsert(prisma, 'post', postsToCreate, {
+      operationName: 'community posts',
+      chunkSize: 500,
+      skipDuplicates: true
+    });
+
+    // Fetch the created posts for return
+    const createdPosts = await prisma.post.findMany({
+      where: {
+        roomId: {
+          in: [...new Set(postsToCreate.map(p => p.roomId))]
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    posts.push(...createdPosts);
+    console.log(`✅ Created ${result.count} posts using bulk operations across ${rooms.length} rooms`);
+  }
+
   return posts;
 }
 
 async function seedCommentsWithTemplates(prisma: PrismaClient, posts: any[], memberships: any[]) {
-  console.log('💬 Creating supportive comments...');
+  console.log('💬 Creating supportive comments with bulk operations...');
 
   const comments: any[] = [];
+  const commentsToCreate: any[] = [];
 
-  for (const post of posts) {
-    // Get the community this post belongs to
-    const postRoom = await prisma.room.findUnique({
-      where: { id: post.roomId },
-      include: {
-        roomGroup: {
-          include: {
-            community: true,
-          },
+  // Import bulk operations utilities
+  const { chunkedBulkInsert } = await import('./scripts/bulk-operations');
+
+  // Get all rooms data to avoid repeated queries
+  const roomsData = await prisma.room.findMany({
+    where: {
+      id: {
+        in: [...new Set(posts.map(p => p.roomId))]
+      }
+    },
+    include: {
+      roomGroup: {
+        include: {
+          community: true,
         },
       },
-    });
+    },
+  });
 
+  // Create a lookup map for faster access
+  const roomLookup = new Map(roomsData.map(room => [room.id, room]));
+
+  for (const post of posts) {
+    const postRoom = roomLookup.get(post.roomId);
     if (!postRoom) continue;
 
     // Get members of this community (excluding the post author)
@@ -475,34 +511,54 @@ async function seedCommentsWithTemplates(prisma: PrismaClient, posts: any[], mem
 
     if (communityMembers.length === 0) continue;
 
-    // Create 2-6 comments for this post
-    const commentCount = faker.number.int({ min: 2, max: 6 });
+    // Create comments based on enhanced SEED_CONFIG (2-8 comments per post instead of 2-6)
+    const commentCount = Math.min(
+      faker.number.int({ min: 2, max: 8 }),
+      communityMembers.length
+    );
     
-    for (let i = 0; i < Math.min(commentCount, communityMembers.length); i++) {
+    for (let i = 0; i < commentCount; i++) {
       const commenter = faker.helpers.arrayElement(communityMembers);
       const commentText = faker.helpers.arrayElement(COMMENT_TEMPLATES);
 
-      try {
-        const comment = await prisma.comment.create({
-          data: {
-            content: commentText,
-            userId: commenter.userId,
-            postId: post.id,
-            createdAt: faker.date.between({
-              from: post.createdAt,
-              to: new Date(),
-            }),
-          },
-        });
+      const commentData = {
+        content: commentText,
+        userId: commenter.userId,
+        postId: post.id,
+        createdAt: faker.date.between({
+          from: post.createdAt,
+          to: new Date(),
+        }),
+      };
 
-        comments.push(comment);
-      } catch (error) {
-        console.log(`  ⚠️ Skipped comment creation`);
-      }
+      commentsToCreate.push(commentData);
     }
   }
 
-  console.log(`✅ Created ${comments.length} supportive comments`);
+  if (commentsToCreate.length > 0) {
+    // Use bulk insert for better performance
+    const result = await chunkedBulkInsert(prisma, 'comment', commentsToCreate, {
+      operationName: 'supportive comments',
+      chunkSize: 1000,
+      skipDuplicates: true
+    });
+
+    // Fetch the created comments for return
+    const createdComments = await prisma.comment.findMany({
+      where: {
+        postId: {
+          in: [...new Set(commentsToCreate.map(c => c.postId))]
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    comments.push(...createdComments);
+    console.log(`✅ Created ${result.count} supportive comments using bulk operations across ${posts.length} posts`);
+  }
+
   return comments;
 }
 

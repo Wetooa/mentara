@@ -34,12 +34,19 @@ export class WorksheetsController {
   @Get()
   findAll(
     @CurrentUserId() clerkId: string,
-    @Query() query: PaginationQuery & FilterQuery,
+    @Query() query: PaginationQuery & FilterQuery & { isCompleted?: boolean; limit?: number },
   ) {
+    // Convert isCompleted boolean to status string for service compatibility
+    let status: string | undefined = query.status;
+    if (query.isCompleted !== undefined) {
+      status = query.isCompleted ? 'SUBMITTED' : 'ASSIGNED';
+    }
+
     return this.worksheetsService.findAll(
       query.userId,
       query.therapistId,
-      query.status,
+      status,
+      query.limit,
     );
   }
 
