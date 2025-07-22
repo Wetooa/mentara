@@ -190,16 +190,16 @@ async function createConversationMessages(
         content,
         messageType,
         createdAt: messageDate,
-        // Add some attachments for non-text messages
+        // Add some attachments for non-text messages (using array fields)
         ...(messageType === 'IMAGE' && {
-          attachmentUrl: faker.image.url(),
-          attachmentName: 'shared_image.jpg',
-          attachmentSize: faker.number.int({ min: 100000, max: 5000000 }),
+          attachmentUrls: [faker.image.url()],
+          attachmentNames: ['shared_image.jpg'],
+          attachmentSizes: [faker.number.int({ min: 100000, max: 5000000 })],
         }),
         ...(messageType === 'AUDIO' && {
-          attachmentUrl: faker.internet.url() + '/voice.mp3',
-          attachmentName: 'voice_message.mp3',
-          attachmentSize: faker.number.int({ min: 50000, max: 2000000 }),
+          attachmentUrls: [faker.internet.url() + '/voice.mp3'],
+          attachmentNames: ['voice_message.mp3'],
+          attachmentSizes: [faker.number.int({ min: 50000, max: 2000000 })],
         }),
       },
     });
