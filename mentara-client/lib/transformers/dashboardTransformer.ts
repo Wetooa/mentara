@@ -108,7 +108,7 @@ export function transformDashboardData(
           `${meeting.therapist?.user?.firstName || ""} ${meeting.therapist?.user?.lastName || ""}`.trim() ||
           "Therapist",
         therapistAvatar: undefined, // Backend doesn't provide this yet
-        dateTime: safeDateTimeFormat(meeting.startTime),
+        dateTime: safeDateTimeFormat(meeting.dateTime),
         duration: meeting.duration,
         status: transformMeetingStatus(meeting.status),
         joinUrl: `/session/join/${meeting.id}`,

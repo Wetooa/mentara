@@ -258,7 +258,10 @@ export default function SessionDetailsPage() {
               </Badge>
             </div>
             <p className="text-muted-foreground">
-              {format(new Date(session.dateTime), "EEEE, MMMM d, yyyy")} at {format(new Date(session.dateTime), "h:mm a")}
+              {session.dateTime 
+                ? `${format(new Date(session.dateTime), "EEEE, MMMM d, yyyy")} at ${format(new Date(session.dateTime), "h:mm a")}`
+                : "Date not available"
+              }
             </p>
           </div>
         </div>

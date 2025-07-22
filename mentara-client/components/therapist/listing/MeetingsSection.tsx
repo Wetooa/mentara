@@ -78,7 +78,14 @@ export default function MeetingsSection() {
       </div>
 
       <div className="space-y-4">
-        {displayMeetings.map((meeting) => {
+        {displayMeetings
+          .map((meeting) => {
+          // Check if dateTime exists before parsing
+          if (!meeting.dateTime) {
+            console.warn('Meeting missing dateTime:', meeting);
+            return null;
+          }
+          
           // Parse the date from ISO string
           const meetingDate = parseISO(meeting.dateTime);
           const formattedDate = format(meetingDate, "MMM d, yyyy");
@@ -94,9 +101,11 @@ export default function MeetingsSection() {
 
           // Generate initials for the avatar
           const initials = meeting.therapistName
-            .split(" ")
-            .map((name) => name.charAt(0))
-            .join("");
+            ? meeting.therapistName
+                .split(" ")
+                .map((name) => name.charAt(0))
+                .join("")
+            : "??";
 
           return (
             <Card
@@ -144,7 +153,8 @@ export default function MeetingsSection() {
               </CardContent>
             </Card>
           );
-        })}
+        })
+        .filter(Boolean)}
       </div>
     </div>
   );
