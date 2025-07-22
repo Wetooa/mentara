@@ -128,7 +128,7 @@ export default function TherapistRequestsPage() {
     setResponseDialogOpen(true);
   };
 
-  const handleFilterChange = (key: keyof RequestFilters, value: string) => {
+  const handleFilterChange = (key: keyof RequestFilters, value: string | undefined) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
@@ -236,12 +236,12 @@ export default function TherapistRequestsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={filters.priority} onValueChange={(value) => handleFilterChange('priority', value)}>
+            <Select value={filters.priority || 'all'} onValueChange={(value) => handleFilterChange('priority', value === 'all' ? undefined : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Priorities</SelectItem>
+                <SelectItem value="all">All Priorities</SelectItem>
                 <SelectItem value="high">High Priority</SelectItem>
                 <SelectItem value="medium">Medium Priority</SelectItem>
                 <SelectItem value="low">Low Priority</SelectItem>

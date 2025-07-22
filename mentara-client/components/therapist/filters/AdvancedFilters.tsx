@@ -410,14 +410,14 @@ export function AdvancedFilters({
             <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-700">Location/Province</Label>
               <Select
-                value={localFilters.location}
-                onValueChange={(value) => updateFilter('location', value)}
+                value={localFilters.location || 'all'}
+                onValueChange={(value) => updateFilter('location', value === 'all' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select province..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Provinces</SelectItem>
+                  <SelectItem value="all">All Provinces</SelectItem>
                   {LOCATION_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}

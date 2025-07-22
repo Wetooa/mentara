@@ -112,14 +112,14 @@ export function SessionFilters({
 
             {/* Status Filter */}
             <Select
-              value={filters.status || ''}
-              onValueChange={(value) => onFilterUpdate('status', value as SessionFiltersType['status'] || undefined)}
+              value={filters.status || 'all'}
+              onValueChange={(value) => onFilterUpdate('status', value === 'all' ? undefined : value as SessionFiltersType['status'])}
             >
               <SelectTrigger className="w-[140px] h-10">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 {statusOptions.map((status) => (
                   <SelectItem key={status.value} value={status.value}>
                     {status.label}
@@ -181,15 +181,15 @@ export function SessionFilters({
 
             {/* Status Filter */}
             <Select
-              value={filters.status || ''}
-              onValueChange={(value) => onFilterUpdate('status', value as SessionFiltersType['status'] || undefined)}
+              value={filters.status || 'all'}
+              onValueChange={(value) => onFilterUpdate('status', value === 'all' ? undefined : value as SessionFiltersType['status'])}
             >
               <SelectTrigger>
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 {statusOptions.map((status) => (
                   <SelectItem key={status.value} value={status.value}>
                     <div className="flex items-center gap-2">
