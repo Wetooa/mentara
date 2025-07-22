@@ -5,10 +5,37 @@ import { join } from 'path';
 import * as fs from 'fs';
 import helmet from 'helmet';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as net from 'net';
 import {
   validateEnvironmentVariables,
   logEnvironmentInfo,
 } from './config/env-validation';
+
+/**
+ * Check if a port is available
+ */
+async function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.listen(port, () => {
+      server.once('close', () => resolve(true));
+      server.close();
+    });
+    server.on('error', () => resolve(false));
+  });
+}
+
+/**
+ * Find an available port starting from the preferred port
+ */
+async function findAvailablePort(preferredPort: number): Promise<number> {
+  for (let port = preferredPort; port < preferredPort + 10; port++) {
+    if (await isPortAvailable(port)) {
+      return port;
+    }
+  }
+  throw new Error(`No available ports found in range ${preferredPort}-${preferredPort + 9}`);
+}
 
 async function bootstrap() {
   console.log('Memory before app load:', process.memoryUsage());
@@ -104,10 +131,75 @@ async function bootstrap() {
   // Global prefix for all API routes
   app.setGlobalPrefix('api');
 
-  await app.listen(process.env.PORT ?? 3001);
-  console.log(`Application is running on: ${await app.getUrl()}`);
-  console.log('🔌 WebSocket (Socket.io) support enabled');
-  console.log(`📡 WebSocket server listening on port: ${process.env.PORT ?? 3001}`);
+  const preferredPort = parseInt(process.env.PORT ?? '3001', 10);
+  let actualPort = preferredPort;
+  
+  // In development, try to find an available port if the preferred one is busy
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      actualPort = await findAvailablePort(preferredPort);
+      if (actualPort !== preferredPort) {
+        console.log(`⚠️  Port ${preferredPort} is busy, using port ${actualPort} instead`);
+      }
+    } catch (error) {
+      console.error(`❌ Could not find an available port: ${error.message}`);
+      console.error(`💡 Try: npx kill-port ${preferredPort} to free up the preferred port`);
+      process.exit(1);
+    }
+  } else {
+    // In production, strictly use the configured port
+    actualPort = preferredPort;
+  }
+  
+  try {
+    await app.listen(actualPort);
+    console.log(`✅ Application is running on: ${await app.getUrl()}`);
+    console.log('🔌 WebSocket (Socket.io) support enabled');
+    console.log(`📡 WebSocket server listening on port: ${actualPort}`);
+    
+    if (actualPort !== preferredPort) {
+      console.log(`🔄 Note: Using port ${actualPort} instead of preferred port ${preferredPort}`);
+    }
+  } catch (error) {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${actualPort} is already in use. Please:
+1. Kill the process using the port: npx kill-port ${actualPort}
+2. Or use a different port by setting PORT environment variable
+3. Or wait for the previous process to terminate`);
+      process.exit(1);
+    } else {
+      console.error('❌ Failed to start server:', error);
+      process.exit(1);
+    }
+  }
+
+  // Graceful shutdown handlers
+  const shutdown = async (signal: string) => {
+    console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+    try {
+      await app.close();
+      console.log('✅ Application shut down successfully');
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ Error during shutdown:', error);
+      process.exit(1);
+    }
+  };
+
+  // Handle termination signals
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  
+  // Handle uncaught exceptions and unhandled rejections
+  process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    shutdown('uncaughtException');
+  });
+  
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    shutdown('unhandledRejection');
+  });
 }
 
 void bootstrap();
