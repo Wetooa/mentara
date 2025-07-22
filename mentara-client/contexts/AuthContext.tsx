@@ -12,7 +12,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
+import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
 import { useCurrentUserProfile } from "@/hooks/auth/useCurrentUserProfile";
 
@@ -90,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const api = useApi();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   // Ref to track if auth loading is already in progress to prevent infinite loops
   const authLoadingRef = useRef<boolean>(false);
@@ -108,11 +109,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Determine if we should check authentication based on route
   const shouldCheckAuth = !isPublicRoute(pathname);
 
-  // Check for token on mount and route changes
+  // Set client state on mount to prevent SSR issues
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    setHasToken(!!token);
-  }, [pathname]);
+    setIsClient(true);
+  }, []);
+
+  // Check for token on mount and route changes (client-side only)
+  useEffect(() => {
+    if (isClient) {
+      setHasToken(hasAuthToken());
+    }
+  }, [pathname, isClient]);
 
   // Fetch user role using React Query (only when we have a token and need auth)
   const {
@@ -123,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery({
     queryKey: ["auth", "user-role"],
     queryFn: () => api.auth.getUserRole(),
-    enabled: shouldCheckAuth && hasToken === true,
+    enabled: isClient && shouldCheckAuth && hasToken === true,
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
       if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -174,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
       };
     },
-    enabled: !!userId && !!userRole && hasToken === true,
+    enabled: isClient && !!userId && !!userRole && hasToken === true,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error: any) => {
       // Don't retry on 401/403 errors (auth failures)
@@ -204,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sync global loading with React Query loading state
   useEffect(() => {
-    if (shouldCheckAuth && hasToken === true) {
+    if (isClient && shouldCheckAuth && hasToken === true) {
       if (isLoading) {
         // Prevent starting multiple loading operations
         if (!authLoadingRef.current) {
@@ -251,8 +258,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-    } else if (!shouldCheckAuth && authLoadingRef.current) {
-      // Complete any auth loading for public routes
+    } else if ((!shouldCheckAuth || !isClient) && authLoadingRef.current) {
+      // Complete any auth loading for public routes or during SSR
       authLoadingRef.current = false;
 
       // Clear progress interval
@@ -272,6 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
   }, [
+    isClient,
     isLoading,
     error,
     shouldCheckAuth,
@@ -284,7 +292,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    if (isClient) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
     setHasToken(false);
     router.push("/auth/sign-in");
   };
@@ -296,8 +306,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Handle route protection and redirection
   useEffect(() => {
-    // Skip redirections during loading or if we don't know token status yet
-    if (isLoading || hasToken === null) return;
+    // Skip redirections during loading, SSR, or if we don't know token status yet
+    if (!isClient || isLoading || hasToken === null) return;
 
     const isPublic = isPublicRoute(pathname);
 
@@ -360,6 +370,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Authenticated user with correct role or on general protected route - allow access
     }
   }, [
+    isClient,
     isLoading,
     isAuthenticated,
     userRole,
@@ -373,7 +384,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Show minimal loading state during authentication check
   // The global loading bar will handle the visual feedback
-  if ((isLoading || hasToken === null) && shouldCheckAuth) {
+  if ((isLoading || hasToken === null || !isClient) && shouldCheckAuth) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center justify-center gap-2">

@@ -52,6 +52,8 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import type { MessagingMessage, MessagingConversation } from '@/lib/api/services/messaging';
+import { useUserSearch } from '@/components/search/hooks/useUserSearch';
+import type { User } from '@/components/search/UserSearchBar';
 
 interface MessengerInterfaceProps {
   className?: string;
@@ -282,6 +284,49 @@ const MessageBubble: React.FC<{
   );
 };
 
+const UserSearchResult: React.FC<{
+  user: User;
+  onCreateConversation: () => void;
+}> = ({ user, onCreateConversation }) => {
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+      <Avatar className="h-12 w-12">
+        <AvatarImage src={user.avatarUrl} />
+        <AvatarFallback>{getInitials(`${user.firstName} ${user.lastName}`)}</AvatarFallback>
+      </Avatar>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm truncate">
+            {user.firstName} {user.lastName}
+          </h4>
+          <Badge variant="secondary" className="text-xs">
+            {user.role}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-sm text-muted-foreground truncate">
+            {user.email}
+          </p>
+        </div>
+      </div>
+      
+      <Button 
+        size="sm" 
+        variant="outline"
+        onClick={(e) => {
+          e.stopPropagation();
+          onCreateConversation();
+        }}
+        className="flex-shrink-0"
+      >
+        Start Chat
+      </Button>
+    </div>
+  );
+};
+
 const ConversationItem: React.FC<{
   conversation: MessagingConversation;
   isSelected: boolean;
@@ -376,6 +421,12 @@ export function MessengerInterface({
   const [replyToMessage, setReplyToMessage] = useState<MessagingMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<MessagingMessage | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  
+  // User search functionality
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const { searchUsers } = useUserSearch();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
@@ -416,6 +467,8 @@ export function MessengerInterface({
     addReaction,
     sendTypingIndicator,
     uploadFile,
+    createConversation,
+    refetchConversations,
   } = useRealtimeMessaging({
     conversationId: selectedConversationId || undefined,
     enableRealtime: true,
@@ -508,6 +561,75 @@ export function MessengerInterface({
     }
   };
 
+  // Enhanced search functionality
+  const debouncedUserSearch = useCallback(async (query: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      setIsSearchingUsers(false);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        setIsSearchingUsers(true);
+        const users = await searchUsers(query.trim());
+        
+        // Filter out current user and users already in conversations
+        const existingParticipantIds = new Set(
+          conversations.flatMap(conv => 
+            conv.participants.map(p => p.userId)
+          )
+        );
+        
+        const filteredUsers = (users || []).filter(u => 
+          u.id !== user?.id && !existingParticipantIds.has(u.id)
+        );
+        
+        setSearchResults(filteredUsers);
+      } catch (error) {
+        console.error('User search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearchingUsers(false);
+      }
+    }, 300);
+  }, [searchUsers, conversations, user?.id]);
+
+  // Handle search input changes
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    debouncedUserSearch(value);
+  }, [debouncedUserSearch]);
+
+  // Handle conversation creation
+  const handleCreateConversation = useCallback(async (targetUser: User) => {
+    try {
+      console.log('Creating conversation with user:', targetUser);
+      const newConversation = await createConversation([targetUser.id]);
+      
+      if (newConversation) {
+        // Select the new conversation immediately
+        setSelectedConversationId(newConversation.id);
+        
+        // Clear search
+        setSearchTerm('');
+        setSearchResults([]);
+        
+        // Refresh conversations list to ensure it's up to date
+        refetchConversations();
+        
+        toast.success(`Started conversation with ${targetUser.firstName} ${targetUser.lastName}`);
+      }
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      toast.error('Failed to start conversation');
+    }
+  }, [createConversation, refetchConversations]);
+
   const filteredConversations = conversations.filter(conv => {
     if (!searchTerm) return true;
     const otherParticipant = conv.participants[0];
@@ -567,9 +689,9 @@ export function MessengerInterface({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search conversations..."
+              placeholder="Search conversations or users..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -593,30 +715,80 @@ export function MessengerInterface({
             <div className="p-4 text-center text-red-500">
               Failed to load conversations
             </div>
-          ) : filteredConversations.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              {searchTerm ? 'No conversations found' : 'No conversations yet'}
-            </div>
           ) : (
-            <div className="p-2 space-y-1">
-              {filteredConversations.map(conversation => {
-                const otherParticipant = conversation.participants[0];
-                const isOnline = otherParticipant ? onlineUsers.has(otherParticipant.userId) : false;
-                const isTypingInConv = typingUsers.some(t => 
-                  t.conversationId === conversation.id && t.isTyping
-                );
+            <div className="space-y-1">
+              {/* Show existing conversations first */}
+              {filteredConversations.length > 0 && (
+                <div className="p-2 space-y-1">
+                  <div className="px-2 py-1">
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Your Conversations
+                    </h3>
+                  </div>
+                  {filteredConversations.map(conversation => {
+                    const otherParticipant = conversation.participants[0];
+                    const isOnline = otherParticipant ? onlineUsers.has(otherParticipant.userId) : false;
+                    const isTypingInConv = typingUsers.some(t => 
+                      t.conversationId === conversation.id && t.isTyping
+                    );
 
-                return (
-                  <ConversationItem
-                    key={conversation.id}
-                    conversation={conversation}
-                    isSelected={selectedConversationId === conversation.id}
-                    onSelect={() => setSelectedConversationId(conversation.id)}
-                    isOnline={isOnline}
-                    isTyping={isTypingInConv}
-                  />
-                );
-              })}
+                    return (
+                      <ConversationItem
+                        key={conversation.id}
+                        conversation={conversation}
+                        isSelected={selectedConversationId === conversation.id}
+                        onSelect={() => setSelectedConversationId(conversation.id)}
+                        isOnline={isOnline}
+                        isTyping={isTypingInConv}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Show user search results */}
+              {searchTerm && searchTerm.length >= 2 && (
+                <div className="border-t border-gray-100">
+                  {isSearchingUsers ? (
+                    <div className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        Searching users...
+                      </div>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="p-2 space-y-1">
+                      <div className="px-2 py-1">
+                        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Start New Conversation
+                        </h3>
+                      </div>
+                      {searchResults.map(user => (
+                        <UserSearchResult
+                          key={user.id}
+                          user={user}
+                          onCreateConversation={() => handleCreateConversation(user)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-muted-foreground text-sm">
+                      No users found for "{searchTerm}"
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Empty state when no search term and no conversations */}
+              {!searchTerm && filteredConversations.length === 0 && (
+                <div className="p-4 text-center text-muted-foreground">
+                  <div className="mb-2">
+                    <Users className="h-12 w-12 mx-auto text-gray-300 mb-2" />
+                  </div>
+                  <p className="text-sm font-medium mb-1">No conversations yet</p>
+                  <p className="text-xs">Search for users above to start a conversation</p>
+                </div>
+              )}
             </div>
           )}
         </ScrollArea>

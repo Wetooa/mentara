@@ -1,9 +1,20 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-Failed to initialize socket issue
-- im still getting a failed to initialize socket issue on the socket connection indicator on the topbar
-- figure out why this is so,
-- trace the logic from the topbar component to the socket connection logic
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 

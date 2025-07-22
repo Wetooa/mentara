@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { hasAuthToken } from '@/lib/constants/auth';
 import { 
   PublicProfileResponse, 
   UpdateProfileRequest, 
@@ -17,8 +18,15 @@ export function useProfile(userId: string) {
     queryFn: (): Promise<PublicProfileResponse> => {
       return api.profile.getProfile(userId);
     },
-    enabled: !!userId,
+    enabled: !!userId && hasAuthToken(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on 401/403 errors (auth failures)
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 }
 

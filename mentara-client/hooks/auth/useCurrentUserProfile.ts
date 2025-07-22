@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
+import { hasAuthToken } from "@/lib/constants/auth";
 import type { UserRole } from "@/contexts/AuthContext";
 
 // Profile data interface that normalizes across all user types
@@ -64,7 +65,7 @@ export function useCurrentUserProfile() {
         ...profileData, // Include any additional role-specific data
       };
     },
-    enabled: isAuthenticated && !!user?.id && !!user?.role,
+    enabled: isAuthenticated && !!user?.id && !!user?.role && hasAuthToken(),
     staleTime: 5 * 60 * 1000, // 5 minutes - profile data doesn't change frequently
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error: any) => {

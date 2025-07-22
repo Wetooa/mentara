@@ -41,8 +41,17 @@ function createServerApiClient(): AxiosInstance {
       return response;
     },
     (error: AxiosError) => {
-      // Server-side error handling - no redirects, just log and re-throw
-      console.error('Server API Error:', error.message);
+      // Server-side error handling - no redirects, graceful authentication failures
+      if (error.response?.status === 401) {
+        // 401 errors are expected for server-side requests to authenticated endpoints
+        // Don't log these as errors since server doesn't have access to browser tokens
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Server API: Authentication required for ${error.config?.url}`);
+        }
+      } else {
+        // Log other types of errors for debugging
+        console.error('Server API Error:', error.message);
+      }
       return Promise.reject(error);
     }
   );

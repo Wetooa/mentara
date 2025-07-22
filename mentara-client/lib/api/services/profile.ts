@@ -99,7 +99,7 @@ export function createProfileService(axios: AxiosInstance) {
     async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
       const formData = new FormData();
       formData.append('avatar', file);
-      
+
       const { data } = await axios.put('/profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -114,7 +114,7 @@ export function createProfileService(axios: AxiosInstance) {
     async uploadCoverImage(file: File): Promise<{ coverImageUrl: string }> {
       const formData = new FormData();
       formData.append('cover', file);
-      
+
       const { data } = await axios.put('/profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -131,14 +131,14 @@ export function createProfileService(axios: AxiosInstance) {
       files?: { avatar?: File; cover?: File }
     ): Promise<UpdateProfileResponse> {
       const formData = new FormData();
-      
+
       // Add text fields
       Object.entries(profileData).forEach(([key, value]) => {
         if (value !== undefined) {
           formData.append(key, value);
         }
       });
-      
+
       // Add files
       if (files?.avatar) {
         formData.append('avatar', files.avatar);
@@ -146,7 +146,7 @@ export function createProfileService(axios: AxiosInstance) {
       if (files?.cover) {
         formData.append('cover', files.cover);
       }
-      
+
       const { data } = await axios.put('/profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
