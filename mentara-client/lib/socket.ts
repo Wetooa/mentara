@@ -21,9 +21,9 @@ let socket: Socket | null = null;
 // Socket instances by namespace
 const sockets: Record<string, Socket> = {};
 
-export const getSocket = (namespace?: string): Socket => {
+export const getSocket = (namespace?: string, token?: string): Socket => {
   if (namespace) {
-    return getNamespacedSocket(namespace);
+    return getNamespacedSocket(namespace, token);
   }
   
   if (!socket) {
@@ -33,14 +33,23 @@ export const getSocket = (namespace?: string): Socket => {
       NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
       NODE_ENV: process.env.NODE_ENV,
     });
+    console.log('🔑 [SOCKET] Authentication token provided:', !!token);
     
-    socket = io(SOCKET_URL, {
+    const socketOptions: SocketOptions = {
       autoConnect: false,
       withCredentials: true,
       transports: ['websocket', 'polling'],
       timeout: 20000,
       forceNew: false,
-    });
+    };
+
+    // Add authentication token if provided
+    if (token) {
+      socketOptions.auth = { token };
+      console.log('🔐 [SOCKET] Adding authentication token to socket options');
+    }
+    
+    socket = io(SOCKET_URL, socketOptions);
 
     // Add comprehensive connection logging
     socket.on('connect', () => {
@@ -84,7 +93,7 @@ export const getSocket = (namespace?: string): Socket => {
   return socket;
 };
 
-export const getNamespacedSocket = (namespace: string): Socket => {
+export const getNamespacedSocket = (namespace: string, token?: string): Socket => {
   if (!sockets[namespace]) {
     console.log(`🔌 [SOCKET] Creating namespaced socket connection to: ${SOCKET_URL}${namespace}`);
     console.log(`🔧 [SOCKET] Namespace [${namespace}] configuration:`, {
@@ -94,14 +103,23 @@ export const getNamespacedSocket = (namespace: string): Socket => {
       transports: ['websocket', 'polling'],
       timeout: 20000,
     });
+    console.log(`🔑 [SOCKET] Authentication token provided for [${namespace}]:`, !!token);
     
-    sockets[namespace] = io(`${SOCKET_URL}${namespace}`, {
+    const socketOptions: SocketOptions = {
       autoConnect: false,
       withCredentials: true,
       transports: ['websocket', 'polling'],
       timeout: 20000,
       forceNew: false,
-    });
+    };
+
+    // Add authentication token if provided
+    if (token) {
+      socketOptions.auth = { token };
+      console.log(`🔐 [SOCKET] Adding authentication token to namespace [${namespace}] options`);
+    }
+    
+    sockets[namespace] = io(`${SOCKET_URL}${namespace}`, socketOptions);
 
     // Add comprehensive namespace-specific logging
     sockets[namespace].on('connect', () => {
@@ -148,9 +166,9 @@ export const getNamespacedSocket = (namespace: string): Socket => {
 // Named export for convenience
 export const createSocket = getNamespacedSocket;
 
-export const connectSocket = (namespace?: string): Promise<Socket> => {
+export const connectSocket = (namespace?: string, token?: string): Promise<Socket> => {
   return new Promise((resolve, reject) => {
-    const socketInstance = getSocket(namespace);
+    const socketInstance = getSocket(namespace, token);
     const namespaceLabel = namespace || 'default';
     
     console.log(`🔄 [SOCKET] Attempting to connect socket [${namespaceLabel}]...`);
@@ -268,11 +286,11 @@ export const isSocketConnected = (namespace?: string): boolean => {
 };
 
 // Helper functions for specific namespaces
-export const getMessagingSocket = () => getNamespacedSocket('/messaging');
-export const getMeetingsSocket = () => getNamespacedSocket('/meetings');
+export const getMessagingSocket = (token?: string) => getNamespacedSocket('/messaging', token);
+export const getMeetingsSocket = (token?: string) => getNamespacedSocket('/meetings', token);
 
-export const connectMessagingSocket = () => connectSocket('/messaging');
-export const connectMeetingsSocket = () => connectSocket('/meetings');
+export const connectMessagingSocket = (token?: string) => connectSocket('/messaging', token);
+export const connectMeetingsSocket = (token?: string) => connectSocket('/meetings', token);
 
 export const isMessagingConnected = () => isSocketConnected('/messaging');
 export const isMeetingsConnected = () => isSocketConnected('/meetings');

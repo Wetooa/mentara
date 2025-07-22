@@ -3,6 +3,7 @@ import { useApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { getMessagingSocket, connectMessagingSocket } from '@/lib/socket';
 import { toast } from 'sonner';
 import { queryKeys } from '@/lib/queryKeys';
 import type { 
@@ -277,12 +278,10 @@ export function useRealtimeMessaging(params: {
     try {
       setConnectionState(prev => ({ ...prev, isReconnecting: true, error: null }));
       
-      // Connect to messaging namespace
-      const socket = io(`${process.env.NEXT_PUBLIC_WS_URL}/messaging`, {
-        auth: { token: accessToken },
-        transports: ['websocket', 'polling'],
-        timeout: 10000,
-      });
+      console.log('📡 [MESSAGING] Connecting to messaging WebSocket with auth token:', !!accessToken);
+      
+      // Use centralized messaging socket with authentication token
+      const socket = getMessagingSocket(accessToken || undefined);
       
       socket.on('connect', () => {
         console.log('Messaging WebSocket connected');
@@ -378,6 +377,9 @@ export function useRealtimeMessaging(params: {
       });
 
       socketRef.current = socket;
+
+      // Connect the messaging socket with authentication token
+      await connectMessagingSocket(accessToken || undefined);
 
     } catch (error) {
       console.error('Failed to connect to messaging WebSocket:', error);

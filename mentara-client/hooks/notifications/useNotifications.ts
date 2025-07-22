@@ -132,13 +132,15 @@ export function useNotifications(params: {
       setConnectionState(prev => ({ ...prev, isReconnecting: true, error: null }));
       
       console.log('🔔 Connecting notifications to messaging socket...');
+      console.log('🔑 [NOTIFICATIONS] Using access token for socket authentication:', !!accessToken);
       
-      // Use centralized messaging socket
-      const socket = getMessagingSocket();
+      // Use centralized messaging socket with authentication token
+      const socket = getMessagingSocket(accessToken || undefined);
       
       // Set up notification-specific event listeners
       socket.on('connect', () => {
         console.log('✅ Notifications connected via messaging socket');
+        console.log('👤 [NOTIFICATIONS] User authenticated:', { userId: user.id, role: user.role });
         setConnectionState({
           isConnected: true,
           isReconnecting: false,
@@ -188,8 +190,8 @@ export function useNotifications(params: {
 
       socketRef.current = socket;
 
-      // Connect the messaging socket
-      await connectMessagingSocket();
+      // Connect the messaging socket with authentication token
+      await connectMessagingSocket(accessToken || undefined);
 
     } catch (error) {
       console.error('❌ Failed to connect notifications socket:', error);
