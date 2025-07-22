@@ -46,8 +46,6 @@ export interface MeetingsResponse {
   total: number;
 }
 
-export interface UpcomingMeetingsResponse extends MeetingsResponse {}
-
 export interface MeetingsQueryOptions {
   status?: string;
   type?: string;
@@ -66,7 +64,7 @@ export function createMeetingsService(axios: AxiosInstance) {
      * Get upcoming meetings for the current user
      * @param limit - Maximum number of meetings to fetch
      */
-    async getUpcomingMeetings(limit?: number): Promise<UpcomingMeetingsResponse> {
+    async getUpcomingMeetings(limit?: number): Promise<MeetingsResponse> {
       const params = limit ? { limit } : {};
       const { data } = await axios.get("/meetings/upcoming", { params });
       return data;

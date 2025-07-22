@@ -14,7 +14,6 @@ import {
   Clock, 
   User, 
   Video, 
-  Phone, 
   MessageCircle,
   Edit,
   Trash2,
@@ -214,7 +213,7 @@ export default function SessionDetailsPage() {
         <Alert className="max-w-md mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Session not found. It may have been deleted or you don't have permission to view it.
+            Session not found. It may have been deleted or you don&apos;t have permission to view it.
           </AlertDescription>
         </Alert>
       </div>
