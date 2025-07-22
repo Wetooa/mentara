@@ -135,121 +135,63 @@ export const TEST_ACCOUNTS = {
   ],
 };
 
-// Configuration constants - COMPREHENSIVE DEV SEEDING
+// Configuration constants - COMPREHENSIVE DEV SEEDING (ENHANCED)
 export const SEED_CONFIG = {
   USERS: {
-    CLIENTS: 5, // 5 clients for comprehensive testing
-    THERAPISTS: 5, // 5 therapists for comprehensive testing
-    ADMINS: 5, // 5 admins for comprehensive testing
-    MODERATORS: 5, // 5 moderators for comprehensive testing
+    CLIENTS: 75, // Increased from 5 to 75 for realistic testing
+    THERAPISTS: 35, // Increased from 5 to 35 for realistic testing
+    ADMINS: 8, // Increased from 5 to 8 for comprehensive testing
+    MODERATORS: 12, // Increased from 5 to 12 for comprehensive testing
   },
   COMMUNITIES: {
     ADDITIONAL: 0, // No additional communities - only questionnaire-based ones
-    POSTS_PER_COMMUNITY: 3, // Create some posts for demo
-    COMMENTS_PER_POST: 3, // Create some comments for demo
+    POSTS_PER_COMMUNITY: 15, // Increased from 3 to 15 for active communities
+    COMMENTS_PER_POST: 8, // Increased from 3 to 8 for realistic engagement
   },
   RELATIONSHIPS: {
-    CLIENT_THERAPIST_RATIO: 0.8, // 80% of clients get assigned to therapists
-    MEETINGS_PER_RELATIONSHIP: 1, // Reduced from 3 for testing
+    CLIENT_THERAPIST_RATIO: 0.85, // Increased from 0.8 to 85% assignment rate
+    MEETINGS_PER_RELATIONSHIP: 4, // Increased from 1 to 4 meetings per relationship
   },
   ASSESSMENTS: {
-    COMPLETION_RATE: 0.8, // 80% of clients complete pre-assessments
+    COMPLETION_RATE: 0.85, // Increased from 0.8 to 85% completion rate
   },
   MESSAGING: {
     CONVERSATIONS_PER_RELATIONSHIP: 1, // Direct therapy conversations
-    MESSAGES_PER_CONVERSATION: 3, // Reduced from 15 for testing
-    GROUP_CONVERSATIONS: 1, // Reduced from 3 for testing
-    SUPPORT_CONVERSATIONS: 1, // Reduced from 2 for testing
+    MESSAGES_PER_CONVERSATION: 25, // Increased from 3 to 25 for realistic chat history
+    GROUP_CONVERSATIONS: 5, // Increased from 1 to 5 for community engagement
+    SUPPORT_CONVERSATIONS: 3, // Increased from 1 to 3 for support channels
   },
   WORKSHEETS: {
-    TEMPLATES: 3, // Reduced from 10 for testing
-    SUBMISSIONS_PER_RELATIONSHIP: 1, // Reduced from 3 for testing
-    COMPLETION_RATE: 0.75, // 75% completion rate for assigned worksheets
+    TEMPLATES: 8, // Increased from 3 to 8 for comprehensive therapy tools
+    SUBMISSIONS_PER_RELATIONSHIP: 3, // Increased from 1 to 3 submissions per relationship
+    COMPLETION_RATE: 0.80, // Increased from 0.75 to 80% completion rate
   },
   REVIEWS: {
-    REVIEW_RATE: 0.6, // 60% of completed relationships get reviews
-    AVERAGE_RATING: 4.2, // Average therapist rating
-    DETAILED_REVIEW_RATE: 0.8, // 80% of reviews include written feedback
+    REVIEW_RATE: 0.70, // Increased from 0.6 to 70% review rate
+    AVERAGE_RATING: 4.3, // Slightly increased average rating
+    DETAILED_REVIEW_RATE: 0.85, // Increased from 0.8 to 85% detailed reviews
   },
   SESSIONS: {
-    SESSIONS_PER_RELATIONSHIP: 1, // Further reduced for testing
-    ACTIVITIES_PER_SESSION: 1, // Further reduced for testing
-    PROGRESS_TRACKING_RATE: 0.5, // Reduced to 50% for testing
+    SESSIONS_PER_RELATIONSHIP: 4, // Increased from 1 to 4 sessions per relationship
+    ACTIVITIES_PER_SESSION: 3, // Increased from 1 to 3 activities per session
+    PROGRESS_TRACKING_RATE: 0.75, // Increased from 0.5 to 75% tracking rate
   },
   NOTIFICATIONS: {
-    DEVICES_PER_USER: 1.0, // Reduced from 1.3 for testing
-    NOTIFICATIONS_PER_USER: 1, // Ultra-minimal for testing
-    READ_RATE: 0.7, // 70% of notifications are read
+    DEVICES_PER_USER: 1.5, // Increased from 1.0 to 1.5 devices per user
+    NOTIFICATIONS_PER_USER: 12, // Increased from 1 to 12 notifications per user
+    READ_RATE: 0.75, // Increased from 0.7 to 75% read rate
   },
   THERAPIST_REQUESTS: {
-    REQUEST_RATE: 0.4, // 40% of clients make additional therapist requests
-    PENDING_RATE: 0.2, // 20% of requests are still pending
-    PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.6, low: 0.3 },
+    REQUEST_RATE: 0.5, // Increased from 0.4 to 50% request rate
+    PENDING_RATE: 0.25, // Increased from 0.2 to 25% pending rate
+    PRIORITY_DISTRIBUTION: { high: 0.15, medium: 0.65, low: 0.20 },
   },
   AUDIT_LOGS: {
-    COUNT: 5, // Ultra-minimal for testing
-    SUCCESS_RATE: 0.95, // 95% of actions are successful
-    ADMIN_ACTION_RATE: 0.3, // 30% of logs are admin actions
+    COUNT: 50, // Increased from 5 to 50 for realistic audit trail
+    SUCCESS_RATE: 0.96, // Slightly increased success rate
+    ADMIN_ACTION_RATE: 0.35, // Increased from 0.3 to 35% admin actions
   },
 };
-// Configuration constants - SIMPLE DEV SEEDING (reduced counts)
-export const SIMPLE_SEED_CONFIG = {
-  USERS: {
-    CLIENTS: 3, // Minimal clients for development
-    THERAPISTS: 3, // Minimal therapists for development  
-    ADMINS: 1, // Single admin for development
-    MODERATORS: 2, // Minimal moderators for development
-  },
-  COMMUNITIES: {
-    ADDITIONAL: 0, // No additional communities
-    POSTS_PER_COMMUNITY: 1, // Single post per community for testing
-    COMMENTS_PER_POST: 1, // Single comment per post for testing
-  },
-  RELATIONSHIPS: {
-    CLIENT_THERAPIST_RATIO: 0.5, // 50% of clients get assigned to therapists
-    MEETINGS_PER_RELATIONSHIP: 1, // Single meeting per relationship
-  },
-  ASSESSMENTS: {
-    COMPLETION_RATE: 0.5, // 50% of clients complete pre-assessments
-  },
-  MESSAGING: {
-    CONVERSATIONS_PER_RELATIONSHIP: 1, // Single conversation
-    MESSAGES_PER_CONVERSATION: 1, // Single message for testing
-    GROUP_CONVERSATIONS: 0, // No group conversations
-    SUPPORT_CONVERSATIONS: 0, // No support conversations
-  },
-  WORKSHEETS: {
-    TEMPLATES: 2, // Minimal worksheet templates
-    SUBMISSIONS_PER_RELATIONSHIP: 1, // Single submission
-    COMPLETION_RATE: 0.5, // 50% completion rate
-  },
-  REVIEWS: {
-    REVIEW_RATE: 0.3, // 30% of relationships get reviews
-    AVERAGE_RATING: 4.0, // Simple average rating
-    DETAILED_REVIEW_RATE: 0.5, // 50% of reviews include written feedback
-  },
-  SESSIONS: {
-    SESSIONS_PER_RELATIONSHIP: 1, // Single session per relationship
-    ACTIVITIES_PER_SESSION: 1, // Single activity per session
-    PROGRESS_TRACKING_RATE: 0.3, // Minimal progress tracking
-  },
-  NOTIFICATIONS: {
-    DEVICES_PER_USER: 1.0, // Single device per user
-    NOTIFICATIONS_PER_USER: 1, // Single notification per user
-    READ_RATE: 0.5, // 50% of notifications are read
-  },
-  THERAPIST_REQUESTS: {
-    REQUEST_RATE: 0.2, // 20% of clients make therapist requests
-    PENDING_RATE: 0.1, // 10% of requests are still pending
-    PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.5, low: 0.4 },
-  },
-  AUDIT_LOGS: {
-    COUNT: 2, // Minimal audit logs
-    SUCCESS_RATE: 0.9, // 90% of actions are successful
-    ADMIN_ACTION_RATE: 0.2, // 20% of logs are admin actions
-  },
-};
-
 // Illness communities configuration - Based on questionnaire disorders
 // These match the exact disorders from @mentara-commons/src/constants/questionnaire/questionnaire-mapping.ts
 export const ILLNESS_COMMUNITIES = [

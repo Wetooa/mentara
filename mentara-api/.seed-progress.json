@@ -1,6 +1,6 @@
 {
   "startedAt": "2025-07-22T14:07:53.959Z",
-  "lastUpdatedAt": "2025-07-22T14:10:44.649Z",
+  "lastUpdatedAt": "2025-07-22T14:28:24.450Z",
   "lastPhase": 10,
   "completedPhases": [
     1,
@@ -11,15 +11,10 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
-  "failedPhases": [
-    {
-      "phase": 10,
-      "error": "⨯ Unable to compile TypeScript:\n\u001b[96mprisma/seed/scripts/phase-10-worksheets.ts\u001b[0m:\u001b[93m15\u001b[0m:\u001b[93m40\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2339: \u001b[0mProperty 'worksheetTemplate' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.\n\n\u001b[7m15\u001b[0m     const existingCount = await prisma.worksheetTemplate.count();\n\u001b[7m  \u001b[0m \u001b[91m                                       ~~~~~~~~~~~~~~~~~\u001b[0m\n",
-      "timestamp": "2025-07-22T14:10:44.649Z"
-    }
-  ],
+  "failedPhases": [],
   "metadata": {
     "phase_1": {
       "users": [
@@ -5563,6 +5558,9 @@
     "phase_9": {
       "conversations": [],
       "messages": []
+    },
+    "phase_10": {
+      "worksheets": []
     }
   },
   "config": "comprehensive"

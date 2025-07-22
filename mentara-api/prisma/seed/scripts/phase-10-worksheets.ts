@@ -22,12 +22,18 @@ export async function runPhase10Worksheets(
       };
     }
 
-    console.log(`✅ Phase 10 completed: Worksheets & materials ready (simplified)`);
+    // Import and call the actual worksheet seeding function
+    const { seedWorksheets } = await import('../worksheets.seed');
+    const result = await seedWorksheets(prisma, relationshipsData.relationships || []);
+    
+    const totalWorksheets = result.worksheets?.length || 0;
+
+    console.log(`✅ Phase 10 completed: ${totalWorksheets} worksheets & therapy materials created`);
 
     return {
       success: true,
-      message: 'Worksheets & therapy materials phase completed',
-      data: { worksheets: [] },
+      message: `Created ${totalWorksheets} worksheets and therapy materials`,
+      data: result,
     };
 
   } catch (error) {

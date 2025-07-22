@@ -55,13 +55,17 @@ import {
   createTherapistService,
   type TherapistService,
 } from "./services/therapists";
+import {
+  createWorksheetService,
+  type WorksheetsService,
+} from "./services/worksheets";
 export type { ApiError, ApiResponse } from "@/types/api";
 
 // Export client utilities
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse };
+export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -77,6 +81,7 @@ const filesService = createFilesService(apiClient);
 const adminService = createAdminService(apiClient);
 const profileService = createProfileService(apiClient);
 const preAssessmentService = createPreAssessmentService(apiClient);
+const worksheetService = createWorksheetService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -94,6 +99,7 @@ export const api = {
   admin: adminService,
   profile: profileService,
   preAssessment: preAssessmentService,
+  worksheets: worksheetService,
 };
 
 // Export the main API type
