@@ -14,6 +14,7 @@ import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 import { useGlobalLoading } from "@/hooks/loading/useGlobalLoading";
+import { useCurrentUserProfile } from "@/hooks/auth/useCurrentUserProfile";
 
 // Types
 export type UserRole = "client" | "therapist" | "moderator" | "admin";
@@ -21,6 +22,9 @@ export type UserRole = "client" | "therapist" | "moderator" | "admin";
 export interface User {
   id: string;
   role: UserRole;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthContextType {
@@ -29,6 +33,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   userRole: UserRole | null;
   logout: () => void;
+  refreshProfile: () => void;
 }
 
 // Create Auth Context
@@ -131,12 +136,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userRole = (authData as any)?.role as UserRole | null;
   const userId = (authData as any)?.userId || null;
 
-  // Create user object
+  // Fetch profile data if user is authenticated
+  const {
+    data: profileData,
+    refetch: refetchProfile,
+  } = useQuery({
+    queryKey: ["auth", "current-user-profile", userId, userRole],
+    queryFn: async () => {
+      if (!userRole) {
+        throw new Error("User role not available");
+      }
+
+      let profileResponse: any;
+
+      // Call the appropriate role-specific profile endpoint
+      switch (userRole) {
+        case "client":
+          profileResponse = await api.auth.client.getProfile();
+          break;
+        case "therapist":
+          profileResponse = await api.auth.therapist.getProfile();
+          break;
+        case "admin":
+          profileResponse = await api.auth.admin.getProfile();
+          break;
+        case "moderator":
+          profileResponse = await api.auth.moderator.getProfile();
+          break;
+        default:
+          throw new Error(`Unsupported user role: ${userRole}`);
+      }
+
+      // Normalize the profile data structure
+      return {
+        firstName: profileResponse.user?.firstName || profileResponse.firstName || "",
+        lastName: profileResponse.user?.lastName || profileResponse.lastName || "",
+        avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
+      };
+    },
+    enabled: !!userId && !!userRole && hasToken === true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on 401/403 errors (auth failures)
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+  });
+
+  // Create user object with profile data when available
   const user: User | null =
     userRole && userId
       ? {
           id: userId,
           role: userRole,
+          firstName: profileData?.firstName,
+          lastName: profileData?.lastName,
+          avatarUrl: profileData?.avatarUrl,
         }
       : null;
 
@@ -230,6 +287,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setHasToken(false);
     router.push("/auth/sign-in");
+  };
+
+  // Function to refresh profile data
+  const refreshProfile = () => {
+    refetchProfile();
   };
 
   // Handle route protection and redirection
@@ -329,6 +391,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated,
     userRole,
     logout,
+    refreshProfile,
   };
 
   return (
