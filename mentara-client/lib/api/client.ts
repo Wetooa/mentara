@@ -29,9 +29,28 @@ export function createApiClient(): AxiosInstance {
     (error) => Promise.reject(error)
   );
 
-  // Response interceptor - handle common errors (don't auto-extract data)
+  // Response interceptor - unwrap backend response format and handle errors
   client.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      // Check if response data has the backend's standardized format
+      if (
+        response.data &&
+        typeof response.data === 'object' &&
+        'success' in response.data &&
+        'data' in response.data
+      ) {
+        // If success is false, treat as an error
+        if (!response.data.success) {
+          const error = new Error(response.data.message || 'Request failed');
+          return Promise.reject(error);
+        }
+        
+        // Unwrap the data from the backend's standardized format
+        response.data = response.data.data;
+      }
+      
+      return response;
+    },
     (error: AxiosError) => {
       // Handle 401 errors (unauthorized) - but only for authenticated requests
       if (error.response?.status === 401) {
