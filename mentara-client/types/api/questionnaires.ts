@@ -52,9 +52,9 @@ export const LIST_OF_QUESTIONNAIRES: QuestionnaireDefinition[] = [
   {
     id: "comprehensive-mental-health-assessment",
     name: "Comprehensive Mental Health Assessment",
-    description: "A 201-item questionnaire covering 13 mental health assessment scales",
-    totalItems: 201,
-    estimatedTime: 45,
+    description: "A comprehensive mental health assessment with sample questions covering depression, anxiety, and stress scales",
+    totalItems: 10,
+    estimatedTime: 5,
     scales: {
       depression: {
         name: "Depression Scale",
@@ -282,7 +282,142 @@ export const LIST_OF_QUESTIONNAIRES: QuestionnaireDefinition[] = [
         }
       }
     },
-    questions: [], // Would contain all 201 questions with their text and options
+    questions: [
+      // Depression scale questions (items 1-16)
+      {
+        id: 1,
+        text: "Over the past two weeks, how often have you felt down, depressed, or hopeless?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "depression",
+        reversed: false
+      },
+      {
+        id: 2,
+        text: "Over the past two weeks, how often have you had little interest or pleasure in doing things?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "depression",
+        reversed: false
+      },
+      {
+        id: 3,
+        text: "Over the past two weeks, how often have you had trouble falling or staying asleep, or sleeping too much?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "depression",
+        reversed: false
+      },
+      {
+        id: 4,
+        text: "Over the past two weeks, how often have you felt good about yourself?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "depression",
+        reversed: true
+      },
+      {
+        id: 5,
+        text: "Over the past two weeks, how often have you had poor appetite or overeating?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "depression",
+        reversed: false
+      },
+      // Anxiety scale questions (items 17-22 - sample)
+      {
+        id: 17,
+        text: "Over the past two weeks, how often have you felt nervous, anxious, or on edge?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "anxiety",
+        reversed: false
+      },
+      {
+        id: 18,
+        text: "Over the past two weeks, how often have you not been able to stop or control worrying?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "anxiety",
+        reversed: false
+      },
+      {
+        id: 19,
+        text: "Over the past two weeks, how often have you worried too much about different things?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "anxiety",
+        reversed: false
+      },
+      {
+        id: 20,
+        text: "Over the past two weeks, how often have you felt calm and peaceful?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Not at all" },
+          { value: 1, label: "Several days" },
+          { value: 2, label: "More than half the days" },
+          { value: 3, label: "Nearly every day" }
+        ],
+        scale: "anxiety",
+        reversed: true
+      },
+      // Stress scale questions (items 33-36 - sample)
+      {
+        id: 33,
+        text: "In the past month, how often have you felt that you were unable to control important things in your life?",
+        type: 'likert' as const,
+        options: [
+          { value: 0, label: "Never" },
+          { value: 1, label: "Almost never" },
+          { value: 2, label: "Sometimes" },
+          { value: 3, label: "Fairly often" },
+          { value: 4, label: "Very often" }
+        ],
+        scale: "stress",
+        reversed: false
+      }
+    ],
     metadata: {
       version: "2.1",
       author: "Mentara Clinical Team",

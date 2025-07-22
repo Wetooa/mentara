@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { QuestionnaireDefinition } from "@/types/api/questionnaires";
+import { QuestionnaireDefinition, LIST_OF_QUESTIONNAIRES } from "@/types/api/questionnaires";
 
 /**
  * React Query hook for fetching questionnaire definitions
+ * Falls back to static data if API is unavailable
  * GET /pre-assessment/questionnaires
  */
 export function useQuestionnaires() {
@@ -11,11 +12,20 @@ export function useQuestionnaires() {
 
   return useQuery({
     queryKey: ["questionnaires"],
-    queryFn: () => api.preAssessment.getQuestionnaires(),
+    queryFn: async () => {
+      try {
+        // Try to fetch from API first
+        return await api.preAssessment.getQuestionnaires();
+      } catch (error) {
+        // Fall back to static data if API is unavailable
+        console.warn("Failed to fetch questionnaires from API, using static data:", error);
+        return LIST_OF_QUESTIONNAIRES;
+      }
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes - questionnaires don't change often
     gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 1, // Reduced retry count since we have fallback
+    retryDelay: 1000,
   });
 }
 
