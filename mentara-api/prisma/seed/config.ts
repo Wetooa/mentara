@@ -145,8 +145,8 @@ export const SEED_CONFIG = {
   },
   COMMUNITIES: {
     ADDITIONAL: 0, // No additional communities - only questionnaire-based ones
-    POSTS_PER_COMMUNITY: 3, // Reduced to reasonable level - enough to see community activity
-    COMMENTS_PER_POST: 3, // Reduced to reasonable level - enough for engagement testing
+    POSTS_PER_COMMUNITY: 1, // Minimal content - just enough to see community activity
+    COMMENTS_PER_POST: 2, // Minimal engagement - enough to test comment functionality
   },
   RELATIONSHIPS: {
     CLIENT_THERAPIST_RATIO: 0.6, // 60% of clients get therapists (3 out of 5) - realistic

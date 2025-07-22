@@ -3,6 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { PhaseResult } from './progress-tracker';
+import { seedPreAssessments } from '../assessments.seed';
 
 export async function runPhase05Assessments(
   prisma: PrismaClient,
@@ -23,13 +24,24 @@ export async function runPhase05Assessments(
       };
     }
 
-    // Simplified assessment creation
-    console.log(`✅ Phase 5 completed: Pre-assessments ready (simplified)`);
+    // Get clients from users data
+    const clients = usersData.clients || [];
+    if (clients.length === 0) {
+      return {
+        success: false,
+        message: 'No clients found in users data for assessment creation',
+      };
+    }
+
+    // Create pre-assessments using the existing seed function
+    const assessments = await seedPreAssessments(prisma, clients, config);
+
+    console.log(`✅ Phase 5 completed: Created ${assessments.length} pre-assessments`);
 
     return {
       success: true,
-      message: 'Pre-assessments phase completed',
-      data: { assessments: [] },
+      message: `Pre-assessments phase completed - ${assessments.length} assessments created`,
+      data: { assessments },
     };
 
   } catch (error) {

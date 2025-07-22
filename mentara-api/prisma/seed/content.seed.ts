@@ -592,9 +592,9 @@ async function seedHeartsForContent(
       (m) => m.communityId === postRoom.roomGroup.communityId
     );
 
-    // 40-80% of community members heart each post (mental health communities are supportive)
+    // 20-40% of community members heart each post (reduced volume for development)
     const heartsCount = Math.floor(
-      communityMembers.length * faker.number.float({ min: 0.4, max: 0.8 })
+      communityMembers.length * faker.number.float({ min: 0.2, max: 0.4 })
     );
     const heartersSelection = faker.helpers.arrayElements(communityMembers, heartsCount);
 
@@ -640,9 +640,9 @@ async function seedHeartsForContent(
       (m) => m.communityId === commentPost.room?.roomGroup.communityId
     );
 
-    // 25-60% of community members heart each comment
+    // 15-30% of community members heart each comment (reduced volume for development)
     const heartsCount = Math.floor(
-      communityMembers.length * faker.number.float({ min: 0.25, max: 0.6 })
+      communityMembers.length * faker.number.float({ min: 0.15, max: 0.3 })
     );
     const heartersSelection = faker.helpers.arrayElements(communityMembers, heartsCount);
 
