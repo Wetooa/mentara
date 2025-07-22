@@ -31,7 +31,7 @@ export function createAuthService(client: AxiosInstance) {
      * POST /auth/login
      */
     async login(data: LoginDto): Promise<AuthResponse> {
-      const response = await client.post("/auth/login", data);
+      const response = await client.post("auth/login", data);
       return response.data;
     },
 
@@ -40,7 +40,7 @@ export function createAuthService(client: AxiosInstance) {
      * GET /auth/user-role
      */
     async getUserRole(): Promise<{ role: string; userId: string }> {
-      const response = await client.get("/auth/user-role");
+      const response = await client.get("auth/user-role");
       return response.data;
     },
 
@@ -52,7 +52,7 @@ export function createAuthService(client: AxiosInstance) {
      * POST /auth/request-password-reset
      */
     async requestPasswordReset(data: RequestPasswordResetDto): Promise<SuccessMessageResponse> {
-      const response = await client.post("/auth/request-password-reset", data);
+      const response = await client.post("auth/request-password-reset", data);
       return response.data;
     },
 
@@ -61,7 +61,7 @@ export function createAuthService(client: AxiosInstance) {
      * POST /auth/reset-password
      */
     async resetPassword(data: ResetPasswordDto): Promise<SuccessMessageResponse> {
-      const response = await client.post("/auth/reset-password", data);
+      const response = await client.post("auth/reset-password", data);
       return response.data;
     },
 
@@ -83,7 +83,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/client/register
        */
       async register(data: RegisterClientDto): Promise<ClientAuthResponse> {
-        const response = await client.post("/auth/client/register", data);
+        const response = await client.post("auth/client/register", data);
         return response.data;
       },
 
@@ -92,7 +92,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/login
        */
       async login(data: LoginDto): Promise<ClientAuthResponse> {
-        const response = await client.post("/auth/login", data);
+        const response = await client.post("auth/login", data);
         return response.data;
       },
 
@@ -101,7 +101,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/client/profile
        */
       async getProfile(): Promise<any> {
-        const response = await client.get("/auth/client/profile");
+        const response = await client.get("auth/client/profile");
         return response.data;
       },
 
@@ -110,7 +110,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/client/first-sign-in-status
        */
       async getFirstSignInStatus(): Promise<any> {
-        const response = await client.get("/auth/client/first-sign-in-status");
+        const response = await client.get("auth/client/first-sign-in-status");
         return response.data;
       },
 
@@ -130,7 +130,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/client/verify-otp
        */
       async verifyOtp(data: VerifyOtpDto): Promise<EmailResponse> {
-        const response = await client.post("/auth/client/verify-otp", data);
+        const response = await client.post("auth/client/verify-otp", data);
         return response.data;
       },
 
@@ -139,7 +139,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/client/resend-otp
        */
       async resendOtp(data: ResendOtpDto): Promise<EmailResponse> {
-        const response = await client.post("/auth/client/resend-otp", data);
+        const response = await client.post("auth/client/resend-otp", data);
         return response.data;
       },
     },
@@ -153,7 +153,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/admin/create-account
        */
       async createAccount(data: RegisterAdminDto): Promise<any> {
-        const response = await client.post("/auth/admin/create-account", data);
+        const response = await client.post("auth/admin/create-account", data);
         return response.data;
       },
 
@@ -162,7 +162,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/login
        */
       async login(data: LoginDto): Promise<AdminAuthResponse> {
-        const response = await client.post("/auth/login", data);
+        const response = await client.post("auth/login", data);
         return response.data;
       },
 
@@ -171,7 +171,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/admin/profile
        */
       async getProfile(): Promise<any> {
-        const response = await client.get("/auth/admin/profile");
+        const response = await client.get("auth/admin/profile");
         return response.data;
       },
 
@@ -180,7 +180,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/admin/permissions
        */
       async getPermissions(): Promise<any> {
-        const response = await client.get("/auth/admin/permissions");
+        const response = await client.get("auth/admin/permissions");
         return response.data;
       },
 
@@ -189,7 +189,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/admin/dashboard-stats
        */
       async getDashboardStats(): Promise<any> {
-        const response = await client.get("/auth/admin/dashboard-stats");
+        const response = await client.get("auth/admin/dashboard-stats");
         return response.data;
       },
     },
@@ -215,7 +215,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/login
        */
       async login(data: LoginDto): Promise<AuthResponse> {
-        const response = await client.post("/auth/login", data);
+        const response = await client.post("auth/login", data);
         return response.data;
       },
 
@@ -224,7 +224,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/moderator/profile
        */
       async getProfile(): Promise<any> {
-        const response = await client.get("/auth/moderator/profile");
+        const response = await client.get("auth/moderator/profile");
         return response.data;
       },
 
@@ -233,7 +233,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/moderator/permissions
        */
       async getPermissions(): Promise<any> {
-        const response = await client.get("/auth/moderator/permissions");
+        const response = await client.get("auth/moderator/permissions");
         return response.data;
       },
 
@@ -253,7 +253,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/moderator/dashboard-stats
        */
       async getDashboardStats(): Promise<any> {
-        const response = await client.get("/auth/moderator/dashboard-stats");
+        const response = await client.get("auth/moderator/dashboard-stats");
         return response.data;
       },
     },
@@ -268,7 +268,7 @@ export function createAuthService(client: AxiosInstance) {
        * Accepts FormData with applicationDataJson, fileTypes, and files
        */
       async register(data: FormData): Promise<TherapistAuthResponse> {
-        const response = await client.post("/auth/therapist/register", data, {
+        const response = await client.post("auth/therapist/register", data, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -281,7 +281,7 @@ export function createAuthService(client: AxiosInstance) {
        * POST /auth/login
        */
       async login(data: LoginDto): Promise<TherapistAuthResponse> {
-        const response = await client.post("/auth/login", data);
+        const response = await client.post("auth/login", data);
         return response.data;
       },
 
@@ -290,7 +290,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/therapist/profile
        */
       async getProfile(): Promise<any> {
-        const response = await client.get("/auth/therapist/profile");
+        const response = await client.get("auth/therapist/profile");
         return response.data;
       },
 
@@ -299,7 +299,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/therapist/applications
        */
       async getApplications(): Promise<any> {
-        const response = await client.get("/auth/therapist/applications");
+        const response = await client.get("auth/therapist/applications");
         return response.data;
       },
 
