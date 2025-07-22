@@ -415,9 +415,9 @@ async function seedPostsWithTemplates(prisma: PrismaClient, rooms: any[], member
     // Get appropriate templates for this room
     const roomTemplates = POST_TEMPLATES[room.name] || POST_TEMPLATES['General Chat'];
     
-    // Create posts data (increased from 1-3 to 5-15 based on SEED_CONFIG)
+    // Create posts data based on SEED_CONFIG
     const postsToCreateCount = Math.min(
-      faker.number.int({ min: 5, max: 15 }),
+      SEED_CONFIG.COMMUNITIES.POSTS_PER_COMMUNITY,
       roomTemplates.length * 3  // Allow template reuse for more content
     );
     
@@ -511,9 +511,9 @@ async function seedCommentsWithTemplates(prisma: PrismaClient, posts: any[], mem
 
     if (communityMembers.length === 0) continue;
 
-    // Create comments based on enhanced SEED_CONFIG (2-8 comments per post instead of 2-6)
+    // Create comments based on SEED_CONFIG
     const commentCount = Math.min(
-      faker.number.int({ min: 2, max: 8 }),
+      SEED_CONFIG.COMMUNITIES.COMMENTS_PER_POST,
       communityMembers.length
     );
     
