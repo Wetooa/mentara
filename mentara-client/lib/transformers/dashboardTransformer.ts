@@ -1,7 +1,7 @@
 import type {
   ApiDashboardResponse,
   UserDashboardData,
-} from "@/lib/api/types/dashboard";
+} from "@/types/api/dashboard";
 
 /**
  * Transform backend dashboard response to frontend UserDashboardData format

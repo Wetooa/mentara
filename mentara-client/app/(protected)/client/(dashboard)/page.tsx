@@ -11,7 +11,7 @@ import {
   transformDashboardData,
   createFallbackDashboardData,
 } from "@/lib/transformers/dashboardTransformer";
-import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import type { UserDashboardData } from "@/types/api/dashboard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";

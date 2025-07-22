@@ -14,7 +14,7 @@ import {
   SuccessMessageResponse,
   TherapistAuthResponse,
   VerifyOtpDto
-} from "./types";
+} from "@/types/auth";
 
 /**
  * Unified Authentication Service

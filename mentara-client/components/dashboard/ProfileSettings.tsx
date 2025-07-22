@@ -28,7 +28,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import type { UserDashboardData } from "@/types/api/dashboard";
 
 interface ProfileSettingsProps {
   user: UserDashboardData["user"];

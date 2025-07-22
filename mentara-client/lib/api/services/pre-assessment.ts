@@ -9,7 +9,7 @@ import {
   ReprocessRequest,
 } from "@/types/api/pre-assessment";
 import { QuestionnaireDefinition } from "@/types/api/questionnaires";
-import { SuccessMessageResponse } from "./types";
+import { SuccessMessageResponse } from "@/types/auth";
 
 /**
  * Pre-Assessment Service

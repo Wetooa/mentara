@@ -38,6 +38,10 @@ import {
   type NotificationService,
 } from "./services/notifications";
 import {
+  createPreAssessmentService,
+  type PreAssessmentService,
+} from "./services/pre-assessment";
+import {
   createProfileService,
   type PublicProfileResponse,
   type UpdateProfileRequest,
@@ -51,11 +55,7 @@ import {
   createTherapistService,
   type TherapistService,
 } from "./services/therapists";
-import {
-  createPreAssessmentService,
-  type PreAssessmentService,
-} from "./services/pre-assessment";
-export type { ApiError, ApiResponse } from "./types";
+export type { ApiError, ApiResponse } from "@/types/api";
 
 // Export client utilities
 export { apiClient, createApiClient };
@@ -94,12 +94,6 @@ export const api = {
   admin: adminService,
   profile: profileService,
   preAssessment: preAssessmentService,
-
-  // Backwards compatible structure for existing hooks
-  clientAuth: authService.client,
-  adminAuth: authService.admin,
-  moderatorAuth: authService.moderator,
-  therapistAuth: authService.therapist,
 };
 
 // Export the main API type
@@ -110,12 +104,9 @@ export function useApi() {
   return api;
 }
 
-// For backwards compatibility with hooks that might expect this pattern
-export function createAuthServiceInstance() {
-  return createAuthService(apiClient);
-}
-
-// Re-export commonly used types from local type definitions
+// Re-export commonly used types from centralized type definitions
 export type {
-  AdminAuthResponse, ApiError, ApiResponse, ClientAuthResponse, ClientUser, EmailResponse, LoginDto, RegisterAdminDto, RegisterClientDto, RegisterModeratorDto, ResendOtpDto, SendOtpDto, SuccessMessageResponse, TherapistAuthResponse, VerifyOtpDto
-} from "./types";
+  AdminAuthResponse, ClientAuthResponse, ClientUser, EmailResponse, LoginDto, RegisterAdminDto, RegisterClientDto, RegisterModeratorDto, ResendOtpDto, SendOtpDto, SuccessMessageResponse, TherapistAuthResponse, VerifyOtpDto
+} from "@/types/auth";
+
+export type { ApiError, ApiResponse } from "@/types/api";
