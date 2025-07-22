@@ -9,7 +9,6 @@ import {
   History,
   Settings,
   LogOut,
-  ChevronDown,
   Menu,
   X,
   ChevronLeft,
@@ -17,11 +16,9 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { cn, getProfileUrl } from "@/lib/utils";
-import Logo from "@/components/Logo";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -42,10 +39,9 @@ export default function ModeratorLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   // Load sidebar state from localStorage
   useEffect(() => {

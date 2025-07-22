@@ -10,7 +10,6 @@ import {
   Settings,
   UserCheck,
   LogOut,
-  ChevronDown,
   Menu,
   X,
   ChevronLeft,
@@ -19,10 +18,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn, getProfileUrl } from "@/lib/utils";
-import Logo from "@/components/Logo";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -45,7 +42,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   // Load sidebar state from localStorage
   useEffect(() => {
