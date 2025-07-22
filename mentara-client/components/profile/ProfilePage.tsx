@@ -1,32 +1,15 @@
 "use client";
 
-import { useState } from 'react';
-import { useProfile } from '@/hooks/profile/useProfile';
-import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Edit, 
-  MapPin, 
-  Calendar, 
-  Users, 
-  MessageCircle, 
-  FileText, 
-  Star,
-  Shield,
-  Briefcase,
-  Clock,
-  DollarSign,
-  Globe
-} from 'lucide-react';
-import { ProfileHeader } from './ProfileHeader';
-import { ProfileCommunities } from './ProfileCommunities';
-import { ProfileActivity } from './ProfileActivity';
-import { ProfileInfo } from './ProfileInfo';
-import { ProfileEditModal } from './ProfileEditModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/profile/useProfile';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { ProfileActivity } from './ProfileActivity';
+import { ProfileCommunities } from './ProfileCommunities';
+import { ProfileEditModal } from './ProfileEditModal';
+import { ProfileHeader } from './ProfileHeader';
+import { ProfileInfo } from './ProfileInfo';
 
 interface ProfilePageProps {
   userId: string;
@@ -64,7 +47,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
     <>
       <div className={cn("space-y-6", className)}>
         {/* Profile Header */}
-        <ProfileHeader 
+        <ProfileHeader
           profile={profile}
           isOwnProfile={isOwnProfile}
           onEditClick={() => setIsEditModalOpen(true)}
@@ -75,7 +58,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
           {/* Left Column - Profile Info & Communities */}
           <div className="lg:col-span-1 space-y-6">
             <ProfileInfo profile={profile} />
-            <ProfileCommunities 
+            <ProfileCommunities
               mutualCommunities={profile.mutualCommunities}
               stats={profile.stats}
             />
@@ -83,7 +66,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
 
           {/* Right Column - Activity Feed */}
           <div className="lg:col-span-2">
-            <ProfileActivity 
+            <ProfileActivity
               recentActivity={profile.recentActivity}
               stats={profile.stats}
             />
@@ -111,12 +94,12 @@ function ProfilePageSkeleton() {
         <div className="relative">
           {/* Cover Image Skeleton */}
           <div className="h-48 bg-gray-200 rounded-lg animate-pulse mb-4" />
-          
+
           {/* Profile Info Skeleton */}
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
             {/* Avatar Skeleton */}
             <div className="w-24 h-24 bg-gray-200 rounded-full animate-pulse flex-shrink-0" />
-            
+
             {/* Name and Bio Skeleton */}
             <div className="flex-1 space-y-2">
               <div className="h-6 bg-gray-200 rounded animate-pulse w-48" />
@@ -139,7 +122,7 @@ function ProfilePageSkeleton() {
               <div className="h-4 bg-gray-200 rounded animate-pulse w-full" />
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="space-y-3">
               <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />

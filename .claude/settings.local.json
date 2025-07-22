@@ -166,7 +166,8 @@
       "WebFetch(domain:github.com)",
       "Bash(timeout 10s npm run start:dev)",
       "Bash(true)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(timeout 10 npm run dev:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
