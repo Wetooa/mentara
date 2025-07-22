@@ -68,7 +68,7 @@ export const TEST_ACCOUNTS = {
       id: 'fake_therapist_test_4',
       email: 'test.therapist.trauma@mentaratest.dev',
       firstName: 'Dr. James',
-      lastName: 'O\'Connor',
+      lastName: "O'Connor",
       role: 'therapist' as const,
     },
     {
@@ -217,14 +217,22 @@ export const SEED_CONFIG = {
 // These match the exact disorders from @mentara-commons/src/constants/questionnaire/questionnaire-mapping.ts
 export const ILLNESS_COMMUNITIES = [
   {
+    name: 'General Support',
+    slug: 'general-support',
+    description:
+      'A welcoming community for general mental health support and discussion.',
+  },
+  {
     name: 'Stress Support',
     slug: 'stress-support',
-    description: 'A supportive community for individuals managing stress and overwhelm.',
+    description:
+      'A supportive community for individuals managing stress and overwhelm.',
   },
   {
     name: 'Anxiety Support',
     slug: 'anxiety-support',
-    description: 'A supportive community for individuals with anxiety disorders.',
+    description:
+      'A supportive community for individuals with anxiety disorders.',
   },
   {
     name: 'Depression Support',
@@ -234,7 +242,8 @@ export const ILLNESS_COMMUNITIES = [
   {
     name: 'Insomnia Support',
     slug: 'insomnia-support',
-    description: 'A supportive community for individuals struggling with sleep disorders.',
+    description:
+      'A supportive community for individuals struggling with sleep disorders.',
   },
   {
     name: 'Panic Disorder Support',
@@ -244,17 +253,20 @@ export const ILLNESS_COMMUNITIES = [
   {
     name: 'Bipolar Disorder Support',
     slug: 'bipolar-disorder-support',
-    description: 'A supportive community for individuals with bipolar disorder (BD).',
+    description:
+      'A supportive community for individuals with bipolar disorder (BD).',
   },
   {
     name: 'OCD Support',
     slug: 'ocd-support',
-    description: 'A supportive community for individuals with obsessive compulsive disorder.',
+    description:
+      'A supportive community for individuals with obsessive compulsive disorder.',
   },
   {
     name: 'PTSD Support',
     slug: 'ptsd-support',
-    description: 'A supportive community for individuals with post-traumatic stress disorder.',
+    description:
+      'A supportive community for individuals with post-traumatic stress disorder.',
   },
   {
     name: 'Social Anxiety Support',
@@ -264,7 +276,8 @@ export const ILLNESS_COMMUNITIES = [
   {
     name: 'Phobia Support',
     slug: 'phobia-support',
-    description: 'A supportive community for individuals with phobias and specific fears.',
+    description:
+      'A supportive community for individuals with phobias and specific fears.',
   },
   {
     name: 'Burnout Support',
@@ -274,7 +287,8 @@ export const ILLNESS_COMMUNITIES = [
   {
     name: 'Eating Disorders Support',
     slug: 'eating-disorders-support',
-    description: 'A supportive community for individuals with binge eating and eating disorders.',
+    description:
+      'A supportive community for individuals with binge eating and eating disorders.',
   },
   {
     name: 'ADHD Support',
@@ -284,7 +298,14 @@ export const ILLNESS_COMMUNITIES = [
   {
     name: 'Substance Use Support',
     slug: 'substance-use-support',
-    description: 'A supportive community for individuals with substance or alcohol use issues.',
+    description:
+      'A supportive community for individuals with substance or alcohol use issues.',
+  },
+  {
+    name: 'Drug Use Support',
+    slug: 'drug-use-support',
+    description:
+      'A supportive community for individuals dealing with drug use and recovery.',
   },
 ];
 
@@ -293,7 +314,8 @@ export const ADDITIONAL_COMMUNITIES = [
   {
     name: 'General Support',
     slug: 'general-support',
-    description: 'A welcoming space for anyone seeking general mental health support.',
+    description:
+      'A welcoming space for anyone seeking general mental health support.',
   },
   {
     name: 'Mindfulness & Meditation',
@@ -303,7 +325,8 @@ export const ADDITIONAL_COMMUNITIES = [
   {
     name: 'Family & Relationships',
     slug: 'family-relationships',
-    description: 'Support for navigating family dynamics and relationship challenges.',
+    description:
+      'Support for navigating family dynamics and relationship challenges.',
   },
 ];
 
@@ -317,19 +340,22 @@ export const WORKSHEET_TEMPLATES = [
   },
   {
     title: 'Cognitive Behavioral Thought Record',
-    description: 'Identify and challenge negative thought patterns using CBT techniques',
+    description:
+      'Identify and challenge negative thought patterns using CBT techniques',
     category: 'Cognitive Therapy',
     estimatedDuration: 20,
   },
   {
     title: 'Anxiety Exposure Hierarchy',
-    description: 'Create a step-by-step plan for facing anxiety-provoking situations',
+    description:
+      'Create a step-by-step plan for facing anxiety-provoking situations',
     category: 'Anxiety Management',
     estimatedDuration: 30,
   },
   {
     title: 'Gratitude and Positive Events Log',
-    description: 'Daily practice of gratitude and positive experience reflection',
+    description:
+      'Daily practice of gratitude and positive experience reflection',
     category: 'Positive Psychology',
     estimatedDuration: 15,
   },
@@ -341,13 +367,15 @@ export const WORKSHEET_TEMPLATES = [
   },
   {
     title: 'Relationship Patterns Worksheet',
-    description: 'Explore patterns in your relationships and communication styles',
+    description:
+      'Explore patterns in your relationships and communication styles',
     category: 'Relationship Therapy',
     estimatedDuration: 40,
   },
   {
     title: 'Mindfulness Body Scan Practice',
-    description: 'Guided mindfulness exercise for body awareness and relaxation',
+    description:
+      'Guided mindfulness exercise for body awareness and relaxation',
     category: 'Mindfulness',
     estimatedDuration: 25,
   },
@@ -359,13 +387,15 @@ export const WORKSHEET_TEMPLATES = [
   },
   {
     title: 'Trauma Narrative Timeline',
-    description: 'Safe exploration of trauma experiences with professional guidance',
+    description:
+      'Safe exploration of trauma experiences with professional guidance',
     category: 'Trauma Recovery',
     estimatedDuration: 45,
   },
   {
     title: 'Addiction Recovery Relapse Prevention Plan',
-    description: 'Develop strategies and warning signs for maintaining sobriety',
+    description:
+      'Develop strategies and warning signs for maintaining sobriety',
     category: 'Addiction Recovery',
     estimatedDuration: 50,
   },
