@@ -4,26 +4,25 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
+import {
   LayoutDashboard,
-  Users, 
-  MessageSquare, 
-  FileText, 
+  Users,
+  MessageSquare,
+  FileText,
   Calendar,
   UserCheck,
-  Community,
   Menu,
   X,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  UsersRound,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { Button } from "@/components/ui/button";
 import { cn, getProfileUrl } from "@/lib/utils";
-
 
 export default function TherapistLayout({
   children,
@@ -63,7 +62,7 @@ export default function TherapistLayout({
 
   // Load sidebar state from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('therapist-sidebar-expanded');
+    const saved = localStorage.getItem("therapist-sidebar-expanded");
     if (saved !== null) {
       setIsSidebarExpanded(JSON.parse(saved));
     }
@@ -73,7 +72,10 @@ export default function TherapistLayout({
   const toggleSidebar = () => {
     const newState = !isSidebarExpanded;
     setIsSidebarExpanded(newState);
-    localStorage.setItem('therapist-sidebar-expanded', JSON.stringify(newState));
+    localStorage.setItem(
+      "therapist-sidebar-expanded",
+      JSON.stringify(newState)
+    );
   };
 
   // Navigation menu items for therapist
@@ -117,7 +119,7 @@ export default function TherapistLayout({
     {
       name: "Community",
       path: "/therapist/community",
-      icon: <Community className="h-5 w-5" />,
+      icon: <UsersRound className="h-5 w-5" />,
       id: "community",
     },
   ];
@@ -125,14 +127,16 @@ export default function TherapistLayout({
   return (
     <div className="flex h-screen w-full bg-white">
       {/* Desktop Sidebar Navigation */}
-      <nav className={cn(
-        "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
-        isSidebarExpanded ? "w-64" : "w-[70px]"
-      )}>
+      <nav
+        className={cn(
+          "hidden md:flex fixed left-0 top-0 z-10 h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
+          isSidebarExpanded ? "w-64" : "w-[70px]"
+        )}
+      >
         {/* Header with Logo and Toggle */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <Link 
-            href="/therapist/dashboard" 
+          <Link
+            href="/therapist/dashboard"
             className={cn(
               "flex items-center transition-all duration-300",
               isSidebarExpanded ? "" : "justify-center"
@@ -152,7 +156,7 @@ export default function TherapistLayout({
               </span>
             )}
           </Link>
-          
+
           <Button
             variant="ghost"
             size="icon"
@@ -173,7 +177,8 @@ export default function TherapistLayout({
         {/* Navigation Items */}
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
           {navItems.map((item) => {
-            const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+            const isActive =
+              pathname === item.path || pathname.startsWith(`${item.path}/`);
             return (
               <Link
                 key={item.id}
@@ -196,7 +201,7 @@ export default function TherapistLayout({
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
                   )}
                 />
-                
+
                 {/* Discord-style bevel background */}
                 <div
                   className={cn(
@@ -218,7 +223,7 @@ export default function TherapistLayout({
                   >
                     {item.icon}
                   </div>
-                  
+
                   {isSidebarExpanded && (
                     <span
                       className={cn(
@@ -236,11 +241,13 @@ export default function TherapistLayout({
             );
           })}
         </div>
-        
+
         {/* Footer */}
         <div className="border-t border-gray-200 p-4">
           {isSidebarExpanded ? (
-            <p className="text-xs text-gray-500 text-center">© 2025 Mentara Therapist</p>
+            <p className="text-xs text-gray-500 text-center">
+              © 2025 Mentara Therapist
+            </p>
           ) : (
             <div className="flex justify-center">
               <div className="h-2 w-2 rounded-full bg-gray-300" />
@@ -266,7 +273,9 @@ export default function TherapistLayout({
                   height={32}
                   priority
                 />
-                <span className="text-lg font-semibold text-gray-900">Therapist</span>
+                <span className="text-lg font-semibold text-gray-900">
+                  Therapist
+                </span>
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -279,7 +288,9 @@ export default function TherapistLayout({
             <div className="flex-1 px-4 py-6">
               <div className="space-y-2">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+                  const isActive =
+                    pathname === item.path ||
+                    pathname.startsWith(`${item.path}/`);
                   return (
                     <Link
                       key={item.id}
@@ -332,18 +343,21 @@ export default function TherapistLayout({
       )}
 
       {/* Main Content Area - Responsive padding */}
-      <div className={cn(
-        "flex flex-1 flex-col w-full h-screen transition-all duration-300",
-        "md:ml-0",
-        isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
-      )}>
+      <div
+        className={cn(
+          "flex flex-1 flex-col w-full h-screen transition-all duration-300",
+          "md:ml-0",
+          isSidebarExpanded ? "md:ml-64" : "md:ml-[70px]"
+        )}
+      >
         {/* Top Header - Responsive */}
-        <header className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm" 
+        <header
+          className="fixed top-0 right-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white/90 backdrop-blur-md px-4 shadow-sm"
           style={{
-            width: isSidebarExpanded 
-              ? 'calc(100% - 256px)' 
-              : 'calc(100% - 70px)',
-            ...(window.innerWidth < 768 && { width: '100%' })
+            width: isSidebarExpanded
+              ? "calc(100% - 256px)"
+              : "calc(100% - 70px)",
+            ...(window.innerWidth < 768 && { width: "100%" }),
           }}
         >
           {/* Mobile menu button and title */}
@@ -356,14 +370,17 @@ export default function TherapistLayout({
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <span className="text-lg font-semibold text-gray-900">Therapist</span>
+            <span className="text-lg font-semibold text-gray-900">
+              Therapist
+            </span>
           </div>
 
           {/* Desktop title */}
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold text-gray-900">
-              {navItems.find(item => 
-                pathname === item.path || pathname.startsWith(`${item.path}/`)
+              {navItems.find(
+                (item) =>
+                  pathname === item.path || pathname.startsWith(`${item.path}/`)
               )?.name || "Dashboard"}
             </h1>
           </div>
@@ -383,9 +400,9 @@ export default function TherapistLayout({
 
           {/* User Area */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <NotificationDropdown 
-              variant="default" 
-              maxNotifications={5} 
+            <NotificationDropdown
+              variant="default"
+              maxNotifications={5}
               showConnectionStatus={true}
               className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-blue-200"
             />
@@ -393,12 +410,16 @@ export default function TherapistLayout({
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex flex-col items-end">
                 <span className="text-sm font-medium text-gray-900">
-                  {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Therapist"}
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : "Therapist"}
                 </span>
-                <span className="text-xs text-gray-500 capitalize">{user?.role || "therapist"}</span>
+                <span className="text-xs text-gray-500 capitalize">
+                  {user?.role || "therapist"}
+                </span>
               </div>
 
-              <button 
+              <button
                 onClick={handleAvatarClick}
                 className="relative group focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 rounded-full transition-all duration-300"
                 title="Go to profile"
@@ -446,7 +467,8 @@ export default function TherapistLayout({
 
         {/* Main Content - Responsive padding */}
         <main className="flex-1 w-full h-full pt-16 md:pt-16 pb-16 md:pb-0 overflow-y-auto bg-gray-50">
-          <div className="md:hidden h-[50px]" /> {/* Extra space for mobile search */}
+          <div className="md:hidden h-[50px]" />{" "}
+          {/* Extra space for mobile search */}
           {children}
         </main>
 
@@ -454,7 +476,8 @@ export default function TherapistLayout({
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200 shadow-lg">
           <div className="flex items-center justify-around py-2">
             {navItems.slice(0, 5).map((item) => {
-              const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+              const isActive =
+                pathname === item.path || pathname.startsWith(`${item.path}/`);
               return (
                 <Link
                   key={item.id}

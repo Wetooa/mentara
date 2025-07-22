@@ -559,7 +559,6 @@ export class AdminTherapistService {
               suspendedAt: null,
               suspendedBy: null,
               suspensionReason: null,
-              isVerified: true, // Mark as verified when approved
               emailVerified: true, // Ensure email is verified
             },
           });
