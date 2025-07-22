@@ -1,0 +1,96 @@
+import { AxiosInstance } from "axios";
+import { ClientProfile } from "@/types/api/client";
+import { TherapistRecommendation } from "@/types/api/therapist";
+
+/**
+ * Client Service
+ * Handles all client-specific operations
+ * Maps directly to backend ClientController (/client endpoints)
+ */
+export function createClientService(client: AxiosInstance) {
+  return {
+    // ================================
+    // PROFILE OPERATIONS
+    // ================================
+    /**
+     * Get client profile
+     * GET /client/profile
+     */
+    async getProfile(): Promise<ClientProfile> {
+      const response = await client.get("client/profile");
+      return response.data;
+    },
+
+    /**
+     * Update client profile
+     * PUT /client/profile
+     */
+    async updateProfile(data: {
+      firstName?: string;
+      lastName?: string;
+      bio?: string;
+      avatarUrl?: string;
+      phoneNumber?: string;
+      dateOfBirth?: Date | string;
+      gender?: string;
+      location?: string;
+      emergencyContact?: string;
+    }): Promise<ClientProfile> {
+      const response = await client.put("client/profile", data);
+      return response.data;
+    },
+
+    // ================================
+    // THERAPIST RECOMMENDATION OPERATIONS
+    // ================================
+    /**
+     * Check if client needs therapist recommendations
+     * GET /client/needs-therapist-recommendations
+     */
+    async needsTherapistRecommendations(): Promise<{ needsTherapistRecommendations: boolean }> {
+      const response = await client.get("client/needs-therapist-recommendations");
+      return response.data;
+    },
+
+    /**
+     * Mark therapist recommendations as seen
+     * PUT /client/mark-therapist-recommendations-seen
+     */
+    async markTherapistRecommendationsSeen(): Promise<{ success: boolean }> {
+      const response = await client.put("client/mark-therapist-recommendations-seen");
+      return response.data;
+    },
+
+    // ================================
+    // THERAPIST ASSIGNMENT OPERATIONS
+    // ================================
+    /**
+     * Get assigned therapist
+     * GET /client/therapist
+     */
+    async getAssignedTherapist(): Promise<{ therapist: TherapistRecommendation | null }> {
+      const response = await client.get("client/therapist");
+      return response.data;
+    },
+
+    /**
+     * Assign a therapist to the client
+     * POST /client/therapist
+     */
+    async assignTherapist(therapistId: string): Promise<{ therapist: TherapistRecommendation }> {
+      const response = await client.post("client/therapist", { therapistId });
+      return response.data;
+    },
+
+    /**
+     * Remove assigned therapist
+     * DELETE /client/therapist
+     */
+    async removeTherapist(): Promise<{ success: boolean }> {
+      const response = await client.delete("client/therapist");
+      return response.data;
+    },
+  };
+}
+
+export type ClientService = ReturnType<typeof createClientService>;

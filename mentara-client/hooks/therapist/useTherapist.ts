@@ -52,16 +52,12 @@ export function useTherapist() {
   // Mutation to assign a therapist
   const assignTherapistMutation = useMutation({
     mutationFn: async (therapistId: string) => {
-      // For now, use the request therapist change endpoint as assignment
-      // This needs a proper assignment endpoint in the backend
-      return api.client.requestTherapistChange(`Requesting assignment to therapist ${therapistId}`);
+      return api.client.assignTherapist(therapistId);
     },
     onSuccess: (data, therapistId) => {
-      toast.success("Therapist assignment requested successfully!");
+      toast.success("Therapist assigned successfully!");
       // Invalidate and refetch the assigned therapist
       queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
-      // Note: In a real implementation, this would directly assign the therapist
-      // For now, it creates a change request that admin needs to approve
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
@@ -71,16 +67,16 @@ export function useTherapist() {
 
   // Mutation to remove/change therapist
   const removeTherapistMutation = useMutation({
-    mutationFn: async (reason: string = "Client requested therapist change") => {
-      return api.client.requestTherapistChange(reason);
+    mutationFn: async () => {
+      return api.client.removeTherapist();
     },
     onSuccess: () => {
-      toast.success("Therapist change request submitted successfully!");
+      toast.success("Therapist removed successfully!");
       // Invalidate the assigned therapist query
       queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
     },
     onError: (error: MentaraApiError) => {
-      const message = error?.response?.data?.message || error?.message || "Failed to submit therapist change request";
+      const message = error?.response?.data?.message || error?.message || "Failed to remove therapist";
       toast.error(message);
     },
   });
@@ -90,8 +86,8 @@ export function useTherapist() {
     await assignTherapistMutation.mutateAsync(therapistId);
   };
 
-  const removeTherapist = async (reason?: string): Promise<void> => {
-    await removeTherapistMutation.mutateAsync(reason);
+  const removeTherapist = async (): Promise<void> => {
+    await removeTherapistMutation.mutateAsync();
   };
 
   return {

@@ -14,6 +14,10 @@ import {
   type BookingService,
 } from "./services/booking";
 import {
+  createClientService,
+  type ClientService,
+} from "./services/client";
+import {
   createCommunityService,
   type CommunityService,
 } from "./services/communities";
@@ -65,10 +69,11 @@ export type { ApiError, ApiResponse } from "@/types/api";
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService };
+export { createAdminService, createAuthService, createBookingService, createClientService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, createWorksheetService, type AdminService, type AuthService, type BookingService, type ClientService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse, type WorksheetsService };
 
 // Create service instances
 const authService = createAuthService(apiClient);
+const clientService = createClientService(apiClient);
 const dashboardService = createDashboardService(apiClient);
 const therapistService = createTherapistService(apiClient);
 const communityService = createCommunityService(apiClient);
@@ -87,6 +92,7 @@ const worksheetService = createWorksheetService(apiClient);
 export const api = {
   // New unified structure
   auth: authService,
+  client: clientService,
   dashboard: dashboardService,
   therapists: therapistService,
   communities: communityService,
