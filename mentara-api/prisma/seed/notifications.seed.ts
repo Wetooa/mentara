@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
+import { SEED_CONFIG } from './config';
 
 // Simple notification types that exist in the schema
 const NOTIFICATION_TYPES = [
@@ -29,7 +29,7 @@ export async function seedNotifications(
 ) {
   console.log('🔔 Creating basic notifications...');
 
-  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
+  const config = SEED_CONFIG;
   const notifications: any[] = [];
   const notificationCount = users.length * config.NOTIFICATIONS.NOTIFICATIONS_PER_USER;
 

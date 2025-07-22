@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
+import { SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
 // Assessment categories with their descriptions and question types
@@ -47,7 +47,7 @@ export async function seedPreAssessments(
 ) {
   console.log('📋 Creating comprehensive assessment system...');
 
-  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
+  const config = SEED_CONFIG;
 
   // Create assessment types first
   await createAssessmentTypes(prisma);

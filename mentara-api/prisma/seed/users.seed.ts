@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { TEST_ACCOUNTS, SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
+import { TEST_ACCOUNTS, SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
 export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehensive' = 'comprehensive') {
@@ -236,7 +236,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Clients
   console.log('🔹 Development Client Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.CLIENTS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.CLIENTS; i++) {
     const clientId = uuidv4();
     const clientUser = await prisma.user.create({
       data: {
@@ -265,7 +265,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Therapists
   console.log('🔹 Development Therapist Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.THERAPISTS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.THERAPISTS; i++) {
     const therapistId = uuidv4();
     const therapistUser = await prisma.user.create({
       data: {
@@ -316,7 +316,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Admins
   console.log('🔹 Development Admin Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.ADMINS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.ADMINS; i++) {
     const adminId = uuidv4();
     const adminUser = await prisma.user.create({
       data: {
@@ -346,7 +346,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
 
   // Create 3 Moderators
   console.log('🔹 Development Moderator Accounts:');
-  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.MODERATORS; i++) {
+  for (let i = 1; i <= SEED_CONFIG.USERS.MODERATORS; i++) {
     const moderatorId = uuidv4();
     const moderatorUser = await prisma.user.create({
       data: {

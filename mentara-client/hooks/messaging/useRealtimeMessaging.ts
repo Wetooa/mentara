@@ -271,7 +271,7 @@ export function useRealtimeMessaging(params: {
   });
 
   // WebSocket connection management
-  const connectWebSocket = useCallback(() => {
+  const connectWebSocket = useCallback(async () => {
     if (!accessToken || !user || !config.enableRealtime) return;
     if (socketRef.current?.connected) return;
 
@@ -426,8 +426,8 @@ export function useRealtimeMessaging(params: {
     reconnectAttemptsRef.current++;
     const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
     
-    reconnectTimeoutRef.current = setTimeout(() => {
-      connectWebSocket();
+    reconnectTimeoutRef.current = setTimeout(async () => {
+      await connectWebSocket();
     }, delay);
   }, [connectWebSocket]);
 

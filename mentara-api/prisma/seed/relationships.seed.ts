@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
+import { SEED_CONFIG } from './config';
 
 export async function seedClientTherapistRelationships(
   prisma: PrismaClient,
@@ -13,7 +13,7 @@ export async function seedClientTherapistRelationships(
 ) {
   console.log('🤝 Creating client-therapist relationships...');
 
-  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
+  const config = SEED_CONFIG;
   const relationships: any[] = [];
   const assignmentCount = Math.floor(
     clients.length * config.RELATIONSHIPS.CLIENT_THERAPIST_RATIO,
@@ -45,7 +45,7 @@ export async function seedMeetings(
 ) {
   console.log('📅 Creating meetings...');
 
-  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
+  const config = SEED_CONFIG;
   const meetings: any[] = [];
 
   for (const { relationship, client, therapist } of relationships) {

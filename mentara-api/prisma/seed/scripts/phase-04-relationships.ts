@@ -4,7 +4,7 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { PhaseResult } from './progress-tracker';
-import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from '../config';
+import { SEED_CONFIG } from '../config';
 
 interface RelationshipsPhaseData {
   relationships: any[];
@@ -48,7 +48,7 @@ export async function runPhase04Relationships(
       };
     }
 
-    const seedConfig = config === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
+    const seedConfig = SEED_CONFIG;
     const relationships: any[] = [];
     
     // Assign therapists to clients based on configuration ratio
