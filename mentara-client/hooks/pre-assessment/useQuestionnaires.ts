@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { QuestionnaireDefinition, LIST_OF_QUESTIONNAIRES } from "@/types/api/questionnaires";
+import { QuestionnaireDefinition } from "@/types/api/questionnaires";
+import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaire/questionnaire-mapping";
 
 /**
  * React Query hook for fetching questionnaire definitions

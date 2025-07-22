@@ -60,3 +60,4 @@ export const COMMUNITY_RECOMMENDATION_THRESHOLDS = {
 
 export type QuestionnaireType = keyof typeof QUESTIONNAIRE_TO_COMMUNITY_MAP;
 export type CommunityName = typeof QUESTIONNAIRE_TO_COMMUNITY_MAP[QuestionnaireType];
+

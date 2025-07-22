@@ -32,7 +32,6 @@ export function createAuthService(client: AxiosInstance) {
      */
     async login(data: LoginDto): Promise<AuthResponse> {
       const response = await client.post("auth/login", data);
-      alert(JSON.stringify(response));
       return response.data;
     },
 

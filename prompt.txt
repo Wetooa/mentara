@@ -1,6 +1,9 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
 
+Hook Audit
+- i notice that many of the hooks are just exporting the hooks in their respective folders for backward compatibility, please remove the unnecessary hooks and only keep the ones that are actually used in the codebase
+
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 
 - data flow is >> page > components > hooks > lib/api axios > REST > backend controller

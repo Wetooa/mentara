@@ -26,7 +26,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * GET /pre-assessment/questionnaires
      */
     async getQuestionnaires(): Promise<QuestionnaireDefinition[]> {
-      const response = await client.get("/pre-assessment/questionnaires");
+      const response = await client.get("pre-assessment/questionnaires");
       return response.data;
     },
 
@@ -38,7 +38,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * POST /pre-assessment
      */
     async create(data: CreatePreAssessmentDto): Promise<PreAssessment> {
-      const response = await client.post("/pre-assessment", data);
+      const response = await client.post("pre-assessment", data);
       return response.data;
     },
 
@@ -47,7 +47,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * GET /pre-assessment
      */
     async getUserAssessment(): Promise<PreAssessment> {
-      const response = await client.get("/pre-assessment");
+      const response = await client.get("pre-assessment");
       return response.data;
     },
 
@@ -56,7 +56,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * GET /pre-assessment/:id
      */
     async getById(id: string): Promise<PreAssessment> {
-      const response = await client.get(`/pre-assessment/${id}`);
+      const response = await client.get(`pre-assessment/${id}`);
       return response.data;
     },
 
@@ -65,7 +65,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * PUT /pre-assessment
      */
     async update(data: UpdatePreAssessmentDto): Promise<PreAssessment> {
-      const response = await client.put("/pre-assessment", data);
+      const response = await client.put("pre-assessment", data);
       return response.data;
     },
 
@@ -74,7 +74,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * PUT /pre-assessment/:id
      */
     async updateById(id: string, data: UpdatePreAssessmentDto): Promise<PreAssessment> {
-      const response = await client.put(`/pre-assessment/${id}`, data);
+      const response = await client.put(`pre-assessment/${id}`, data);
       return response.data;
     },
 
@@ -83,7 +83,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * DELETE /pre-assessment
      */
     async delete(): Promise<SuccessMessageResponse> {
-      const response = await client.delete("/pre-assessment");
+      const response = await client.delete("pre-assessment");
       return response.data;
     },
 
@@ -92,7 +92,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * DELETE /pre-assessment/:id
      */
     async deleteById(id: string): Promise<SuccessMessageResponse> {
-      const response = await client.delete(`/pre-assessment/${id}`);
+      const response = await client.delete(`pre-assessment/${id}`);
       return response.data;
     },
 
@@ -101,7 +101,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * GET /pre-assessment/list
      */
     async list(params?: PreAssessmentListParams): Promise<PreAssessmentListResponse> {
-      const response = await client.get("/pre-assessment/list", { params });
+      const response = await client.get("pre-assessment/list", { params });
       return response.data;
     },
 
@@ -113,7 +113,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * GET /pre-assessment/ai-service/health
      */
     async getAIServiceHealth(): Promise<AIServiceHealthResponse> {
-      const response = await client.get("/pre-assessment/ai-service/health");
+      const response = await client.get("pre-assessment/ai-service/health");
       return response.data;
     },
 
@@ -122,7 +122,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * POST /pre-assessment/:id/reprocess
      */
     async reprocess(id: string, data?: ReprocessRequest): Promise<PreAssessment> {
-      const response = await client.post(`/pre-assessment/${id}/reprocess`, data);
+      const response = await client.post(`pre-assessment/${id}/reprocess`, data);
       return response.data;
     },
 
@@ -134,7 +134,7 @@ export function createPreAssessmentService(client: AxiosInstance) {
      * GET /pre-assessment/:id/insights
      */
     async getClinicalInsights(id: string): Promise<any> {
-      const response = await client.get(`/pre-assessment/${id}/insights`);
+      const response = await client.get(`pre-assessment/${id}/insights`);
       return response.data;
     },
   };
