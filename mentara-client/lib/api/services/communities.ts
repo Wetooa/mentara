@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axios";
+import type { Comment, CreateCommentRequest } from "@/types/api/communities";
 
 export interface CommunityRecommendation {
   id: string;
@@ -87,6 +88,7 @@ export interface CommunityStats {
   totalMembers: number;
   activeCommunities: number;
 }
+
 
 /**
  * Community API service for recommendations, joining, and management
@@ -422,6 +424,90 @@ export function createCommunityService(axios: AxiosInstance) {
      */
     async requestJoin(communityId: string): Promise<{ success: boolean }> {
       const { data } = await axios.post(`/communities/${communityId}/request-join`);
+      return data;
+    },
+
+    // Comment Management Methods
+
+    /**
+     * Get all comments for a post
+     */
+    async getCommentsByPost(postId: string): Promise<Comment[]> {
+      const { data } = await axios.get(`/comments/post/${postId}`);
+      return data;
+    },
+
+    /**
+     * Create a new comment
+     */
+    async createComment(request: CreateCommentRequest): Promise<Comment> {
+      const { data } = await axios.post('/comments', request);
+      return data;
+    },
+
+    /**
+     * Update a comment (only by owner)
+     */
+    async updateComment(commentId: string, content: string): Promise<Comment> {
+      const { data } = await axios.put(`/comments/${commentId}`, { content });
+      return data;
+    },
+
+    /**
+     * Delete a comment (only by owner)
+     */
+    async deleteComment(commentId: string): Promise<Comment> {
+      const { data } = await axios.delete(`/comments/${commentId}`);
+      return data;
+    },
+
+    /**
+     * Heart/like a comment
+     */
+    async heartComment(commentId: string): Promise<{ hearted: boolean }> {
+      const { data } = await axios.post(`/comments/${commentId}/heart`);
+      return data;
+    },
+
+    /**
+     * Remove heart/like from a comment
+     */
+    async unheartComment(commentId: string): Promise<{ hearted: boolean }> {
+      const { data } = await axios.post(`/comments/${commentId}/heart`);
+      return data;
+    },
+
+    /**
+     * Check if a comment is hearted by current user
+     */
+    async isCommentHearted(commentId: string): Promise<{ hearted: boolean }> {
+      const { data } = await axios.get(`/comments/${commentId}/hearted`);
+      return data;
+    },
+
+    /**
+     * Report a comment for inappropriate content
+     */
+    async reportComment(commentId: string, reason: string, content?: string): Promise<{ success: boolean; reportId: string }> {
+      const { data } = await axios.post(`/comments/${commentId}/report`, { reason, content });
+      return data;
+    },
+
+    // Post Edit Methods
+
+    /**
+     * Update a post (only by owner)
+     */
+    async updatePost(postId: string, postData: { title?: string; content?: string }): Promise<PostData> {
+      const { data } = await axios.put(`/posts/${postId}`, postData);
+      return data;
+    },
+
+    /**
+     * Delete a post (only by owner)
+     */
+    async deletePost(postId: string): Promise<PostData> {
+      const { data } = await axios.delete(`/posts/${postId}`);
       return data;
     },
   };
