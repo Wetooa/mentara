@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { useTherapistMeetings, useTherapistDashboard } from './therapist/useTherapistDashboard'
-import { useMeetings } from './booking/useBooking'
+import { useTherapistMeetings, useTherapistDashboard } from '../therapist/useTherapistDashboard'
+import { useMeetings } from '../booking/useBooking'
 import { useAuth } from '@/contexts/AuthContext'
 
 // Enhanced meeting data interface for calendar display

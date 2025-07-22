@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRealTimeEvents } from "./useRealTimeEvents";
+import { useRealTimeEvents } from "../useRealTimeEvents";
 
 interface Notification {
   id: string;
