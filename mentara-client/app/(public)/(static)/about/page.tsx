@@ -219,34 +219,114 @@ export default function AboutPage() {
         </div>
       </motion.section>
 
-      {/* Call to Action */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        className="py-16 bg-tertiary/10"
-      >
-        <div className="container px-4 mx-auto">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-secondary mb-6">
-              Join Our Community
-            </h2>
-            <p className="text-gray-600 text-lg mb-8">
-              Take the first step toward a stronger, healthier you. Our team is
-              ready to provide the support you need on your wellness journey.
-            </p>
-            <Link
-              href="/landing"
-              className={cn(
-                buttonVariants(),
-                "bg-tertiary hover:bg-tertiary/90 text-primary font-bold px-8 py-3 text-lg"
-              )}
-            >
-              Get Started Today
-            </Link>
-          </div>
+      {/* Enhanced Call to Action */}
+      <section className="py-24 bg-gradient-to-br from-primary/10 via-background to-tertiary/15 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-black/[0.02] bg-[size:50px_50px]" />
+        
+        {/* Animated background elements */}
+        <motion.div
+          className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        <div className="container px-4 mx-auto relative z-10">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+            className="max-w-4xl mx-auto"
+          >
+            <Card className="border-border/30 shadow-2xl relative overflow-hidden">
+              {/* Enhanced glassmorphism background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80" />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-tertiary/10" />
+              
+              <CardContent className="p-8 md:p-12 text-center relative z-10">
+                <motion.div variants={itemVariants}>
+                  <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary border-primary/20">
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Ready to Begin?
+                  </Badge>
+                  
+                  <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-6 leading-tight">
+                    Join Our Growing{" "}
+                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      Community
+                    </span>
+                  </h2>
+                  
+                  <p className="text-xl text-muted-foreground leading-relaxed mb-8 max-w-2xl mx-auto">
+                    Take the first step toward a stronger, healthier you. Our team is ready to provide the support you need on your wellness journey.
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                    <Link href="/landing">
+                      <motion.div
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          size="lg"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all group"
+                        >
+                          <Heart className="mr-2 w-5 h-5" />
+                          Get Started Today
+                          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </motion.div>
+                    </Link>
+                    
+                    <Link href="/community">
+                      <motion.div
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-8 py-4 rounded-xl text-lg group backdrop-blur-sm"
+                        >
+                          <Users className="mr-2 w-4 h-4" />
+                          Explore Community
+                          <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </motion.div>
+                    </Link>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <motion.div
+                      animate={{
+                        rotate: [0, 360],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                    >
+                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    </motion.div>
+                    <span>
+                      Trusted by 10,000+ individuals on their wellness journey
+                    </span>
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                  </div>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-      </motion.section>
-    </motion.div>
+      </section>
+    </div>
   );
 }
