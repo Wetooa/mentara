@@ -392,6 +392,16 @@ export function MessengerInterface({
     enablePresence: true,
   });
 
+  // Debug logging for conversations data
+  useEffect(() => {
+    console.log('🖥️ [MESSENGER INTERFACE] Conversations state updated');
+    console.log('   isLoadingConversations:', isLoadingConversations);
+    console.log('   conversationsError:', conversationsError);
+    console.log('   conversations:', conversations);
+    console.log('   conversations length:', conversations?.length || 0);
+    console.log('   user context:', { id: user?.id, email: user?.email });
+  }, [conversations, isLoadingConversations, conversationsError, user]);
+
   // Get selected conversation messages
   const {
     messages,
