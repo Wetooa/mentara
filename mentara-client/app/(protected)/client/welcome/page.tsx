@@ -569,7 +569,7 @@ export default function ClientWelcomePage() {
             {(recommendations?.recommendations || []).map((therapist, index) => (
               <TherapistRecommendationCard
                 key={therapist.id}
-                therapist={{...therapist.therapist, matchScore: therapist.score}}
+                therapist={therapist}
                 rank={index + 1}
                 isSelected={selectedTherapists.includes(therapist.id)}
                 onSelect={(selected) => handleTherapistSelect(therapist.id, selected)}

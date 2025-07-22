@@ -213,14 +213,12 @@ export class TherapistRecommendationController {
           this.communitiesService.getRecommendedCommunities(user.id),
         ]);
 
-      // Transform therapist data to match frontend expectations
+      // Transform therapist data to match frontend expectations - flatten structure
       const recommendations = (therapistRecommendations?.therapists || []).map((therapist, index) => ({
-        id: therapist.userId,
-        therapist: {
-          ...therapist,
-          id: therapist.userId,
-        },
-        score: therapist.matchScore || 0,
+        ...therapist,
+        id: therapist.userId, // Use userId as the primary ID
+        matchScore: therapist.matchScore || 0, // Add matchScore directly to therapist object
+        score: therapist.matchScore || 0, // Keep score for backward compatibility
         rank: index + 1,
       }));
 
