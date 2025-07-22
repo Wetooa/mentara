@@ -142,6 +142,27 @@ export function useSessionsInDateRange(dateFrom: string, dateTo: string, limit =
 }
 
 /**
+ * Hook for fetching a single session by ID
+ */
+export function useSessionById(sessionId: string) {
+  const api = useApi();
+  
+  return useQuery({
+    queryKey: ['sessions', 'by-id', sessionId],
+    queryFn: () => api.meetings.getMeetingById(sessionId),
+    staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes
+    enabled: !!sessionId,
+    retry: (failureCount, error: MentaraApiError) => {
+      // Don't retry if not found or not authorized
+      if (error?.status === 404 || error?.status === 403 || error?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+}
+
+/**
  * Hook for getting session statistics
  */
 export function useSessionStats() {

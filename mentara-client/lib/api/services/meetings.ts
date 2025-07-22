@@ -6,12 +6,16 @@ export interface Meeting {
   description?: string;
   startTime: string;
   endTime?: string;
+  dateTime: string; // Alias for startTime for consistency
   duration: number;
   status: "SCHEDULED" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
   meetingType: string;
+  type?: string; // Alias for meetingType for consistency
   meetingUrl?: string;
   clientId: string;
   therapistId: string;
+  notes?: string; // Session notes
+  feedback?: string; // Session feedback
   client?: {
     userId: string;
     user: {
@@ -23,6 +27,9 @@ export interface Meeting {
   };
   therapist?: {
     userId: string;
+    name?: string; // Computed from firstName + lastName
+    specialization?: string;
+    experience?: number;
     user: {
       firstName: string;
       lastName: string;
@@ -79,6 +86,14 @@ export function createMeetingsService(axios: AxiosInstance) {
      * @param meetingId - The meeting ID
      */
     async getMeeting(meetingId: string): Promise<Meeting> {
+      return this.getById(meetingId);
+    },
+
+    /**
+     * Get a specific meeting by ID (alias for sessions hooks)
+     * @param meetingId - The meeting ID
+     */
+    async getMeetingById(meetingId: string): Promise<Meeting> {
       return this.getById(meetingId);
     },
 
