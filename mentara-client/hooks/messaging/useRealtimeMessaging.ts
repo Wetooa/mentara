@@ -111,7 +111,7 @@ export function useRealtimeMessaging(
     error: conversationsError,
     refetch: refetchConversations,
   } = useQuery({
-    queryKey: queryKeys.messaging.conversations,
+    queryKey: ["messaging", "conversations"],
     queryFn: async () => {
       console.log(
         "🔄 [FRONTEND] useRealtimeMessaging - calling getConversations API"
@@ -153,7 +153,7 @@ export function useRealtimeMessaging(
     refetch: refetchMessages,
   } = useQuery({
     queryKey: config.conversationId
-      ? queryKeys.messaging.messages(config.conversationId)
+      ? ["messaging", "conversations", config.conversationId]
       : [],
     queryFn: () =>
       config.conversationId
@@ -235,7 +235,7 @@ export function useRealtimeMessaging(
 
       // Update conversations list with latest message
       queryClient.setQueryData<MessagingConversation[]>(
-        queryKeys.messaging.conversations,
+        ["messaging", "conversations"],
         (old) => {
           if (!old) return old;
           return old.map((conv) =>
@@ -257,7 +257,7 @@ export function useRealtimeMessaging(
 
       // Optimistically update message as read
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(config.conversationId),
+        ["messaging", "conversations", config.conversationId],
         (old) => {
           if (!old) return old;
           return old.map((msg) =>
@@ -294,7 +294,7 @@ export function useRealtimeMessaging(
 
       // Optimistically add reaction
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(config.conversationId),
+        ["messaging", "conversations", config.conversationId],
         (old) => {
           if (!old) return old;
           return old.map((msg) =>
@@ -511,13 +511,13 @@ export function useRealtimeMessaging(
     (message: MessagingMessage) => {
       // Add message to conversation
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(message.conversationId),
+        ["messaging", "conversations", config.conversationId],
         (old) => (old ? [...old, message] : [message])
       );
 
       // Update conversation last message
       queryClient.setQueryData<MessagingConversation[]>(
-        queryKeys.messaging.conversations,
+        ["messaging", "conversations"],
         (old) => {
           if (!old) return old;
           return old.map((conv) =>
@@ -554,14 +554,14 @@ export function useRealtimeMessaging(
   const handleMessageUpdate = useCallback(
     (message: MessagingMessage) => {
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(message.conversationId),
+        ["messaging", "conversations", config.conversationId],
         (old) => {
           if (!old) return old;
           return old.map((msg) => (msg.id === message.id ? message : msg));
         }
       );
     },
-    [queryClient]
+    [queryClient, config.conversationId]
   );
 
   const handleMessageRead = useCallback(
@@ -569,7 +569,7 @@ export function useRealtimeMessaging(
       if (!config.conversationId) return;
 
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(config.conversationId),
+        ["messaging", "conversations", config.conversationId],
         (old) => {
           if (!old) return old;
           return old.map((msg) =>
@@ -606,7 +606,7 @@ export function useRealtimeMessaging(
       if (!config.conversationId) return;
 
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(config.conversationId),
+        ["messaging", "conversations", config.conversationId],
         (old) => {
           if (!old) return old;
           return old.map((msg) => {
