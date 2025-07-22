@@ -1,10 +1,13 @@
 ULTRATHINK and use sequential-thinking-mcp to plan and fix
 
-welcome page issues
-- please improve the ui in this portion, search up whats good to use and improve it to best of your abilities
-- basically make it "prettier"
-- dont forget that this page also recommends communities too
-- this is kinda like the landing page for authenticated users which is why i would like good design here
+login issues
+- im getting these error when trying to login
+
+[Nest] 1007620  - 07/22/2025, 8:34:02 AM   ERROR [HttpExceptionFilter] HTTP 404 Error - POST /auth/login: Cannot POST /auth/login
+[Nest] 1007620  - 07/22/2025, 8:34:22 AM   ERROR [HttpExceptionFilter] HTTP 404 Error - POST /auth/login: Cannot POST /auth/login
+[Nest] 1007620  - 07/22/2025, 8:34:26 AM   ERROR [HttpExceptionFilter] HTTP 404 Error - POST /auth/login: Cannot POST /auth/login
+
+find out and fix the issue
 
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.

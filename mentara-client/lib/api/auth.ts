@@ -159,11 +159,11 @@ export function createAuthService(client: AxiosInstance) {
       },
 
       /**
-       * Login admin
-       * POST /auth/admin/login
+       * Login admin - uses universal login endpoint
+       * POST /auth/login
        */
       async login(data: LoginDto): Promise<AdminAuthResponse> {
-        const response = await client.post("/auth/admin/login", data);
+        const response = await client.post("/auth/login", data);
         return response.data;
       },
 
@@ -212,11 +212,11 @@ export function createAuthService(client: AxiosInstance) {
       },
 
       /**
-       * Login moderator
-       * POST /auth/moderator/login
+       * Login moderator - uses universal login endpoint
+       * POST /auth/login
        */
       async login(data: LoginDto): Promise<AuthResponse> {
-        const response = await client.post("/auth/moderator/login", data);
+        const response = await client.post("/auth/login", data);
         return response.data;
       },
 
@@ -278,11 +278,11 @@ export function createAuthService(client: AxiosInstance) {
       },
 
       /**
-       * Login therapist
-       * POST /auth/therapist/login
+       * Login therapist - uses universal login endpoint
+       * POST /auth/login
        */
       async login(data: LoginDto): Promise<TherapistAuthResponse> {
-        const response = await client.post("/auth/therapist/login", data);
+        const response = await client.post("/auth/login", data);
         return response.data;
       },
 
