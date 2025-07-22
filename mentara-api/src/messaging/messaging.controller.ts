@@ -103,11 +103,11 @@ export class MessagingController {
       
       console.log('✅ [CONTROLLER RESPONSE] Returning', result.length, 'recent communications');
       console.log('📱 [RESPONSE SUMMARY]:', result.map(comm => ({
-        id: comm.id,
-        name: comm.name,
-        role: comm.role,
-        hasLastMessage: !!comm.lastMessage,
-        unreadCount: comm.unreadCount
+        id: comm?.id,
+        name: comm?.name,
+        role: comm?.role,
+        hasLastMessage: !!comm?.lastMessage,
+        unreadCount: comm?.unreadCount
       })));
       
       return result;
