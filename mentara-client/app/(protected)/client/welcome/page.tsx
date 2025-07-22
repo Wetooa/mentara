@@ -47,18 +47,7 @@ export default function ClientWelcomePage() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Fetch community recommendations (only when needed)
-  const { 
-    data: communityRecommendations, 
-    isLoading: communityLoading, 
-    error: communityError,
-    refetch: refetchCommunities 
-  } = useQuery({
-    queryKey: ['community-recommendations', 'personalized'],
-    queryFn: () => api.communities.getRecommendations(),
-    enabled: currentStep === 'communities',
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  // Communities are now included in the main recommendations response
 
   // Create therapist matches mutation (automatic matching)
   const createMatchesMutation = useMutation({
@@ -158,7 +147,7 @@ export default function ClientWelcomePage() {
   const maxSelections = 5;
   const selectionProgress = (selectedTherapists.length / maxSelections) * 100;
 
-  if (recommendationsLoading || currentStep === 'loading' || (currentStep === 'communities' && communityLoading)) {
+  if (recommendationsLoading || currentStep === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20">
         <div className="container mx-auto py-12 space-y-12">
@@ -176,11 +165,7 @@ export default function ClientWelcomePage() {
             <div className="space-y-4">
               <Skeleton className="h-12 w-80 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
               <Skeleton className="h-6 w-96 mx-auto bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
-              {currentStep === 'communities' ? (
-                <p className="text-emerald-600 font-medium animate-pulse">Finding personalized community recommendations...</p>
-              ) : (
-                <p className="text-blue-600 font-medium animate-pulse">Discovering your perfect therapist matches...</p>
-              )}
+              <p className="text-blue-600 font-medium animate-pulse">Discovering your perfect therapist matches...</p>
             </div>
 
             {/* Enhanced Loading Progress */}
@@ -265,30 +250,7 @@ export default function ClientWelcomePage() {
     );
   }
 
-  if (currentStep === 'communities' && communityError) {
-    return (
-      <div className="container mx-auto py-8">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-8 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Unable to Load Community Recommendations</h2>
-            <p className="text-muted-foreground mb-4">
-              We&apos;re having trouble loading your community recommendations. You can skip this step for now.
-            </p>
-            <div className="space-y-2">
-              <Button onClick={() => refetchCommunities()} className="w-full">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Try Again
-              </Button>
-              <Button variant="outline" onClick={handleSkipCommunities} className="w-full">
-                Continue to Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Community error handling removed since communities are included in main response
 
   // Show community recommendations step
   if (currentStep === 'communities') {
@@ -358,7 +320,7 @@ export default function ClientWelcomePage() {
           </div>
 
         {/* Community Recommendations */}
-        {(communityRecommendations?.data?.length ?? 0) > 0 ? (
+        {(recommendations?.communities?.length ?? 0) > 0 ? (
           <div className="space-y-6">
             {/* Enhanced Community Match Summary */}
             <Card className="bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/80 border-emerald-200/50 shadow-xl backdrop-blur-sm">
@@ -371,7 +333,7 @@ export default function ClientWelcomePage() {
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">Personalized Community Matches</h3>
                       <p className="text-gray-600 font-medium">
-                        Found {communityRecommendations?.data?.length || 0} meaningful communities based on your unique assessment
+                        Found {recommendations?.communities?.length || 0} meaningful communities based on your unique assessment
                       </p>
                     </div>
                   </div>
@@ -399,7 +361,7 @@ export default function ClientWelcomePage() {
 
             {/* Community Recommendation Cards */}
             <div className="grid gap-6">
-              {(communityRecommendations?.data || []).map((community, index) => (
+              {(recommendations?.communities || []).map((community, index) => (
                 <CommunityRecommendationCard
                   key={community.id}
                   community={community}
