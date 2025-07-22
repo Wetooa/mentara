@@ -282,7 +282,7 @@ export function generateMetadataWithStructuredData(
  */
 export function updateTitleWithNotifications(
   baseTitle: string,
-  notificationData?: NotificationData
+  _notificationData?: NotificationData
 ): string {
   // Simple format: just return the base title as "Mentara | [Page]"
   // Notifications are now handled by favicon only, not title
