@@ -6,21 +6,18 @@
 export const TEST_ACCOUNTS = {
   CLIENTS: [
     {
-      id: 'fake_client_test_1',
       email: 'test.client.basic@mentaratest.dev',
       firstName: 'Sarah',
       lastName: 'Johnson',
       role: 'client' as const,
     },
     {
-      id: 'fake_client_test_2',
       email: 'test.client.complete@mentaratest.dev',
       firstName: 'Marcus',
       lastName: 'Rodriguez',
       role: 'client' as const,
     },
     {
-      id: 'fake_client_test_3',
       email: 'test.client.inactive@mentaratest.dev',
       firstName: 'Jennifer',
       lastName: 'Chen',
@@ -28,14 +25,12 @@ export const TEST_ACCOUNTS = {
       isActive: false,
     },
     {
-      id: 'fake_client_test_4',
       email: 'test.client.premium@mentaratest.dev',
       firstName: 'David',
       lastName: 'Kim',
       role: 'client' as const,
     },
     {
-      id: 'fake_client_test_5',
       email: 'test.client.longterm@mentaratest.dev',
       firstName: 'Maria',
       lastName: 'Gonzalez',
@@ -44,35 +39,30 @@ export const TEST_ACCOUNTS = {
   ],
   THERAPISTS: [
     {
-      id: 'fake_therapist_test_1',
       email: 'test.therapist.approved@mentaratest.dev',
       firstName: 'Dr. Michael',
       lastName: 'Thompson',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_2',
       email: 'test.therapist.pending@mentaratest.dev',
       firstName: 'Dr. Lisa',
       lastName: 'Park',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_3',
       email: 'test.therapist.specialist@mentaratest.dev',
       firstName: 'Dr. Amanda',
       lastName: 'Williams',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_4',
       email: 'test.therapist.trauma@mentaratest.dev',
       firstName: 'Dr. James',
       lastName: 'O\'Connor',
       role: 'therapist' as const,
     },
     {
-      id: 'fake_therapist_test_5',
       email: 'test.therapist.anxiety@mentaratest.dev',
       firstName: 'Dr. Emily',
       lastName: 'Zhang',
@@ -81,35 +71,30 @@ export const TEST_ACCOUNTS = {
   ],
   ADMINS: [
     {
-      id: 'fake_admin_test_1',
       email: 'test.admin.super@mentaratest.dev',
       firstName: 'Robert',
       lastName: 'Anderson',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_2',
       email: 'test.admin.user.manager@mentaratest.dev',
       firstName: 'Linda',
       lastName: 'Martinez',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_3',
       email: 'test.admin.content.manager@mentaratest.dev',
       firstName: 'William',
       lastName: 'Johnson',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_4',
       email: 'test.admin.billing@mentaratest.dev',
       firstName: 'Nancy',
       lastName: 'Wilson',
       role: 'admin' as const,
     },
     {
-      id: 'fake_admin_test_5',
       email: 'test.admin.technical@mentaratest.dev',
       firstName: 'Kevin',
       lastName: 'Lee',
@@ -118,35 +103,30 @@ export const TEST_ACCOUNTS = {
   ],
   MODERATORS: [
     {
-      id: 'fake_moderator_test_1',
       email: 'test.moderator.primary@mentaratest.dev',
       firstName: 'Alex',
       lastName: 'Morgan',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_2',
       email: 'test.moderator.community@mentaratest.dev',
       firstName: 'Taylor',
       lastName: 'Davis',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_3',
       email: 'test.moderator.content@mentaratest.dev',
       firstName: 'Jordan',
       lastName: 'Smith',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_4',
       email: 'test.moderator.support@mentaratest.dev',
       firstName: 'Casey',
       lastName: 'Brown',
       role: 'moderator' as const,
     },
     {
-      id: 'fake_moderator_test_5',
       email: 'test.moderator.night@mentaratest.dev',
       firstName: 'Avery',
       lastName: 'White',

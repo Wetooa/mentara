@@ -18,19 +18,19 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     return await createSimpleUsers(prisma);
   }
 
-  // Create test accounts first with defined IDs for testing
+  // Create test accounts first with auto-generated UUIDs
   console.log('🧪 Creating test accounts...');
+  console.log('🔹 Test Admin Accounts:');
 
   // Create test admin users
   for (const adminData of TEST_ACCOUNTS.ADMINS) {
     const userData = SeedDataGenerator.generateUserData('admin', adminData);
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(
-      `✅ Created test admin: ${adminData.firstName} ${adminData.lastName}`,
-    );
+    console.log(`  ${adminData.firstName} ${adminData.lastName}: ${user.id} (${user.email})`);
   }
 
+  console.log('🔹 Test Moderator Accounts:');
   // Create test moderator users
   for (const moderatorData of TEST_ACCOUNTS.MODERATORS) {
     const userData = SeedDataGenerator.generateUserData(
@@ -39,11 +39,10 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     );
     const user = await prisma.user.create({ data: userData });
     users.push(user);
-    console.log(
-      `✅ Created test moderator: ${moderatorData.firstName} ${moderatorData.lastName}`,
-    );
+    console.log(`  ${moderatorData.firstName} ${moderatorData.lastName}: ${user.id} (${user.email})`);
   }
 
+  console.log('🔹 Test Client Accounts:');
   // Create test client users
   for (const clientData of TEST_ACCOUNTS.CLIENTS) {
     const userData = SeedDataGenerator.generateUserData('client', clientData);
@@ -56,11 +55,10 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     });
     clients.push({ user, client });
     users.push(user);
-    console.log(
-      `✅ Created test client: ${clientData.firstName} ${clientData.lastName}`,
-    );
+    console.log(`  ${clientData.firstName} ${clientData.lastName}: ${user.id} (${user.email})`);
   }
 
+  console.log('🔹 Test Therapist Accounts:');
   // Create test therapist users
   for (const therapistData of TEST_ACCOUNTS.THERAPISTS) {
     const userData = SeedDataGenerator.generateUserData(
@@ -78,9 +76,7 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     });
     therapists.push({ user, therapist });
     users.push(user);
-    console.log(
-      `✅ Created test therapist: ${therapistData.firstName} ${therapistData.lastName}`,
-    );
+    console.log(`  ${therapistData.firstName} ${therapistData.lastName}: ${user.id} (${user.email})`);
   }
 
   // Create additional fake users for testing (if needed)
@@ -91,7 +87,6 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     SEED_CONFIG.USERS.ADMINS - TEST_ACCOUNTS.ADMINS.length;
   for (let i = 0; i < additionalAdmins; i++) {
     const userData = SeedDataGenerator.generateUserData('admin', {
-      id: `fake_admin_${i + 1}`,
       email: `admin${i + 1}@mentara.com`,
       firstName: 'Admin',
       lastName: `User ${i + 1}`,
@@ -108,7 +103,6 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     SEED_CONFIG.USERS.MODERATORS - TEST_ACCOUNTS.MODERATORS.length;
   for (let i = 0; i < additionalModerators; i++) {
     const userData = SeedDataGenerator.generateUserData('moderator', {
-      id: `fake_moderator_${i + 1}`,
       email: `moderator${i + 1}@mentara.com`,
       firstName: 'Moderator',
       lastName: `User ${i + 1}`,
@@ -124,9 +118,7 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
   const additionalClients =
     SEED_CONFIG.USERS.CLIENTS - TEST_ACCOUNTS.CLIENTS.length;
   for (let i = 0; i < additionalClients; i++) {
-    const userData = SeedDataGenerator.generateUserData('client', {
-      id: `fake_client_${i + 1}`,
-    });
+    const userData = SeedDataGenerator.generateUserData('client', {});
     const user = await prisma.user.create({ data: userData });
     const client = await prisma.client.create({
       data: {
@@ -145,9 +137,7 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
   const additionalTherapists =
     SEED_CONFIG.USERS.THERAPISTS - TEST_ACCOUNTS.THERAPISTS.length;
   for (let i = 0; i < additionalTherapists; i++) {
-    const userData = SeedDataGenerator.generateUserData('therapist', {
-      id: `fake_therapist_${i + 1}`,
-    });
+    const userData = SeedDataGenerator.generateUserData('therapist', {});
     const user = await prisma.user.create({ data: userData });
     const therapistProfileData = SeedDataGenerator.generateTherapistData();
     const therapist = await prisma.therapist.create({

@@ -5,11 +5,11 @@ const prisma = new PrismaClient({
 });
 
 async function debugCheckUser() {
-  console.log('🔍 Debugging messaging issue for fake_client_test_1...\n');
+  console.log('🔍 Debugging messaging issue for test client (test.client.basic@mentaratest.dev)...\n');
   
   try {
-    // 1. Check if fake_client_test_1 exists
-    console.log('1️⃣ Checking if fake_client_test_1 user exists...');
+    // 1. Check if test client exists
+    console.log('1️⃣ Checking if test client user exists...');
     const user = await prisma.user.findUnique({
       where: { email: 'test.client.basic@mentaratest.dev' },
       include: {
@@ -18,7 +18,7 @@ async function debugCheckUser() {
     });
     
     if (!user) {
-      console.log('❌ User fake_client_test_1 does NOT exist!');
+      console.log('❌ Test client user does NOT exist!');
       return;
     }
     
