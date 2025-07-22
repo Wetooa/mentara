@@ -80,7 +80,7 @@ export function TherapistApplicationCard({
             <div className="flex items-start gap-3 sm:gap-4">
               <Checkbox
                 checked={isSelected}
-                onCheckedChange={(checked) => onSelect(therapist.id as string, !!(checked as boolean))}
+                onCheckedChange={(checked) => onSelect(therapist.userId as string, !!(checked as boolean))}
                 disabled={isProcessing}
               />
               
