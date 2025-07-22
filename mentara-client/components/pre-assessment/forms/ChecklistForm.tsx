@@ -30,20 +30,20 @@ export default function PreAssessmentInitialCheckList({
 
         <div className="w-full flex flex-col gap-2">
           {LIST_OF_QUESTIONNAIRES.map((questionnaire) => {
-            const isSelected = isQuestionnaireSelected(questionnaire.id);
-            const handleSelect = () => handleSelectQuestionnaire(questionnaire.id);
+            const isSelected = isQuestionnaireSelected(questionnaire);
+            const handleSelect = () => handleSelectQuestionnaire(questionnaire);
 
             return (
               <div
                 onClick={handleSelect}
-                key={questionnaire.id}
+                key={questionnaire}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
                   "justify-start px-6 gap-4"
                 )}
               >
                 <Checkbox onClick={handleSelect} checked={isSelected} />
-                <label>{questionnaire.name}</label>
+                <label>{questionnaire}</label>
               </div>
             );
           })}
