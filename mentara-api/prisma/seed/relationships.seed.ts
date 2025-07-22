@@ -117,8 +117,9 @@ export async function seedMeetingNotes(
     try {
       const notes = await prisma.meetingNotes.create({
         data: {
+          id: `meeting_notes_${meeting.id}_${Date.now()}`,
           meetingId: meeting.id,
-          content: faker.helpers.arrayElement(noteTemplates),
+          notes: faker.helpers.arrayElement(noteTemplates),
           createdAt: faker.date.between({
             from: meeting.startTime,
             to: new Date(meeting.startTime.getTime() + 24 * 60 * 60 * 1000) // Within 24 hours after meeting

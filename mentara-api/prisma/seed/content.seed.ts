@@ -665,7 +665,7 @@ async function seedReportsForContent(
               'Off-topic discussion',
               'Violation of community guidelines'
             ]),
-            description: faker.helpers.arrayElement([
+            content: faker.helpers.arrayElement([
               'This post contains inappropriate language and may be triggering for other members.',
               'This appears to be spam or promotional content not related to mental health support.',
               'The content is harassing other community members.',
@@ -729,7 +729,7 @@ async function seedReportsForContent(
               'Personal attack',
               'Violation of community guidelines'
             ]),
-            description: faker.helpers.arrayElement([
+            content: faker.helpers.arrayElement([
               'This comment contains inappropriate language.',
               'This comment appears to be spam.',
               'The comment is personally attacking another member.',

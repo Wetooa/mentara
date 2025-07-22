@@ -1,9 +1,8 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-DB seed files audit
-- please improve db seed file
-- audit if it actually makes seed for ALL tables and if there are any errors in seed creation
-- i want ALL tables to have data when running db:seed:full
+Component Files audit
+- i notice that some of components in the client side have business logic in side them. im fine with having a bit of business logic such as handles for onClick, but i dont want to see any business logic such as api calls or data manipulation in the components.
+- these should be in hooks or lib/api files.
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 

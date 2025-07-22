@@ -353,8 +353,8 @@ async function seedUserBlocks(prisma: PrismaClient, users: any[]) {
       try {
         const block = await prisma.userBlock.create({
           data: {
-            blockingUserId: blockingUser.id,
-            blockedUserId: blockedUser.id,
+            blockerId: blockingUser.id,
+            blockedId: blockedUser.id,
             reason: faker.helpers.arrayElement([
               'Inappropriate behavior',
               'Harassment',
@@ -401,7 +401,7 @@ async function seedTypingIndicators(prisma: PrismaClient, conversations: any[], 
           data: {
             conversationId: conversation.id,
             userId: typingUser.userId,
-            startedAt: faker.date.recent({ days: 1 }),
+            lastTypingAt: faker.date.recent({ days: 1 }),
           },
         });
         typingIndicators.push(typingIndicator);

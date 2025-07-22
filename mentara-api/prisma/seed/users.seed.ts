@@ -158,5 +158,9 @@ export async function seedUsers(prisma: PrismaClient) {
     );
   }
 
+  // Extract moderators and admins from users array
+  const moderators = users.filter(user => user.role === 'moderator');
+  const admins = users.filter(user => user.role === 'admin');
+  
   return { users, clients, therapists, moderators, admins };
 }

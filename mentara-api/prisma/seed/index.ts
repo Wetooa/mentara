@@ -35,13 +35,11 @@ async function main() {
     const communities = await seedCommunities(prisma);
 
     // Phase 3: Memberships
-    console.log('
-📍 PHASE 3: Creating Community Memberships');
+    console.log('\n📍 PHASE 3: Creating Community Memberships');
     await seedMemberships(prisma, users, communities);
 
     // Phase 3.5: Moderator-Community Assignments
-    console.log('
-📍 PHASE 3.5: Creating Moderator-Community Assignments');
+    console.log('\n📍 PHASE 3.5: Creating Moderator-Community Assignments');
     await seedModeratorCommunityAssignments(prisma, moderators, communities);
 
     // Phase 4: Client-Therapist Relationships
@@ -57,13 +55,11 @@ async function main() {
     await seedPreAssessments(prisma, clients);
 
     // Phase 6: Meetings
-    console.log('
-📍 PHASE 6: Creating Meetings');
+    console.log('\n📍 PHASE 6: Creating Meetings');
     const meetings = await seedMeetings(prisma, relationships);
 
     // Phase 6.5: Meeting Notes
-    console.log('
-📍 PHASE 6.5: Creating Meeting Notes');
+    console.log('\n📍 PHASE 6.5: Creating Meeting Notes');
     await seedMeetingNotes(prisma, meetings);
 
     // Phase 7: Payment Methods
