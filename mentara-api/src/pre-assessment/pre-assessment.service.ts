@@ -370,7 +370,7 @@ export class PreAssessmentService {
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          answers: data.answers || existingAssessment.answers,
+          answers: data.answers || existingAssessment.answers as number[],
           scores,
           severityLevels,
           aiEstimate,
