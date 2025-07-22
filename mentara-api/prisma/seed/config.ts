@@ -150,20 +150,20 @@ export const SEED_CONFIG = {
   },
   RELATIONSHIPS: {
     CLIENT_THERAPIST_RATIO: 0.6, // 60% of clients get therapists (3 out of 5) - realistic
-    MEETINGS_PER_RELATIONSHIP: 2, // Reduced to 2 meetings per relationship - adequate for testing
+    MEETINGS_PER_RELATIONSHIP: 6, // Increased to 6 meetings per relationship - more session history
   },
   ASSESSMENTS: {
     COMPLETION_RATE: 0.8, // 80% completion rate - good for testing
   },
   MESSAGING: {
     CONVERSATIONS_PER_RELATIONSHIP: 1, // Direct therapy conversations
-    MESSAGES_PER_CONVERSATION: 8, // Reduced to 8 messages - enough to see conversation flow
+    MESSAGES_PER_CONVERSATION: 15, // Increased to 15 messages - more realistic conversations
     GROUP_CONVERSATIONS: 2, // Reduced to 2 group conversations - enough for testing
     SUPPORT_CONVERSATIONS: 1, // Single support conversation - adequate for testing
   },
   WORKSHEETS: {
     TEMPLATES: 4, // Reduced to 4 templates - good variety without overwhelm
-    SUBMISSIONS_PER_RELATIONSHIP: 2, // Reduced to 2 submissions per relationship
+    SUBMISSIONS_PER_RELATIONSHIP: 4, // Increased to 4 submissions per relationship - more worksheet data
     COMPLETION_RATE: 0.75, // 75% completion rate - realistic for testing
   },
   REVIEWS: {
@@ -172,13 +172,13 @@ export const SEED_CONFIG = {
     DETAILED_REVIEW_RATE: 0.8, // 80% of reviews include written feedback
   },
   SESSIONS: {
-    SESSIONS_PER_RELATIONSHIP: 2, // Reduced to 2 sessions per relationship
-    ACTIVITIES_PER_SESSION: 2, // Reduced to 2 activities per session
+    SESSIONS_PER_RELATIONSHIP: 5, // Increased to 5 sessions per relationship - better session tracking
+    ACTIVITIES_PER_SESSION: 4, // Increased to 4 activities per session - more detailed sessions
     PROGRESS_TRACKING_RATE: 0.7, // 70% tracking rate - good for testing
   },
   NOTIFICATIONS: {
     DEVICES_PER_USER: 1.0, // 1 device per user - keeps it simple
-    NOTIFICATIONS_PER_USER: 3, // Reduced to 3 notifications per user - adequate for testing
+    NOTIFICATIONS_PER_USER: 12, // Increased to 12 notifications per user - richer notification testing
     READ_RATE: 0.7, // 70% of notifications are read
   },
   THERAPIST_REQUESTS: {
@@ -187,7 +187,7 @@ export const SEED_CONFIG = {
     PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.6, low: 0.3 },
   },
   AUDIT_LOGS: {
-    COUNT: 15, // Reduced to 15 audit logs - enough for testing without overwhelm
+    COUNT: 50, // Increased to 50 audit logs - more audit trail data
     SUCCESS_RATE: 0.9, // 90% of actions are successful
     ADMIN_ACTION_RATE: 0.3, // 30% of logs are admin actions
   },

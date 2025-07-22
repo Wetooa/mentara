@@ -30,6 +30,16 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     const userData = SeedDataGenerator.generateUserData('admin', adminData);
     const user = await prisma.user.create({ data: userData });
     users.push(user);
+    
+    // Create admin profile
+    await prisma.admin.create({
+      data: {
+        userId: user.id,
+        permissions: ['user_management', 'therapist_approval', 'system_admin'],
+        adminLevel: 'admin',
+      },
+    });
+    
     console.log(`  ${adminData.firstName} ${adminData.lastName}: ${user.id} (${user.email})`);
   }
 
@@ -42,6 +52,16 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
     );
     const user = await prisma.user.create({ data: userData });
     users.push(user);
+    
+    // Create moderator profile
+    await prisma.moderator.create({
+      data: {
+        userId: user.id,
+        permissions: ['content_moderation', 'community_management'],
+        assignedCommunities: {},
+      },
+    });
+    
     console.log(`  ${moderatorData.firstName} ${moderatorData.lastName}: ${user.id} (${user.email})`);
   }
 
@@ -210,6 +230,56 @@ export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehe
       }));
       therapists.push(...therapistPairs);
     }
+  }
+
+  // Create admin profiles for admin users using batched transactions
+  const adminUsers = users.filter(u => u.role === 'admin');
+  if (adminUsers.length > 0) {
+    console.log(`👨‍💼 Creating ${adminUsers.length} admin profiles with batched transactions...`);
+    
+    const adminProfileOperations = adminUsers.map(user => {
+      return () => prisma.admin.create({
+        data: {
+          userId: user.id,
+          permissions: ['user_management', 'therapist_approval', 'system_admin'],
+          adminLevel: 'admin',
+        },
+      });
+    });
+
+    await batchedTransaction(
+      prisma,
+      adminProfileOperations,
+      {
+        operationName: 'admin profiles',
+        batchSize: 100
+      }
+    );
+  }
+
+  // Create moderator profiles for moderator users using batched transactions
+  const moderatorUsers = users.filter(u => u.role === 'moderator');
+  if (moderatorUsers.length > 0) {
+    console.log(`👮 Creating ${moderatorUsers.length} moderator profiles with batched transactions...`);
+    
+    const moderatorProfileOperations = moderatorUsers.map(user => {
+      return () => prisma.moderator.create({
+        data: {
+          userId: user.id,
+          permissions: ['content_moderation', 'community_management'],
+          assignedCommunities: {},
+        },
+      });
+    });
+
+    await batchedTransaction(
+      prisma,
+      moderatorProfileOperations,
+      {
+        operationName: 'moderator profiles',
+        batchSize: 100
+      }
+    );
   }
 
   // Extract moderators and admins from users array
