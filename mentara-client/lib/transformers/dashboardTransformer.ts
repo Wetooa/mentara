@@ -177,8 +177,13 @@ export function transformDashboardData(
           "Contact",
         status: comm.status || "offline",
         lastMessage:
-          comm.lastMessage || comm.lastMessageContent || "No messages yet",
-        time: safeDateTimeFormat(comm.time || comm.lastMessageTime || comm.updatedAt),
+          comm.lastMessage?.content || comm.lastMessageContent || "No messages yet",
+        time: safeDateTimeFormat(
+          comm.lastMessage?.time || 
+          comm.time || 
+          comm.lastMessageTime || 
+          comm.updatedAt
+        ),
         unread: comm.unread || comm.unreadCount || 0,
         avatar:
           comm.avatar ||
