@@ -1,12 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { getMessagingSocket, connectMessagingSocket, isMessagingConnected, disconnectSocket } from "@/lib/socket";
-
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
-import { useEffect, useCallback, useRef, useState } from "react";
+import { useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Socket } from "socket.io-client";
+import { useSocketConnection } from "../useSocketConnection";
 
 interface Notification {
   id: string;
@@ -27,12 +25,7 @@ interface NotificationWebSocketEvent {
   data: any;
 }
 
-interface NotificationConnectionState {
-  isConnected: boolean;
-  isReconnecting: boolean;
-  error: string | null;
-  lastConnected: Date | null;
-}
+// Removed NotificationConnectionState - now using centralized socket connection
 
 /**
  * Enhanced hook for managing user notifications with real-time WebSocket support
@@ -46,7 +39,7 @@ export function useNotifications(params: {
 } = {}) {
   const api = useApi();
   const queryClient = useQueryClient();
-  const { accessToken, user } = useAuth();
+  const { user } = useAuth();
   
   // Configuration with defaults
   const config = {
@@ -55,19 +48,15 @@ export function useNotifications(params: {
     ...params
   };
   
-  // WebSocket connection state
-  const [connectionState, setConnectionState] = useState<NotificationConnectionState>({
-    isConnected: false,
-    isReconnecting: false,
-    error: null,
-    lastConnected: null,
+  // Use centralized socket connection
+  const {
+    connectionState,
+    subscribeToEvent,
+    reconnect: reconnectWebSocket,
+  } = useSocketConnection({
+    subscriberId: 'notifications',
+    enableRealtime: config.enableRealtime,
   });
-  
-  const socketRef = useRef<Socket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 5;
-  const reconnectDelay = 3000;
 
   // Get notifications
   const {
@@ -123,140 +112,7 @@ export function useNotifications(params: {
     },
   });
 
-  // Socket.io connection management using centralized configuration
-  const connectWebSocket = useCallback(async () => {
-    if (!accessToken || !user || !config.enableRealtime) return;
-    if (socketRef.current?.connected) return;
-
-    try {
-      setConnectionState(prev => ({ ...prev, isReconnecting: true, error: null }));
-      
-      console.log('🔔 Connecting notifications to messaging socket...');
-      console.log('🔑 [NOTIFICATIONS] Using access token for socket authentication:', !!accessToken);
-      
-      // Use centralized messaging socket with authentication token
-      const socket = getMessagingSocket(accessToken || undefined);
-      
-      // Set up notification-specific event listeners
-      socket.on('connect', () => {
-        console.log('✅ Notifications connected via messaging socket');
-        console.log('👤 [NOTIFICATIONS] User authenticated:', { userId: user.id, role: user.role });
-        setConnectionState({
-          isConnected: true,
-          isReconnecting: false,
-          error: null,
-          lastConnected: new Date(),
-        });
-        reconnectAttemptsRef.current = 0;
-        
-        // Join user room for notifications
-        socket.emit('join_user_room', { userId: user.id });
-      });
-
-      // Listen for notification events
-      socket.on('notification', (data) => {
-        handleWebSocketEvent({ type: 'notification', data });
-      });
-
-      socket.on('unreadCount', (data) => {
-        handleWebSocketEvent({ type: 'unread_count_updated', data });
-      });
-
-      socket.on('disconnect', (reason) => {
-        console.log('Notifications Socket.io disconnected:', reason);
-        setConnectionState(prev => ({ 
-          ...prev, 
-          isConnected: false, 
-          isReconnecting: false 
-        }));
-
-        // Auto-reconnect on unexpected disconnection
-        if (reason === 'io server disconnect' || reason === 'transport error') {
-          if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-            scheduleReconnect();
-          }
-        }
-      });
-
-      socket.on('connect_error', (error) => {
-        console.error('🚫 Notifications socket connection error:', error);
-        setConnectionState(prev => ({ 
-          ...prev, 
-          error: 'Connection error',
-          isReconnecting: false 
-        }));
-        scheduleReconnect();
-      });
-
-      socketRef.current = socket;
-
-      // Connect the messaging socket with authentication token
-      await connectMessagingSocket(accessToken || undefined);
-
-    } catch (error) {
-      console.error('❌ Failed to connect notifications socket:', error);
-      setConnectionState(prev => ({ 
-        ...prev, 
-        error: 'Failed to connect',
-        isReconnecting: false 
-      }));
-      scheduleReconnect();
-    }
-  }, [accessToken, user, config.enableRealtime]);
-
-  const disconnectWebSocket = useCallback(() => {
-    console.log('🔔 Disconnecting notifications socket...');
-    
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    
-    // Remove notification-specific listeners before disconnecting
-    if (socketRef.current) {
-      socketRef.current.off('notification');
-      socketRef.current.off('unreadCount');
-      socketRef.current = null;
-    }
-    
-    setConnectionState({
-      isConnected: false,
-      isReconnecting: false,
-      error: null,
-      lastConnected: null,
-    });
-  }, []);
-
-  const scheduleReconnect = useCallback(() => {
-    if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-      setConnectionState(prev => ({ 
-        ...prev, 
-        error: 'Max reconnection attempts reached' 
-      }));
-      return;
-    }
-
-    reconnectAttemptsRef.current++;
-    const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1); // Exponential backoff
-    
-    console.log(`🔄 Scheduling notification socket reconnection attempt ${reconnectAttemptsRef.current} in ${delay}ms`);
-    
-    reconnectTimeoutRef.current = setTimeout(() => {
-      connectWebSocket();
-    }, delay);
-  }, [connectWebSocket]);
-
-  // Sync connection state with centralized socket
-  const updateConnectionState = useCallback(() => {
-    const isConnected = isMessagingConnected();
-    setConnectionState(prev => ({
-      ...prev,
-      isConnected,
-      isReconnecting: prev.isReconnecting && !isConnected,
-    }));
-  }, []);
-
-  // Handle WebSocket events
+  // Handle WebSocket events using centralized connection
   const handleWebSocketEvent = useCallback((event: NotificationWebSocketEvent) => {
     switch (event.type) {
       case 'notification':
@@ -364,29 +220,36 @@ export function useNotifications(params: {
     }
   }, []);
 
-  // Sync connection state with centralized socket
+  // Subscribe to notification events using centralized connection
   useEffect(() => {
-    const interval = setInterval(updateConnectionState, 1000);
-    return () => clearInterval(interval);
-  }, [updateConnectionState]);
+    if (!config.enableRealtime) return;
 
-  // WebSocket lifecycle management
-  useEffect(() => {
-    if (config.enableRealtime && accessToken && user) {
-      connectWebSocket();
-    }
-    
+    console.log('🔔 [NOTIFICATIONS] Setting up event subscriptions');
+
+    const unsubscribeNotification = subscribeToEvent('notification', (data) => {
+      handleWebSocketEvent({ type: 'notification', data });
+    });
+
+    const unsubscribeUnreadCount = subscribeToEvent('unreadCount', (data) => {
+      handleWebSocketEvent({ type: 'unread_count_updated', data });
+    });
+
+    const unsubscribeNotificationRead = subscribeToEvent('notification_read', (data) => {
+      handleWebSocketEvent({ type: 'notification_read', data });
+    });
+
+    const unsubscribeNotificationDeleted = subscribeToEvent('notification_deleted', (data) => {
+      handleWebSocketEvent({ type: 'notification_deleted', data });
+    });
+
+    // Cleanup subscriptions
     return () => {
-      disconnectWebSocket();
+      unsubscribeNotification();
+      unsubscribeUnreadCount();
+      unsubscribeNotificationRead();
+      unsubscribeNotificationDeleted();
     };
-  }, [connectWebSocket, disconnectWebSocket, config.enableRealtime, accessToken, user]);
-
-  // Manual reconnection
-  const reconnectWebSocket = useCallback(() => {
-    disconnectWebSocket();
-    reconnectAttemptsRef.current = 0;
-    setTimeout(connectWebSocket, 1000);
-  }, [connectWebSocket, disconnectWebSocket]);
+  }, [config.enableRealtime, subscribeToEvent, handleWebSocketEvent]);
 
   // Enhanced mark as read with real-time sync
   const markAsReadEnhanced = useCallback((id: string) => {
