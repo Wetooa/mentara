@@ -101,7 +101,7 @@ export default function DashboardPage() {
 
   // Navigation handlers for clickable dashboard cards
   const handleUpcomingSessionsClick = () => {
-    router.push('/client/booking');
+    router.push('/client/sessions/upcoming');
   };
 
   const handlePendingWorksheetsClick = () => {
@@ -109,8 +109,7 @@ export default function DashboardPage() {
   };
 
   const handleCompletedSessionsClick = () => {
-    // Could navigate to a sessions history page in the future
-    console.log('Navigate to completed sessions');
+    router.push('/client/sessions/completed');
   };
 
   const handleCompletedWorksheetsClick = () => {

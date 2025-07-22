@@ -46,6 +46,12 @@ export default function MainLayout({
       id: "dashboard",
     },
     {
+      name: "Sessions",
+      path: "/client/sessions",
+      icon: "/icons/sessions.svg",
+      id: "sessions",
+    },
+    {
       name: "Therapist",
       path: "/client/therapist",
       icon: "/icons/therapist.svg",
