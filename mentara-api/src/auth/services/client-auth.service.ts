@@ -302,11 +302,11 @@ export class ClientAuthService {
     const result = await this.emailVerificationService.verifyEmail(otpCode);
     
     if (result.success) {
-      // Update isVerified flag for client
+      // Update emailVerified flag for client
       await this.prisma.user.update({
         where: { id: user.id },
         data: {
-          isVerified: true,
+          emailVerified: true,
         },
       });
     }
