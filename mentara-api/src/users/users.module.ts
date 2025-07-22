@@ -6,7 +6,6 @@ import { ProfileService } from './profile.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
 import { EventBusService } from '../common/events/event-bus.service';
-import { SupabaseStorageService } from '../common/services/supabase-storage.service';
 
 @Module({
   controllers: [UsersController, ProfileController],
@@ -16,7 +15,6 @@ import { SupabaseStorageService } from '../common/services/supabase-storage.serv
     PrismaService,
     RoleUtils,
     EventBusService,
-    SupabaseStorageService,
   ],
   exports: [UsersService, ProfileService],
 })
