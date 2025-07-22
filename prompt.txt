@@ -1,14 +1,19 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-Dashboard UX issues
-- currently, the book session buttons on the dashboard is not properly working. the same also goes for the schedule button on the "Your therapist part", these buttons are not working or doing anything
+
+Session Page error
+- for some reason, im getting this error when I try to use the Select component in the session page:
+
+Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+
+components/ui/select.tsx (110:5) @ SelectItem
+
+  108 | }: React.ComponentProps<typeof SelectPrimitive.Item>) {
+  109 |   return (
+> 110 |     <SelectPrimitive.Item
+      |     ^
 
 
-- recent communications section is also not showing any data even though the user has a contact with one of their therapists
-- just to be clear, when you have a therapist, you automatically should have a contact with them so when getting the users conversations, it should also check their therapists to see if they already have a conversation with them and create one if there is none
-
-
-- progress tracking and notifications being on the very bottom. another issue is the "recent communications" is taking up full view height meaning the progress tracking and notifications are not visible unless you scroll down. This is not a good UX, they should be visible without scrolling down. this issue might need a rethinking of the dashboard layout to make it more user-friendly and accessible. search the web for the possible issues
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 
