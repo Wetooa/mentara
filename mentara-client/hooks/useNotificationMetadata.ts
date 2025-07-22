@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { updateTitleWithNotifications, NotificationData, NOTIFICATION_METADATA } from "@/lib/metadata";
+import { updateTitleWithNotifications, NotificationData } from "@/lib/metadata";
 
 interface UseNotificationMetadataOptions {
   baseTitle?: string;
@@ -56,14 +56,10 @@ export function useNotificationMetadata(
           n.type === "SECURITY_ALERT" || n.type === "PAYMENT_FAILED"
         );
         
-        // Determine latest notification type for indicator
-        const latestNotification = notifications[0];
-        const latestType = latestNotification?.type as keyof typeof NOTIFICATION_METADATA;
-
+        // Simplified notification data (no complex type tracking)
         return {
           unreadCount,
           hasUrgent,
-          latestType: latestType && NOTIFICATION_METADATA[latestType] ? latestType : undefined,
         };
       } catch (error) {
         console.error("Failed to fetch notification metadata:", error);

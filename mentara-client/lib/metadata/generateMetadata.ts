@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { SITE_CONFIG, DEFAULT_METADATA, ROLE_METADATA, NOTIFICATION_METADATA } from "./constants";
+import { SITE_CONFIG, DEFAULT_METADATA, ROLE_METADATA } from "./constants";
 import { generateOpenGraphMetadata } from "./openGraph";
 import { generateStructuredData } from "./structuredData";
 
@@ -44,7 +44,7 @@ export interface TherapistProfile extends UserProfile {
 export interface NotificationData {
   unreadCount: number;
   hasUrgent: boolean;
-  latestType?: keyof typeof NOTIFICATION_METADATA;
+  // Removed latestType since we no longer use complex notification metadata
 }
 
 /**
@@ -185,26 +185,15 @@ export function generateProfileMetadata(profile: UserProfile | TherapistProfile)
 }
 
 /**
- * Generate metadata for role-specific dashboards
+ * Generate metadata for role-specific dashboards (simplified)
  */
 export function generateRoleMetadata(
-  role: keyof typeof ROLE_METADATA,
-  notificationData?: NotificationData
+  role: keyof typeof ROLE_METADATA
 ): Metadata {
   const roleConfig = ROLE_METADATA[role];
   
-  let title = roleConfig.title;
-  
-  // Add notification indicators to title
-  if (notificationData?.unreadCount > 0) {
-    const indicator = notificationData.hasUrgent 
-      ? NOTIFICATION_METADATA.URGENT 
-      : notificationData.latestType 
-        ? NOTIFICATION_METADATA[notificationData.latestType] 
-        : "🔔";
-    
-    title = `(${notificationData.unreadCount}) ${indicator} ${title}`;
-  }
+  // Simple title format: "Mentara | [Role]" - no notification indicators
+  const title = roleConfig.title;
 
   return generatePageMetadata({
     title,
@@ -288,21 +277,14 @@ export function generateMetadataWithStructuredData(
 }
 
 /**
- * Update page title with notification count (client-side)
+ * Update page title with simple format (client-side)
+ * Simplified: Always returns "Mentara | [Page Name]" format regardless of notifications
  */
 export function updateTitleWithNotifications(
   baseTitle: string,
-  notificationData: NotificationData
+  notificationData?: NotificationData
 ): string {
-  if (notificationData.unreadCount === 0) {
-    return baseTitle;
-  }
-
-  const indicator = notificationData.hasUrgent 
-    ? NOTIFICATION_METADATA.URGENT 
-    : notificationData.latestType 
-      ? NOTIFICATION_METADATA[notificationData.latestType] 
-      : "🔔";
-  
-  return `(${notificationData.unreadCount}) ${indicator} ${baseTitle}`;
+  // Simple format: just return the base title as "Mentara | [Page]"
+  // Notifications are now handled by favicon only, not title
+  return baseTitle;
 }
