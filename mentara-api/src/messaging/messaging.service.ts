@@ -77,7 +77,9 @@ export class MessagingService {
       type: rawType = 'direct',
       title,
     } = createConversationDto;
-    
+
+    console.log(createConversationDto);
+
     const type = this.mapConversationType(rawType);
 
     // Validate conversation type and participants
@@ -166,9 +168,9 @@ export class MessagingService {
   async getUserConversations(userId: string, page = 1, limit = 20) {
     console.log('🔍 [MESSAGING SERVICE] getUserConversations called');
     console.log('📊 [PARAMETERS]', { userId, page, limit });
-    
+
     const skip = (page - 1) * limit;
-    
+
     try {
       console.log('🗃️ [DATABASE] Executing conversation query...');
       const conversations = await this.prisma.conversation.findMany({
@@ -229,14 +231,25 @@ export class MessagingService {
         take: limit,
       });
 
-      console.log('✅ [DATABASE RESULT] Found conversations:', conversations.length);
+      console.log(
+        '✅ [DATABASE RESULT] Found conversations:',
+        conversations.length,
+      );
       console.log('📝 [CONVERSATION DETAILS]:');
       conversations.forEach((conv, index) => {
-        console.log(`   ${index + 1}. ${conv.type} - "${conv.title || 'Untitled'}" (ID: ${conv.id})`);
-        console.log(`      Participants: ${conv.participants.length}, Messages: ${conv.messages.length}`);
+        console.log(
+          `   ${index + 1}. ${conv.type} - "${conv.title || 'Untitled'}" (ID: ${conv.id})`,
+        );
+        console.log(
+          `      Participants: ${conv.participants.length}, Messages: ${conv.messages.length}`,
+        );
         if (conv.participants.length > 0) {
-          const otherParticipants = conv.participants.filter(p => p.userId !== userId);
-          console.log(`      Other participants: ${otherParticipants.map(p => `${p.user.firstName} ${p.user.lastName} (${p.user.role})`).join(', ')}`);
+          const otherParticipants = conv.participants.filter(
+            (p) => p.userId !== userId,
+          );
+          console.log(
+            `      Other participants: ${otherParticipants.map((p) => `${p.user.firstName} ${p.user.lastName} (${p.user.role})`).join(', ')}`,
+          );
         }
       });
 
@@ -407,9 +420,24 @@ export class MessagingService {
         messageType,
         replyToId,
         // Use multiple attachment fields (schema only supports these)
-        attachmentUrls: attachmentUrls.length > 0 ? attachmentUrls : (attachmentUrl ? [attachmentUrl] : []),
-        attachmentNames: attachmentNames.length > 0 ? attachmentNames : (attachmentName ? [attachmentName] : []),
-        attachmentSizes: attachmentSizes.length > 0 ? attachmentSizes : (attachmentSize ? [attachmentSize] : []),
+        attachmentUrls:
+          attachmentUrls.length > 0
+            ? attachmentUrls
+            : attachmentUrl
+              ? [attachmentUrl]
+              : [],
+        attachmentNames:
+          attachmentNames.length > 0
+            ? attachmentNames
+            : attachmentName
+              ? [attachmentName]
+              : [],
+        attachmentSizes:
+          attachmentSizes.length > 0
+            ? attachmentSizes
+            : attachmentSize
+              ? [attachmentSize]
+              : [],
       },
       include: {
         sender: {
@@ -477,7 +505,9 @@ export class MessagingService {
         recipientIds,
         replyToMessageId: message.replyToId || undefined,
         fileAttachments:
-          message.attachmentUrls.length > 0 ? message.attachmentUrls : undefined,
+          message.attachmentUrls.length > 0
+            ? message.attachmentUrls
+            : undefined,
       }),
     );
 

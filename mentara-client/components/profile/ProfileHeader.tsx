@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Edit, MapPin, Calendar, Shield, Star } from 'lucide-react';
 import { PublicProfileResponse } from '@/lib/api/services/profile';
 import { format, parseISO } from 'date-fns';
+import { ChatButton } from './ChatButton';
 
 interface ProfileHeaderProps {
   profile: PublicProfileResponse;
@@ -73,6 +74,17 @@ export function ProfileHeader({ profile, isOwnProfile, onEditClick }: ProfileHea
             <Edit className="w-4 h-4 mr-2" />
             Edit Profile
           </Button>
+        )}
+
+        {/* Chat Button (Other Profiles Only) */}
+        {!isOwnProfile && (
+          <ChatButton
+            targetUserId={user.id}
+            targetUserName={displayName}
+            variant="secondary"
+            size="sm"
+            className="absolute top-4 right-4 bg-white/90 hover:bg-white"
+          />
         )}
       </div>
 

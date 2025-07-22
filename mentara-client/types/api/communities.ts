@@ -1,4 +1,5 @@
 // Community DTOs matching backend exactly
+export enum ActiveCommunities {}
 
 export interface Community {
   id: string;
@@ -72,7 +73,7 @@ export interface Comment {
     firstName: string;
     lastName: string;
     avatarUrl?: string;
-    role?: 'client' | 'therapist' | 'moderator' | 'admin';
+    role?: "client" | "therapist" | "moderator" | "admin";
   };
   hearts: CommentHeart[];
   children?: Comment[];
@@ -137,7 +138,7 @@ export interface CreateCommentRequest {
 
 export interface PostAttachment {
   id?: string;
-  type: 'image' | 'file' | 'video';
+  type: "image" | "file" | "video";
   url: string;
   fileName: string;
   fileSize?: number;

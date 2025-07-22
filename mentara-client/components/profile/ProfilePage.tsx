@@ -1,15 +1,32 @@
 "use client";
 
-import { Card } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/profile/useProfile';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { ProfileActivity } from './ProfileActivity';
-import { ProfileCommunities } from './ProfileCommunities';
-import { ProfileEditModal } from './ProfileEditModal';
-import { ProfileHeader } from './ProfileHeader';
-import { ProfileInfo } from './ProfileInfo';
+import { useState } from "react";
+import { useProfile } from "@/hooks/profile/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Edit,
+  MapPin,
+  Calendar,
+  Users,
+  MessageCircle,
+  FileText,
+  Star,
+  Shield,
+  Briefcase,
+  Clock,
+  DollarSign,
+  Globe,
+} from "lucide-react";
+import { ProfileHeader } from "./ProfileHeader";
+import { ProfileCommunities } from "./ProfileCommunities";
+import { ProfileActivity } from "./ProfileActivity";
+import { ProfileInfo } from "./ProfileInfo";
+import { ProfileEditModal } from "./ProfileEditModal";
+import { cn } from "@/lib/utils";
 
 interface ProfilePageProps {
   userId: string;
@@ -34,10 +51,20 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
 
   if (error || !profile) {
     return (
-      <div className={cn("flex flex-col items-center justify-center py-12", className)}>
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center py-12",
+          className
+        )}
+      >
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Profile Not Found</h3>
-          <p className="text-gray-600">This profile may not exist or you may not have permission to view it.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Profile Not Found
+          </h3>
+          <p className="text-gray-600">
+            This profile may not exist or you may not have permission to view
+            it.
+          </p>
         </div>
       </div>
     );
@@ -128,7 +155,10 @@ function ProfilePageSkeleton() {
               <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
               <div className="flex flex-wrap gap-2">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-6 bg-gray-200 rounded-full animate-pulse w-20" />
+                  <div
+                    key={i}
+                    className="h-6 bg-gray-200 rounded-full animate-pulse w-20"
+                  />
                 ))}
               </div>
             </div>

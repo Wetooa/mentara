@@ -564,6 +564,53 @@ export class AdminTherapistService {
           });
         }
 
+        // Join the therapist to the community
+        if (upperCaseStatus === 'APPROVED') {
+          // Map areas of expertise to community slugs
+          const areasToCommunityMap: Record<string, string> = {
+            stress: 'stress-support',
+            anxiety: 'anxiety-support',
+            depression: 'depression-support',
+            insomnia: 'insomnia-support',
+            panic: 'panic-disorder-support',
+            bipolar: 'bipolar-disorder-support',
+            ocd: 'ocd-support',
+            ptsd: 'ptsd-support',
+            'social-anxiety': 'social-anxiety-support',
+            phobia: 'phobia-support',
+            burnout: 'burnout-support',
+            'eating-disorder': 'eating-disorders-support',
+            adhd: 'adhd-support',
+            'substance-use': 'substance-use-support',
+            'drug-use': 'drug-use-support',
+          };
+
+          // Get community IDs based on therapist's areas of expertise
+          const communityMemberships = updatedTherapist.areasOfExpertise
+            .map((area) => areasToCommunityMap[area])
+            .filter(Boolean) // Remove undefined values
+            .map((communitySlug) => ({
+              userId: therapistId,
+              communityId: `dev_comm_${communitySlug}`, // Using the format from your screenshot
+              joinedAt: new Date(),
+            }));
+
+          // Also add to general support community
+          communityMemberships.push({
+            userId: therapistId,
+            communityId: 'dev_comm_general-support',
+            joinedAt: new Date(),
+          });
+
+          // Create all memberships
+          if (communityMemberships.length > 0) {
+            await tx.membership.createMany({
+              data: communityMemberships,
+              skipDuplicates: true, // Prevent duplicate memberships
+            });
+          }
+        }
+
         // Audit log removed - not needed for student project
         if (upperCaseStatus === 'APPROVED') {
           // 5. Send approval email

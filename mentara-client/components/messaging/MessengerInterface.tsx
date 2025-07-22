@@ -1,20 +1,25 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Send,
   Paperclip,
@@ -40,46 +45,61 @@ import {
   Copy,
   Forward,
   Flag,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useRealtimeMessaging } from '@/hooks/messaging/useRealtimeMessaging';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { format, isToday, isYesterday, differenceInMinutes } from 'date-fns';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useMessaging } from "@/hooks/messaging/useMessaging";
+import { useStartConversation } from "@/hooks/messaging/useStartConversation";
+import { logger } from "@/lib/logger";
+import { ConnectionStatus } from "@/components/messaging/ConnectionStatus";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import type { MessagingMessage, MessagingConversation } from '@/lib/api/services/messaging';
-import { useUserSearch } from '@/components/search/hooks/useUserSearch';
-import type { User } from '@/components/search/UserSearchBar';
+} from "@/components/ui/resizable";
+import type {
+  MessagingMessage,
+  MessagingConversation,
+} from "@/lib/api/services/messaging";
+import { User } from "../search";
 
 interface MessengerInterfaceProps {
   className?: string;
-  onCallInitiate?: (conversationId: string, type: 'audio' | 'video') => void;
+  onCallInitiate?: (conversationId: string, type: "audio" | "video") => void;
   onVideoMeetingJoin?: (conversationId: string) => void;
+  targetUserId?: string;
 }
 
-const EMOJI_REACTIONS = ['❤️', '👍', '😂', '😮', '😢', '😡'];
+function getOtherParticipant(
+  conversation: MessagingConversation,
+  userId?: string
+) {
+  if (!userId) return null;
+  if (!conversation) return null;
+  return conversation.participants.find((p) => p.userId !== userId) || null;
+}
+
+const EMOJI_REACTIONS = ["❤️", "👍", "😂", "😮", "😢", "😡"];
 
 const formatMessageTime = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
 
-  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 1) return "Just now";
   if (diffMinutes < 60) return `${diffMinutes}m`;
-  if (isToday(date)) return format(date, 'HH:mm');
-  if (isYesterday(date)) return 'Yesterday';
-  return format(date, 'MMM d');
+  if (isToday(date)) return format(date, "HH:mm");
+  if (isYesterday(date)) return "Yesterday";
+  return format(date, "MMM d");
 };
 
 const getInitials = (name: string) => {
   return name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
     .toUpperCase()
     .slice(0, 2);
 };
@@ -95,45 +115,51 @@ const MessageBubble: React.FC<{
   onCopy: () => void;
   onForward: () => void;
   onReport: () => void;
-}> = ({ 
-  message, 
-  isOwn, 
-  showAvatar, 
-  onReact, 
-  onReply, 
-  onEdit, 
-  onDelete, 
-  onCopy, 
-  onForward, 
-  onReport 
+}> = ({
+  message,
+  isOwn,
+  showAvatar,
+  onReact,
+  onReply,
+  onEdit,
+  onDelete,
+  onCopy,
+  onForward,
+  onReport,
 }) => {
   const [showReactions, setShowReactions] = useState(false);
-  
+
   const getMessageStatus = () => {
     if (!isOwn) return null;
-    
-    const hasReadReceipts = message.readReceipts && message.readReceipts.length > 0;
+
+    const hasReadReceipts =
+      message.readReceipts && message.readReceipts.length > 0;
     if (hasReadReceipts) {
       return <CheckCheck className="h-3 w-3 text-blue-500" />;
     }
-    
+
     // Simple delivered vs sent logic (could be enhanced with real delivery status)
     const messageAge = Date.now() - new Date(message.createdAt).getTime();
     if (messageAge > 1000) {
       return <CheckCheck className="h-3 w-3 text-gray-400" />;
     }
-    
+
     return <Check className="h-3 w-3 text-gray-400" />;
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content);
-    toast.success('Message copied to clipboard');
+    toast.success("Message copied to clipboard");
     onCopy();
   };
 
   return (
-    <div className={cn("flex gap-3 group", isOwn ? "flex-row-reverse" : "flex-row")}>
+    <div
+      className={cn(
+        "flex gap-3 group",
+        isOwn ? "flex-row-reverse" : "flex-row"
+      )}
+    >
       {/* Avatar */}
       {showAvatar && !isOwn && (
         <Avatar className="h-8 w-8 flex-shrink-0">
@@ -144,10 +170,20 @@ const MessageBubble: React.FC<{
       {showAvatar && isOwn && <div className="w-8" />}
 
       {/* Message Content */}
-      <div className={cn("flex flex-col gap-1 max-w-[70%]", isOwn ? "items-end" : "items-start")}>
+      <div
+        className={cn(
+          "flex flex-col gap-1 max-w-[70%]",
+          isOwn ? "items-end" : "items-start"
+        )}
+      >
         {/* Reply indicator */}
         {message.replyToId && (
-          <div className={cn("text-xs text-muted-foreground flex items-center gap-1", isOwn ? "flex-row-reverse" : "flex-row")}>
+          <div
+            className={cn(
+              "text-xs text-muted-foreground flex items-center gap-1",
+              isOwn ? "flex-row-reverse" : "flex-row"
+            )}
+          >
             <Reply className="h-3 w-3" />
             Replying to message
           </div>
@@ -157,8 +193,8 @@ const MessageBubble: React.FC<{
         <div
           className={cn(
             "relative px-3 py-2 rounded-2xl text-sm",
-            isOwn 
-              ? "bg-blue-500 text-white rounded-br-md" 
+            isOwn
+              ? "bg-blue-500 text-white rounded-br-md"
               : "bg-gray-100 text-gray-900 rounded-bl-md",
             message.isEdited && "opacity-90"
           )}
@@ -174,18 +210,22 @@ const MessageBubble: React.FC<{
           </div>
 
           {/* Attachments */}
-          {message.attachments && message.attachments.length > 0 && (
+          {message.attachmentUrls && message.attachmentUrls.length > 0 && (
             <div className="mt-2 space-y-2">
-              {message.attachments.map(attachment => (
+              {message.attachmentUrls.map((url, index) => (
                 <div
-                  key={attachment.id}
+                  key={index}
                   className={cn(
                     "p-2 rounded-lg border flex items-center gap-2",
-                    isOwn ? "bg-blue-400/20 border-blue-300" : "bg-white border-gray-200"
+                    isOwn
+                      ? "bg-blue-400/20 border-blue-300"
+                      : "bg-white border-gray-200"
                   )}
                 >
                   <Paperclip className="h-4 w-4" />
-                  <span className="text-xs truncate">{attachment.fileName}</span>
+                  <span className="text-xs truncate">
+                    {message.attachmentNames?.[index] || 'File'}
+                  </span>
                 </div>
               ))}
             </div>
@@ -195,10 +235,13 @@ const MessageBubble: React.FC<{
           {message.reactions && message.reactions.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {Object.entries(
-                message.reactions.reduce((acc, reaction) => {
-                  acc[reaction.emoji] = (acc[reaction.emoji] || 0) + 1;
-                  return acc;
-                }, {} as Record<string, number>)
+                message.reactions.reduce(
+                  (acc, reaction) => {
+                    acc[reaction.emoji] = (acc[reaction.emoji] || 0) + 1;
+                    return acc;
+                  },
+                  {} as Record<string, number>
+                )
               ).map(([emoji, count]) => (
                 <Badge
                   key={emoji}
@@ -214,11 +257,13 @@ const MessageBubble: React.FC<{
 
           {/* Quick reactions (on hover) */}
           {showReactions && (
-            <div className={cn(
-              "absolute -top-8 flex gap-1 bg-white rounded-full shadow-lg border p-1",
-              isOwn ? "-left-20" : "-right-20"
-            )}>
-              {EMOJI_REACTIONS.map(emoji => (
+            <div
+              className={cn(
+                "absolute -top-8 flex gap-1 bg-white rounded-full shadow-lg border p-1",
+                isOwn ? "-left-20" : "-right-20"
+              )}
+            >
+              {EMOJI_REACTIONS.map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => onReact(emoji)}
@@ -232,14 +277,24 @@ const MessageBubble: React.FC<{
         </div>
 
         {/* Message metadata */}
-        <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", isOwn ? "flex-row-reverse" : "flex-row")}>
+        <div
+          className={cn(
+            "flex items-center gap-2 text-xs text-muted-foreground",
+            isOwn ? "flex-row-reverse" : "flex-row"
+          )}
+        >
           <span>{formatMessageTime(message.createdAt)}</span>
           {getMessageStatus()}
         </div>
       </div>
 
       {/* Message actions */}
-      <div className={cn("opacity-0 group-hover:opacity-100 transition-opacity", isOwn ? "order-first" : "order-last")}>
+      <div
+        className={cn(
+          "opacity-0 group-hover:opacity-100 transition-opacity",
+          isOwn ? "order-first" : "order-last"
+        )}
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -333,18 +388,21 @@ const ConversationItem: React.FC<{
   onSelect: () => void;
   isOnline?: boolean;
   isTyping?: boolean;
-}> = ({ conversation, isSelected, onSelect, isOnline, isTyping }) => {
-  const otherParticipant = conversation.participants[0]; // Assuming direct conversation
-  const displayName = otherParticipant 
+  user: User;
+}> = ({ conversation, isSelected, onSelect, isOnline, isTyping, user }) => {
+  const otherParticipant = getOtherParticipant(conversation, user.id); // Assuming direct conversation
+  const displayName = otherParticipant
     ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
-    : 'Unknown User';
+    : "Unknown User";
 
   return (
     <div
       onClick={onSelect}
       className={cn(
         "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
-        isSelected ? "bg-blue-50 border-l-4 border-l-blue-500" : "hover:bg-gray-50"
+        isSelected
+          ? "bg-blue-50 border-l-4 border-l-blue-500"
+          : "hover:bg-gray-50"
       )}
     >
       <div className="relative">
@@ -367,7 +425,7 @@ const ConversationItem: React.FC<{
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center justify-between mt-1">
           <p className="text-sm text-muted-foreground truncate">
             {isTyping ? (
@@ -375,12 +433,12 @@ const ConversationItem: React.FC<{
             ) : conversation.lastMessage ? (
               conversation.lastMessage.content
             ) : (
-              'Start a conversation'
+              "Start a conversation"
             )}
           </p>
           {conversation.unreadCount && conversation.unreadCount > 0 && (
             <Badge variant="destructive" className="text-xs h-5 min-w-5 px-1.5">
-              {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
+              {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
             </Badge>
           )}
         </div>
@@ -395,62 +453,143 @@ const TypingIndicator: React.FC<{ users: string[] }> = ({ users }) => {
   return (
     <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
       <div className="flex gap-1">
-        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <div
+          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+          style={{ animationDelay: "0ms" }}
+        />
+        <div
+          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+          style={{ animationDelay: "150ms" }}
+        />
+        <div
+          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+          style={{ animationDelay: "300ms" }}
+        />
       </div>
       <span>
-        {users.length === 1 
+        {users.length === 1
           ? `${users[0]} is typing...`
-          : `${users.slice(0, -1).join(', ')} and ${users[users.length - 1]} are typing...`
-        }
+          : `${users.slice(0, -1).join(", ")} and ${users[users.length - 1]} are typing...`}
       </span>
     </div>
   );
 };
 
-export function MessengerInterface({ 
-  className, 
-  onCallInitiate, 
-  onVideoMeetingJoin 
+export function MessengerInterface({
+  className,
+  onCallInitiate,
+  onVideoMeetingJoin,
+  targetUserId,
 }: MessengerInterfaceProps) {
   const { user } = useAuth();
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [messageInput, setMessageInput] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [replyToMessage, setReplyToMessage] = useState<MessagingMessage | null>(null);
-  const [editingMessage, setEditingMessage] = useState<MessagingMessage | null>(null);
+
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [messageInput, setMessageInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [replyToMessage, setReplyToMessage] = useState<MessagingMessage | null>(
+    null
+  );
+  const [editingMessage, setEditingMessage] = useState<MessagingMessage | null>(
+    null
+  );
   const [isTyping, setIsTyping] = useState(false);
   
-  // User search functionality
-  const [searchResults, setSearchResults] = useState<User[]>([]);
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
-  const { searchUsers } = useUserSearch();
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get conversations list
-  const {
-    conversations,
-    isLoadingConversations,
-    conversationsError,
-  } = useRealtimeMessaging({
-    enableRealtime: true,
-    enableTypingIndicators: true,
-    enablePresence: true,
-  });
+  const { conversations, isLoadingConversations, conversationsError } =
+    useMessaging({
+      enableRealtime: true,
+      enableTypingIndicators: true,
+      enablePresence: true,
+    });
 
-  // Debug logging for conversations data
+  // Hook for starting conversations (deep linking)
+  const { startConversation, isStarting } = useStartConversation();
+
+  // Handle targetUserId prop for deep linking
   useEffect(() => {
-    console.log('🖥️ [MESSENGER INTERFACE] Conversations state updated');
-    console.log('   isLoadingConversations:', isLoadingConversations);
-    console.log('   conversationsError:', conversationsError);
-    console.log('   conversations:', conversations);
-    console.log('   conversations length:', conversations?.length || 0);
-    console.log('   user context:', { id: user?.id, email: user?.email });
+    if (
+      targetUserId &&
+      conversations.length > 0 &&
+      !selectedConversationId &&
+      !isStarting
+    ) {
+      console.log(
+        "🔗 [DEEP LINK] Starting conversation with targetUserId:",
+        targetUserId
+      );
+
+      // Check if conversation already exists
+      const existingConversation = conversations.find(
+        (conv) =>
+          conv.type === "direct" && // Fixed: lowercase to match backend
+          conv.participants.some((p) => p.userId === targetUserId)
+      );
+
+      if (existingConversation) {
+        console.log(
+          "🔗 [DEEP LINK] Found existing conversation:",
+          existingConversation.id
+        );
+        setSelectedConversationId(existingConversation.id);
+      } else {
+        console.log(
+          "🔗 [DEEP LINK] Creating new conversation with user:",
+          targetUserId
+        );
+        startConversation(targetUserId, {
+          onSuccess: (conversation) => {
+            console.log(
+              "🔗 [DEEP LINK] Conversation created/found:",
+              conversation.id
+            );
+            setSelectedConversationId(conversation.id);
+          },
+          onError: (error) => {
+            console.error(
+              "🔗 [DEEP LINK] Failed to start conversation:",
+              error
+            );
+            toast.error("Failed to start conversation");
+          },
+        });
+      }
+    }
+  }, [
+    targetUserId,
+    conversations,
+    selectedConversationId,
+    isStarting,
+    startConversation,
+  ]);
+
+  // Enhanced logging for conversations data
+  useEffect(() => {
+    logger.debug(
+      "MessengerInterface",
+      "Conversations state updated",
+      {
+        isLoadingConversations,
+        conversationsError: conversationsError?.message,
+        conversationCount: conversations?.length || 0,
+      },
+      { userId: user?.id }
+    );
+
+    if (conversationsError) {
+      logger.error(
+        "MessengerInterface",
+        "Conversations loading error",
+        conversationsError,
+        { userId: user?.id }
+      );
+    }
   }, [conversations, isLoadingConversations, conversationsError, user]);
 
   // Get selected conversation messages
@@ -467,9 +606,7 @@ export function MessengerInterface({
     addReaction,
     sendTypingIndicator,
     uploadFile,
-    createConversation,
-    refetchConversations,
-  } = useRealtimeMessaging({
+  } = useMessaging({
     conversationId: selectedConversationId || undefined,
     enableRealtime: true,
     enableTypingIndicators: true,
@@ -478,7 +615,7 @@ export function MessengerInterface({
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Auto-focus message input when conversation is selected
@@ -489,14 +626,16 @@ export function MessengerInterface({
   }, [selectedConversationId]);
 
   // Mark messages as read when conversation is viewed
-  useEffect(() => {
-    if (selectedConversationId && messages.length > 0) {
-      const unreadMessages = messages.filter(m => !m.isRead && m.senderId !== user?.id);
-      unreadMessages.forEach(message => {
-        markAsRead(message.id);
-      });
-    }
-  }, [selectedConversationId, messages, markAsRead, user?.id]);
+  // useEffect(() => {
+  //   if (selectedConversationId && messages.length > 0) {
+  //     const unreadMessages = messages.filter(
+  //       (m) => !m.isRead && m.authorId !== user?.id
+  //     ); // Fixed: use authorId
+  //     unreadMessages.forEach((message) => {
+  //       markAsRead(message.id);
+  //     });
+  //   }
+  // }, [selectedConversationId, messages, markAsRead, user?.id]);
 
   // Handle typing indicators
   const handleTyping = useCallback(() => {
@@ -520,7 +659,9 @@ export function MessengerInterface({
     if (!messageInput.trim() || !selectedConversationId) return;
 
     const content = messageInput.trim();
-    setMessageInput('');
+    logger.messaging.messageSent("pending", selectedConversationId, content);
+
+    setMessageInput("");
     setReplyToMessage(null);
     setEditingMessage(null);
 
@@ -532,15 +673,20 @@ export function MessengerInterface({
 
     try {
       await sendMessage(content, {
-        replyToId: replyToMessage?.id,
+        replyToMessageId: replyToMessage?.id, // Fixed: use replyToMessageId
       });
+      logger.messaging.messageSent("success", selectedConversationId, content);
     } catch (error) {
-      toast.error('Failed to send message');
+      logger.error("MessengerInterface", "Failed to send message", error, {
+        conversationId: selectedConversationId,
+        userId: user?.id,
+      });
+      toast.error("Failed to send message");
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -555,189 +701,133 @@ export function MessengerInterface({
       await sendMessage(`Shared a file: ${file.name}`, {
         attachments: [uploadedFile],
       });
-      toast.success('File sent successfully');
+      toast.success("File sent successfully");
     } catch (error) {
-      toast.error('Failed to upload file');
+      toast.error("Failed to upload file");
     }
   };
 
-  // Enhanced search functionality
-  const debouncedUserSearch = useCallback(async (query: string) => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    if (query.trim().length < 2) {
-      setSearchResults([]);
-      setIsSearchingUsers(false);
-      return;
-    }
-
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        setIsSearchingUsers(true);
-        const users = await searchUsers(query.trim());
-        
-        // Filter out current user and users already in conversations
-        const existingParticipantIds = new Set(
-          conversations.flatMap(conv => 
-            conv.participants.map(p => p.userId)
-          )
-        );
-        
-        const filteredUsers = (users || []).filter(u => 
-          u.id !== user?.id && !existingParticipantIds.has(u.id)
-        );
-        
-        setSearchResults(filteredUsers);
-      } catch (error) {
-        console.error('User search error:', error);
-        setSearchResults([]);
-      } finally {
-        setIsSearchingUsers(false);
-      }
-    }, 300);
-  }, [searchUsers, conversations, user?.id]);
-
-  // Handle search input changes
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-    debouncedUserSearch(value);
-  }, [debouncedUserSearch]);
-
-  // Handle conversation creation
-  const handleCreateConversation = useCallback(async (targetUser: User) => {
-    try {
-      console.log('Creating conversation with user:', targetUser);
-      const newConversation = await createConversation([targetUser.id]);
-      
-      if (newConversation) {
-        // Select the new conversation immediately
-        setSelectedConversationId(newConversation.id);
-        
-        // Clear search
-        setSearchTerm('');
-        setSearchResults([]);
-        
-        // Refresh conversations list to ensure it's up to date
-        refetchConversations();
-        
-        toast.success(`Started conversation with ${targetUser.firstName} ${targetUser.lastName}`);
-      }
-    } catch (error) {
-      console.error('Failed to create conversation:', error);
-      toast.error('Failed to start conversation');
-    }
-  }, [createConversation, refetchConversations]);
-
-  const filteredConversations = conversations.filter(conv => {
+  const filteredConversations = conversations.filter((conv) => {
     if (!searchTerm) return true;
-    const otherParticipant = conv.participants[0];
-    const displayName = otherParticipant 
+    const otherParticipant = getOtherParticipant(conv, user.id);
+    const displayName = otherParticipant
       ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
-      : '';
+      : "";
     return displayName.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
-  const otherParticipant = selectedConversation?.participants[0];
-  const displayName = otherParticipant 
+  const selectedConversation = conversations.find(
+    (c) => c.id === selectedConversationId
+  );
+  const otherParticipant = getOtherParticipant(selectedConversation!, user.id);
+  const displayName = otherParticipant
     ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
-    : '';
+    : "";
 
   const currentTypingUsers = typingUsers
-    .filter(t => t.conversationId === selectedConversationId && t.isTyping)
-    .map(t => t.userName);
+    .filter((t) => t.conversationId === selectedConversationId && t.isTyping)
+    .map((t) => t.userName);
 
   return (
-    <div className={cn("h-full bg-white rounded-lg shadow-lg overflow-hidden", className)}>
+    <div
+      className={cn(
+        "h-full bg-white rounded-lg shadow-lg overflow-hidden",
+        className
+      )}
+    >
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="min-w-[280px]">
+        <ResizablePanel
+          defaultSize={25}
+          minSize={20}
+          maxSize={40}
+          className="min-w-[280px]"
+        >
           {/* Sidebar - Conversations List */}
           <div className="w-full h-full border-r border-gray-200 flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Messages</h2>
-            <div className="flex items-center gap-2">
-              {/* Connection status */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Circle 
-                      className={cn(
-                        "h-2 w-2",
-                        connectionState.isConnected 
-                          ? "fill-green-500 text-green-500" 
-                          : "fill-red-500 text-red-500"
-                      )} 
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {connectionState.isConnected ? 'Connected' : 'Disconnected'}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <Button variant="ghost" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+            {/* Header */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold">Messages</h2>
+                <div className="flex items-center gap-2">
+                  {/* Enhanced connection status */}
+                  <ConnectionStatus
+                    isConnected={connectionState.isConnected}
+                    isReconnecting={connectionState.isReconnecting}
+                    error={connectionState.error}
+                    lastConnected={connectionState.lastConnected}
+                    showDetails={false}
+                    className="scale-75"
+                  />
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search conversations or users..."
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {/* Conversations List */}
-        <ScrollArea className="flex-1">
-          {isLoadingConversations ? (
-            <div className="p-4 space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="h-12 w-12 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse" />
-                  </div>
+                  <Button variant="ghost" size="sm">
+                    <Settings className="h-4 w-4" />
+                  </Button>
                 </div>
-              ))}
+              </div>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search conversations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-          ) : conversationsError ? (
-            <div className="p-4 text-center text-red-500">
-              Failed to load conversations
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {/* Show existing conversations first */}
-              {filteredConversations.length > 0 && (
+
+            {/* Conversations List */}
+            <ScrollArea className="flex-1">
+              {isLoadingConversations ? (
+                <div className="p-4 space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="h-12 w-12 bg-gray-200 rounded-full animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : conversationsError ? (
+                <div className="p-4 text-center text-red-500">
+                  Failed to load conversations
+                </div>
+              ) : filteredConversations.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  {searchTerm
+                    ? "No conversations found"
+                    : "No conversations yet"}
+                </div>
+              ) : (
                 <div className="p-2 space-y-1">
-                  <div className="px-2 py-1">
-                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Your Conversations
-                    </h3>
-                  </div>
-                  {filteredConversations.map(conversation => {
-                    const otherParticipant = conversation.participants[0];
-                    const isOnline = otherParticipant ? onlineUsers.has(otherParticipant.userId) : false;
-                    const isTypingInConv = typingUsers.some(t => 
-                      t.conversationId === conversation.id && t.isTyping
+                  {filteredConversations.map((conversation) => {
+                    const otherParticipant = getOtherParticipant(
+                      conversation,
+                      user.id
+                    );
+                    const isOnline = otherParticipant
+                      ? onlineUsers.has(otherParticipant.userId)
+                      : false;
+                    const isTypingInConv = typingUsers.some(
+                      (t) => t.conversationId === conversation.id && t.isTyping
                     );
 
                     return (
                       <ConversationItem
                         key={conversation.id}
+                        user={user}
                         conversation={conversation}
                         isSelected={selectedConversationId === conversation.id}
-                        onSelect={() => setSelectedConversationId(conversation.id)}
+                        onSelect={() => {
+                          logger.messaging.conversationJoined(
+                            conversation.id,
+                            user?.id
+                          );
+                          setSelectedConversationId(conversation.id);
+                        }}
                         isOnline={isOnline}
                         isTyping={isTypingInConv}
                       />
@@ -745,247 +835,220 @@ export function MessengerInterface({
                   })}
                 </div>
               )}
-              
-              {/* Show user search results */}
-              {searchTerm && searchTerm.length >= 2 && (
-                <div className="border-t border-gray-100">
-                  {isSearchingUsers ? (
-                    <div className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        Searching users...
-                      </div>
-                    </div>
-                  ) : searchResults.length > 0 ? (
-                    <div className="p-2 space-y-1">
-                      <div className="px-2 py-1">
-                        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          Start New Conversation
-                        </h3>
-                      </div>
-                      {searchResults.map(user => (
-                        <UserSearchResult
-                          key={user.id}
-                          user={user}
-                          onCreateConversation={() => handleCreateConversation(user)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-4 text-center text-muted-foreground text-sm">
-                      No users found for "{searchTerm}"
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Empty state when no search term and no conversations */}
-              {!searchTerm && filteredConversations.length === 0 && (
-                <div className="p-4 text-center text-muted-foreground">
-                  <div className="mb-2">
-                    <Users className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                  </div>
-                  <p className="text-sm font-medium mb-1">No conversations yet</p>
-                  <p className="text-xs">Search for users above to start a conversation</p>
-                </div>
-              )}
-            </div>
-          )}
-        </ScrollArea>
+            </ScrollArea>
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200" />
         <ResizablePanel defaultSize={75}>
-          {/* Main Chat Area */}
           <div className="flex-1 flex flex-col h-full">
-        {selectedConversationId ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={otherParticipant?.user.avatarUrl} />
-                    <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
-                  </Avatar>
-                  {otherParticipant && onlineUsers.has(otherParticipant.userId) && (
-                    <Circle className="absolute -bottom-0.5 -right-0.5 h-3 w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-medium">{displayName}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {otherParticipant && onlineUsers.has(otherParticipant.userId) 
-                      ? 'Online' 
-                      : 'Offline'
-                    }
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onCallInitiate?.(selectedConversationId, 'audio')}
-                >
-                  <Phone className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onVideoMeetingJoin?.(selectedConversationId)}
-                >
-                  <Video className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <Users className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Messages Area */}
-            <ScrollArea className="flex-1 p-4">
-              {isLoadingMessages ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex gap-3">
-                      <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-16 bg-gray-200 rounded-lg animate-pulse" />
-                      </div>
+            {selectedConversationId ? (
+              <>
+                {/* Chat Header */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={otherParticipant?.user.avatarUrl} />
+                      <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold text-sm">{displayName}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {onlineUsers.has(otherParticipant?.userId || '') ? (
+                          <span className="text-green-600 flex items-center gap-1">
+                            <Circle className="h-2 w-2 fill-current" />
+                            Online
+                          </span>
+                        ) : (
+                          'Offline'
+                        )}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              ) : messagesError ? (
-                <div className="text-center text-red-500">
-                  Failed to load messages
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="text-center text-muted-foreground">
-                  Start your conversation with {displayName}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map((message, index) => {
-                    const isOwn = message.senderId === user?.id;
-                    const prevMessage = messages[index - 1];
-                    const showAvatar = !prevMessage || 
-                      prevMessage.senderId !== message.senderId ||
-                      differenceInMinutes(new Date(message.createdAt), new Date(prevMessage.createdAt)) > 5;
-
-                    return (
-                      <MessageBubble
-                        key={message.id}
-                        message={message}
-                        isOwn={isOwn}
-                        showAvatar={showAvatar}
-                        onReact={(emoji) => addReaction(message.id, emoji)}
-                        onReply={() => setReplyToMessage(message)}
-                        onEdit={isOwn ? () => setEditingMessage(message) : undefined}
-                        onDelete={isOwn ? () => {
-                          // Handle delete
-                          toast.info('Delete functionality coming soon');
-                        } : undefined}
-                        onCopy={() => {}}
-                        onForward={() => toast.info('Forward functionality coming soon')}
-                        onReport={() => toast.info('Report functionality coming soon')}
-                      />
-                    );
-                  })}
+                  </div>
                   
-                  {/* Typing indicator */}
-                  <TypingIndicator users={currentTypingUsers} />
-                  
-                  <div ref={messagesEndRef} />
+                  <div className="flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onCallInitiate?.(selectedConversationId, "audio")}
+                          >
+                            <Phone className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Audio call</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onCallInitiate?.(selectedConversationId, "video")}
+                          >
+                            <Video className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Video call</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Search className="h-4 w-4 mr-2" />
+                          Search conversation
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Users className="h-4 w-4 mr-2" />
+                          Conversation info
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-              )}
-            </ScrollArea>
 
-            {/* Reply indicator */}
-            {replyToMessage && (
-              <div className="px-4 py-2 bg-gray-50 border-t flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm">
-                  <Reply className="h-4 w-4" />
-                  <span className="text-muted-foreground">Replying to:</span>
-                  <span className="truncate max-w-xs">{replyToMessage.content}</span>
+                {/* Messages Area */}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <ScrollArea className="flex-1 p-4">
+                    {isLoadingMessages ? (
+                      <div className="flex items-center justify-center h-32">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                      </div>
+                    ) : messagesError ? (
+                      <div className="flex items-center justify-center h-32 text-red-500">
+                        Failed to load messages
+                      </div>
+                    ) : messages.length === 0 ? (
+                      <div className="flex items-center justify-center h-32 text-muted-foreground">
+                        <div className="text-center">
+                          <h4 className="font-medium mb-1">No messages yet</h4>
+                          <p className="text-sm">Start the conversation with {displayName}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {messages.map((message, index) => {
+                          const isOwn = message.senderId === user?.id;
+                          const prevMessage = messages[index - 1];
+                          const showAvatar = !prevMessage || prevMessage.senderId !== message.senderId;
+                          
+                          return (
+                            <MessageBubble
+                              key={message.id}
+                              message={message}
+                              isOwn={isOwn}
+                              showAvatar={showAvatar}
+                              onReact={(emoji) => addReaction(message.id, emoji)}
+                              onReply={() => setReplyToMessage(message)}
+                              onEdit={isOwn ? () => setEditingMessage(message) : undefined}
+                              onDelete={isOwn ? () => {/* TODO: implement delete */} : undefined}
+                              onCopy={() => {/* Already handled in MessageBubble */}}
+                              onForward={() => {/* TODO: implement forward */}}
+                              onReport={() => {/* TODO: implement report */}}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {/* Typing Indicators */}
+                    {currentTypingUsers.length > 0 && (
+                      <TypingIndicator users={currentTypingUsers} />
+                    )}
+                    
+                    {/* Auto-scroll anchor */}
+                    <div ref={messagesEndRef} />
+                  </ScrollArea>
+
+                  {/* Reply indicator */}
+                  {replyToMessage && (
+                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Reply className="h-4 w-4" />
+                        <span>Replying to: {replyToMessage.content.substring(0, 50)}...</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setReplyToMessage(null)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Message Input Area */}
+                  <div className="p-4 border-t border-gray-200 bg-white">
+                    <div className="flex items-end gap-2">
+                      {/* File Upload */}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="sm" className="flex-shrink-0">
+                              <label htmlFor="file-upload" className="cursor-pointer">
+                                <Paperclip className="h-4 w-4" />
+                              </label>
+                              <input
+                                id="file-upload"
+                                type="file"
+                                className="hidden"
+                                onChange={handleFileUpload}
+                              />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Attach file</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      {/* Message Input */}
+                      <div className="flex-1 min-w-0">
+                        <Input
+                          ref={messageInputRef}
+                          placeholder={`Message ${displayName}...`}
+                          value={messageInput}
+                          onChange={(e) => {
+                            setMessageInput(e.target.value);
+                            handleTyping();
+                          }}
+                          onKeyPress={handleKeyPress}
+                          disabled={isSendingMessage}
+                          className="resize-none"
+                        />
+                      </div>
+
+                      {/* Send Button */}
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!messageInput.trim() || isSendingMessage}
+                        className="flex-shrink-0"
+                      >
+                        {isSendingMessage ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setReplyToMessage(null)}
-                >
-                  ✕
-                </Button>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-center">
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Select a conversation</h3>
+                  <p className="text-muted-foreground">Choose a conversation to start messaging</p>
+                </div>
               </div>
             )}
-
-            {/* Message Input */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-end gap-2">
-                <div className="flex gap-1">
-                  <input
-                    type="file"
-                    id="file-upload"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex-1 relative">
-                  <Input
-                    ref={messageInputRef}
-                    placeholder="Type a message..."
-                    value={messageInput}
-                    onChange={(e) => {
-                      setMessageInput(e.target.value);
-                      handleTyping();
-                    }}
-                    onKeyPress={handleKeyPress}
-                    disabled={isSendingMessage}
-                    className="pr-10"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2"
-                  >
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!messageInput.trim() || isSendingMessage}
-                  size="sm"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </>
-        ) : (
-          /* No conversation selected */
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div>
-              <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Select a conversation</h3>
-              <p className="text-muted-foreground">
-                Choose a conversation to start messaging
-              </p>
-            </div>
-          </div>
-        )}
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

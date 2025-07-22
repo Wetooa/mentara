@@ -60,6 +60,8 @@ const createQueryKeys = () => {
       search: (query: string, conversationId?: string) => 
         [...base.messaging.all, 'search', query, conversationId] as const,
       blockedUsers: [...base.messaging.all, 'blocked'] as const,
+      // Add key for starting conversations from dev branch
+      startConversation: (targetUserId: string) => [...base.messaging.all, 'startConversation', targetUserId] as const,
     },
     worksheets: {
       ...base.worksheets,
