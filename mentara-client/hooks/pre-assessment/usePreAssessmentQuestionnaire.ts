@@ -1,5 +1,5 @@
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
-import { QUESTIONNAIRE_MAP } from "@/constants/questionnaires";
+import { useQuestionnaireQuestions } from "./useQuestionnaires";
 
 export interface UsePreAssessmentQuestionnaireReturn {
   // Question data
@@ -7,7 +7,11 @@ export interface UsePreAssessmentQuestionnaireReturn {
     prefix: string;
     question: string;
     options: string[];
-  };
+  } | null;
+  
+  // Loading states
+  isLoading: boolean;
+  error: any;
   
   // State
   currentAnswer: number;
@@ -27,15 +31,34 @@ export function usePreAssessmentQuestionnaire(): UsePreAssessmentQuestionnaireRe
   const formIndex = step - 1;
   const questionIndex = miniStep;
 
+  // Get questionnaire ID from store
   const questionnaireId = questionnaires[formIndex];
-  const questions = QUESTIONNAIRE_MAP[questionnaireId].questions;
-  const question = questions[questionIndex];
+  
+  // Fetch questions from API
+  const { 
+    data: questions, 
+    isLoading, 
+    error,
+    questionnaire 
+  } = useQuestionnaireQuestions(questionnaireId || "");
 
-  const currentAnswer = answers[formIndex][questionIndex];
-  const isLastQuestion = questions.length - 1 === questionIndex;
+  // Get current question
+  const rawQuestion = questions && questions.length > questionIndex ? questions[questionIndex] : null;
+  
+  // Transform question to expected format
+  const question = rawQuestion ? {
+    prefix: questionnaire?.name || "Assessment",
+    question: rawQuestion.text,
+    options: rawQuestion.options.map(option => option.label)
+  } : null;
+
+  const currentAnswer = answers[formIndex]?.[questionIndex] ?? -1;
+  const isLastQuestion = questions ? questions.length - 1 === questionIndex : false;
 
   const handleSelectAnswer = (answer: number) => {
-    const previousAnswers: number[] = answers[formIndex];
+    if (!questions || formIndex < 0 || questionIndex < 0) return;
+    
+    const previousAnswers: number[] = answers[formIndex] || [];
     
     const formAnswers: number[] = [
       ...previousAnswers.slice(0, questionIndex),
@@ -52,6 +75,10 @@ export function usePreAssessmentQuestionnaire(): UsePreAssessmentQuestionnaireRe
   return {
     // Question data
     question,
+    
+    // Loading states
+    isLoading,
+    error,
     
     // State
     currentAnswer,

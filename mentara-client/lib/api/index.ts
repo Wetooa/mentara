@@ -51,13 +51,17 @@ import {
   createTherapistService,
   type TherapistService,
 } from "./services/therapists";
+import {
+  createPreAssessmentService,
+  type PreAssessmentService,
+} from "./services/pre-assessment";
 export type { ApiError, ApiResponse } from "./types";
 
 // Export client utilities
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createProfileService, createSearchService, createTherapistService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse };
+export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -72,6 +76,7 @@ const messagingService = createMessagingService(apiClient);
 const filesService = createFilesService(apiClient);
 const adminService = createAdminService(apiClient);
 const profileService = createProfileService(apiClient);
+const preAssessmentService = createPreAssessmentService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -88,6 +93,7 @@ export const api = {
   files: filesService,
   admin: adminService,
   profile: profileService,
+  preAssessment: preAssessmentService,
 
   // Backwards compatible structure for existing hooks
   clientAuth: authService.client,

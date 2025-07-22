@@ -302,4 +302,4 @@ export const QUESTIONNAIRE_MAP = LIST_OF_QUESTIONNAIRES.reduce((map, questionnai
   return map;
 }, {} as Record<string, QuestionnaireDefinition>);
 
-export type ListOfQuestionnaires = typeof LIST_OF_QUESTIONNAIRES;
+export type ListOfQuestionnaires = string;

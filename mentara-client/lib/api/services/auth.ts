@@ -88,11 +88,11 @@ export function createAuthService(client: AxiosInstance) {
       },
 
       /**
-       * Login client
-       * POST /auth/client/login
+       * Login client - uses universal login endpoint
+       * POST /auth/login
        */
       async login(data: LoginDto): Promise<ClientAuthResponse> {
-        const response = await client.post("/auth/client/login", data);
+        const response = await client.post("/auth/login", data);
         return response.data;
       },
 
