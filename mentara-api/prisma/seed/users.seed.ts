@@ -158,5 +158,5 @@ export async function seedUsers(prisma: PrismaClient) {
     );
   }
 
-  return { users, clients, therapists };
+  return { users, clients, therapists, moderators, admins };
 }

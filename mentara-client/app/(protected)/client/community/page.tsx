@@ -32,7 +32,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useCommunityPage } from "@/hooks/useCommunityPage";
+import { useCommunityPage } from "@/hooks/community/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/api/communities";

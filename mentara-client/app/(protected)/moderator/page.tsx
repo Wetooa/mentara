@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ModerationStats } from "@/components/moderator";
-import { useModeratorDashboard, useRefreshModeratorDashboard } from "@/hooks/useModeratorDashboard";
+import { useModeratorDashboard, useRefreshModeratorDashboard } from "@/hooks/moderator/useModeratorDashboard";
 
 export default function ModeratorDashboard() {
   const { data: stats, isLoading } = useModeratorDashboard();

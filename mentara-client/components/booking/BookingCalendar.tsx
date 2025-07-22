@@ -14,8 +14,8 @@ import {
   ChevronRight,
   AlertCircle,
 } from "lucide-react";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { TimeSlot } from "@/hooks/useAvailableSlots";
+import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
+import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 
 interface BookingCalendarProps {
   therapistId: string;

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { EnhancedCalendar } from '@/components/ui/enhanced-calendar'
-import { useCalendarMeetings } from '@/hooks/useCalendarMeetings'
+import { useCalendarMeetings } from '@/hooks/calendar/useCalendarMeetings'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

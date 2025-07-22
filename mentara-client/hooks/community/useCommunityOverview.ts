@@ -1,4 +1,4 @@
-import { useCommunities } from '@/hooks/useCommunities';
+import { useCommunities } from '@/hooks/community/useCommunities';
 import { useCommunityMembers, useCommunityMemberships } from '@/hooks/community/useCommunityMembers';
 import { useCommunityRooms } from '@/hooks/community/useCommunityRooms';
 import { useCommunityStats } from '@/hooks/community/useCommunityStats';

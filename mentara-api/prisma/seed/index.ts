@@ -4,10 +4,11 @@
 import { PrismaClient } from '@prisma/client';
 import { SEED_CONFIG } from './config';
 import { seedUsers } from './users.seed';
-import { seedCommunities, seedMemberships } from './communities.seed';
+import { seedCommunities, seedMemberships, seedModeratorCommunityAssignments } from './communities.seed';
 import { 
   seedClientTherapistRelationships, 
   seedMeetings, 
+  seedMeetingNotes,
   seedTherapistAvailability 
 } from './relationships.seed';
 import { seedPreAssessments } from './assessments.seed';
@@ -27,15 +28,21 @@ async function main() {
   try {
     // Phase 1: Users
     console.log('\n📍 PHASE 1: Creating Users');
-    const { users, clients, therapists } = await seedUsers(prisma);
+    const { users, clients, therapists, moderators, admins } = await seedUsers(prisma);
 
     // Phase 2: Communities
     console.log('\n📍 PHASE 2: Creating Communities');
     const communities = await seedCommunities(prisma);
 
     // Phase 3: Memberships
-    console.log('\n📍 PHASE 3: Creating Community Memberships');
+    console.log('
+📍 PHASE 3: Creating Community Memberships');
     await seedMemberships(prisma, users, communities);
+
+    // Phase 3.5: Moderator-Community Assignments
+    console.log('
+📍 PHASE 3.5: Creating Moderator-Community Assignments');
+    await seedModeratorCommunityAssignments(prisma, moderators, communities);
 
     // Phase 4: Client-Therapist Relationships
     console.log('\n📍 PHASE 4: Creating Client-Therapist Relationships');
@@ -50,8 +57,14 @@ async function main() {
     await seedPreAssessments(prisma, clients);
 
     // Phase 6: Meetings
-    console.log('\n📍 PHASE 6: Creating Meetings');
+    console.log('
+📍 PHASE 6: Creating Meetings');
     const meetings = await seedMeetings(prisma, relationships);
+
+    // Phase 6.5: Meeting Notes
+    console.log('
+📍 PHASE 6.5: Creating Meeting Notes');
+    await seedMeetingNotes(prisma, meetings);
 
     // Phase 7: Payment Methods
     console.log('\n📍 PHASE 7: Creating Payment Methods');

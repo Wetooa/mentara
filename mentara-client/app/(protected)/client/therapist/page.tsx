@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFilters } from "@/hooks/useFilters";
+import { useFilters } from "@/hooks/utils/useFilters";
 
 export default function TherapistPage() {
   const [searchQuery, setSearchQuery] = useState("");

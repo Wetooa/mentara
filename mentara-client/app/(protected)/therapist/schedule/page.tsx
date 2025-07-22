@@ -20,8 +20,8 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
 import { MeetingCalendar } from "@/components/calendar/MeetingCalendar";
-import { useBooking, useMeetings } from "@/hooks/useBooking";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
+import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
+import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
 import { MeetingStatus } from "@/types/booking";
 import { toast } from "sonner";
 

@@ -123,7 +123,13 @@ export async function seedMessaging(
   // Add read receipts and reactions to recent messages
   await addMessageEngagement(prisma, messages);
 
-  return { conversations, messages };
+  // Add user blocking relationships
+  const blocks = await seedUserBlocks(prisma, allUsers);
+
+  // Add typing indicators for active conversations
+  const typingIndicators = await seedTypingIndicators(prisma, conversations, allUsers);
+
+  return { conversations, messages, blocks, typingIndicators };
 }
 
 async function createConversationMessages(
@@ -327,6 +333,86 @@ async function addMessageEngagement(prisma: PrismaClient, messages: any[]) {
       // Continue with next message if this one fails
     }
   }
+}
+
+async function seedUserBlocks(prisma: PrismaClient, users: any[]) {
+  console.log('🚫 Creating user blocking relationships...');
+
+  const blocks: any[] = [];
+
+  // Create a small number of blocks (about 2% of users block someone)
+  const blockingUsers = faker.helpers.arrayElements(users, Math.ceil(users.length * 0.02));
+
+  for (const blockingUser of blockingUsers) {
+    // Each blocking user blocks 1-2 other users
+    const blockCount = faker.number.int({ min: 1, max: 2 });
+    const potentialBlockees = users.filter(u => u.id !== blockingUser.id);
+    const blockedUsers = faker.helpers.arrayElements(potentialBlockees, blockCount);
+
+    for (const blockedUser of blockedUsers) {
+      try {
+        const block = await prisma.userBlock.create({
+          data: {
+            blockingUserId: blockingUser.id,
+            blockedUserId: blockedUser.id,
+            reason: faker.helpers.arrayElement([
+              'Inappropriate behavior',
+              'Harassment',
+              'Spam messages', 
+              'Personal conflict',
+              'Violation of community guidelines'
+            ]),
+            createdAt: faker.date.past({ years: 1 }),
+          },
+        });
+        blocks.push(block);
+      } catch (error) {
+        // Skip if block already exists
+      }
+    }
+  }
+
+  console.log(`✅ Created ${blocks.length} user blocks`);
+  return blocks;
+}
+
+async function seedTypingIndicators(prisma: PrismaClient, conversations: any[], users: any[]) {
+  console.log('⌨️ Creating typing indicators for active conversations...');
+
+  const typingIndicators: any[] = [];
+
+  // Add typing indicators to recent conversations (simulate current typing)
+  const recentConversations = conversations
+    .filter(conv => new Date(conv.lastMessageAt) > new Date(Date.now() - 24 * 60 * 60 * 1000))
+    .slice(0, 10); // Limit to most recent 10 conversations
+
+  for (const conversation of recentConversations) {
+    // Get participants
+    const participants = await prisma.conversationParticipant.findMany({
+      where: { conversationId: conversation.id },
+    });
+
+    // Randomly add typing indicators for some participants
+    if (faker.datatype.boolean({ probability: 0.3 })) {
+      const typingUser = faker.helpers.arrayElement(participants);
+      
+      try {
+        const typingIndicator = await prisma.typingIndicator.create({
+          data: {
+            conversationId: conversation.id,
+            userId: typingUser.userId,
+            startedAt: faker.date.recent({ days: 1 }),
+          },
+        });
+        typingIndicators.push(typingIndicator);
+      } catch (error) {
+        // Skip if indicator already exists
+      }
+    }
+  }
+
+  console.log(`✅ Created ${typingIndicators.length} typing indicators`);
+  return typingIndicators;
 }
 
 function generateTherapistMessage(): string {

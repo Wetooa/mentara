@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCreateReview } from "@/hooks/useReviews";
+import { useCreateReview } from "@/hooks/reviews/useReviews";
 import { TherapistCardData } from "@/types/therapist";
 
 const reviewFormSchema = z.object({

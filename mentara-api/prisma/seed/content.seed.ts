@@ -385,11 +385,13 @@ export async function seedCommunityContent(
   const posts = await seedPostsWithTemplates(prisma, rooms, memberships);
   const comments = await seedCommentsWithTemplates(prisma, posts, memberships);
   const hearts = await seedHeartsForContent(prisma, posts, comments, memberships);
+  const reports = await seedReportsForContent(prisma, posts, comments, memberships);
 
   return {
     posts,
     comments,
     hearts,
+    reports,
   };
 }
 
@@ -613,5 +615,143 @@ async function seedHeartsForContent(
     postHearts,
     commentHearts,
   };
+}
+
+async function seedReportsForContent(
+  prisma: PrismaClient,
+  posts: any[],
+  comments: any[],
+  memberships: any[]
+) {
+  console.log('🚨 Creating content reports for moderation...');
+
+  const reports: any[] = [];
+
+  // Create reports for some posts (about 5% of posts get reported)
+  const postsToReport = faker.helpers.arrayElements(posts, Math.ceil(posts.length * 0.05));
+  
+  for (const post of postsToReport) {
+    const postRoom = await prisma.room.findUnique({
+      where: { id: post.roomId },
+      include: {
+        roomGroup: {
+          include: {
+            community: true,
+          },
+        },
+      },
+    });
+
+    if (!postRoom) continue;
+
+    const communityMembers = memberships.filter(
+      (m) => m.communityId === postRoom.roomGroup.communityId
+    );
+
+    // Random member reports the post
+    const reporter = faker.helpers.arrayElement(communityMembers);
+    
+    if (reporter.userId !== post.authorId) {
+      try {
+        const report = await prisma.report.create({
+          data: {
+            reporterId: reporter.userId,
+            postId: post.id,
+            reason: faker.helpers.arrayElement([
+              'Inappropriate content',
+              'Spam or promotional content',
+              'Harassment or bullying',
+              'False information',
+              'Off-topic discussion',
+              'Violation of community guidelines'
+            ]),
+            description: faker.helpers.arrayElement([
+              'This post contains inappropriate language and may be triggering for other members.',
+              'This appears to be spam or promotional content not related to mental health support.',
+              'The content is harassing other community members.',
+              'The information shared appears to be medically inaccurate.',
+              'This post is not relevant to this community\'s purpose.',
+              'The post violates our community guidelines about respectful communication.'
+            ]),
+            status: faker.helpers.arrayElement(['PENDING', 'PENDING', 'REVIEWED', 'DISMISSED']),
+            createdAt: faker.date.between({
+              from: post.createdAt,
+              to: new Date(),
+            }),
+          },
+        });
+        reports.push(report);
+      } catch (error) {
+        // Skip if report already exists
+      }
+    }
+  }
+
+  // Create reports for some comments (about 3% of comments get reported)
+  const commentsToReport = faker.helpers.arrayElements(comments, Math.ceil(comments.length * 0.03));
+  
+  for (const comment of commentsToReport) {
+    const commentPost = await prisma.post.findUnique({
+      where: { id: comment.postId },
+      include: {
+        room: {
+          include: {
+            roomGroup: {
+              include: {
+                community: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!commentPost?.room) continue;
+
+    const communityMembers = memberships.filter(
+      (m) => m.communityId === commentPost.room?.roomGroup.communityId
+    );
+
+    // Random member reports the comment
+    const reporter = faker.helpers.arrayElement(communityMembers);
+    
+    if (reporter.userId !== comment.authorId) {
+      try {
+        const report = await prisma.report.create({
+          data: {
+            reporterId: reporter.userId,
+            commentId: comment.id,
+            reason: faker.helpers.arrayElement([
+              'Inappropriate content',
+              'Spam or promotional content', 
+              'Harassment or bullying',
+              'False information',
+              'Personal attack',
+              'Violation of community guidelines'
+            ]),
+            description: faker.helpers.arrayElement([
+              'This comment contains inappropriate language.',
+              'This comment appears to be spam.',
+              'The comment is personally attacking another member.',
+              'The information in this comment is misleading.',
+              'This comment is disrespectful to other community members.',
+              'The comment violates our guidelines about supportive communication.'
+            ]),
+            status: faker.helpers.arrayElement(['PENDING', 'PENDING', 'REVIEWED', 'DISMISSED']),
+            createdAt: faker.date.between({
+              from: comment.createdAt,
+              to: new Date(),
+            }),
+          },
+        });
+        reports.push(report);
+      } catch (error) {
+        // Skip if report already exists
+      }
+    }
+  }
+
+  console.log(`✅ Created ${reports.length} content reports`);
+  return reports;
 }
 

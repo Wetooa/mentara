@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { PhoneCall, MessageSquare, Calendar, Heart } from "lucide-react";
 import { TherapistCardData } from "@/types/therapist";
 import { Badge } from "@/components/ui/badge";
-import { useFavorites } from "@/hooks/useFavorites";
+import { useFavorites } from "@/hooks/user/useFavorites";
 import StarRating from "@/components/reviews/StarRating";
-import { useTherapistReviewStats } from "@/hooks/useReviews";
+import { useTherapistReviewStats } from "@/hooks/reviews/useReviews";
 
 interface TherapistCardProps {
   therapist: TherapistCardData;

@@ -4,7 +4,7 @@ import TherapistCard from "@/components/therapist/listing/TherapistCard";
 import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
 import BookingModal from "@/components/booking/BookingModal";
 import Pagination from "@/components/ui/pagination";
-import { useFilteredTherapists } from "@/hooks/useTherapists";
+import { useFilteredTherapists } from "@/hooks/therapist/useTherapists";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
