@@ -2,12 +2,6 @@
 
 import { ProfilePage } from '@/components/profile';
 import { useEffect } from 'react';
-import { 
-  generateProfileMetadata, 
-  generateMetadataWithStructuredData,
-  UserProfile,
-  SITE_CONFIG 
-} from '@/lib/metadata';
 
 interface ClientProfilePageProps {
   params: { id: string };

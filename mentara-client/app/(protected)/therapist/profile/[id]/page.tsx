@@ -2,12 +2,6 @@
 
 import { ProfilePage } from '@/components/profile';
 import { useEffect } from 'react';
-import { 
-  generateProfileMetadata, 
-  generateMetadataWithStructuredData,
-  TherapistProfile,
-  SITE_CONFIG 
-} from '@/lib/metadata';
 
 interface TherapistProfilePageProps {
   params: { id: string };
