@@ -131,107 +131,128 @@ export const OmniSearchBar: React.FC<OmniSearchBarProps> = ({
     <div className={cn('relative w-full', className)}>
       {/* Search Form */}
       <form onSubmit={handleSubmit} className="relative">
-        <div className="relative flex items-center">
-          {/* Search Icon */}
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          
-          {/* Search Input */}
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={handleQueryChange}
-            placeholder={placeholder}
-            className={cn(
-              'w-full pl-10 pr-20 py-3 text-sm border border-input rounded-lg',
-              'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-              'placeholder:text-muted-foreground bg-background',
-              isLoading && 'pr-24'
-            )}
-            aria-label="Omnisearch input"
-            aria-describedby="search-help"
-          />
-
-          {/* Loading Spinner */}
-          {isLoading && (
-            <div className="absolute right-16 top-1/2 transform -translate-y-1/2">
-              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="relative">
+          {/* Enhanced Search Container */}
+          <div className={cn(
+            'relative flex items-center bg-background border border-input rounded-xl',
+            'transition-all duration-200 focus-within:ring-2 focus-within:ring-ring focus-within:border-transparent',
+            'hover:border-ring/50 shadow-sm hover:shadow-md',
+            isLoading && 'pr-2'
+          )}>
+            {/* Search Icon */}
+            <div className="flex items-center justify-center w-12 h-12">
+              <Search className="w-5 h-5 text-muted-foreground" />
             </div>
-          )}
+            
+            {/* Enhanced Search Input */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={handleQueryChange}
+              placeholder={placeholder}
+              className={cn(
+                'flex-1 h-12 px-0 text-base border-0 bg-transparent',
+                'focus:outline-none focus:ring-0',
+                'placeholder:text-muted-foreground/70',
+                'min-w-0' // Prevent input from growing too wide
+              )}
+              aria-label="Search input"
+              aria-describedby="search-help"
+            />
 
-          {/* Clear Button */}
-          {query && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-12 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Clear search"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+            {/* Right Side Actions Container */}
+            <div className="flex items-center gap-2 pr-3">
+              {/* Loading Spinner */}
+              {isLoading && (
+                <div className="flex items-center justify-center w-6 h-6">
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
 
-          {/* Filters Button */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                aria-label="Search filters"
-              >
-                <Filter className="w-4 h-4" />
-                {activeFilterCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-4 w-4 text-xs rounded-full p-0 flex items-center justify-center"
-                  >
-                    {activeFilterCount}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Search In</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {DEFAULT_ENTITY_TYPES.map((entityType) => (
-                <DropdownMenuCheckboxItem
-                  key={entityType}
-                  checked={filters.entityTypes.includes(entityType)}
-                  onCheckedChange={() => handleEntityTypeToggle(entityType)}
+              {/* Clear Button */}
+              {query && !isLoading && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClear}
+                  className="h-8 w-8 p-0 hover:bg-muted rounded-lg transition-colors"
+                  aria-label="Clear search"
                 >
-                  {ENTITY_TYPE_LABELS[entityType]}
-                </DropdownMenuCheckboxItem>
-              ))}
-              <DropdownMenuSeparator />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setFilters({ ...filters, entityTypes: DEFAULT_ENTITY_TYPES })}
-                className="w-full justify-start h-auto p-2"
-              >
-                Select All
-              </Button>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+
+              {/* Filters Button */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      'h-8 w-8 p-0 rounded-lg transition-colors',
+                      activeFilterCount > 0 && 'bg-primary/10 text-primary hover:bg-primary/20'
+                    )}
+                    aria-label="Search filters"
+                  >
+                    <div className="relative">
+                      <Filter className="w-4 h-4" />
+                      {activeFilterCount > 0 && (
+                        <div className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                          {activeFilterCount}
+                        </div>
+                      )}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Search In</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {DEFAULT_ENTITY_TYPES.map((entityType) => (
+                    <DropdownMenuCheckboxItem
+                      key={entityType}
+                      checked={filters.entityTypes.includes(entityType)}
+                      onCheckedChange={() => handleEntityTypeToggle(entityType)}
+                    >
+                      {ENTITY_TYPE_LABELS[entityType]}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, entityTypes: DEFAULT_ENTITY_TYPES })}
+                    className="w-full justify-start h-auto p-2"
+                  >
+                    Select All
+                  </Button>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
       </form>
 
-      {/* Active Filters Display */}
+      {/* Active Filters Display - Improved Design */}
       {activeFilterCount > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          <span className="text-xs text-muted-foreground">Excluding:</span>
+        <div className="flex flex-wrap items-center gap-2 mt-3 px-1">
+          <span className="text-sm text-muted-foreground font-medium">Excluding:</span>
           {DEFAULT_ENTITY_TYPES
             .filter(type => !filters.entityTypes.includes(type))
             .map(type => (
               <Badge 
                 key={type} 
-                variant="secondary" 
-                className="text-xs cursor-pointer"
+                variant="outline" 
+                className={cn(
+                  'text-xs px-2 py-1 cursor-pointer transition-colors',
+                  'hover:bg-destructive hover:text-destructive-foreground',
+                  'border-muted-foreground/30'
+                )}
                 onClick={() => handleEntityTypeToggle(type)}
               >
                 {ENTITY_TYPE_LABELS[type]}
-                <X className="w-3 h-3 ml-1" />
+                <X className="w-3 h-3 ml-1.5" />
               </Badge>
             ))}
         </div>

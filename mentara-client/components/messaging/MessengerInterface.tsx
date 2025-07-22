@@ -46,6 +46,11 @@ import { useRealtimeMessaging } from '@/hooks/messaging/useRealtimeMessaging';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format, isToday, isYesterday, differenceInMinutes } from 'date-fns';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import type { MessagingMessage, MessagingConversation } from '@/lib/api/services/messaging';
 
 interface MessengerInterfaceProps {
@@ -513,9 +518,11 @@ export function MessengerInterface({
     .map(t => t.userName);
 
   return (
-    <div className={cn("flex h-full bg-white rounded-lg shadow-lg overflow-hidden", className)}>
-      {/* Sidebar - Conversations List */}
-      <div className="w-80 border-r border-gray-200 flex flex-col">
+    <div className={cn("h-full bg-white rounded-lg shadow-lg overflow-hidden", className)}>
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="min-w-[280px]">
+          {/* Sidebar - Conversations List */}
+          <div className="w-full h-full border-r border-gray-200 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-3">
@@ -603,10 +610,12 @@ export function MessengerInterface({
             </div>
           )}
         </ScrollArea>
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+          </div>
+        </ResizablePanel>
+        <ResizableHandle withHandle className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200" />
+        <ResizablePanel defaultSize={75}>
+          {/* Main Chat Area */}
+          <div className="flex-1 flex flex-col h-full">
         {selectedConversationId ? (
           <>
             {/* Chat Header */}
@@ -795,7 +804,9 @@ export function MessengerInterface({
             </div>
           </div>
         )}
-      </div>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

@@ -7,6 +7,8 @@ import {
   VerifyOtpDto,
   SendOtpDto,
   ResendOtpDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
   ClientAuthResponse,
   AdminAuthResponse,
   TherapistAuthResponse,
@@ -40,6 +42,36 @@ export function createAuthService(client: AxiosInstance) {
      */
     async getUserRole(): Promise<{ role: string; userId: string }> {
       const response = await client.get("/auth/user-role");
+      return response.data;
+    },
+
+    // ================================
+    // PASSWORD RESET
+    // ================================
+    /**
+     * Request password reset
+     * POST /auth/request-password-reset
+     */
+    async requestPasswordReset(data: RequestPasswordResetDto): Promise<SuccessMessageResponse> {
+      const response = await client.post("/auth/request-password-reset", data);
+      return response.data;
+    },
+
+    /**
+     * Reset password with token
+     * POST /auth/reset-password
+     */
+    async resetPassword(data: ResetPasswordDto): Promise<SuccessMessageResponse> {
+      const response = await client.post("/auth/reset-password", data);
+      return response.data;
+    },
+
+    /**
+     * Validate reset token
+     * GET /auth/validate-reset-token?token={token}
+     */
+    async validateResetToken(token: string): Promise<{ valid: boolean; message: string }> {
+      const response = await client.get(`/auth/validate-reset-token?token=${token}`);
       return response.data;
     },
 

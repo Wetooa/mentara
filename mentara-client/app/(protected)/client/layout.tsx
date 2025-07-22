@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut } from "lucide-react";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { UserSearchBar, User } from "@/components/search";
 
 export default function MainLayout({
@@ -87,7 +87,7 @@ export default function MainLayout({
               <Link
                 key={item.id}
                 href={item.path}
-                className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-out ${
+                className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out ${
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-primary"
@@ -95,7 +95,7 @@ export default function MainLayout({
               >
                 {/* Discord-style bevel background */}
                 <div
-                  className={`absolute inset-0 transition-all duration-300 ease-out ${
+                  className={`absolute inset-0 transition-all duration-400 ease-in-out ${
                     isActive
                       ? "bg-primary/15 rounded-2xl scale-100"
                       : "bg-transparent rounded-full scale-75 group-hover:bg-primary/10 group-hover:rounded-2xl group-hover:scale-100"
@@ -104,7 +104,7 @@ export default function MainLayout({
 
                 {/* Left accent indicator */}
                 <div
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-out ${
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-in-out ${
                     isActive
                       ? "h-8 opacity-100"
                       : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
@@ -253,12 +253,12 @@ export default function MainLayout({
 
           {/* User Area */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="relative p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-medium shadow-sm">
-                3
-              </span>
-            </button>
+            <NotificationDropdown 
+              variant="default" 
+              maxNotifications={5} 
+              showConnectionStatus={true}
+              className="p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-primary/30"
+            />
 
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex flex-col items-end">

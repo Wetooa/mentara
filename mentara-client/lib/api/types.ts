@@ -14,6 +14,10 @@ export type {
   SendOtpDto,
   ResendOtpDto,
   
+  // Password Reset DTOs
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+  
   // Response Types
   ClientAuthResponse,
   AdminAuthResponse,

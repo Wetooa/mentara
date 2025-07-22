@@ -6,6 +6,7 @@ import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
 import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
 import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
 import { MatchedClientsSection } from "@/components/therapist/dashboard/MatchedClientsSection";
+import { DashboardCalendarWidget } from "@/components/therapist/dashboard/DashboardCalendarWidget";
 import { useTherapistDashboard } from "@/hooks/useTherapistDashboard";
 
 export default function TherapistDashboardPage() {
@@ -68,14 +69,18 @@ export default function TherapistDashboardPage() {
           </div>
         </div>
 
-        <div>
-          <h2 className="text-lg font-medium mb-4">Overview</h2>
-          <DashboardOverview patientStats={stats?.patientStats || {
-            total: 0,
-            percentage: 0,
-            months: 0,
-            chartData: []
-          }} />
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-medium mb-4">Overview</h2>
+            <DashboardOverview patientStats={stats?.patientStats || {
+              total: 0,
+              percentage: 0,
+              months: 0,
+              chartData: []
+            }} />
+          </div>
+          
+          <DashboardCalendarWidget />
         </div>
       </div>
     </div>
