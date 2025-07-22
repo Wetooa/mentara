@@ -3,18 +3,20 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG } from './config';
+import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
 
 export async function seedClientTherapistRelationships(
   prisma: PrismaClient,
   clients: any[],
   therapists: any[],
+  mode: 'simple' | 'comprehensive' = 'comprehensive'
 ) {
   console.log('🤝 Creating client-therapist relationships...');
 
+  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
   const relationships: any[] = [];
   const assignmentCount = Math.floor(
-    clients.length * SEED_CONFIG.RELATIONSHIPS.CLIENT_THERAPIST_RATIO,
+    clients.length * config.RELATIONSHIPS.CLIENT_THERAPIST_RATIO,
   );
   const clientsToAssign = faker.helpers.arrayElements(clients, assignmentCount);
 
@@ -38,16 +40,18 @@ export async function seedClientTherapistRelationships(
 
 export async function seedMeetings(
   prisma: PrismaClient,
-  relationships: any[]
+  relationships: any[],
+  mode: 'simple' | 'comprehensive' = 'comprehensive'
 ) {
   console.log('📅 Creating meetings...');
 
+  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
   const meetings: any[] = [];
 
   for (const { relationship, client, therapist } of relationships) {
     const meetingCount = faker.number.int({
       min: 1,
-      max: SEED_CONFIG.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP,
+      max: config.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP,
     });
 
     for (let i = 0; i < meetingCount; i++) {

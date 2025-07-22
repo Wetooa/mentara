@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG } from './config';
+import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
 // Assessment categories with their descriptions and question types
@@ -42,9 +42,12 @@ const assessmentCategories = [
 
 export async function seedPreAssessments(
   prisma: PrismaClient,
-  clients: any[]
+  clients: any[],
+  mode: 'simple' | 'comprehensive' = 'comprehensive'
 ) {
   console.log('📋 Creating comprehensive assessment system...');
+
+  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
 
   // Create assessment types first
   await createAssessmentTypes(prisma);
@@ -52,7 +55,7 @@ export async function seedPreAssessments(
   // Create pre-assessments for clients
   const assessments: any[] = [];
   const assessmentCount = Math.floor(
-    clients.length * SEED_CONFIG.ASSESSMENTS.COMPLETION_RATE,
+    clients.length * config.ASSESSMENTS.COMPLETION_RATE,
   );
   const clientsWithAssessments = faker.helpers.arrayElements(
     clients,

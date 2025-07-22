@@ -1,0 +1,63 @@
+d7dc50d0e35125202428727a6c6f8d4e
+"use strict";
+
+/**
+ * Auth Response Types - API response structures for authentication
+ */
+/* istanbul ignore next */
+function cov_squ2b96oq() {
+  var path = "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/auth/types/auth.response.ts";
+  var hash = "694de356ba7edc8e005707df910c8c729be573be";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/auth/types/auth.response.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 5,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 62
+        }
+      }
+    },
+    fnMap: {},
+    branchMap: {},
+    s: {
+      "0": 0
+    },
+    f: {},
+    b: {},
+    inputSourceMap: {
+      file: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/auth/types/auth.response.ts",
+      mappings: ";AAAA;;GAEG",
+      names: [],
+      sources: ["/home/wetooa/Documents/code/projects/mentara/mentara-api/src/auth/types/auth.response.ts"],
+      sourcesContent: ["/**\n * Auth Response Types - API response structures for authentication\n */\n\nimport { UserRole } from '../../types/global';\n\n// Token pair\nexport interface TokenPair {\n  accessToken: string;\n  refreshToken: string;\n}\n\n// Base auth user\nexport interface AuthUser {\n  id: string;\n  email: string;\n  firstName: string;\n  lastName: string;\n  role: UserRole;\n  isEmailVerified: boolean;\n  createdAt: Date;\n  updatedAt: Date;\n  client?: any; // Optional client data for client role users\n}\n\n// Auth response wrapper\nexport interface AuthResponse<T = AuthUser> {\n  user: T;\n  token: string; // Simplified single token approach\n  tokens?: TokenPair; // Optional for backward compatibility\n  isFirstLogin?: boolean;\n  message?: string;\n}\n\n// Role-specific auth responses\nexport interface ClientAuthResponse extends AuthResponse {\n  user: AuthUser & {\n    role: UserRole.CLIENT;\n    client?: {\n      hasSeenTherapistRecommendations: boolean;\n    };\n  };\n}\n\nexport interface TherapistAuthResponse extends AuthResponse {\n  user: AuthUser & {\n    role: UserRole.THERAPIST;\n    therapist?: {\n      isApproved: boolean;\n      approvalStatus: string;\n    };\n  };\n}\n\nexport interface AdminAuthResponse extends AuthResponse {\n  user: AuthUser & {\n    role: UserRole.ADMIN;\n    admin?: {\n      permissions: string[];\n    };\n  };\n}\n\nexport interface ModeratorAuthResponse extends AuthResponse {\n  user: AuthUser & {\n    role: UserRole.MODERATOR;\n    moderator?: {\n      permissions: string[];\n      assignedCommunities: string[];\n    };\n  };\n}\n\n// Profile responses\nexport interface ClientProfileResponse {\n  id: string;\n  email: string;\n  firstName: string;\n  lastName: string;\n  role: 'client';\n  dateOfBirth?: string;\n  phoneNumber?: string;\n  profileComplete: boolean;\n  therapistId?: string;\n  createdAt: string;\n  hasSeenTherapistRecommendations: boolean;\n}\n\n// Email responses\nexport interface EmailResponse {\n  success: boolean;\n  status?: 'success' | 'error'; // Optional status for compatibility\n  message: string;\n  sentTo?: string;\n}\n\nexport interface EmailStatusResponse {\n  emailVerified: boolean;\n  verificationSentAt?: Date;\n  canResend: boolean;\n}\n\n// OTP responses\nexport interface OtpEmailData {\n  email: string;\n  otpCode: string;\n  expiresAt: Date;\n}\n\nexport interface AutoOtpEmailRequest {\n  email: string;\n  otpCode: string;\n  type: 'registration' | 'password_reset' | 'login_verification';\n}\n\n// Session responses\nexport interface SessionInfoResponse {\n  sessionId: string;\n  userId: string;\n  createdAt: Date;\n  lastUsedAt: Date;\n  ipAddress?: string;\n  userAgent?: string;\n}\n\nexport interface ActiveSessionsResponse {\n  sessions: SessionInfoResponse[];\n  currentSessionId: string;\n}\n\nexport interface TerminateSessionResponse {\n  success: boolean;\n  message: string;\n  terminatedSessionId: string;\n}\n\nexport interface TerminateOtherSessionsResponse {\n  success: boolean;\n  message: string;\n  terminatedCount: number;\n}\n\nexport interface UniversalLogoutResponse {\n  success: boolean;\n  message: string;\n}\n\nexport interface CheckUserExistsResponse {\n  exists: boolean;\n  email?: string;\n}\n\n// Onboarding response\nexport interface OnboardingStatusResponse {\n  isFirstSignIn: boolean;\n  hasSeenRecommendations: boolean;\n  profileCompleted: boolean;\n  assessmentCompleted: boolean;\n  isOnboardingComplete: boolean;\n  completedSteps: string[];\n  nextStep?: string;\n}\n\n// User response (for user data without tokens)\nexport interface UserResponse {\n  user: AuthUser;\n}"],
+      version: 3
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "694de356ba7edc8e005707df910c8c729be573be"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_squ2b96oq = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_squ2b96oq();
+cov_squ2b96oq().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3Zfc3F1MmI5Nm9xIiwicGF0aCIsImhhc2giLCJnbG9iYWwiLCJGdW5jdGlvbiIsImdjdiIsImNvdmVyYWdlRGF0YSIsInN0YXRlbWVudE1hcCIsInN0YXJ0IiwibGluZSIsImNvbHVtbiIsImVuZCIsImZuTWFwIiwiYnJhbmNoTWFwIiwicyIsImYiLCJiIiwiaW5wdXRTb3VyY2VNYXAiLCJmaWxlIiwibWFwcGluZ3MiLCJuYW1lcyIsInNvdXJjZXMiLCJzb3VyY2VzQ29udGVudCIsInZlcnNpb24iLCJfY292ZXJhZ2VTY2hlbWEiLCJjb3ZlcmFnZSIsImFjdHVhbENvdmVyYWdlIl0sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvdHlwZXMvYXV0aC5yZXNwb25zZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEF1dGggUmVzcG9uc2UgVHlwZXMgLSBBUEkgcmVzcG9uc2Ugc3RydWN0dXJlcyBmb3IgYXV0aGVudGljYXRpb25cbiAqL1xuXG5pbXBvcnQgeyBVc2VyUm9sZSB9IGZyb20gJy4uLy4uL3R5cGVzL2dsb2JhbCc7XG5cbi8vIFRva2VuIHBhaXJcbmV4cG9ydCBpbnRlcmZhY2UgVG9rZW5QYWlyIHtcbiAgYWNjZXNzVG9rZW46IHN0cmluZztcbiAgcmVmcmVzaFRva2VuOiBzdHJpbmc7XG59XG5cbi8vIEJhc2UgYXV0aCB1c2VyXG5leHBvcnQgaW50ZXJmYWNlIEF1dGhVc2VyIHtcbiAgaWQ6IHN0cmluZztcbiAgZW1haWw6IHN0cmluZztcbiAgZmlyc3ROYW1lOiBzdHJpbmc7XG4gIGxhc3ROYW1lOiBzdHJpbmc7XG4gIHJvbGU6IFVzZXJSb2xlO1xuICBpc0VtYWlsVmVyaWZpZWQ6IGJvb2xlYW47XG4gIGNyZWF0ZWRBdDogRGF0ZTtcbiAgdXBkYXRlZEF0OiBEYXRlO1xuICBjbGllbnQ/OiBhbnk7IC8vIE9wdGlvbmFsIGNsaWVudCBkYXRhIGZvciBjbGllbnQgcm9sZSB1c2Vyc1xufVxuXG4vLyBBdXRoIHJlc3BvbnNlIHdyYXBwZXJcbmV4cG9ydCBpbnRlcmZhY2UgQXV0aFJlc3BvbnNlPFQgPSBBdXRoVXNlcj4ge1xuICB1c2VyOiBUO1xuICB0b2tlbjogc3RyaW5nOyAvLyBTaW1wbGlmaWVkIHNpbmdsZSB0b2tlbiBhcHByb2FjaFxuICB0b2tlbnM/OiBUb2tlblBhaXI7IC8vIE9wdGlvbmFsIGZvciBiYWNrd2FyZCBjb21wYXRpYmlsaXR5XG4gIGlzRmlyc3RMb2dpbj86IGJvb2xlYW47XG4gIG1lc3NhZ2U/OiBzdHJpbmc7XG59XG5cbi8vIFJvbGUtc3BlY2lmaWMgYXV0aCByZXNwb25zZXNcbmV4cG9ydCBpbnRlcmZhY2UgQ2xpZW50QXV0aFJlc3BvbnNlIGV4dGVuZHMgQXV0aFJlc3BvbnNlIHtcbiAgdXNlcjogQXV0aFVzZXIgJiB7XG4gICAgcm9sZTogVXNlclJvbGUuQ0xJRU5UO1xuICAgIGNsaWVudD86IHtcbiAgICAgIGhhc1NlZW5UaGVyYXBpc3RSZWNvbW1lbmRhdGlvbnM6IGJvb2xlYW47XG4gICAgfTtcbiAgfTtcbn1cblxuZXhwb3J0IGludGVyZmFjZSBUaGVyYXBpc3RBdXRoUmVzcG9uc2UgZXh0ZW5kcyBBdXRoUmVzcG9uc2Uge1xuICB1c2VyOiBBdXRoVXNlciAmIHtcbiAgICByb2xlOiBVc2VyUm9sZS5USEVSQVBJU1Q7XG4gICAgdGhlcmFwaXN0Pzoge1xuICAgICAgaXNBcHByb3ZlZDogYm9vbGVhbjtcbiAgICAgIGFwcHJvdmFsU3RhdHVzOiBzdHJpbmc7XG4gICAgfTtcbiAgfTtcbn1cblxuZXhwb3J0IGludGVyZmFjZSBBZG1pbkF1dGhSZXNwb25zZSBleHRlbmRzIEF1dGhSZXNwb25zZSB7XG4gIHVzZXI6IEF1dGhVc2VyICYge1xuICAgIHJvbGU6IFVzZXJSb2xlLkFETUlOO1xuICAgIGFkbWluPzoge1xuICAgICAgcGVybWlzc2lvbnM6IHN0cmluZ1tdO1xuICAgIH07XG4gIH07XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgTW9kZXJhdG9yQXV0aFJlc3BvbnNlIGV4dGVuZHMgQXV0aFJlc3BvbnNlIHtcbiAgdXNlcjogQXV0aFVzZXIgJiB7XG4gICAgcm9sZTogVXNlclJvbGUuTU9ERVJBVE9SO1xuICAgIG1vZGVyYXRvcj86IHtcbiAgICAgIHBlcm1pc3Npb25zOiBzdHJpbmdbXTtcbiAgICAgIGFzc2lnbmVkQ29tbXVuaXRpZXM6IHN0cmluZ1tdO1xuICAgIH07XG4gIH07XG59XG5cbi8vIFByb2ZpbGUgcmVzcG9uc2VzXG5leHBvcnQgaW50ZXJmYWNlIENsaWVudFByb2ZpbGVSZXNwb25zZSB7XG4gIGlkOiBzdHJpbmc7XG4gIGVtYWlsOiBzdHJpbmc7XG4gIGZpcnN0TmFtZTogc3RyaW5nO1xuICBsYXN0TmFtZTogc3RyaW5nO1xuICByb2xlOiAnY2xpZW50JztcbiAgZGF0ZU9mQmlydGg/OiBzdHJpbmc7XG4gIHBob25lTnVtYmVyPzogc3RyaW5nO1xuICBwcm9maWxlQ29tcGxldGU6IGJvb2xlYW47XG4gIHRoZXJhcGlzdElkPzogc3RyaW5nO1xuICBjcmVhdGVkQXQ6IHN0cmluZztcbiAgaGFzU2VlblRoZXJhcGlzdFJlY29tbWVuZGF0aW9uczogYm9vbGVhbjtcbn1cblxuLy8gRW1haWwgcmVzcG9uc2VzXG5leHBvcnQgaW50ZXJmYWNlIEVtYWlsUmVzcG9uc2Uge1xuICBzdWNjZXNzOiBib29sZWFuO1xuICBzdGF0dXM/OiAnc3VjY2VzcycgfCAnZXJyb3InOyAvLyBPcHRpb25hbCBzdGF0dXMgZm9yIGNvbXBhdGliaWxpdHlcbiAgbWVzc2FnZTogc3RyaW5nO1xuICBzZW50VG8/OiBzdHJpbmc7XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgRW1haWxTdGF0dXNSZXNwb25zZSB7XG4gIGVtYWlsVmVyaWZpZWQ6IGJvb2xlYW47XG4gIHZlcmlmaWNhdGlvblNlbnRBdD86IERhdGU7XG4gIGNhblJlc2VuZDogYm9vbGVhbjtcbn1cblxuLy8gT1RQIHJlc3BvbnNlc1xuZXhwb3J0IGludGVyZmFjZSBPdHBFbWFpbERhdGEge1xuICBlbWFpbDogc3RyaW5nO1xuICBvdHBDb2RlOiBzdHJpbmc7XG4gIGV4cGlyZXNBdDogRGF0ZTtcbn1cblxuZXhwb3J0IGludGVyZmFjZSBBdXRvT3RwRW1haWxSZXF1ZXN0IHtcbiAgZW1haWw6IHN0cmluZztcbiAgb3RwQ29kZTogc3RyaW5nO1xuICB0eXBlOiAncmVnaXN0cmF0aW9uJyB8ICdwYXNzd29yZF9yZXNldCcgfCAnbG9naW5fdmVyaWZpY2F0aW9uJztcbn1cblxuLy8gU2Vzc2lvbiByZXNwb25zZXNcbmV4cG9ydCBpbnRlcmZhY2UgU2Vzc2lvbkluZm9SZXNwb25zZSB7XG4gIHNlc3Npb25JZDogc3RyaW5nO1xuICB1c2VySWQ6IHN0cmluZztcbiAgY3JlYXRlZEF0OiBEYXRlO1xuICBsYXN0VXNlZEF0OiBEYXRlO1xuICBpcEFkZHJlc3M/OiBzdHJpbmc7XG4gIHVzZXJBZ2VudD86IHN0cmluZztcbn1cblxuZXhwb3J0IGludGVyZmFjZSBBY3RpdmVTZXNzaW9uc1Jlc3BvbnNlIHtcbiAgc2Vzc2lvbnM6IFNlc3Npb25JbmZvUmVzcG9uc2VbXTtcbiAgY3VycmVudFNlc3Npb25JZDogc3RyaW5nO1xufVxuXG5leHBvcnQgaW50ZXJmYWNlIFRlcm1pbmF0ZVNlc3Npb25SZXNwb25zZSB7XG4gIHN1Y2Nlc3M6IGJvb2xlYW47XG4gIG1lc3NhZ2U6IHN0cmluZztcbiAgdGVybWluYXRlZFNlc3Npb25JZDogc3RyaW5nO1xufVxuXG5leHBvcnQgaW50ZXJmYWNlIFRlcm1pbmF0ZU90aGVyU2Vzc2lvbnNSZXNwb25zZSB7XG4gIHN1Y2Nlc3M6IGJvb2xlYW47XG4gIG1lc3NhZ2U6IHN0cmluZztcbiAgdGVybWluYXRlZENvdW50OiBudW1iZXI7XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgVW5pdmVyc2FsTG9nb3V0UmVzcG9uc2Uge1xuICBzdWNjZXNzOiBib29sZWFuO1xuICBtZXNzYWdlOiBzdHJpbmc7XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgQ2hlY2tVc2VyRXhpc3RzUmVzcG9uc2Uge1xuICBleGlzdHM6IGJvb2xlYW47XG4gIGVtYWlsPzogc3RyaW5nO1xufVxuXG4vLyBPbmJvYXJkaW5nIHJlc3BvbnNlXG5leHBvcnQgaW50ZXJmYWNlIE9uYm9hcmRpbmdTdGF0dXNSZXNwb25zZSB7XG4gIGlzRmlyc3RTaWduSW46IGJvb2xlYW47XG4gIGhhc1NlZW5SZWNvbW1lbmRhdGlvbnM6IGJvb2xlYW47XG4gIHByb2ZpbGVDb21wbGV0ZWQ6IGJvb2xlYW47XG4gIGFzc2Vzc21lbnRDb21wbGV0ZWQ6IGJvb2xlYW47XG4gIGlzT25ib2FyZGluZ0NvbXBsZXRlOiBib29sZWFuO1xuICBjb21wbGV0ZWRTdGVwczogc3RyaW5nW107XG4gIG5leHRTdGVwPzogc3RyaW5nO1xufVxuXG4vLyBVc2VyIHJlc3BvbnNlIChmb3IgdXNlciBkYXRhIHdpdGhvdXQgdG9rZW5zKVxuZXhwb3J0IGludGVyZmFjZSBVc2VyUmVzcG9uc2Uge1xuICB1c2VyOiBBdXRoVXNlcjtcbn0iXSwibWFwcGluZ3MiOiI7O0FBQUE7OztBQUFBO0FBQUEsU0FBQUEsY0FBQTtFQUFBLElBQUFDLElBQUE7RUFBQSxJQUFBQyxJQUFBO0VBQUEsSUFBQUMsTUFBQSxPQUFBQyxRQUFBO0VBQUEsSUFBQUMsR0FBQTtFQUFBLElBQUFDLFlBQUE7SUFBQUwsSUFBQTtJQUFBTSxZQUFBO01BQUE7UUFBQUMsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7SUFBQTtJQUFBRSxLQUFBO0lBQUFDLFNBQUE7SUFBQUMsQ0FBQTtNQUFBO0lBQUE7SUFBQUMsQ0FBQTtJQUFBQyxDQUFBO0lBQUFDLGNBQUE7TUFBQUMsSUFBQTtNQUFBQyxRQUFBO01BQUFDLEtBQUE7TUFBQUMsT0FBQTtNQUFBQyxjQUFBO01BQUFDLE9BQUE7SUFBQTtJQUFBQyxlQUFBO0lBQUF0QixJQUFBO0VBQUE7RUFBQSxJQUFBdUIsUUFBQSxHQUFBdEIsTUFBQSxDQUFBRSxHQUFBLE1BQUFGLE1BQUEsQ0FBQUUsR0FBQTtFQUFBLEtBQUFvQixRQUFBLENBQUF4QixJQUFBLEtBQUF3QixRQUFBLENBQUF4QixJQUFBLEVBQUFDLElBQUEsS0FBQUEsSUFBQTtJQUFBdUIsUUFBQSxDQUFBeEIsSUFBQSxJQUFBSyxZQUFBO0VBQUE7RUFBQSxJQUFBb0IsY0FBQSxHQUFBRCxRQUFBLENBQUF4QixJQUFBO0VBQUEiLCJpZ25vcmVMaXN0IjpbXX0=
