@@ -117,7 +117,7 @@ export async function seedMeetingNotes(
     try {
       const notes = await prisma.meetingNotes.create({
         data: {
-
+          id: `meeting_notes_${meeting.id}_${Date.now()}`,
           meetingId: meeting.id,
           notes: faker.helpers.arrayElement(noteTemplates),
           createdAt: faker.date.between({
