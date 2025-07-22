@@ -12,12 +12,12 @@ export async function runPhase10Worksheets(
   console.log(`📚 PHASE 10: Creating worksheets & therapy materials (${config} mode)...`);
 
   try {
-    const existingCount = await prisma.worksheetTemplate.count();
+    const existingCount = await prisma.worksheet.count();
     if (existingCount > 0) {
-      console.log(`⏭️ Found ${existingCount} existing worksheet templates, skipping phase`);
+      console.log(`⏭️ Found ${existingCount} existing worksheets, skipping phase`);
       return {
         success: true,
-        message: `Found ${existingCount} existing worksheet templates`,
+        message: `Found ${existingCount} existing worksheets`,
         skipped: true,
       };
     }

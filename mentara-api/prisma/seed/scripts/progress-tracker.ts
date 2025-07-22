@@ -203,9 +203,9 @@ export class ProgressTracker {
       6: 'Meetings, Notes & Payment Methods',
       7: 'Payment Transactions',
       8: 'Community Content (posts, comments, reactions)',
-      9: 'Therapist Availability',
-      10: 'Messaging System (conversations, messages)',
-      11: 'Worksheets & Therapy Materials',
+      9: 'Messaging System (conversations, messages)',
+      10: 'Worksheets & Therapy Materials',
+      11: 'Therapist Reviews & Ratings',
       12: 'Therapist Reviews & Ratings',
       13: 'Notifications & Device Tokens',
       14: 'Final Validation & Summary'
