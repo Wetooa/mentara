@@ -47,7 +47,7 @@ export async function runPhase07Payments(
     }
 
     // Create payment transactions for meetings
-    const payments = await seedPayments(prisma, meetings, users, paymentMethods, config);
+    const payments = await seedPayments(prisma, meetings, paymentMethods);
 
     console.log(`✅ Phase 7 completed: Created ${payments.length} payment transactions`);
 

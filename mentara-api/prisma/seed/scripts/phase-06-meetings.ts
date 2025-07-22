@@ -54,7 +54,7 @@ export async function runPhase06Meetings(
     const availability = await seedTherapistAvailability(prisma, therapists);
 
     // Create payment methods for users
-    const paymentMethods = await seedPaymentMethods(prisma, users, config);
+    const paymentMethods = await seedPaymentMethods(prisma, users);
 
     console.log(`✅ Phase 6 completed: Created ${meetings.length} meetings, ${meetingNotes.length} meeting notes, ${availability.length} availability slots, ${paymentMethods.length} payment methods`);
 
