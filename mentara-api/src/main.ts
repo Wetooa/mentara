@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as fs from 'fs';
 import helmet from 'helmet';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import {
   validateEnvironmentVariables,
   logEnvironmentInfo,
@@ -27,6 +28,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
   });
+
+  // Configure Socket.io adapter for WebSocket support
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Enable security headers with helmet
   app.use(
@@ -62,7 +66,7 @@ async function bootstrap() {
   //   }),
   // );
 
-  // Enable CORS with secure configuration
+  // Enable CORS with secure configuration for both HTTP API and WebSocket connections
   app.enableCors({
     origin:
       process.env.NODE_ENV === 'production'
@@ -83,6 +87,8 @@ async function bootstrap() {
       'x-clerk-auth-token',
     ],
     optionsSuccessStatus: 200,
+    // Additional settings for WebSocket connections
+    transports: ['websocket', 'polling'],
   });
 
   // Ensure uploads directory exists
@@ -102,6 +108,8 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3001);
   console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log('🔌 WebSocket (Socket.io) support enabled');
+  console.log(`📡 WebSocket server listening on port: ${process.env.PORT ?? 3001}`);
 }
 
 void bootstrap();

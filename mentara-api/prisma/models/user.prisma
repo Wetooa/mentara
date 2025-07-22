@@ -1,124 +1,92 @@
 model User {
-    id         String    @id @unique @default(uuid())
-    email      String    @unique
-    firstName  String
-    middleName String? // Optional middle name
-    lastName   String
-    birthDate  DateTime? // User's birth date
-    address    String? // User's address
-    role       String    @default("client") // client, therapist, moderator, admin
-    createdAt  DateTime  @default(now())
-    updatedAt  DateTime  @updatedAt
+  id                  String                    @id @unique @default(uuid())
+  email               String                    @unique
+  firstName           String
+  middleName          String?
+  lastName            String
+  birthDate           DateTime?
+  address             String?
+  role                String                    @default("client")
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  password            String?
+  emailVerified       Boolean                   @default(false)
+  emailVerifyToken    String?                   @unique
+  emailVerifyTokenExp DateTime?
+  resetToken          String?                   @unique
+  resetTokenExpiry    DateTime?
+  isActive            Boolean                   @default(true)
+  failedLoginCount    Int                       @default(0)
+  avatarUrl           String?
+  coverImageUrl       String?
+  bio                 String?
+  suspendedAt         DateTime?
+  suspendedBy         String?
+  suspensionReason    String?
+  deactivatedAt       DateTime?
+  deactivatedBy       String?
+  deactivationReason  String?
+  lastLoginAt         DateTime?
+  lockoutUntil        DateTime?
+  admin               Admin?                    @relation("UserAdmin")
+  client              Client?                   @relation("UserClient")
+  comments            Comment[]
+  commentHearts       CommentHeart[]
+  conversations       ConversationParticipant[] @relation("UserConversations")
+  memberships         Membership[]
+  sentMessages        Message[]                 @relation("UserMessages")
+  messageReactions    MessageReaction[]         @relation("UserMessageReactions")
+  messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
+  moderator           Moderator?                @relation("UserModerator")
+  notifications       Notification[]            @relation("UserNotifications")
+  paymentMethods      PaymentMethod[]           @relation("UserPaymentMethods")
+  posts               Post[]
+  postHearts          PostHeart[]
+  reports             Report[]                  @relation("UserReports")
+  therapist           Therapist?                @relation("UserTherapist")
+  blockedBy           UserBlock[]               @relation("UserBlocked")
+  blocking            UserBlock[]               @relation("UserBlocking")
 
-    // Authentication fields
-    password String? // Hashed password
-
-    emailVerified       Boolean   @default(false)
-    emailVerifyToken    String?   @unique
-    emailVerifyTokenExp DateTime?
-
-    resetToken       String?   @unique
-    resetTokenExpiry DateTime?
-    isActive         Boolean   @default(true)
-    failedLoginCount Int       @default(0)
-    avatarUrl        String?
-    coverImageUrl    String? // Cover/banner image URL
-    bio              String?
-
-    // Account status fields
-    suspendedAt        DateTime?
-    suspendedBy        String?
-    suspensionReason   String?
-    deactivatedAt      DateTime?
-    deactivatedBy      String?
-    deactivationReason String?
-    lastLoginAt        DateTime?
-    lockoutUntil       DateTime?
-
-    // Essential content relations
-    posts         Post[]
-    comments      Comment[] // Supports nested comments through parentId
-    postHearts    PostHeart[]
-    commentHearts CommentHeart[] // Supports hearts on all comment levels
-
-    // Reports (instead of reddit-like features)
-    reports Report[] @relation("UserReports")
-
-    // Role-specific relations
-    client    Client?    @relation("UserClient")
-    therapist Therapist? @relation("UserTherapist")
-    moderator Moderator? @relation("UserModerator")
-    admin     Admin?     @relation("UserAdmin")
-
-    // Essential messaging
-    conversations       ConversationParticipant[] @relation("UserConversations")
-    sentMessages        Message[]                 @relation("UserMessages")
-    messageReadReceipts MessageReadReceipt[]      @relation("UserReadReceipts")
-    messageReactions    MessageReaction[]         @relation("UserMessageReactions")
-
-    // User blocking system
-    blocking  UserBlock[] @relation("UserBlocking")
-    blockedBy UserBlock[] @relation("UserBlocked")
-
-    // Simple notifications (WebSocket only)
-    notifications Notification[] @relation("UserNotifications")
-
-    // Simple billing
-    paymentMethods PaymentMethod[] @relation("UserPaymentMethods")
-
-    // Essential community features (minimal)
-    memberships Membership[]
-
-    @@index([email])
-    @@index([role])
+  @@index([email])
+  @@index([role])
 }
 
 model Client {
-    userId String @id @unique
-    user   User   @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
+  userId                          String            @id @unique
+  hasSeenTherapistRecommendations Boolean           @default(false)
+  createdAt                       DateTime          @default(now())
+  updatedAt                       DateTime          @default(now())
+  user                            User              @relation("UserClient", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTherapists              ClientTherapist[]
+  meetings                        Meeting[]         @relation("ClientMeetings")
+  paymentsAsClient                Payment[]
+  preAssessment                   PreAssessment?
+  reviews                         Review[]
+  worksheets                      Worksheet[]
 
-    // Patient-specific relations
-    worksheets         Worksheet[]
-    preAssessment      PreAssessment?
-    assignedTherapists ClientTherapist[]
-    meetings           Meeting[]         @relation("ClientMeetings")
-    reviews            Review[] // Reviews written by this client
-    paymentsAsClient   Payment[] // Payments made by this client
-
-    hasSeenTherapistRecommendations Boolean @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now())
-
-    @@index([userId])
+  @@index([userId])
 }
 
 model Moderator {
-    userId String @id @unique
-    user   User   @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)
+  userId               String               @id @unique
+  permissions          String[]
+  assignedCommunities  Json?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  user                 User                 @relation("UserModerator", fields: [userId], references: [id], onDelete: Cascade)
+  moderatorCommunities ModeratorCommunity[]
 
-    // Moderator-specific fields
-    permissions         String[] // Array of moderator permissions
-    assignedCommunities Json? // Communities they moderate
-
-    createdAt            DateTime             @default(now())
-    updatedAt            DateTime             @updatedAt
-    moderatorCommunities ModeratorCommunity[]
-
-    @@index([userId])
+  @@index([userId])
 }
 
 model Admin {
-    userId String @id @unique
-    user   User   @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
+  userId              String      @id @unique
+  permissions         String[]
+  adminLevel          String      @default("admin")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  user                User        @relation("UserAdmin", fields: [userId], references: [id], onDelete: Cascade)
+  processedTherapists Therapist[]
 
-    // Admin-specific fields
-    permissions         String[] // Array of admin permissions
-    adminLevel          String      @default("admin") // admin, super_admin, etc.
-    processedTherapists Therapist[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([userId])
+  @@index([userId])
 }

@@ -1,76 +1,67 @@
 model Meeting {
-    id           String         @id @default(uuid())
-    title        String? // Optional meeting title
-    description  String? // Optional meeting description
-    startTime    DateTime
-    endTime      DateTime? // Calculated from startTime + duration, helps with queries
-    duration     Int            @default(60)
-    status       MeetingStatus  @default(SCHEDULED)
-    meetingType  String         @default("video") // video only
-    meetingUrl   String? // Video call URL
-    meetingNotes MeetingNotes[]
+  id           String         @id @default(uuid())
+  title        String?
+  description  String?
+  startTime    DateTime
+  endTime      DateTime?
+  duration     Int            @default(60)
+  status       MeetingStatus  @default(SCHEDULED)
+  meetingType  String         @default("video")
+  meetingUrl   String?
+  clientId     String
+  therapistId  String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  client       Client         @relation("ClientMeetings", fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist    Therapist      @relation("TherapistMeetings", fields: [therapistId], references: [userId], onDelete: Cascade)
+  meetingNotes MeetingNotes[]
+  payments     Payment[]
+  reviews      Review[]
 
-    // Relations
-    clientId    String
-    therapistId String
-    client      Client    @relation("ClientMeetings", fields: [clientId], references: [userId], onDelete: Cascade)
-    therapist   Therapist @relation("TherapistMeetings", fields: [therapistId], references: [userId], onDelete: Cascade)
-
-    // Reviews for this meeting
-    reviews  Review[]
-    payments Payment[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Add checks sometime later
-
-    @@index([clientId])
-    @@index([therapistId])
-    @@index([startTime])
-    @@index([endTime])
-    @@index([status])
-    @@index([therapistId, startTime, status]) // For availability queries
-    @@index([therapistId, startTime, endTime]) // For conflict detection
-    @@index([clientId, startTime, endTime]) // For client conflict detection
+  @@index([clientId])
+  @@index([therapistId])
+  @@index([startTime])
+  @@index([endTime])
+  @@index([status])
+  @@index([therapistId, startTime, status])
+  @@index([therapistId, startTime, endTime])
+  @@index([clientId, startTime, endTime])
 }
 
 model MeetingNotes {
-    id        String   @id @unique
-    meetingId String
-    meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
-    notes     String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id @unique
+  meetingId String
+  notes     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
 
-    @@index([meetingId])
+  @@index([meetingId])
 }
 
 model TherapistAvailability {
-    id          String  @id @default(uuid())
-    therapistId String
-    dayOfWeek   String // MONDAY, TUESDAY, etc. - more readable than numbers
-    startTime   String // Time in HH:MM format (e.g., "09:00")
-    endTime     String // Time in HH:MM format (e.g., "17:00")
-    timezone    String  @default("UTC") // Handle timezone properly
-    isAvailable Boolean @default(true)
-    notes       String? // Optional notes
+  id          String    @id @default(uuid())
+  therapistId String
+  dayOfWeek   String
+  startTime   String
+  endTime     String
+  timezone    String    @default("UTC")
+  isAvailable Boolean   @default(true)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
-    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@unique([therapistId, dayOfWeek, startTime, endTime])
-    @@index([therapistId])
-    @@index([dayOfWeek])
+  @@unique([therapistId, dayOfWeek, startTime, endTime])
+  @@index([therapistId])
+  @@index([dayOfWeek])
 }
 
 enum MeetingStatus {
-    SCHEDULED
-    CONFIRMED
-    IN_PROGRESS
-    COMPLETED
-    CANCELLED
-    NO_SHOW
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }

@@ -48,7 +48,7 @@ export function useNotificationMetadata(
     queryKey: ["notifications", "metadata"],
     queryFn: async (): Promise<NotificationData> => {
       try {
-        const notifications = await api.notifications.getUnreadNotifications();
+        const notifications = await api.notifications.getMy({ isRead: false });
         
         const unreadCount = notifications.length;
         const hasUrgent = notifications.some(n => 

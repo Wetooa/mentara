@@ -1,29 +1,22 @@
 model Review {
-    id          String  @id @default(uuid())
-    rating      Int // 1-5 star rating
-    title       String? // Optional review title
-    content     String? @db.Text // Review content
-    isAnonymous Boolean @default(false) // Whether the review is anonymous
+  id          String    @id @default(uuid())
+  rating      Int
+  title       String?
+  content     String?
+  isAnonymous Boolean   @default(false)
+  clientId    String
+  therapistId String
+  meetingId   String?
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  client      Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  meeting     Meeting?  @relation(fields: [meetingId], references: [id])
+  therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
-    // Relations
-    clientId    String
-    therapistId String
-    meetingId   String? // Optional - link to specific meeting
-
-    client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
-    meeting   Meeting?  @relation(fields: [meetingId], references: [id], onDelete: SetNull)
-
-    // Metadata
-    isVerified Boolean @default(false) // Verified as from actual client
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Prevent duplicate reviews for same client-therapist pair
-    @@unique([clientId, therapistId, meetingId])
-    @@index([therapistId])
-    @@index([clientId])
-    @@index([rating])
-    @@index([createdAt])
+  @@unique([clientId, therapistId, meetingId])
+  @@index([therapistId])
+  @@index([clientId])
+  @@index([rating])
+  @@index([createdAt])
 }

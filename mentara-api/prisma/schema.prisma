@@ -8,6 +8,3 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-
-// Multi-file schema - models are automatically loaded from the models/ directory
-// when using prismaSchemaFolder preview feature

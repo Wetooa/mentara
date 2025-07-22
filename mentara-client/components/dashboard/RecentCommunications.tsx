@@ -19,7 +19,15 @@ export default function RecentCommunications({
   onContactSelect,
 }: RecentCommunicationsProps) {
   const getDisplayTime = (time: string): string => {
+    if (!time) {
+      return "Unknown";
+    }
+    
     const messageTime = new Date(time);
+    if (isNaN(messageTime.getTime())) {
+      return "Invalid Date";
+    }
+    
     const now = new Date();
     const diffInHours = (now.getTime() - messageTime.getTime()) / (1000 * 60 * 60);
 

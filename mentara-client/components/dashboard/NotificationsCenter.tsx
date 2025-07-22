@@ -69,9 +69,18 @@ export default function NotificationsCenter({
   notifications,
 }: NotificationsCenterProps) {
   // Sort notifications by date (newest first)
-  const sortedNotifications = [...notifications].sort((a, b) => {
-    return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
-  });
+  const sortedNotifications = [...notifications]
+    .filter(notification => notification.dateTime) // Filter out notifications without dateTime
+    .sort((a, b) => {
+      const dateA = new Date(a.dateTime);
+      const dateB = new Date(b.dateTime);
+      
+      // Handle invalid dates
+      if (isNaN(dateA.getTime())) return 1;
+      if (isNaN(dateB.getTime())) return -1;
+      
+      return dateB.getTime() - dateA.getTime();
+    });
 
   // Function to get icon based on notification type
   const getNotificationIcon = (type: string) => {
@@ -131,12 +140,19 @@ export default function NotificationsCenter({
             >
               {sortedNotifications.map((notification, index) => {
                 // Calculate time ago
-                const timeAgo = formatDistanceToNow(
-                  parseISO(notification.dateTime),
-                  {
-                    addSuffix: true,
+                let timeAgo = "Unknown time";
+                try {
+                  if (notification.dateTime) {
+                    const parsedDate = parseISO(notification.dateTime);
+                    if (!isNaN(parsedDate.getTime())) {
+                      timeAgo = formatDistanceToNow(parsedDate, {
+                        addSuffix: true,
+                      });
+                    }
                   }
-                );
+                } catch (error) {
+                  console.warn("Invalid date format:", notification.dateTime);
+                }
 
                 return (
                   <motion.div

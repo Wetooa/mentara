@@ -33,16 +33,16 @@ export default function ProtectedError({ error, reset }: ProtectedErrorProps) {
 
   const getRoleBasedDashboard = () => {
     if (!user) return '/';
-    
+
     switch (user.role) {
       case 'client':
-        return '/client/dashboard';
+        return '/client';
       case 'therapist':
-        return '/therapist/dashboard';
+        return '/therapist';
       case 'moderator':
-        return '/moderator/dashboard';
+        return '/moderator';
       case 'admin':
-        return '/admin/dashboard';
+        return '/admin';
       default:
         return '/';
     }
@@ -52,7 +52,7 @@ export default function ProtectedError({ error, reset }: ProtectedErrorProps) {
     if (!user) {
       return "There was an issue with your session. This might be a temporary problem with authentication.";
     }
-    
+
     switch (user.role) {
       case 'client':
         return "We experienced an issue accessing your client area. This might be a temporary session problem, and your therapy progress is still safe.";
@@ -109,7 +109,7 @@ export default function ProtectedError({ error, reset }: ProtectedErrorProps) {
             {getRoleBasedMessage()}
           </p>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           {/* Supportive Message */}
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 text-center">
@@ -132,21 +132,21 @@ export default function ProtectedError({ error, reset }: ProtectedErrorProps) {
               )}
             </div>
           )}
-          
+
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button 
-              onClick={handleRefresh} 
+            <Button
+              onClick={handleRefresh}
               className="w-full bg-primary hover:bg-primary/90 text-white"
               size="lg"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again
             </Button>
-            
+
             {user && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleGoToDashboard}
                 className="w-full border-primary/20 text-primary hover:bg-primary/5"
                 size="lg"
@@ -155,9 +155,9 @@ export default function ProtectedError({ error, reset }: ProtectedErrorProps) {
                 Go to My Dashboard
               </Button>
             )}
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={handleLogout}
               className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
               size="lg"

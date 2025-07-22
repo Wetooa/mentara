@@ -48,42 +48,30 @@ export function transformDashboardData(
       // TODO: Implement progress tracking in backend
       weeklyMood: [
         {
-          date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)),
           value: 3,
         },
         {
-          date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)),
           value: 3,
         },
         {
-          date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)),
           value: 4,
         },
         {
-          date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)),
           value: 2,
         },
         {
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)),
           value: 3,
         },
         {
-          date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)),
           value: 4,
         },
-        { date: new Date().toISOString().split("T")[0], value: 4 },
+        { date: formatDateSafely(new Date()), value: 4 },
       ],
       treatmentProgress: Math.min(
         100,
@@ -217,6 +205,22 @@ function transformNotificationType(
   };
 
   return typeMap[backendType.toLowerCase()] || "system";
+}
+
+/**
+ * Safely format a date to YYYY-MM-DD format
+ */
+function formatDateSafely(date: Date): string {
+  try {
+    if (!date || isNaN(date.getTime())) {
+      return new Date().toISOString().split("T")[0];
+    }
+    const isoString = date.toISOString();
+    return isoString ? isoString.split("T")[0] : new Date().toISOString().split("T")[0];
+  } catch (error) {
+    console.warn("Error formatting date:", error);
+    return new Date().toISOString().split("T")[0];
+  }
 }
 
 /**

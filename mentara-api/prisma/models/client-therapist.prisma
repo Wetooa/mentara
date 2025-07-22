@@ -1,14 +1,12 @@
-// Many-to-many relationship between clients and therapists
 model ClientTherapist {
-    id          String   @id @default(uuid())
-    clientId    String
-    therapistId String
-    assignedAt  DateTime @default(now())
+  id          String    @id @default(uuid())
+  clientId    String
+  therapistId String
+  assignedAt  DateTime  @default(now())
+  client      Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist   Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
-    client    Client    @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-    therapist Therapist @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
-
-    @@unique([clientId, therapistId])
-    @@index([clientId])
-    @@index([therapistId])
+  @@unique([clientId, therapistId])
+  @@index([clientId])
+  @@index([therapistId])
 }
