@@ -6,6 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
+import { MessagingService } from '../messaging/messaging.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 // Client profile DTO interface
 interface ClientProfileDto {
@@ -23,7 +24,10 @@ import type { UpdateClientDto, TherapistRecommendation } from './types';
 export class ClientService {
   private readonly logger = new Logger(ClientService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messagingService: MessagingService,
+  ) {}
 
   async getProfile(userId: string): Promise<ClientProfileDto> {
     try {
@@ -218,6 +222,19 @@ export class ClientService {
         therapistId: therapistId,
       },
     });
+
+    // Automatically create conversation between client and therapist
+    try {
+      await this.messagingService.createConversation(userId, {
+        participantIds: [therapistId],
+        type: 'direct',
+        title: `Therapy Session with ${therapist.user.firstName} ${therapist.user.lastName}`,
+      });
+      this.logger.log(`Auto-created conversation between client ${userId} and therapist ${therapistId}`);
+    } catch (error) {
+      // Log error but don't fail the assignment if conversation creation fails
+      this.logger.warn(`Failed to auto-create conversation between client ${userId} and therapist ${therapistId}: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     // Transform the Prisma result to match TherapistRecommendation type
     return {

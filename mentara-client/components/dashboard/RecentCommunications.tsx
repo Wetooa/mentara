@@ -63,7 +63,7 @@ export default function RecentCommunications({
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-fit max-h-80">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <MessageCircle className="h-5 w-5 text-blue-600" />
@@ -78,7 +78,7 @@ export default function RecentCommunications({
           View All
         </Button>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 overflow-y-auto">
         {recentContacts.length > 0 ? (
           <>
             {recentContacts.slice(0, 4).map((contact) => (

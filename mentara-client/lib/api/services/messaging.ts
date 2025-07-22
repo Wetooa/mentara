@@ -141,6 +141,13 @@ export function createMessagingService(axios: AxiosInstance) {
       return data;
     },
 
+    async getRecentCommunications(limit?: number) {
+      const { data } = await axios.get('/messaging/recent-communications', { 
+        params: { limit } 
+      });
+      return data;
+    },
+
     async createConversation(conversationData: CreateConversationDto) {
       const { data } = await axios.post<MessagingConversation>('/messaging/conversations', conversationData);
       return data;

@@ -85,6 +85,38 @@ export class MessagingController {
     }
   }
 
+  @Get('recent-communications')
+  async getRecentCommunications(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: string,
+  ) {
+    console.log('📞 [MESSAGING CONTROLLER] getRecentCommunications endpoint called');
+    console.log('👤 [USER ID]', userId);
+    console.log('📊 [LIMIT]', limit);
+    
+    try {
+      const limitNum = limit ? Number(limit) : 5;
+      const result = await this.messagingService.getRecentCommunications(
+        userId,
+        limitNum,
+      );
+      
+      console.log('✅ [CONTROLLER RESPONSE] Returning', result.length, 'recent communications');
+      console.log('📱 [RESPONSE SUMMARY]:', result.map(comm => ({
+        id: comm.id,
+        name: comm.name,
+        role: comm.role,
+        hasLastMessage: !!comm.lastMessage,
+        unreadCount: comm.unreadCount
+      })));
+      
+      return result;
+    } catch (error) {
+      console.error('❌ [CONTROLLER ERROR] getRecentCommunications failed:', error);
+      throw error;
+    }
+  }
+
   @Get('conversations/:conversationId/messages')
   async getConversationMessages(
     @CurrentUserId() userId: string,

@@ -88,7 +88,7 @@ export function useRecentCommunications() {
 
   return useQuery({
     queryKey: ["dashboard", "communications", "recent"],
-    queryFn: () => api.messaging?.getRecentCommunications?.() || Promise.resolve([]),
+    queryFn: () => api.messaging?.getRecentCommunications?.(5) || Promise.resolve([]),
     staleTime: 1000 * 60 * 2, // Communications change moderately
     enabled: !!api.messaging?.getRecentCommunications,
   });

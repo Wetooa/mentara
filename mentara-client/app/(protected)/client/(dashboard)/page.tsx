@@ -76,29 +76,23 @@ export default function DashboardPage() {
     isDashboardLoading || isNotificationsLoading || isCommunicationsLoading;
 
   const handleMessageTherapist = () => {
-    // TODO: Navigate to messages page
-    // Navigation functionality to be implemented
+    router.push('/client/messages');
   };
 
   const handleScheduleSession = () => {
-    // TODO: Navigate to scheduling page
-    // Navigation functionality to be implemented
+    router.push('/client/booking');
   };
 
   const handleViewAllMessages = () => {
-    // TODO: Navigate to messages page
-    // Navigation functionality to be implemented
+    router.push('/client/messages');
   };
 
   const handleContactSelect = (contactId: string) => {
-    // TODO: Navigate to specific conversation
-    // Navigation functionality to be implemented
-    void contactId; // Acknowledge parameter
+    router.push(`/client/messages?contact=${contactId}`);
   };
 
   const handleBookSession = () => {
-    // TODO: Navigate to booking page
-    // Navigation functionality to be implemented
+    router.push('/client/booking');
   };
 
   const handleRetry = () => {
@@ -206,9 +200,9 @@ export default function DashboardPage() {
         onTherapistsClick={handleTherapistsClick}
       />
 
-      {/* Main Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
+      {/* Main Dashboard Content - Redesigned for better above-fold visibility */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Column - Sessions and Worksheets */}
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
@@ -217,7 +211,7 @@ export default function DashboardPage() {
           <WorksheetStatus worksheets={dashboardData.worksheets} />
         </div>
 
-        {/* Right Column */}
+        {/* Right Column 1 - Therapist and Communications */}
         <div className="space-y-6">
           <AssignedTherapist
             assignedTherapists={dashboardApiData?.assignedTherapists || []}
@@ -230,6 +224,10 @@ export default function DashboardPage() {
             onViewAllMessages={handleViewAllMessages}
             onContactSelect={handleContactSelect}
           />
+        </div>
+
+        {/* Right Column 2 - Progress and Notifications (Always Visible) */}
+        <div className="space-y-6">
           <ProgressTracking progress={dashboardData.progress} />
           <NotificationsCenter notifications={dashboardData.notifications} />
         </div>
