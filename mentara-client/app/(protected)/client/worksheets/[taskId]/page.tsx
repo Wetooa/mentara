@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   MoreHorizontal,
@@ -16,6 +17,7 @@ import { Task, TaskFile, transformWorksheetAssignmentToTask } from "@/components
 import WorksheetProgress from "@/components/worksheets/WorksheetProgress";
 import { toast } from "sonner";
 import { useApi } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
 import { use } from "react";
 
 interface TaskDetailPageProps {
@@ -30,41 +32,51 @@ export default function TaskDetailPage({ params }: TaskDetailPageProps) {
 
 function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const router = useRouter();
-  const [task, setTask] = useState<Task | undefined>(undefined);
+  const queryClient = useQueryClient();
   const [showFileOptions, setShowFileOptions] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const api = useApi();
-  // Toast functionality using sonner
+
+  // Use React Query to fetch worksheet data
+  const {
+    data: worksheetData,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: queryKeys.worksheets.byId(taskId),
+    queryFn: () => api.worksheets.getById(taskId),
+    enabled: !!taskId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: (failureCount, error: any) => {
+      // Don't retry on 404 or auth errors
+      if (error?.response?.status === 404 || error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 2;
+    }
+  });
+
+  // Transform the worksheet data to Task format
+  const task = worksheetData ? transformWorksheetAssignmentToTask(worksheetData) : undefined;
+
+  // File upload mutation with optimistic updates
+  const uploadFileMutation = useMutation({
+    mutationFn: (file: File) => api.worksheets.uploadFile(file, taskId, "submission"),
+    onSuccess: (uploadedFile) => {
+      // Invalidate and refetch worksheet data
+      queryClient.invalidateQueries({ queryKey: queryKeys.worksheets.byId(taskId) });
+      toast.success(`Successfully uploaded ${uploadedFile.filename}`);
+    },
+    onError: (error) => {
+      console.error("Error uploading file:", error);
+      toast.error("Failed to upload file. Please try again.");
+    }
+  });
 
   // Determine if task is editable based on submission status
-  const isTaskEditable =
-    task && !task.isCompleted && task.status !== "past_due";
-
-  // Fetch task data from API
-  useEffect(() => {
-    async function fetchTask() {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Call the API to get worksheet details
-        const worksheetData = await api.worksheets.getById(taskId);
-        // Transform API response to Task interface
-        const transformedTask = transformWorksheetAssignmentToTask(worksheetData);
-        setTask(transformedTask);
-      } catch (err) {
-        console.error("Error fetching worksheet:", err);
-        setError("Failed to load worksheet details. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchTask();
-  }, [taskId, api.worksheets]);
+  const isTaskEditable = task && !task.isCompleted && task.status !== "past_due";
 
   useEffect(() => {
     // Close dropdown when clicking outside
@@ -106,79 +118,19 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
   const handleFileSelection = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (e.target.files && e.target.files.length > 0 && task) {
+    if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       console.log("Selected file:", file.name);
 
-      // File size validation (5MB limit)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        toast.error("File size must be less than 5MB. Please choose a smaller file.");
+      // Use the built-in validation from the API service
+      const validation = api.worksheets.validateFile(file);
+      if (!validation.isValid) {
+        toast.error(validation.error);
         return;
       }
 
-      // File type validation
-      const allowedTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain",
-        "image/jpeg",
-        "image/png",
-      ];
-      
-      if (!allowedTypes.includes(file.type)) {
-        toast.error("Invalid file type. Please upload PDF, DOC, DOCX, TXT, JPG, or PNG files only.");
-        return;
-      }
-
-      try {
-        // Show uploading state
-        const tempFile = {
-          id: "uploading",
-          filename: file.name,
-          url: "",
-          uploading: true,
-        };
-
-        // Temporarily add the file to show upload progress
-        setTask({
-          ...task,
-          myWork: [...(task.myWork || []), tempFile],
-        });
-
-        // Upload the file to the server
-        const uploadedFile = await api.worksheets.uploadFile(
-          file,
-          task.id,
-          "submission"
-        );
-
-        // Update the task with the uploaded file (remove temp file and add real one)
-        setTask({
-          ...task,
-          myWork: [
-            ...(task.myWork || []).filter((work) => work.id !== "uploading"),
-            {
-              id: uploadedFile.id,
-              filename: uploadedFile.filename,
-              url: uploadedFile.url,
-            },
-          ],
-        });
-        
-        toast.success(`Successfully uploaded ${file.name}`);
-      } catch (err) {
-        console.error("Error uploading file:", err);
-        
-        // Remove the temporary file on error
-        setTask({
-          ...task,
-          myWork: (task.myWork || []).filter((work) => work.id !== "uploading"),
-        });
-        
-        toast.error("Failed to upload file. Please try again.");
-      }
+      // Upload the file using the mutation
+      uploadFileMutation.mutate(file);
 
       // Reset the file input
       if (fileInputRef.current) {
@@ -287,7 +239,36 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
     );
   }
 
-  if (error || !task) {
+  if (error) {
+    return (
+      <div className="h-full bg-white p-6">
+        <div className="flex items-center mb-6">
+          <button
+            onClick={handleBack}
+            className="flex items-center text-primary hover:text-primary/80"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            Back
+          </button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <p className="text-secondary text-center">
+            {(error as any)?.response?.status === 404 
+              ? "Worksheet not found" 
+              : "Failed to load worksheet details. Please try again."}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!task) {
     return (
       <div className="h-full bg-white p-6">
         <div className="flex items-center mb-6">
@@ -300,7 +281,7 @@ function TaskDetailPageClient({ taskId }: { taskId: string }) {
           </button>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-secondary">{error || "Worksheet not found"}</p>
+          <p className="text-secondary">Worksheet not found</p>
         </div>
       </div>
     );
