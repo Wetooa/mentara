@@ -2,7 +2,8 @@
 // Handles creation of all user types: clients, therapists, admins, moderators
 
 import { PrismaClient } from '@prisma/client';
-import { TEST_ACCOUNTS, SEED_CONFIG } from './config';
+import { v4 as uuidv4 } from 'uuid';
+import { TEST_ACCOUNTS, SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
 export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehensive' = 'comprehensive') {
@@ -179,10 +180,12 @@ async function createSimpleUsers(prisma: PrismaClient) {
   const moderators: any[] = [];
 
   // Create 3 Clients
-  for (let i = 1; i <= SEED_CONFIG.USERS.CLIENTS; i++) {
+  console.log('🔹 Development Client Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.CLIENTS; i++) {
+    const clientId = uuidv4();
     const clientUser = await prisma.user.create({
       data: {
-        id: `dev_client_${i}`,
+        id: clientId,
         email: `client${i}@mentaratest.dev`,
         firstName: `Client`,
         lastName: `${i}`,
@@ -192,8 +195,9 @@ async function createSimpleUsers(prisma: PrismaClient) {
         password: await require('bcrypt').hash('password123', 10),
       },
     });
+    console.log(`  Client ${i}: ${clientId} (${clientUser.email})`);
     
-    await prisma.client.create({
+    const client = await prisma.client.create({
       data: {
         userId: clientUser.id,
         hasSeenTherapistRecommendations: false,
@@ -201,14 +205,16 @@ async function createSimpleUsers(prisma: PrismaClient) {
     });
     
     users.push(clientUser);
-    clients.push(clientUser);
+    clients.push({ user: clientUser, client });
   }
 
   // Create 3 Therapists
-  for (let i = 1; i <= SEED_CONFIG.USERS.THERAPISTS; i++) {
+  console.log('🔹 Development Therapist Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.THERAPISTS; i++) {
+    const therapistId = uuidv4();
     const therapistUser = await prisma.user.create({
       data: {
-        id: `dev_therapist_${i}`,
+        id: therapistId,
         email: `therapist${i}@mentaratest.dev`,
         firstName: `Dr. Therapist`,
         lastName: `${i}`,
@@ -218,8 +224,9 @@ async function createSimpleUsers(prisma: PrismaClient) {
         password: await require('bcrypt').hash('password123', 10),
       },
     });
+    console.log(`  Therapist ${i}: ${therapistId} (${therapistUser.email})`);
     
-    await prisma.therapist.create({
+    const therapist = await prisma.therapist.create({
       data: {
         userId: therapistUser.id,
         mobile: `+1555000${i}${i}${i}${i}`,
@@ -249,14 +256,16 @@ async function createSimpleUsers(prisma: PrismaClient) {
     });
     
     users.push(therapistUser);
-    therapists.push(therapistUser);
+    therapists.push({ user: therapistUser, therapist });
   }
 
   // Create 3 Admins
-  for (let i = 1; i <= SEED_CONFIG.USERS.ADMINS; i++) {
+  console.log('🔹 Development Admin Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.ADMINS; i++) {
+    const adminId = uuidv4();
     const adminUser = await prisma.user.create({
       data: {
-        id: `dev_admin_${i}`,
+        id: adminId,
         email: `admin${i}@mentaratest.dev`,
         firstName: `Admin`,
         lastName: `${i}`,
@@ -266,6 +275,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
         password: await require('bcrypt').hash('password123', 10),
       },
     });
+    console.log(`  Admin ${i}: ${adminId} (${adminUser.email})`);
     
     await prisma.admin.create({
       data: {
@@ -280,10 +290,12 @@ async function createSimpleUsers(prisma: PrismaClient) {
   }
 
   // Create 3 Moderators
-  for (let i = 1; i <= SEED_CONFIG.USERS.MODERATORS; i++) {
+  console.log('🔹 Development Moderator Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.MODERATORS; i++) {
+    const moderatorId = uuidv4();
     const moderatorUser = await prisma.user.create({
       data: {
-        id: `dev_moderator_${i}`,
+        id: moderatorId,
         email: `moderator${i}@mentaratest.dev`,
         firstName: `Moderator`,
         lastName: `${i}`,
@@ -293,6 +305,7 @@ async function createSimpleUsers(prisma: PrismaClient) {
         password: await require('bcrypt').hash('password123', 10),
       },
     });
+    console.log(`  Moderator ${i}: ${moderatorId} (${moderatorUser.email})`);
     
     await prisma.moderator.create({
       data: {

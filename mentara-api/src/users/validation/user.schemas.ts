@@ -7,21 +7,7 @@ import { z } from 'zod';
 
 // Path parameter validation
 export const UserIdParamSchema = z.object({
-  id: z.string().refine((value) => {
-    // Accept UUIDs (production format)
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (uuidRegex.test(value)) {
-      return true;
-    }
-    
-    // Accept development ID patterns (dev_client_1, dev_therapist_1, etc.)
-    const devIdRegex = /^dev_(client|therapist|admin|moderator)_\d+$/;
-    if (devIdRegex.test(value)) {
-      return true;
-    }
-    
-    return false;
-  }, 'Invalid user ID format: must be UUID or development ID pattern (dev_role_number)'),
+  id: z.string().uuid('Invalid user ID format'),
 });
 
 // User deactivation validation
