@@ -157,16 +157,19 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     </div>
   );
 
-  const renderSuggestionsContainer = ({ containerProps, children }: { containerProps: React.HTMLProps<HTMLDivElement>; children: React.ReactNode }) => (
-    <div
-      {...containerProps}
-      className={cn(
-        'absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 max-h-96 overflow-y-auto',
-        containerProps.className
-      )}
-      role="listbox"
-      aria-label="Search suggestions"
-    >
+  const renderSuggestionsContainer = ({ containerProps, children }: { containerProps: React.HTMLProps<HTMLDivElement>; children: React.ReactNode }) => {
+    const { key, ...restProps } = containerProps;
+    return (
+      <div
+        key={key}
+        {...restProps}
+        className={cn(
+          'absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 max-h-96 overflow-y-auto',
+          containerProps.className
+        )}
+        role="listbox"
+        aria-label="Search suggestions"
+      >
       {isLoading && (
         <div className="flex items-center justify-center p-4" role="status" aria-live="polite">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -183,8 +186,9 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       )}
       
       {!isLoading && children}
-    </div>
-  );
+      </div>
+    );
+  };
 
   const inputProps = {
     placeholder,
