@@ -1,11 +1,10 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-
-Profile activity page wrong redirect
-- check out the profile activity page, there is a wrong redirect happening here
-- the main issue here is we are using a common ProfileActivity component for both clients and therapists
-- however, this causes the redirect issue on the activity
-- its redirecting to /communities/:slug instead of the /<role>/communities/:slug. i organized it in this way so clients have a dedicated communities page and therapists have their own communities page
+Notification dropdown socket issue
+- the topbar websocket signifier is already working, however, the one of notifications is not.
+- im confused why this is so as they both should be using the same websocket connection
+- fix the notification dropdown socket issue
+- this could possible be a possible redundancy between websocket connection code, figure this out. be vigilent. understand the codebase before making changes
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 

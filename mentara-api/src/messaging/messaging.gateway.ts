@@ -544,7 +544,7 @@ export class MessagingGateway
     client: AuthenticatedSocket,
     userId: string,
   ) {
-    const userRoom = `user_${userId}`;
+    const userRoom = `user:${userId}`;
     await client.join(userRoom);
     this.logger.debug(
       `User ${userId} subscribed to personal room: ${userRoom}`,
@@ -555,7 +555,7 @@ export class MessagingGateway
     client: AuthenticatedSocket,
     userId: string,
   ) {
-    const userRoom = `user_${userId}`;
+    const userRoom = `user:${userId}`;
     await client.leave(userRoom);
     this.logger.debug(
       `User ${userId} unsubscribed from personal room: ${userRoom}`,
