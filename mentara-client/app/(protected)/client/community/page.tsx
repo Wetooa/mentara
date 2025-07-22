@@ -25,7 +25,10 @@ import {
   AlertCircle,
   Activity,
   Paperclip,
-  X
+  X,
+  Edit3,
+  Trash2,
+  MoreHorizontal
 } from "lucide-react";
 import {
   ResizableHandle,
@@ -34,6 +37,7 @@ import {
 } from "@/components/ui/resizable";
 import { useCommunityPage } from "@/hooks/community/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/api/communities";
 
@@ -50,22 +54,38 @@ export default function UserCommunity() {
     postsError,
     createPostMutation,
     heartPostMutation,
+    // Edit post functionality
+    isEditPostOpen,
+    editingPost,
+    editPostTitle,
+    editPostContent,
+    editPostMutation,
+    deletePostMutation,
     handleCommunitySelect,
     handleRoomSelect,
     handleCreatePost,
     handleHeartPost,
+    handleEditPost,
+    handleUpdatePost,
+    handleDeletePost,
     handleFileSelect,
     handleFileRemove,
     retryLoadPosts,
     setIsCreatePostOpen,
     setNewPostTitle,
     setNewPostContent,
+    setIsEditPostOpen,
+    setEditPostTitle,
+    setEditPostContent,
     getUserInitials,
     getRoomBreadcrumb,
     isPostingAllowed,
     isPostHearted,
+    isPostOwner,
     selectedFiles,
   } = useCommunityPage();
+
+  const { user } = useAuth();
 
   // Enhanced community data with new hooks
   // const { stats: communityStats } = useCommunityStats();
@@ -335,6 +355,64 @@ export default function UserCommunity() {
                     </div>
                   </DialogContent>
                 </Dialog>
+
+                {/* Edit Post Dialog */}
+                <Dialog open={isEditPostOpen} onOpenChange={setIsEditPostOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Edit Post in {selectedRoom?.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="edit-title">Title</Label>
+                        <Input
+                          id="edit-title"
+                          value={editPostTitle}
+                          onChange={(e) => setEditPostTitle(e.target.value)}
+                          placeholder="Update your post title..."
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-content">Content</Label>
+                        <Textarea
+                          id="edit-content"
+                          value={editPostContent}
+                          onChange={(e) => setEditPostContent(e.target.value)}
+                          placeholder="Update your thoughts, experiences, or ask for support..."
+                          rows={6}
+                          className="mt-1 resize-none"
+                        />
+                      </div>
+                      
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditPostOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleUpdatePost}
+                          disabled={editPostMutation.isPending || !editPostTitle.trim() || !editPostContent.trim()}
+                          className="bg-community-accent hover:bg-community-accent/90 text-community-accent-foreground"
+                        >
+                          {editPostMutation.isPending ? (
+                            <div className="flex items-center gap-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                              Updating...
+                            </div>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Update Post
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
@@ -523,6 +601,30 @@ export default function UserCommunity() {
                                   {formatDistanceToNow(new Date(), { addSuffix: true })}
                                 </p>
                               </div>
+                              
+                              {/* Edit/Delete buttons for post owner */}
+                              {isPostOwner(post as unknown as Post) && (
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditPost(post as unknown as Post)}
+                                    className="h-8 w-8 p-0 hover:bg-community-accent/10 text-community-soothing-foreground hover:text-community-accent"
+                                    disabled={editPostMutation.isPending}
+                                  >
+                                    <Edit3 className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeletePost((post as unknown as Post).id)}
+                                    className="h-8 w-8 p-0 hover:bg-community-heart/10 text-community-soothing-foreground hover:text-community-heart"
+                                    disabled={deletePostMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                             
                             <CardTitle className="mt-6 text-2xl font-bold text-community-calm-foreground leading-relaxed group-hover:text-community-accent transition-colors duration-300">

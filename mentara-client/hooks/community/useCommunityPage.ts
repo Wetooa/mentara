@@ -20,6 +20,12 @@ export function useCommunityPage() {
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  
+  // Edit post state
+  const [isEditPostOpen, setIsEditPostOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editPostTitle, setEditPostTitle] = useState("");
+  const [editPostContent, setEditPostContent] = useState("");
 
   // Get selected community and room info
   const { data: selectedCommunity } = useQuery({
@@ -88,6 +94,48 @@ export function useCommunityPage() {
     },
   });
 
+  // Edit post mutation
+  const editPostMutation = useMutation({
+    mutationFn: ({ postId, postData }: { postId: string; postData: { title?: string; content?: string } }) =>
+      api.communities.updatePost(postId, postData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+      setIsEditPostOpen(false);
+      setEditingPost(null);
+      setEditPostTitle("");
+      setEditPostContent("");
+      toast.success("Post updated successfully!");
+    },
+    onError: (error: MentaraApiError) => {
+      if (error.status === 403) {
+        toast.error("You can only edit your own posts");
+      } else if (error.status === 404) {
+        toast.error("Post not found");
+      } else {
+        toast.error(error.message || "Failed to update post");
+      }
+    },
+  });
+
+  // Delete post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: (postId: string) => api.communities.deletePost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['communities', 'roomPosts', selectedRoomId!] });
+      queryClient.invalidateQueries({ queryKey: ['communities', 'stats', 'general'] });
+      toast.success("Post deleted successfully!");
+    },
+    onError: (error: MentaraApiError) => {
+      if (error.status === 403) {
+        toast.error("You can only delete your own posts");
+      } else if (error.status === 404) {
+        toast.error("Post not found");
+      } else {
+        toast.error(error.message || "Failed to delete post");
+      }
+    },
+  });
+
   const handleCommunitySelect = (communityId: string) => {
     setSelectedCommunityId(communityId);
   };
@@ -141,6 +189,38 @@ export function useCommunityPage() {
   const handleHeartPost = (post: Post) => {
     const isHearted = post.hearts.some(heart => heart.userId === user?.id);
     heartPostMutation.mutate({ postId: post.id, isHearted });
+  };
+
+  const handleEditPost = (post: Post) => {
+    setEditingPost(post);
+    setEditPostTitle((post as any).title || "");
+    setEditPostContent((post as any).content || "");
+    setIsEditPostOpen(true);
+  };
+
+  const handleUpdatePost = () => {
+    if (!editingPost || !editPostTitle.trim() || !editPostContent.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    editPostMutation.mutate({
+      postId: editingPost.id,
+      postData: {
+        title: editPostTitle.trim(),
+        content: editPostContent.trim(),
+      },
+    });
+  };
+
+  const handleDeletePost = (postId: string) => {
+    if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+      deletePostMutation.mutate(postId);
+    }
+  };
+
+  const isPostOwner = (post: Post) => {
+    return post.userId === user?.id;
   };
 
   const getUserInitials = (firstName?: string, lastName?: string) => {
@@ -217,6 +297,12 @@ export function useCommunityPage() {
     newPostContent,
     selectedFiles,
     
+    // Edit state
+    isEditPostOpen,
+    editingPost,
+    editPostTitle,
+    editPostContent,
+    
     // Data
     postsData,
     postsLoading,
@@ -226,12 +312,17 @@ export function useCommunityPage() {
     // Mutations
     createPostMutation,
     heartPostMutation,
+    editPostMutation,
+    deletePostMutation,
     
     // Handlers
     handleCommunitySelect,
     handleRoomSelect,
     handleCreatePost,
     handleHeartPost,
+    handleEditPost,
+    handleUpdatePost,
+    handleDeletePost,
     handleFileSelect,
     handleFileRemove,
     retryLoadPosts,
@@ -240,11 +331,15 @@ export function useCommunityPage() {
     setIsCreatePostOpen,
     setNewPostTitle,
     setNewPostContent,
+    setIsEditPostOpen,
+    setEditPostTitle,
+    setEditPostContent,
     
     // Utilities
     getUserInitials,
     getRoomBreadcrumb,
     isPostingAllowed,
     isPostHearted,
+    isPostOwner,
   };
 }
