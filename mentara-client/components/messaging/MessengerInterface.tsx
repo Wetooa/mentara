@@ -42,8 +42,10 @@ import {
   Flag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useRealtimeMessaging } from '@/hooks/messaging/useRealtimeMessaging';
+import { useMessaging } from '@/hooks/messaging/useMessaging';
 import { useStartConversation } from '@/hooks/messaging/useStartConversation';
+import { logger } from '@/lib/logger';
+import { ConnectionStatus } from '@/components/messaging/ConnectionStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format, isToday, isYesterday, differenceInMinutes } from 'date-fns';
@@ -146,7 +148,7 @@ const MessageBubble: React.FC<{
       {/* Message Content */}
       <div className={cn("flex flex-col gap-1 max-w-[70%]", isOwn ? "items-end" : "items-start")}>
         {/* Reply indicator */}
-        {message.replyToId && (
+        {message.replyToMessageId && ( {/* Fixed: use replyToMessageId */}
           <div className={cn("text-xs text-muted-foreground flex items-center gap-1", isOwn ? "flex-row-reverse" : "flex-row")}>
             <Reply className="h-3 w-3" />
             Replying to message
@@ -389,7 +391,7 @@ export function MessengerInterface({
     conversations,
     isLoadingConversations,
     conversationsError,
-  } = useRealtimeMessaging({
+  } = useMessaging({
     enableRealtime: true,
     enableTypingIndicators: true,
     enablePresence: true,
@@ -405,7 +407,7 @@ export function MessengerInterface({
       
       // Check if conversation already exists
       const existingConversation = conversations.find(conv => 
-        conv.type === 'DIRECT' && 
+        conv.type === 'direct' && // Fixed: lowercase to match backend
         conv.participants.some(p => p.userId === targetUserId)
       );
       
@@ -428,14 +430,17 @@ export function MessengerInterface({
     }
   }, [targetUserId, conversations, selectedConversationId, isStarting, startConversation]);
 
-  // Debug logging for conversations data
+  // Enhanced logging for conversations data
   useEffect(() => {
-    console.log('🖥️ [MESSENGER INTERFACE] Conversations state updated');
-    console.log('   isLoadingConversations:', isLoadingConversations);
-    console.log('   conversationsError:', conversationsError);
-    console.log('   conversations:', conversations);
-    console.log('   conversations length:', conversations?.length || 0);
-    console.log('   user context:', { id: user?.id, email: user?.email });
+    logger.debug('MessengerInterface', 'Conversations state updated', {
+      isLoadingConversations,
+      conversationsError: conversationsError?.message,
+      conversationCount: conversations?.length || 0,
+    }, { userId: user?.id });
+
+    if (conversationsError) {
+      logger.error('MessengerInterface', 'Conversations loading error', conversationsError, { userId: user?.id });
+    }
   }, [conversations, isLoadingConversations, conversationsError, user]);
 
   // Get selected conversation messages
@@ -452,7 +457,7 @@ export function MessengerInterface({
     addReaction,
     sendTypingIndicator,
     uploadFile,
-  } = useRealtimeMessaging({
+  } = useMessaging({
     conversationId: selectedConversationId || undefined,
     enableRealtime: true,
     enableTypingIndicators: true,
@@ -474,7 +479,7 @@ export function MessengerInterface({
   // Mark messages as read when conversation is viewed
   useEffect(() => {
     if (selectedConversationId && messages.length > 0) {
-      const unreadMessages = messages.filter(m => !m.isRead && m.senderId !== user?.id);
+      const unreadMessages = messages.filter(m => !m.isRead && m.authorId !== user?.id); // Fixed: use authorId
       unreadMessages.forEach(message => {
         markAsRead(message.id);
       });
@@ -503,6 +508,8 @@ export function MessengerInterface({
     if (!messageInput.trim() || !selectedConversationId) return;
 
     const content = messageInput.trim();
+    logger.messaging.messageSent('pending', selectedConversationId, content);
+    
     setMessageInput('');
     setReplyToMessage(null);
     setEditingMessage(null);
@@ -515,9 +522,14 @@ export function MessengerInterface({
 
     try {
       await sendMessage(content, {
-        replyToId: replyToMessage?.id,
+        replyToMessageId: replyToMessage?.id, // Fixed: use replyToMessageId
       });
+      logger.messaging.messageSent('success', selectedConversationId, content);
     } catch (error) {
+      logger.error('MessengerInterface', 'Failed to send message', error, { 
+        conversationId: selectedConversationId,
+        userId: user?.id 
+      });
       toast.error('Failed to send message');
     }
   };
@@ -574,24 +586,15 @@ export function MessengerInterface({
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Messages</h2>
             <div className="flex items-center gap-2">
-              {/* Connection status */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Circle 
-                      className={cn(
-                        "h-2 w-2",
-                        connectionState.isConnected 
-                          ? "fill-green-500 text-green-500" 
-                          : "fill-red-500 text-red-500"
-                      )} 
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {connectionState.isConnected ? 'Connected' : 'Disconnected'}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {/* Enhanced connection status */}
+              <ConnectionStatus
+                isConnected={connectionState.isConnected}
+                isReconnecting={connectionState.isReconnecting}
+                error={connectionState.error}
+                lastConnected={connectionState.lastConnected}
+                showDetails={false}
+                className="scale-75"
+              />
               
               <Button variant="ghost" size="sm">
                 <Settings className="h-4 w-4" />
@@ -647,7 +650,10 @@ export function MessengerInterface({
                     key={conversation.id}
                     conversation={conversation}
                     isSelected={selectedConversationId === conversation.id}
-                    onSelect={() => setSelectedConversationId(conversation.id)}
+                    onSelect={() => {
+                      logger.messaging.conversationJoined(conversation.id, user?.id);
+                      setSelectedConversationId(conversation.id);
+                    }}
                     isOnline={isOnline}
                     isTyping={isTypingInConv}
                   />
@@ -732,10 +738,10 @@ export function MessengerInterface({
               ) : (
                 <div className="space-y-4">
                   {messages.map((message, index) => {
-                    const isOwn = message.senderId === user?.id;
+                    const isOwn = message.authorId === user?.id; // Fixed: use authorId
                     const prevMessage = messages[index - 1];
                     const showAvatar = !prevMessage || 
-                      prevMessage.senderId !== message.senderId ||
+                      prevMessage.authorId !== message.authorId || // Fixed: use authorId
                       differenceInMinutes(new Date(message.createdAt), new Date(prevMessage.createdAt)) > 5;
 
                     return (
