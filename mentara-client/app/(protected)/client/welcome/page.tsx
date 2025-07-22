@@ -93,6 +93,13 @@ export default function ClientWelcomePage() {
 
   useEffect(() => {
     if (!recommendationsLoading && recommendations) {
+      // Debug logging for received recommendations
+      console.log('[DEBUG] Welcome page received recommendations:', {
+        recommendationsCount: recommendations?.recommendations?.length || 0,
+        communitiesCount: recommendations?.communities?.length || 0,
+        hasWelcomeMessage: !!recommendations?.welcomeMessage,
+        fullData: recommendations
+      });
       setCurrentStep('recommendations');
     }
   }, [recommendationsLoading, recommendations]);

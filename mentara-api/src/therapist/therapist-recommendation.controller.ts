@@ -213,6 +213,12 @@ export class TherapistRecommendationController {
           this.communitiesService.getRecommendedCommunities(user.id),
         ]);
 
+      // Debug logging for community recommendations
+      console.log(`[DEBUG] Community recommendations for user ${user.id}:`, {
+        count: communityRecommendations?.length || 0,
+        communities: communityRecommendations?.map(c => ({ id: c.id, name: c.name })) || []
+      });
+
       // Transform therapist data to match frontend expectations - flatten structure
       const recommendations = (therapistRecommendations?.therapists || []).map((therapist, index) => ({
         ...therapist,
@@ -266,6 +272,13 @@ export class TherapistRecommendationController {
           lastUpdated: new Date(),
         },
       };
+
+      // Debug logging for final response
+      console.log(`[DEBUG] Final welcome response:`, {
+        recommendationsCount: enhancedRecommendations.recommendations.length,
+        communitiesCount: enhancedRecommendations.communities.length,
+        hasWelcomeMessage: !!enhancedRecommendations.welcomeMessage
+      });
 
       return enhancedRecommendations;
     } catch (error) {

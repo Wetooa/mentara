@@ -247,6 +247,114 @@ export class MessagingService {
     }
   }
 
+  /**
+   * Get recent communications for dashboard
+   * Returns a simplified format optimized for the dashboard recent communications widget
+   */
+  async getRecentCommunications(userId: string, limit = 5) {
+    console.log('📧 [MESSAGING SERVICE] getRecentCommunications called');
+    console.log('📊 [PARAMETERS]', { userId, limit });
+
+    try {
+      // Get user's recent conversations with detailed information
+      const conversations = await this.prisma.conversation.findMany({
+        where: {
+          participants: {
+            some: {
+              userId,
+              isActive: true,
+            },
+          },
+          isActive: true,
+          lastMessageAt: { not: null }, // Only conversations with messages
+        },
+        include: {
+          participants: {
+            where: { 
+              userId: { not: userId }, // Get other participants only
+              isActive: true 
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                  role: true,
+                },
+              },
+            },
+          },
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+            where: { isDeleted: false },
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              messageType: true,
+              senderId: true,
+            },
+          },
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  isDeleted: false,
+                  readReceipts: {
+                    none: { userId },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { lastMessageAt: 'desc' },
+        take: limit,
+      });
+
+      console.log('✅ [DATABASE RESULT] Found recent communications:', conversations.length);
+
+      // Transform conversations to recent communications format
+      const recentCommunications = conversations.map((conversation) => {
+        const otherParticipant = conversation.participants[0]; // Get the other participant
+        const lastMessage = conversation.messages[0];
+        const unreadCount = conversation._count.messages;
+
+        if (!otherParticipant) {
+          console.log('⚠️ [WARNING] Conversation has no other participants:', conversation.id);
+          return null;
+        }
+
+        return {
+          id: otherParticipant.user.id,
+          conversationId: conversation.id,
+          name: `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`,
+          role: otherParticipant.user.role,
+          avatar: otherParticipant.user.avatarUrl || null,
+          lastMessage: lastMessage ? {
+            content: lastMessage.content,
+            time: lastMessage.createdAt.toISOString(),
+            isFromUser: lastMessage.senderId === userId,
+            messageType: lastMessage.messageType,
+          } : null,
+          unreadCount,
+          status: 'offline', // Default status, could be enhanced with real-time presence
+          conversationType: conversation.type,
+        };
+      }).filter(Boolean); // Remove null entries
+
+      console.log('📱 [FORMATTED RESULT] Recent communications formatted:', recentCommunications.length);
+
+      return recentCommunications;
+    } catch (error) {
+      console.error('❌ [DATABASE ERROR] getRecentCommunications failed:', error);
+      throw error;
+    }
+  }
+
   // Message Management
   async sendMessage(
     userId: string,
