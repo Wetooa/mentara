@@ -1,20 +1,89 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
+Messaging issues
+- im so confused, these errors are showing up on the messaging part. its not using the backend client correct? 
+- figure out why this is happening and fix it
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'groupMessagesByDate' is not exported from '@/data/mockMessagesData' (imported as 'groupMessagesByDate').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'fetchConversation' is not exported from '@/data/mockMessagesData' (imported as 'fetchConversation').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'groupMessagesByDate' is not exported from '@/data/mockMessagesData' (imported as 'groupMessagesByDate').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
+🔧 [SOCKET-MANAGER] Socket manager initialized
+MessagingApiService is deprecated. Use createMessagingApiService with authentication.
+ GET /client/messages 200 in 3742ms
+ ⚠ ./components/messages/MessageChatArea.tsx
+Attempted import error: 'fetchConversation' is not exported from '@/data/mockMessagesData' (imported as 'fetchConversation').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'groupMessagesByDate' is not exported from '@/data/mockMessagesData' (imported as 'groupMessagesByDate').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'fetchConversation' is not exported from '@/data/mockMessagesData' (imported as 'fetchConversation').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'groupMessagesByDate' is not exported from '@/data/mockMessagesData' (imported as 'groupMessagesByDate').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
+ ⚠ ./components/messages/MessageChatArea.tsx
+Attempted import error: 'fetchConversation' is not exported from '@/data/mockMessagesData' (imported as 'fetchConversation').
 
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
 
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'groupMessagesByDate' is not exported from '@/data/mockMessagesData' (imported as 'groupMessagesByDate').
+
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
+
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'fetchConversation' is not exported from '@/data/mockMessagesData' (imported as 'fetchConversation').
+
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
+
+./components/messages/MessageChatArea.tsx
+Attempted import error: 'groupMessagesByDate' is not exported from '@/data/mockMessagesData' (imported as 'groupMessagesByDate').
+
+Import trace for requested module:
+./components/messages/MessageChatArea.tsx
+./app/(protected)/client/messages/layout.tsx
+ GET /mentara-landscape.png 404 in 1228ms
+ ⨯ The requested resource isn't a valid image for /mentara-landscape.png received text/html; charset=utf-8
+ GET /client/messages 200 in 53ms
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 
