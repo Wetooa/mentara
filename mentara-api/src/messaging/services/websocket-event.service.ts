@@ -128,6 +128,8 @@ export class WebSocketEventService implements OnModuleInit {
           title,
         } = conversationEvent.eventData;
 
+        console.log('LOOK HERE LOL RETARD', event.eventData);
+
         // Notify all participants about new conversation
         for (const participantId of participantIds) {
           this.messagingGateway.server

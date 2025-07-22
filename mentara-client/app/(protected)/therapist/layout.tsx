@@ -52,7 +52,7 @@ export default function TherapistLayout({
     console.log("Selected user:", user);
     // Navigate to patient profile if it's a client, or handle other user types
     if (user.role === "client") {
-      router.push(`/therapist/patients/${user.id}`);
+      router.push(`/therapist/profile/${user.id}`);
     }
   };
 

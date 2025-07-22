@@ -1,22 +1,26 @@
+import { User } from "@/types";
 import { AxiosInstance } from "axios";
 
 // Types for messaging API - synchronized with backend
 export interface MessagingMessage {
   id: string;
-  authorId: string; // Fixed: backend uses authorId, not senderId
+  conversationId: string;
+  senderId: string;
   content: string;
-  type: "text" | "image" | "audio" | "video" | "system"; // Fixed: lowercase to match backend
-  createdAt: string;
-  updatedAt: string;
-  isRead: boolean;
+  messageType: "text" | "image" | "audio" | "video" | "system"; // Updated to match your backend types
+  attachmentUrls: string[];
+  attachmentNames: string[];
+  attachmentSizes: number[];
+  replyToId: string | null;
   isEdited: boolean;
   isDeleted: boolean;
-  editedAt?: string;
-  replyToMessageId?: string; // Fixed: backend uses replyToMessageId
-  conversationId: string;
-  attachments?: MessagingAttachment[];
-  reactions?: MessagingReaction[];
-  readReceipts?: MessagingReadReceipt[];
+  editedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  sender: User;
+  replyTo: MessagingMessage | null;
+  reactions: MessagingReaction[];
+  readReceipts: MessagingReadReceipt[];
 }
 
 export interface MessagingAttachment {

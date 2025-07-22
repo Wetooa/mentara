@@ -2,7 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useCallback, useRef, useState } from "react";
-import { getMessagingSocket, connectMessagingSocket, isMessagingConnected, disconnectSocket } from "@/lib/socket";
+import {
+  getMessagingSocket,
+  connectMessagingSocket,
+  isMessagingConnected,
+  disconnectSocket,
+} from "@/lib/socket";
 import { Socket } from "socket.io-client";
 import { toast } from "sonner";
 import type {
@@ -75,12 +80,14 @@ interface ConversationEventData {
  * Consolidates all messaging functionality with proper React Query cache management
  * Fixes type mismatches and environment variable issues
  */
-export function useMessaging(params: {
-  conversationId?: string;
-  enableRealtime?: boolean;
-  enableTypingIndicators?: boolean;
-  enablePresence?: boolean;
-} = {}) {
+export function useMessaging(
+  params: {
+    conversationId?: string;
+    enableRealtime?: boolean;
+    enableTypingIndicators?: boolean;
+    enablePresence?: boolean;
+  } = {}
+) {
   const api = useApi();
   const queryClient = useQueryClient();
   const { accessToken, user } = useAuth();
@@ -94,14 +101,17 @@ export function useMessaging(params: {
   };
 
   // WebSocket state
-  const [connectionState, setConnectionState] = useState<WebSocketConnectionState>({
-    isConnected: false,
-    isReconnecting: false,
-    error: null,
-    lastConnected: null,
-  });
+  const [connectionState, setConnectionState] =
+    useState<WebSocketConnectionState>({
+      isConnected: false,
+      isReconnecting: false,
+      error: null,
+      lastConnected: null,
+    });
 
-  const [typingUsers, setTypingUsers] = useState<Map<string, TypingStatus>>(new Map());
+  const [typingUsers, setTypingUsers] = useState<Map<string, TypingStatus>>(
+    new Map()
+  );
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   // Refs
@@ -109,7 +119,7 @@ export function useMessaging(params: {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
-  
+
   // Constants
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
@@ -117,8 +127,10 @@ export function useMessaging(params: {
   // Query keys for consistent cache management
   const queryKeys = {
     conversations: ["messaging", "conversations"] as const,
-    messages: (conversationId: string) => ["messaging", "messages", conversationId] as const,
-    conversationDetails: (conversationId: string) => ["messaging", "conversation", conversationId] as const,
+    messages: (conversationId: string) =>
+      ["messaging", "messages", conversationId] as const,
+    conversationDetails: (conversationId: string) =>
+      ["messaging", "conversation", conversationId] as const,
   };
 
   // ============ REACT QUERY QUERIES ============
@@ -134,7 +146,11 @@ export function useMessaging(params: {
     queryFn: async () => {
       console.log("🔄 [useMessaging] Fetching conversations...");
       const result = await api.messaging.getConversations();
-      console.log("✅ [useMessaging] Fetched", result?.length || 0, "conversations");
+      console.log(
+        "✅ [useMessaging] Fetched",
+        result?.length || 0,
+        "conversations"
+      );
       return result;
     },
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -148,10 +164,15 @@ export function useMessaging(params: {
     error: messagesError,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: config.conversationId ? queryKeys.messages(config.conversationId) : [],
+    queryKey: config.conversationId
+      ? queryKeys.messages(config.conversationId)
+      : [],
     queryFn: () => {
       if (!config.conversationId) return Promise.resolve([]);
-      console.log("🔄 [useMessaging] Fetching messages for conversation:", config.conversationId);
+      console.log(
+        "🔄 [useMessaging] Fetching messages for conversation:",
+        config.conversationId
+      );
       return api.messaging.getMessages(config.conversationId);
     },
     enabled: !!config.conversationId,
@@ -170,12 +191,17 @@ export function useMessaging(params: {
       conversationId: string;
       messageData: SendMessageDto;
     }) => {
-      console.log("📤 [useMessaging] Sending message:", { conversationId, messageData });
+      console.log("📤 [useMessaging] Sending message:", {
+        conversationId,
+        messageData,
+      });
       return api.messaging.sendMessage(conversationId, messageData);
     },
     onMutate: async ({ conversationId, messageData }) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.messages(conversationId) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.messages(conversationId),
+      });
 
       // Snapshot the previous value
       const previousMessages = queryClient.getQueryData<MessagingMessage[]>(
@@ -219,8 +245,11 @@ export function useMessaging(params: {
       toast.error("Failed to send message");
     },
     onSuccess: (newMessage, { conversationId }) => {
-      console.log("✅ [useMessaging] Message sent successfully:", newMessage.id);
-      
+      console.log(
+        "✅ [useMessaging] Message sent successfully:",
+        newMessage.id
+      );
+
       // Replace temp message with real message
       queryClient.setQueryData<MessagingMessage[]>(
         queryKeys.messages(conversationId),
@@ -249,13 +278,14 @@ export function useMessaging(params: {
 
   // Mark message as read mutation
   const markAsReadMutation = useMutation({
-    mutationFn: (messageId: string) => api.messaging.markMessageAsRead(messageId),
+    mutationFn: (messageId: string) =>
+      api.messaging.markMessageAsRead(messageId),
     onSuccess: (_, messageId) => {
       console.log("✅ [useMessaging] Marked message as read:", messageId);
     },
     onError: (error) => {
       console.error("❌ [useMessaging] Failed to mark message as read:", error);
-      toast.error("Failed to mark message as read");
+      toast.error("Failed to mark message HAHA as read");
     },
   });
 
@@ -276,7 +306,9 @@ export function useMessaging(params: {
 
   const connectWebSocket = useCallback(async () => {
     if (!accessToken || !user || !config.enableRealtime) {
-      console.log("⏭️ [useMessaging] WebSocket connection skipped - missing auth or realtime disabled");
+      console.log(
+        "⏭️ [useMessaging] WebSocket connection skipped - missing auth or realtime disabled"
+      );
       return;
     }
 
@@ -287,7 +319,7 @@ export function useMessaging(params: {
 
     try {
       console.log("🔄 [useMessaging] Connecting to messaging WebSocket...");
-      
+
       setConnectionState((prev) => ({
         ...prev,
         isReconnecting: true,
@@ -301,13 +333,12 @@ export function useMessaging(params: {
       socket.auth = { token: accessToken };
 
       setupWebSocketEventHandlers(socket);
-      
-      await connectMessagingSocket();
-      
-      socketRef.current = socket;
-      
-      console.log("✅ [useMessaging] WebSocket connected successfully");
 
+      await connectMessagingSocket();
+
+      socketRef.current = socket;
+
+      console.log("✅ [useMessaging] WebSocket connected successfully");
     } catch (error) {
       console.error("❌ [useMessaging] Failed to connect WebSocket:", error);
       setConnectionState((prev) => ({
@@ -319,122 +350,145 @@ export function useMessaging(params: {
     }
   }, [accessToken, user, config.enableRealtime]);
 
-  const setupWebSocketEventHandlers = useCallback((socket: Socket) => {
-    // Connection events
-    socket.on("connect", () => {
-      console.log("✅ [useMessaging] WebSocket connected:", socket.id);
-      setConnectionState({
-        isConnected: true,
-        isReconnecting: false,
-        error: null,
-        lastConnected: new Date(),
-      });
-      reconnectAttemptsRef.current = 0;
+  const setupWebSocketEventHandlers = useCallback(
+    (socket: Socket) => {
+      // Connection events
+      socket.on("connect", () => {
+        console.log("✅ [useMessaging] WebSocket connected:", socket.id);
+        setConnectionState({
+          isConnected: true,
+          isReconnecting: false,
+          error: null,
+          lastConnected: new Date(),
+        });
+        reconnectAttemptsRef.current = 0;
 
-      // Join conversation room if specified
-      if (config.conversationId) {
-        console.log("🏠 [useMessaging] Joining conversation room:", config.conversationId);
-        socket.emit("join_conversation", { conversationId: config.conversationId });
-      }
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("❌ [useMessaging] WebSocket disconnected:", reason);
-      setConnectionState((prev) => ({
-        ...prev,
-        isConnected: false,
-        isReconnecting: false,
-      }));
-
-      // Auto-reconnect unless it was a server disconnect
-      if (reason !== "io server disconnect") {
-        scheduleReconnect();
-      }
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("🚫 [useMessaging] WebSocket connection error:", error);
-      setConnectionState((prev) => ({
-        ...prev,
-        error: "Connection error",
-        isReconnecting: false,
-      }));
-      scheduleReconnect();
-    });
-
-    // Message events - with proper backend event names
-    socket.on("new_message", (data: MessageEventData) => {
-      console.log("📨 [useMessaging] Received new message:", data.message.id);
-      handleNewMessage(data.message);
-    });
-
-    socket.on("message_updated", (data: MessageUpdatedEventData) => {
-      console.log("✏️ [useMessaging] Message updated:", data.messageId);
-      handleMessageUpdate(data);
-    });
-
-    socket.on("message_read", (data: MessageReadEventData) => {
-      console.log("👁️ [useMessaging] Message read:", data.messageId);
-      handleMessageRead(data);
-    });
-
-    socket.on("message_reaction", (data: MessageReactionEventData) => {
-      console.log("⚡ [useMessaging] Message reaction:", { messageId: data.messageId, emoji: data.emoji });
-      handleMessageReaction(data);
-    });
-
-    // Typing indicators
-    if (config.enableTypingIndicators) {
-      socket.on("typing_indicator", (data: TypingEventData) => {
-        console.log("✏️ [useMessaging] Typing indicator:", data);
-        if (data.userId !== user?.id) {
-          if (data.isTyping) {
-            setTypingUsers((prev) => new Map(prev).set(data.userId, {
-              conversationId: data.conversationId,
-              userId: data.userId,
-              isTyping: data.isTyping,
-            }));
-          } else {
-            setTypingUsers((prev) => {
-              const newMap = new Map(prev);
-              newMap.delete(data.userId);
-              return newMap;
-            });
-          }
-        }
-      });
-    }
-
-    // Presence events
-    if (config.enablePresence) {
-      socket.on("user_status_changed", (data: UserStatusEventData) => {
-        console.log("👤 [useMessaging] User status changed:", data);
-        if (data.status === "online") {
-          setOnlineUsers((prev) => new Set(prev).add(data.userId));
-        } else {
-          setOnlineUsers((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(data.userId);
-            return newSet;
+        // Join conversation room if specified
+        if (config.conversationId) {
+          console.log(
+            "🏠 [useMessaging] Joining conversation room:",
+            config.conversationId
+          );
+          socket.emit("join_conversation", {
+            conversationId: config.conversationId,
           });
         }
       });
-    }
 
-    // Conversation events
-    socket.on("conversation_joined", (data: ConversationEventData) => {
-      console.log("🏠 [useMessaging] Joined conversation:", data.conversationId);
-    });
+      socket.on("disconnect", (reason) => {
+        console.log("❌ [useMessaging] WebSocket disconnected:", reason);
+        setConnectionState((prev) => ({
+          ...prev,
+          isConnected: false,
+          isReconnecting: false,
+        }));
 
-    socket.on("conversation_left", (data: ConversationEventData) => {
-      console.log("🚪 [useMessaging] Left conversation:", data.conversationId);
-    });
+        // Auto-reconnect unless it was a server disconnect
+        if (reason !== "io server disconnect") {
+          scheduleReconnect();
+        }
+      });
 
-  }, [config.conversationId, config.enableTypingIndicators, config.enablePresence, user?.id]);
+      socket.on("connect_error", (error) => {
+        console.error("🚫 [useMessaging] WebSocket connection error:", error);
+        setConnectionState((prev) => ({
+          ...prev,
+          error: "Connection error",
+          isReconnecting: false,
+        }));
+        scheduleReconnect();
+      });
+
+      // Message events - with proper backend event names
+      socket.on("new_message", (data: MessageEventData) => {
+        console.log("📨 [useMessaging] Received new message:", data.message.id);
+        handleNewMessage(data.message);
+      });
+
+      socket.on("message_updated", (data: MessageUpdatedEventData) => {
+        console.log("✏️ [useMessaging] Message updated:", data.messageId);
+        handleMessageUpdate(data);
+      });
+
+      socket.on("message_read", (data: MessageReadEventData) => {
+        console.log("👁️ [useMessaging] Message read:", data.messageId);
+        handleMessageRead(data);
+      });
+
+      socket.on("message_reaction", (data: MessageReactionEventData) => {
+        console.log("⚡ [useMessaging] Message reaction:", {
+          messageId: data.messageId,
+          emoji: data.emoji,
+        });
+        handleMessageReaction(data);
+      });
+
+      // Typing indicators
+      if (config.enableTypingIndicators) {
+        socket.on("typing_indicator", (data: TypingEventData) => {
+          console.log("✏️ [useMessaging] Typing indicator:", data);
+          if (data.userId !== user?.id) {
+            if (data.isTyping) {
+              setTypingUsers((prev) =>
+                new Map(prev).set(data.userId, {
+                  conversationId: data.conversationId,
+                  userId: data.userId,
+                  isTyping: data.isTyping,
+                })
+              );
+            } else {
+              setTypingUsers((prev) => {
+                const newMap = new Map(prev);
+                newMap.delete(data.userId);
+                return newMap;
+              });
+            }
+          }
+        });
+      }
+
+      // Presence events
+      if (config.enablePresence) {
+        socket.on("user_status_changed", (data: UserStatusEventData) => {
+          console.log("👤 [useMessaging] User status changed:", data);
+          if (data.status === "online") {
+            setOnlineUsers((prev) => new Set(prev).add(data.userId));
+          } else {
+            setOnlineUsers((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(data.userId);
+              return newSet;
+            });
+          }
+        });
+      }
+
+      // Conversation events
+      socket.on("conversation_joined", (data: ConversationEventData) => {
+        console.log(
+          "🏠 [useMessaging] Joined conversation:",
+          data.conversationId
+        );
+      });
+
+      socket.on("conversation_left", (data: ConversationEventData) => {
+        console.log(
+          "🚪 [useMessaging] Left conversation:",
+          data.conversationId
+        );
+      });
+    },
+    [
+      config.conversationId,
+      config.enableTypingIndicators,
+      config.enablePresence,
+      user?.id,
+    ]
+  );
 
   const disconnectWebSocket = useCallback(() => {
     console.log("🔌 [useMessaging] Disconnecting WebSocket...");
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -445,7 +499,7 @@ export function useMessaging(params: {
       typingTimeoutRef.current = null;
     }
 
-    disconnectSocket('/messaging');
+    disconnectSocket("/messaging");
     socketRef.current = null;
 
     setConnectionState({
@@ -469,9 +523,12 @@ export function useMessaging(params: {
     }
 
     reconnectAttemptsRef.current++;
-    const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+    const delay =
+      reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
 
-    console.log(`🔄 [useMessaging] Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
+    console.log(
+      `🔄 [useMessaging] Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current})`
+    );
 
     reconnectTimeoutRef.current = setTimeout(() => {
       connectWebSocket();
@@ -480,127 +537,144 @@ export function useMessaging(params: {
 
   // ============ WEBSOCKET EVENT HANDLERS ============
 
-  const handleNewMessage = useCallback((message: MessagingMessage) => {
-    // Add message to the cache
-    if (message.conversationId === config.conversationId) {
-      queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messages(message.conversationId),
-        (old) => (old ? [...old, message] : [message])
+  const handleNewMessage = useCallback(
+    (message: MessagingMessage) => {
+      // Add message to the cache
+      if (message.conversationId === config.conversationId) {
+        queryClient.setQueryData<MessagingMessage[]>(
+          queryKeys.messages(message.conversationId),
+          (old) => (old ? [...old, message] : [message])
+        );
+      }
+
+      // Update conversations list
+      queryClient.setQueryData<MessagingConversation[]>(
+        queryKeys.conversations,
+        (old) => {
+          if (!old) return old;
+          return old.map((conv) =>
+            conv.id === message.conversationId
+              ? { ...conv, lastMessage: message }
+              : conv
+          );
+        }
       );
-    }
 
-    // Update conversations list
-    queryClient.setQueryData<MessagingConversation[]>(
-      queryKeys.conversations,
-      (old) => {
-        if (!old) return old;
-        return old.map((conv) =>
-          conv.id === message.conversationId
-            ? { ...conv, lastMessage: message }
-            : conv
-        );
-      }
-    );
-
-    // Show toast for new messages from others (not in current conversation)
-    if (
-      message.authorId !== user?.id &&
-      message.conversationId !== config.conversationId
-    ) {
-      toast("New message", {
-        description: message.content.length > 50
-          ? message.content.substring(0, 50) + "..."
-          : message.content,
-      });
-    }
-  }, [queryClient, user?.id, config.conversationId]);
-
-  const handleMessageUpdate = useCallback((data: MessageUpdatedEventData) => {
-    if (!config.conversationId) return;
-
-    queryClient.setQueryData<MessagingMessage[]>(
-      queryKeys.messages(config.conversationId),
-      (old) => {
-        if (!old) return old;
-        return old.map((msg) =>
-          msg.id === data.messageId
-            ? {
-                ...msg,
-                content: data.content ?? msg.content,
-                isDeleted: data.isDeleted ?? msg.isDeleted,
-                isEdited: true,
-                updatedAt: new Date().toISOString(),
-              }
-            : msg
-        );
-      }
-    );
-  }, [queryClient, config.conversationId]);
-
-  const handleMessageRead = useCallback((data: MessageReadEventData) => {
-    if (!config.conversationId) return;
-
-    queryClient.setQueryData<MessagingMessage[]>(
-      queryKeys.messages(config.conversationId),
-      (old) => {
-        if (!old) return old;
-        return old.map((msg) =>
-          msg.id === data.messageId
-            ? {
-                ...msg,
-                readReceipts: [
-                  ...(msg.readReceipts || []).filter((r) => r.userId !== data.userId),
-                  {
-                    id: `${data.messageId}-${data.userId}`,
-                    messageId: data.messageId,
-                    userId: data.userId,
-                    readAt: data.readAt,
-                  },
-                ],
-              }
-            : msg
-        );
-      }
-    );
-  }, [queryClient, config.conversationId]);
-
-  const handleMessageReaction = useCallback((data: MessageReactionEventData) => {
-    if (!config.conversationId) return;
-
-    queryClient.setQueryData<MessagingMessage[]>(
-      queryKeys.messages(config.conversationId),
-      (old) => {
-        if (!old) return old;
-        return old.map((msg) => {
-          if (msg.id !== data.messageId) return msg;
-
-          const reactions = msg.reactions || [];
-          if (data.action === "add") {
-            return {
-              ...msg,
-              reactions: [
-                ...reactions.filter((r) => !(r.userId === data.userId && r.emoji === data.emoji)),
-                {
-                  id: `${data.messageId}-${data.userId}-${data.emoji}`,
-                  messageId: data.messageId,
-                  userId: data.userId,
-                  emoji: data.emoji,
-                  createdAt: new Date().toISOString(),
-                },
-              ],
-            };
-          } else {
-            return {
-              ...msg,
-              reactions: reactions.filter(
-                (r) => !(r.userId === data.userId && r.emoji === data.emoji)
-              ),
-            };
-          }
+      // Show toast for new messages from others (not in current conversation)
+      if (
+        message.authorId !== user?.id &&
+        message.conversationId !== config.conversationId
+      ) {
+        toast("New message", {
+          description:
+            message.content.length > 50
+              ? message.content.substring(0, 50) + "..."
+              : message.content,
         });
       }
-    );
-  }, [queryClient, config.conversationId]);
+    },
+    [queryClient, user?.id, config.conversationId]
+  );
+
+  const handleMessageUpdate = useCallback(
+    (data: MessageUpdatedEventData) => {
+      if (!config.conversationId) return;
+
+      queryClient.setQueryData<MessagingMessage[]>(
+        queryKeys.messages(config.conversationId),
+        (old) => {
+          if (!old) return old;
+          return old.map((msg) =>
+            msg.id === data.messageId
+              ? {
+                  ...msg,
+                  content: data.content ?? msg.content,
+                  isDeleted: data.isDeleted ?? msg.isDeleted,
+                  isEdited: true,
+                  updatedAt: new Date().toISOString(),
+                }
+              : msg
+          );
+        }
+      );
+    },
+    [queryClient, config.conversationId]
+  );
+
+  const handleMessageRead = useCallback(
+    (data: MessageReadEventData) => {
+      if (!config.conversationId) return;
+
+      queryClient.setQueryData<MessagingMessage[]>(
+        queryKeys.messages(config.conversationId),
+        (old) => {
+          if (!old) return old;
+          return old.map((msg) =>
+            msg.id === data.messageId
+              ? {
+                  ...msg,
+                  readReceipts: [
+                    ...(msg.readReceipts || []).filter(
+                      (r) => r.userId !== data.userId
+                    ),
+                    {
+                      id: `${data.messageId}-${data.userId}`,
+                      messageId: data.messageId,
+                      userId: data.userId,
+                      readAt: data.readAt,
+                    },
+                  ],
+                }
+              : msg
+          );
+        }
+      );
+    },
+    [queryClient, config.conversationId]
+  );
+
+  const handleMessageReaction = useCallback(
+    (data: MessageReactionEventData) => {
+      if (!config.conversationId) return;
+
+      queryClient.setQueryData<MessagingMessage[]>(
+        queryKeys.messages(config.conversationId),
+        (old) => {
+          if (!old) return old;
+          return old.map((msg) => {
+            if (msg.id !== data.messageId) return msg;
+
+            const reactions = msg.reactions || [];
+            if (data.action === "add") {
+              return {
+                ...msg,
+                reactions: [
+                  ...reactions.filter(
+                    (r) => !(r.userId === data.userId && r.emoji === data.emoji)
+                  ),
+                  {
+                    id: `${data.messageId}-${data.userId}-${data.emoji}`,
+                    messageId: data.messageId,
+                    userId: data.userId,
+                    emoji: data.emoji,
+                    createdAt: new Date().toISOString(),
+                  },
+                ],
+              };
+            } else {
+              return {
+                ...msg,
+                reactions: reactions.filter(
+                  (r) => !(r.userId === data.userId && r.emoji === data.emoji)
+                ),
+              };
+            }
+          });
+        }
+      );
+    },
+    [queryClient, config.conversationId]
+  );
 
   // ============ PUBLIC ACTIONS ============
 
@@ -640,11 +714,18 @@ export function useMessaging(params: {
 
   const sendTypingIndicator = useCallback(
     (isTyping: boolean) => {
-      if (!socketRef.current?.connected || !config.conversationId || !config.enableTypingIndicators) {
+      if (
+        !socketRef.current?.connected ||
+        !config.conversationId ||
+        !config.enableTypingIndicators
+      ) {
         return;
       }
 
-      console.log("✏️ [useMessaging] Sending typing indicator:", { conversationId: config.conversationId, isTyping });
+      console.log("✏️ [useMessaging] Sending typing indicator:", {
+        conversationId: config.conversationId,
+        isTyping,
+      });
 
       socketRef.current.emit("typing_indicator", {
         conversationId: config.conversationId,
@@ -699,7 +780,13 @@ export function useMessaging(params: {
     return () => {
       disconnectWebSocket();
     };
-  }, [connectWebSocket, disconnectWebSocket, config.enableRealtime, accessToken, user]);
+  }, [
+    connectWebSocket,
+    disconnectWebSocket,
+    config.enableRealtime,
+    accessToken,
+    user,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -742,7 +829,7 @@ export function useMessaging(params: {
       api.messaging.removeReaction(messageId, emoji),
     sendTypingIndicator,
     uploadFile,
-    
+
     // Utilities
     refetchConversations,
     refetchMessages,

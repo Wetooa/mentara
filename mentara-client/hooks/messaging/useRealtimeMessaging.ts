@@ -281,7 +281,7 @@ export function useRealtimeMessaging(
       );
     },
     onError: () => {
-      toast.error("Failed to mark message as read");
+      toast.error("Failed to mark message HAHA as read");
     },
   });
 
