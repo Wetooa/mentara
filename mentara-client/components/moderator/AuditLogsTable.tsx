@@ -45,7 +45,7 @@ import {
   Download,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useAuditLogsSearch, useAuditLogsStats } from "@/hooks/useModerator";
+import { useAuditLogsSearch, useAuditLogsStats } from "@/hooks/moderator/useModerator";
 import type { AuditLog, AuditLogParams } from "@/types/api";
 
 interface AuditLogsTableProps {

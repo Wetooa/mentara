@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
+import { getMessagingSocket, connectMessagingSocket, isMessagingConnected, disconnectSocket } from "@/lib/socket";
 
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 
 interface Notification {
   id: string;
@@ -122,25 +123,22 @@ export function useNotifications(params: {
     },
   });
 
-  // Socket.io connection management
-  const connectWebSocket = useCallback(() => {
+  // Socket.io connection management using centralized configuration
+  const connectWebSocket = useCallback(async () => {
     if (!accessToken || !user || !config.enableRealtime) return;
     if (socketRef.current?.connected) return;
 
     try {
       setConnectionState(prev => ({ ...prev, isReconnecting: true, error: null }));
       
-      // Connect to messaging namespace with authentication
-      const socket = io(`${process.env.NEXT_PUBLIC_WS_URL}/messaging`, {
-        auth: {
-          token: accessToken,
-        },
-        transports: ['websocket', 'polling'],
-        timeout: 10000,
-      });
+      console.log('🔔 Connecting notifications to messaging socket...');
       
+      // Use centralized messaging socket
+      const socket = getMessagingSocket();
+      
+      // Set up notification-specific event listeners
       socket.on('connect', () => {
-        console.log('Notifications Socket.io connected');
+        console.log('✅ Notifications connected via messaging socket');
         setConnectionState({
           isConnected: true,
           isReconnecting: false,
@@ -179,7 +177,7 @@ export function useNotifications(params: {
       });
 
       socket.on('connect_error', (error) => {
-        console.error('Notifications Socket.io connection error:', error);
+        console.error('🚫 Notifications socket connection error:', error);
         setConnectionState(prev => ({ 
           ...prev, 
           error: 'Connection error',
@@ -190,8 +188,11 @@ export function useNotifications(params: {
 
       socketRef.current = socket;
 
+      // Connect the messaging socket
+      await connectMessagingSocket();
+
     } catch (error) {
-      console.error('Failed to connect to notifications Socket.io:', error);
+      console.error('❌ Failed to connect notifications socket:', error);
       setConnectionState(prev => ({ 
         ...prev, 
         error: 'Failed to connect',
@@ -202,13 +203,17 @@ export function useNotifications(params: {
   }, [accessToken, user, config.enableRealtime]);
 
   const disconnectWebSocket = useCallback(() => {
+    console.log('🔔 Disconnecting notifications socket...');
+    
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
     
+    // Remove notification-specific listeners before disconnecting
     if (socketRef.current) {
-      socketRef.current.disconnect();
+      socketRef.current.off('notification');
+      socketRef.current.off('unreadCount');
       socketRef.current = null;
     }
     
@@ -232,10 +237,22 @@ export function useNotifications(params: {
     reconnectAttemptsRef.current++;
     const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1); // Exponential backoff
     
+    console.log(`🔄 Scheduling notification socket reconnection attempt ${reconnectAttemptsRef.current} in ${delay}ms`);
+    
     reconnectTimeoutRef.current = setTimeout(() => {
       connectWebSocket();
     }, delay);
   }, [connectWebSocket]);
+
+  // Sync connection state with centralized socket
+  const updateConnectionState = useCallback(() => {
+    const isConnected = isMessagingConnected();
+    setConnectionState(prev => ({
+      ...prev,
+      isConnected,
+      isReconnecting: prev.isReconnecting && !isConnected,
+    }));
+  }, []);
 
   // Handle WebSocket events
   const handleWebSocketEvent = useCallback((event: NotificationWebSocketEvent) => {
@@ -344,6 +361,12 @@ export function useNotifications(params: {
         toast(notification.message, toastOptions);
     }
   }, []);
+
+  // Sync connection state with centralized socket
+  useEffect(() => {
+    const interval = setInterval(updateConnectionState, 1000);
+    return () => clearInterval(interval);
+  }, [updateConnectionState]);
 
   // WebSocket lifecycle management
   useEffect(() => {

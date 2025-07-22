@@ -1,64 +1,60 @@
 model Community {
-    id          String   @id @default(uuid())
-    name        String   @unique
-    slug        String   @unique
-    description String
-    imageUrl    String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id                   String               @id @default(uuid())
+  name                 String               @unique
+  slug                 String               @unique
+  description          String
+  imageUrl             String
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  memberships          Membership[]
+  moderatorCommunities ModeratorCommunity[]
+  roomGroups           RoomGroup[]
 
-    memberships          Membership[]
-    moderatorCommunities ModeratorCommunity[]
-    roomGroups           RoomGroup[]
-
-    // Simplified community system (removed complex recommendation and join request features)
-    @@index([name])
-    @@index([slug])
+  @@index([name])
+  @@index([slug])
 }
 
 model Membership {
-    id       String   @id @default(uuid())
-    joinedAt DateTime @default(now())
+  id          String    @id @default(uuid())
+  joinedAt    DateTime  @default(now())
+  communityId String
+  userId      String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    communityId String
-    userId      String
-    community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([userId, communityId])
-    @@index([userId])
-    @@index([communityId])
+  @@unique([userId, communityId])
+  @@index([userId])
+  @@index([communityId])
 }
 
 model ModeratorCommunity {
-    id          String   @id @default(uuid())
-    moderatorId String
-    communityId String
-    assignedAt  DateTime @default(now())
+  id          String    @id @default(uuid())
+  moderatorId String
+  communityId String
+  assignedAt  DateTime  @default(now())
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  moderator   Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
 
-    moderator Moderator @relation(fields: [moderatorId], references: [userId], onDelete: Cascade)
-    community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
-    @@unique([moderatorId, communityId])
-    @@index([moderatorId])
-    @@index([communityId])
+  @@unique([moderatorId, communityId])
+  @@index([moderatorId])
+  @@index([communityId])
 }
 
 model RoomGroup {
-    id          String    @id @default(uuid())
-    name        String
-    order       Int // for UI ordering
-    communityId String
-    community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-    rooms       Room[]
+  id          String    @id @default(uuid())
+  name        String
+  order       Int
+  communityId String
+  rooms       Room[]
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 }
 
 model Room {
-    id          String    @id @default(uuid())
-    name        String
-    order       Int
-    postingRole String    @default("member") // member, moderator, admin - minimum role required to post
-    roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id], onDelete: Cascade)
-    roomGroupId String
-    posts       Post[]
+  id          String    @id @default(uuid())
+  name        String
+  order       Int
+  postingRole String    @default("member")
+  roomGroupId String
+  posts       Post[]
+  roomGroup   RoomGroup @relation(fields: [roomGroupId], references: [id], onDelete: Cascade)
 }

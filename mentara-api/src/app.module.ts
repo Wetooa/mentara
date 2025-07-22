@@ -36,7 +36,6 @@ import { CommonModule } from './common/common.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { SecurityGuard } from './common/guards/security.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
-import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
@@ -44,23 +43,24 @@ import { JwtService } from '@nestjs/jwt';
     ConfigModule.forRoot(),
     ThrottlerModule.forRoot([
       {
+        name: 'default',
         ttl: 60000, // 1 minute
-        limit: 300, // 300 requests per minute per IP (increased for community interactions)
+        limit: process.env.NODE_ENV === 'production' ? 500 : 2000, // Increased limits for development
       },
       {
         name: 'auth',
         ttl: 300000, // 5 minutes
-        limit: 10, // 10 auth attempts per 5 minutes per IP
+        limit: process.env.NODE_ENV === 'production' ? 30 : 100, // More reasonable auth attempts
       },
       {
         name: 'upload',
         ttl: 60000, // 1 minute
-        limit: 5, // 5 file uploads per minute per IP
+        limit: process.env.NODE_ENV === 'production' ? 20 : 50, // Increased upload limits
       },
       {
         name: 'community',
         ttl: 60000, // 1 minute
-        limit: 250, // 250 community requests per minute per IP
+        limit: process.env.NODE_ENV === 'production' ? 400 : 1000, // Higher community interaction limits
       },
     ]),
     EventEmitterModule.forRoot({
@@ -131,7 +131,5 @@ import { JwtService } from '@nestjs/jwt';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
-
-    consumer.apply(RateLimitMiddleware).forRoutes('*');
   }
 }

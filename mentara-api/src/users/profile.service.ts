@@ -254,11 +254,11 @@ export class ProfileService {
       user: {
         id: updatedUser.id,
         firstName: updatedUser.firstName,
-        middleName: updatedUser.middleName,
+        middleName: updatedUser.middleName ?? undefined,
         lastName: updatedUser.lastName,
-        bio: updatedUser.bio,
-        avatarUrl: updatedUser.avatarUrl,
-        coverImageUrl: updatedUser.coverImageUrl,
+        bio: updatedUser.bio ?? undefined,
+        avatarUrl: updatedUser.avatarUrl ?? undefined,
+        coverImageUrl: updatedUser.coverImageUrl ?? undefined,
         role: updatedUser.role,
         createdAt: updatedUser.createdAt.toISOString(),
         updatedAt: updatedUser.updatedAt.toISOString()

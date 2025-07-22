@@ -59,7 +59,7 @@ describe('Complex Workflow Integration', () => {
           lastName: 'Client',
           role: 'client',
           isActive: true,
-          isVerified: false,
+          emailVerified: false,
         }),
       });
 
@@ -175,7 +175,7 @@ describe('Complex Workflow Integration', () => {
             lastName: 'Professional',
             role: 'therapist',
             isActive: true,
-            isVerified: true,
+            emailVerified: true,
           }),
         });
 
@@ -710,7 +710,7 @@ describe('Complex Workflow Integration', () => {
           lastName: 'Johnson',
           role: 'therapist',
           isActive: true,
-          isVerified: false, // Not verified until approved
+          emailVerified: false, // Not verified until approved
         }),
       });
 
@@ -819,7 +819,7 @@ describe('Complex Workflow Integration', () => {
       // 6. Update user verification status
       await prisma.user.update({
         where: { id: therapistUser.id },
-        data: { isVerified: true },
+        data: { emailVerified: true },
       });
 
       // 7. Create approval audit log
@@ -1064,7 +1064,7 @@ describe('Complex Workflow Integration', () => {
       // Comprehensive assertions
       expect(completeTherapistWorkflow).toBeTruthy();
       expect(completeTherapistWorkflow?.status).toBe('approved');
-      expect(completeTherapistWorkflow?.user.isVerified).toBe(true);
+      expect(completeTherapistWorkflow?.user.emailVerified).toBe(true);
       expect(completeTherapistWorkflow?.processedByAdmin?.user.role).toBe('admin');
       expect(completeTherapistWorkflow?.assignedClients).toHaveLength(1);
       expect(completeTherapistWorkflow?.meetings).toHaveLength(1);

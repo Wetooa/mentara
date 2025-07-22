@@ -1,0 +1,22 @@
+ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
+
+
+Profile issue
+- when accessing user profile, for some resaon im getting this error on the backend
+- can you figure out why this happens and fix it, as a result, im getting a profile not found on the frontned
+- this applies to all ids, whether it's the users own id or someone else's id
+
+[Nest] 2699566  - 07/22/2025, 9:07:22 PM   ERROR [HttpExceptionFilter] HTTP 400 Error - GET /api/profile/dev_client_1: Validation failed
+
+
+use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
+
+- data flow is >> page > components > hooks > lib/api axios > REST > backend controller
+- no business logic in components
+- pages should be simplified
+- axios auth.ts should be sample axios file
+- useLogin is a sample hooks file
+- use react query alongside axios api 
+- PLEASE READ THE DATABASE FIRST BEFORE DOING ANYTHING
+- if you see duplicate code, remove the other one or merge them
+- DONT RUN THE SEED FILE AGAIN

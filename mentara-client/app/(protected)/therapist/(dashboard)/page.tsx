@@ -5,7 +5,7 @@ import DashboardGreeting from "@/components/therapist/dashboard/DashboardGreetin
 import DashboardStats from "@/components/therapist/dashboard/DashboardStats";
 import DashboardPatientList from "@/components/therapist/dashboard/DashboardPatientList";
 import DashboardOverview from "@/components/therapist/dashboard/DashboardOverview";
-import { useTherapistDashboard } from "@/hooks/useTherapistDashboard";
+import { useTherapistDashboard } from "@/hooks/therapist/useTherapistDashboard";
 
 export default function TherapistDashboardPage() {
   const { data, isLoading, error } = useTherapistDashboard();

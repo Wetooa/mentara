@@ -8,7 +8,7 @@ import PatientSessionNotes from "@/components/therapist/patient/PatientSessionNo
 import PatientWorksheets from "@/components/therapist/patient/PatientWorksheets";
 import PatientProgressDashboard from "@/components/therapist/patient/PatientProgressDashboard";
 import { SessionSchedulingModal } from "@/components/therapist/patient/SessionSchedulingModal";
-import { usePatientData } from "@/hooks/usePatientsList";
+import { usePatientData } from "@/hooks/therapist/usePatientsList";
 
 export default function PatientDetailPage(
   props: {

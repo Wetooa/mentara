@@ -14,8 +14,8 @@ import {
   ChevronRight,
   AlertCircle,
 } from "lucide-react";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { TimeSlot } from "@/hooks/useAvailableSlots";
+import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
+import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 
 interface BookingCalendarProps {
   therapistId: string;
@@ -35,7 +35,7 @@ export function BookingCalendar({
   const [calendarDate, setCalendarDate] = useState<Date>(selectedDate || new Date());
   
   // Format date for API
-  const dateString = calendarDate.toISOString().split('T')[0];
+  const dateString = calendarDate ? calendarDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
   
   const {
     timeSlots,

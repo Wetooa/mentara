@@ -1,30 +1,19 @@
-// Worksheet Assignment System
-// Therapists create worksheets (assignments) for clients
-// Clients submit files as their response
-
 model Worksheet {
-  id          String   @id @default(uuid())
-  clientId    String   // Which client this is assigned to
-  therapistId String   // Which therapist created it
-  
-  // Assignment details
-  title        String
-  instructions String   @db.Text // Detailed instructions for the client
-  dueDate      DateTime
-  status       WorksheetStatus @default(ASSIGNED)
-  
-  // Optional materials from therapist (reference files, examples, etc.)
-  materialUrls  String[] @default([])
-  materialNames String[] @default([])
-  
-  // Relations
-  client     Client              @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-  therapist  Therapist           @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
-  submission WorksheetSubmission? // 1-to-1 relationship with submission
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id            String               @id @default(uuid())
+  clientId      String
+  therapistId   String
+  title         String
+  instructions  String
+  dueDate       DateTime
+  status        WorksheetStatus      @default(ASSIGNED)
+  materialUrls  String[]             @default([])
+  materialNames String[]             @default([])
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  client        Client               @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  therapist     Therapist            @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
+  submission    WorksheetSubmission?
+
   @@index([clientId])
   @@index([therapistId])
   @@index([status])
@@ -32,28 +21,22 @@ model Worksheet {
 }
 
 model WorksheetSubmission {
-  id          String @id @default(uuid())
-  worksheetId String @unique // 1-to-1 with worksheet
-  
-  // Submission files (client's response)
-  fileUrls  String[] // URLs to submitted files
-  fileNames String[] // Original file names
-  fileSizes Int[]    // File sizes for reference
-  
-  // Submission metadata
-  submittedAt DateTime @default(now())
-  feedback    String?  @db.Text // Therapist feedback on submission
-  
-  // Relations
-  worksheet Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
-  
+  id          String    @id @default(uuid())
+  worksheetId String    @unique
+  fileUrls    String[]
+  fileNames   String[]
+  fileSizes   Int[]
+  submittedAt DateTime  @default(now())
+  feedback    String?
+  worksheet   Worksheet @relation(fields: [worksheetId], references: [id], onDelete: Cascade)
+
   @@index([worksheetId])
   @@index([submittedAt])
 }
 
 enum WorksheetStatus {
-  ASSIGNED    // Therapist assigned it to client
-  SUBMITTED   // Client submitted files
-  REVIEWED    // Therapist reviewed and gave feedback
-  OVERDUE     // Past due date without submission
+  ASSIGNED
+  SUBMITTED
+  REVIEWED
+  OVERDUE
 }

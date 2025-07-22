@@ -78,16 +78,7 @@ export function useDashboardData() {
 /**
  * Hook for fetching user notifications
  */
-export function useNotifications(options?: { limit?: number; isRead?: boolean }) {
-  const api = useApi();
 
-  return useQuery({
-    queryKey: ["notifications", options?.limit, options?.isRead],
-    queryFn: () => api.notifications?.getNotifications?.(options) || Promise.resolve([]),
-    staleTime: 1000 * 60 * 1, // Notifications are time-sensitive
-    enabled: !!api.notifications?.getNotifications,
-  });
-}
 
 /**
  * Hook for fetching recent communications

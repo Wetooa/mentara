@@ -1,7 +1,7 @@
 import type {
   ApiDashboardResponse,
   UserDashboardData,
-} from "@/lib/api/types/dashboard";
+} from "@/types/api/dashboard";
 
 /**
  * Transform backend dashboard response to frontend UserDashboardData format
@@ -11,6 +11,9 @@ export function transformDashboardData(
   notifications: unknown[] = [],
   recentCommunications: unknown[] = []
 ): UserDashboardData {
+  console.log('🔍 Starting dashboard data transformation...');
+  console.log('🔍 Backend data keys:', Object.keys(backendData || {}));
+  
   const {
     client,
     stats,
@@ -18,6 +21,14 @@ export function transformDashboardData(
     pendingWorksheets,
     assignedTherapists,
   } = backendData;
+
+  // DEBUG: Log each section of data
+  console.log('🔍 Client data:', client);
+  console.log('🔍 Stats data:', stats);
+  console.log('🔍 Upcoming meetings data:', upcomingMeetings);
+  console.log('🔍 Pending worksheets data:', pendingWorksheets);
+  console.log('🔍 Notifications data:', notifications);
+  console.log('🔍 Communications data:', recentCommunications);
 
   // Handle cases where client.user might be null or undefined
   if (!client?.user) {
@@ -48,42 +59,30 @@ export function transformDashboardData(
       // TODO: Implement progress tracking in backend
       weeklyMood: [
         {
-          date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)),
           value: 3,
         },
         {
-          date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)),
           value: 3,
         },
         {
-          date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)),
           value: 4,
         },
         {
-          date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)),
           value: 2,
         },
         {
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)),
           value: 3,
         },
         {
-          date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          date: formatDateSafely(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)),
           value: 4,
         },
-        { date: new Date().toISOString().split("T")[0], value: 4 },
+        { date: formatDateSafely(new Date()), value: 4 },
       ],
       treatmentProgress: Math.min(
         100,
@@ -97,60 +96,97 @@ export function transformDashboardData(
         )
       ), // Calculated engagement
     },
-    upcomingSessions: upcomingMeetings.map((meeting) => ({
-      id: meeting.id,
-      title: meeting.title || "Therapy Session",
-      therapistId: meeting.therapist?.userId || "",
-      therapistName:
-        `${meeting.therapist?.user?.firstName || ""} ${meeting.therapist?.user?.lastName || ""}`.trim() ||
-        "Therapist",
-      therapistAvatar: undefined, // Backend doesn't provide this yet
-      dateTime: meeting.startTime,
-      duration: meeting.duration,
-      status: transformMeetingStatus(meeting.status),
-      joinUrl: `/session/join/${meeting.id}`,
-    })),
-    worksheets: pendingWorksheets.map((worksheet) => ({
-      id: worksheet.id,
-      title: worksheet.title,
-      assignedDate: worksheet.assignedDate,
-      dueDate:
-        worksheet.dueDate ||
-        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
-      status: worksheet.isCompleted
-        ? "completed"
-        : determineWorksheetStatus(worksheet.dueDate),
-      progress: worksheet.progress || 0,
-      therapistName:
-        `${worksheet.therapist?.user?.firstName || ""} ${worksheet.therapist?.user?.lastName || ""}`.trim() ||
-        "Therapist",
-    })),
-    notifications: notifications.map((notification) => ({
-      id: notification.id,
-      type: transformNotificationType(notification.type),
-      title: notification.title,
-      message: notification.message,
-      dateTime: notification.createdAt || notification.dateTime,
-      read: notification.read || notification.isRead || false,
-      actionUrl: notification.actionUrl,
-    })),
-    recentCommunications: recentCommunications.slice(0, 4).map((comm) => ({
-      id: comm.id,
-      name:
-        comm.name ||
-        `${comm.user?.firstName || ""} ${comm.user?.lastName || ""}`.trim() ||
-        "Contact",
-      status: comm.status || "offline",
-      lastMessage:
-        comm.lastMessage || comm.lastMessageContent || "No messages yet",
-      time: comm.time || comm.lastMessageTime || comm.updatedAt,
-      unread: comm.unread || comm.unreadCount || 0,
-      avatar:
-        comm.avatar ||
-        comm.user?.avatarUrl ||
-        comm.user?.imageUrl ||
-        "/default-avatar.jpg",
-    })),
+    upcomingSessions: upcomingMeetings.map((meeting, index) => {
+      console.log(`🔍 Processing meeting ${index}:`, meeting);
+      console.log(`🔍 Meeting startTime type/value:`, typeof meeting.startTime, meeting.startTime);
+      
+      return {
+        id: meeting.id,
+        title: meeting.title || "Therapy Session",
+        therapistId: meeting.therapist?.userId || "",
+        therapistName:
+          `${meeting.therapist?.user?.firstName || ""} ${meeting.therapist?.user?.lastName || ""}`.trim() ||
+          "Therapist",
+        therapistAvatar: undefined, // Backend doesn't provide this yet
+        dateTime: meeting.startTime,
+        duration: meeting.duration,
+        status: transformMeetingStatus(meeting.status),
+        joinUrl: `/session/join/${meeting.id}`,
+      };
+    }),
+    worksheets: pendingWorksheets.map((worksheet, index) => {
+      console.log(`🔍 Processing worksheet ${index}:`, worksheet);
+      console.log(`🔍 Worksheet dates:`, {
+        assignedDate: worksheet.assignedDate,
+        dueDate: worksheet.dueDate,
+        assignedDateType: typeof worksheet.assignedDate,
+        dueDateType: typeof worksheet.dueDate
+      });
+      
+      return {
+        id: worksheet.id,
+        title: worksheet.title,
+        assignedDate: worksheet.assignedDate,
+        dueDate:
+          worksheet.dueDate ||
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
+        status: worksheet.isCompleted
+          ? "completed"
+          : determineWorksheetStatus(worksheet.dueDate),
+        progress: worksheet.progress || 0,
+        therapistName:
+          `${worksheet.therapist?.user?.firstName || ""} ${worksheet.therapist?.user?.lastName || ""}`.trim() ||
+          "Therapist",
+      };
+    }),
+    notifications: notifications.map((notification, index) => {
+      console.log(`🔍 Processing notification ${index}:`, notification);
+      console.log(`🔍 Notification dates:`, {
+        createdAt: notification.createdAt,
+        dateTime: notification.dateTime,
+        createdAtType: typeof notification.createdAt,
+        dateTimeType: typeof notification.dateTime
+      });
+      
+      return {
+        id: notification.id,
+        type: transformNotificationType(notification.type),
+        title: notification.title,
+        message: notification.message,
+        dateTime: notification.createdAt || notification.dateTime,
+        read: notification.read || notification.isRead || false,
+        actionUrl: notification.actionUrl,
+      };
+    }),
+    recentCommunications: recentCommunications.slice(0, 4).map((comm, index) => {
+      console.log(`🔍 Processing communication ${index}:`, comm);
+      console.log(`🔍 Communication time fields:`, {
+        time: comm.time,
+        lastMessageTime: comm.lastMessageTime,
+        updatedAt: comm.updatedAt,
+        timeType: typeof comm.time,
+        lastMessageTimeType: typeof comm.lastMessageTime,
+        updatedAtType: typeof comm.updatedAt
+      });
+      
+      return {
+        id: comm.id,
+        name:
+          comm.name ||
+          `${comm.user?.firstName || ""} ${comm.user?.lastName || ""}`.trim() ||
+          "Contact",
+        status: comm.status || "offline",
+        lastMessage:
+          comm.lastMessage || comm.lastMessageContent || "No messages yet",
+        time: comm.time || comm.lastMessageTime || comm.updatedAt,
+        unread: comm.unread || comm.unreadCount || 0,
+        avatar:
+          comm.avatar ||
+          comm.user?.avatarUrl ||
+          comm.user?.imageUrl ||
+          "/default-avatar.jpg",
+      };
+    }),
   };
 }
 
@@ -217,6 +253,22 @@ function transformNotificationType(
   };
 
   return typeMap[backendType.toLowerCase()] || "system";
+}
+
+/**
+ * Safely format a date to YYYY-MM-DD format
+ */
+function formatDateSafely(date: Date): string {
+  try {
+    if (!date || isNaN(date.getTime())) {
+      return new Date().toISOString().split("T")[0];
+    }
+    const isoString = date.toISOString();
+    return isoString ? isoString.split("T")[0] : new Date().toISOString().split("T")[0];
+  } catch (error) {
+    console.warn("Error formatting date:", error);
+    return new Date().toISOString().split("T")[0];
+  }
 }
 
 /**

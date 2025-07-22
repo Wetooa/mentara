@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
-import Autosuggest from 'react-autosuggest';
 import { Search, X, User, UserCircle, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { useUserSearch } from './hooks/useUserSearch';
 import { useRecentSearches } from './hooks/useRecentSearches';
 import { RecentSearches } from './RecentSearches';
@@ -67,6 +68,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [currentRoleFilter, setCurrentRoleFilter] = useState<string>(roleFilter);
   const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const { searchUsers } = useUserSearch();
@@ -107,29 +109,29 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     [searchUsers, currentRoleFilter]
   );
 
-  const onSuggestionsFetchRequested = useCallback(
-    ({ value }: { value: string }) => {
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setQuery(value);
+      setShowRecentSearches(false);
+      
+      // Open popover when typing
+      if (value.length > 0) {
+        setIsOpen(true);
+      }
+      
+      // Trigger search
       debouncedSearch(value);
     },
     [debouncedSearch]
   );
 
-  const onSuggestionsClearRequested = useCallback(() => {
-    setSuggestions([]);
-  }, []);
-
-  const getSuggestionValue = (suggestion: User) => {
-    return `${suggestion.firstName} ${suggestion.lastName}`;
-  };
-
-  const renderSuggestion = (suggestion: User, { isHighlighted }: { isHighlighted: boolean }) => (
-    <div
-      className={cn(
-        'flex items-center gap-3 p-3 cursor-pointer transition-colors',
-        isHighlighted ? 'bg-accent' : 'hover:bg-accent/50'
-      )}
-      role="option"
-      aria-selected={isHighlighted}
+  const renderSuggestion = (suggestion: User) => (
+    <CommandItem
+      key={suggestion.id}
+      value={`${suggestion.firstName} ${suggestion.lastName} ${suggestion.email}`}
+      onSelect={() => handleSuggestionSelected(suggestion)}
+      className="flex items-center gap-3 p-3 cursor-pointer"
       aria-label={`${suggestion.firstName} ${suggestion.lastName}, ${suggestion.role}, ${suggestion.email}`}
     >
       <Avatar className="w-8 h-8">
@@ -154,80 +156,12 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
         </div>
         <p className="text-xs text-muted-foreground truncate">{suggestion.email}</p>
       </div>
-    </div>
+    </CommandItem>
   );
 
-  const renderSuggestionsContainer = ({ containerProps, children }: { containerProps: React.HTMLProps<HTMLDivElement>; children: React.ReactNode }) => (
-    <div
-      {...containerProps}
-      className={cn(
-        'absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 max-h-96 overflow-y-auto',
-        containerProps.className
-      )}
-      role="listbox"
-      aria-label="Search suggestions"
-    >
-      {isLoading && (
-        <div className="flex items-center justify-center p-4" role="status" aria-live="polite">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            Searching...
-          </div>
-        </div>
-      )}
-      
-      {!isLoading && query.length >= 2 && suggestions.length === 0 && (
-        <div className="p-4 text-center text-sm text-muted-foreground" role="status" aria-live="polite">
-          No users found for &quot;{query}&quot;
-        </div>
-      )}
-      
-      {!isLoading && children}
-    </div>
-  );
 
-  const inputProps = {
-    placeholder,
-    value: query,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      setQuery(e.target.value);
-      setShowRecentSearches(false);
-    },
-    onFocus: () => {
-      if (query.trim().length === 0) {
-        setShowRecentSearches(true);
-      }
-    },
-    onBlur: () => {
-      // Delay hiding recent searches to allow clicking on them
-      setTimeout(() => {
-        setShowRecentSearches(false);
-      }, 200);
-    },
-    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Escape') {
-        setQuery('');
-        setSuggestions([]);
-        setShowRecentSearches(false);
-      }
-    },
-    className: cn(
-      'w-full pl-10 pr-4 py-2 text-sm border border-input rounded-md',
-      'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
-      'placeholder:text-muted-foreground'
-    ),
-    'aria-label': 'Search for users',
-    'aria-describedby': 'search-instructions',
-    'aria-expanded': suggestions.length > 0 || showRecentSearches,
-    'aria-haspopup': 'listbox',
-    'aria-autocomplete': 'list' as const,
-    'role': 'combobox',
-  };
 
-  const handleSuggestionSelected = (
-    event: React.FormEvent<HTMLFormElement>,
-    { suggestion }: { suggestion: User }
-  ) => {
+  const handleSuggestionSelected = (suggestion: User) => {
     // Add to recent searches
     addRecentSearch(query, suggestion);
     
@@ -235,6 +169,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
     setQuery('');
     setSuggestions([]);
     setShowRecentSearches(false);
+    setIsOpen(false);
   };
 
   const handleRecentSearchSelect = (searchQuery: string) => {
@@ -253,6 +188,27 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
   const clearSearch = () => {
     setQuery('');
     setSuggestions([]);
+    setIsOpen(false);
+  };
+
+  const handleInputFocus = () => {
+    if (query.trim().length === 0) {
+      setShowRecentSearches(true);
+      setIsOpen(true);
+    } else if (suggestions.length > 0) {
+      setIsOpen(true);
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setQuery('');
+      setSuggestions([]);
+      setShowRecentSearches(false);
+      setIsOpen(false);
+    } else if (e.key === 'ArrowDown' && !isOpen) {
+      setIsOpen(true);
+    }
   };
 
   return (
@@ -267,32 +223,75 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        
-        <Autosuggest
-          suggestions={suggestions}
-          onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-          onSuggestionsClearRequested={onSuggestionsClearRequested}
-          getSuggestionValue={getSuggestionValue}
-          renderSuggestion={renderSuggestion}
-          renderSuggestionsContainer={renderSuggestionsContainer}
-          onSuggestionSelected={handleSuggestionSelected}
-          inputProps={inputProps}
-          focusInputOnSuggestionClick={false}
-        />
-        
-          {query && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Clear search"
-              title="Clear search"
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            
+            <PopoverTrigger asChild>
+              <input
+                type="text"
+                placeholder={placeholder}
+                value={query}
+                onChange={handleInputChange}
+                onFocus={handleInputFocus}
+                onKeyDown={handleInputKeyDown}
+                className={cn(
+                  'w-full pl-10 pr-4 py-2 text-sm border border-input rounded-md',
+                  'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+                  'placeholder:text-muted-foreground'
+                )}
+                aria-label="Search for users"
+                aria-describedby="search-instructions"
+                aria-expanded={isOpen}
+                aria-haspopup="listbox"
+                aria-autocomplete="list"
+                role="combobox"
+              />
+            </PopoverTrigger>
+            
+            {query && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            
+            <PopoverContent 
+              className="w-[var(--radix-popover-trigger-width)] p-0" 
+              align="start"
+              onOpenAutoFocus={(e) => e.preventDefault()}
             >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+              <Command shouldFilter={false}>
+                <CommandList className="max-h-96">
+                  {isLoading && (
+                    <div className="flex items-center justify-center p-4" role="status" aria-live="polite">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        Searching...
+                      </div>
+                    </div>
+                  )}
+                  
+                  {!isLoading && query.length >= 2 && suggestions.length === 0 && (
+                    <CommandEmpty>
+                      No users found for "{query}"
+                    </CommandEmpty>
+                  )}
+                  
+                  {!isLoading && suggestions.length > 0 && (
+                    <CommandGroup>
+                      {suggestions.map((suggestion) => renderSuggestion(suggestion))}
+                    </CommandGroup>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </div>
+        </Popover>
         
         {/* WebSocket Connection Status Indicator */}
         {showConnectionStatus && (
@@ -309,7 +308,7 @@ export const UserSearchBar: React.FC<UserSearchBarProps> = ({
       </div>
 
       {/* Recent Searches */}
-      {showRecentSearches && !query && (
+      {showRecentSearches && !query && isOpen && (
         <div className="absolute top-full left-0 right-0 mt-1 z-50">
           <RecentSearches
             onSearchSelect={handleRecentSearchSelect}

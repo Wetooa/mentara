@@ -33,13 +33,25 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
       return { meetingDates: [], selectedDateMeetings: [] };
     }
 
-    const meetings = meetingsData.meetings;
-    const dates = meetings.map(meeting => parseISO(meeting.startTime));
+    const meetings = meetingsData.meetings.filter(meeting => meeting.startTime);
+    const dates = meetings
+      .map(meeting => {
+        try {
+          return parseISO(meeting.startTime);
+        } catch {
+          return null;
+        }
+      })
+      .filter((date): date is Date => date !== null && !isNaN(date.getTime()));
     
     const selectedMeetings = selectedDate 
-      ? meetings.filter(meeting => 
-          isSameDay(parseISO(meeting.startTime), selectedDate)
-        )
+      ? meetings.filter(meeting => {
+          try {
+            return meeting.startTime && isSameDay(parseISO(meeting.startTime), selectedDate);
+          } catch {
+            return false;
+          }
+        })
       : [];
 
     return {
@@ -157,7 +169,7 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">
-                          {format(parseISO(meeting.startTime), 'h:mm a')}
+                          {meeting.startTime ? format(parseISO(meeting.startTime), 'h:mm a') : 'Time TBD'}
                         </span>
                         <Badge 
                           variant="outline" 

@@ -9,7 +9,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-gradient-to-b from-white to-tertiary/50 w-full h-full flex items-center justify-center">
+    <div className="bg-gradient-to-b from-tertiary to-transparent w-full h-full flex items-center justify-center">
       <AuthErrorBoundary
         fallbackTitle="Authentication Error"
         fallbackMessage="There was a problem with authentication. Please try signing in again."

@@ -28,7 +28,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import type { UserDashboardData } from "@/types/api/dashboard";
 
 interface ProfileSettingsProps {
   user: UserDashboardData["user"];
@@ -423,7 +423,7 @@ export default function ProfileSettings({
                     <Label>Member Since</Label>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-gray-500" />
-                      <span>{new Date(user.joinDate).toLocaleDateString()}</span>
+                      <span>{user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'Unknown'}</span>
                     </div>
                   </div>
                   <div className="space-y-2">

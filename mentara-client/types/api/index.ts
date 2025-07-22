@@ -1,6 +1,21 @@
 // Re-export all API types for easy importing
 // NOTE: To avoid naming conflicts, we use qualified re-exports where needed
 
+// API Response wrapper for consistency
+export interface ApiResponse<T = any> {
+  data?: T;
+  message?: string;
+  status: 'success' | 'error';
+}
+
+// Error response structure
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
+  details?: any;
+}
+
 // Frontend-specific auth extensions (core auth types now in commons)
 export * from './auth-extensions';
 

@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/api/communities";
-import { useCommunityPage } from "@/hooks/useCommunityPage";
+import { useCommunityPage } from "@/hooks/community/useCommunityPage";
 import { useCommunityStats } from "@/hooks/community";
 
 

@@ -1,5 +1,63 @@
 // Dashboard DTOs for all role-specific dashboard endpoints
 
+export interface UserDashboardData {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+  };
+  stats: {
+    completedSessions: number;
+    upcomingSessions: number;
+    completedWorksheets: number;
+    pendingWorksheets: number;
+    therapistsConsulted: number;
+  };
+  upcomingSessions: Array<{
+    id: string;
+    title?: string;
+    startTime: string;
+    endTime?: string;
+    therapist?: {
+      userId: string;
+      user: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+  }>;
+  worksheets: Array<{
+    id: string;
+    title: string;
+    status: string;
+    dueDate?: string;
+    completedAt?: string;
+  }>;
+  progress: {
+    overallProgress: number;
+    weeklyGoals: number;
+    sessionsCompleted: number;
+    milestonesReached: number;
+  };
+  notifications: Array<{
+    id: string;
+    title: string;
+    message: string;
+    type: string;
+    isRead: boolean;
+    createdAt: string;
+  }>;
+  recentCommunications: Array<{
+    id: string;
+    name: string;
+    lastMessage: string;
+    timestamp: string;
+    unreadCount: number;
+  }>;
+}
+
 export interface ClientDashboardResponseDto {
   user: {
     id: string;

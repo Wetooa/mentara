@@ -1,7 +1,7 @@
 import {
   type ListOfQuestionnaires,
   QUESTIONNAIRE_MAP,
-} from "@/constants/questionnaires";
+} from "@/constants/questionnaire/questionnaire-mapping";
 import { create } from "zustand";
 
 const inProd = process.env.NODE_ENV === "production";

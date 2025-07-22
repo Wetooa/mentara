@@ -1,0 +1,320 @@
+e01734a56c434a7781e8317009d1c3cb
+"use strict";
+
+/**
+ * Reviews Module Validation Schemas - Zod schemas for review operations
+ * Separated from types for clean architecture
+ */
+/* istanbul ignore next */
+function cov_13xbrrospa() {
+  var path = "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/reviews/validation/review.schemas.ts";
+  var hash = "57f43df82e95374e919cd2985ee371466b06e1ae";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/reviews/validation/review.schemas.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 6,
+          column: 62
+        }
+      },
+      "1": {
+        start: {
+          line: 7,
+          column: 0
+        },
+        end: {
+          line: 7,
+          column: 294
+        }
+      },
+      "2": {
+        start: {
+          line: 8,
+          column: 14
+        },
+        end: {
+          line: 8,
+          column: 28
+        }
+      },
+      "3": {
+        start: {
+          line: 10,
+          column: 21
+        },
+        end: {
+          line: 14,
+          column: 39
+        }
+      },
+      "4": {
+        start: {
+          line: 16,
+          column: 25
+        },
+        end: {
+          line: 22,
+          column: 13
+        }
+      },
+      "5": {
+        start: {
+          line: 24,
+          column: 0
+        },
+        end: {
+          line: 41,
+          column: 12
+        }
+      },
+      "6": {
+        start: {
+          line: 43,
+          column: 0
+        },
+        end: {
+          line: 60,
+          column: 12
+        }
+      },
+      "7": {
+        start: {
+          line: 62,
+          column: 0
+        },
+        end: {
+          line: 76,
+          column: 12
+        }
+      },
+      "8": {
+        start: {
+          line: 78,
+          column: 0
+        },
+        end: {
+          line: 133,
+          column: 12
+        }
+      },
+      "9": {
+        start: {
+          line: 135,
+          column: 0
+        },
+        end: {
+          line: 137,
+          column: 3
+        }
+      },
+      "10": {
+        start: {
+          line: 138,
+          column: 0
+        },
+        end: {
+          line: 140,
+          column: 3
+        }
+      },
+      "11": {
+        start: {
+          line: 141,
+          column: 0
+        },
+        end: {
+          line: 143,
+          column: 3
+        }
+      },
+      "12": {
+        start: {
+          line: 145,
+          column: 0
+        },
+        end: {
+          line: 151,
+          column: 12
+        }
+      },
+      "13": {
+        start: {
+          line: 152,
+          column: 0
+        },
+        end: {
+          line: 162,
+          column: 12
+        }
+      }
+    },
+    fnMap: {},
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0
+    },
+    f: {},
+    b: {},
+    inputSourceMap: {
+      file: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/reviews/validation/review.schemas.ts",
+      mappings: "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",
+      names: [],
+      sources: ["/home/wetooa/Documents/code/projects/mentara/mentara-api/src/reviews/validation/review.schemas.ts"],
+      sourcesContent: ["/**\n * Reviews Module Validation Schemas - Zod schemas for review operations\n * Separated from types for clean architecture\n */\n\nimport { z } from 'zod';\n\n// Rating validation helper\nconst ratingSchema = z\n  .number()\n  .int()\n  .min(1, 'Rating must be at least 1')\n  .max(5, 'Rating must be at most 5');\n\n// Category ratings schema\nconst categoriesSchema = z.object({\n  communication: ratingSchema.optional(),\n  professionalism: ratingSchema.optional(),\n  helpfulness: ratingSchema.optional(),\n  availability: ratingSchema.optional(),\n  overall: ratingSchema.optional(),\n}).optional();\n\n// Review creation validation\nexport const CreateReviewDtoSchema = z.object({\n  rating: ratingSchema,\n  comment: z\n    .string()\n    .max(2000, 'Comment must be less than 2000 characters')\n    .optional(),\n  isAnonymous: z\n    .boolean()\n    .optional(),\n  categories: categoriesSchema,\n  tags: z\n    .array(z.string().max(50, 'Tag must be less than 50 characters'))\n    .max(10, 'Maximum 10 tags allowed')\n    .optional(),\n  wouldRecommend: z\n    .boolean()\n    .optional(),\n}).strict();\n\n// Review update validation\nexport const UpdateReviewDtoSchema = z.object({\n  rating: ratingSchema.optional(),\n  comment: z\n    .string()\n    .max(2000, 'Comment must be less than 2000 characters')\n    .optional(),\n  isAnonymous: z\n    .boolean()\n    .optional(),\n  categories: categoriesSchema,\n  tags: z\n    .array(z.string().max(50, 'Tag must be less than 50 characters'))\n    .max(10, 'Maximum 10 tags allowed')\n    .optional(),\n  wouldRecommend: z\n    .boolean()\n    .optional(),\n}).strict();\n\n// Review moderation validation\nexport const ModerateReviewDtoSchema = z.object({\n  action: z\n    .enum(['approve', 'reject', 'flag', 'hide'], {\n      required_error: 'Moderation action is required',\n      invalid_type_error: 'Invalid moderation action',\n    }),\n  reason: z\n    .string()\n    .max(500, 'Reason must be less than 500 characters')\n    .optional(),\n  moderatorNotes: z\n    .string()\n    .max(1000, 'Moderator notes must be less than 1000 characters')\n    .optional(),\n}).strict();\n\n// Review query validation\nexport const GetReviewsDtoSchema = z.object({\n  therapistId: z\n    .string()\n    .uuid('Invalid therapist ID')\n    .optional(),\n  clientId: z\n    .string()\n    .uuid('Invalid client ID')\n    .optional(),\n  rating: ratingSchema.optional(),\n  minRating: ratingSchema.optional(),\n  maxRating: ratingSchema.optional(),\n  status: z\n    .enum(['pending', 'approved', 'rejected', 'flagged', 'hidden'], {\n      invalid_type_error: 'Invalid status',\n    })\n    .optional(),\n  isAnonymous: z\n    .boolean()\n    .optional(),\n  sortBy: z\n    .enum(['rating', 'date', 'helpful'], {\n      invalid_type_error: 'Invalid sort field',\n    })\n    .optional(),\n  sortOrder: z\n    .enum(['asc', 'desc'], {\n      invalid_type_error: 'Invalid sort order',\n    })\n    .optional(),\n  limit: z\n    .number()\n    .int()\n    .min(1, 'Limit must be at least 1')\n    .max(100, 'Limit cannot exceed 100')\n    .optional(),\n  offset: z\n    .number()\n    .int()\n    .min(0, 'Offset cannot be negative')\n    .optional(),\n  includeModerated: z\n    .boolean()\n    .optional(),\n  dateFrom: z\n    .string()\n    .regex(/^\\d{4}-\\d{2}-\\d{2}$/, 'Date must be in YYYY-MM-DD format')\n    .optional(),\n  dateTo: z\n    .string()\n    .regex(/^\\d{4}-\\d{2}-\\d{2}$/, 'Date must be in YYYY-MM-DD format')\n    .optional(),\n  tags: z\n    .array(z.string().max(50, 'Tag must be less than 50 characters'))\n    .optional(),\n}).strict();\n\n// Path parameter validation\nexport const ReviewIdParamSchema = z.object({\n  id: z.string().uuid('Invalid review ID format'),\n});\n\nexport const TherapistIdParamSchema = z.object({\n  therapistId: z.string().uuid('Invalid therapist ID format'),\n});\n\nexport const MeetingIdParamSchema = z.object({\n  meetingId: z.string().uuid('Invalid meeting ID format'),\n});\n\n// Review interaction validation\nexport const ReviewHelpfulDtoSchema = z.object({\n  action: z\n    .enum(['helpful', 'unhelpful', 'remove'], {\n      required_error: 'Action is required',\n      invalid_type_error: 'Invalid action type',\n    }),\n}).strict();\n\nexport const ReviewReportDtoSchema = z.object({\n  reason: z\n    .enum(['inappropriate', 'spam', 'fake', 'harassment', 'other'], {\n      required_error: 'Report reason is required',\n      invalid_type_error: 'Invalid report reason',\n    }),\n  description: z\n    .string()\n    .max(1000, 'Description must be less than 1000 characters')\n    .optional(),\n}).strict();"],
+      version: 3
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "57f43df82e95374e919cd2985ee371466b06e1ae"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_13xbrrospa = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_13xbrrospa();
+cov_13xbrrospa().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_13xbrrospa().s[1]++;
+exports.ReviewReportDtoSchema = exports.ReviewHelpfulDtoSchema = exports.MeetingIdParamSchema = exports.TherapistIdParamSchema = exports.ReviewIdParamSchema = exports.GetReviewsDtoSchema = exports.ModerateReviewDtoSchema = exports.UpdateReviewDtoSchema = exports.CreateReviewDtoSchema = void 0;
+const zod_1 =
+/* istanbul ignore next */
+(cov_13xbrrospa().s[2]++, require("zod"));
+// Rating validation helper
+const ratingSchema =
+/* istanbul ignore next */
+(cov_13xbrrospa().s[3]++, zod_1.z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating must be at most 5'));
+// Category ratings schema
+const categoriesSchema =
+/* istanbul ignore next */
+(cov_13xbrrospa().s[4]++, zod_1.z.object({
+  communication: ratingSchema.optional(),
+  professionalism: ratingSchema.optional(),
+  helpfulness: ratingSchema.optional(),
+  availability: ratingSchema.optional(),
+  overall: ratingSchema.optional()
+}).optional());
+// Review creation validation
+/* istanbul ignore next */
+cov_13xbrrospa().s[5]++;
+exports.CreateReviewDtoSchema = zod_1.z.object({
+  rating: ratingSchema,
+  comment: zod_1.z.string().max(2000, 'Comment must be less than 2000 characters').optional(),
+  isAnonymous: zod_1.z.boolean().optional(),
+  categories: categoriesSchema,
+  tags: zod_1.z.array(zod_1.z.string().max(50, 'Tag must be less than 50 characters')).max(10, 'Maximum 10 tags allowed').optional(),
+  wouldRecommend: zod_1.z.boolean().optional()
+}).strict();
+// Review update validation
+/* istanbul ignore next */
+cov_13xbrrospa().s[6]++;
+exports.UpdateReviewDtoSchema = zod_1.z.object({
+  rating: ratingSchema.optional(),
+  comment: zod_1.z.string().max(2000, 'Comment must be less than 2000 characters').optional(),
+  isAnonymous: zod_1.z.boolean().optional(),
+  categories: categoriesSchema,
+  tags: zod_1.z.array(zod_1.z.string().max(50, 'Tag must be less than 50 characters')).max(10, 'Maximum 10 tags allowed').optional(),
+  wouldRecommend: zod_1.z.boolean().optional()
+}).strict();
+// Review moderation validation
+/* istanbul ignore next */
+cov_13xbrrospa().s[7]++;
+exports.ModerateReviewDtoSchema = zod_1.z.object({
+  action: zod_1.z.enum(['approve', 'reject', 'flag', 'hide'], {
+    required_error: 'Moderation action is required',
+    invalid_type_error: 'Invalid moderation action'
+  }),
+  reason: zod_1.z.string().max(500, 'Reason must be less than 500 characters').optional(),
+  moderatorNotes: zod_1.z.string().max(1000, 'Moderator notes must be less than 1000 characters').optional()
+}).strict();
+// Review query validation
+/* istanbul ignore next */
+cov_13xbrrospa().s[8]++;
+exports.GetReviewsDtoSchema = zod_1.z.object({
+  therapistId: zod_1.z.string().uuid('Invalid therapist ID').optional(),
+  clientId: zod_1.z.string().uuid('Invalid client ID').optional(),
+  rating: ratingSchema.optional(),
+  minRating: ratingSchema.optional(),
+  maxRating: ratingSchema.optional(),
+  status: zod_1.z.enum(['pending', 'approved', 'rejected', 'flagged', 'hidden'], {
+    invalid_type_error: 'Invalid status'
+  }).optional(),
+  isAnonymous: zod_1.z.boolean().optional(),
+  sortBy: zod_1.z.enum(['rating', 'date', 'helpful'], {
+    invalid_type_error: 'Invalid sort field'
+  }).optional(),
+  sortOrder: zod_1.z.enum(['asc', 'desc'], {
+    invalid_type_error: 'Invalid sort order'
+  }).optional(),
+  limit: zod_1.z.number().int().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').optional(),
+  offset: zod_1.z.number().int().min(0, 'Offset cannot be negative').optional(),
+  includeModerated: zod_1.z.boolean().optional(),
+  dateFrom: zod_1.z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
+  dateTo: zod_1.z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
+  tags: zod_1.z.array(zod_1.z.string().max(50, 'Tag must be less than 50 characters')).optional()
+}).strict();
+// Path parameter validation
+/* istanbul ignore next */
+cov_13xbrrospa().s[9]++;
+exports.ReviewIdParamSchema = zod_1.z.object({
+  id: zod_1.z.string().uuid('Invalid review ID format')
+});
+/* istanbul ignore next */
+cov_13xbrrospa().s[10]++;
+exports.TherapistIdParamSchema = zod_1.z.object({
+  therapistId: zod_1.z.string().uuid('Invalid therapist ID format')
+});
+/* istanbul ignore next */
+cov_13xbrrospa().s[11]++;
+exports.MeetingIdParamSchema = zod_1.z.object({
+  meetingId: zod_1.z.string().uuid('Invalid meeting ID format')
+});
+// Review interaction validation
+/* istanbul ignore next */
+cov_13xbrrospa().s[12]++;
+exports.ReviewHelpfulDtoSchema = zod_1.z.object({
+  action: zod_1.z.enum(['helpful', 'unhelpful', 'remove'], {
+    required_error: 'Action is required',
+    invalid_type_error: 'Invalid action type'
+  })
+}).strict();
+/* istanbul ignore next */
+cov_13xbrrospa().s[13]++;
+exports.ReviewReportDtoSchema = zod_1.z.object({
+  reason: zod_1.z.enum(['inappropriate', 'spam', 'fake', 'harassment', 'other'], {
+    required_error: 'Report reason is required',
+    invalid_type_error: 'Invalid report reason'
+  }),
+  description: zod_1.z.string().max(1000, 'Description must be less than 1000 characters').optional()
+}).strict();
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMTN4YnJyb3NwYSIsInBhdGgiLCJoYXNoIiwiZ2xvYmFsIiwiRnVuY3Rpb24iLCJnY3YiLCJjb3ZlcmFnZURhdGEiLCJzdGF0ZW1lbnRNYXAiLCJzdGFydCIsImxpbmUiLCJjb2x1bW4iLCJlbmQiLCJmbk1hcCIsImJyYW5jaE1hcCIsInMiLCJmIiwiYiIsImlucHV0U291cmNlTWFwIiwiZmlsZSIsIm1hcHBpbmdzIiwibmFtZXMiLCJzb3VyY2VzIiwic291cmNlc0NvbnRlbnQiLCJ2ZXJzaW9uIiwiX2NvdmVyYWdlU2NoZW1hIiwiY292ZXJhZ2UiLCJhY3R1YWxDb3ZlcmFnZSIsInpvZF8xIiwicmVxdWlyZSIsInJhdGluZ1NjaGVtYSIsInoiLCJudW1iZXIiLCJpbnQiLCJtaW4iLCJtYXgiLCJjYXRlZ29yaWVzU2NoZW1hIiwib2JqZWN0IiwiY29tbXVuaWNhdGlvbiIsIm9wdGlvbmFsIiwicHJvZmVzc2lvbmFsaXNtIiwiaGVscGZ1bG5lc3MiLCJhdmFpbGFiaWxpdHkiLCJvdmVyYWxsIiwiZXhwb3J0cyIsIkNyZWF0ZVJldmlld0R0b1NjaGVtYSIsInJhdGluZyIsImNvbW1lbnQiLCJzdHJpbmciLCJpc0Fub255bW91cyIsImJvb2xlYW4iLCJjYXRlZ29yaWVzIiwidGFncyIsImFycmF5Iiwid291bGRSZWNvbW1lbmQiLCJzdHJpY3QiLCJVcGRhdGVSZXZpZXdEdG9TY2hlbWEiLCJNb2RlcmF0ZVJldmlld0R0b1NjaGVtYSIsImFjdGlvbiIsImVudW0iLCJyZXF1aXJlZF9lcnJvciIsImludmFsaWRfdHlwZV9lcnJvciIsInJlYXNvbiIsIm1vZGVyYXRvck5vdGVzIiwiR2V0UmV2aWV3c0R0b1NjaGVtYSIsInRoZXJhcGlzdElkIiwidXVpZCIsImNsaWVudElkIiwibWluUmF0aW5nIiwibWF4UmF0aW5nIiwic3RhdHVzIiwic29ydEJ5Iiwic29ydE9yZGVyIiwibGltaXQiLCJvZmZzZXQiLCJpbmNsdWRlTW9kZXJhdGVkIiwiZGF0ZUZyb20iLCJyZWdleCIsImRhdGVUbyIsIlJldmlld0lkUGFyYW1TY2hlbWEiLCJpZCIsIlRoZXJhcGlzdElkUGFyYW1TY2hlbWEiLCJNZWV0aW5nSWRQYXJhbVNjaGVtYSIsIm1lZXRpbmdJZCIsIlJldmlld0hlbHBmdWxEdG9TY2hlbWEiLCJSZXZpZXdSZXBvcnREdG9TY2hlbWEiLCJkZXNjcmlwdGlvbiJdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9yZXZpZXdzL3ZhbGlkYXRpb24vcmV2aWV3LnNjaGVtYXMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBSZXZpZXdzIE1vZHVsZSBWYWxpZGF0aW9uIFNjaGVtYXMgLSBab2Qgc2NoZW1hcyBmb3IgcmV2aWV3IG9wZXJhdGlvbnNcbiAqIFNlcGFyYXRlZCBmcm9tIHR5cGVzIGZvciBjbGVhbiBhcmNoaXRlY3R1cmVcbiAqL1xuXG5pbXBvcnQgeyB6IH0gZnJvbSAnem9kJztcblxuLy8gUmF0aW5nIHZhbGlkYXRpb24gaGVscGVyXG5jb25zdCByYXRpbmdTY2hlbWEgPSB6XG4gIC5udW1iZXIoKVxuICAuaW50KClcbiAgLm1pbigxLCAnUmF0aW5nIG11c3QgYmUgYXQgbGVhc3QgMScpXG4gIC5tYXgoNSwgJ1JhdGluZyBtdXN0IGJlIGF0IG1vc3QgNScpO1xuXG4vLyBDYXRlZ29yeSByYXRpbmdzIHNjaGVtYVxuY29uc3QgY2F0ZWdvcmllc1NjaGVtYSA9IHoub2JqZWN0KHtcbiAgY29tbXVuaWNhdGlvbjogcmF0aW5nU2NoZW1hLm9wdGlvbmFsKCksXG4gIHByb2Zlc3Npb25hbGlzbTogcmF0aW5nU2NoZW1hLm9wdGlvbmFsKCksXG4gIGhlbHBmdWxuZXNzOiByYXRpbmdTY2hlbWEub3B0aW9uYWwoKSxcbiAgYXZhaWxhYmlsaXR5OiByYXRpbmdTY2hlbWEub3B0aW9uYWwoKSxcbiAgb3ZlcmFsbDogcmF0aW5nU2NoZW1hLm9wdGlvbmFsKCksXG59KS5vcHRpb25hbCgpO1xuXG4vLyBSZXZpZXcgY3JlYXRpb24gdmFsaWRhdGlvblxuZXhwb3J0IGNvbnN0IENyZWF0ZVJldmlld0R0b1NjaGVtYSA9IHoub2JqZWN0KHtcbiAgcmF0aW5nOiByYXRpbmdTY2hlbWEsXG4gIGNvbW1lbnQ6IHpcbiAgICAuc3RyaW5nKClcbiAgICAubWF4KDIwMDAsICdDb21tZW50IG11c3QgYmUgbGVzcyB0aGFuIDIwMDAgY2hhcmFjdGVycycpXG4gICAgLm9wdGlvbmFsKCksXG4gIGlzQW5vbnltb3VzOiB6XG4gICAgLmJvb2xlYW4oKVxuICAgIC5vcHRpb25hbCgpLFxuICBjYXRlZ29yaWVzOiBjYXRlZ29yaWVzU2NoZW1hLFxuICB0YWdzOiB6XG4gICAgLmFycmF5KHouc3RyaW5nKCkubWF4KDUwLCAnVGFnIG11c3QgYmUgbGVzcyB0aGFuIDUwIGNoYXJhY3RlcnMnKSlcbiAgICAubWF4KDEwLCAnTWF4aW11bSAxMCB0YWdzIGFsbG93ZWQnKVxuICAgIC5vcHRpb25hbCgpLFxuICB3b3VsZFJlY29tbWVuZDogelxuICAgIC5ib29sZWFuKClcbiAgICAub3B0aW9uYWwoKSxcbn0pLnN0cmljdCgpO1xuXG4vLyBSZXZpZXcgdXBkYXRlIHZhbGlkYXRpb25cbmV4cG9ydCBjb25zdCBVcGRhdGVSZXZpZXdEdG9TY2hlbWEgPSB6Lm9iamVjdCh7XG4gIHJhdGluZzogcmF0aW5nU2NoZW1hLm9wdGlvbmFsKCksXG4gIGNvbW1lbnQ6IHpcbiAgICAuc3RyaW5nKClcbiAgICAubWF4KDIwMDAsICdDb21tZW50IG11c3QgYmUgbGVzcyB0aGFuIDIwMDAgY2hhcmFjdGVycycpXG4gICAgLm9wdGlvbmFsKCksXG4gIGlzQW5vbnltb3VzOiB6XG4gICAgLmJvb2xlYW4oKVxuICAgIC5vcHRpb25hbCgpLFxuICBjYXRlZ29yaWVzOiBjYXRlZ29yaWVzU2NoZW1hLFxuICB0YWdzOiB6XG4gICAgLmFycmF5KHouc3RyaW5nKCkubWF4KDUwLCAnVGFnIG11c3QgYmUgbGVzcyB0aGFuIDUwIGNoYXJhY3RlcnMnKSlcbiAgICAubWF4KDEwLCAnTWF4aW11bSAxMCB0YWdzIGFsbG93ZWQnKVxuICAgIC5vcHRpb25hbCgpLFxuICB3b3VsZFJlY29tbWVuZDogelxuICAgIC5ib29sZWFuKClcbiAgICAub3B0aW9uYWwoKSxcbn0pLnN0cmljdCgpO1xuXG4vLyBSZXZpZXcgbW9kZXJhdGlvbiB2YWxpZGF0aW9uXG5leHBvcnQgY29uc3QgTW9kZXJhdGVSZXZpZXdEdG9TY2hlbWEgPSB6Lm9iamVjdCh7XG4gIGFjdGlvbjogelxuICAgIC5lbnVtKFsnYXBwcm92ZScsICdyZWplY3QnLCAnZmxhZycsICdoaWRlJ10sIHtcbiAgICAgIHJlcXVpcmVkX2Vycm9yOiAnTW9kZXJhdGlvbiBhY3Rpb24gaXMgcmVxdWlyZWQnLFxuICAgICAgaW52YWxpZF90eXBlX2Vycm9yOiAnSW52YWxpZCBtb2RlcmF0aW9uIGFjdGlvbicsXG4gICAgfSksXG4gIHJlYXNvbjogelxuICAgIC5zdHJpbmcoKVxuICAgIC5tYXgoNTAwLCAnUmVhc29uIG11c3QgYmUgbGVzcyB0aGFuIDUwMCBjaGFyYWN0ZXJzJylcbiAgICAub3B0aW9uYWwoKSxcbiAgbW9kZXJhdG9yTm90ZXM6IHpcbiAgICAuc3RyaW5nKClcbiAgICAubWF4KDEwMDAsICdNb2RlcmF0b3Igbm90ZXMgbXVzdCBiZSBsZXNzIHRoYW4gMTAwMCBjaGFyYWN0ZXJzJylcbiAgICAub3B0aW9uYWwoKSxcbn0pLnN0cmljdCgpO1xuXG4vLyBSZXZpZXcgcXVlcnkgdmFsaWRhdGlvblxuZXhwb3J0IGNvbnN0IEdldFJldmlld3NEdG9TY2hlbWEgPSB6Lm9iamVjdCh7XG4gIHRoZXJhcGlzdElkOiB6XG4gICAgLnN0cmluZygpXG4gICAgLnV1aWQoJ0ludmFsaWQgdGhlcmFwaXN0IElEJylcbiAgICAub3B0aW9uYWwoKSxcbiAgY2xpZW50SWQ6IHpcbiAgICAuc3RyaW5nKClcbiAgICAudXVpZCgnSW52YWxpZCBjbGllbnQgSUQnKVxuICAgIC5vcHRpb25hbCgpLFxuICByYXRpbmc6IHJhdGluZ1NjaGVtYS5vcHRpb25hbCgpLFxuICBtaW5SYXRpbmc6IHJhdGluZ1NjaGVtYS5vcHRpb25hbCgpLFxuICBtYXhSYXRpbmc6IHJhdGluZ1NjaGVtYS5vcHRpb25hbCgpLFxuICBzdGF0dXM6IHpcbiAgICAuZW51bShbJ3BlbmRpbmcnLCAnYXBwcm92ZWQnLCAncmVqZWN0ZWQnLCAnZmxhZ2dlZCcsICdoaWRkZW4nXSwge1xuICAgICAgaW52YWxpZF90eXBlX2Vycm9yOiAnSW52YWxpZCBzdGF0dXMnLFxuICAgIH0pXG4gICAgLm9wdGlvbmFsKCksXG4gIGlzQW5vbnltb3VzOiB6XG4gICAgLmJvb2xlYW4oKVxuICAgIC5vcHRpb25hbCgpLFxuICBzb3J0Qnk6IHpcbiAgICAuZW51bShbJ3JhdGluZycsICdkYXRlJywgJ2hlbHBmdWwnXSwge1xuICAgICAgaW52YWxpZF90eXBlX2Vycm9yOiAnSW52YWxpZCBzb3J0IGZpZWxkJyxcbiAgICB9KVxuICAgIC5vcHRpb25hbCgpLFxuICBzb3J0T3JkZXI6IHpcbiAgICAuZW51bShbJ2FzYycsICdkZXNjJ10sIHtcbiAgICAgIGludmFsaWRfdHlwZV9lcnJvcjogJ0ludmFsaWQgc29ydCBvcmRlcicsXG4gICAgfSlcbiAgICAub3B0aW9uYWwoKSxcbiAgbGltaXQ6IHpcbiAgICAubnVtYmVyKClcbiAgICAuaW50KClcbiAgICAubWluKDEsICdMaW1pdCBtdXN0IGJlIGF0IGxlYXN0IDEnKVxuICAgIC5tYXgoMTAwLCAnTGltaXQgY2Fubm90IGV4Y2VlZCAxMDAnKVxuICAgIC5vcHRpb25hbCgpLFxuICBvZmZzZXQ6IHpcbiAgICAubnVtYmVyKClcbiAgICAuaW50KClcbiAgICAubWluKDAsICdPZmZzZXQgY2Fubm90IGJlIG5lZ2F0aXZlJylcbiAgICAub3B0aW9uYWwoKSxcbiAgaW5jbHVkZU1vZGVyYXRlZDogelxuICAgIC5ib29sZWFuKClcbiAgICAub3B0aW9uYWwoKSxcbiAgZGF0ZUZyb206IHpcbiAgICAuc3RyaW5nKClcbiAgICAucmVnZXgoL15cXGR7NH0tXFxkezJ9LVxcZHsyfSQvLCAnRGF0ZSBtdXN0IGJlIGluIFlZWVktTU0tREQgZm9ybWF0JylcbiAgICAub3B0aW9uYWwoKSxcbiAgZGF0ZVRvOiB6XG4gICAgLnN0cmluZygpXG4gICAgLnJlZ2V4KC9eXFxkezR9LVxcZHsyfS1cXGR7Mn0kLywgJ0RhdGUgbXVzdCBiZSBpbiBZWVlZLU1NLUREIGZvcm1hdCcpXG4gICAgLm9wdGlvbmFsKCksXG4gIHRhZ3M6IHpcbiAgICAuYXJyYXkoei5zdHJpbmcoKS5tYXgoNTAsICdUYWcgbXVzdCBiZSBsZXNzIHRoYW4gNTAgY2hhcmFjdGVycycpKVxuICAgIC5vcHRpb25hbCgpLFxufSkuc3RyaWN0KCk7XG5cbi8vIFBhdGggcGFyYW1ldGVyIHZhbGlkYXRpb25cbmV4cG9ydCBjb25zdCBSZXZpZXdJZFBhcmFtU2NoZW1hID0gei5vYmplY3Qoe1xuICBpZDogei5zdHJpbmcoKS51dWlkKCdJbnZhbGlkIHJldmlldyBJRCBmb3JtYXQnKSxcbn0pO1xuXG5leHBvcnQgY29uc3QgVGhlcmFwaXN0SWRQYXJhbVNjaGVtYSA9IHoub2JqZWN0KHtcbiAgdGhlcmFwaXN0SWQ6IHouc3RyaW5nKCkudXVpZCgnSW52YWxpZCB0aGVyYXBpc3QgSUQgZm9ybWF0JyksXG59KTtcblxuZXhwb3J0IGNvbnN0IE1lZXRpbmdJZFBhcmFtU2NoZW1hID0gei5vYmplY3Qoe1xuICBtZWV0aW5nSWQ6IHouc3RyaW5nKCkudXVpZCgnSW52YWxpZCBtZWV0aW5nIElEIGZvcm1hdCcpLFxufSk7XG5cbi8vIFJldmlldyBpbnRlcmFjdGlvbiB2YWxpZGF0aW9uXG5leHBvcnQgY29uc3QgUmV2aWV3SGVscGZ1bER0b1NjaGVtYSA9IHoub2JqZWN0KHtcbiAgYWN0aW9uOiB6XG4gICAgLmVudW0oWydoZWxwZnVsJywgJ3VuaGVscGZ1bCcsICdyZW1vdmUnXSwge1xuICAgICAgcmVxdWlyZWRfZXJyb3I6ICdBY3Rpb24gaXMgcmVxdWlyZWQnLFxuICAgICAgaW52YWxpZF90eXBlX2Vycm9yOiAnSW52YWxpZCBhY3Rpb24gdHlwZScsXG4gICAgfSksXG59KS5zdHJpY3QoKTtcblxuZXhwb3J0IGNvbnN0IFJldmlld1JlcG9ydER0b1NjaGVtYSA9IHoub2JqZWN0KHtcbiAgcmVhc29uOiB6XG4gICAgLmVudW0oWydpbmFwcHJvcHJpYXRlJywgJ3NwYW0nLCAnZmFrZScsICdoYXJhc3NtZW50JywgJ290aGVyJ10sIHtcbiAgICAgIHJlcXVpcmVkX2Vycm9yOiAnUmVwb3J0IHJlYXNvbiBpcyByZXF1aXJlZCcsXG4gICAgICBpbnZhbGlkX3R5cGVfZXJyb3I6ICdJbnZhbGlkIHJlcG9ydCByZWFzb24nLFxuICAgIH0pLFxuICBkZXNjcmlwdGlvbjogelxuICAgIC5zdHJpbmcoKVxuICAgIC5tYXgoMTAwMCwgJ0Rlc2NyaXB0aW9uIG11c3QgYmUgbGVzcyB0aGFuIDEwMDAgY2hhcmFjdGVycycpXG4gICAgLm9wdGlvbmFsKCksXG59KS5zdHJpY3QoKTsiXSwibWFwcGluZ3MiOiI7O0FBQUE7Ozs7QUFBQTtBQUFBLFNBQUFBLGVBQUE7RUFBQSxJQUFBQyxJQUFBO0VBQUEsSUFBQUMsSUFBQTtFQUFBLElBQUFDLE1BQUEsT0FBQUMsUUFBQTtFQUFBLElBQUFDLEdBQUE7RUFBQSxJQUFBQyxZQUFBO0lBQUFMLElBQUE7SUFBQU0sWUFBQTtNQUFBO1FBQUFDLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7TUFBQTtRQUFBRixLQUFBO1VBQUFDLElBQUE7VUFBQUMsTUFBQTtRQUFBO1FBQUFDLEdBQUE7VUFBQUYsSUFBQTtVQUFBQyxNQUFBO1FBQUE7TUFBQTtNQUFBO1FBQUFGLEtBQUE7VUFBQUMsSUFBQTtVQUFBQyxNQUFBO1FBQUE7UUFBQUMsR0FBQTtVQUFBRixJQUFBO1VBQUFDLE1BQUE7UUFBQTtNQUFBO01BQUE7UUFBQUYsS0FBQTtVQUFBQyxJQUFBO1VBQUFDLE1BQUE7UUFBQTtRQUFBQyxHQUFBO1VBQUFGLElBQUE7VUFBQUMsTUFBQTtRQUFBO01BQUE7SUFBQTtJQUFBRSxLQUFBO0lBQUFDLFNBQUE7SUFBQUMsQ0FBQTtNQUFBO01BQUE7TUFBQTtNQUFBO01BQUE7TUFBQTtNQUFBO01BQUE7TUFBQTtNQUFBO01BQUE7TUFBQTtNQUFBO01BQUE7SUFBQTtJQUFBQyxDQUFBO0lBQUFDLENBQUE7SUFBQUMsY0FBQTtNQUFBQyxJQUFBO01BQUFDLFFBQUE7TUFBQUMsS0FBQTtNQUFBQyxPQUFBO01BQUFDLGNBQUE7TUFBQUMsT0FBQTtJQUFBO0lBQUFDLGVBQUE7SUFBQXRCLElBQUE7RUFBQTtFQUFBLElBQUF1QixRQUFBLEdBQUF0QixNQUFBLENBQUFFLEdBQUEsTUFBQUYsTUFBQSxDQUFBRSxHQUFBO0VBQUEsS0FBQW9CLFFBQUEsQ0FBQXhCLElBQUEsS0FBQXdCLFFBQUEsQ0FBQXhCLElBQUEsRUFBQUMsSUFBQSxLQUFBQSxJQUFBO0lBQUF1QixRQUFBLENBQUF4QixJQUFBLElBQUFLLFlBQUE7RUFBQTtFQUFBLElBQUFvQixjQUFBLEdBQUFELFFBQUEsQ0FBQXhCLElBQUE7RUFBQTtJQWVNO0lBQUFELGNBQUEsWUFBQUEsQ0FBQTtNQUFBLE9BQUEwQixjQUFBO0lBQUE7RUFBQTtFQUFBLE9BQUFBLGNBQUE7QUFBQTtBQUFBMUIsY0FBQTtBQUFBQSxjQUFBLEdBQUFjLENBQUE7Ozs7Ozs7QUFWTixNQUFBYSxLQUFBO0FBQUE7QUFBQSxDQUFBM0IsY0FBQSxHQUFBYyxDQUFBLE9BQUFjLE9BQUE7QUFFQTtBQUNBLE1BQU1DLFlBQVk7QUFBQTtBQUFBLENBQUE3QixjQUFBLEdBQUFjLENBQUEsT0FBR2EsS0FBQSxDQUFBRyxDQUFDLENBQ25CQyxNQUFNLEVBQUUsQ0FDUkMsR0FBRyxFQUFFLENBQ0xDLEdBQUcsQ0FBQyxDQUFDLEVBQUUsMkJBQTJCLENBQUMsQ0FDbkNDLEdBQUcsQ0FBQyxDQUFDLEVBQUUsMEJBQTBCLENBQUM7QUFFckM7QUFDQSxNQUFNQyxnQkFBZ0I7QUFBQTtBQUFBLENBQUFuQyxjQUFBLEdBQUFjLENBQUEsT0FBR2EsS0FBQSxDQUFBRyxDQUFDLENBQUNNLE1BQU0sQ0FBQztFQUNoQ0MsYUFBYSxFQUFFUixZQUFZLENBQUNTLFFBQVEsRUFBRTtFQUN0Q0MsZUFBZSxFQUFFVixZQUFZLENBQUNTLFFBQVEsRUFBRTtFQUN4Q0UsV0FBVyxFQUFFWCxZQUFZLENBQUNTLFFBQVEsRUFBRTtFQUNwQ0csWUFBWSxFQUFFWixZQUFZLENBQUNTLFFBQVEsRUFBRTtFQUNyQ0ksT0FBTyxFQUFFYixZQUFZLENBQUNTLFFBQVE7Q0FDL0IsQ0FBQyxDQUFDQSxRQUFRLEVBQUU7QUFFYjtBQUFBO0FBQUF0QyxjQUFBLEdBQUFjLENBQUE7QUFDYTZCLE9BQUEsQ0FBQUMscUJBQXFCLEdBQUdqQixLQUFBLENBQUFHLENBQUMsQ0FBQ00sTUFBTSxDQUFDO0VBQzVDUyxNQUFNLEVBQUVoQixZQUFZO0VBQ3BCaUIsT0FBTyxFQUFFbkIsS0FBQSxDQUFBRyxDQUFDLENBQ1BpQixNQUFNLEVBQUUsQ0FDUmIsR0FBRyxDQUFDLElBQUksRUFBRSwyQ0FBMkMsQ0FBQyxDQUN0REksUUFBUSxFQUFFO0VBQ2JVLFdBQVcsRUFBRXJCLEtBQUEsQ0FBQUcsQ0FBQyxDQUNYbUIsT0FBTyxFQUFFLENBQ1RYLFFBQVEsRUFBRTtFQUNiWSxVQUFVLEVBQUVmLGdCQUFnQjtFQUM1QmdCLElBQUksRUFBRXhCLEtBQUEsQ0FBQUcsQ0FBQyxDQUNKc0IsS0FBSyxDQUFDekIsS0FBQSxDQUFBRyxDQUFDLENBQUNpQixNQUFNLEVBQUUsQ0FBQ2IsR0FBRyxDQUFDLEVBQUUsRUFBRSxxQ0FBcUMsQ0FBQyxDQUFDLENBQ2hFQSxHQUFHLENBQUMsRUFBRSxFQUFFLHlCQUF5QixDQUFDLENBQ2xDSSxRQUFRLEVBQUU7RUFDYmUsY0FBYyxFQUFFMUIsS0FBQSxDQUFBRyxDQUFDLENBQ2RtQixPQUFPLEVBQUUsQ0FDVFgsUUFBUTtDQUNaLENBQUMsQ0FBQ2dCLE1BQU0sRUFBRTtBQUVYO0FBQUE7QUFBQXRELGNBQUEsR0FBQWMsQ0FBQTtBQUNhNkIsT0FBQSxDQUFBWSxxQkFBcUIsR0FBRzVCLEtBQUEsQ0FBQUcsQ0FBQyxDQUFDTSxNQUFNLENBQUM7RUFDNUNTLE1BQU0sRUFBRWhCLFlBQVksQ0FBQ1MsUUFBUSxFQUFFO0VBQy9CUSxPQUFPLEVBQUVuQixLQUFBLENBQUFHLENBQUMsQ0FDUGlCLE1BQU0sRUFBRSxDQUNSYixHQUFHLENBQUMsSUFBSSxFQUFFLDJDQUEyQyxDQUFDLENBQ3RESSxRQUFRLEVBQUU7RUFDYlUsV0FBVyxFQUFFckIsS0FBQSxDQUFBRyxDQUFDLENBQ1htQixPQUFPLEVBQUUsQ0FDVFgsUUFBUSxFQUFFO0VBQ2JZLFVBQVUsRUFBRWYsZ0JBQWdCO0VBQzVCZ0IsSUFBSSxFQUFFeEIsS0FBQSxDQUFBRyxDQUFDLENBQ0pzQixLQUFLLENBQUN6QixLQUFBLENBQUFHLENBQUMsQ0FBQ2lCLE1BQU0sRUFBRSxDQUFDYixHQUFHLENBQUMsRUFBRSxFQUFFLHFDQUFxQyxDQUFDLENBQUMsQ0FDaEVBLEdBQUcsQ0FBQyxFQUFFLEVBQUUseUJBQXlCLENBQUMsQ0FDbENJLFFBQVEsRUFBRTtFQUNiZSxjQUFjLEVBQUUxQixLQUFBLENBQUFHLENBQUMsQ0FDZG1CLE9BQU8sRUFBRSxDQUNUWCxRQUFRO0NBQ1osQ0FBQyxDQUFDZ0IsTUFBTSxFQUFFO0FBRVg7QUFBQTtBQUFBdEQsY0FBQSxHQUFBYyxDQUFBO0FBQ2E2QixPQUFBLENBQUFhLHVCQUF1QixHQUFHN0IsS0FBQSxDQUFBRyxDQUFDLENBQUNNLE1BQU0sQ0FBQztFQUM5Q3FCLE1BQU0sRUFBRTlCLEtBQUEsQ0FBQUcsQ0FBQyxDQUNONEIsSUFBSSxDQUFDLENBQUMsU0FBUyxFQUFFLFFBQVEsRUFBRSxNQUFNLEVBQUUsTUFBTSxDQUFDLEVBQUU7SUFDM0NDLGNBQWMsRUFBRSwrQkFBK0I7SUFDL0NDLGtCQUFrQixFQUFFO0dBQ3JCLENBQUM7RUFDSkMsTUFBTSxFQUFFbEMsS0FBQSxDQUFBRyxDQUFDLENBQ05pQixNQUFNLEVBQUUsQ0FDUmIsR0FBRyxDQUFDLEdBQUcsRUFBRSx5Q0FBeUMsQ0FBQyxDQUNuREksUUFBUSxFQUFFO0VBQ2J3QixjQUFjLEVBQUVuQyxLQUFBLENBQUFHLENBQUMsQ0FDZGlCLE1BQU0sRUFBRSxDQUNSYixHQUFHLENBQUMsSUFBSSxFQUFFLG1EQUFtRCxDQUFDLENBQzlESSxRQUFRO0NBQ1osQ0FBQyxDQUFDZ0IsTUFBTSxFQUFFO0FBRVg7QUFBQTtBQUFBdEQsY0FBQSxHQUFBYyxDQUFBO0FBQ2E2QixPQUFBLENBQUFvQixtQkFBbUIsR0FBR3BDLEtBQUEsQ0FBQUcsQ0FBQyxDQUFDTSxNQUFNLENBQUM7RUFDMUM0QixXQUFXLEVBQUVyQyxLQUFBLENBQUFHLENBQUMsQ0FDWGlCLE1BQU0sRUFBRSxDQUNSa0IsSUFBSSxDQUFDLHNCQUFzQixDQUFDLENBQzVCM0IsUUFBUSxFQUFFO0VBQ2I0QixRQUFRLEVBQUV2QyxLQUFBLENBQUFHLENBQUMsQ0FDUmlCLE1BQU0sRUFBRSxDQUNSa0IsSUFBSSxDQUFDLG1CQUFtQixDQUFDLENBQ3pCM0IsUUFBUSxFQUFFO0VBQ2JPLE1BQU0sRUFBRWhCLFlBQVksQ0FBQ1MsUUFBUSxFQUFFO0VBQy9CNkIsU0FBUyxFQUFFdEMsWUFBWSxDQUFDUyxRQUFRLEVBQUU7RUFDbEM4QixTQUFTLEVBQUV2QyxZQUFZLENBQUNTLFFBQVEsRUFBRTtFQUNsQytCLE1BQU0sRUFBRTFDLEtBQUEsQ0FBQUcsQ0FBQyxDQUNONEIsSUFBSSxDQUFDLENBQUMsU0FBUyxFQUFFLFVBQVUsRUFBRSxVQUFVLEVBQUUsU0FBUyxFQUFFLFFBQVEsQ0FBQyxFQUFFO0lBQzlERSxrQkFBa0IsRUFBRTtHQUNyQixDQUFDLENBQ0R0QixRQUFRLEVBQUU7RUFDYlUsV0FBVyxFQUFFckIsS0FBQSxDQUFBRyxDQUFDLENBQ1htQixPQUFPLEVBQUUsQ0FDVFgsUUFBUSxFQUFFO0VBQ2JnQyxNQUFNLEVBQUUzQyxLQUFBLENBQUFHLENBQUMsQ0FDTjRCLElBQUksQ0FBQyxDQUFDLFFBQVEsRUFBRSxNQUFNLEVBQUUsU0FBUyxDQUFDLEVBQUU7SUFDbkNFLGtCQUFrQixFQUFFO0dBQ3JCLENBQUMsQ0FDRHRCLFFBQVEsRUFBRTtFQUNiaUMsU0FBUyxFQUFFNUMsS0FBQSxDQUFBRyxDQUFDLENBQ1Q0QixJQUFJLENBQUMsQ0FBQyxLQUFLLEVBQUUsTUFBTSxDQUFDLEVBQUU7SUFDckJFLGtCQUFrQixFQUFFO0dBQ3JCLENBQUMsQ0FDRHRCLFFBQVEsRUFBRTtFQUNia0MsS0FBSyxFQUFFN0MsS0FBQSxDQUFBRyxDQUFDLENBQ0xDLE1BQU0sRUFBRSxDQUNSQyxHQUFHLEVBQUUsQ0FDTEMsR0FBRyxDQUFDLENBQUMsRUFBRSwwQkFBMEIsQ0FBQyxDQUNsQ0MsR0FBRyxDQUFDLEdBQUcsRUFBRSx5QkFBeUIsQ0FBQyxDQUNuQ0ksUUFBUSxFQUFFO0VBQ2JtQyxNQUFNLEVBQUU5QyxLQUFBLENBQUFHLENBQUMsQ0FDTkMsTUFBTSxFQUFFLENBQ1JDLEdBQUcsRUFBRSxDQUNMQyxHQUFHLENBQUMsQ0FBQyxFQUFFLDJCQUEyQixDQUFDLENBQ25DSyxRQUFRLEVBQUU7RUFDYm9DLGdCQUFnQixFQUFFL0MsS0FBQSxDQUFBRyxDQUFDLENBQ2hCbUIsT0FBTyxFQUFFLENBQ1RYLFFBQVEsRUFBRTtFQUNicUMsUUFBUSxFQUFFaEQsS0FBQSxDQUFBRyxDQUFDLENBQ1JpQixNQUFNLEVBQUUsQ0FDUjZCLEtBQUssQ0FBQyxxQkFBcUIsRUFBRSxtQ0FBbUMsQ0FBQyxDQUNqRXRDLFFBQVEsRUFBRTtFQUNidUMsTUFBTSxFQUFFbEQsS0FBQSxDQUFBRyxDQUFDLENBQ05pQixNQUFNLEVBQUUsQ0FDUjZCLEtBQUssQ0FBQyxxQkFBcUIsRUFBRSxtQ0FBbUMsQ0FBQyxDQUNqRXRDLFFBQVEsRUFBRTtFQUNiYSxJQUFJLEVBQUV4QixLQUFBLENBQUFHLENBQUMsQ0FDSnNCLEtBQUssQ0FBQ3pCLEtBQUEsQ0FBQUcsQ0FBQyxDQUFDaUIsTUFBTSxFQUFFLENBQUNiLEdBQUcsQ0FBQyxFQUFFLEVBQUUscUNBQXFDLENBQUMsQ0FBQyxDQUNoRUksUUFBUTtDQUNaLENBQUMsQ0FBQ2dCLE1BQU0sRUFBRTtBQUVYO0FBQUE7QUFBQXRELGNBQUEsR0FBQWMsQ0FBQTtBQUNhNkIsT0FBQSxDQUFBbUMsbUJBQW1CLEdBQUduRCxLQUFBLENBQUFHLENBQUMsQ0FBQ00sTUFBTSxDQUFDO0VBQzFDMkMsRUFBRSxFQUFFcEQsS0FBQSxDQUFBRyxDQUFDLENBQUNpQixNQUFNLEVBQUUsQ0FBQ2tCLElBQUksQ0FBQywwQkFBMEI7Q0FDL0MsQ0FBQztBQUFDO0FBQUFqRSxjQUFBLEdBQUFjLENBQUE7QUFFVTZCLE9BQUEsQ0FBQXFDLHNCQUFzQixHQUFHckQsS0FBQSxDQUFBRyxDQUFDLENBQUNNLE1BQU0sQ0FBQztFQUM3QzRCLFdBQVcsRUFBRXJDLEtBQUEsQ0FBQUcsQ0FBQyxDQUFDaUIsTUFBTSxFQUFFLENBQUNrQixJQUFJLENBQUMsNkJBQTZCO0NBQzNELENBQUM7QUFBQztBQUFBakUsY0FBQSxHQUFBYyxDQUFBO0FBRVU2QixPQUFBLENBQUFzQyxvQkFBb0IsR0FBR3RELEtBQUEsQ0FBQUcsQ0FBQyxDQUFDTSxNQUFNLENBQUM7RUFDM0M4QyxTQUFTLEVBQUV2RCxLQUFBLENBQUFHLENBQUMsQ0FBQ2lCLE1BQU0sRUFBRSxDQUFDa0IsSUFBSSxDQUFDLDJCQUEyQjtDQUN2RCxDQUFDO0FBRUY7QUFBQTtBQUFBakUsY0FBQSxHQUFBYyxDQUFBO0FBQ2E2QixPQUFBLENBQUF3QyxzQkFBc0IsR0FBR3hELEtBQUEsQ0FBQUcsQ0FBQyxDQUFDTSxNQUFNLENBQUM7RUFDN0NxQixNQUFNLEVBQUU5QixLQUFBLENBQUFHLENBQUMsQ0FDTjRCLElBQUksQ0FBQyxDQUFDLFNBQVMsRUFBRSxXQUFXLEVBQUUsUUFBUSxDQUFDLEVBQUU7SUFDeENDLGNBQWMsRUFBRSxvQkFBb0I7SUFDcENDLGtCQUFrQixFQUFFO0dBQ3JCO0NBQ0osQ0FBQyxDQUFDTixNQUFNLEVBQUU7QUFBQztBQUFBdEQsY0FBQSxHQUFBYyxDQUFBO0FBRUM2QixPQUFBLENBQUF5QyxxQkFBcUIsR0FBR3pELEtBQUEsQ0FBQUcsQ0FBQyxDQUFDTSxNQUFNLENBQUM7RUFDNUN5QixNQUFNLEVBQUVsQyxLQUFBLENBQUFHLENBQUMsQ0FDTjRCLElBQUksQ0FBQyxDQUFDLGVBQWUsRUFBRSxNQUFNLEVBQUUsTUFBTSxFQUFFLFlBQVksRUFBRSxPQUFPLENBQUMsRUFBRTtJQUM5REMsY0FBYyxFQUFFLDJCQUEyQjtJQUMzQ0Msa0JBQWtCLEVBQUU7R0FDckIsQ0FBQztFQUNKeUIsV0FBVyxFQUFFMUQsS0FBQSxDQUFBRyxDQUFDLENBQ1hpQixNQUFNLEVBQUUsQ0FDUmIsR0FBRyxDQUFDLElBQUksRUFBRSwrQ0FBK0MsQ0FBQyxDQUMxREksUUFBUTtDQUNaLENBQUMsQ0FBQ2dCLE1BQU0sRUFBRSIsImlnbm9yZUxpc3QiOltdfQ==

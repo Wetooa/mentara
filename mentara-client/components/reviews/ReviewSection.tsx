@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReviewCard from "./ReviewCard";
-import { useTherapistReviews, useTherapistReviewStats } from "@/hooks/useReviews";
+import { useTherapistReviews, useTherapistReviewStats } from "@/hooks/reviews/useReviews";
 // import { Review } from "@/types/review";
 
 interface ReviewSectionProps {

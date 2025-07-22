@@ -27,7 +27,7 @@ export function useLogin() {
       if (response.user.role === "client") {
         // Check if client has seen therapist recommendations (backend now returns this)
         const hasSeenRecommendations = response.user.client?.hasSeenTherapistRecommendations;
-        
+
         if (hasSeenRecommendations === false) {
           router.push("/client/welcome");
         } else {

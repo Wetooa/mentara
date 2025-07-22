@@ -29,9 +29,9 @@ import { SidebarContent } from "@/components/therapist-application/SidebarConten
 
 // Store and API
 import useTherapistForm from "@/store/therapistform";
-import { useIsMobile } from "@/hooks/useMobile";
-import { useAutoSave } from "@/hooks/useAutoSave";
-import { useSectionCompletion } from "@/hooks/useSectionCompletion";
+import { useIsMobile } from "@/hooks/utils/useMobile";
+import { useAutoSave } from "@/hooks/utils/useAutoSave";
+import { useSectionCompletion } from "@/hooks/user/useSectionCompletion";
 import { useApi } from "@/lib/api";
 import { toast } from "sonner";
 

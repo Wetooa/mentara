@@ -46,7 +46,7 @@ describe('TherapistProfileController', () => {
     assessmentTools: ['GAD-7', 'PHQ-9', 'PCL-5'],
     hourlyRate: 150.0,
     isActive: true,
-    isVerified: true,
+    emailVerified: true,
     availableForNewClients: true,
     maxClientsPerWeek: 20,
     preferredSessionLength: 60,
@@ -570,7 +570,7 @@ describe('TherapistProfileController', () => {
       const result = await controller.getTherapistProfile(TEST_USER_IDS.THERAPIST);
 
       expect(result.isActive).toBe(true);
-      expect(result.isVerified).toBe(true);
+      expect(result.emailVerified).toBe(true);
       expect(typeof result.hourlyRate).toBe('number');
       expect(typeof result.availableForNewClients).toBe('boolean');
       expect(typeof result.maxClientsPerWeek).toBe('number');

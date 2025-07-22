@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Loader2, AlertCircle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useTherapistMeetings } from "@/hooks/useTherapistDashboard";
+import { useTherapistMeetings } from "@/hooks/therapist/useTherapistDashboard";
 import { format, parseISO } from "date-fns";
 
 export default function MeetingsSection() {

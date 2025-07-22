@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Review } from "@/types/review";
-import { useMarkReviewHelpful } from "@/hooks/useReviews";
+import { useMarkReviewHelpful } from "@/hooks/reviews/useReviews";
 import { formatDistanceToNow } from "date-fns";
 
 interface ReviewCardProps {

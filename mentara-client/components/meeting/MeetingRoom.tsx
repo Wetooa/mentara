@@ -25,10 +25,10 @@ import {
   PhoneOff,
   MoreVertical,
 } from "lucide-react";
-import { useMeetingRoom } from "@/hooks/useMeetingRoom";
+import { useMeetingRoom } from "@/hooks/sessions/useMeetingRoom";
 import { WebRTCService } from "@/lib/webrtc/webrtc-service";
 import { MediaRecorderService } from "@/lib/webrtc/media-recorder-service";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "@/hooks/utils/useMediaQuery";
 import { toast } from "sonner";
 
 interface MeetingRoomProps {

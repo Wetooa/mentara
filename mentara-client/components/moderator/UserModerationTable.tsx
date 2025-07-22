@@ -59,7 +59,7 @@ import {
   History,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useFlaggedUsers, useModerateUser, useUserModerationHistory } from "@/hooks/useModerator";
+import { useFlaggedUsers, useModerateUser, useUserModerationHistory } from "@/hooks/moderator/useModerator";
 import type { User as UserType, UserModerationParams } from "@/types/api";
 
 interface UserModerationTableProps {

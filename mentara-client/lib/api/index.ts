@@ -4,71 +4,64 @@
  */
 
 import { apiClient, createApiClient } from "./client";
-import { createAuthService, type AuthService } from "./auth";
 import {
-  createDashboardService,
-  type DashboardService,
-} from "./services/dashboard";
-import {
-  createTherapistService,
-  type TherapistService,
-} from "./services/therapists";
-import {
-  createCommunityService,
-  type CommunityService,
-} from "./services/communities";
-import {
-  createMeetingsService,
-  type MeetingsService,
-} from "./services/meetings";
+  createAdminService,
+  type AdminService,
+} from "./services/admin";
+import { createAuthService, type AuthService } from "./services/auth";
 import {
   createBookingService,
   type BookingService,
 } from "./services/booking";
 import {
-  createNotificationService,
-  type NotificationService,
-} from "./services/notifications";
+  createCommunityService,
+  type CommunityService,
+} from "./services/communities";
 import {
-  createSearchService,
-  type SearchService,
-} from "./services/search";
-import {
-  createMessagingService,
-  type MessagingService,
-} from "./services/messaging";
+  createDashboardService,
+  type DashboardService,
+} from "./services/dashboard";
 import {
   createFilesService,
   type FilesService,
 } from "./services/files";
 import {
-  createAdminService,
-  type AdminService,
-} from "./services/admin";
+  createMeetingsService,
+  type MeetingsService,
+} from "./services/meetings";
+import {
+  createMessagingService,
+  type MessagingService,
+} from "./services/messaging";
+import {
+  createNotificationService,
+  type NotificationService,
+} from "./services/notifications";
+import {
+  createPreAssessmentService,
+  type PreAssessmentService,
+} from "./services/pre-assessment";
 import {
   createProfileService,
   type PublicProfileResponse,
   type UpdateProfileRequest,
   type UpdateProfileResponse,
 } from "./services/profile";
-export type { ApiResponse, ApiError } from "./types";
+import {
+  createSearchService,
+  type SearchService,
+} from "./services/search";
+import {
+  createTherapistService,
+  type TherapistService,
+} from "./services/therapists";
+export type { ApiError, ApiResponse } from "@/types/api";
 
 // Export client utilities
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAuthService, type AuthService };
-export { createDashboardService, type DashboardService };
-export { createTherapistService, type TherapistService };
-export { createCommunityService, type CommunityService };
-export { createMeetingsService, type MeetingsService };
-export { createBookingService, type BookingService };
-export { createNotificationService, type NotificationService };
-export { createSearchService, type SearchService };
-export { createMessagingService, type MessagingService };
-export { createFilesService, type FilesService };
-export { createAdminService, type AdminService };
-export { createProfileService, type PublicProfileResponse, type UpdateProfileRequest, type UpdateProfileResponse };
+export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createPreAssessmentService, createProfileService, createSearchService, createTherapistService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PreAssessmentService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -83,6 +76,7 @@ const messagingService = createMessagingService(apiClient);
 const filesService = createFilesService(apiClient);
 const adminService = createAdminService(apiClient);
 const profileService = createProfileService(apiClient);
+const preAssessmentService = createPreAssessmentService(apiClient);
 
 // Create and export the main API instance with backwards compatible structure
 export const api = {
@@ -99,12 +93,7 @@ export const api = {
   files: filesService,
   admin: adminService,
   profile: profileService,
-
-  // Backwards compatible structure for existing hooks
-  clientAuth: authService.client,
-  adminAuth: authService.admin,
-  moderatorAuth: authService.moderator,
-  therapistAuth: authService.therapist,
+  preAssessment: preAssessmentService,
 };
 
 // Export the main API type
@@ -115,26 +104,9 @@ export function useApi() {
   return api;
 }
 
-// For backwards compatibility with hooks that might expect this pattern
-export function createAuthServiceInstance() {
-  return createAuthService(apiClient);
-}
-
-// Re-export commonly used types from local type definitions
+// Re-export commonly used types from centralized type definitions
 export type {
-  LoginDto,
-  RegisterClientDto,
-  RegisterAdminDto,
-  RegisterModeratorDto,
-  VerifyOtpDto,
-  SendOtpDto,
-  ResendOtpDto,
-  ClientAuthResponse,
-  AdminAuthResponse,
-  TherapistAuthResponse,
-  EmailResponse,
-  SuccessMessageResponse,
-  ClientUser,
-  ApiResponse,
-  ApiError,
-} from "./types";
+  AdminAuthResponse, ClientAuthResponse, ClientUser, EmailResponse, LoginDto, RegisterAdminDto, RegisterClientDto, RegisterModeratorDto, ResendOtpDto, SendOtpDto, SuccessMessageResponse, TherapistAuthResponse, VerifyOtpDto
+} from "@/types/auth";
+
+export type { ApiError, ApiResponse } from "@/types/api";

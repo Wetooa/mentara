@@ -1,7 +1,6 @@
-import { io, Socket } from "socket.io-client";
+import { getMessagingSocket, connectMessagingSocket, isMessagingConnected, disconnectSocket } from "./socket";
+import { Socket } from "socket.io-client";
 import { Message } from "@/components/messages/types";
-
-const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5000";
 
 export interface MessagingWebSocketEvents {
   // Connection events
@@ -69,36 +68,36 @@ export class MessagingWebSocketService {
     this.connect();
   }
 
-  // Connect to WebSocket server (simplified without authentication)
+  // Connect to WebSocket server using centralized socket configuration
   async connect(): Promise<void> {
     if (this.socket?.connected) {
-      console.log("WebSocket already connected");
+      console.log("Messaging WebSocket already connected");
       return;
     }
 
-    console.log(
-      "Connecting to WebSocket without authentication (demo mode)..."
-    );
-
-    this.socket = io(`${WEBSOCKET_URL}/messaging`, {
-      // Remove auth requirement for demo to prevent connection loops
-      transports: ["websocket"],
-      upgrade: true,
-      rememberUpgrade: true,
-      timeout: 10000, // 10 second timeout
-      autoConnect: true,
-    });
-
-    this.setupEventListeners();
+    try {
+      console.log("Connecting to messaging WebSocket...");
+      
+      // Use centralized socket configuration
+      this.socket = getMessagingSocket();
+      this.setupEventListeners();
+      
+      // Connect the socket
+      await connectMessagingSocket();
+      
+      console.log("✅ Messaging WebSocket connected successfully");
+    } catch (error) {
+      console.error("❌ Failed to connect messaging WebSocket:", error);
+      throw error;
+    }
   }
 
   // Disconnect from WebSocket server
   disconnect(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-      this.isConnected = false;
-    }
+    console.log("🔌 Disconnecting messaging WebSocket");
+    disconnectSocket('/messaging');
+    this.socket = null;
+    this.isConnected = false;
   }
 
   // Setup internal event listeners
@@ -282,7 +281,7 @@ export class MessagingWebSocketService {
 
   // Utility methods
   isSocketConnected(): boolean {
-    return this.isConnected && !!this.socket?.connected;
+    return isMessagingConnected();
   }
 
   // Simplified token methods for demo (authentication disabled)

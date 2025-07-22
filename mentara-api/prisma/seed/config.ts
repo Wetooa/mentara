@@ -212,6 +212,63 @@ export const SEED_CONFIG = {
     ADMIN_ACTION_RATE: 0.3, // 30% of logs are admin actions
   },
 };
+// Configuration constants - SIMPLE DEV SEEDING (reduced counts)
+export const SIMPLE_SEED_CONFIG = {
+  USERS: {
+    CLIENTS: 3, // Minimal clients for development
+    THERAPISTS: 3, // Minimal therapists for development  
+    ADMINS: 1, // Single admin for development
+    MODERATORS: 2, // Minimal moderators for development
+  },
+  COMMUNITIES: {
+    ADDITIONAL: 0, // No additional communities
+    POSTS_PER_COMMUNITY: 1, // Single post per community for testing
+    COMMENTS_PER_POST: 1, // Single comment per post for testing
+  },
+  RELATIONSHIPS: {
+    CLIENT_THERAPIST_RATIO: 0.5, // 50% of clients get assigned to therapists
+    MEETINGS_PER_RELATIONSHIP: 1, // Single meeting per relationship
+  },
+  ASSESSMENTS: {
+    COMPLETION_RATE: 0.5, // 50% of clients complete pre-assessments
+  },
+  MESSAGING: {
+    CONVERSATIONS_PER_RELATIONSHIP: 1, // Single conversation
+    MESSAGES_PER_CONVERSATION: 1, // Single message for testing
+    GROUP_CONVERSATIONS: 0, // No group conversations
+    SUPPORT_CONVERSATIONS: 0, // No support conversations
+  },
+  WORKSHEETS: {
+    TEMPLATES: 2, // Minimal worksheet templates
+    SUBMISSIONS_PER_RELATIONSHIP: 1, // Single submission
+    COMPLETION_RATE: 0.5, // 50% completion rate
+  },
+  REVIEWS: {
+    REVIEW_RATE: 0.3, // 30% of relationships get reviews
+    AVERAGE_RATING: 4.0, // Simple average rating
+    DETAILED_REVIEW_RATE: 0.5, // 50% of reviews include written feedback
+  },
+  SESSIONS: {
+    SESSIONS_PER_RELATIONSHIP: 1, // Single session per relationship
+    ACTIVITIES_PER_SESSION: 1, // Single activity per session
+    PROGRESS_TRACKING_RATE: 0.3, // Minimal progress tracking
+  },
+  NOTIFICATIONS: {
+    DEVICES_PER_USER: 1.0, // Single device per user
+    NOTIFICATIONS_PER_USER: 1, // Single notification per user
+    READ_RATE: 0.5, // 50% of notifications are read
+  },
+  THERAPIST_REQUESTS: {
+    REQUEST_RATE: 0.2, // 20% of clients make therapist requests
+    PENDING_RATE: 0.1, // 10% of requests are still pending
+    PRIORITY_DISTRIBUTION: { high: 0.1, medium: 0.5, low: 0.4 },
+  },
+  AUDIT_LOGS: {
+    COUNT: 2, // Minimal audit logs
+    SUCCESS_RATE: 0.9, // 90% of actions are successful
+    ADMIN_ACTION_RATE: 0.2, // 20% of logs are admin actions
+  },
+};
 
 // Illness communities configuration - Based on questionnaire disorders
 // These match the exact disorders from @mentara-commons/src/constants/questionnaire/questionnaire-mapping.ts

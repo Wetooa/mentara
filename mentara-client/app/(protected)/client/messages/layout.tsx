@@ -4,7 +4,7 @@
 import React from "react";
 import MessageSidebar from "@/components/messages/MessageSidebar";
 import { MessageChatArea } from "@/components/messages/MessageChatArea";
-import { useMessaging } from "@/hooks/useMessaging";
+import { useMessaging } from "@/hooks/sessions/useMessaging";
 import { MessageAttachment } from "@/types/api/messaging";
 import { Conversation } from "@/components/messages/types";
 

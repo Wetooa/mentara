@@ -1,7 +1,7 @@
 import {
   type ListOfQuestionnaires,
   QUESTIONNAIRE_MAP,
-} from "@/constants/questionnaires";
+} from "@/constants/questionnaire/questionnaire-mapping";
 
 export function answersToAnswerMatrix(
   questionnaires: ListOfQuestionnaires[],
@@ -14,6 +14,7 @@ export function answersToAnswerMatrix(
     Stress: 174, // PSS
     Anxiety: 69, // GAD7
     Depression: 165, // PHQ9
+    "Drug Abuse": 24, // DAST
     Insomnia: 76, // ISI
     Panic: 158, // PDSS
     "Bipolar disorder (BD)": 105, // MDQ

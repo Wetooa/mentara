@@ -23,7 +23,7 @@ describe('PostsService', () => {
     avatarUrl: 'https://example.com/avatar.jpg',
     role: 'client',
     isActive: true,
-    isVerified: true,
+    emailVerified: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     stripeCustomerId: null,
