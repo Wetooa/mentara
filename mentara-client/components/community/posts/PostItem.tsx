@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -116,6 +117,7 @@ export function PostItem({
 }: PostItemProps) {
   const api = useApi();
   const queryClient = useQueryClient();
+  const { userRole } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const voteScore = post.votes.upvotes - post.votes.downvotes;
@@ -155,7 +157,7 @@ export function PostItem({
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/communities/${post.community.id}/posts/${post.id}`;
+    const url = `${window.location.origin}/${userRole}/community/${post.community.id}/posts/${post.id}`;
     
     if (navigator.share) {
       try {

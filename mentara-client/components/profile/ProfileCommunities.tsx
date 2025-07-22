@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 import { Users, ExternalLink } from 'lucide-react';
 import { PublicProfileResponse } from '@/lib/api/services/profile';
 import Link from 'next/link';
@@ -14,6 +15,7 @@ interface ProfileCommunitiesProps {
 }
 
 export function ProfileCommunities({ mutualCommunities, stats }: ProfileCommunitiesProps) {
+  const { userRole } = useAuth();
   const hasSharedCommunities = mutualCommunities.length > 0;
 
   return (
@@ -49,7 +51,7 @@ export function ProfileCommunities({ mutualCommunities, stats }: ProfileCommunit
             
             <div className="space-y-2">
               {mutualCommunities.map((community) => (
-                <CommunityItem key={community.id} community={community} />
+                <CommunityItem key={community.id} community={community} userRole={userRole} />
               ))}
             </div>
           </div>
@@ -71,7 +73,7 @@ export function ProfileCommunities({ mutualCommunities, stats }: ProfileCommunit
             className="w-full mt-3"
             asChild
           >
-            <Link href="/communities">
+            <Link href={`/${userRole}/community`}>
               <ExternalLink className="w-4 h-4 mr-2" />
               Explore All Communities
             </Link>
@@ -83,9 +85,11 @@ export function ProfileCommunities({ mutualCommunities, stats }: ProfileCommunit
 }
 
 function CommunityItem({ 
-  community 
+  community,
+  userRole 
 }: { 
-  community: PublicProfileResponse['mutualCommunities'][0] 
+  community: PublicProfileResponse['mutualCommunities'][0];
+  userRole: string | null;
 }) {
   // Generate initials from community name
   const initials = community.name
@@ -95,7 +99,7 @@ function CommunityItem({
     .join('');
 
   return (
-    <Link href={`/communities/${community.slug}`}>
+    <Link href={`/${userRole}/community/${community.slug}`}>
       <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group">
         <Avatar className="w-8 h-8">
           <AvatarImage src={community.imageUrl} alt={community.name} />

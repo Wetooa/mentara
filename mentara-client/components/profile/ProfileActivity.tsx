@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 import { PublicProfileResponse } from '@/lib/api/services/profile';
 import { format, parseISO } from 'date-fns';
 import {
@@ -18,6 +19,7 @@ interface ProfileActivityProps {
 }
 
 export function ProfileActivity({ recentActivity, stats }: ProfileActivityProps) {
+  const { userRole } = useAuth();
   const hasActivity = recentActivity.length > 0;
 
   return (
@@ -99,7 +101,7 @@ function ActivityItem({
               {isPost ? 'Posted in' : 'Commented in'}
             </span>
             <Link
-              href={`/communities/${activity.community.slug}`}
+              href={`/${userRole}/community/${activity.community.slug}`}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               {activity.community.name}
