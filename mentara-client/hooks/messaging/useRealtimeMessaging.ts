@@ -175,13 +175,15 @@ export function useRealtimeMessaging(
     onMutate: async ({ conversationId, messageData }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: queryKeys.messaging.messages(conversationId),
+        queryKey: ["messaging", "messages", conversationId],
       });
 
       // Snapshot the previous value
-      const previousMessages = queryClient.getQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId)
-      );
+      const previousMessages = queryClient.getQueryData<MessagingMessage[]>([
+        "messaging",
+        "messages",
+        conversationId,
+      ]);
 
       // Optimistically update with temporary message
       const tempMessage: MessagingMessage = {
@@ -202,7 +204,7 @@ export function useRealtimeMessaging(
       };
 
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId),
+        ["messaging", "messages", conversationId],
         (old) => (old ? [...old, tempMessage] : [tempMessage])
       );
 
@@ -213,7 +215,7 @@ export function useRealtimeMessaging(
       // Rollback on error
       if (context) {
         queryClient.setQueryData(
-          queryKeys.messaging.messages(context.conversationId),
+          ["messaging", "messages", context.conversationId],
           context.previousMessages
         );
       }
@@ -222,7 +224,7 @@ export function useRealtimeMessaging(
     onSuccess: (newMessage, { conversationId }) => {
       // Replace temp message with real message
       queryClient.setQueryData<MessagingMessage[]>(
-        queryKeys.messaging.messages(conversationId),
+        ["messaging", "messages", conversationId],
         (old) => {
           if (!old) return [newMessage];
           // Replace the last message (temp message) with the real one
@@ -795,7 +797,7 @@ export function useRealtimeMessaging(
       }),
     blockUser: (userId: string, reason?: string) =>
       api.messaging.blockUser({ userId, reason }),
-    createConversation: (participantUserIds: string[]) =>
-      api.messaging.createConversation({ participantUserIds }),
+    createConversation: (participantIds: string[]) =>
+      api.messaging.createConversation({ participantIds }),
   };
 }
