@@ -5,12 +5,17 @@ import { PrismaClient } from '@prisma/client';
 import { TEST_ACCOUNTS, SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
-export async function seedUsers(prisma: PrismaClient) {
-  console.log('👥 Creating users...');
+export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehensive' = 'comprehensive') {
+  console.log(`👥 Creating users (${mode} mode)...`);
 
   const users: any[] = [];
   const clients: any[] = [];
   const therapists: any[] = [];
+
+  // Simple mode: Create minimal development users
+  if (mode === 'simple') {
+    return await createSimpleUsers(prisma);
+  }
 
   // Create test accounts first with defined IDs for testing
   console.log('🧪 Creating test accounts...');
@@ -162,5 +167,144 @@ export async function seedUsers(prisma: PrismaClient) {
   const moderators = users.filter(user => user.role === 'moderator');
   const admins = users.filter(user => user.role === 'admin');
   
+  return { users, clients, therapists, moderators, admins };
+}
+
+// Simple user creation for development
+async function createSimpleUsers(prisma: PrismaClient) {
+  const users: any[] = [];
+  const clients: any[] = [];
+  const therapists: any[] = [];
+  const admins: any[] = [];
+  const moderators: any[] = [];
+
+  // Create 3 Clients
+  for (let i = 1; i <= SEED_CONFIG.USERS.CLIENTS; i++) {
+    const clientUser = await prisma.user.create({
+      data: {
+        id: `dev_client_${i}`,
+        email: `client${i}@mentaratest.dev`,
+        firstName: `Client`,
+        lastName: `${i}`,
+        role: 'client',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    
+    await prisma.client.create({
+      data: {
+        userId: clientUser.id,
+        hasSeenTherapistRecommendations: false,
+      },
+    });
+    
+    users.push(clientUser);
+    clients.push(clientUser);
+  }
+
+  // Create 3 Therapists
+  for (let i = 1; i <= SEED_CONFIG.USERS.THERAPISTS; i++) {
+    const therapistUser = await prisma.user.create({
+      data: {
+        id: `dev_therapist_${i}`,
+        email: `therapist${i}@mentaratest.dev`,
+        firstName: `Dr. Therapist`,
+        lastName: `${i}`,
+        role: 'therapist',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    
+    await prisma.therapist.create({
+      data: {
+        userId: therapistUser.id,
+        mobile: `+1555000${i}${i}${i}${i}`,
+        province: 'Test Province',
+        timezone: 'UTC',
+        status: 'APPROVED',
+        providerType: 'Licensed Psychologist',
+        professionalLicenseType: 'Clinical Psychology',
+        isPRCLicensed: 'Yes',
+        prcLicenseNumber: `PRC${i}${i}${i}${i}${i}`,
+        expirationDateOfLicense: new Date('2025-12-31'),
+        practiceStartDate: new Date('2020-01-01'),
+        providedOnlineTherapyBefore: true,
+        comfortableUsingVideoConferencing: true,
+        preferredSessionLength: [60],
+        compliesWithDataPrivacyAct: true,
+        willingToAbideByPlatformGuidelines: true,
+        sessionLength: '60 minutes',
+        hourlyRate: 100.00,
+        expertise: ['General Therapy'],
+        approaches: ['CBT'],
+        languages: ['English'],
+        illnessSpecializations: ['Anxiety', 'Depression'],
+        acceptTypes: ['Individual'],
+        treatmentSuccessRates: {},
+      },
+    });
+    
+    users.push(therapistUser);
+    therapists.push(therapistUser);
+  }
+
+  // Create 3 Admins
+  for (let i = 1; i <= SEED_CONFIG.USERS.ADMINS; i++) {
+    const adminUser = await prisma.user.create({
+      data: {
+        id: `dev_admin_${i}`,
+        email: `admin${i}@mentaratest.dev`,
+        firstName: `Admin`,
+        lastName: `${i}`,
+        role: 'admin',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    
+    await prisma.admin.create({
+      data: {
+        userId: adminUser.id,
+        permissions: ['user_management', 'therapist_approval', 'system_admin'],
+        adminLevel: 'admin',
+      },
+    });
+    
+    users.push(adminUser);
+    admins.push(adminUser);
+  }
+
+  // Create 3 Moderators
+  for (let i = 1; i <= SEED_CONFIG.USERS.MODERATORS; i++) {
+    const moderatorUser = await prisma.user.create({
+      data: {
+        id: `dev_moderator_${i}`,
+        email: `moderator${i}@mentaratest.dev`,
+        firstName: `Moderator`,
+        lastName: `${i}`,
+        role: 'moderator',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    
+    await prisma.moderator.create({
+      data: {
+        userId: moderatorUser.id,
+        permissions: ['content_moderation', 'community_management'],
+        assignedCommunities: {},
+      },
+    });
+    
+    users.push(moderatorUser);
+    moderators.push(moderatorUser);
+  }
+
   return { users, clients, therapists, moderators, admins };
 }

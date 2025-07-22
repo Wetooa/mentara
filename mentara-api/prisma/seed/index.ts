@@ -28,7 +28,7 @@ async function main() {
   try {
     // Phase 1: Users
     console.log('\n📍 PHASE 1: Creating Users');
-    const { users, clients, therapists, moderators, admins } = await seedUsers(prisma);
+    const { users, clients, therapists, moderators, admins } = await seedUsers(prisma, 'comprehensive');
 
     // Phase 2: Communities
     console.log('\n📍 PHASE 2: Creating Communities');
