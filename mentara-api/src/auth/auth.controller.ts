@@ -6,48 +6,42 @@ import {
   HttpStatus,
   Post,
   Query,
-  UseGuards,
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { CurrentUserId } from './decorators/current-user-id.decorator';
 import { Public } from './decorators/public.decorator';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 // Import types from local auth types
-import type {
-  LoginDto,
-  RegisterUserDto,
-  RequestPasswordResetDto,
-  ResetPasswordDto,
-  VerifyEmailDto,
-  ResendVerificationEmailDto,
-  AuthResponse,
-  UserResponse,
-} from './types';
 import type { SuccessResponse } from '../types/global';
+import type {
+  AuthResponse,
+  LoginDto,
+  RequestPasswordResetDto,
+  ResendVerificationEmailDto,
+  ResetPasswordDto,
+  UserResponse,
+  VerifyEmailDto,
+} from './types';
 
 // Import validation schemas from local validation
-import {
-  LoginDtoSchema,
-  RegisterUserDtoSchema,
-  RequestPasswordResetDtoSchema,
-  ResetPasswordDtoSchema,
-  VerifyEmailDtoSchema,
-  ResendVerificationEmailDtoSchema,
-} from './validation';
+import { Request } from 'express';
+import { SuccessMessageDto } from '../common/dto';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './services/email-verification.service';
 import { PasswordResetService } from './services/password-reset.service';
-import { Request } from 'express';
 import {
-  AuthResponseDto,
-  UserResponseDto,
-  SuccessMessageDto,
-} from '../common/dto';
+  LoginDtoSchema,
+  RequestPasswordResetDtoSchema,
+  ResendVerificationEmailDtoSchema,
+  ResetPasswordDtoSchema,
+  VerifyEmailDtoSchema,
+} from './validation';
 
 @Controller('auth')
 export class AuthController {
@@ -67,7 +61,7 @@ export class AuthController {
   @Get('me')
   async getMe(@CurrentUserId() id: string): Promise<UserResponse> {
     const user = await this.authService.getUser(id);
-    return { 
+    return {
       user: {
         id: user.id,
         email: user.email,
@@ -78,7 +72,7 @@ export class AuthController {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         client: user.client || undefined,
-      }
+      },
     };
   }
 
@@ -86,7 +80,7 @@ export class AuthController {
   @Get('users')
   async getAllUsers(): Promise<UserResponse[]> {
     const users = await this.authService.getUsers();
-    return users.map(user => ({
+    return users.map((user) => ({
       user: {
         id: user.id,
         email: user.email,
@@ -97,7 +91,7 @@ export class AuthController {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         client: user.client || undefined,
-      }
+      },
     }));
   }
 
@@ -105,9 +99,7 @@ export class AuthController {
   @Throttle({ default: { limit: 20, ttl: 300000 } }) // 20 logout attempts per 5 minutes
   @Post('force-logout')
   @HttpCode(HttpStatus.OK)
-  async forceLogout(
-    @CurrentUserId() id: string,
-  ): Promise<SuccessResponse> {
+  async forceLogout(@CurrentUserId() id: string): Promise<SuccessResponse> {
     await this.authService.forceLogout(id);
     return new SuccessMessageDto('Successfully logged out from all devices');
   }
@@ -151,9 +143,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @CurrentUserId() userId: string,
-  ): Promise<SuccessResponse> {
+  async logout(@CurrentUserId() userId: string): Promise<SuccessResponse> {
     await this.authService.logout(userId);
     return new SuccessMessageDto('Logged out successfully');
   }
@@ -165,7 +155,7 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    return { 
+    return {
       user: {
         id: user.id,
         email: user.email,
@@ -176,7 +166,7 @@ export class AuthController {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         client: user.client || undefined,
-      }
+      },
     };
   }
 

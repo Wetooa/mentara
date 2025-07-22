@@ -19,8 +19,9 @@ import {
 } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { TherapistAvailabilityCalendar } from "@/components/therapist/TherapistAvailabilityCalendar";
-import { useBooking, useMeetings } from "@/hooks/useBooking";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
+import { MeetingCalendar } from "@/components/calendar/MeetingCalendar";
+import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
+import { useAvailableSlots } from "@/hooks/booking/useAvailableSlots";
 import { MeetingStatus } from "@/types/booking";
 import { toast } from "sonner";
 
@@ -29,7 +30,7 @@ export default function TherapistSchedulePage() {
   const [activeTab, setActiveTab] = useState("schedule");
 
   // Format date for API
-  const dateString = selectedDate.toISOString().split('T')[0];
+  const dateString = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
 
   // Get meetings for the selected date
   const { meetings, isLoading: meetingsLoading } = useMeetings({
@@ -294,16 +295,17 @@ export default function TherapistSchedulePage() {
 
         {/* Calendar View Tab */}
         <TabsContent value="calendar" className="space-y-6">
-          <Card>
-            <CardContent className="p-8">
-              <div className="text-center text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                <h3 className="text-lg font-medium mb-2">Calendar View</h3>
-                <p>Full calendar view will be implemented here</p>
-                <p className="text-sm">This would show a monthly/weekly calendar with all appointments</p>
-              </div>
-            </CardContent>
-          </Card>
+          <MeetingCalendar
+            title="Schedule Calendar"
+            showHeader={true}
+            showStats={true}
+            hoverDelay={3000}
+            onDateSelect={(date) => {
+              setSelectedDate(date);
+              setActiveTab("schedule");
+            }}
+            className="max-w-6xl mx-auto"
+          />
         </TabsContent>
 
         {/* All Upcoming Tab */}

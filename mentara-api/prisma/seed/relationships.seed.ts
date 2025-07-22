@@ -3,18 +3,20 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG } from './config';
+import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
 
 export async function seedClientTherapistRelationships(
   prisma: PrismaClient,
   clients: any[],
   therapists: any[],
+  mode: 'simple' | 'comprehensive' = 'comprehensive'
 ) {
   console.log('🤝 Creating client-therapist relationships...');
 
+  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
   const relationships: any[] = [];
   const assignmentCount = Math.floor(
-    clients.length * SEED_CONFIG.RELATIONSHIPS.CLIENT_THERAPIST_RATIO,
+    clients.length * config.RELATIONSHIPS.CLIENT_THERAPIST_RATIO,
   );
   const clientsToAssign = faker.helpers.arrayElements(clients, assignmentCount);
 
@@ -38,16 +40,18 @@ export async function seedClientTherapistRelationships(
 
 export async function seedMeetings(
   prisma: PrismaClient,
-  relationships: any[]
+  relationships: any[],
+  mode: 'simple' | 'comprehensive' = 'comprehensive'
 ) {
   console.log('📅 Creating meetings...');
 
+  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
   const meetings: any[] = [];
 
   for (const { relationship, client, therapist } of relationships) {
     const meetingCount = faker.number.int({
       min: 1,
-      max: SEED_CONFIG.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP,
+      max: config.RELATIONSHIPS.MEETINGS_PER_RELATIONSHIP,
     });
 
     for (let i = 0; i < meetingCount; i++) {
@@ -85,6 +89,55 @@ export async function seedMeetings(
   }
 
   return meetings;
+}
+
+export async function seedMeetingNotes(
+  prisma: PrismaClient,
+  meetings: any[]
+) {
+  console.log('📝 Creating meeting notes for therapy sessions...');
+
+  const meetingNotes: any[] = [];
+
+  // Create notes for completed meetings (about 80% have notes)
+  const completedMeetings = meetings.filter(meeting => meeting.status === 'COMPLETED');
+  const notesCount = Math.floor(completedMeetings.length * 0.8);
+  const meetingsWithNotes = faker.helpers.arrayElements(completedMeetings, notesCount);
+
+  const noteTemplates = [
+    "Client presented with increased anxiety this week. Discussed coping strategies including deep breathing exercises and mindfulness techniques. Homework assigned: practice daily mindfulness for 10 minutes.",
+    "Significant progress noted in mood regulation. Client reported using CBT techniques successfully during a challenging work situation. Continue current treatment plan with focus on thought challenging.",
+    "Session focused on trauma processing using EMDR techniques. Client showed good tolerance and engagement. Plan to continue trauma work in next session with additional grounding exercises.",
+    "Client expressed concerns about medication side effects. Discussed with prescribing psychiatrist. Mood tracking shows improvement over past 2 weeks. Continue current therapeutic approach.",
+    "Family dynamics discussion revealed additional stressors. Introduced boundary-setting techniques and communication skills. Client motivated to practice assertiveness in family interactions.",
+    "Crisis intervention session. Client experiencing acute anxiety related to work deadlines. Developed safety plan and coping strategies. Follow-up scheduled within 48 hours.",
+    "Couples therapy session addressing communication patterns. Both partners engaged well with conflict resolution exercises. Homework: practice active listening techniques daily.",
+    "Group therapy dynamics positive. Client participating more actively and providing peer support. Continue encouraging social skill development and community engagement.",
+    "Substance use recovery focus. Client maintained sobriety for 2 weeks. Discussed triggers and relapse prevention strategies. Connected with sponsor and AA meetings.",
+    "Sleep hygiene improvements noted. Client following sleep schedule consistently. Anxiety levels decreased. Continue behavioral interventions for insomnia management."
+  ];
+
+  for (const meeting of meetingsWithNotes) {
+    try {
+      const notes = await prisma.meetingNotes.create({
+        data: {
+          id: `meeting_notes_${meeting.id}_${Date.now()}`,
+          meetingId: meeting.id,
+          notes: faker.helpers.arrayElement(noteTemplates),
+          createdAt: faker.date.between({
+            from: meeting.startTime,
+            to: new Date(meeting.startTime.getTime() + 24 * 60 * 60 * 1000) // Within 24 hours after meeting
+          }),
+        },
+      });
+      meetingNotes.push(notes);
+    } catch (error) {
+      // Skip if notes already exist
+    }
+  }
+
+  console.log(`✅ Created ${meetingNotes.length} meeting notes`);
+  return meetingNotes;
 }
 
 export async function seedTherapistAvailability(

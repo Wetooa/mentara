@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,45 +29,15 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import { useApi } from "@/lib/api";
 import { TherapistCardData } from "@/types/therapist";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useSubscriptionStatus } from "@/hooks/billing";
-import { toast } from "sonner";
-
-// Local type definitions
-interface AvailableSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-  availableDurations: MeetingDuration[];
-}
-
-interface MeetingDuration {
-  id: string;
-  name: string;
-  duration: number;
-}
-
-enum MeetingType {
-  VIDEO = "video",
-}
-
-interface CreateMeetingRequest {
-  therapistId: string;
-  startTime: string;
-  duration: number;
-  title?: string;
-  description?: string;
-  meetingType: MeetingType;
-}
+import { useBookingModal } from "@/hooks/booking/useBookingModal";
 
 interface BookingModalProps {
   therapist: TherapistCardData | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (meeting: CreateMeetingRequest) => void;
+  onSuccess?: (meeting: any) => void;
 }
 
 export default function BookingModal({
@@ -76,121 +46,46 @@ export default function BookingModal({
   onClose,
   onSuccess,
 }: BookingModalProps) {
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
-  const [selectedDuration, setSelectedDuration] =
-    useState<MeetingDuration | null>(null);
-  const [meetingType, setMeetingType] = useState<MeetingType>(
-    MeetingType.VIDEO
-  );
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-
-  const api = useApi();
-  const queryClient = useQueryClient();
-  
-  // Payment verification
   const {
+    // State
+    selectedDate,
+    setSelectedDate,
+    selectedSlot,
+    setSelectedSlot,
+    selectedDuration,
+    setSelectedDuration,
+    meetingType,
+    setMeetingType,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    
+    // Data
+    availableSlots,
+    
+    // Loading states
+    slotsLoading,
+    slotsError,
+    subscriptionLoading,
+    
+    // Payment status
     isActive,
     isTrial,
     isPastDue,
     hasPaymentIssue,
     needsPaymentMethod,
-    isLoading: subscriptionLoading
-  } = useSubscriptionStatus();
-
-  // Reset form when modal opens/closes
-  useEffect(() => {
-    if (isOpen && therapist) {
-      setSelectedDate(undefined);
-      setSelectedSlot(null);
-      setSelectedDuration(null);
-      setMeetingType(MeetingType.VIDEO);
-      setTitle(`Session with ${therapist.name}`);
-      setDescription("");
-    }
-  }, [isOpen, therapist]);
-
-  // Get available durations
-  // const { data: durations = [] } = useQuery({
-  //   queryKey: ["meeting-durations"],
-  //   queryFn: () => api.booking.durations.getAll(),
-  //   enabled: isOpen,
-  // });
-
-  // Get available slots for selected date
-  const {
-    data: availableSlots = [],
-    isLoading: slotsLoading,
-    error: slotsError,
-  } = useQuery({
-    queryKey: ["available-slots", therapist?.id, selectedDate?.toISOString()],
-    queryFn: () => {
-      if (!therapist || !selectedDate) return [];
-      return api.booking.availability.getSlots(
-        therapist.id,
-        selectedDate.toISOString().split("T")[0]
-      );
-    },
-    enabled: !!(therapist && selectedDate),
-  });
-
-  // Create meeting mutation
-  const createMeetingMutation = useMutation({
-    mutationFn: (meetingData: CreateMeetingRequest) => {
-      return api.booking.meetings.create(meetingData);
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["available-slots"] });
-      onSuccess?.(data);
-      onClose();
-    },
-  });
-
-  const handleBooking = () => {
-    if (!therapist || !selectedSlot || !selectedDuration || !selectedDate) {
-      return;
-    }
-
-    // Payment verification
-    if (!isActive && !isTrial) {
-      toast.error("Active subscription required to book sessions. Please upgrade your plan.");
-      return;
-    }
-
-    if (hasPaymentIssue) {
-      toast.error("Please resolve payment issues before booking sessions. Check your billing settings.");
-      return;
-    }
-
-    if (needsPaymentMethod) {
-      toast.error("Please add a payment method to book sessions.");
-      return;
-    }
-
-    const startTime = new Date(selectedSlot.startTime);
-
-    const meetingData: CreateMeetingRequest = {
-      therapistId: therapist.id,
-      startTime: startTime.toISOString(),
-      duration: selectedDuration.duration,
-      title: title || `Session with ${therapist.name}`,
-      description,
-      meetingType,
-    };
-
-    createMeetingMutation.mutate(meetingData);
-  };
-
-  const isFormValid =
-    selectedDate && 
-    selectedSlot && 
-    selectedDuration && 
-    title.trim() &&
-    (isActive || isTrial) && 
-    !hasPaymentIssue && 
-    !needsPaymentMethod;
+    
+    // Actions
+    handleBooking,
+    
+    // Mutations
+    isCreatingMeeting,
+    createMeetingError,
+    
+    // Validation
+    canBook,
+  } = useBookingModal(therapist, isOpen, onSuccess, onClose);
 
   if (!therapist) return null;
 
@@ -284,7 +179,7 @@ export default function BookingModal({
                       </div>
                     )}
 
-                  {availableSlots.map((slot: AvailableSlot, index: number) => (
+                  {availableSlots.map((slot: any, index: number) => (
                     <Card
                       key={index}
                       className={`cursor-pointer transition-colors ${
@@ -292,10 +187,7 @@ export default function BookingModal({
                           ? "ring-2 ring-blue-500 bg-blue-50"
                           : "hover:bg-gray-50"
                       }`}
-                      onClick={() => {
-                        setSelectedSlot(slot);
-                        setSelectedDuration(null);
-                      }}
+                      onClick={() => setSelectedSlot(slot)}
                     >
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between">
@@ -355,13 +247,13 @@ export default function BookingModal({
                 <Label className="text-base font-semibold">Meeting Type</Label>
                 <Select
                   value={meetingType}
-                  onValueChange={(value: MeetingType) => setMeetingType(value)}
+                  onValueChange={(value: any) => setMeetingType(value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={MeetingType.VIDEO}>
+                    <SelectItem value="video">
                       <div className="flex items-center gap-2">
                         <Video className="h-4 w-4" />
                         Video Call
@@ -403,7 +295,7 @@ export default function BookingModal({
         </div>
 
         {/* Booking Summary */}
-        {isFormValid && (
+        {canBook && (
           <div className="border-t pt-4">
             <h3 className="font-semibold mb-2">Booking Summary</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -435,12 +327,12 @@ export default function BookingModal({
         )}
 
         {/* Error Display */}
-        {createMeetingMutation.error && (
+        {createMeetingError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {createMeetingMutation.error instanceof Error
-                ? createMeetingMutation.error.message
+              {createMeetingError instanceof Error
+                ? createMeetingError.message
                 : "Failed to book session. Please try again."}
             </AlertDescription>
           </Alert>
@@ -453,9 +345,9 @@ export default function BookingModal({
           </Button>
           <Button
             onClick={handleBooking}
-            disabled={!isFormValid || createMeetingMutation.isPending}
+            disabled={!canBook || isCreatingMeeting}
           >
-            {createMeetingMutation.isPending ? (
+            {isCreatingMeeting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 Booking...

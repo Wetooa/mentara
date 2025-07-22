@@ -44,9 +44,9 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useNotifications } from '@/hooks/useNotifications';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
+import { useNotifications } from '@/hooks/notifications/useNotifications';
+import { usePushNotifications } from '@/hooks/notifications/usePushNotifications';
+import { useRealTimeNotifications } from '@/hooks/notifications/useRealTimeNotifications';
 
 interface NotificationCenterProps {
   className?: string;

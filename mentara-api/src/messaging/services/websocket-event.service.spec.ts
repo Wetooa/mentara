@@ -511,7 +511,7 @@ describe('WebSocketEventService', () => {
           lastName: 'Doe',
           role: 'client',
           registrationMethod: 'email',
-          isVerified: true,
+          emailVerified: true,
         });
 
         const handler = (eventBusService.subscribe as jest.Mock).mock.calls.find(

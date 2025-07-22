@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, ChevronDown, ChevronRight, RefreshCw, AlertCircle } from "lucide-react";
-import { usePatientsList } from "@/hooks/usePatientsList";
+import { usePatientsList } from "@/hooks/therapist/usePatientsList";
 
 export default function PatientsLayout({
   children,

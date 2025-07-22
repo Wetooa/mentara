@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaires";
+import { LIST_OF_QUESTIONNAIRES } from "@/constants/questionnaire/questionnaire-mapping";
 import { cn } from "@/lib/utils";
 import { usePreAssessmentChecklist } from "@/hooks/pre-assessment/usePreAssessmentChecklist";
 
@@ -29,21 +29,21 @@ export default function PreAssessmentInitialCheckList({
         </div>
 
         <div className="w-full flex flex-col gap-2">
-          {LIST_OF_QUESTIONNAIRES.map((item) => {
-            const isSelected = isQuestionnaireSelected(item);
-            const handleSelect = () => handleSelectQuestionnaire(item);
+          {LIST_OF_QUESTIONNAIRES.map((questionnaire) => {
+            const isSelected = isQuestionnaireSelected(questionnaire);
+            const handleSelect = () => handleSelectQuestionnaire(questionnaire);
 
             return (
               <div
                 onClick={handleSelect}
-                key={item}
+                key={questionnaire}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
                   "justify-start px-6 gap-4"
                 )}
               >
                 <Checkbox onClick={handleSelect} checked={isSelected} />
-                <label>{item}</label>
+                <label>{questionnaire}</label>
               </div>
             );
           })}

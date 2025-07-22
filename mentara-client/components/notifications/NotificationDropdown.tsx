@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuHeader,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -195,50 +194,49 @@ export function NotificationDropdown({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-hidden">
-        <DropdownMenuHeader className="p-4 pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold">Notifications</h3>
+      <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-x-hidden overflow-y-auto">
+        <div className="px-3 py-3 pb-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <h3 className="font-semibold text-sm">Notifications</h3>
               {showConnectionStatus && !connectionState.isConnected && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs shrink-0">
                   <AlertCircle className="h-3 w-3 mr-1" />
                   Offline
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleMarkAllAsRead}
                   disabled={isMarkingAllAsRead}
-                  className="text-xs h-6 px-2"
+                  className="text-xs h-6 px-1.5"
                 >
                   <CheckCheck className="h-3 w-3 mr-1" />
-                  Mark all read
+                  <span className="hidden sm:inline">Mark all</span>
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push("/notifications")}
-                className="text-xs h-6 px-2"
+                className="text-xs h-6 px-1.5"
               >
-                <Settings className="h-3 w-3 mr-1" />
-                Settings
+                <Settings className="h-3 w-3" />
               </Button>
             </div>
           </div>
-        </DropdownMenuHeader>
+        </div>
 
         <DropdownMenuSeparator />
 
-        <div className="max-h-80 overflow-y-auto">
+        <div className="max-h-80 overflow-x-hidden overflow-y-auto">
           {/* Loading State */}
           {isLoading && (
-            <div className="p-4 space-y-3">
+            <div className="px-3 py-3 space-y-3">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <Skeleton className="h-8 w-8 rounded-full" />
@@ -253,7 +251,7 @@ export function NotificationDropdown({
 
           {/* Error State */}
           {error && !isLoading && (
-            <div className="p-4">
+            <div className="px-3 py-3">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
@@ -290,7 +288,7 @@ export function NotificationDropdown({
               {displayNotifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors relative group ${
+                  className={`px-3 py-3 hover:bg-gray-50 cursor-pointer transition-colors relative group ${
                     !notification.isRead ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
                   }`}
                   onClick={() => handleNotificationClick(notification)}
@@ -310,13 +308,13 @@ export function NotificationDropdown({
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium line-clamp-1">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium line-clamp-1 break-words">
                             {notification.title}
                           </h4>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1 break-words">
                             {notification.message}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
@@ -324,7 +322,7 @@ export function NotificationDropdown({
                               {formatTimeAgo(notification.createdAt)}
                             </span>
                             {notification.actionUrl && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs shrink-0">
                                 <ExternalLink className="h-2.5 w-2.5 mr-1" />
                                 Action available
                               </Badge>
@@ -333,7 +331,7 @@ export function NotificationDropdown({
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           {!notification.isRead && (
                             <Button
                               variant="ghost"
@@ -373,7 +371,7 @@ export function NotificationDropdown({
         {displayNotifications.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <div className="p-3">
+            <div className="px-3 py-3">
               <Button
                 variant="outline"
                 size="sm"
@@ -381,7 +379,7 @@ export function NotificationDropdown({
                   router.push("/notifications");
                   setIsOpen(false);
                 }}
-                className="w-full"
+                className="w-full min-w-0 truncate"
               >
                 View all notifications
               </Button>

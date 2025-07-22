@@ -52,7 +52,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Mobile Interactions', () => {
-  const mockUseIsMobile = jest.requireMock('@/hooks/use-mobile').useIsMobile;
+  const mockUseIsMobile = jest.requireMock('@/hooks/utils/useMobile').useIsMobile;
 
   beforeEach(() => {
     jest.clearAllMocks();

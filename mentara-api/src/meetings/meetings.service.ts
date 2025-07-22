@@ -99,6 +99,25 @@ export class MeetingsService {
    * Get user's upcoming meetings
    */
   async getUpcomingMeetings(userId: string, limit = 10) {
+    // First validate that user exists as either client or therapist
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        client: { select: { userId: true } },
+        therapist: { select: { userId: true } },
+      },
+    });
+
+    if (!userExists) {
+      this.logger.warn(`User not found: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
+
+    if (!userExists.client && !userExists.therapist) {
+      this.logger.warn(`User ${userId} is not a client or therapist`);
+      throw new NotFoundException('User must be a client or therapist to access meetings');
+    }
+
     const meetings = await this.prisma.meeting.findMany({
       where: {
         OR: [{ clientId: userId }, { therapistId: userId }],
@@ -133,7 +152,12 @@ export class MeetingsService {
       take: limit,
     });
 
-    return meetings;
+    this.logger.log(`Found ${meetings.length} upcoming meetings for user ${userId}`);
+
+    return {
+      meetings,
+      total: meetings.length,
+    };
   }
 
   /**

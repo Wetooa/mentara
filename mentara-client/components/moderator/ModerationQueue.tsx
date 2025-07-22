@@ -56,7 +56,7 @@ import {
   // Flag,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useContentModerationQueue, useModerateContent } from "@/hooks/useModerator";
+import { useContentModerationQueue, useModerateContent } from "@/hooks/moderator/useModerator";
 import type { Post, Comment, ContentModerationParams } from "@/types/api";
 
 interface ModerationQueueProps {

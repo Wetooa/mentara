@@ -20,7 +20,7 @@ import {
   ApproveTherapistDtoSchema,
   RejectTherapistDtoSchema,
   UpdateTherapistStatusDtoSchema,
-  PendingTherapistFiltersDtoSchema,
+  TherapistFiltersDtoSchema,
 } from '../validation/admin.schemas';
 import type {
   ApproveTherapistDto,
@@ -45,7 +45,7 @@ export class AdminTherapistController {
   @Get('pending')
   @HttpCode(HttpStatus.OK)
   async getPendingApplications(
-    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
+    @Query(new ZodValidationPipe(TherapistFiltersDtoSchema))
     filters: PendingTherapistFiltersDto,
     @CurrentUserId() adminId: string,
     @CurrentUserRole() role: string,
@@ -54,14 +54,15 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} fetching pending therapist applications`);
-    const serviceResponse = await this.adminTherapistService.getPendingApplications(filters);
+    const serviceResponse =
+      await this.adminTherapistService.getPendingApplications(filters);
     return AdminResponseTransformer.transformTherapistList(serviceResponse);
   }
 
   @Get('applications')
   @HttpCode(HttpStatus.OK)
   async getAllApplications(
-    @Query(new ZodValidationPipe(PendingTherapistFiltersDtoSchema))
+    @Query(new ZodValidationPipe(TherapistFiltersDtoSchema))
     filters: PendingTherapistFiltersDto,
     @CurrentUserId() adminId: string,
     @CurrentUserRole() role: string,
@@ -70,7 +71,8 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} fetching all therapist applications`);
-    const serviceResponse = await this.adminTherapistService.getPendingApplications(filters);
+    const serviceResponse =
+      await this.adminTherapistService.getApplications(filters);
     return AdminResponseTransformer.transformTherapistList(serviceResponse);
   }
 
@@ -87,8 +89,11 @@ export class AdminTherapistController {
     this.logger.log(
       `Admin ${adminId} viewing therapist application ${therapistId}`,
     );
-    const serviceResponse = await this.adminTherapistService.getApplicationDetails(therapistId);
-    return AdminResponseTransformer.transformApplicationDetails(serviceResponse);
+    const serviceResponse =
+      await this.adminTherapistService.getApplicationDetails(therapistId);
+    return AdminResponseTransformer.transformApplicationDetails(
+      serviceResponse,
+    );
   }
 
   @Post(':id/approve')
@@ -109,7 +114,10 @@ export class AdminTherapistController {
       adminId,
       approvalDto,
     );
-    return AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
+    return AdminResponseTransformer.transformActionResponse(
+      serviceResponse,
+      therapistId,
+    );
   }
 
   @Post(':id/reject')
@@ -130,7 +138,10 @@ export class AdminTherapistController {
       adminId,
       rejectionDto,
     );
-    return AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
+    return AdminResponseTransformer.transformActionResponse(
+      serviceResponse,
+      therapistId,
+    );
   }
 
   @Put(':id/status')
@@ -148,12 +159,16 @@ export class AdminTherapistController {
     this.logger.log(
       `Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`,
     );
-    const serviceResponse = await this.adminTherapistService.updateTherapistStatus(
+    const serviceResponse =
+      await this.adminTherapistService.updateTherapistStatus(
+        therapistId,
+        adminId,
+        statusDto,
+      );
+    return AdminResponseTransformer.transformActionResponse(
+      serviceResponse,
       therapistId,
-      adminId,
-      statusDto,
     );
-    return AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
   }
 
   @Get('metrics')
@@ -168,10 +183,13 @@ export class AdminTherapistController {
       throw new ForbiddenException('Admin access required');
     }
     this.logger.log(`Admin ${adminId} fetching therapist application metrics`);
-    const serviceResponse = await this.adminTherapistService.getTherapistApplicationMetrics(
-      startDate,
-      endDate,
+    const serviceResponse =
+      await this.adminTherapistService.getTherapistApplicationMetrics(
+        startDate,
+        endDate,
+      );
+    return AdminResponseTransformer.transformApplicationMetrics(
+      serviceResponse,
     );
-    return AdminResponseTransformer.transformApplicationMetrics(serviceResponse);
   }
 }

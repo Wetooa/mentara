@@ -53,18 +53,18 @@ export const AdminTherapistQuerySchema = z.object({
 });
 
 export const CreateAdminAccountDtoSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   role: z.enum(['admin', 'moderator']),
 });
 
 export const CreateAdminDtoSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   role: z.enum(['admin', 'moderator']),
 });
 
@@ -93,7 +93,7 @@ export const ApproveTherapistDtoSchema = z.object({
 });
 
 export const RejectTherapistDtoSchema = z.object({
-  reason: z.string().min(1, "Reason is required"),
+  reason: z.string().min(1, 'Reason is required'),
   rejectionMessage: z.string().optional(),
 });
 
@@ -103,10 +103,11 @@ export const UpdateTherapistStatusDtoSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const PendingTherapistFiltersDtoSchema = z.object({
+export const TherapistFiltersDtoSchema = z.object({
   search: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED']).optional(),
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
 });

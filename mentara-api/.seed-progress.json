@@ -1,0 +1,4983 @@
+{
+  "startedAt": "2025-07-22T13:15:51.688Z",
+  "lastUpdatedAt": "2025-07-22T13:17:25.196Z",
+  "lastPhase": 8,
+  "completedPhases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "failedPhases": [],
+  "metadata": {
+    "phase_1": {
+      "users": [
+        {
+          "id": "dev_client_2",
+          "email": "client2@mentaratest.dev",
+          "firstName": "Client",
+          "middleName": null,
+          "lastName": "2",
+          "birthDate": null,
+          "address": null,
+          "role": "client",
+          "createdAt": "2025-07-22T08:10:30.719Z",
+          "updatedAt": "2025-07-22T08:10:30.719Z",
+          "password": "$2b$10$qxkip8D8.w6JC.ULZ6E6uOjyMNIcFoRgFviGPhgE/Y8mSMyfHB12C",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": {
+            "userId": "dev_client_2",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:30.940Z",
+            "updatedAt": "2025-07-22T08:10:30.940Z"
+          },
+          "therapist": null
+        },
+        {
+          "id": "dev_client_3",
+          "email": "client3@mentaratest.dev",
+          "firstName": "Client",
+          "middleName": null,
+          "lastName": "3",
+          "birthDate": null,
+          "address": null,
+          "role": "client",
+          "createdAt": "2025-07-22T08:10:31.234Z",
+          "updatedAt": "2025-07-22T08:10:31.234Z",
+          "password": "$2b$10$RklLEM8QdlX8qfU1otxSdeU1PsLoE2kHXa.SE0SBHypiBLx2hDU0K",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": {
+            "userId": "dev_client_3",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:31.453Z",
+            "updatedAt": "2025-07-22T08:10:31.453Z"
+          },
+          "therapist": null
+        },
+        {
+          "id": "dev_client_4",
+          "email": "client4@mentaratest.dev",
+          "firstName": "Client",
+          "middleName": null,
+          "lastName": "4",
+          "birthDate": null,
+          "address": null,
+          "role": "client",
+          "createdAt": "2025-07-22T08:10:31.738Z",
+          "updatedAt": "2025-07-22T08:10:31.738Z",
+          "password": "$2b$10$x64Fz3fm/Oe/RFIlOjxPOepoxrUhbRTpyoO5FDryzrS01boElQCUO",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": {
+            "userId": "dev_client_4",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:31.964Z",
+            "updatedAt": "2025-07-22T08:10:31.964Z"
+          },
+          "therapist": null
+        },
+        {
+          "id": "dev_client_5",
+          "email": "client5@mentaratest.dev",
+          "firstName": "Client",
+          "middleName": null,
+          "lastName": "5",
+          "birthDate": null,
+          "address": null,
+          "role": "client",
+          "createdAt": "2025-07-22T08:10:32.250Z",
+          "updatedAt": "2025-07-22T08:10:32.250Z",
+          "password": "$2b$10$bFGn7oO7j.W6sFQ6OnJzpufkjXl1hXKP41hsf1bQol6YgYwuKGD.m",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": {
+            "userId": "dev_client_5",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:32.474Z",
+            "updatedAt": "2025-07-22T08:10:32.474Z"
+          },
+          "therapist": null
+        },
+        {
+          "id": "dev_therapist_1",
+          "email": "therapist1@mentaratest.dev",
+          "firstName": "Dr. Therapist",
+          "middleName": null,
+          "lastName": "1",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T08:10:32.767Z",
+          "updatedAt": "2025-07-22T08:10:32.767Z",
+          "password": "$2b$10$z7qbLWQSX2rGSGCJ8USclesQ.GkCSev74RtF8.qG2yUGYxJeP5g1W",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "dev_therapist_1",
+            "mobile": "+15550001111",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:32.991Z",
+            "processingDate": "2025-07-22T08:10:32.991Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC11111",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:32.991Z",
+            "updatedAt": "2025-07-22T08:10:32.991Z"
+          }
+        },
+        {
+          "id": "dev_therapist_2",
+          "email": "therapist2@mentaratest.dev",
+          "firstName": "Dr. Therapist",
+          "middleName": null,
+          "lastName": "2",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T08:10:33.271Z",
+          "updatedAt": "2025-07-22T08:10:33.271Z",
+          "password": "$2b$10$IqR2St2TUP95itCjH0BKI.h8FaVY1NMZA6.YGbOSmUP5/aIzIp/qK",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "dev_therapist_2",
+            "mobile": "+15550002222",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:33.491Z",
+            "processingDate": "2025-07-22T08:10:33.491Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC22222",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:33.491Z",
+            "updatedAt": "2025-07-22T08:10:33.491Z"
+          }
+        },
+        {
+          "id": "dev_therapist_3",
+          "email": "therapist3@mentaratest.dev",
+          "firstName": "Dr. Therapist",
+          "middleName": null,
+          "lastName": "3",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T08:10:33.776Z",
+          "updatedAt": "2025-07-22T08:10:33.776Z",
+          "password": "$2b$10$nsK6C0kzQrksl6jMfLkgT.i..WoY1cgr8a9oSjqa7V3lZmFCl1Dry",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "dev_therapist_3",
+            "mobile": "+15550003333",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:34.002Z",
+            "processingDate": "2025-07-22T08:10:34.002Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC33333",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:34.002Z",
+            "updatedAt": "2025-07-22T08:10:34.002Z"
+          }
+        },
+        {
+          "id": "dev_therapist_4",
+          "email": "therapist4@mentaratest.dev",
+          "firstName": "Dr. Therapist",
+          "middleName": null,
+          "lastName": "4",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T08:10:34.287Z",
+          "updatedAt": "2025-07-22T08:10:34.287Z",
+          "password": "$2b$10$QfSyPa2UHvKvgaM7YGfnGeCv.D/MJC6jEWnj9c6Q90EihQTfg.1Iy",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "dev_therapist_4",
+            "mobile": "+15550004444",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:34.510Z",
+            "processingDate": "2025-07-22T08:10:34.510Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC44444",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:34.510Z",
+            "updatedAt": "2025-07-22T08:10:34.510Z"
+          }
+        },
+        {
+          "id": "dev_therapist_5",
+          "email": "therapist5@mentaratest.dev",
+          "firstName": "Dr. Therapist",
+          "middleName": null,
+          "lastName": "5",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T08:10:34.840Z",
+          "updatedAt": "2025-07-22T08:10:34.840Z",
+          "password": "$2b$10$ewreX1Rm5GxAq0u29kwOLeagkPF4S5lfiCg1PE4QgNuhsSANAI.JG",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "dev_therapist_5",
+            "mobile": "+15550005555",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:35.055Z",
+            "processingDate": "2025-07-22T08:10:35.055Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC55555",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:35.055Z",
+            "updatedAt": "2025-07-22T08:10:35.055Z"
+          }
+        },
+        {
+          "id": "dev_admin_2",
+          "email": "admin2@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "2",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:35.851Z",
+          "updatedAt": "2025-07-22T08:10:35.851Z",
+          "password": "$2b$10$C/R.5/qxnc35ebgnG8Ae1Oh8e.9Fd1/ypLlALGrYt8UYU1JiBFtDu",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_3",
+          "email": "admin3@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "3",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:36.343Z",
+          "updatedAt": "2025-07-22T08:10:36.343Z",
+          "password": "$2b$10$LiQSfQTdhn1LOxk2k5uMDepkEfJTc8zZx/1FL3/ej5GHeK5OH8YIq",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_4",
+          "email": "admin4@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "4",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:36.838Z",
+          "updatedAt": "2025-07-22T08:10:36.838Z",
+          "password": "$2b$10$uNTGceRYGtNE7gFDJpdPMussqFPA87rF/cws.qTqHPWqNPd87Hklq",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_5",
+          "email": "admin5@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "5",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:37.338Z",
+          "updatedAt": "2025-07-22T08:10:37.338Z",
+          "password": "$2b$10$uuCCyMVvb.H2zH301P1yyudeuWavEuwBJuJqCR1iRPmL.vzJEVotu",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_1",
+          "email": "moderator1@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "1",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:37.845Z",
+          "updatedAt": "2025-07-22T08:10:37.845Z",
+          "password": "$2b$10$ddpo5izlaW3Gdhcsl3rY7uHXw4O0Gp/aPKs4bDGAU5Bmt.q7l4qLu",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_2",
+          "email": "moderator2@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "2",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:38.349Z",
+          "updatedAt": "2025-07-22T08:10:38.349Z",
+          "password": "$2b$10$XsgFbntLjlbCGOi1D.ueLucrhxkuacBc5WrW6BubZEF1yYh.YllS.",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_3",
+          "email": "moderator3@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "3",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:38.865Z",
+          "updatedAt": "2025-07-22T08:10:38.865Z",
+          "password": "$2b$10$SX9Nthu17CX4e8kMa021MupQpK7e4VpvIT5QCsXhhtGSd0HhUpN9i",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_4",
+          "email": "moderator4@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "4",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:39.386Z",
+          "updatedAt": "2025-07-22T08:10:39.386Z",
+          "password": "$2b$10$6EdcVKM9.EQHxqBNZaF54uEQJv3YBm1qPF0MgkNoLLXLt7G4.vSWO",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_5",
+          "email": "moderator5@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "5",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:39.942Z",
+          "updatedAt": "2025-07-22T08:10:39.942Z",
+          "password": "$2b$10$0/YP/NRnzW5vySWO9RcyxeINDZjrBjcBPsrjljFXny5bASAB3A1ZS",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "243419b3-ea14-4042-886e-4f2ed18e5829",
+          "email": "tristanjamestolentino56@gmail.com",
+          "firstName": "Tristan James",
+          "middleName": null,
+          "lastName": "Tolentino",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T12:19:45.870Z",
+          "updatedAt": "2025-07-22T12:20:46.590Z",
+          "password": "$2b$12$NCVYvEV5BROmsILHD1ZPZuKKAQRQzwPqGJULVsB1r4Za0LiG4jQxC",
+          "emailVerified": true,
+          "emailVerifyToken": "405502",
+          "emailVerifyTokenExp": "2025-07-23T12:19:46.367Z",
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": "2025-07-22T12:20:46.589Z",
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "243419b3-ea14-4042-886e-4f2ed18e5829",
+            "mobile": "09472546834",
+            "province": "Cebu",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T12:19:45.964Z",
+            "processingDate": "2025-07-22T12:20:07.110Z",
+            "processedByAdminId": "dev_admin_1",
+            "providerType": "Mental Health Counselor",
+            "professionalLicenseType": "rgc",
+            "isPRCLicensed": "no",
+            "prcLicenseNumber": "",
+            "expirationDateOfLicense": "2025-07-22T12:19:45.962Z",
+            "practiceStartDate": "2003-09-22T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/0b12dd62-37f8-416a-a0c2-8c0c879e4265.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/0a9ade83-5e73-4f1f-a3fb-caaeb6c4649b.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/02bbb246-e091-4823-a8b3-e972adb63d40.docx"
+            ],
+            "documentNames": [
+              "TOLENTINO_SME_MANAGEMENT_PROPOSAL.pdf",
+              "FullScaleID.pdf",
+              "knights_move.docx"
+            ],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [
+              "stress"
+            ],
+            "assessmentTools": [
+              "pss"
+            ],
+            "therapeuticApproachesUsedList": [
+              "cbt",
+              "person-centered"
+            ],
+            "languagesOffered": [
+              "english"
+            ],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              30,
+              45,
+              60
+            ],
+            "privateConfidentialSpace": "yes",
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": "yes",
+            "complaintsOrDisciplinaryActions": "no",
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "stress"
+            ],
+            "approaches": [
+              "cbt",
+              "person-centered"
+            ],
+            "languages": [
+              "english"
+            ],
+            "illnessSpecializations": [],
+            "acceptTypes": [
+              "self-pay"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "30",
+            "hourlyRate": "1500",
+            "createdAt": "2025-07-22T12:19:45.964Z",
+            "updatedAt": "2025-07-22T12:20:07.111Z"
+          }
+        },
+        {
+          "id": "dev_client_1",
+          "email": "client1@mentaratest.dev",
+          "firstName": "Client",
+          "middleName": null,
+          "lastName": "1",
+          "birthDate": null,
+          "address": null,
+          "role": "client",
+          "createdAt": "2025-07-22T08:10:30.208Z",
+          "updatedAt": "2025-07-22T13:05:01.804Z",
+          "password": "$2b$10$g40HoBFTMqIpHjzx/1K2NurTiLLV9Vo.Nc.LqfzRm3MVrrD9iOQcm",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": "2025-07-22T13:05:01.803Z",
+          "lockoutUntil": null,
+          "client": {
+            "userId": "dev_client_1",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:30.428Z",
+            "updatedAt": "2025-07-22T08:10:30.428Z"
+          },
+          "therapist": null
+        },
+        {
+          "id": "c1641f03-c551-4b3d-89ea-8fe1f25e696d",
+          "email": "ngekngok@gmail.com",
+          "firstName": "Juju",
+          "middleName": null,
+          "lastName": "Beat",
+          "birthDate": null,
+          "address": null,
+          "role": "therapist",
+          "createdAt": "2025-07-22T09:13:17.254Z",
+          "updatedAt": "2025-07-22T11:37:48.349Z",
+          "password": "$2b$12$qGq5GTHG7.JCeB0aeRs6guBs7cCJ1m4wZ11L6WIZF932uaRy5pqOm",
+          "emailVerified": false,
+          "emailVerifyToken": "607152",
+          "emailVerifyTokenExp": "2025-07-23T09:13:17.695Z",
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": {
+            "userId": "c1641f03-c551-4b3d-89ea-8fe1f25e696d",
+            "mobile": "09532409428",
+            "province": "Zamboanga del Norte",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T09:13:17.343Z",
+            "processingDate": "2025-07-22T11:37:48.248Z",
+            "processedByAdminId": "dev_admin_1",
+            "providerType": "Therapist",
+            "professionalLicenseType": "rpsy",
+            "isPRCLicensed": "yes",
+            "prcLicenseNumber": "1234567",
+            "expirationDateOfLicense": "2020-09-11T00:00:00.000Z",
+            "practiceStartDate": "2003-07-31T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/2472b65a-4bac-4e1a-8552-c40caa286f64.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/7d77d57f-431a-4a6a-83fe-168dadf17428.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/8ee0679c-bdcc-4312-94f1-d15cb406df59.pdf"
+            ],
+            "documentNames": [
+              "TOLENTINO_WM_MANAGEMENT_PROPOSAL.docx.pdf",
+              "TOLENTINO_SME_MANAGEMENT_PROPOSAL.pdf",
+              "FullScaleID.pdf"
+            ],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [
+              "stress",
+              "burnout",
+              "drug-use"
+            ],
+            "assessmentTools": [
+              "pss",
+              "mdq",
+              "audit"
+            ],
+            "therapeuticApproachesUsedList": [
+              "cbt"
+            ],
+            "languagesOffered": [
+              "english",
+              "filipino"
+            ],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              30,
+              45,
+              60
+            ],
+            "privateConfidentialSpace": "yes",
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": "yes",
+            "complaintsOrDisciplinaryActions": "no",
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "stress",
+              "burnout",
+              "drug-use"
+            ],
+            "approaches": [
+              "cbt"
+            ],
+            "languages": [
+              "english",
+              "filipino"
+            ],
+            "illnessSpecializations": [],
+            "acceptTypes": [
+              "self-pay"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60",
+            "hourlyRate": "1500",
+            "createdAt": "2025-07-22T09:13:17.343Z",
+            "updatedAt": "2025-07-22T11:37:48.249Z"
+          }
+        },
+        {
+          "id": "dev_admin_1",
+          "email": "admin1@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "1",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:35.339Z",
+          "updatedAt": "2025-07-22T12:14:34.541Z",
+          "password": "$2b$10$d3EufHfV0Blogk9SNZSisO1tTTbqMKrSQs1B/dwYQCqWS2WOpX2Pi",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": "2025-07-22T12:14:34.540Z",
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        }
+      ],
+      "clients": [
+        {
+          "user": {
+            "id": "dev_client_2",
+            "email": "client2@mentaratest.dev",
+            "firstName": "Client",
+            "middleName": null,
+            "lastName": "2",
+            "birthDate": null,
+            "address": null,
+            "role": "client",
+            "createdAt": "2025-07-22T08:10:30.719Z",
+            "updatedAt": "2025-07-22T08:10:30.719Z",
+            "password": "$2b$10$qxkip8D8.w6JC.ULZ6E6uOjyMNIcFoRgFviGPhgE/Y8mSMyfHB12C",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": {
+              "userId": "dev_client_2",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:30.940Z",
+              "updatedAt": "2025-07-22T08:10:30.940Z"
+            },
+            "therapist": null
+          },
+          "client": {
+            "userId": "dev_client_2",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:30.940Z",
+            "updatedAt": "2025-07-22T08:10:30.940Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_client_3",
+            "email": "client3@mentaratest.dev",
+            "firstName": "Client",
+            "middleName": null,
+            "lastName": "3",
+            "birthDate": null,
+            "address": null,
+            "role": "client",
+            "createdAt": "2025-07-22T08:10:31.234Z",
+            "updatedAt": "2025-07-22T08:10:31.234Z",
+            "password": "$2b$10$RklLEM8QdlX8qfU1otxSdeU1PsLoE2kHXa.SE0SBHypiBLx2hDU0K",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": {
+              "userId": "dev_client_3",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:31.453Z",
+              "updatedAt": "2025-07-22T08:10:31.453Z"
+            },
+            "therapist": null
+          },
+          "client": {
+            "userId": "dev_client_3",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:31.453Z",
+            "updatedAt": "2025-07-22T08:10:31.453Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_client_4",
+            "email": "client4@mentaratest.dev",
+            "firstName": "Client",
+            "middleName": null,
+            "lastName": "4",
+            "birthDate": null,
+            "address": null,
+            "role": "client",
+            "createdAt": "2025-07-22T08:10:31.738Z",
+            "updatedAt": "2025-07-22T08:10:31.738Z",
+            "password": "$2b$10$x64Fz3fm/Oe/RFIlOjxPOepoxrUhbRTpyoO5FDryzrS01boElQCUO",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": {
+              "userId": "dev_client_4",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:31.964Z",
+              "updatedAt": "2025-07-22T08:10:31.964Z"
+            },
+            "therapist": null
+          },
+          "client": {
+            "userId": "dev_client_4",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:31.964Z",
+            "updatedAt": "2025-07-22T08:10:31.964Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_client_5",
+            "email": "client5@mentaratest.dev",
+            "firstName": "Client",
+            "middleName": null,
+            "lastName": "5",
+            "birthDate": null,
+            "address": null,
+            "role": "client",
+            "createdAt": "2025-07-22T08:10:32.250Z",
+            "updatedAt": "2025-07-22T08:10:32.250Z",
+            "password": "$2b$10$bFGn7oO7j.W6sFQ6OnJzpufkjXl1hXKP41hsf1bQol6YgYwuKGD.m",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": {
+              "userId": "dev_client_5",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:32.474Z",
+              "updatedAt": "2025-07-22T08:10:32.474Z"
+            },
+            "therapist": null
+          },
+          "client": {
+            "userId": "dev_client_5",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:32.474Z",
+            "updatedAt": "2025-07-22T08:10:32.474Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_client_1",
+            "email": "client1@mentaratest.dev",
+            "firstName": "Client",
+            "middleName": null,
+            "lastName": "1",
+            "birthDate": null,
+            "address": null,
+            "role": "client",
+            "createdAt": "2025-07-22T08:10:30.208Z",
+            "updatedAt": "2025-07-22T13:05:01.804Z",
+            "password": "$2b$10$g40HoBFTMqIpHjzx/1K2NurTiLLV9Vo.Nc.LqfzRm3MVrrD9iOQcm",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": "2025-07-22T13:05:01.803Z",
+            "lockoutUntil": null,
+            "client": {
+              "userId": "dev_client_1",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:30.428Z",
+              "updatedAt": "2025-07-22T08:10:30.428Z"
+            },
+            "therapist": null
+          },
+          "client": {
+            "userId": "dev_client_1",
+            "hasSeenTherapistRecommendations": false,
+            "createdAt": "2025-07-22T08:10:30.428Z",
+            "updatedAt": "2025-07-22T08:10:30.428Z"
+          }
+        }
+      ],
+      "therapists": [
+        {
+          "user": {
+            "id": "dev_therapist_1",
+            "email": "therapist1@mentaratest.dev",
+            "firstName": "Dr. Therapist",
+            "middleName": null,
+            "lastName": "1",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T08:10:32.767Z",
+            "updatedAt": "2025-07-22T08:10:32.767Z",
+            "password": "$2b$10$z7qbLWQSX2rGSGCJ8USclesQ.GkCSev74RtF8.qG2yUGYxJeP5g1W",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "dev_therapist_1",
+              "mobile": "+15550001111",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:32.991Z",
+              "processingDate": "2025-07-22T08:10:32.991Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC11111",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:32.991Z",
+              "updatedAt": "2025-07-22T08:10:32.991Z"
+            }
+          },
+          "therapist": {
+            "userId": "dev_therapist_1",
+            "mobile": "+15550001111",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:32.991Z",
+            "processingDate": "2025-07-22T08:10:32.991Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC11111",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:32.991Z",
+            "updatedAt": "2025-07-22T08:10:32.991Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_therapist_2",
+            "email": "therapist2@mentaratest.dev",
+            "firstName": "Dr. Therapist",
+            "middleName": null,
+            "lastName": "2",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T08:10:33.271Z",
+            "updatedAt": "2025-07-22T08:10:33.271Z",
+            "password": "$2b$10$IqR2St2TUP95itCjH0BKI.h8FaVY1NMZA6.YGbOSmUP5/aIzIp/qK",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "dev_therapist_2",
+              "mobile": "+15550002222",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:33.491Z",
+              "processingDate": "2025-07-22T08:10:33.491Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC22222",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:33.491Z",
+              "updatedAt": "2025-07-22T08:10:33.491Z"
+            }
+          },
+          "therapist": {
+            "userId": "dev_therapist_2",
+            "mobile": "+15550002222",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:33.491Z",
+            "processingDate": "2025-07-22T08:10:33.491Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC22222",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:33.491Z",
+            "updatedAt": "2025-07-22T08:10:33.491Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_therapist_3",
+            "email": "therapist3@mentaratest.dev",
+            "firstName": "Dr. Therapist",
+            "middleName": null,
+            "lastName": "3",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T08:10:33.776Z",
+            "updatedAt": "2025-07-22T08:10:33.776Z",
+            "password": "$2b$10$nsK6C0kzQrksl6jMfLkgT.i..WoY1cgr8a9oSjqa7V3lZmFCl1Dry",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "dev_therapist_3",
+              "mobile": "+15550003333",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:34.002Z",
+              "processingDate": "2025-07-22T08:10:34.002Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC33333",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:34.002Z",
+              "updatedAt": "2025-07-22T08:10:34.002Z"
+            }
+          },
+          "therapist": {
+            "userId": "dev_therapist_3",
+            "mobile": "+15550003333",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:34.002Z",
+            "processingDate": "2025-07-22T08:10:34.002Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC33333",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:34.002Z",
+            "updatedAt": "2025-07-22T08:10:34.002Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_therapist_4",
+            "email": "therapist4@mentaratest.dev",
+            "firstName": "Dr. Therapist",
+            "middleName": null,
+            "lastName": "4",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T08:10:34.287Z",
+            "updatedAt": "2025-07-22T08:10:34.287Z",
+            "password": "$2b$10$QfSyPa2UHvKvgaM7YGfnGeCv.D/MJC6jEWnj9c6Q90EihQTfg.1Iy",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "dev_therapist_4",
+              "mobile": "+15550004444",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:34.510Z",
+              "processingDate": "2025-07-22T08:10:34.510Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC44444",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:34.510Z",
+              "updatedAt": "2025-07-22T08:10:34.510Z"
+            }
+          },
+          "therapist": {
+            "userId": "dev_therapist_4",
+            "mobile": "+15550004444",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:34.510Z",
+            "processingDate": "2025-07-22T08:10:34.510Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC44444",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:34.510Z",
+            "updatedAt": "2025-07-22T08:10:34.510Z"
+          }
+        },
+        {
+          "user": {
+            "id": "dev_therapist_5",
+            "email": "therapist5@mentaratest.dev",
+            "firstName": "Dr. Therapist",
+            "middleName": null,
+            "lastName": "5",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T08:10:34.840Z",
+            "updatedAt": "2025-07-22T08:10:34.840Z",
+            "password": "$2b$10$ewreX1Rm5GxAq0u29kwOLeagkPF4S5lfiCg1PE4QgNuhsSANAI.JG",
+            "emailVerified": true,
+            "emailVerifyToken": null,
+            "emailVerifyTokenExp": null,
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "dev_therapist_5",
+              "mobile": "+15550005555",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:35.055Z",
+              "processingDate": "2025-07-22T08:10:35.055Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC55555",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:35.055Z",
+              "updatedAt": "2025-07-22T08:10:35.055Z"
+            }
+          },
+          "therapist": {
+            "userId": "dev_therapist_5",
+            "mobile": "+15550005555",
+            "province": "Test Province",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T08:10:35.055Z",
+            "processingDate": "2025-07-22T08:10:35.055Z",
+            "processedByAdminId": null,
+            "providerType": "Licensed Psychologist",
+            "professionalLicenseType": "Clinical Psychology",
+            "isPRCLicensed": "Yes",
+            "prcLicenseNumber": "PRC55555",
+            "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+            "practiceStartDate": "2020-01-01T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [],
+            "documentNames": [],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [],
+            "assessmentTools": [],
+            "therapeuticApproachesUsedList": [],
+            "languagesOffered": [],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              60
+            ],
+            "privateConfidentialSpace": null,
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": null,
+            "complaintsOrDisciplinaryActions": null,
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "General Therapy"
+            ],
+            "approaches": [
+              "CBT"
+            ],
+            "languages": [
+              "English"
+            ],
+            "illnessSpecializations": [
+              "Anxiety",
+              "Depression"
+            ],
+            "acceptTypes": [
+              "Individual"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60 minutes",
+            "hourlyRate": "100",
+            "createdAt": "2025-07-22T08:10:35.055Z",
+            "updatedAt": "2025-07-22T08:10:35.055Z"
+          }
+        },
+        {
+          "user": {
+            "id": "243419b3-ea14-4042-886e-4f2ed18e5829",
+            "email": "tristanjamestolentino56@gmail.com",
+            "firstName": "Tristan James",
+            "middleName": null,
+            "lastName": "Tolentino",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T12:19:45.870Z",
+            "updatedAt": "2025-07-22T12:20:46.590Z",
+            "password": "$2b$12$NCVYvEV5BROmsILHD1ZPZuKKAQRQzwPqGJULVsB1r4Za0LiG4jQxC",
+            "emailVerified": true,
+            "emailVerifyToken": "405502",
+            "emailVerifyTokenExp": "2025-07-23T12:19:46.367Z",
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": "2025-07-22T12:20:46.589Z",
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "243419b3-ea14-4042-886e-4f2ed18e5829",
+              "mobile": "09472546834",
+              "province": "Cebu",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T12:19:45.964Z",
+              "processingDate": "2025-07-22T12:20:07.110Z",
+              "processedByAdminId": "dev_admin_1",
+              "providerType": "Mental Health Counselor",
+              "professionalLicenseType": "rgc",
+              "isPRCLicensed": "no",
+              "prcLicenseNumber": "",
+              "expirationDateOfLicense": "2025-07-22T12:19:45.962Z",
+              "practiceStartDate": "2003-09-22T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [
+                "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/0b12dd62-37f8-416a-a0c2-8c0c879e4265.pdf",
+                "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/0a9ade83-5e73-4f1f-a3fb-caaeb6c4649b.pdf",
+                "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/02bbb246-e091-4823-a8b3-e972adb63d40.docx"
+              ],
+              "documentNames": [
+                "TOLENTINO_SME_MANAGEMENT_PROPOSAL.pdf",
+                "FullScaleID.pdf",
+                "knights_move.docx"
+              ],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [
+                "stress"
+              ],
+              "assessmentTools": [
+                "pss"
+              ],
+              "therapeuticApproachesUsedList": [
+                "cbt",
+                "person-centered"
+              ],
+              "languagesOffered": [
+                "english"
+              ],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                30,
+                45,
+                60
+              ],
+              "privateConfidentialSpace": "yes",
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": "yes",
+              "complaintsOrDisciplinaryActions": "no",
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "stress"
+              ],
+              "approaches": [
+                "cbt",
+                "person-centered"
+              ],
+              "languages": [
+                "english"
+              ],
+              "illnessSpecializations": [],
+              "acceptTypes": [
+                "self-pay"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "30",
+              "hourlyRate": "1500",
+              "createdAt": "2025-07-22T12:19:45.964Z",
+              "updatedAt": "2025-07-22T12:20:07.111Z"
+            }
+          },
+          "therapist": {
+            "userId": "243419b3-ea14-4042-886e-4f2ed18e5829",
+            "mobile": "09472546834",
+            "province": "Cebu",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T12:19:45.964Z",
+            "processingDate": "2025-07-22T12:20:07.110Z",
+            "processedByAdminId": "dev_admin_1",
+            "providerType": "Mental Health Counselor",
+            "professionalLicenseType": "rgc",
+            "isPRCLicensed": "no",
+            "prcLicenseNumber": "",
+            "expirationDateOfLicense": "2025-07-22T12:19:45.962Z",
+            "practiceStartDate": "2003-09-22T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/0b12dd62-37f8-416a-a0c2-8c0c879e4265.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/0a9ade83-5e73-4f1f-a3fb-caaeb6c4649b.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/02bbb246-e091-4823-a8b3-e972adb63d40.docx"
+            ],
+            "documentNames": [
+              "TOLENTINO_SME_MANAGEMENT_PROPOSAL.pdf",
+              "FullScaleID.pdf",
+              "knights_move.docx"
+            ],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [
+              "stress"
+            ],
+            "assessmentTools": [
+              "pss"
+            ],
+            "therapeuticApproachesUsedList": [
+              "cbt",
+              "person-centered"
+            ],
+            "languagesOffered": [
+              "english"
+            ],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              30,
+              45,
+              60
+            ],
+            "privateConfidentialSpace": "yes",
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": "yes",
+            "complaintsOrDisciplinaryActions": "no",
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "stress"
+            ],
+            "approaches": [
+              "cbt",
+              "person-centered"
+            ],
+            "languages": [
+              "english"
+            ],
+            "illnessSpecializations": [],
+            "acceptTypes": [
+              "self-pay"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "30",
+            "hourlyRate": "1500",
+            "createdAt": "2025-07-22T12:19:45.964Z",
+            "updatedAt": "2025-07-22T12:20:07.111Z"
+          }
+        },
+        {
+          "user": {
+            "id": "c1641f03-c551-4b3d-89ea-8fe1f25e696d",
+            "email": "ngekngok@gmail.com",
+            "firstName": "Juju",
+            "middleName": null,
+            "lastName": "Beat",
+            "birthDate": null,
+            "address": null,
+            "role": "therapist",
+            "createdAt": "2025-07-22T09:13:17.254Z",
+            "updatedAt": "2025-07-22T11:37:48.349Z",
+            "password": "$2b$12$qGq5GTHG7.JCeB0aeRs6guBs7cCJ1m4wZ11L6WIZF932uaRy5pqOm",
+            "emailVerified": false,
+            "emailVerifyToken": "607152",
+            "emailVerifyTokenExp": "2025-07-23T09:13:17.695Z",
+            "resetToken": null,
+            "resetTokenExpiry": null,
+            "isActive": true,
+            "failedLoginCount": 0,
+            "avatarUrl": null,
+            "coverImageUrl": null,
+            "bio": null,
+            "suspendedAt": null,
+            "suspendedBy": null,
+            "suspensionReason": null,
+            "deactivatedAt": null,
+            "deactivatedBy": null,
+            "deactivationReason": null,
+            "lastLoginAt": null,
+            "lockoutUntil": null,
+            "client": null,
+            "therapist": {
+              "userId": "c1641f03-c551-4b3d-89ea-8fe1f25e696d",
+              "mobile": "09532409428",
+              "province": "Zamboanga del Norte",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T09:13:17.343Z",
+              "processingDate": "2025-07-22T11:37:48.248Z",
+              "processedByAdminId": "dev_admin_1",
+              "providerType": "Therapist",
+              "professionalLicenseType": "rpsy",
+              "isPRCLicensed": "yes",
+              "prcLicenseNumber": "1234567",
+              "expirationDateOfLicense": "2020-09-11T00:00:00.000Z",
+              "practiceStartDate": "2003-07-31T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [
+                "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/2472b65a-4bac-4e1a-8552-c40caa286f64.pdf",
+                "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/7d77d57f-431a-4a6a-83fe-168dadf17428.pdf",
+                "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/8ee0679c-bdcc-4312-94f1-d15cb406df59.pdf"
+              ],
+              "documentNames": [
+                "TOLENTINO_WM_MANAGEMENT_PROPOSAL.docx.pdf",
+                "TOLENTINO_SME_MANAGEMENT_PROPOSAL.pdf",
+                "FullScaleID.pdf"
+              ],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [
+                "stress",
+                "burnout",
+                "drug-use"
+              ],
+              "assessmentTools": [
+                "pss",
+                "mdq",
+                "audit"
+              ],
+              "therapeuticApproachesUsedList": [
+                "cbt"
+              ],
+              "languagesOffered": [
+                "english",
+                "filipino"
+              ],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                30,
+                45,
+                60
+              ],
+              "privateConfidentialSpace": "yes",
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": "yes",
+              "complaintsOrDisciplinaryActions": "no",
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "stress",
+                "burnout",
+                "drug-use"
+              ],
+              "approaches": [
+                "cbt"
+              ],
+              "languages": [
+                "english",
+                "filipino"
+              ],
+              "illnessSpecializations": [],
+              "acceptTypes": [
+                "self-pay"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60",
+              "hourlyRate": "1500",
+              "createdAt": "2025-07-22T09:13:17.343Z",
+              "updatedAt": "2025-07-22T11:37:48.249Z"
+            }
+          },
+          "therapist": {
+            "userId": "c1641f03-c551-4b3d-89ea-8fe1f25e696d",
+            "mobile": "09532409428",
+            "province": "Zamboanga del Norte",
+            "timezone": "UTC",
+            "status": "APPROVED",
+            "submissionDate": "2025-07-22T09:13:17.343Z",
+            "processingDate": "2025-07-22T11:37:48.248Z",
+            "processedByAdminId": "dev_admin_1",
+            "providerType": "Therapist",
+            "professionalLicenseType": "rpsy",
+            "isPRCLicensed": "yes",
+            "prcLicenseNumber": "1234567",
+            "expirationDateOfLicense": "2020-09-11T00:00:00.000Z",
+            "practiceStartDate": "2003-07-31T00:00:00.000Z",
+            "licenseVerified": false,
+            "licenseVerifiedAt": null,
+            "licenseVerifiedBy": null,
+            "certifications": null,
+            "certificateUrls": [],
+            "certificateNames": [],
+            "licenseUrls": [],
+            "licenseNames": [],
+            "documentUrls": [
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/2472b65a-4bac-4e1a-8552-c40caa286f64.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/7d77d57f-431a-4a6a-83fe-168dadf17428.pdf",
+              "https://wnsoxejdzmaiwnluuzpi.supabase.co/storage/v1/object/public/documents/8ee0679c-bdcc-4312-94f1-d15cb406df59.pdf"
+            ],
+            "documentNames": [
+              "TOLENTINO_WM_MANAGEMENT_PROPOSAL.docx.pdf",
+              "TOLENTINO_SME_MANAGEMENT_PROPOSAL.pdf",
+              "FullScaleID.pdf"
+            ],
+            "yearsOfExperience": null,
+            "educationBackground": null,
+            "specialCertifications": [],
+            "practiceLocation": null,
+            "acceptsInsurance": false,
+            "acceptedInsuranceTypes": [],
+            "areasOfExpertise": [
+              "stress",
+              "burnout",
+              "drug-use"
+            ],
+            "assessmentTools": [
+              "pss",
+              "mdq",
+              "audit"
+            ],
+            "therapeuticApproachesUsedList": [
+              "cbt"
+            ],
+            "languagesOffered": [
+              "english",
+              "filipino"
+            ],
+            "providedOnlineTherapyBefore": true,
+            "comfortableUsingVideoConferencing": true,
+            "preferredSessionLength": [
+              30,
+              45,
+              60
+            ],
+            "privateConfidentialSpace": "yes",
+            "compliesWithDataPrivacyAct": true,
+            "professionalLiabilityInsurance": "yes",
+            "complaintsOrDisciplinaryActions": "no",
+            "willingToAbideByPlatformGuidelines": true,
+            "expertise": [
+              "stress",
+              "burnout",
+              "drug-use"
+            ],
+            "approaches": [
+              "cbt"
+            ],
+            "languages": [
+              "english",
+              "filipino"
+            ],
+            "illnessSpecializations": [],
+            "acceptTypes": [
+              "self-pay"
+            ],
+            "treatmentSuccessRates": {},
+            "sessionLength": "60",
+            "hourlyRate": "1500",
+            "createdAt": "2025-07-22T09:13:17.343Z",
+            "updatedAt": "2025-07-22T11:37:48.249Z"
+          }
+        }
+      ],
+      "moderators": [
+        {
+          "id": "dev_moderator_1",
+          "email": "moderator1@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "1",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:37.845Z",
+          "updatedAt": "2025-07-22T08:10:37.845Z",
+          "password": "$2b$10$ddpo5izlaW3Gdhcsl3rY7uHXw4O0Gp/aPKs4bDGAU5Bmt.q7l4qLu",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_2",
+          "email": "moderator2@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "2",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:38.349Z",
+          "updatedAt": "2025-07-22T08:10:38.349Z",
+          "password": "$2b$10$XsgFbntLjlbCGOi1D.ueLucrhxkuacBc5WrW6BubZEF1yYh.YllS.",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_3",
+          "email": "moderator3@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "3",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:38.865Z",
+          "updatedAt": "2025-07-22T08:10:38.865Z",
+          "password": "$2b$10$SX9Nthu17CX4e8kMa021MupQpK7e4VpvIT5QCsXhhtGSd0HhUpN9i",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_4",
+          "email": "moderator4@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "4",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:39.386Z",
+          "updatedAt": "2025-07-22T08:10:39.386Z",
+          "password": "$2b$10$6EdcVKM9.EQHxqBNZaF54uEQJv3YBm1qPF0MgkNoLLXLt7G4.vSWO",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_moderator_5",
+          "email": "moderator5@mentaratest.dev",
+          "firstName": "Moderator",
+          "middleName": null,
+          "lastName": "5",
+          "birthDate": null,
+          "address": null,
+          "role": "moderator",
+          "createdAt": "2025-07-22T08:10:39.942Z",
+          "updatedAt": "2025-07-22T08:10:39.942Z",
+          "password": "$2b$10$0/YP/NRnzW5vySWO9RcyxeINDZjrBjcBPsrjljFXny5bASAB3A1ZS",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        }
+      ],
+      "admins": [
+        {
+          "id": "dev_admin_2",
+          "email": "admin2@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "2",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:35.851Z",
+          "updatedAt": "2025-07-22T08:10:35.851Z",
+          "password": "$2b$10$C/R.5/qxnc35ebgnG8Ae1Oh8e.9Fd1/ypLlALGrYt8UYU1JiBFtDu",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_3",
+          "email": "admin3@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "3",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:36.343Z",
+          "updatedAt": "2025-07-22T08:10:36.343Z",
+          "password": "$2b$10$LiQSfQTdhn1LOxk2k5uMDepkEfJTc8zZx/1FL3/ej5GHeK5OH8YIq",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_4",
+          "email": "admin4@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "4",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:36.838Z",
+          "updatedAt": "2025-07-22T08:10:36.838Z",
+          "password": "$2b$10$uNTGceRYGtNE7gFDJpdPMussqFPA87rF/cws.qTqHPWqNPd87Hklq",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_5",
+          "email": "admin5@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "5",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:37.338Z",
+          "updatedAt": "2025-07-22T08:10:37.338Z",
+          "password": "$2b$10$uuCCyMVvb.H2zH301P1yyudeuWavEuwBJuJqCR1iRPmL.vzJEVotu",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": null,
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        },
+        {
+          "id": "dev_admin_1",
+          "email": "admin1@mentaratest.dev",
+          "firstName": "Admin",
+          "middleName": null,
+          "lastName": "1",
+          "birthDate": null,
+          "address": null,
+          "role": "admin",
+          "createdAt": "2025-07-22T08:10:35.339Z",
+          "updatedAt": "2025-07-22T12:14:34.541Z",
+          "password": "$2b$10$d3EufHfV0Blogk9SNZSisO1tTTbqMKrSQs1B/dwYQCqWS2WOpX2Pi",
+          "emailVerified": true,
+          "emailVerifyToken": null,
+          "emailVerifyTokenExp": null,
+          "resetToken": null,
+          "resetTokenExpiry": null,
+          "isActive": true,
+          "failedLoginCount": 0,
+          "avatarUrl": null,
+          "coverImageUrl": null,
+          "bio": null,
+          "suspendedAt": null,
+          "suspendedBy": null,
+          "suspensionReason": null,
+          "deactivatedAt": null,
+          "deactivatedBy": null,
+          "deactivationReason": null,
+          "lastLoginAt": "2025-07-22T12:14:34.540Z",
+          "lockoutUntil": null,
+          "client": null,
+          "therapist": null
+        }
+      ]
+    },
+    "phase_2": {
+      "communities": [
+        {
+          "id": "dev_comm_stress-support",
+          "name": "Stress Support",
+          "slug": "stress-support",
+          "description": "A supportive community for individuals managing stress and overwhelm.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:40.403Z",
+          "updatedAt": "2025-07-22T08:10:40.403Z"
+        },
+        {
+          "id": "dev_comm_anxiety-support",
+          "name": "Anxiety Support",
+          "slug": "anxiety-support",
+          "description": "A supportive community for individuals with anxiety disorders.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:40.623Z",
+          "updatedAt": "2025-07-22T08:10:40.623Z"
+        },
+        {
+          "id": "dev_comm_depression-support",
+          "name": "Depression Support",
+          "slug": "depression-support",
+          "description": "A supportive community for individuals with depression.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:40.844Z",
+          "updatedAt": "2025-07-22T08:10:40.844Z"
+        },
+        {
+          "id": "dev_comm_insomnia-support",
+          "name": "Insomnia Support",
+          "slug": "insomnia-support",
+          "description": "A supportive community for individuals struggling with sleep disorders.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:41.066Z",
+          "updatedAt": "2025-07-22T08:10:41.066Z"
+        },
+        {
+          "id": "dev_comm_panic-disorder-support",
+          "name": "Panic Disorder Support",
+          "slug": "panic-disorder-support",
+          "description": "A supportive community for individuals with panic disorder.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:41.281Z",
+          "updatedAt": "2025-07-22T08:10:41.281Z"
+        },
+        {
+          "id": "dev_comm_bipolar-disorder-support",
+          "name": "Bipolar Disorder Support",
+          "slug": "bipolar-disorder-support",
+          "description": "A supportive community for individuals with bipolar disorder (BD).",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:41.499Z",
+          "updatedAt": "2025-07-22T08:10:41.499Z"
+        },
+        {
+          "id": "dev_comm_ocd-support",
+          "name": "OCD Support",
+          "slug": "ocd-support",
+          "description": "A supportive community for individuals with obsessive compulsive disorder.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:41.718Z",
+          "updatedAt": "2025-07-22T08:10:41.718Z"
+        },
+        {
+          "id": "dev_comm_ptsd-support",
+          "name": "PTSD Support",
+          "slug": "ptsd-support",
+          "description": "A supportive community for individuals with post-traumatic stress disorder.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:41.937Z",
+          "updatedAt": "2025-07-22T08:10:41.937Z"
+        },
+        {
+          "id": "dev_comm_social-anxiety-support",
+          "name": "Social Anxiety Support",
+          "slug": "social-anxiety-support",
+          "description": "A supportive community for individuals with social anxiety.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:42.151Z",
+          "updatedAt": "2025-07-22T08:10:42.151Z"
+        },
+        {
+          "id": "dev_comm_phobia-support",
+          "name": "Phobia Support",
+          "slug": "phobia-support",
+          "description": "A supportive community for individuals with phobias and specific fears.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:42.367Z",
+          "updatedAt": "2025-07-22T08:10:42.367Z"
+        },
+        {
+          "id": "dev_comm_burnout-support",
+          "name": "Burnout Support",
+          "slug": "burnout-support",
+          "description": "A supportive community for individuals experiencing burnout.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:42.585Z",
+          "updatedAt": "2025-07-22T08:10:42.585Z"
+        },
+        {
+          "id": "dev_comm_eating-disorders-support",
+          "name": "Eating Disorders Support",
+          "slug": "eating-disorders-support",
+          "description": "A supportive community for individuals with binge eating and eating disorders.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:42.802Z",
+          "updatedAt": "2025-07-22T08:10:42.802Z"
+        },
+        {
+          "id": "dev_comm_adhd-support",
+          "name": "ADHD Support",
+          "slug": "adhd-support",
+          "description": "A supportive community for individuals with ADD/ADHD.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:43.021Z",
+          "updatedAt": "2025-07-22T08:10:43.021Z"
+        },
+        {
+          "id": "dev_comm_substance-use-support",
+          "name": "Substance Use Support",
+          "slug": "substance-use-support",
+          "description": "A supportive community for individuals with substance or alcohol use issues.",
+          "imageUrl": "",
+          "createdAt": "2025-07-22T08:10:43.241Z",
+          "updatedAt": "2025-07-22T08:10:43.241Z"
+        }
+      ]
+    },
+    "phase_3": {
+      "memberships": [
+        {
+          "id": "2a46e518-87fc-465b-81cc-32a28569dace",
+          "joinedAt": "2025-07-22T08:10:43.463Z",
+          "communityId": "dev_comm_stress-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "29b22a8a-dee9-42de-95cd-0735dbe15d0b",
+          "joinedAt": "2025-07-22T08:10:43.684Z",
+          "communityId": "dev_comm_anxiety-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "75bdedfd-b06a-4f47-9aae-6ff18f6d30c1",
+          "joinedAt": "2025-07-22T08:10:43.905Z",
+          "communityId": "dev_comm_depression-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "bec84b28-224a-431d-ac0c-caf2c02a7256",
+          "joinedAt": "2025-07-22T08:10:44.122Z",
+          "communityId": "dev_comm_insomnia-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "c50b6b22-7979-4584-bff3-e40da9637522",
+          "joinedAt": "2025-07-22T08:10:44.341Z",
+          "communityId": "dev_comm_panic-disorder-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "051405b9-aae6-44e5-a0d2-117c40b2f41d",
+          "joinedAt": "2025-07-22T08:10:44.576Z",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "a5239a48-cb94-490d-baf8-e9186790de2d",
+          "joinedAt": "2025-07-22T08:10:44.795Z",
+          "communityId": "dev_comm_ocd-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "03e24198-23ad-4907-878d-7b19cddc561b",
+          "joinedAt": "2025-07-22T08:10:45.026Z",
+          "communityId": "dev_comm_ptsd-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "9099e3bc-0093-4555-a133-612d6973b1c7",
+          "joinedAt": "2025-07-22T08:10:45.248Z",
+          "communityId": "dev_comm_social-anxiety-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "bb8ef281-1729-463b-ad3f-13854dc4ebff",
+          "joinedAt": "2025-07-22T08:10:45.527Z",
+          "communityId": "dev_comm_phobia-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "def70d79-ec31-4c22-a6c2-bb4274f69220",
+          "joinedAt": "2025-07-22T08:10:45.743Z",
+          "communityId": "dev_comm_burnout-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "7c434def-484f-49fe-8c8d-c340782a4163",
+          "joinedAt": "2025-07-22T08:10:45.964Z",
+          "communityId": "dev_comm_eating-disorders-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "8ce83fdf-5813-4ea1-b146-e5013d244e5c",
+          "joinedAt": "2025-07-22T08:10:46.182Z",
+          "communityId": "dev_comm_adhd-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "0ae8f213-e1ed-4028-a200-4beb2cbb5124",
+          "joinedAt": "2025-07-22T08:10:46.402Z",
+          "communityId": "dev_comm_substance-use-support",
+          "userId": "dev_client_1"
+        },
+        {
+          "id": "725dc041-2abb-4842-a86b-6e8b1f741b88",
+          "joinedAt": "2025-07-22T08:10:46.624Z",
+          "communityId": "dev_comm_stress-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "05bb8d6e-cde6-4329-804c-464f37082f0d",
+          "joinedAt": "2025-07-22T08:10:46.842Z",
+          "communityId": "dev_comm_anxiety-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "6f0b3336-b705-4f80-8f5c-40bdc8e108d3",
+          "joinedAt": "2025-07-22T08:10:47.059Z",
+          "communityId": "dev_comm_depression-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "88f2cfcf-7cfe-4ee1-bc5f-6bbb54bd500c",
+          "joinedAt": "2025-07-22T08:10:47.278Z",
+          "communityId": "dev_comm_insomnia-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "4818e3b0-7929-41ea-bad5-76764b6c3f5f",
+          "joinedAt": "2025-07-22T08:10:47.501Z",
+          "communityId": "dev_comm_panic-disorder-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "1af28e90-ec6c-44dc-9a30-08cef16bbbf2",
+          "joinedAt": "2025-07-22T08:10:47.716Z",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "2d7f854e-5c62-4145-ac7e-00ac95667808",
+          "joinedAt": "2025-07-22T08:10:47.940Z",
+          "communityId": "dev_comm_ocd-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "0379ad06-5a2f-4323-b816-00a25b20f47e",
+          "joinedAt": "2025-07-22T08:10:48.156Z",
+          "communityId": "dev_comm_ptsd-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "8d54e6fd-295d-4970-a059-4427257e4937",
+          "joinedAt": "2025-07-22T08:10:48.378Z",
+          "communityId": "dev_comm_social-anxiety-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "df469134-afa2-4e83-951e-f4641708524a",
+          "joinedAt": "2025-07-22T08:10:48.594Z",
+          "communityId": "dev_comm_phobia-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "391bdaa8-f179-41c7-b4cb-a3fe02377bb6",
+          "joinedAt": "2025-07-22T08:10:48.816Z",
+          "communityId": "dev_comm_burnout-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "27406e59-5c7c-4e41-8d14-fb02e76d4d32",
+          "joinedAt": "2025-07-22T08:10:49.033Z",
+          "communityId": "dev_comm_eating-disorders-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "193c11e9-f7ba-422b-995c-63eeffdf9af1",
+          "joinedAt": "2025-07-22T08:10:49.250Z",
+          "communityId": "dev_comm_adhd-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "fd4e77eb-f26f-4c40-9525-f7497c98db9d",
+          "joinedAt": "2025-07-22T08:10:49.466Z",
+          "communityId": "dev_comm_substance-use-support",
+          "userId": "dev_client_2"
+        },
+        {
+          "id": "449fda65-185b-4fd6-aa95-6eed16d7fa71",
+          "joinedAt": "2025-07-22T08:10:49.682Z",
+          "communityId": "dev_comm_stress-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "54ffc3ce-6b38-4ea1-938a-c05bf9a719f8",
+          "joinedAt": "2025-07-22T08:10:49.900Z",
+          "communityId": "dev_comm_anxiety-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "78688de4-250c-4717-a9af-f8d7961afaf6",
+          "joinedAt": "2025-07-22T08:10:50.122Z",
+          "communityId": "dev_comm_depression-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "fbff4a5c-d326-4235-b4b6-43186ca12fdf",
+          "joinedAt": "2025-07-22T08:10:50.340Z",
+          "communityId": "dev_comm_insomnia-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "356fdb8e-3e0a-4b06-bd88-e15d3c166aca",
+          "joinedAt": "2025-07-22T08:10:50.562Z",
+          "communityId": "dev_comm_panic-disorder-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "2af99b95-edf2-4de0-90b8-7d350e3c1b67",
+          "joinedAt": "2025-07-22T08:10:50.779Z",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "260d269c-572a-4e1c-a3a7-753e62bfc5fd",
+          "joinedAt": "2025-07-22T08:10:50.994Z",
+          "communityId": "dev_comm_ocd-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "f524c522-4dc2-4268-9e8b-f040443df463",
+          "joinedAt": "2025-07-22T08:10:51.208Z",
+          "communityId": "dev_comm_ptsd-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "2ebab0ba-d5be-46ab-949d-8c0cd752bdef",
+          "joinedAt": "2025-07-22T08:10:51.423Z",
+          "communityId": "dev_comm_social-anxiety-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "ec0ae301-7235-446d-80f8-6d323b5a5c52",
+          "joinedAt": "2025-07-22T08:10:51.640Z",
+          "communityId": "dev_comm_phobia-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "e814315e-83bb-4630-a43d-4a3bcd758244",
+          "joinedAt": "2025-07-22T08:10:51.872Z",
+          "communityId": "dev_comm_burnout-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "361da258-2852-4afc-b095-16bce2164eb2",
+          "joinedAt": "2025-07-22T08:10:52.105Z",
+          "communityId": "dev_comm_eating-disorders-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "3645765a-9d59-42fd-afbb-737e90a06831",
+          "joinedAt": "2025-07-22T08:10:52.344Z",
+          "communityId": "dev_comm_adhd-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "7ec5be95-45af-4603-a697-0f4f2e6293fd",
+          "joinedAt": "2025-07-22T08:10:52.570Z",
+          "communityId": "dev_comm_substance-use-support",
+          "userId": "dev_client_3"
+        },
+        {
+          "id": "15f0e2ff-485f-4371-9009-5a341dbf8af5",
+          "joinedAt": "2025-07-22T08:10:52.787Z",
+          "communityId": "dev_comm_stress-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "de5127a5-6c5f-4465-b399-5a49926b81eb",
+          "joinedAt": "2025-07-22T08:10:53.003Z",
+          "communityId": "dev_comm_anxiety-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "cb2e49d7-b57d-472d-bd22-71407eb8a315",
+          "joinedAt": "2025-07-22T08:10:53.221Z",
+          "communityId": "dev_comm_depression-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "80aee79a-bce2-495b-b51f-cc6f0249bc37",
+          "joinedAt": "2025-07-22T08:10:53.439Z",
+          "communityId": "dev_comm_insomnia-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "dfcf22ee-f220-44d6-bacb-c440d80b62ae",
+          "joinedAt": "2025-07-22T08:10:53.655Z",
+          "communityId": "dev_comm_panic-disorder-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "010f0656-b63c-4835-8a80-f826c8102558",
+          "joinedAt": "2025-07-22T08:10:53.870Z",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "9a15b5db-f77a-4eab-ad85-af2a17cbe337",
+          "joinedAt": "2025-07-22T08:10:54.110Z",
+          "communityId": "dev_comm_ocd-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "f9686df5-1f25-497f-ae34-9bcfdcf48e40",
+          "joinedAt": "2025-07-22T08:10:54.328Z",
+          "communityId": "dev_comm_ptsd-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "89b5cf3d-d771-4801-83ee-e7e6d402ea0b",
+          "joinedAt": "2025-07-22T08:10:54.544Z",
+          "communityId": "dev_comm_social-anxiety-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "794819bb-184a-4c98-af85-e1ae7a52c584",
+          "joinedAt": "2025-07-22T08:10:54.768Z",
+          "communityId": "dev_comm_phobia-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "c2c6dd5e-b4da-40e4-a0ee-cfc2c5cd420c",
+          "joinedAt": "2025-07-22T08:10:54.990Z",
+          "communityId": "dev_comm_burnout-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "30d286f7-7f00-48f4-95ea-e91ae7d5496c",
+          "joinedAt": "2025-07-22T08:10:55.208Z",
+          "communityId": "dev_comm_eating-disorders-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "662d339c-590e-404b-a2e5-f7696d05c0b7",
+          "joinedAt": "2025-07-22T08:10:55.428Z",
+          "communityId": "dev_comm_adhd-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "52f342c3-8758-4dbb-a113-4651a052eafb",
+          "joinedAt": "2025-07-22T08:10:55.651Z",
+          "communityId": "dev_comm_substance-use-support",
+          "userId": "dev_client_4"
+        },
+        {
+          "id": "eba8d108-2cdc-4be5-b908-0a04dafab792",
+          "joinedAt": "2025-07-22T08:10:55.871Z",
+          "communityId": "dev_comm_stress-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "abbae75e-58cc-4730-a7c4-7d06861952bc",
+          "joinedAt": "2025-07-22T08:10:56.091Z",
+          "communityId": "dev_comm_anxiety-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "b6513793-4d54-4d67-ae2b-8fcb1b30201b",
+          "joinedAt": "2025-07-22T08:10:56.308Z",
+          "communityId": "dev_comm_depression-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "ffc160cf-50a4-4a73-9371-eb30a6f38d11",
+          "joinedAt": "2025-07-22T08:10:56.526Z",
+          "communityId": "dev_comm_insomnia-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "00eff744-6eea-4644-89e8-33ef0bda6b01",
+          "joinedAt": "2025-07-22T08:10:56.743Z",
+          "communityId": "dev_comm_panic-disorder-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "3be2c90e-39e5-49cd-b883-b5e4d024dc04",
+          "joinedAt": "2025-07-22T08:10:56.963Z",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "a6dd24f3-8fc9-4ca7-8b26-460e291c4c36",
+          "joinedAt": "2025-07-22T08:10:57.181Z",
+          "communityId": "dev_comm_ocd-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "89a9a104-e81e-4244-a16a-9f32ac9084c7",
+          "joinedAt": "2025-07-22T08:10:57.397Z",
+          "communityId": "dev_comm_ptsd-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "67a183b4-fbb7-4d23-9311-bf7fd890924f",
+          "joinedAt": "2025-07-22T08:10:57.618Z",
+          "communityId": "dev_comm_social-anxiety-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "1a2c79dd-29ff-4445-a494-ff7e8738ca0d",
+          "joinedAt": "2025-07-22T08:10:57.889Z",
+          "communityId": "dev_comm_phobia-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "96c091c3-1c03-4405-8541-a726f9693d8a",
+          "joinedAt": "2025-07-22T08:10:58.166Z",
+          "communityId": "dev_comm_burnout-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "30a37f46-93c4-4408-9502-a161f7fd1906",
+          "joinedAt": "2025-07-22T08:10:58.438Z",
+          "communityId": "dev_comm_eating-disorders-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "b10996c3-432a-4c42-b3e0-64a04912dfa7",
+          "joinedAt": "2025-07-22T08:10:58.722Z",
+          "communityId": "dev_comm_adhd-support",
+          "userId": "dev_client_5"
+        },
+        {
+          "id": "eeb257bc-4073-4c1a-887b-1e08cb70f2c7",
+          "joinedAt": "2025-07-22T08:10:59.022Z",
+          "communityId": "dev_comm_substance-use-support",
+          "userId": "dev_client_5"
+        }
+      ],
+      "moderatorAssignments": [
+        {
+          "id": "8b2c8a17-477c-4fc2-ba63-f7bd61022edf",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_stress-support",
+          "assignedAt": "2025-07-22T08:10:59.239Z"
+        },
+        {
+          "id": "bbe5ce57-38b3-45a9-b540-501ef3d00030",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_anxiety-support",
+          "assignedAt": "2025-07-22T08:10:59.459Z"
+        },
+        {
+          "id": "2c80e842-0cb2-410e-a464-9171b664997f",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_depression-support",
+          "assignedAt": "2025-07-22T08:10:59.715Z"
+        },
+        {
+          "id": "237f33cb-8b8c-4195-917c-a49449bd0269",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_insomnia-support",
+          "assignedAt": "2025-07-22T08:10:59.958Z"
+        },
+        {
+          "id": "973a522e-8a58-43f5-ac17-8dff605a564d",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_panic-disorder-support",
+          "assignedAt": "2025-07-22T08:11:00.181Z"
+        },
+        {
+          "id": "2b6abe21-ad76-4ddb-b73c-af0a02510829",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "assignedAt": "2025-07-22T08:11:00.403Z"
+        },
+        {
+          "id": "1ffbb4f1-3551-414e-8b4d-a9f77c8db87a",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_ocd-support",
+          "assignedAt": "2025-07-22T08:11:00.900Z"
+        },
+        {
+          "id": "d7e6cfc7-2fea-4c58-a201-6640069cba45",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_ptsd-support",
+          "assignedAt": "2025-07-22T08:11:01.121Z"
+        },
+        {
+          "id": "e760d4c9-27a2-4819-9497-5344a5069d7d",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_social-anxiety-support",
+          "assignedAt": "2025-07-22T08:11:01.339Z"
+        },
+        {
+          "id": "35c284e1-d0ff-439a-b8f0-9a60f928e364",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_phobia-support",
+          "assignedAt": "2025-07-22T08:11:01.595Z"
+        },
+        {
+          "id": "4183f584-8a6b-49f8-b8a7-1aa27b28db8f",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_burnout-support",
+          "assignedAt": "2025-07-22T08:11:01.838Z"
+        },
+        {
+          "id": "7d678c46-46dc-4907-8934-56a0e2ec7489",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_eating-disorders-support",
+          "assignedAt": "2025-07-22T08:11:02.055Z"
+        },
+        {
+          "id": "da4fc60d-a89f-45b3-a3d6-b28f5b090201",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_adhd-support",
+          "assignedAt": "2025-07-22T08:11:02.273Z"
+        },
+        {
+          "id": "f85611b5-5ccc-43e4-8e7d-ff155e7d542f",
+          "moderatorId": "dev_moderator_1",
+          "communityId": "dev_comm_substance-use-support",
+          "assignedAt": "2025-07-22T08:11:02.541Z"
+        },
+        {
+          "id": "353da39c-a4d0-40c6-93ad-9ce2294826ea",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_stress-support",
+          "assignedAt": "2025-07-22T08:11:02.760Z"
+        },
+        {
+          "id": "df00a173-7e45-4814-bf55-c85ce51e7687",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_anxiety-support",
+          "assignedAt": "2025-07-22T08:11:02.977Z"
+        },
+        {
+          "id": "517d1f1a-3d5b-4345-b768-9bc5697be1d6",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_depression-support",
+          "assignedAt": "2025-07-22T08:11:03.195Z"
+        },
+        {
+          "id": "5c0776ed-5e40-4982-a7f2-35136fec100f",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_insomnia-support",
+          "assignedAt": "2025-07-22T08:11:03.437Z"
+        },
+        {
+          "id": "95f430e5-23ec-42c0-bf19-32659c8d74de",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_panic-disorder-support",
+          "assignedAt": "2025-07-22T08:11:03.661Z"
+        },
+        {
+          "id": "85a297ec-03fd-448a-9fc9-394ef84a8af8",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "assignedAt": "2025-07-22T08:11:03.881Z"
+        },
+        {
+          "id": "fdeecbde-ef2e-45b5-8fec-0edd18c776e5",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_ocd-support",
+          "assignedAt": "2025-07-22T08:11:04.100Z"
+        },
+        {
+          "id": "a4c3f60d-f7ac-453a-9b6d-67b98e41fb07",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_ptsd-support",
+          "assignedAt": "2025-07-22T08:11:04.343Z"
+        },
+        {
+          "id": "6242e014-9eff-4351-bdcb-8f47185ddb25",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_social-anxiety-support",
+          "assignedAt": "2025-07-22T08:11:04.560Z"
+        },
+        {
+          "id": "5f70ec77-e791-4ff0-bffb-1b8aa652befa",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_phobia-support",
+          "assignedAt": "2025-07-22T08:11:04.775Z"
+        },
+        {
+          "id": "a98ed923-a56a-4f51-bc8b-4f44493ad64e",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_burnout-support",
+          "assignedAt": "2025-07-22T08:11:04.996Z"
+        },
+        {
+          "id": "7780da5e-dceb-45fe-a7b7-dfd7561595d7",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_eating-disorders-support",
+          "assignedAt": "2025-07-22T08:11:05.240Z"
+        },
+        {
+          "id": "360661ec-9161-4fef-9ce5-e8bf3e27bde6",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_adhd-support",
+          "assignedAt": "2025-07-22T08:11:05.467Z"
+        },
+        {
+          "id": "1e0f8610-cc27-4b29-a5f5-8438f388095a",
+          "moderatorId": "dev_moderator_2",
+          "communityId": "dev_comm_substance-use-support",
+          "assignedAt": "2025-07-22T08:11:05.683Z"
+        },
+        {
+          "id": "ec02415c-cd1a-4d5e-b05f-012d95a23857",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_stress-support",
+          "assignedAt": "2025-07-22T08:11:05.901Z"
+        },
+        {
+          "id": "2b4ad6ed-316d-4163-9c35-533f8315a0c3",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_anxiety-support",
+          "assignedAt": "2025-07-22T08:11:06.127Z"
+        },
+        {
+          "id": "2197c2c6-2fa6-45af-9e55-4b4f69173454",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_depression-support",
+          "assignedAt": "2025-07-22T08:11:06.343Z"
+        },
+        {
+          "id": "8eafec3a-c45f-4762-a734-9120a2cb6775",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_insomnia-support",
+          "assignedAt": "2025-07-22T08:11:06.561Z"
+        },
+        {
+          "id": "d02984bc-c80b-4786-8ba9-be67afab9c84",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_panic-disorder-support",
+          "assignedAt": "2025-07-22T08:11:06.777Z"
+        },
+        {
+          "id": "1f61e5b1-d13a-48bd-9af9-6b970ddf0d76",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "assignedAt": "2025-07-22T08:11:07.036Z"
+        },
+        {
+          "id": "26b70e68-8456-4b3c-a26f-a3bf8c7304aa",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_ocd-support",
+          "assignedAt": "2025-07-22T08:11:07.262Z"
+        },
+        {
+          "id": "0dd606d4-db27-4705-b89b-587125d7928c",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_ptsd-support",
+          "assignedAt": "2025-07-22T08:11:07.480Z"
+        },
+        {
+          "id": "7321b8e9-4d01-4754-b9a5-26f90630eb80",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_social-anxiety-support",
+          "assignedAt": "2025-07-22T08:11:07.696Z"
+        },
+        {
+          "id": "928f7146-5d77-443b-a3c5-628ad8935591",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_phobia-support",
+          "assignedAt": "2025-07-22T08:11:07.919Z"
+        },
+        {
+          "id": "53ae9a09-1eef-4147-ae24-b8861dc63f6e",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_burnout-support",
+          "assignedAt": "2025-07-22T08:11:08.138Z"
+        },
+        {
+          "id": "b88357a1-2a78-4b6a-be5c-1fcdf939bf0e",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_eating-disorders-support",
+          "assignedAt": "2025-07-22T08:11:08.364Z"
+        },
+        {
+          "id": "7a6ae6a2-f399-4a1a-9432-9425853fc9e8",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_adhd-support",
+          "assignedAt": "2025-07-22T08:11:08.584Z"
+        },
+        {
+          "id": "6534e82c-8598-4c7b-bfba-f037490519ab",
+          "moderatorId": "dev_moderator_3",
+          "communityId": "dev_comm_substance-use-support",
+          "assignedAt": "2025-07-22T08:11:08.800Z"
+        },
+        {
+          "id": "36974fb1-e43b-49c5-a50c-bc0b56799fce",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_stress-support",
+          "assignedAt": "2025-07-22T08:11:09.018Z"
+        },
+        {
+          "id": "f0f32a67-6a5b-4c87-87be-cdb92f3df5ee",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_anxiety-support",
+          "assignedAt": "2025-07-22T08:11:09.238Z"
+        },
+        {
+          "id": "ed81df8e-24b3-4dd3-8816-56632efbcd29",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_depression-support",
+          "assignedAt": "2025-07-22T08:11:09.455Z"
+        },
+        {
+          "id": "37287fab-1908-490d-8f89-71ba7495f5f4",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_insomnia-support",
+          "assignedAt": "2025-07-22T08:11:09.673Z"
+        },
+        {
+          "id": "47cb6a23-86b3-4c37-959b-1c7f846ef2f4",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_panic-disorder-support",
+          "assignedAt": "2025-07-22T08:11:09.898Z"
+        },
+        {
+          "id": "08091451-dd0a-4fef-92b9-aa63bbfa6d7a",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "assignedAt": "2025-07-22T08:11:10.121Z"
+        },
+        {
+          "id": "6f374214-a3eb-4590-879a-d41fa00534b1",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_ocd-support",
+          "assignedAt": "2025-07-22T08:11:10.338Z"
+        },
+        {
+          "id": "52fa2f84-a305-47ca-8bdf-8ba74caf0b63",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_ptsd-support",
+          "assignedAt": "2025-07-22T08:11:10.556Z"
+        },
+        {
+          "id": "777b61b5-0378-4536-814d-645a6dde2532",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_social-anxiety-support",
+          "assignedAt": "2025-07-22T08:11:10.774Z"
+        },
+        {
+          "id": "3e755b02-f6cf-49c7-aa3d-14c6ae0a64f6",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_phobia-support",
+          "assignedAt": "2025-07-22T08:11:10.991Z"
+        },
+        {
+          "id": "5b5715ef-9f9e-465e-9ab4-9a3f8f317ef0",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_burnout-support",
+          "assignedAt": "2025-07-22T08:11:11.210Z"
+        },
+        {
+          "id": "e6930540-bb0c-48c3-b2d2-085fe789650b",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_eating-disorders-support",
+          "assignedAt": "2025-07-22T08:11:11.430Z"
+        },
+        {
+          "id": "065cc7d7-d798-489e-96dc-9c45e902574c",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_adhd-support",
+          "assignedAt": "2025-07-22T08:11:11.647Z"
+        },
+        {
+          "id": "92bafeae-2e74-4499-af06-f1116d308a14",
+          "moderatorId": "dev_moderator_4",
+          "communityId": "dev_comm_substance-use-support",
+          "assignedAt": "2025-07-22T08:11:11.868Z"
+        },
+        {
+          "id": "2fd99276-6d0c-4388-b78e-b44ee471b971",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_stress-support",
+          "assignedAt": "2025-07-22T08:11:12.090Z"
+        },
+        {
+          "id": "5c69f72b-1ccb-4cbe-8ecd-07c4335d417c",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_anxiety-support",
+          "assignedAt": "2025-07-22T08:11:12.307Z"
+        },
+        {
+          "id": "638efac9-c0d1-426d-bd89-6f2cbbcf9e46",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_depression-support",
+          "assignedAt": "2025-07-22T08:11:12.524Z"
+        },
+        {
+          "id": "c6fd8f7e-fb10-4faa-b350-c44f21ff8213",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_insomnia-support",
+          "assignedAt": "2025-07-22T08:11:12.741Z"
+        },
+        {
+          "id": "aa78c317-7de3-45cc-95cb-fd6d1516531d",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_panic-disorder-support",
+          "assignedAt": "2025-07-22T08:11:12.960Z"
+        },
+        {
+          "id": "6e20ef8b-1d7d-41e5-ab27-444a6f10bcaf",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_bipolar-disorder-support",
+          "assignedAt": "2025-07-22T08:11:13.181Z"
+        },
+        {
+          "id": "703b21a8-3e24-496e-a516-4fcac0dffe74",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_ocd-support",
+          "assignedAt": "2025-07-22T08:11:13.403Z"
+        },
+        {
+          "id": "95b6a9c6-0128-4ddb-88ee-be0e8349628c",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_ptsd-support",
+          "assignedAt": "2025-07-22T08:11:13.619Z"
+        },
+        {
+          "id": "3fa188fe-ae10-4ba9-abb0-14242d7761d4",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_social-anxiety-support",
+          "assignedAt": "2025-07-22T08:11:13.839Z"
+        },
+        {
+          "id": "4934bfc6-f428-4888-bfc5-6d5209565a2a",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_phobia-support",
+          "assignedAt": "2025-07-22T08:11:14.058Z"
+        },
+        {
+          "id": "1c26bb50-fc2e-470d-ad99-5885d395bab3",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_burnout-support",
+          "assignedAt": "2025-07-22T08:11:14.278Z"
+        },
+        {
+          "id": "76463d46-cd00-48e3-81ce-3fd77df5435e",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_eating-disorders-support",
+          "assignedAt": "2025-07-22T08:11:14.495Z"
+        },
+        {
+          "id": "8b496ba3-a79d-4c60-bffb-66b965993aef",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_adhd-support",
+          "assignedAt": "2025-07-22T08:11:14.726Z"
+        },
+        {
+          "id": "e748ae11-b21e-4fba-868f-8b60c7360a50",
+          "moderatorId": "dev_moderator_5",
+          "communityId": "dev_comm_substance-use-support",
+          "assignedAt": "2025-07-22T08:11:14.943Z"
+        }
+      ]
+    },
+    "phase_4": {
+      "relationships": [
+        {
+          "relationship": {
+            "id": "2f8aee91-9832-44ac-9911-08c53d6c7206",
+            "clientId": "dev_client_1",
+            "therapistId": "dev_therapist_2",
+            "assignedAt": "2024-11-16T06:46:55.449Z"
+          },
+          "client": {
+            "user": {
+              "id": "dev_client_1",
+              "email": "client1@mentaratest.dev",
+              "firstName": "Client",
+              "middleName": null,
+              "lastName": "1",
+              "birthDate": null,
+              "address": null,
+              "role": "client",
+              "createdAt": "2025-07-22T08:10:30.208Z",
+              "updatedAt": "2025-07-22T13:05:01.804Z",
+              "password": "$2b$10$g40HoBFTMqIpHjzx/1K2NurTiLLV9Vo.Nc.LqfzRm3MVrrD9iOQcm",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": "2025-07-22T13:05:01.803Z",
+              "lockoutUntil": null,
+              "client": {
+                "userId": "dev_client_1",
+                "hasSeenTherapistRecommendations": false,
+                "createdAt": "2025-07-22T08:10:30.428Z",
+                "updatedAt": "2025-07-22T08:10:30.428Z"
+              },
+              "therapist": null
+            },
+            "client": {
+              "userId": "dev_client_1",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:30.428Z",
+              "updatedAt": "2025-07-22T08:10:30.428Z"
+            }
+          },
+          "therapist": {
+            "user": {
+              "id": "dev_therapist_2",
+              "email": "therapist2@mentaratest.dev",
+              "firstName": "Dr. Therapist",
+              "middleName": null,
+              "lastName": "2",
+              "birthDate": null,
+              "address": null,
+              "role": "therapist",
+              "createdAt": "2025-07-22T08:10:33.271Z",
+              "updatedAt": "2025-07-22T08:10:33.271Z",
+              "password": "$2b$10$IqR2St2TUP95itCjH0BKI.h8FaVY1NMZA6.YGbOSmUP5/aIzIp/qK",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": null,
+              "therapist": {
+                "userId": "dev_therapist_2",
+                "mobile": "+15550002222",
+                "province": "Test Province",
+                "timezone": "UTC",
+                "status": "APPROVED",
+                "submissionDate": "2025-07-22T08:10:33.491Z",
+                "processingDate": "2025-07-22T08:10:33.491Z",
+                "processedByAdminId": null,
+                "providerType": "Licensed Psychologist",
+                "professionalLicenseType": "Clinical Psychology",
+                "isPRCLicensed": "Yes",
+                "prcLicenseNumber": "PRC22222",
+                "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+                "practiceStartDate": "2020-01-01T00:00:00.000Z",
+                "licenseVerified": false,
+                "licenseVerifiedAt": null,
+                "licenseVerifiedBy": null,
+                "certifications": null,
+                "certificateUrls": [],
+                "certificateNames": [],
+                "licenseUrls": [],
+                "licenseNames": [],
+                "documentUrls": [],
+                "documentNames": [],
+                "yearsOfExperience": null,
+                "educationBackground": null,
+                "specialCertifications": [],
+                "practiceLocation": null,
+                "acceptsInsurance": false,
+                "acceptedInsuranceTypes": [],
+                "areasOfExpertise": [],
+                "assessmentTools": [],
+                "therapeuticApproachesUsedList": [],
+                "languagesOffered": [],
+                "providedOnlineTherapyBefore": true,
+                "comfortableUsingVideoConferencing": true,
+                "preferredSessionLength": [
+                  60
+                ],
+                "privateConfidentialSpace": null,
+                "compliesWithDataPrivacyAct": true,
+                "professionalLiabilityInsurance": null,
+                "complaintsOrDisciplinaryActions": null,
+                "willingToAbideByPlatformGuidelines": true,
+                "expertise": [
+                  "General Therapy"
+                ],
+                "approaches": [
+                  "CBT"
+                ],
+                "languages": [
+                  "English"
+                ],
+                "illnessSpecializations": [
+                  "Anxiety",
+                  "Depression"
+                ],
+                "acceptTypes": [
+                  "Individual"
+                ],
+                "treatmentSuccessRates": {},
+                "sessionLength": "60 minutes",
+                "hourlyRate": "100",
+                "createdAt": "2025-07-22T08:10:33.491Z",
+                "updatedAt": "2025-07-22T08:10:33.491Z"
+              }
+            },
+            "therapist": {
+              "userId": "dev_therapist_2",
+              "mobile": "+15550002222",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:33.491Z",
+              "processingDate": "2025-07-22T08:10:33.491Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC22222",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:33.491Z",
+              "updatedAt": "2025-07-22T08:10:33.491Z"
+            }
+          }
+        },
+        {
+          "relationship": {
+            "id": "afbe9fad-b065-4e51-bf36-a50b34d917ea",
+            "clientId": "dev_client_5",
+            "therapistId": "dev_therapist_4",
+            "assignedAt": "2025-03-19T08:02:39.749Z"
+          },
+          "client": {
+            "user": {
+              "id": "dev_client_5",
+              "email": "client5@mentaratest.dev",
+              "firstName": "Client",
+              "middleName": null,
+              "lastName": "5",
+              "birthDate": null,
+              "address": null,
+              "role": "client",
+              "createdAt": "2025-07-22T08:10:32.250Z",
+              "updatedAt": "2025-07-22T08:10:32.250Z",
+              "password": "$2b$10$bFGn7oO7j.W6sFQ6OnJzpufkjXl1hXKP41hsf1bQol6YgYwuKGD.m",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": {
+                "userId": "dev_client_5",
+                "hasSeenTherapistRecommendations": false,
+                "createdAt": "2025-07-22T08:10:32.474Z",
+                "updatedAt": "2025-07-22T08:10:32.474Z"
+              },
+              "therapist": null
+            },
+            "client": {
+              "userId": "dev_client_5",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:32.474Z",
+              "updatedAt": "2025-07-22T08:10:32.474Z"
+            }
+          },
+          "therapist": {
+            "user": {
+              "id": "dev_therapist_4",
+              "email": "therapist4@mentaratest.dev",
+              "firstName": "Dr. Therapist",
+              "middleName": null,
+              "lastName": "4",
+              "birthDate": null,
+              "address": null,
+              "role": "therapist",
+              "createdAt": "2025-07-22T08:10:34.287Z",
+              "updatedAt": "2025-07-22T08:10:34.287Z",
+              "password": "$2b$10$QfSyPa2UHvKvgaM7YGfnGeCv.D/MJC6jEWnj9c6Q90EihQTfg.1Iy",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": null,
+              "therapist": {
+                "userId": "dev_therapist_4",
+                "mobile": "+15550004444",
+                "province": "Test Province",
+                "timezone": "UTC",
+                "status": "APPROVED",
+                "submissionDate": "2025-07-22T08:10:34.510Z",
+                "processingDate": "2025-07-22T08:10:34.510Z",
+                "processedByAdminId": null,
+                "providerType": "Licensed Psychologist",
+                "professionalLicenseType": "Clinical Psychology",
+                "isPRCLicensed": "Yes",
+                "prcLicenseNumber": "PRC44444",
+                "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+                "practiceStartDate": "2020-01-01T00:00:00.000Z",
+                "licenseVerified": false,
+                "licenseVerifiedAt": null,
+                "licenseVerifiedBy": null,
+                "certifications": null,
+                "certificateUrls": [],
+                "certificateNames": [],
+                "licenseUrls": [],
+                "licenseNames": [],
+                "documentUrls": [],
+                "documentNames": [],
+                "yearsOfExperience": null,
+                "educationBackground": null,
+                "specialCertifications": [],
+                "practiceLocation": null,
+                "acceptsInsurance": false,
+                "acceptedInsuranceTypes": [],
+                "areasOfExpertise": [],
+                "assessmentTools": [],
+                "therapeuticApproachesUsedList": [],
+                "languagesOffered": [],
+                "providedOnlineTherapyBefore": true,
+                "comfortableUsingVideoConferencing": true,
+                "preferredSessionLength": [
+                  60
+                ],
+                "privateConfidentialSpace": null,
+                "compliesWithDataPrivacyAct": true,
+                "professionalLiabilityInsurance": null,
+                "complaintsOrDisciplinaryActions": null,
+                "willingToAbideByPlatformGuidelines": true,
+                "expertise": [
+                  "General Therapy"
+                ],
+                "approaches": [
+                  "CBT"
+                ],
+                "languages": [
+                  "English"
+                ],
+                "illnessSpecializations": [
+                  "Anxiety",
+                  "Depression"
+                ],
+                "acceptTypes": [
+                  "Individual"
+                ],
+                "treatmentSuccessRates": {},
+                "sessionLength": "60 minutes",
+                "hourlyRate": "100",
+                "createdAt": "2025-07-22T08:10:34.510Z",
+                "updatedAt": "2025-07-22T08:10:34.510Z"
+              }
+            },
+            "therapist": {
+              "userId": "dev_therapist_4",
+              "mobile": "+15550004444",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:34.510Z",
+              "processingDate": "2025-07-22T08:10:34.510Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC44444",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:34.510Z",
+              "updatedAt": "2025-07-22T08:10:34.510Z"
+            }
+          }
+        },
+        {
+          "relationship": {
+            "id": "2b7dddd5-077b-4a7a-8a8c-ec62b46efe8d",
+            "clientId": "dev_client_4",
+            "therapistId": "dev_therapist_1",
+            "assignedAt": "2025-02-09T09:50:51.194Z"
+          },
+          "client": {
+            "user": {
+              "id": "dev_client_4",
+              "email": "client4@mentaratest.dev",
+              "firstName": "Client",
+              "middleName": null,
+              "lastName": "4",
+              "birthDate": null,
+              "address": null,
+              "role": "client",
+              "createdAt": "2025-07-22T08:10:31.738Z",
+              "updatedAt": "2025-07-22T08:10:31.738Z",
+              "password": "$2b$10$x64Fz3fm/Oe/RFIlOjxPOepoxrUhbRTpyoO5FDryzrS01boElQCUO",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": {
+                "userId": "dev_client_4",
+                "hasSeenTherapistRecommendations": false,
+                "createdAt": "2025-07-22T08:10:31.964Z",
+                "updatedAt": "2025-07-22T08:10:31.964Z"
+              },
+              "therapist": null
+            },
+            "client": {
+              "userId": "dev_client_4",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:31.964Z",
+              "updatedAt": "2025-07-22T08:10:31.964Z"
+            }
+          },
+          "therapist": {
+            "user": {
+              "id": "dev_therapist_1",
+              "email": "therapist1@mentaratest.dev",
+              "firstName": "Dr. Therapist",
+              "middleName": null,
+              "lastName": "1",
+              "birthDate": null,
+              "address": null,
+              "role": "therapist",
+              "createdAt": "2025-07-22T08:10:32.767Z",
+              "updatedAt": "2025-07-22T08:10:32.767Z",
+              "password": "$2b$10$z7qbLWQSX2rGSGCJ8USclesQ.GkCSev74RtF8.qG2yUGYxJeP5g1W",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": null,
+              "therapist": {
+                "userId": "dev_therapist_1",
+                "mobile": "+15550001111",
+                "province": "Test Province",
+                "timezone": "UTC",
+                "status": "APPROVED",
+                "submissionDate": "2025-07-22T08:10:32.991Z",
+                "processingDate": "2025-07-22T08:10:32.991Z",
+                "processedByAdminId": null,
+                "providerType": "Licensed Psychologist",
+                "professionalLicenseType": "Clinical Psychology",
+                "isPRCLicensed": "Yes",
+                "prcLicenseNumber": "PRC11111",
+                "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+                "practiceStartDate": "2020-01-01T00:00:00.000Z",
+                "licenseVerified": false,
+                "licenseVerifiedAt": null,
+                "licenseVerifiedBy": null,
+                "certifications": null,
+                "certificateUrls": [],
+                "certificateNames": [],
+                "licenseUrls": [],
+                "licenseNames": [],
+                "documentUrls": [],
+                "documentNames": [],
+                "yearsOfExperience": null,
+                "educationBackground": null,
+                "specialCertifications": [],
+                "practiceLocation": null,
+                "acceptsInsurance": false,
+                "acceptedInsuranceTypes": [],
+                "areasOfExpertise": [],
+                "assessmentTools": [],
+                "therapeuticApproachesUsedList": [],
+                "languagesOffered": [],
+                "providedOnlineTherapyBefore": true,
+                "comfortableUsingVideoConferencing": true,
+                "preferredSessionLength": [
+                  60
+                ],
+                "privateConfidentialSpace": null,
+                "compliesWithDataPrivacyAct": true,
+                "professionalLiabilityInsurance": null,
+                "complaintsOrDisciplinaryActions": null,
+                "willingToAbideByPlatformGuidelines": true,
+                "expertise": [
+                  "General Therapy"
+                ],
+                "approaches": [
+                  "CBT"
+                ],
+                "languages": [
+                  "English"
+                ],
+                "illnessSpecializations": [
+                  "Anxiety",
+                  "Depression"
+                ],
+                "acceptTypes": [
+                  "Individual"
+                ],
+                "treatmentSuccessRates": {},
+                "sessionLength": "60 minutes",
+                "hourlyRate": "100",
+                "createdAt": "2025-07-22T08:10:32.991Z",
+                "updatedAt": "2025-07-22T08:10:32.991Z"
+              }
+            },
+            "therapist": {
+              "userId": "dev_therapist_1",
+              "mobile": "+15550001111",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:32.991Z",
+              "processingDate": "2025-07-22T08:10:32.991Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC11111",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:32.991Z",
+              "updatedAt": "2025-07-22T08:10:32.991Z"
+            }
+          }
+        },
+        {
+          "relationship": {
+            "id": "0735458c-e86c-4c21-99df-f90040f72403",
+            "clientId": "dev_client_2",
+            "therapistId": "dev_therapist_2",
+            "assignedAt": "2025-03-26T01:38:09.061Z"
+          },
+          "client": {
+            "user": {
+              "id": "dev_client_2",
+              "email": "client2@mentaratest.dev",
+              "firstName": "Client",
+              "middleName": null,
+              "lastName": "2",
+              "birthDate": null,
+              "address": null,
+              "role": "client",
+              "createdAt": "2025-07-22T08:10:30.719Z",
+              "updatedAt": "2025-07-22T08:10:30.719Z",
+              "password": "$2b$10$qxkip8D8.w6JC.ULZ6E6uOjyMNIcFoRgFviGPhgE/Y8mSMyfHB12C",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": {
+                "userId": "dev_client_2",
+                "hasSeenTherapistRecommendations": false,
+                "createdAt": "2025-07-22T08:10:30.940Z",
+                "updatedAt": "2025-07-22T08:10:30.940Z"
+              },
+              "therapist": null
+            },
+            "client": {
+              "userId": "dev_client_2",
+              "hasSeenTherapistRecommendations": false,
+              "createdAt": "2025-07-22T08:10:30.940Z",
+              "updatedAt": "2025-07-22T08:10:30.940Z"
+            }
+          },
+          "therapist": {
+            "user": {
+              "id": "dev_therapist_2",
+              "email": "therapist2@mentaratest.dev",
+              "firstName": "Dr. Therapist",
+              "middleName": null,
+              "lastName": "2",
+              "birthDate": null,
+              "address": null,
+              "role": "therapist",
+              "createdAt": "2025-07-22T08:10:33.271Z",
+              "updatedAt": "2025-07-22T08:10:33.271Z",
+              "password": "$2b$10$IqR2St2TUP95itCjH0BKI.h8FaVY1NMZA6.YGbOSmUP5/aIzIp/qK",
+              "emailVerified": true,
+              "emailVerifyToken": null,
+              "emailVerifyTokenExp": null,
+              "resetToken": null,
+              "resetTokenExpiry": null,
+              "isActive": true,
+              "failedLoginCount": 0,
+              "avatarUrl": null,
+              "coverImageUrl": null,
+              "bio": null,
+              "suspendedAt": null,
+              "suspendedBy": null,
+              "suspensionReason": null,
+              "deactivatedAt": null,
+              "deactivatedBy": null,
+              "deactivationReason": null,
+              "lastLoginAt": null,
+              "lockoutUntil": null,
+              "client": null,
+              "therapist": {
+                "userId": "dev_therapist_2",
+                "mobile": "+15550002222",
+                "province": "Test Province",
+                "timezone": "UTC",
+                "status": "APPROVED",
+                "submissionDate": "2025-07-22T08:10:33.491Z",
+                "processingDate": "2025-07-22T08:10:33.491Z",
+                "processedByAdminId": null,
+                "providerType": "Licensed Psychologist",
+                "professionalLicenseType": "Clinical Psychology",
+                "isPRCLicensed": "Yes",
+                "prcLicenseNumber": "PRC22222",
+                "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+                "practiceStartDate": "2020-01-01T00:00:00.000Z",
+                "licenseVerified": false,
+                "licenseVerifiedAt": null,
+                "licenseVerifiedBy": null,
+                "certifications": null,
+                "certificateUrls": [],
+                "certificateNames": [],
+                "licenseUrls": [],
+                "licenseNames": [],
+                "documentUrls": [],
+                "documentNames": [],
+                "yearsOfExperience": null,
+                "educationBackground": null,
+                "specialCertifications": [],
+                "practiceLocation": null,
+                "acceptsInsurance": false,
+                "acceptedInsuranceTypes": [],
+                "areasOfExpertise": [],
+                "assessmentTools": [],
+                "therapeuticApproachesUsedList": [],
+                "languagesOffered": [],
+                "providedOnlineTherapyBefore": true,
+                "comfortableUsingVideoConferencing": true,
+                "preferredSessionLength": [
+                  60
+                ],
+                "privateConfidentialSpace": null,
+                "compliesWithDataPrivacyAct": true,
+                "professionalLiabilityInsurance": null,
+                "complaintsOrDisciplinaryActions": null,
+                "willingToAbideByPlatformGuidelines": true,
+                "expertise": [
+                  "General Therapy"
+                ],
+                "approaches": [
+                  "CBT"
+                ],
+                "languages": [
+                  "English"
+                ],
+                "illnessSpecializations": [
+                  "Anxiety",
+                  "Depression"
+                ],
+                "acceptTypes": [
+                  "Individual"
+                ],
+                "treatmentSuccessRates": {},
+                "sessionLength": "60 minutes",
+                "hourlyRate": "100",
+                "createdAt": "2025-07-22T08:10:33.491Z",
+                "updatedAt": "2025-07-22T08:10:33.491Z"
+              }
+            },
+            "therapist": {
+              "userId": "dev_therapist_2",
+              "mobile": "+15550002222",
+              "province": "Test Province",
+              "timezone": "UTC",
+              "status": "APPROVED",
+              "submissionDate": "2025-07-22T08:10:33.491Z",
+              "processingDate": "2025-07-22T08:10:33.491Z",
+              "processedByAdminId": null,
+              "providerType": "Licensed Psychologist",
+              "professionalLicenseType": "Clinical Psychology",
+              "isPRCLicensed": "Yes",
+              "prcLicenseNumber": "PRC22222",
+              "expirationDateOfLicense": "2025-12-31T00:00:00.000Z",
+              "practiceStartDate": "2020-01-01T00:00:00.000Z",
+              "licenseVerified": false,
+              "licenseVerifiedAt": null,
+              "licenseVerifiedBy": null,
+              "certifications": null,
+              "certificateUrls": [],
+              "certificateNames": [],
+              "licenseUrls": [],
+              "licenseNames": [],
+              "documentUrls": [],
+              "documentNames": [],
+              "yearsOfExperience": null,
+              "educationBackground": null,
+              "specialCertifications": [],
+              "practiceLocation": null,
+              "acceptsInsurance": false,
+              "acceptedInsuranceTypes": [],
+              "areasOfExpertise": [],
+              "assessmentTools": [],
+              "therapeuticApproachesUsedList": [],
+              "languagesOffered": [],
+              "providedOnlineTherapyBefore": true,
+              "comfortableUsingVideoConferencing": true,
+              "preferredSessionLength": [
+                60
+              ],
+              "privateConfidentialSpace": null,
+              "compliesWithDataPrivacyAct": true,
+              "professionalLiabilityInsurance": null,
+              "complaintsOrDisciplinaryActions": null,
+              "willingToAbideByPlatformGuidelines": true,
+              "expertise": [
+                "General Therapy"
+              ],
+              "approaches": [
+                "CBT"
+              ],
+              "languages": [
+                "English"
+              ],
+              "illnessSpecializations": [
+                "Anxiety",
+                "Depression"
+              ],
+              "acceptTypes": [
+                "Individual"
+              ],
+              "treatmentSuccessRates": {},
+              "sessionLength": "60 minutes",
+              "hourlyRate": "100",
+              "createdAt": "2025-07-22T08:10:33.491Z",
+              "updatedAt": "2025-07-22T08:10:33.491Z"
+            }
+          }
+        }
+      ]
+    },
+    "phase_5": {
+      "assessments": []
+    },
+    "phase_6": {
+      "meetings": [],
+      "paymentMethods": []
+    },
+    "phase_7": {
+      "payments": []
+    },
+    "phase_8": {
+      "posts": [],
+      "comments": [],
+      "hearts": []
+    }
+  },
+  "config": "comprehensive"
+}

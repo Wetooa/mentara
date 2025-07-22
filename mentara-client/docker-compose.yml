@@ -15,7 +15,7 @@ services:
       PORT: ${PORT:-3000}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL:-http://localhost:3000}
-      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3001}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-http://localhost:3001}
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
       NEXT_PUBLIC_MICROSOFT_CLIENT_ID: ${NEXT_PUBLIC_MICROSOFT_CLIENT_ID}
@@ -99,7 +99,7 @@ networks:
 # Optional variables:
 # - NODE_ENV: Environment (default: production)
 # - PORT: Frontend server port (default: 3000)
-# - NEXT_PUBLIC_WS_URL: WebSocket server URL
+# - NEXT_PUBLIC_WS_URL: WebSocket server URL (use http:// for Socket.io)
 # - NEXT_PUBLIC_AI_SERVICE_URL: AI service endpoint
 # - NEXT_PUBLIC_TURN_SERVER_*: WebRTC TURN server configuration
 #

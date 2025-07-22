@@ -18,17 +18,14 @@ export function useMessaging() {
     const unsubscribeMessage = webSocket.subscribeToMessages((message) => {
       // Handle new messages received via WebSocket
       // This would update the conversations state
-      console.log('New message received:', message);
     });
 
     const unsubscribeTyping = webSocket.subscribeToTyping((data) => {
       // Handle typing indicators
-      console.log('Typing status:', data);
     });
 
     const unsubscribeStatus = webSocket.subscribeToUserStatus((data) => {
       // Handle user online/offline status
-      console.log('User status:', data);
     });
 
     return () => {

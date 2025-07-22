@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -72,165 +72,183 @@ export function TherapistApplicationCard({
 
   return (
     <>
-      <Card className={`transition-all ${isSelected ? 'ring-2 ring-primary' : ''} ${isProcessing ? 'opacity-60' : ''}`}>
-        <CardHeader className="pb-3 sm:pb-6">
-          {/* Mobile-first responsive layout */}
-          <div className="space-y-3 sm:space-y-0">
-            {/* Header Row with Checkbox, Avatar, and Basic Info */}
-            <div className="flex items-start gap-3 sm:gap-4">
+      <Card className={`transition-all duration-200 hover:shadow-md ${
+        isSelected ? 'ring-2 ring-blue-500 shadow-md' : 'shadow-sm'
+      } ${isProcessing ? 'opacity-60' : ''} rounded-lg overflow-hidden bg-white border border-gray-200`}>
+        <div className="p-4">
+          {/* Main Content Row: Checkbox + Avatar + Info + Actions */}
+          <div className="flex items-start gap-4">
+            {/* Checkbox */}
+            <div className="flex-shrink-0 pt-1">
               <Checkbox
                 checked={isSelected}
-                onCheckedChange={(checked) => onSelect(therapist.id as string, !!(checked as boolean))}
+                onCheckedChange={(checked) => onSelect(therapist.userId as string, !!(checked as boolean))}
                 disabled={isProcessing}
+                className="h-4 w-4"
               />
-              
-              <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+            </div>
+
+            {/* Avatar with Status */}
+            <div className="flex-shrink-0 relative">
+              <Avatar className="h-12 w-12">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <AvatarImage src={(therapist.user as any)?.avatarUrl} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-gray-100 text-gray-600 font-medium">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {(therapist.user as any)?.firstName?.[0]}{(therapist.user as any)?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                  <h3 className="font-semibold text-base sm:text-lg leading-tight">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(therapist.user as any)?.firstName} {(therapist.user as any)?.lastName}
-                  </h3>
-                  <Badge variant={getStatusBadgeVariant(therapist.status as string)} className={getStatusColor(therapist.status as string)}>
-                    {(therapist.status as string)?.charAt(0).toUpperCase() + (therapist.status as string)?.slice(1)}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-2 mb-3 sm:mb-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 min-w-0">
+              {/* Name and Status Row */}
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold text-gray-900 text-base truncate">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <span className="text-sm text-muted-foreground truncate">{(therapist.user as any)?.email}</span>
+                  {(therapist.user as any)?.firstName} {(therapist.user as any)?.lastName}
+                </h3>
+                <Badge 
+                  variant={getStatusBadgeVariant(therapist.status as string)} 
+                  className={`${getStatusColor(therapist.status as string)} text-xs font-medium px-2 py-1`}
+                >
+                  {(therapist.status as string)?.charAt(0).toUpperCase() + (therapist.status as string)?.slice(1)}
+                </Badge>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-center gap-2 mb-3">
+                <Mail className="h-4 w-4 text-gray-400" />
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <span className="text-sm text-gray-600 truncate">{(therapist.user as any)?.email}</span>
+              </div>
+
+              {/* Key Information Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-600 truncate">{(therapist.province as string) || 'Not specified'}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <GraduationCap className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-600 truncate">{(therapist.providerType as string) || 'Not specified'}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-600 truncate">{yearsOfExperience} years exp</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-600 truncate">
+                    Applied {formatDistanceToNow(new Date((therapist.submissionDate || therapist.createdAt) as string), { addSuffix: true })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Additional Details Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3 pt-3 border-t border-gray-100">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">License</span>
+                    <span className="text-sm text-gray-700 truncate block">{(therapist.prcLicenseNumber as string) || 'Not provided'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Specializations</span>
+                    <span className="text-sm text-gray-700 truncate block">
+                      {(therapist.areasOfExpertise as string[])?.length > 0 ? (
+                        <>
+                          {(therapist.areasOfExpertise as string[]).slice(0, 1).join(', ')}
+                          {(therapist.areasOfExpertise as string[]).length > 1 && ` +${(therapist.areasOfExpertise as string[]).length - 1} more`}
+                        </>
+                      ) : (
+                        'Not specified'
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CreditCard className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Rate</span>
+                    <span className="text-sm text-gray-700 truncate block">
+                      {(therapist.hourlyRate as number) ? `₱${therapist.hourlyRate}/hr` : 'Not set'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Session</span>
+                    <span className="text-sm text-gray-700 truncate block">
+                      {(therapist.sessionDuration as number) ? `${therapist.sessionDuration} min` : 'Not set'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            {/* Info Grid - Responsive */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground ml-0 sm:ml-16">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{(therapist.province as string) || 'Not specified'}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <GraduationCap className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{(therapist.providerType as string) || 'Not specified'}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{yearsOfExperience} years experience</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <CalendarDays className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">Applied {formatDistanceToNow(new Date((therapist.submissionDate || therapist.createdAt) as string), { addSuffix: true })}</span>
-              </div>
-            </div>
-            
-            {/* Action Buttons - Mobile optimized */}
-            <div className="flex flex-wrap gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={onViewDetails} disabled={isProcessing}>
-                <Eye className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Details</span>
-              </Button>
-              
-              {therapist.status === 'pending' && (
-                <>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowApprovalDialog(true)}
-                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                    disabled={isProcessing}
-                  >
-                    <Check className="h-4 w-4 sm:mr-1" />
-                    <span className="hidden sm:inline">Approve</span>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowRejectionDialog(true)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    disabled={isProcessing}
-                  >
-                    <X className="h-4 w-4 sm:mr-1" />
-                    <span className="hidden sm:inline">Reject</span>
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <div className="flex items-center gap-1 mb-1">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">License:</span>
-              </div>
-              <p className="text-muted-foreground">{(therapist.prcLicenseNumber as string) || 'Not provided'}</p>
-            </div>
-            
-            <div>
-              <div className="flex items-center gap-1 mb-1">
-                <Star className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Specializations:</span>
-              </div>
-              <p className="text-muted-foreground">
-                {(therapist.areasOfExpertise as string[])?.length > 0 ? (
+
+            {/* Action Buttons */}
+            <div className="flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={onViewDetails} 
+                  disabled={isProcessing}
+                  className="h-8 px-3 text-xs hover:bg-gray-50"
+                >
+                  <Eye className="h-4 w-4 mr-1.5" />
+                  Details
+                </Button>
+                
+                {therapist.status === 'pending' && (
                   <>
-                    {(therapist.areasOfExpertise as string[]).slice(0, 2).join(', ')}
-                    {(therapist.areasOfExpertise as string[]).length > 2 && ` +${(therapist.areasOfExpertise as string[]).length - 2} more`}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowApprovalDialog(true)}
+                      className="h-8 px-3 text-xs text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                      disabled={isProcessing}
+                    >
+                      <Check className="h-4 w-4 mr-1.5" />
+                      Approve
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowRejectionDialog(true)}
+                      className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      disabled={isProcessing}
+                    >
+                      <X className="h-4 w-4 mr-1.5" />
+                      Reject
+                    </Button>
                   </>
-                ) : (
-                  'Not specified'
                 )}
-              </p>
-            </div>
-            
-            <div>
-              <div className="flex items-center gap-1 mb-1">
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Rate:</span>
               </div>
-              <p className="text-muted-foreground">
-                {(therapist.hourlyRate as number) ? `₱${therapist.hourlyRate}/hour` : 'Not set'}
-              </p>
-            </div>
-            
-            <div>
-              <div className="flex items-center gap-1 mb-1">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Session Length:</span>
-              </div>
-              <p className="text-muted-foreground">
-                {(therapist.sessionDuration as number) ? `${therapist.sessionDuration} min` : 'Not set'}
-              </p>
             </div>
           </div>
 
-          {/* Additional Information */}
-          {((therapist.bio as string) || (therapist.education as string) || (therapist.yearsOfExperience as number)) && (
-            <div className="mt-4 pt-4 border-t">
-              <div className="grid gap-2">
+          {/* Bio and Education (Collapsible) */}
+          {((therapist.bio as string) || (therapist.education as string)) && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="space-y-2">
                 {(therapist.bio as string) && (
                   <div>
-                    <span className="font-medium text-sm">Bio:</span>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{therapist.bio as string}</p>
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Bio</span>
+                    <p className="text-sm text-gray-700 mt-1 line-clamp-2">{therapist.bio as string}</p>
                   </div>
                 )}
                 
                 {(therapist.education as string) && (
                   <div>
-                    <span className="font-medium text-sm">Education:</span>
-                    <p className="text-sm text-muted-foreground">{therapist.education as string}</p>
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Education</span>
+                    <p className="text-sm text-gray-700 mt-1">{therapist.education as string}</p>
                   </div>
                 )}
               </div>
@@ -239,11 +257,13 @@ export function TherapistApplicationCard({
 
           {/* Processing Status */}
           {(therapist.processedBy as string) && (therapist.processedAt as string) && (
-            <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-              Processed by {therapist.processedBy as string} {formatDistanceToNow(new Date(therapist.processedAt as string), { addSuffix: true })}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-xs text-gray-500">
+                Processed by {therapist.processedBy as string} {formatDistanceToNow(new Date(therapist.processedAt as string), { addSuffix: true })}
+              </p>
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
 
       <ApprovalDialog

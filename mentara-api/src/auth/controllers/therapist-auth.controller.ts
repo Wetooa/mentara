@@ -20,20 +20,13 @@ import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 // Import types from local auth types
-import type {
-  RegisterTherapistDto,
-  LoginDto,
-} from '../types';
+import type { RegisterTherapistDto, LoginDto } from '../types';
 
 // Import validation schemas from local validation
-import {
-  LoginDtoSchema,
-} from '../validation';
+import { LoginDtoSchema } from '../validation';
 
 // Import constants from local auth constants
-import {
-  ALLOWED_DOCUMENT_MIME_TYPES,
-} from '../types';
+import { ALLOWED_DOCUMENT_MIME_TYPES } from '../types';
 import { TherapistAuthService } from '../services/therapist-auth.service';
 import { SupabaseStorageService } from '../../common/services/supabase-storage.service';
 import { Request } from 'express';
@@ -257,38 +250,8 @@ export class TherapistAuthController {
     }
   }
 
-  @Public()
-  @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(
-    @Body(new ZodValidationPipe(LoginDtoSchema)) loginDto: LoginDto,
-    @Req() req: Request,
-  ) {
-    const ipAddress = req.ip;
-    const userAgent = req.get('User-Agent');
-
-    const result = await this.therapistAuthService.loginTherapist(
-      loginDto.email,
-      loginDto.password,
-      ipAddress,
-      userAgent,
-    );
-
-    return {
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
-      },
-      accessToken: result.token,
-      refreshToken: result.token, // Same token for compatibility
-      expiresIn: 0, // Non-expiring
-    };
-  }
+  // REMOVED: Duplicate login route - use universal /auth/login instead
+  // This was redundant with AuthController.login() which handles all roles
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')

@@ -1,35 +1,21 @@
-// Simple Transaction-Based Billing
-// Pay-per-session model where clients pay therapists directly
-
 model Payment {
-  id String @id @default(uuid())
-
-  // Basic payment info
-  amount   Decimal       @db.Decimal(10, 2)
-  currency String        @default("USD")
-  status   PaymentStatus @default(PENDING)
-
-  // Transaction participants
-  clientId    String
-  therapistId String
-  meetingId   String? // Optional - links to specific session
-
-  // Payment processing
-  paymentMethodId String? // How they paid (card, etc.)
+  id              String         @id @default(uuid())
+  amount          Decimal        @db.Decimal(10, 2)
+  currency        String         @default("USD")
+  status          PaymentStatus  @default(PENDING)
+  clientId        String
+  therapistId     String
+  meetingId       String?
+  paymentMethodId String?
   processedAt     DateTime?
   failedAt        DateTime?
-
-  // Simple failure tracking
-  failureReason String?
-
-  // Relations
-  client        Client         @relation(fields: [clientId], references: [userId], onDelete: Cascade)
-  therapist     Therapist      @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
-  meeting       Meeting?       @relation(fields: [meetingId], references: [id], onDelete: SetNull)
-  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  failureReason   String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  client          Client         @relation(fields: [clientId], references: [userId], onDelete: Cascade)
+  meeting         Meeting?       @relation(fields: [meetingId], references: [id])
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  therapist       Therapist      @relation(fields: [therapistId], references: [userId], onDelete: Cascade)
 
   @@index([clientId])
   @@index([therapistId])
@@ -38,27 +24,21 @@ model Payment {
 }
 
 model PaymentMethod {
-  id     String @id @default(uuid())
-  userId String
-
-  // Basic card info
+  id        String            @id @default(uuid())
+  userId    String
   type      PaymentMethodType @default(CARD)
   cardLast4 String?
   cardBrand String?
   isDefault Boolean           @default(false)
-
-  // Relations
-  user     User      @relation("UserPaymentMethods", fields: [userId], references: [id], onDelete: Cascade)
-  payments Payment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  payments  Payment[]
+  user      User              @relation("UserPaymentMethods", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isDefault])
 }
 
-// Simple enums
 enum PaymentStatus {
   PENDING
   COMPLETED

@@ -95,7 +95,7 @@ export interface EmailResponse {
 }
 
 export interface EmailStatusResponse {
-  isVerified: boolean;
+  emailVerified: boolean;
   verificationSentAt?: Date;
   canResend: boolean;
 }

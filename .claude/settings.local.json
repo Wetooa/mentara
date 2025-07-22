@@ -158,7 +158,12 @@
       "Bash(timeout 15 npm run dev)",
       "Bash(pkill:*)",
       "Bash(tail:*)",
-      "mcp__zen__chat"
+      "mcp__zen__chat",
+      "Bash(ss:*)",
+      "mcp__serena__find_referencing_symbols",
+      "mcp__serena__find_referencing_symbols",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "enableAllProjectMcpServers": true,

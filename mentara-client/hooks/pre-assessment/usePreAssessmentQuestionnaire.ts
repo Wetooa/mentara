@@ -1,5 +1,5 @@
 import { usePreAssessmentChecklistStore } from "@/store/pre-assessment";
-import { QUESTIONNAIRE_MAP } from "@/constants/questionnaires";
+import { QUESTIONNAIRE_MAP } from "@/constants/questionnaire/questionnaire-mapping";
 
 export interface UsePreAssessmentQuestionnaireReturn {
   // Question data
@@ -7,7 +7,11 @@ export interface UsePreAssessmentQuestionnaireReturn {
     prefix: string;
     question: string;
     options: string[];
-  };
+  } | null;
+  
+  // Loading states
+  isLoading: boolean;
+  error: any;
   
   // State
   currentAnswer: number;
@@ -27,15 +31,34 @@ export function usePreAssessmentQuestionnaire(): UsePreAssessmentQuestionnaireRe
   const formIndex = step - 1;
   const questionIndex = miniStep;
 
-  const questionnaireId = questionnaires[formIndex];
-  const questions = QUESTIONNAIRE_MAP[questionnaireId].questions;
-  const question = questions[questionIndex];
+  // Get questionnaire name from store
+  const questionnaireName = questionnaires[formIndex];
+  
+  // Get questionnaire data from static mapping
+  const questionnaireData = questionnaireName ? QUESTIONNAIRE_MAP[questionnaireName] : null;
+  const questions = questionnaireData?.questions || [];
+  
+  // Get current question directly
+  const rawQuestion = questions.length > questionIndex ? questions[questionIndex] : null;
+  
+  // Transform question to expected format
+  const question = rawQuestion ? {
+    prefix: rawQuestion.prefix || questionnaireData?.title || "Assessment", 
+    question: rawQuestion.question,
+    options: rawQuestion.options
+  } : null;
 
-  const currentAnswer = answers[formIndex][questionIndex];
-  const isLastQuestion = questions.length - 1 === questionIndex;
+  // No loading or error states needed for static data
+  const isLoading = false;
+  const error = null;
+
+  const currentAnswer = answers[formIndex]?.[questionIndex] ?? -1;
+  const isLastQuestion = questions ? questions.length - 1 === questionIndex : false;
 
   const handleSelectAnswer = (answer: number) => {
-    const previousAnswers: number[] = answers[formIndex];
+    if (!questions || formIndex < 0 || questionIndex < 0) return;
+    
+    const previousAnswers: number[] = answers[formIndex] || [];
     
     const formAnswers: number[] = [
       ...previousAnswers.slice(0, questionIndex),
@@ -52,6 +75,10 @@ export function usePreAssessmentQuestionnaire(): UsePreAssessmentQuestionnaireRe
   return {
     // Question data
     question,
+    
+    // Loading states
+    isLoading,
+    error,
     
     // State
     currentAnswer,

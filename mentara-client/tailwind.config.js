@@ -73,6 +73,17 @@ module.exports = {
       backgroundImage: {
         'community-gradient': 'linear-gradient(135deg, oklch(var(--community-warm) / 0.1), oklch(var(--community-calm) / 0.1))',
         'community-soothing-gradient': 'linear-gradient(45deg, oklch(var(--community-soothing) / 0.1), oklch(var(--community-accent) / 0.1))',
+        'glassmorphism': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      },
+      backdropBlur: {
+        'xs': '2px',
+      },
+      boxShadow: {
+        'glassmorphism': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        'glow': '0 0 20px rgba(99, 102, 241, 0.3)',
+        'glow-lg': '0 0 40px rgba(99, 102, 241, 0.4)',
       }
     },
   },

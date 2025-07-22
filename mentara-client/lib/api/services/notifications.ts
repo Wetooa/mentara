@@ -47,7 +47,7 @@ export function createNotificationService(axios: AxiosInstance) {
      * Mark all notifications as read
      */
     async markAllAsRead() {
-      const { data } = await axios.patch("/notifications/read-all");
+      const { data } = await axios.patch("/notifications/mark-all-read");
       return data;
     },
 

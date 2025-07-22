@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 import BookingCalendar from "@/components/booking/BookingCalendar";
 import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
-import { useBooking, useMeetings } from "@/hooks/useBooking";
-import { useTherapist } from "@/hooks/useTherapist";
+import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
+import { useTherapist } from "@/hooks/therapist/useTherapist";
 import { MeetingStatus } from "@/types/booking";
-import { TimeSlot } from "@/hooks/useAvailableSlots";
+import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 import { toast } from "sonner";
 
 export default function BookingPage() {

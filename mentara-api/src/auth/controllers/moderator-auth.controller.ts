@@ -69,38 +69,8 @@ export class ModeratorAuthController {
     };
   }
 
-  @Public()
-  @Throttle({ default: { limit: 10, ttl: 300000 } }) // 10 login attempts per 5 minutes
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(
-    @Body(new ZodValidationPipe(LoginDtoSchema)) loginDto: LoginDto,
-    @Req() req: Request,
-  ) {
-    const ipAddress = req.ip;
-    const userAgent = req.get('User-Agent');
-
-    const result = await this.moderatorAuthService.loginModerator(
-      loginDto.email,
-      loginDto.password,
-      ipAddress,
-      userAgent,
-    );
-
-    return {
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
-      },
-      accessToken: result.token,
-      refreshToken: result.token, // Same token for compatibility
-      expiresIn: 0, // Non-expiring
-    };
-  }
+  // REMOVED: Duplicate login route - use universal /auth/login instead
+  // This was redundant with AuthController.login() which handles all roles
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')

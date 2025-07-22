@@ -1,0 +1,570 @@
+d2ab30666ccf98931f95b48e5439385e
+"use strict";
+
+/* istanbul ignore next */
+function cov_1ja9d75qcu() {
+  var path = "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/common/events/assessment-events.ts";
+  var hash = "d32d6769f708205d8b01e0e225604f9f68ccac02";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/common/events/assessment-events.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 2,
+          column: 0
+        },
+        end: {
+          line: 2,
+          column: 62
+        }
+      },
+      "1": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 3,
+          column: 285
+        }
+      },
+      "2": {
+        start: {
+          line: 4,
+          column: 33
+        },
+        end: {
+          line: 4,
+          column: 79
+        }
+      },
+      "3": {
+        start: {
+          line: 7,
+          column: 8
+        },
+        end: {
+          line: 7,
+          column: 66
+        }
+      },
+      "4": {
+        start: {
+          line: 10,
+          column: 0
+        },
+        end: {
+          line: 10,
+          column: 62
+        }
+      },
+      "5": {
+        start: {
+          line: 13,
+          column: 8
+        },
+        end: {
+          line: 13,
+          column: 66
+        }
+      },
+      "6": {
+        start: {
+          line: 16,
+          column: 0
+        },
+        end: {
+          line: 16,
+          column: 66
+        }
+      },
+      "7": {
+        start: {
+          line: 19,
+          column: 8
+        },
+        end: {
+          line: 19,
+          column: 61
+        }
+      },
+      "8": {
+        start: {
+          line: 22,
+          column: 0
+        },
+        end: {
+          line: 22,
+          column: 56
+        }
+      },
+      "9": {
+        start: {
+          line: 25,
+          column: 8
+        },
+        end: {
+          line: 25,
+          column: 61
+        }
+      },
+      "10": {
+        start: {
+          line: 28,
+          column: 0
+        },
+        end: {
+          line: 28,
+          column: 58
+        }
+      },
+      "11": {
+        start: {
+          line: 31,
+          column: 8
+        },
+        end: {
+          line: 31,
+          column: 61
+        }
+      },
+      "12": {
+        start: {
+          line: 34,
+          column: 0
+        },
+        end: {
+          line: 34,
+          column: 56
+        }
+      },
+      "13": {
+        start: {
+          line: 37,
+          column: 8
+        },
+        end: {
+          line: 37,
+          column: 59
+        }
+      },
+      "14": {
+        start: {
+          line: 40,
+          column: 0
+        },
+        end: {
+          line: 40,
+          column: 60
+        }
+      },
+      "15": {
+        start: {
+          line: 43,
+          column: 8
+        },
+        end: {
+          line: 43,
+          column: 60
+        }
+      },
+      "16": {
+        start: {
+          line: 46,
+          column: 0
+        },
+        end: {
+          line: 46,
+          column: 62
+        }
+      },
+      "17": {
+        start: {
+          line: 49,
+          column: 8
+        },
+        end: {
+          line: 49,
+          column: 61
+        }
+      },
+      "18": {
+        start: {
+          line: 52,
+          column: 0
+        },
+        end: {
+          line: 52,
+          column: 56
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 6,
+            column: 4
+          },
+          end: {
+            line: 6,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 6,
+            column: 32
+          },
+          end: {
+            line: 8,
+            column: 5
+          }
+        },
+        line: 6
+      },
+      "1": {
+        name: "(anonymous_1)",
+        decl: {
+          start: {
+            line: 12,
+            column: 4
+          },
+          end: {
+            line: 12,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 12,
+            column: 32
+          },
+          end: {
+            line: 14,
+            column: 5
+          }
+        },
+        line: 12
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 18,
+            column: 4
+          },
+          end: {
+            line: 18,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 18,
+            column: 32
+          },
+          end: {
+            line: 20,
+            column: 5
+          }
+        },
+        line: 18
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 24,
+            column: 4
+          },
+          end: {
+            line: 24,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 24,
+            column: 32
+          },
+          end: {
+            line: 26,
+            column: 5
+          }
+        },
+        line: 24
+      },
+      "4": {
+        name: "(anonymous_4)",
+        decl: {
+          start: {
+            line: 30,
+            column: 4
+          },
+          end: {
+            line: 30,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 30,
+            column: 32
+          },
+          end: {
+            line: 32,
+            column: 5
+          }
+        },
+        line: 30
+      },
+      "5": {
+        name: "(anonymous_5)",
+        decl: {
+          start: {
+            line: 36,
+            column: 4
+          },
+          end: {
+            line: 36,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 36,
+            column: 32
+          },
+          end: {
+            line: 38,
+            column: 5
+          }
+        },
+        line: 36
+      },
+      "6": {
+        name: "(anonymous_6)",
+        decl: {
+          start: {
+            line: 42,
+            column: 4
+          },
+          end: {
+            line: 42,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 42,
+            column: 32
+          },
+          end: {
+            line: 44,
+            column: 5
+          }
+        },
+        line: 42
+      },
+      "7": {
+        name: "(anonymous_7)",
+        decl: {
+          start: {
+            line: 48,
+            column: 4
+          },
+          end: {
+            line: 48,
+            column: 5
+          }
+        },
+        loc: {
+          start: {
+            line: 48,
+            column: 32
+          },
+          end: {
+            line: 50,
+            column: 5
+          }
+        },
+        line: 48
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0,
+      "16": 0,
+      "17": 0,
+      "18": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    b: {},
+    inputSourceMap: {
+      file: "/home/wetooa/Documents/code/projects/mentara/mentara-api/src/common/events/assessment-events.ts",
+      mappings: ";;;AAAA,gFAG6C;AAY7C,MAAa,yBAA0B,SAAQ,wCAAyC;IACtF,YAAY,IAA8B,EAAE,QAAwB;QAClE,KAAK,CAAC,IAAI,CAAC,YAAY,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IAC5D,CAAC;CACF;AAJD,8DAIC;AAcD,MAAa,2BAA4B,SAAQ,wCAA2C;IAC1F,YAAY,IAAgC,EAAE,QAAwB;QACpE,KAAK,CAAC,IAAI,CAAC,YAAY,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IAC5D,CAAC;CACF;AAJD,kEAIC;AAcD,MAAa,sBAAuB,SAAQ,wCAAsC;IAChF,YAAY,IAA2B,EAAE,QAAwB;QAC/D,KAAK,CAAC,IAAI,CAAC,WAAW,EAAE,WAAW,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IACvD,CAAC;CACF;AAJD,wDAIC;AAeD,MAAa,uBAAwB,SAAQ,wCAAuC;IAClF,YAAY,IAA4B,EAAE,QAAwB;QAChE,KAAK,CAAC,IAAI,CAAC,WAAW,EAAE,WAAW,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IACvD,CAAC;CACF;AAJD,0DAIC;AAeD,MAAa,sBAAuB,SAAQ,wCAAsC;IAChF,YAAY,IAA2B,EAAE,QAAwB;QAC/D,KAAK,CAAC,IAAI,CAAC,WAAW,EAAE,WAAW,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IACvD,CAAC;CACF;AAJD,wDAIC;AAkBD,MAAa,wBAAyB,SAAQ,wCAAwC;IACpF,YAAY,IAA6B,EAAE,QAAwB;QACjE,KAAK,CAAC,IAAI,CAAC,MAAM,EAAE,cAAc,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IACrD,CAAC;CACF;AAJD,4DAIC;AAeD,MAAa,yBAA0B,SAAQ,wCAAyC;IACtF,YAAY,IAA8B,EAAE,QAAwB;QAClE,KAAK,CAAC,IAAI,CAAC,MAAM,EAAE,eAAe,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IACtD,CAAC;CACF;AAJD,8DAIC;AAaD,MAAa,sBAAuB,SAAQ,wCAAsC;IAChF,YAAY,IAA2B,EAAE,QAAwB;QAC/D,KAAK,CAAC,IAAI,CAAC,WAAW,EAAE,WAAW,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAC;IACvD,CAAC;CACF;AAJD,wDAIC",
+      names: [],
+      sources: ["/home/wetooa/Documents/code/projects/mentara/mentara-api/src/common/events/assessment-events.ts"],
+      sourcesContent: ["import {\n  BaseDomainEvent,\n  EventMetadata,\n} from './interfaces/domain-event.interface';\n\n// Assessment & Progress Events\n\nexport interface PreAssessmentStartedData {\n  assessmentId: string;\n  clientId: string;\n  assessmentType: string;\n  startedAt: Date;\n  estimatedDuration: number; // in minutes\n}\n\nexport class PreAssessmentStartedEvent extends BaseDomainEvent<PreAssessmentStartedData> {\n  constructor(data: PreAssessmentStartedData, metadata?: EventMetadata) {\n    super(data.assessmentId, 'PreAssessment', data, metadata);\n  }\n}\n\nexport interface PreAssessmentCompletedData {\n  assessmentId: string;\n  clientId: string;\n  completedAt: Date;\n  actualDuration: number; // in minutes\n  scores: Record<string, number>;\n  severityLevels: Record<string, string>;\n  aiEstimate: Record<string, any>;\n  recommendedTherapistSpecialties: string[];\n  riskLevel: 'low' | 'medium' | 'high' | 'critical';\n}\n\nexport class PreAssessmentCompletedEvent extends BaseDomainEvent<PreAssessmentCompletedData> {\n  constructor(data: PreAssessmentCompletedData, metadata?: EventMetadata) {\n    super(data.assessmentId, 'PreAssessment', data, metadata);\n  }\n}\n\nexport interface WorksheetAssignedData {\n  worksheetId: string;\n  clientId: string;\n  therapistId: string;\n  worksheetType: string;\n  title: string;\n  description?: string;\n  dueDate?: Date;\n  priority: 'low' | 'medium' | 'high';\n  estimatedTime: number; // in minutes\n}\n\nexport class WorksheetAssignedEvent extends BaseDomainEvent<WorksheetAssignedData> {\n  constructor(data: WorksheetAssignedData, metadata?: EventMetadata) {\n    super(data.worksheetId, 'Worksheet', data, metadata);\n  }\n}\n\nexport interface WorksheetSubmittedData {\n  worksheetId: string;\n  submissionId: string;\n  clientId: string;\n  therapistId: string;\n  submittedAt: Date;\n  timeSpent: number; // in minutes\n  responses: Record<string, any>;\n  attachments?: string[]; // file IDs\n  clientNotes?: string;\n  completionStatus: 'complete' | 'partial' | 'skipped';\n}\n\nexport class WorksheetSubmittedEvent extends BaseDomainEvent<WorksheetSubmittedData> {\n  constructor(data: WorksheetSubmittedData, metadata?: EventMetadata) {\n    super(data.worksheetId, 'Worksheet', data, metadata);\n  }\n}\n\nexport interface WorksheetReviewedData {\n  worksheetId: string;\n  submissionId: string;\n  clientId: string;\n  therapistId: string;\n  reviewedAt: Date;\n  feedback: string;\n  rating?: number; // 1-5\n  followUpRequired: boolean;\n  nextSteps?: string;\n  reviewStatus: 'approved' | 'needs_revision' | 'incomplete';\n}\n\nexport class WorksheetReviewedEvent extends BaseDomainEvent<WorksheetReviewedData> {\n  constructor(data: WorksheetReviewedData, metadata?: EventMetadata) {\n    super(data.worksheetId, 'Worksheet', data, metadata);\n  }\n}\n\nexport interface ProgressNoteCreatedData {\n  noteId: string;\n  clientId: string;\n  therapistId: string;\n  sessionId?: string;\n  noteType:\n    | 'session_note'\n    | 'progress_update'\n    | 'treatment_plan'\n    | 'assessment_note';\n  content: string;\n  tags: string[];\n  isPrivate: boolean;\n  createdAt: Date;\n}\n\nexport class ProgressNoteCreatedEvent extends BaseDomainEvent<ProgressNoteCreatedData> {\n  constructor(data: ProgressNoteCreatedData, metadata?: EventMetadata) {\n    super(data.noteId, 'ProgressNote', data, metadata);\n  }\n}\n\nexport interface TreatmentPlanUpdatedData {\n  planId: string;\n  clientId: string;\n  therapistId: string;\n  updatedSections: string[];\n  goals: string[];\n  interventions: string[];\n  timeline: string;\n  updatedAt: Date;\n  version: number;\n  changeReason: string;\n}\n\nexport class TreatmentPlanUpdatedEvent extends BaseDomainEvent<TreatmentPlanUpdatedData> {\n  constructor(data: TreatmentPlanUpdatedData, metadata?: EventMetadata) {\n    super(data.planId, 'TreatmentPlan', data, metadata);\n  }\n}\n\nexport interface MilestoneAchievedData {\n  milestoneId: string;\n  clientId: string;\n  therapistId: string;\n  milestoneType: string;\n  description: string;\n  achievedAt: Date;\n  relatedGoals: string[];\n  celebrationSent: boolean;\n}\n\nexport class MilestoneAchievedEvent extends BaseDomainEvent<MilestoneAchievedData> {\n  constructor(data: MilestoneAchievedData, metadata?: EventMetadata) {\n    super(data.milestoneId, 'Milestone', data, metadata);\n  }\n}\n"],
+      version: 3
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "d32d6769f708205d8b01e0e225604f9f68ccac02"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1ja9d75qcu = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1ja9d75qcu();
+cov_1ja9d75qcu().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[1]++;
+exports.MilestoneAchievedEvent = exports.TreatmentPlanUpdatedEvent = exports.ProgressNoteCreatedEvent = exports.WorksheetReviewedEvent = exports.WorksheetSubmittedEvent = exports.WorksheetAssignedEvent = exports.PreAssessmentCompletedEvent = exports.PreAssessmentStartedEvent = void 0;
+const domain_event_interface_1 =
+/* istanbul ignore next */
+(cov_1ja9d75qcu().s[2]++, require("./interfaces/domain-event.interface"));
+class PreAssessmentStartedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[0]++;
+    cov_1ja9d75qcu().s[3]++;
+    super(data.assessmentId, 'PreAssessment', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[4]++;
+exports.PreAssessmentStartedEvent = PreAssessmentStartedEvent;
+class PreAssessmentCompletedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[1]++;
+    cov_1ja9d75qcu().s[5]++;
+    super(data.assessmentId, 'PreAssessment', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[6]++;
+exports.PreAssessmentCompletedEvent = PreAssessmentCompletedEvent;
+class WorksheetAssignedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[2]++;
+    cov_1ja9d75qcu().s[7]++;
+    super(data.worksheetId, 'Worksheet', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[8]++;
+exports.WorksheetAssignedEvent = WorksheetAssignedEvent;
+class WorksheetSubmittedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[3]++;
+    cov_1ja9d75qcu().s[9]++;
+    super(data.worksheetId, 'Worksheet', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[10]++;
+exports.WorksheetSubmittedEvent = WorksheetSubmittedEvent;
+class WorksheetReviewedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[4]++;
+    cov_1ja9d75qcu().s[11]++;
+    super(data.worksheetId, 'Worksheet', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[12]++;
+exports.WorksheetReviewedEvent = WorksheetReviewedEvent;
+class ProgressNoteCreatedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[5]++;
+    cov_1ja9d75qcu().s[13]++;
+    super(data.noteId, 'ProgressNote', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[14]++;
+exports.ProgressNoteCreatedEvent = ProgressNoteCreatedEvent;
+class TreatmentPlanUpdatedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[6]++;
+    cov_1ja9d75qcu().s[15]++;
+    super(data.planId, 'TreatmentPlan', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[16]++;
+exports.TreatmentPlanUpdatedEvent = TreatmentPlanUpdatedEvent;
+class MilestoneAchievedEvent extends
+/* istanbul ignore next */
+(domain_event_interface_1.BaseDomainEvent) {
+  constructor(data, metadata) {
+    /* istanbul ignore next */
+    cov_1ja9d75qcu().f[7]++;
+    cov_1ja9d75qcu().s[17]++;
+    super(data.milestoneId, 'Milestone', data, metadata);
+  }
+}
+/* istanbul ignore next */
+cov_1ja9d75qcu().s[18]++;
+exports.MilestoneAchievedEvent = MilestoneAchievedEvent;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMWphOWQ3NXFjdSIsImFjdHVhbENvdmVyYWdlIiwicyIsImRvbWFpbl9ldmVudF9pbnRlcmZhY2VfMSIsInJlcXVpcmUiLCJQcmVBc3Nlc3NtZW50U3RhcnRlZEV2ZW50IiwiQmFzZURvbWFpbkV2ZW50IiwiY29uc3RydWN0b3IiLCJkYXRhIiwibWV0YWRhdGEiLCJmIiwiYXNzZXNzbWVudElkIiwiZXhwb3J0cyIsIlByZUFzc2Vzc21lbnRDb21wbGV0ZWRFdmVudCIsIldvcmtzaGVldEFzc2lnbmVkRXZlbnQiLCJ3b3Jrc2hlZXRJZCIsIldvcmtzaGVldFN1Ym1pdHRlZEV2ZW50IiwiV29ya3NoZWV0UmV2aWV3ZWRFdmVudCIsIlByb2dyZXNzTm90ZUNyZWF0ZWRFdmVudCIsIm5vdGVJZCIsIlRyZWF0bWVudFBsYW5VcGRhdGVkRXZlbnQiLCJwbGFuSWQiLCJNaWxlc3RvbmVBY2hpZXZlZEV2ZW50IiwibWlsZXN0b25lSWQiXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvY29tbW9uL2V2ZW50cy9hc3Nlc3NtZW50LWV2ZW50cy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge1xuICBCYXNlRG9tYWluRXZlbnQsXG4gIEV2ZW50TWV0YWRhdGEsXG59IGZyb20gJy4vaW50ZXJmYWNlcy9kb21haW4tZXZlbnQuaW50ZXJmYWNlJztcblxuLy8gQXNzZXNzbWVudCAmIFByb2dyZXNzIEV2ZW50c1xuXG5leHBvcnQgaW50ZXJmYWNlIFByZUFzc2Vzc21lbnRTdGFydGVkRGF0YSB7XG4gIGFzc2Vzc21lbnRJZDogc3RyaW5nO1xuICBjbGllbnRJZDogc3RyaW5nO1xuICBhc3Nlc3NtZW50VHlwZTogc3RyaW5nO1xuICBzdGFydGVkQXQ6IERhdGU7XG4gIGVzdGltYXRlZER1cmF0aW9uOiBudW1iZXI7IC8vIGluIG1pbnV0ZXNcbn1cblxuZXhwb3J0IGNsYXNzIFByZUFzc2Vzc21lbnRTdGFydGVkRXZlbnQgZXh0ZW5kcyBCYXNlRG9tYWluRXZlbnQ8UHJlQXNzZXNzbWVudFN0YXJ0ZWREYXRhPiB7XG4gIGNvbnN0cnVjdG9yKGRhdGE6IFByZUFzc2Vzc21lbnRTdGFydGVkRGF0YSwgbWV0YWRhdGE/OiBFdmVudE1ldGFkYXRhKSB7XG4gICAgc3VwZXIoZGF0YS5hc3Nlc3NtZW50SWQsICdQcmVBc3Nlc3NtZW50JywgZGF0YSwgbWV0YWRhdGEpO1xuICB9XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgUHJlQXNzZXNzbWVudENvbXBsZXRlZERhdGEge1xuICBhc3Nlc3NtZW50SWQ6IHN0cmluZztcbiAgY2xpZW50SWQ6IHN0cmluZztcbiAgY29tcGxldGVkQXQ6IERhdGU7XG4gIGFjdHVhbER1cmF0aW9uOiBudW1iZXI7IC8vIGluIG1pbnV0ZXNcbiAgc2NvcmVzOiBSZWNvcmQ8c3RyaW5nLCBudW1iZXI+O1xuICBzZXZlcml0eUxldmVsczogUmVjb3JkPHN0cmluZywgc3RyaW5nPjtcbiAgYWlFc3RpbWF0ZTogUmVjb3JkPHN0cmluZywgYW55PjtcbiAgcmVjb21tZW5kZWRUaGVyYXBpc3RTcGVjaWFsdGllczogc3RyaW5nW107XG4gIHJpc2tMZXZlbDogJ2xvdycgfCAnbWVkaXVtJyB8ICdoaWdoJyB8ICdjcml0aWNhbCc7XG59XG5cbmV4cG9ydCBjbGFzcyBQcmVBc3Nlc3NtZW50Q29tcGxldGVkRXZlbnQgZXh0ZW5kcyBCYXNlRG9tYWluRXZlbnQ8UHJlQXNzZXNzbWVudENvbXBsZXRlZERhdGE+IHtcbiAgY29uc3RydWN0b3IoZGF0YTogUHJlQXNzZXNzbWVudENvbXBsZXRlZERhdGEsIG1ldGFkYXRhPzogRXZlbnRNZXRhZGF0YSkge1xuICAgIHN1cGVyKGRhdGEuYXNzZXNzbWVudElkLCAnUHJlQXNzZXNzbWVudCcsIGRhdGEsIG1ldGFkYXRhKTtcbiAgfVxufVxuXG5leHBvcnQgaW50ZXJmYWNlIFdvcmtzaGVldEFzc2lnbmVkRGF0YSB7XG4gIHdvcmtzaGVldElkOiBzdHJpbmc7XG4gIGNsaWVudElkOiBzdHJpbmc7XG4gIHRoZXJhcGlzdElkOiBzdHJpbmc7XG4gIHdvcmtzaGVldFR5cGU6IHN0cmluZztcbiAgdGl0bGU6IHN0cmluZztcbiAgZGVzY3JpcHRpb24/OiBzdHJpbmc7XG4gIGR1ZURhdGU/OiBEYXRlO1xuICBwcmlvcml0eTogJ2xvdycgfCAnbWVkaXVtJyB8ICdoaWdoJztcbiAgZXN0aW1hdGVkVGltZTogbnVtYmVyOyAvLyBpbiBtaW51dGVzXG59XG5cbmV4cG9ydCBjbGFzcyBXb3Jrc2hlZXRBc3NpZ25lZEV2ZW50IGV4dGVuZHMgQmFzZURvbWFpbkV2ZW50PFdvcmtzaGVldEFzc2lnbmVkRGF0YT4ge1xuICBjb25zdHJ1Y3RvcihkYXRhOiBXb3Jrc2hlZXRBc3NpZ25lZERhdGEsIG1ldGFkYXRhPzogRXZlbnRNZXRhZGF0YSkge1xuICAgIHN1cGVyKGRhdGEud29ya3NoZWV0SWQsICdXb3Jrc2hlZXQnLCBkYXRhLCBtZXRhZGF0YSk7XG4gIH1cbn1cblxuZXhwb3J0IGludGVyZmFjZSBXb3Jrc2hlZXRTdWJtaXR0ZWREYXRhIHtcbiAgd29ya3NoZWV0SWQ6IHN0cmluZztcbiAgc3VibWlzc2lvbklkOiBzdHJpbmc7XG4gIGNsaWVudElkOiBzdHJpbmc7XG4gIHRoZXJhcGlzdElkOiBzdHJpbmc7XG4gIHN1Ym1pdHRlZEF0OiBEYXRlO1xuICB0aW1lU3BlbnQ6IG51bWJlcjsgLy8gaW4gbWludXRlc1xuICByZXNwb25zZXM6IFJlY29yZDxzdHJpbmcsIGFueT47XG4gIGF0dGFjaG1lbnRzPzogc3RyaW5nW107IC8vIGZpbGUgSURzXG4gIGNsaWVudE5vdGVzPzogc3RyaW5nO1xuICBjb21wbGV0aW9uU3RhdHVzOiAnY29tcGxldGUnIHwgJ3BhcnRpYWwnIHwgJ3NraXBwZWQnO1xufVxuXG5leHBvcnQgY2xhc3MgV29ya3NoZWV0U3VibWl0dGVkRXZlbnQgZXh0ZW5kcyBCYXNlRG9tYWluRXZlbnQ8V29ya3NoZWV0U3VibWl0dGVkRGF0YT4ge1xuICBjb25zdHJ1Y3RvcihkYXRhOiBXb3Jrc2hlZXRTdWJtaXR0ZWREYXRhLCBtZXRhZGF0YT86IEV2ZW50TWV0YWRhdGEpIHtcbiAgICBzdXBlcihkYXRhLndvcmtzaGVldElkLCAnV29ya3NoZWV0JywgZGF0YSwgbWV0YWRhdGEpO1xuICB9XG59XG5cbmV4cG9ydCBpbnRlcmZhY2UgV29ya3NoZWV0UmV2aWV3ZWREYXRhIHtcbiAgd29ya3NoZWV0SWQ6IHN0cmluZztcbiAgc3VibWlzc2lvbklkOiBzdHJpbmc7XG4gIGNsaWVudElkOiBzdHJpbmc7XG4gIHRoZXJhcGlzdElkOiBzdHJpbmc7XG4gIHJldmlld2VkQXQ6IERhdGU7XG4gIGZlZWRiYWNrOiBzdHJpbmc7XG4gIHJhdGluZz86IG51bWJlcjsgLy8gMS01XG4gIGZvbGxvd1VwUmVxdWlyZWQ6IGJvb2xlYW47XG4gIG5leHRTdGVwcz86IHN0cmluZztcbiAgcmV2aWV3U3RhdHVzOiAnYXBwcm92ZWQnIHwgJ25lZWRzX3JldmlzaW9uJyB8ICdpbmNvbXBsZXRlJztcbn1cblxuZXhwb3J0IGNsYXNzIFdvcmtzaGVldFJldmlld2VkRXZlbnQgZXh0ZW5kcyBCYXNlRG9tYWluRXZlbnQ8V29ya3NoZWV0UmV2aWV3ZWREYXRhPiB7XG4gIGNvbnN0cnVjdG9yKGRhdGE6IFdvcmtzaGVldFJldmlld2VkRGF0YSwgbWV0YWRhdGE/OiBFdmVudE1ldGFkYXRhKSB7XG4gICAgc3VwZXIoZGF0YS53b3Jrc2hlZXRJZCwgJ1dvcmtzaGVldCcsIGRhdGEsIG1ldGFkYXRhKTtcbiAgfVxufVxuXG5leHBvcnQgaW50ZXJmYWNlIFByb2dyZXNzTm90ZUNyZWF0ZWREYXRhIHtcbiAgbm90ZUlkOiBzdHJpbmc7XG4gIGNsaWVudElkOiBzdHJpbmc7XG4gIHRoZXJhcGlzdElkOiBzdHJpbmc7XG4gIHNlc3Npb25JZD86IHN0cmluZztcbiAgbm90ZVR5cGU6XG4gICAgfCAnc2Vzc2lvbl9ub3RlJ1xuICAgIHwgJ3Byb2dyZXNzX3VwZGF0ZSdcbiAgICB8ICd0cmVhdG1lbnRfcGxhbidcbiAgICB8ICdhc3Nlc3NtZW50X25vdGUnO1xuICBjb250ZW50OiBzdHJpbmc7XG4gIHRhZ3M6IHN0cmluZ1tdO1xuICBpc1ByaXZhdGU6IGJvb2xlYW47XG4gIGNyZWF0ZWRBdDogRGF0ZTtcbn1cblxuZXhwb3J0IGNsYXNzIFByb2dyZXNzTm90ZUNyZWF0ZWRFdmVudCBleHRlbmRzIEJhc2VEb21haW5FdmVudDxQcm9ncmVzc05vdGVDcmVhdGVkRGF0YT4ge1xuICBjb25zdHJ1Y3RvcihkYXRhOiBQcm9ncmVzc05vdGVDcmVhdGVkRGF0YSwgbWV0YWRhdGE/OiBFdmVudE1ldGFkYXRhKSB7XG4gICAgc3VwZXIoZGF0YS5ub3RlSWQsICdQcm9ncmVzc05vdGUnLCBkYXRhLCBtZXRhZGF0YSk7XG4gIH1cbn1cblxuZXhwb3J0IGludGVyZmFjZSBUcmVhdG1lbnRQbGFuVXBkYXRlZERhdGEge1xuICBwbGFuSWQ6IHN0cmluZztcbiAgY2xpZW50SWQ6IHN0cmluZztcbiAgdGhlcmFwaXN0SWQ6IHN0cmluZztcbiAgdXBkYXRlZFNlY3Rpb25zOiBzdHJpbmdbXTtcbiAgZ29hbHM6IHN0cmluZ1tdO1xuICBpbnRlcnZlbnRpb25zOiBzdHJpbmdbXTtcbiAgdGltZWxpbmU6IHN0cmluZztcbiAgdXBkYXRlZEF0OiBEYXRlO1xuICB2ZXJzaW9uOiBudW1iZXI7XG4gIGNoYW5nZVJlYXNvbjogc3RyaW5nO1xufVxuXG5leHBvcnQgY2xhc3MgVHJlYXRtZW50UGxhblVwZGF0ZWRFdmVudCBleHRlbmRzIEJhc2VEb21haW5FdmVudDxUcmVhdG1lbnRQbGFuVXBkYXRlZERhdGE+IHtcbiAgY29uc3RydWN0b3IoZGF0YTogVHJlYXRtZW50UGxhblVwZGF0ZWREYXRhLCBtZXRhZGF0YT86IEV2ZW50TWV0YWRhdGEpIHtcbiAgICBzdXBlcihkYXRhLnBsYW5JZCwgJ1RyZWF0bWVudFBsYW4nLCBkYXRhLCBtZXRhZGF0YSk7XG4gIH1cbn1cblxuZXhwb3J0IGludGVyZmFjZSBNaWxlc3RvbmVBY2hpZXZlZERhdGEge1xuICBtaWxlc3RvbmVJZDogc3RyaW5nO1xuICBjbGllbnRJZDogc3RyaW5nO1xuICB0aGVyYXBpc3RJZDogc3RyaW5nO1xuICBtaWxlc3RvbmVUeXBlOiBzdHJpbmc7XG4gIGRlc2NyaXB0aW9uOiBzdHJpbmc7XG4gIGFjaGlldmVkQXQ6IERhdGU7XG4gIHJlbGF0ZWRHb2Fsczogc3RyaW5nW107XG4gIGNlbGVicmF0aW9uU2VudDogYm9vbGVhbjtcbn1cblxuZXhwb3J0IGNsYXNzIE1pbGVzdG9uZUFjaGlldmVkRXZlbnQgZXh0ZW5kcyBCYXNlRG9tYWluRXZlbnQ8TWlsZXN0b25lQWNoaWV2ZWREYXRhPiB7XG4gIGNvbnN0cnVjdG9yKGRhdGE6IE1pbGVzdG9uZUFjaGlldmVkRGF0YSwgbWV0YWRhdGE/OiBFdmVudE1ldGFkYXRhKSB7XG4gICAgc3VwZXIoZGF0YS5taWxlc3RvbmVJZCwgJ01pbGVzdG9uZScsIGRhdGEsIG1ldGFkYXRhKTtcbiAgfVxufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztJ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
