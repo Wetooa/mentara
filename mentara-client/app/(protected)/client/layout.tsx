@@ -8,6 +8,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { UserSearchBar, User } from "@/components/search";
+import { DashboardNotificationMetadata } from "@/components/metadata/NotificationMetadata";
 
 export default function MainLayout({
   children,
@@ -65,8 +66,10 @@ export default function MainLayout({
   ];
 
   return (
-    <div className="flex h-screen w-full bg-white">
-      {/* Desktop Sidebar Navigation */}
+    <>
+      <DashboardNotificationMetadata role="client" />
+      <div className="flex h-screen w-full bg-white">
+        {/* Desktop Sidebar Navigation */}
       <nav className="hidden md:flex fixed left-0 top-0 z-10 h-full w-[70px] flex-col items-center border-r border-gray-200 bg-white py-4">
         {/* Logo */}
         <Link href="/client" className="mb-8 px-2">
@@ -358,6 +361,6 @@ export default function MainLayout({
           </div>
         </nav>
       </div>
-    </div>
+    </>
   );
 }
