@@ -159,7 +159,8 @@
       "Bash(pkill:*)",
       "Bash(tail:*)",
       "mcp__zen__chat",
-      "Bash(ss:*)"
+      "Bash(ss:*)",
+      "mcp__serena__find_referencing_symbols"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -30,7 +30,7 @@ export default function TherapistSchedulePage() {
   const [activeTab, setActiveTab] = useState("schedule");
 
   // Format date for API
-  const dateString = selectedDate.toISOString().split('T')[0];
+  const dateString = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
 
   // Get meetings for the selected date
   const { meetings, isLoading: meetingsLoading } = useMeetings({

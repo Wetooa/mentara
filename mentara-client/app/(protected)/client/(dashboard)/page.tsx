@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   useDashboardData,
-  useNotifications,
   useRecentCommunications,
 } from "@/hooks/dashboard/useClientDashboard";
+import { useNotifications } from "@/hooks/notifications/useNotifications";
 import {
   transformDashboardData,
   createFallbackDashboardData,

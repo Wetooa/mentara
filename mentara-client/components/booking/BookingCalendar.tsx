@@ -35,7 +35,7 @@ export function BookingCalendar({
   const [calendarDate, setCalendarDate] = useState<Date>(selectedDate || new Date());
   
   // Format date for API
-  const dateString = calendarDate.toISOString().split('T')[0];
+  const dateString = calendarDate ? calendarDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
   
   const {
     timeSlots,
