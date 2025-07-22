@@ -23,6 +23,7 @@ export class SeedDataGenerator {
       bio: faker.lorem.paragraph(),
       coverImageUrl: faker.image.url(),
       isActive: true,
+      emailVerified: true, // Set to true for test accounts to enable login
       ...specificData,
       password: hashedPassword, // Hashed dummy password (overrides any from specificData)
     };

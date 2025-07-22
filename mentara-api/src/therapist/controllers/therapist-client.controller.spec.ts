@@ -214,7 +214,7 @@ describe('TherapistClientController', () => {
           lastName: 'Profile',
           email: 'complete@example.com',
           isActive: true,
-          isVerified: true,
+          emailVerified: true,
         }),
         hasSeenTherapistRecommendations: true,
         createdAt: new Date(),

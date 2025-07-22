@@ -51,7 +51,7 @@ export class MockBuilder {
       role,
       email: TEST_EMAILS[role.toUpperCase() as keyof typeof TEST_EMAILS],
       isActive: true,
-      isVerified: true,
+      emailVerified: true,
     };
   }
 
@@ -86,7 +86,7 @@ export class TestDataGenerator {
       lastName: 'User',
       role: 'client',
       isActive: true,
-      isVerified: false,
+      emailVerified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,
