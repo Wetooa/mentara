@@ -13,44 +13,131 @@ import { FilePreviewModal } from "./FilePreviewModal";
 // Backend-specific type that matches actual API response
 export interface TherapistApplicationResponse {
   id: string;
-  status: string;
-  submissionDate: string;
-  processingDate?: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  mobile: string;
-  province: string;
-  providerType: string;
-  professionalLicenseType: string;
-  isPRCLicensed: string;
-  prcLicenseNumber: string;
-  expirationDateOfLicense: string;
-  isLicenseActive: string;
-  practiceStartDate: string;
-  yearsOfExperience: string;
-  areasOfExpertise: string[];
-  assessmentTools: string[];
-  therapeuticApproachesUsedList: string[];
-  languagesOffered: string[];
-  providedOnlineTherapyBefore: string;
-  comfortableUsingVideoConferencing: string;
-  weeklyAvailability: string;
-  preferredSessionLength: string;
-  accepts: string[];
-  privateConfidentialSpace: string;
-  compliesWithDataPrivacyAct: string;
-  professionalLiabilityInsurance: string;
-  complaintsOrDisciplinaryActions: string;
-  willingToAbideByPlatformGuidelines: string;
-  bio?: string;
-  hourlyRate?: number;
-  files?: Array<{
+  status: "APPROVED" | "REJECTED" | "PENDING";
+  submittedAt: string;
+  user: {
     id: string;
-    fileUrl: string;
-    fileName: string;
-    uploadedAt: string;
-  }>;
+    email: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+    birthDate: string | null;
+    address: string | null;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
+    password: string;
+    emailVerified: boolean;
+    emailVerifyToken: string | null;
+    emailVerifyTokenExp: string | null;
+    resetToken: string | null;
+    resetTokenExpiry: string | null;
+    isActive: boolean;
+    isVerified: boolean;
+    failedLoginCount: number;
+    avatarUrl: string | null;
+    coverImageUrl: string | null;
+    bio: string | null;
+    suspendedAt: string | null;
+    suspendedBy: string | null;
+    suspensionReason: string | null;
+    deactivatedAt: string | null;
+    deactivatedBy: string | null;
+    deactivationReason: string | null;
+    lastLoginAt: string | null;
+    lockoutUntil: string | null;
+    client: any | null;
+  };
+  application: {
+    userId: string;
+    mobile: string;
+    province: string;
+    timezone: string;
+    status: "APPROVED" | "REJECTED" | "PENDING";
+    submissionDate: string;
+    processingDate: string | null;
+    processedByAdminId: string | null;
+    providerType: string;
+    professionalLicenseType: string;
+    isPRCLicensed: "Yes" | "No";
+    prcLicenseNumber: string;
+    expirationDateOfLicense: string;
+    practiceStartDate: string;
+    licenseVerified: boolean;
+    licenseVerifiedAt: string | null;
+    licenseVerifiedBy: string | null;
+    certifications: string | null;
+    certificateUrls: string[];
+    certificateNames: string[];
+    licenseUrls: string[];
+    licenseNames: string[];
+    documentUrls: string[];
+    documentNames: string[];
+    yearsOfExperience: number | null;
+    educationBackground: string | null;
+    specialCertifications: string[];
+    practiceLocation: string | null;
+    acceptsInsurance: boolean;
+    acceptedInsuranceTypes: string[];
+    areasOfExpertise: string[];
+    assessmentTools: string[];
+    therapeuticApproachesUsedList: string[];
+    languagesOffered: string[];
+    providedOnlineTherapyBefore: boolean;
+    comfortableUsingVideoConferencing: boolean;
+    preferredSessionLength: number[];
+    privateConfidentialSpace: string | null;
+    compliesWithDataPrivacyAct: boolean;
+    professionalLiabilityInsurance: string | null;
+    complaintsOrDisciplinaryActions: string | null;
+    willingToAbideByPlatformGuidelines: boolean;
+    expertise: string[];
+    approaches: string[];
+    languages: string[];
+    illnessSpecializations: string[];
+    acceptTypes: string[];
+    treatmentSuccessRates: Record<string, any>;
+    sessionLength: string;
+    hourlyRate: string;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      id: string;
+      email: string;
+      firstName: string;
+      middleName: string | null;
+      lastName: string;
+      birthDate: string | null;
+      address: string | null;
+      role: string;
+      createdAt: string;
+      updatedAt: string;
+      password: string;
+      emailVerified: boolean;
+      emailVerifyToken: string | null;
+      emailVerifyTokenExp: string | null;
+      resetToken: string | null;
+      resetTokenExpiry: string | null;
+      isActive: boolean;
+      isVerified: boolean;
+      failedLoginCount: number;
+      avatarUrl: string | null;
+      coverImageUrl: string | null;
+      bio: string | null;
+      suspendedAt: string | null;
+      suspendedBy: string | null;
+      suspensionReason: string | null;
+      deactivatedAt: string | null;
+      deactivatedBy: string | null;
+      deactivationReason: string | null;
+      lastLoginAt: string | null;
+      lockoutUntil: string | null;
+      client: any | null;
+    };
+    processedByAdmin: any | null;
+    assignedClients: any[];
+    reviews: any[];
+  };
 }
 import {
   AlertDialog,
@@ -74,6 +161,7 @@ import {
   XIcon,
   CheckIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface ApplicationFile {
   id: string;
@@ -93,7 +181,7 @@ interface TherapistApplicationDetailsProps {
   };
   onStatusChange?: (
     id: string,
-    status: "approved" | "rejected" | "pending"
+    status: "APPROVED" | "REJECTED" | "PENDING"
   ) => void;
 }
 
@@ -101,10 +189,8 @@ export function TherapistApplicationDetails({
   application,
   onStatusChange,
 }: TherapistApplicationDetailsProps) {
-  // const [selectedFile, setSelectedFile] = useState<{
-  //   name: string;
-  //   url: string;
-  // } | null>(null);
+  console.log("TherapistApplicationDetails", application);
+
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(
     null
@@ -129,13 +215,12 @@ export function TherapistApplicationDetails({
   };
 
   // Helper function to render Yes/No responses with appropriate styling
-  const renderYesNo = (value: string) => {
-    if (value?.toLowerCase() === "yes") {
+  const renderYesNo = (value: boolean) => {
+    if (value === true) {
       return <span className="text-green-600 font-medium">Yes</span>;
-    } else if (value?.toLowerCase() === "no") {
+    } else {
       return <span className="text-red-600 font-medium">No</span>;
     }
-    return value || "N/A";
   };
 
   // Helper function to render object with boolean values or array of strings
@@ -200,57 +285,22 @@ export function TherapistApplicationDetails({
     }
   };
 
-  // Handle protected file access with authentication
-  const handleFileAccess = async (
-    fileUrl: string,
-    action: "view" | "download" = "view"
-  ) => {
-    try {
-      // For protected file URLs, we need to handle authentication
-      const response = await fetch(fileUrl, {
-        credentials: "include", // Include auth cookies
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken") || ""}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to access file");
-      }
-
-      // Create blob URL for viewing/downloading
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      if (action === "download") {
-        // Trigger download
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = fileUrl.split("/").pop() || "file";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } else {
-        // Open for viewing
-        window.open(blobUrl, "_blank");
-      }
-
-      // Clean up blob URL
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
-    } catch (error) {
-      console.error("Error accessing file:", error);
-      toast.error("Failed to access file. Please try again.");
-    }
-  };
-
   // Render uploaded documents using both new files format and legacy uploadedDocuments
   const renderUploadedDocuments = () => {
-    const files = application.files || [];
-    const legacyDocs = application.uploadedDocuments || [];
+    const fileNames = application.application.documentNames || [];
+    const fileLinks = application.application.documentUrls || [];
 
-    if (files.length === 0 && legacyDocs.length === 0) {
+    if (fileNames.length === 0 && fileLinks.length === 0) {
       return <p className="text-gray-500 italic">No documents uploaded</p>;
     }
+
+    // Combine the arrays into file objects
+    const files = fileNames.map((fileName, index) => ({
+      id: `doc-${index}`,
+      fileName: fileName,
+      fileUrl: fileLinks[index] || "",
+      uploadedAt: application.application.createdAt, // Use application creation date as fallback
+    }));
 
     return (
       <div className="grid grid-cols-1 gap-2">
@@ -274,59 +324,10 @@ export function TherapistApplicationDetails({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => setPreviewFile(file)}
+                onClick={() => window.open(file.fileUrl)}
               >
                 <ExternalLinkIcon className="w-4 h-4" />
                 <span>View</span>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => handleFileAccess(file.fileUrl, "download")}
-              >
-                <DownloadIcon className="w-4 h-4" />
-                <span>Download</span>
-              </Button>
-            </div>
-          </div>
-        ))}
-
-        {/* Render legacy uploadedDocuments format for backward compatibility */}
-        {legacyDocs.map((file, index) => (
-          <div
-            key={`legacy-${index}`}
-            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              {getFileIcon(file.fileType)}
-              <span>{file.fileName}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => setPreviewFile({
-                  id: `legacy-${index}`,
-                  fileName: file.fileName,
-                  fileUrl: file.fileUrl,
-                  uploadedAt: new Date().toISOString(), // Legacy files don't have upload date
-                })}
-              >
-                <ExternalLinkIcon className="w-4 h-4" />
-                <span>View</span>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => handleFileAccess(file.fileUrl, "download")}
-              >
-                <DownloadIcon className="w-4 h-4" />
-                <span>Download</span>
               </Button>
             </div>
           </div>
@@ -350,7 +351,7 @@ export function TherapistApplicationDetails({
       {
         applicationId: application.id,
         data: {
-          status: actionType === "approve" ? "approved" : "rejected",
+          status: actionType === "approve" ? "APPROVED" : "REJECTED",
         },
       },
       {
@@ -359,7 +360,7 @@ export function TherapistApplicationDetails({
           if (onStatusChange) {
             onStatusChange(
               application.id,
-              actionType === "approve" ? "approved" : "rejected"
+              actionType === "approve" ? "APPROVED" : "REJECTED"
             );
           }
         },
@@ -388,7 +389,7 @@ export function TherapistApplicationDetails({
             application.status?.slice(1) || "Unknown"}
         </Badge>
         <p className="text-sm text-gray-500">
-          Submitted on {formatDate(application.submissionDate)}
+          Submitted on {formatDate(application.application.submissionDate)}
         </p>
       </div>
       <div>
@@ -418,27 +419,29 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     First Name
                   </h3>
-                  <p className="mt-1">{application.firstName}</p>
+                  <p className="mt-1">{application.user.firstName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Last Name
                   </h3>
-                  <p className="mt-1">{application.lastName}</p>
+                  <p className="mt-1">{application.user.lastName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="mt-1">{application.email}</p>
+                  <p className="mt-1">{application.user.email}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Mobile</h3>
-                  <p className="mt-1">{application.mobile}</p>
+                  <p className="mt-1">
+                    {application.application.mobile || "N/A"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Province
                   </h3>
-                  <p className="mt-1">{application.province}</p>
+                  <p className="mt-1">{application.application.province}</p>
                 </div>
               </div>
             </TabsContent>
@@ -450,7 +453,7 @@ export function TherapistApplicationDetails({
                     Provider Type
                   </h3>
                   <p className="mt-1">
-                    {application.providerType || "Not specified"}
+                    {application.application.providerType || "Not specified"}
                   </p>
                 </div>
                 <div>
@@ -458,7 +461,8 @@ export function TherapistApplicationDetails({
                     Professional License Type
                   </h3>
                   <p className="mt-1">
-                    {application.professionalLicenseType || "Not specified"}
+                    {application.application.professionalLicenseType ||
+                      "Not specified"}
                   </p>
                 </div>
                 <div>
@@ -466,7 +470,7 @@ export function TherapistApplicationDetails({
                     PRC Licensed
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.isPRCLicensed)}
+                    {application.application.isPRCLicensed}
                   </p>
                 </div>
                 <div>
@@ -474,7 +478,7 @@ export function TherapistApplicationDetails({
                     PRC License Number
                   </h3>
                   <p className="mt-1">
-                    {application.prcLicenseNumber || "Not provided"}
+                    {application.application.prcLicenseNumber || "Not provided"}
                   </p>
                 </div>
                 <div>
@@ -482,7 +486,9 @@ export function TherapistApplicationDetails({
                     License Expiration Date
                   </h3>
                   <p className="mt-1">
-                    {formatDate(application.expirationDateOfLicense)}
+                    {formatDate(
+                      application.application.expirationDateOfLicense
+                    )}
                   </p>
                 </div>
                 <div>
@@ -490,14 +496,16 @@ export function TherapistApplicationDetails({
                     License Active
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.isLicenseActive)}
+                    {renderYesNo(application.application.licenseVerified)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Years of Experience
                   </h3>
-                  <p className="mt-1">{application.yearsOfExperience}</p>
+                  <p className="mt-1">
+                    {application.application.yearsOfExperience}
+                  </p>
                 </div>
               </div>
 
@@ -507,28 +515,30 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Areas of Expertise
                 </h3>
-                {renderObjectItems(application.areasOfExpertise)}
+                {renderObjectItems(application.application.areasOfExpertise)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Assessment Tools
                 </h3>
-                {renderObjectItems(application.assessmentTools)}
+                {renderObjectItems(application.application.assessmentTools)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Therapeutic Approaches
                 </h3>
-                {renderObjectItems(application.therapeuticApproachesUsedList)}
+                {renderObjectItems(
+                  application.application.therapeuticApproachesUsedList
+                )}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Languages Offered
                 </h3>
-                {renderObjectItems(application.languagesOffered)}
+                {renderObjectItems(application.application.languagesOffered)}
               </div>
             </TabsContent>
 
@@ -539,7 +549,9 @@ export function TherapistApplicationDetails({
                     Provided Online Therapy Before
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.providedOnlineTherapyBefore)}
+                    {renderYesNo(
+                      application.application.providedOnlineTherapyBefore
+                    )}
                   </p>
                 </div>
                 <div>
@@ -547,20 +559,26 @@ export function TherapistApplicationDetails({
                     Comfortable Using Video Conferencing
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.comfortableUsingVideoConferencing)}
+                    {renderYesNo(
+                      application.application.comfortableUsingVideoConferencing
+                    )}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Weekly Availability (hours)
                   </h3>
-                  <p className="mt-1">{application.weeklyAvailability}</p>
+                  <p className="mt-1">
+                    {application.application.preferredSessionLength}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Preferred Session Length (minutes)
                   </h3>
-                  <p className="mt-1">{application.preferredSessionLength}</p>
+                  <p className="mt-1">
+                    {application.application.preferredSessionLength}
+                  </p>
                 </div>
               </div>
 
@@ -570,7 +588,7 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Accepts
                 </h3>
-                {renderObjectItems(application.accepts)}
+                {renderObjectItems(application.acce)}
               </div>
             </TabsContent>
 
@@ -581,7 +599,7 @@ export function TherapistApplicationDetails({
                     Has Private Confidential Space
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.privateConfidentialSpace)}
+                    {application.application.privateConfidentialSpace}
                   </p>
                 </div>
                 <div>
@@ -589,7 +607,9 @@ export function TherapistApplicationDetails({
                     Complies With Data Privacy Act
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.compliesWithDataPrivacyAct)}
+                    {renderYesNo(
+                      application.application.compliesWithDataPrivacyAct
+                    )}
                   </p>
                 </div>
                 <div>
@@ -597,7 +617,7 @@ export function TherapistApplicationDetails({
                     Professional Liability Insurance
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.professionalLiabilityInsurance)}
+                    {application.application.professionalLiabilityInsurance}
                   </p>
                 </div>
                 <div>
@@ -605,7 +625,7 @@ export function TherapistApplicationDetails({
                     Complaints Or Disciplinary Actions
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(application.complaintsOrDisciplinaryActions)}
+                    {application.application.complaintsOrDisciplinaryActions}
                   </p>
                 </div>
                 <div>
@@ -613,9 +633,7 @@ export function TherapistApplicationDetails({
                     Willing To Abide By Platform Guidelines
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo(
-                      application.willingToAbideByPlatformGuidelines
-                    )}
+                    {application.application.willingToAbideByPlatformGuidelines}
                   </p>
                 </div>
               </div>
@@ -672,8 +690,8 @@ export function TherapistApplicationDetails({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "approve"
-                ? `Are you sure you want to approve ${application.firstName} ${application.lastName}'s application? This will allow them to start using the platform as a therapist.`
-                : `Are you sure you want to reject ${application.firstName} ${application.lastName}'s application? They will be notified via email.`}
+                ? `Are you sure you want to approve ${application.user.firstName} ${application.user.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.user.firstName} ${application.user.lastName}'s application? They will be notified via email.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -2,24 +2,24 @@
 
 /**
  * Admin Therapist Management Page
- * 
+ *
  * This page provides a comprehensive interface for managing therapist applications
  * in the admin panel. It has been refactored to follow modern React patterns:
- * 
+ *
  * Architecture Improvements:
  * - Business logic moved to custom React Query hooks
  * - Component focused solely on UI state management
  * - Type-safe integration with backend DTOs
  * - Optimistic updates with automatic rollback on errors
  * - Consistent error handling and user feedback
- * 
+ *
  * Key Features:
  * - Real-time application filtering and pagination
  * - Individual and bulk application approval/rejection
  * - Detailed application view in modal
  * - Application metrics and statistics display
  * - Comprehensive error handling with user-friendly messages
- * 
+ *
  * @version 2.0.0 - Refactored with custom hooks architecture
  * @lastUpdated 2025-01-22 - Complete DTO synchronization
  */
@@ -62,9 +62,8 @@ import type {
 } from "@/types/api/admin";
 
 export default function AdminTherapistManagementPage() {
-
   const [filters, setFilters] = useState<PendingTherapistFiltersDto>({
-    status: "pending",
+    status: "PENDING",
     limit: 50,
   });
   const [selectedTherapists, setSelectedTherapists] = useState<string[]>([]);
@@ -83,7 +82,8 @@ export default function AdminTherapistManagementPage() {
   const { data: statistics } = useTherapistApplicationMetrics();
 
   // Fetch therapist application details for modal using custom hook
-  const { data: selectedApplication } = useTherapistApplicationDetails(detailsTherapistId);
+  const { data: selectedApplication } =
+    useTherapistApplicationDetails(detailsTherapistId);
 
   // Custom hooks for mutations
   const approveMutation = useApproveTherapist();
@@ -100,21 +100,27 @@ export default function AdminTherapistManagementPage() {
   };
 
   const handleBulkApprove = () => {
-    bulkApproveMutation.mutate({
-      therapistIds: selectedTherapists,
-      data: { approvalMessage: "Bulk approval processed" },
-    }, {
-      onSuccess: () => setSelectedTherapists([]),
-    });
+    bulkApproveMutation.mutate(
+      {
+        therapistIds: selectedTherapists,
+        data: { approvalMessage: "Bulk approval processed" },
+      },
+      {
+        onSuccess: () => setSelectedTherapists([]),
+      }
+    );
   };
 
   const handleBulkReject = () => {
-    bulkRejectMutation.mutate({
-      therapistIds: selectedTherapists,
-      data: { rejectionReason: "incomplete_documentation" },
-    }, {
-      onSuccess: () => setSelectedTherapists([]),
-    });
+    bulkRejectMutation.mutate(
+      {
+        therapistIds: selectedTherapists,
+        data: { rejectionReason: "incomplete_documentation" },
+      },
+      {
+        onSuccess: () => setSelectedTherapists([]),
+      }
+    );
   };
 
   if (isLoading) {
@@ -175,7 +181,7 @@ export default function AdminTherapistManagementPage() {
       </div>
 
       {/* Statistics Overview */}
-      {statistics && <TherapistStatistics statistics={statistics} />}
+      {/* {statistics && <TherapistStatistics statistics={statistics} />} */}
 
       {/* Filters */}
       <Card>
@@ -189,10 +195,10 @@ export default function AdminTherapistManagementPage() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="REJECTED">Rejected</SelectItem>
+                <SelectItem value="SUSPENDED">Suspended</SelectItem>
               </SelectContent>
             </Select>
 
@@ -240,7 +246,9 @@ export default function AdminTherapistManagementPage() {
           onBulkApprove={handleBulkApprove}
           onBulkReject={handleBulkReject}
           onClearSelection={() => setSelectedTherapists([])}
-          isLoading={bulkApproveMutation.isPending || bulkRejectMutation.isPending}
+          isLoading={
+            bulkApproveMutation.isPending || bulkRejectMutation.isPending
+          }
         />
       )}
 
@@ -284,7 +292,7 @@ export default function AdminTherapistManagementPage() {
                 No Applications Found
               </h3>
               <p className="text-sm sm:text-base text-muted-foreground">
-                {filters.status === "pending"
+                {filters.status === "PENDING"
                   ? "No pending therapist applications at this time."
                   : `No ${filters.status} applications found with the current filters.`}
               </p>
@@ -294,16 +302,15 @@ export default function AdminTherapistManagementPage() {
       </div>
 
       {/* Application Details Modal */}
-      <Dialog 
-        open={!!detailsTherapistId} 
+      <Dialog
+        open={!!detailsTherapistId}
         onOpenChange={(open) => !open && setDetailsTherapistId(null)}
       >
         <DialogContent className="w-[95vw] max-w-[1200px] h-[90vh] max-h-[900px] p-0 overflow-hidden">
           <DialogHeader className="p-6 pb-2 border-b">
             <DialogTitle className="text-xl font-semibold">
-              {selectedApplication && 
-                `${selectedApplication.user.firstName} ${selectedApplication.user.lastName} - Application Details`
-              }
+              {selectedApplication &&
+                `${selectedApplication.user.firstName} ${selectedApplication.user.lastName} - Application Details`}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-auto p-6">

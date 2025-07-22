@@ -13,11 +13,11 @@ import type {
 
 /**
  * Admin API Service
- * 
+ *
  * Comprehensive service layer for admin-related operations, specifically
  * focused on therapist application management. This service provides a
  * complete interface to the NestJS backend AdminTherapistController.
- * 
+ *
  * Key Features:
  * - Therapist application CRUD operations
  * - Advanced filtering and pagination support
@@ -25,7 +25,7 @@ import type {
  * - Detailed application metrics and reporting
  * - Comprehensive error handling with typed responses
  * - Complete endpoint synchronization with backend
- * 
+ *
  * Usage:
  * ```typescript
  * const api = useApi();
@@ -34,7 +34,7 @@ import type {
  *   limit: 50
  * });
  * ```
- * 
+ *
  * @version 2.0.0
  * @lastUpdated 2025-01-22 - Full endpoint and type synchronization
  * @maintainer Frontend Architecture Team
@@ -180,7 +180,6 @@ export function createAdminService(axios: AxiosInstance) {
         handleApiError(error);
       }
     },
-
   };
 }
 

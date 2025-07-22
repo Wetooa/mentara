@@ -15,6 +15,9 @@ import {
   type UpdateTherapistStatusDto,
   type PendingTherapistFiltersDto,
 } from '../types';
+import { EmailService } from 'src/email/email.service';
+import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminTherapistService {
@@ -23,9 +26,118 @@ export class AdminTherapistService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly emailService: EmailService,
   ) {}
 
   // ===== THERAPIST APPLICATION RETRIEVAL =====
+  async getApplications(filters: PendingTherapistFiltersDto) {
+    try {
+      const {
+        status = 'PENDING',
+        province,
+        submittedAfter,
+        processedBy,
+        providerType,
+        limit = 50,
+      } = filters;
+
+      const where: Prisma.TherapistWhereInput = {};
+
+      // Apply status filter
+      if (status) {
+        // Convert filter status to uppercase to match enum values
+        where.status = status.toUpperCase() as any;
+      }
+
+      // Apply province filter
+      if (province) {
+        where.province = {
+          contains: province,
+          mode: 'insensitive',
+        };
+      }
+
+      // Apply date filter
+      if (submittedAfter) {
+        where.submissionDate = {
+          gte: new Date(submittedAfter),
+        };
+      }
+
+      // Apply processed by filter
+      if (processedBy) {
+        where.processedByAdminId = processedBy;
+      }
+
+      // Apply provider type filter
+      if (providerType) {
+        where.providerType = {
+          contains: providerType,
+          mode: 'insensitive',
+        };
+      }
+
+      const applications = await this.prisma.therapist.findMany({
+        where,
+        take: limit,
+        orderBy: [{ submissionDate: 'desc' }, { createdAt: 'desc' }],
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              createdAt: true,
+              lastLoginAt: true,
+            },
+          },
+          processedByAdmin: {
+            include: {
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Calculate summary statistics
+      const totalPending = await this.prisma.therapist.count({
+        where: { status: 'PENDING' },
+      });
+
+      const totalApproved = await this.prisma.therapist.count({
+        where: { status: 'APPROVED' },
+      });
+
+      const totalRejected = await this.prisma.therapist.count({
+        where: { status: 'REJECTED' },
+      });
+
+      this.logger.log(
+        `Retrieved ${applications.length} therapist applications with filters: ${JSON.stringify(filters)}`,
+      );
+
+      return {
+        applications,
+        summary: {
+          totalPending,
+          totalApproved,
+          totalRejected,
+          filtered: applications.length,
+        },
+        filters: filters,
+      };
+    } catch (error) {
+      this.logger.error('Failed to retrieve pending applications:', error);
+      throw error;
+    }
+  }
 
   async getPendingApplications(filters: PendingTherapistFiltersDto) {
     try {
@@ -419,6 +531,14 @@ export class AdminTherapistService {
         });
 
         // 4. Update user status if necessary
+        const generateRandomPassword = (): string => {
+          return crypto.randomBytes(8).toString('hex') + 'A1!'; // Ensures uppercase, number, and special char
+        };
+
+        // Hash password
+        const randomPassword = generateRandomPassword();
+        const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
         if (upperCaseStatus === 'SUSPENDED') {
           await tx.user.update({
             where: { id: therapistId },
@@ -433,16 +553,34 @@ export class AdminTherapistService {
           await tx.user.update({
             where: { id: therapistId },
             data: {
+              password: hashedPassword,
               role: 'therapist',
               isActive: true,
               suspendedAt: null,
               suspendedBy: null,
               suspensionReason: null,
+              isVerified: true, // Mark as verified when approved
+              emailVerified: true, // Ensure email is verified
             },
           });
         }
 
         // Audit log removed - not needed for student project
+        if (upperCaseStatus === 'APPROVED') {
+          // 5. Send approval email
+          await this.emailService.sendTherapistApproved(
+            existingTherapist.user.email,
+            existingTherapist.user.firstName,
+            'Welcome to Mentara - Your Therapist Application has been Approved!',
+            randomPassword,
+          );
+        } else if (upperCaseStatus === 'REJECTED') {
+          await this.emailService.sendTherapistDenied(
+            existingTherapist.user.email,
+            existingTherapist.user.firstName,
+            'Mentara Therapist Application Update',
+          );
+        }
 
         // 6. Send status change notification
         const notificationTitle = this.getStatusChangeNotificationTitle(
