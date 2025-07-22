@@ -32,7 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { CrisisSupportModal } from "@/components/crisis/CrisisSupportModal";
 
 interface ReportContentModalProps {
@@ -143,7 +143,7 @@ export function ReportContentModal({
     },
     onSuccess: () => {
       toast.success("Report submitted successfully. Our team will review it shortly.");
-      queryClient.invalidateQueries({ queryKey: queryKeys.reports.all });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       onClose();
       resetForm();
     },

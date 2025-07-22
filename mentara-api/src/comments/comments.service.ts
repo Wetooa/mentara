@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Comment, Prisma, User } from '@prisma/client';
-import { CommentCreateInputDto, CommentUpdateInputDto } from 'mentara-commons';
+import type { CommentCreateInputDto, CommentUpdateInputDto } from './types';
 
 // Define local response type to match actual unified comment structure
 interface CommentResponse {

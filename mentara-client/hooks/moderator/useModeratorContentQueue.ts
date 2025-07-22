@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
 import type { Post, Comment, ContentModerationParams, ModerateContentRequest } from '@/types/api';
@@ -12,7 +11,7 @@ export function useModeratorContentQueue(params: ContentModerationParams = {}) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.moderator.content.queue(params),
+    queryKey: ['moderator', 'content', 'queue', params],
     queryFn: () => api.moderator.content.getQueue(params),
     staleTime: 1000 * 60 * 1, // 1 minute (moderation queue is very dynamic)
     retry: (failureCount, error: MentaraApiError) => {
@@ -44,12 +43,12 @@ export function useModerateContent() {
     onMutate: async ({ contentId }) => {
       // Cancel outgoing refetches for content queue
       await queryClient.cancelQueries({ 
-        queryKey: queryKeys.moderator.content.all() 
+        queryKey: ['moderator', 'content'] 
       });
       
       // Optimistically remove item from queue
       queryClient.setQueriesData(
-        { queryKey: queryKeys.moderator.content.all() },
+        { queryKey: ['moderator', 'content'] },
         (old: any) => {
           if (!old?.content) return old;
           return {
@@ -67,10 +66,10 @@ export function useModerateContent() {
       
       // Invalidate related queries
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.dashboard() 
+        queryKey: ['moderator', 'dashboard'] 
       });
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.contentModeration.all() 
+        queryKey: ['contentModeration'] 
       });
     },
     onError: (error: MentaraApiError, variables, context) => {
@@ -78,7 +77,7 @@ export function useModerateContent() {
       
       // Revert optimistic update on error
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.moderator.content.all() 
+        queryKey: ['moderator', 'content'] 
       });
     },
   });

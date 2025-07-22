@@ -3,16 +3,55 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  useUpdateTherapistApplicationStatus,
-} from "@/hooks/useTherapistApplications";
-import type { TherapistApplication } from "@/lib/api/services/therapists";
+import { useUpdateTherapistApplicationStatus } from "@/hooks/useTherapistApplications";
+import { FilePreviewModal } from "./FilePreviewModal";
+// Backend-specific type that matches actual API response
+export interface TherapistApplicationResponse {
+  id: string;
+  status: string;
+  submissionDate: string;
+  processingDate?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  province: string;
+  providerType: string;
+  professionalLicenseType: string;
+  isPRCLicensed: string;
+  prcLicenseNumber: string;
+  expirationDateOfLicense: string;
+  isLicenseActive: string;
+  practiceStartDate: string;
+  yearsOfExperience: string;
+  areasOfExpertise: string[];
+  assessmentTools: string[];
+  therapeuticApproachesUsedList: string[];
+  languagesOffered: string[];
+  providedOnlineTherapyBefore: string;
+  comfortableUsingVideoConferencing: string;
+  weeklyAvailability: string;
+  preferredSessionLength: string;
+  accepts: string[];
+  privateConfidentialSpace: string;
+  compliesWithDataPrivacyAct: string;
+  professionalLiabilityInsurance: string;
+  complaintsOrDisciplinaryActions: string;
+  willingToAbideByPlatformGuidelines: string;
+  bio?: string;
+  hourlyRate?: number;
+  files?: Array<{
+    id: string;
+    fileUrl: string;
+    fileName: string;
+    uploadedAt: string;
+  }>;
+}
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +83,7 @@ interface ApplicationFile {
 }
 
 interface TherapistApplicationDetailsProps {
-  application: TherapistApplication & {
+  application: TherapistApplicationResponse & {
     files?: ApplicationFile[];
     uploadedDocuments?: Array<{
       fileName: string;
@@ -70,10 +109,16 @@ export function TherapistApplicationDetails({
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(
     null
   );
-
+  const [previewFile, setPreviewFile] = useState<{
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    uploadedAt: string;
+  } | null>(null);
 
   // Use the React Query hook for updating application status
-  const { mutate: updateStatus, isPending } = useUpdateTherapistApplicationStatus();
+  const { mutate: updateStatus, isPending } =
+    useUpdateTherapistApplicationStatus();
 
   const formatDate = (dateString: string) => {
     try {
@@ -229,7 +274,7 @@ export function TherapistApplicationDetails({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => handleFileAccess(file.fileUrl, "view")}
+                onClick={() => setPreviewFile(file)}
               >
                 <ExternalLinkIcon className="w-4 h-4" />
                 <span>View</span>
@@ -263,7 +308,12 @@ export function TherapistApplicationDetails({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
-                onClick={() => handleFileAccess(file.fileUrl, "view")}
+                onClick={() => setPreviewFile({
+                  id: `legacy-${index}`,
+                  fileName: file.fileName,
+                  fileUrl: file.fileUrl,
+                  uploadedAt: new Date().toISOString(), // Legacy files don't have upload date
+                })}
               >
                 <ExternalLinkIcon className="w-4 h-4" />
                 <span>View</span>
@@ -296,52 +346,52 @@ export function TherapistApplicationDetails({
     if (!actionType || !onStatusChange) return;
 
     // Use the React Query hook to update application status
-    updateStatus({
-      applicationId: application.id,
-      data: {
-        status: actionType === "approve" ? "approved" : "rejected",
+    updateStatus(
+      {
+        applicationId: application.id,
+        data: {
+          status: actionType === "approve" ? "approved" : "rejected",
+        },
       },
-    }, {
-      onSuccess: () => {
-        // Update the UI via the callback
-        if (onStatusChange) {
-          onStatusChange(
-            application.id,
-            actionType === "approve" ? "approved" : "rejected"
-          );
-        }
-      },
-      onSettled: () => {
-        // Reset form state after mutation completes (success or error)
-        setConfirmationOpen(false);
-        setActionType(null);
-      },
-    });
+      {
+        onSuccess: () => {
+          // Update the UI via the callback
+          if (onStatusChange) {
+            onStatusChange(
+              application.id,
+              actionType === "approve" ? "approved" : "rejected"
+            );
+          }
+        },
+        onSettled: () => {
+          // Reset form state after mutation completes (success or error)
+          setConfirmationOpen(false);
+          setActionType(null);
+        },
+      }
+    );
   };
 
   return (
-    <Card className="w-full shadow-sm">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">Application Details</CardTitle>
-          <Badge
-            className={
-              application.status === "approved"
-                ? "bg-green-100 text-green-700 hover:bg-green-100"
-                : application.status === "rejected"
-                  ? "bg-red-100 text-red-700 hover:bg-red-100"
-                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-            }
-          >
-            {application.status?.charAt(0).toUpperCase() +
-              application.status?.slice(1) || "Unknown"}
-          </Badge>
-        </div>
+    <div className="w-full">
+      <div className="flex justify-between items-center mb-4">
+        <Badge
+          className={
+            application.status === "APPROVED"
+              ? "bg-green-100 text-green-700 hover:bg-green-100"
+              : application.status === "REJECTED"
+                ? "bg-red-100 text-red-700 hover:bg-red-100"
+                : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+          }
+        >
+          {application.status?.charAt(0).toUpperCase() +
+            application.status?.slice(1) || "Unknown"}
+        </Badge>
         <p className="text-sm text-gray-500">
-          Submitted on {formatDate(application.createdAt)}
+          Submitted on {formatDate(application.submissionDate)}
         </p>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div>
         <Tabs defaultValue="personal">
           <TabsList className="w-full">
             <TabsTrigger value="personal" className="flex-1">
@@ -368,27 +418,27 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     First Name
                   </h3>
-                  <p className="mt-1">{application.personalInfo.firstName}</p>
+                  <p className="mt-1">{application.firstName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Last Name
                   </h3>
-                  <p className="mt-1">{application.personalInfo.lastName}</p>
+                  <p className="mt-1">{application.lastName}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="mt-1">{application.personalInfo.email}</p>
+                  <p className="mt-1">{application.email}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Mobile</h3>
-                  <p className="mt-1">{application.personalInfo.phone}</p>
+                  <p className="mt-1">{application.mobile}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Province
                   </h3>
-                  <p className="mt-1">{application.personalInfo.state}</p>
+                  <p className="mt-1">{application.province}</p>
                 </div>
               </div>
             </TabsContent>
@@ -399,34 +449,40 @@ export function TherapistApplicationDetails({
                   <h3 className="text-sm font-medium text-gray-500">
                     Provider Type
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).providerType as string || 'Not specified'}</p>
+                  <p className="mt-1">
+                    {application.providerType || "Not specified"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Professional License Type
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).professionalLicenseType as string || 'Not specified'}</p>
+                  <p className="mt-1">
+                    {application.professionalLicenseType || "Not specified"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC Licensed
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).isPRCLicensed as string)}
+                    {renderYesNo(application.isPRCLicensed)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     PRC License Number
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).prcLicenseNumber as string || 'Not provided'}</p>
+                  <p className="mt-1">
+                    {application.prcLicenseNumber || "Not provided"}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     License Expiration Date
                   </h3>
                   <p className="mt-1">
-                    {formatDate((application as Record<string, unknown>).expirationDateOfLicense as string)}
+                    {formatDate(application.expirationDateOfLicense)}
                   </p>
                 </div>
                 <div>
@@ -434,14 +490,14 @@ export function TherapistApplicationDetails({
                     License Active
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).isLicenseActive as string)}
+                    {renderYesNo(application.isLicenseActive)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Years of Experience
                   </h3>
-                  <p className="mt-1">{application.professionalInfo.yearsOfExperience}</p>
+                  <p className="mt-1">{application.yearsOfExperience}</p>
                 </div>
               </div>
 
@@ -451,28 +507,28 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Areas of Expertise
                 </h3>
-                {renderObjectItems(application.professionalInfo.specialties)}
+                {renderObjectItems(application.areasOfExpertise)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Assessment Tools
                 </h3>
-                {renderObjectItems((application as Record<string, unknown>).assessmentTools as string[])}
+                {renderObjectItems(application.assessmentTools)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Therapeutic Approaches
                 </h3>
-                {renderObjectItems((application as Record<string, unknown>).therapeuticApproachesUsedList as string[])}
+                {renderObjectItems(application.therapeuticApproachesUsedList)}
               </div>
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Languages Offered
                 </h3>
-                {renderObjectItems(application.professionalInfo.languages)}
+                {renderObjectItems(application.languagesOffered)}
               </div>
             </TabsContent>
 
@@ -483,7 +539,7 @@ export function TherapistApplicationDetails({
                     Provided Online Therapy Before
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).providedOnlineTherapyBefore as string)}
+                    {renderYesNo(application.providedOnlineTherapyBefore)}
                   </p>
                 </div>
                 <div>
@@ -491,20 +547,20 @@ export function TherapistApplicationDetails({
                     Comfortable Using Video Conferencing
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).comfortableUsingVideoConferencing as string)}
+                    {renderYesNo(application.comfortableUsingVideoConferencing)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Weekly Availability (hours)
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).weeklyAvailability as string}</p>
+                  <p className="mt-1">{application.weeklyAvailability}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">
                     Preferred Session Length (minutes)
                   </h3>
-                  <p className="mt-1">{(application as Record<string, unknown>).preferredSessionLength as string}</p>
+                  <p className="mt-1">{application.preferredSessionLength}</p>
                 </div>
               </div>
 
@@ -514,7 +570,7 @@ export function TherapistApplicationDetails({
                 <h3 className="text-sm font-medium text-gray-500 mb-2">
                   Accepts
                 </h3>
-                {renderObjectItems((application as Record<string, unknown>).accepts as string[])}
+                {renderObjectItems(application.accepts)}
               </div>
             </TabsContent>
 
@@ -525,7 +581,7 @@ export function TherapistApplicationDetails({
                     Has Private Confidential Space
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).privateConfidentialSpace as string)}
+                    {renderYesNo(application.privateConfidentialSpace)}
                   </p>
                 </div>
                 <div>
@@ -533,7 +589,7 @@ export function TherapistApplicationDetails({
                     Complies With Data Privacy Act
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).compliesWithDataPrivacyAct as string)}
+                    {renderYesNo(application.compliesWithDataPrivacyAct)}
                   </p>
                 </div>
                 <div>
@@ -541,7 +597,7 @@ export function TherapistApplicationDetails({
                     Professional Liability Insurance
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).professionalLiabilityInsurance as string)}
+                    {renderYesNo(application.professionalLiabilityInsurance)}
                   </p>
                 </div>
                 <div>
@@ -549,7 +605,7 @@ export function TherapistApplicationDetails({
                     Complaints Or Disciplinary Actions
                   </h3>
                   <p className="mt-1">
-                    {renderYesNo((application as Record<string, unknown>).complaintsOrDisciplinaryActions as string)}
+                    {renderYesNo(application.complaintsOrDisciplinaryActions)}
                   </p>
                 </div>
                 <div>
@@ -558,7 +614,7 @@ export function TherapistApplicationDetails({
                   </h3>
                   <p className="mt-1">
                     {renderYesNo(
-                      (application as Record<string, unknown>).willingToAbideByPlatformGuidelines as string
+                      application.willingToAbideByPlatformGuidelines
                     )}
                   </p>
                 </div>
@@ -570,11 +626,11 @@ export function TherapistApplicationDetails({
             </TabsContent>
           </ScrollArea>
         </Tabs>
-      </CardContent>
+      </div>
 
-      {/* Add Card Footer with approval/rejection buttons */}
-      {application.status === "pending" && onStatusChange && (
-        <div className="border-t pt-4 px-6 pb-6">
+      {/* Add Footer with approval/rejection buttons */}
+      {application.status === "PENDING" && onStatusChange && (
+        <div className="border-t pt-4 mt-6">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-500">
               <p>
@@ -616,14 +672,12 @@ export function TherapistApplicationDetails({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === "approve"
-                ? `Are you sure you want to approve ${application.personalInfo.firstName} ${application.personalInfo.lastName}'s application? This will allow them to start using the platform as a therapist.`
-                : `Are you sure you want to reject ${application.personalInfo.firstName} ${application.personalInfo.lastName}'s application? They will be notified via email.`}
+                ? `Are you sure you want to approve ${application.firstName} ${application.lastName}'s application? This will allow them to start using the platform as a therapist.`
+                : `Are you sure you want to reject ${application.firstName} ${application.lastName}'s application? They will be notified via email.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmAction}
               disabled={isPending}
@@ -664,6 +718,12 @@ export function TherapistApplicationDetails({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        file={previewFile}
+        onClose={() => setPreviewFile(null)}
+      />
+    </div>
   );
 }

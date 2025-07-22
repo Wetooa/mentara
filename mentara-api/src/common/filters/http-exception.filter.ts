@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ApiResponseBuilder } from '../types/api-response.types';
+import { ApiResponseDto, ErrorDetail } from '../dto/api-response.dto';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -46,9 +46,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       `HTTP ${status} Error - ${request.method} ${request.url}: ${message}`,
     );
 
-    const errorResponse = ApiResponseBuilder.error(
+    const errorResponse = ApiResponseDto.error(
       message,
-      errors.length > 0 ? errors : undefined,
+      errors.length > 0 ? ApiResponseDto.convertStringErrorsToDetails(errors) : undefined,
       status,
       request.url,
     );

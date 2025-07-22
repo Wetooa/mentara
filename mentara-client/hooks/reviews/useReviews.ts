@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys, getRelatedQueryKeys } from '@/lib/queryKeys';
+
 import { 
   Review, 
   ReviewsResponse, 
@@ -18,7 +18,7 @@ export function useReviews(params: GetReviewsParams = {}) {
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.reviews.list(params),
+    queryKey: ['reviews', 'list', params],
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getAll(params);
     },
@@ -32,7 +32,7 @@ export function useTherapistReviews(therapistId: string, params: Omit<GetReviews
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.reviews.byTherapist(therapistId, params),
+    queryKey: ['reviews', 'byTherapist', therapistId, params],
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getTherapistReviews(therapistId, params);
     },
@@ -47,7 +47,7 @@ export function useTherapistReviewStats(therapistId: string) {
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.reviews.therapistStats(therapistId),
+    queryKey: ['reviews', 'therapistStats', therapistId],
     queryFn: (): Promise<ReviewStats> => {
       return api.reviews.getTherapistStats(therapistId);
     },
@@ -68,13 +68,13 @@ export function useCreateReview() {
     },
     onMutate: async (newReview) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.reviews.all });
+      await queryClient.cancelQueries({ queryKey: ['reviews'] });
       
       // Snapshot the previous value
-      const previousReviews = queryClient.getQueryData(queryKeys.reviews.all);
+      const previousReviews = queryClient.getQueryData(['reviews']);
       
       // Optimistically update to the new value
-      queryClient.setQueryData(queryKeys.reviews.list({}), (old: ReviewsResponse | undefined) => {
+      queryClient.setQueryData(['reviews', 'list', {}], (old: ReviewsResponse | undefined) => {
         if (!old?.reviews) return old;
         
         const optimisticReview = {
@@ -98,7 +98,7 @@ export function useCreateReview() {
     },
     onError: (err, newReview, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.setQueryData(queryKeys.reviews.all, context?.previousReviews);
+      queryClient.setQueryData(['reviews'], context?.previousReviews);
       
       toast.error('Failed to submit review', {
         description: err.message || 'Please try again later.',
@@ -106,14 +106,12 @@ export function useCreateReview() {
     },
     onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      const relatedKeys = getRelatedQueryKeys('review');
-      relatedKeys.forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
-      });
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['therapists'] });
       
       // Also invalidate therapist-specific queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byTherapist(data.therapistId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.therapistStats(data.therapistId) });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'byTherapist', data.therapistId] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'therapistStats', data.therapistId] });
       
       toast.success('Review submitted successfully!', {
         description: 'Your review will be visible after moderation.',
@@ -121,7 +119,7 @@ export function useCreateReview() {
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
     },
   });
 }
@@ -137,9 +135,9 @@ export function useUpdateReview() {
     },
     onSuccess: (data) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byTherapist(data.therapistId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviews.therapistStats(data.therapistId) });
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'byTherapist', data.therapistId] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'therapistStats', data.therapistId] });
       
       toast.success('Review updated successfully!');
     },
@@ -251,7 +249,7 @@ export function usePendingReviews(params: { page?: number; limit?: number } = {}
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.reviews.pending(params),
+    queryKey: ['reviews', 'pending', params],
     queryFn: (): Promise<ReviewsResponse> => {
       return api.reviews.getPending(params);
     },

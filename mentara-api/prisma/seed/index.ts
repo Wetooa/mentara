@@ -15,10 +15,8 @@ import { seedCommunityContent } from './content.seed';
 import { seedMessaging } from './messaging.seed';
 import { seedWorksheets } from './worksheets.seed';
 import { seedReviews } from './reviews.seed';
-import { seedSessions } from './sessions.seed';
 import { seedNotifications } from './notifications.seed';
-import { seedTherapistRequests } from './therapist-requests.seed';
-import { seedAuditLogs } from './audit-logs.seed';
+import { seedPaymentMethods, seedPayments } from './payments.seed';
 
 const prisma = new PrismaClient();
 
@@ -53,44 +51,39 @@ async function main() {
 
     // Phase 6: Meetings
     console.log('\n📍 PHASE 6: Creating Meetings');
-    await seedMeetings(prisma, relationships);
+    const meetings = await seedMeetings(prisma, relationships);
 
-    // Phase 7: Community Content
-    console.log('\n📍 PHASE 7: Creating Community Content');
+    // Phase 7: Payment Methods
+    console.log('\n📍 PHASE 7: Creating Payment Methods');
+    const paymentMethods = await seedPaymentMethods(prisma, users);
+
+    // Phase 8: Payment Transactions
+    console.log('\n📍 PHASE 8: Creating Payment Transactions');
+    const payments = await seedPayments(prisma, meetings, paymentMethods);
+
+    // Phase 9: Community Content
+    console.log('\n📍 PHASE 9: Creating Community Content');
     await seedCommunityContent(prisma, communities, users);
 
-    // Phase 8: Therapist Availability
-    console.log('\n📍 PHASE 8: Creating Therapist Availability');
+    // Phase 10: Therapist Availability
+    console.log('\n📍 PHASE 10: Creating Therapist Availability');
     await seedTherapistAvailability(prisma, therapists);
 
-    // Phase 9: Messaging System
-    console.log('\n📍 PHASE 9: Creating Conversations and Messages');
+    // Phase 11: Messaging System
+    console.log('\n📍 PHASE 11: Creating Conversations and Messages');
     const messagingData = await seedMessaging(prisma, relationships, users);
 
-    // Phase 10: Worksheets and Therapy Materials
-    console.log('\n📍 PHASE 10: Creating Worksheets and Submissions');
+    // Phase 12: Worksheets and Therapy Materials
+    console.log('\n📍 PHASE 12: Creating Worksheets and Submissions');
     const worksheetData = await seedWorksheets(prisma, relationships);
 
-    // Phase 11: Therapist Reviews
-    console.log('\n📍 PHASE 11: Creating Therapist Reviews');
-    const meetings = []; // Placeholder for meetings data
+    // Phase 13: Therapist Reviews
+    console.log('\n📍 PHASE 13: Creating Therapist Reviews');
     const reviewData = await seedReviews(prisma, relationships, meetings, users);
 
-    // Phase 12: Session Records
-    console.log('\n📍 PHASE 12: Creating Session Records and Notes');
-    const sessionData = await seedSessions(prisma, relationships, meetings, users);
-
-    // Phase 13: Notifications System
-    console.log('\n📍 PHASE 13: Creating Notifications and Device Tokens');
+    // Phase 14: Notifications System
+    console.log('\n📍 PHASE 14: Creating Notifications and Device Tokens');
     const notificationData = await seedNotifications(prisma, users, relationships, meetings, worksheetData?.worksheets || [], messagingData?.messages || []);
-
-    // Phase 14: Therapist Requests
-    console.log('\n📍 PHASE 14: Creating Client-Therapist Requests');
-    const requests = await seedTherapistRequests(prisma, clients, therapists, relationships);
-
-    // Phase 15: Admin and System Audit Logs
-    console.log('\n📍 PHASE 15: Creating Audit Logs');
-    const audits = await seedAuditLogs(prisma, users, users.filter(u => u.role === 'admin'));
 
     // Summary
     console.log('\n🎉 Database seeding completed successfully!');
@@ -109,10 +102,9 @@ async function main() {
     console.log(`   💬 Conversations: ${messagingData?.conversations?.length || 'N/A'}`);
     console.log(`   📚 Worksheets: ${worksheetData?.worksheets?.length || 'N/A'}`);
     console.log(`   ⭐ Reviews: ${reviewData?.reviews?.length || 'N/A'}`);
-    console.log(`   📊 Session Records: ${sessionData?.sessionLogs?.length || 'N/A'}`);
     console.log(`   🔔 Notifications: ${notificationData?.notifications?.length || 'N/A'}`);
-    console.log(`   📤 Therapist Requests: ${requests?.length || 'N/A'}`);
-    console.log(`   📋 Audit Logs: ${audits?.length || 'N/A'}`);
+    console.log(`   💳 Payment Methods: ${paymentMethods?.length || 'N/A'}`);
+    console.log(`   💰 Payment Transactions: ${payments?.length || 'N/A'}`);
     
     console.log('\n✨ Comprehensive platform seeding complete!');
     console.log('🏘️  Communities are ready for assessment-based recommendations');
@@ -121,10 +113,9 @@ async function main() {
     console.log('📲 Messaging system with therapy conversations active');
     console.log('📚 Worksheets and therapy materials ready for assignment');
     console.log('⭐ Review system populated for therapist recommendations');
-    console.log('📊 Session tracking and progress monitoring enabled');
     console.log('🔔 Notification system with realistic user engagement');
-    console.log('📤 Client-therapist request workflow populated');
-    console.log('📋 Audit logs ready for admin compliance monitoring');
+    console.log('💳 Payment system with realistic transaction history');
+    console.log('💰 Multiple payment methods per user with transaction tracking');
     
   } catch (error) {
     console.error('❌ Error during seeding:', error);

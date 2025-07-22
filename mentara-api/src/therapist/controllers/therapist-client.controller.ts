@@ -32,6 +32,14 @@ export class TherapistClientController {
     return this.therapistManagementService.getAllClients(therapistId);
   }
 
+  @Get('matched')
+  @HttpCode(HttpStatus.OK)
+  async getMatchedClients(
+    @CurrentUserId() therapistId: string,
+  ): Promise<any> {
+    return this.therapistManagementService.getMatchedClients(therapistId);
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getClientById(

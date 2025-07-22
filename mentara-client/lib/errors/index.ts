@@ -29,11 +29,11 @@ export {
   useProfileMutation,
   useAdminMutation,
   useMeetingMutation,
-} from "../hooks/errors/useStandardMutation";
+} from "../../hooks/errors/useStandardMutation";
 
 export type { 
   StandardMutationConfig 
-} from "../hooks/errors/useStandardMutation";
+} from "../../hooks/errors/useStandardMutation";
 
 export { 
   useStandardQuery,
@@ -49,11 +49,11 @@ export {
   useTherapistQuery,
   useFileQuery,
   useNotificationQuery,
-} from "../hooks/errors/useStandardQuery";
+} from "../../hooks/errors/useStandardQuery";
 
 export type { 
   StandardQueryConfig 
-} from "../hooks/errors/useStandardQuery";
+} from "../../hooks/errors/useStandardQuery";
 
 // Error boundaries
 export { 
@@ -67,7 +67,7 @@ export {
   MeetingErrorBoundary,
   AdminErrorBoundary,
   GenericErrorBoundary,
-} from "../components/errors/StandardErrorBoundary";
+} from "../../components/errors/StandardErrorBoundary";
 
 // Usage Examples:
 //

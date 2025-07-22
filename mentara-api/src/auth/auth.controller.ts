@@ -17,6 +17,20 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUserId } from './decorators/current-user-id.decorator';
 import { Public } from './decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  LoginDto,
+  RegisterUserDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+  ResendVerificationEmailDto,
+  AuthResponse,
+  UserResponse,
+} from './types';
+import type { SuccessResponse } from '../types/global';
+
+// Import validation schemas from local validation
 import {
   LoginDtoSchema,
   RegisterUserDtoSchema,
@@ -24,16 +38,7 @@ import {
   ResetPasswordDtoSchema,
   VerifyEmailDtoSchema,
   ResendVerificationEmailDtoSchema,
-  type LoginDto,
-  type RegisterUserDto,
-  type RequestPasswordResetDto,
-  type ResetPasswordDto,
-  type VerifyEmailDto,
-  type ResendVerificationEmailDto,
-  type AuthResponse,
-  type UserResponse,
-  type SuccessMessageResponse,
-} from 'mentara-commons';
+} from './validation';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './services/email-verification.service';
 import { PasswordResetService } from './services/password-reset.service';
@@ -62,14 +67,38 @@ export class AuthController {
   @Get('me')
   async getMe(@CurrentUserId() id: string): Promise<UserResponse> {
     const user = await this.authService.getUser(id);
-    return UserResponseDto.fromPrismaUser(user);
+    return { 
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: user.emailVerified ?? false,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: user.client || undefined,
+      }
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('users')
   async getAllUsers(): Promise<UserResponse[]> {
     const users = await this.authService.getUsers();
-    return UserResponseDto.fromPrismaUsers(users);
+    return users.map(user => ({
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: user.emailVerified ?? false,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: user.client || undefined,
+      }
+    }));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -78,33 +107,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async forceLogout(
     @CurrentUserId() id: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     await this.authService.forceLogout(id);
     return new SuccessMessageDto('Successfully logged out from all devices');
-  }
-
-  // Local Authentication Endpoints
-  @Public()
-  @Throttle({ default: { limit: 5, ttl: 300000 } }) // 5 registration attempts per 5 minutes
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body(new ZodValidationPipe(RegisterUserDtoSchema))
-    registerDto: RegisterUserDto,
-  ): Promise<SuccessMessageResponse> {
-    // Only allow client and therapist roles for general registration
-    const allowedRole =
-      registerDto.role === 'therapist' ? 'therapist' : 'client';
-
-    const result = await this.authService.registerUserWithEmail(
-      registerDto.email,
-      registerDto.password,
-      registerDto.firstName,
-      registerDto.lastName,
-      allowedRole,
-    );
-
-    return new SuccessMessageDto(result.message);
   }
 
   @Public()
@@ -132,7 +137,10 @@ export class AuthController {
         firstName: result.user.firstName || '',
         lastName: result.user.lastName || '',
         role: result.user.role,
-        emailVerified: result.user.emailVerified,
+        isEmailVerified: result.user.emailVerified ?? false,
+        createdAt: result.user.createdAt,
+        updatedAt: result.user.updatedAt,
+        client: result.user.client,
       },
       token: result.token,
       message: 'Login successful',
@@ -140,13 +148,12 @@ export class AuthController {
   }
 
   // Removed refresh token endpoint - no longer needed with non-expiring tokens
-
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(
     @CurrentUserId() userId: string,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     await this.authService.logout(userId);
     return new SuccessMessageDto('Logged out successfully');
   }
@@ -158,7 +165,37 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    return UserResponseDto.fromPrismaUser(user);
+    return { 
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as any,
+        isEmailVerified: user.emailVerified ?? false,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        client: user.client || undefined,
+      }
+    };
+  }
+
+  // ===== SECURE ROLE CHECKING ENDPOINT =====
+
+  @UseGuards(JwtAuthGuard)
+  @Get('user-role')
+  async getUserRole(
+    @CurrentUserId() userId: string,
+  ): Promise<{ role: string; userId: string }> {
+    const user = await this.authService.validateUser(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return {
+      role: user.role,
+      userId: user.id,
+    };
   }
 
   // Role-specific profile endpoints moved to dedicated controllers:
@@ -176,7 +213,7 @@ export class AuthController {
   async requestPasswordReset(
     @Body(new ZodValidationPipe(RequestPasswordResetDtoSchema))
     requestResetDto: RequestPasswordResetDto,
-  ): Promise<SuccessMessageResponse> {
+  ): Promise<SuccessResponse> {
     await this.passwordResetService.requestPasswordReset(requestResetDto.email);
     return new SuccessMessageDto(
       'If an account with that email exists, we will send a password reset link.',

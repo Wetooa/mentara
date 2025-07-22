@@ -2,6 +2,7 @@
 // Centralized configuration for database seeding
 
 // Test accounts from test-accounts.md
+// ALL TEST ACCOUNTS USE PASSWORD: "password123" for easy testing
 export const TEST_ACCOUNTS = {
   CLIENTS: [
     {
@@ -26,6 +27,20 @@ export const TEST_ACCOUNTS = {
       role: 'client' as const,
       isActive: false,
     },
+    {
+      id: 'fake_client_test_4',
+      email: 'test.client.premium@mentaratest.dev',
+      firstName: 'David',
+      lastName: 'Kim',
+      role: 'client' as const,
+    },
+    {
+      id: 'fake_client_test_5',
+      email: 'test.client.longterm@mentaratest.dev',
+      firstName: 'Maria',
+      lastName: 'Gonzalez',
+      role: 'client' as const,
+    },
   ],
   THERAPISTS: [
     {
@@ -49,6 +64,20 @@ export const TEST_ACCOUNTS = {
       lastName: 'Williams',
       role: 'therapist' as const,
     },
+    {
+      id: 'fake_therapist_test_4',
+      email: 'test.therapist.trauma@mentaratest.dev',
+      firstName: 'Dr. James',
+      lastName: 'O\'Connor',
+      role: 'therapist' as const,
+    },
+    {
+      id: 'fake_therapist_test_5',
+      email: 'test.therapist.anxiety@mentaratest.dev',
+      firstName: 'Dr. Emily',
+      lastName: 'Zhang',
+      role: 'therapist' as const,
+    },
   ],
   ADMINS: [
     {
@@ -63,6 +92,27 @@ export const TEST_ACCOUNTS = {
       email: 'test.admin.user.manager@mentaratest.dev',
       firstName: 'Linda',
       lastName: 'Martinez',
+      role: 'admin' as const,
+    },
+    {
+      id: 'fake_admin_test_3',
+      email: 'test.admin.content.manager@mentaratest.dev',
+      firstName: 'William',
+      lastName: 'Johnson',
+      role: 'admin' as const,
+    },
+    {
+      id: 'fake_admin_test_4',
+      email: 'test.admin.billing@mentaratest.dev',
+      firstName: 'Nancy',
+      lastName: 'Wilson',
+      role: 'admin' as const,
+    },
+    {
+      id: 'fake_admin_test_5',
+      email: 'test.admin.technical@mentaratest.dev',
+      firstName: 'Kevin',
+      lastName: 'Lee',
       role: 'admin' as const,
     },
   ],
@@ -81,21 +131,42 @@ export const TEST_ACCOUNTS = {
       lastName: 'Davis',
       role: 'moderator' as const,
     },
+    {
+      id: 'fake_moderator_test_3',
+      email: 'test.moderator.content@mentaratest.dev',
+      firstName: 'Jordan',
+      lastName: 'Smith',
+      role: 'moderator' as const,
+    },
+    {
+      id: 'fake_moderator_test_4',
+      email: 'test.moderator.support@mentaratest.dev',
+      firstName: 'Casey',
+      lastName: 'Brown',
+      role: 'moderator' as const,
+    },
+    {
+      id: 'fake_moderator_test_5',
+      email: 'test.moderator.night@mentaratest.dev',
+      firstName: 'Avery',
+      lastName: 'White',
+      role: 'moderator' as const,
+    },
   ],
 };
 
-// Configuration constants
+// Configuration constants - COMPREHENSIVE DEV SEEDING
 export const SEED_CONFIG = {
   USERS: {
-    CLIENTS: 2, // Ultra-minimal for testing
-    THERAPISTS: 1, // Ultra-minimal for testing
-    ADMINS: 1, // Ultra-minimal for testing
-    MODERATORS: 0, // Skip moderators for testing
+    CLIENTS: 5, // 5 clients for comprehensive testing
+    THERAPISTS: 5, // 5 therapists for comprehensive testing
+    ADMINS: 5, // 5 admins for comprehensive testing
+    MODERATORS: 5, // 5 moderators for comprehensive testing
   },
   COMMUNITIES: {
-    ADDITIONAL: 1, // Ultra-minimal - Additional to illness communities
-    POSTS_PER_COMMUNITY: 1, // Ultra-minimal for testing
-    COMMENTS_PER_POST: 1, // Ultra-minimal for testing
+    ADDITIONAL: 0, // No additional communities - only questionnaire-based ones
+    POSTS_PER_COMMUNITY: 3, // Create some posts for demo
+    COMMENTS_PER_POST: 3, // Create some comments for demo
   },
   RELATIONSHIPS: {
     CLIENT_THERAPIST_RATIO: 0.8, // 80% of clients get assigned to therapists
@@ -142,20 +213,97 @@ export const SEED_CONFIG = {
   },
 };
 
-// Illness communities configuration - ULTRA-MINIMAL TEST VERSION
+// Illness communities configuration - Based on questionnaire disorders
+// These match the exact disorders from @mentara-commons/src/constants/questionnaire/questionnaire-mapping.ts
 export const ILLNESS_COMMUNITIES = [
+  {
+    name: 'Stress Support',
+    slug: 'stress-support',
+    description: 'A supportive community for individuals managing stress and overwhelm.',
+  },
+  {
+    name: 'Anxiety Support',
+    slug: 'anxiety-support',
+    description: 'A supportive community for individuals with anxiety disorders.',
+  },
+  {
+    name: 'Depression Support',
+    slug: 'depression-support',
+    description: 'A supportive community for individuals with depression.',
+  },
+  {
+    name: 'Insomnia Support',
+    slug: 'insomnia-support',
+    description: 'A supportive community for individuals struggling with sleep disorders.',
+  },
+  {
+    name: 'Panic Disorder Support',
+    slug: 'panic-disorder-support',
+    description: 'A supportive community for individuals with panic disorder.',
+  },
+  {
+    name: 'Bipolar Disorder Support',
+    slug: 'bipolar-disorder-support',
+    description: 'A supportive community for individuals with bipolar disorder (BD).',
+  },
+  {
+    name: 'OCD Support',
+    slug: 'ocd-support',
+    description: 'A supportive community for individuals with obsessive compulsive disorder.',
+  },
+  {
+    name: 'PTSD Support',
+    slug: 'ptsd-support',
+    description: 'A supportive community for individuals with post-traumatic stress disorder.',
+  },
+  {
+    name: 'Social Anxiety Support',
+    slug: 'social-anxiety-support',
+    description: 'A supportive community for individuals with social anxiety.',
+  },
+  {
+    name: 'Phobia Support',
+    slug: 'phobia-support',
+    description: 'A supportive community for individuals with phobias and specific fears.',
+  },
+  {
+    name: 'Burnout Support',
+    slug: 'burnout-support',
+    description: 'A supportive community for individuals experiencing burnout.',
+  },
+  {
+    name: 'Eating Disorders Support',
+    slug: 'eating-disorders-support',
+    description: 'A supportive community for individuals with binge eating and eating disorders.',
+  },
   {
     name: 'ADHD Support',
     slug: 'adhd-support',
-    description: 'A supportive community for individuals with ADHD to share experiences, coping strategies, and resources.',
+    description: 'A supportive community for individuals with ADD/ADHD.',
+  },
+  {
+    name: 'Substance Use Support',
+    slug: 'substance-use-support',
+    description: 'A supportive community for individuals with substance or alcohol use issues.',
   },
 ];
 
-// Additional community types for general support - ULTRA-MINIMAL TEST VERSION
+// Additional communities for comprehensive seeding
 export const ADDITIONAL_COMMUNITIES = [
   {
+    name: 'General Support',
+    slug: 'general-support',
+    description: 'A welcoming space for anyone seeking general mental health support.',
+  },
+  {
     name: 'Mindfulness & Meditation',
-    description: 'A space for sharing mindfulness practices and meditation experiences',
+    slug: 'mindfulness-meditation',
+    description: 'Share mindfulness practices and meditation techniques.',
+  },
+  {
+    name: 'Family & Relationships',
+    slug: 'family-relationships',
+    description: 'Support for navigating family dynamics and relationship challenges.',
   },
 ];
 

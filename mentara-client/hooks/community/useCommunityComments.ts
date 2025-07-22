@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import type { CreateCommentRequest } from "@/types/api/communities";
@@ -20,7 +19,7 @@ export function useCommunityComments(postId: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.comments.byPost(postId),
+    queryKey: ['comments', 'byPost', postId],
     queryFn: () => api.communities.getCommentsByPost(postId),
     enabled: !!postId,
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -30,8 +29,8 @@ export function useCommunityComments(postId: string) {
   const createCommentMutation = useMutation({
     mutationFn: (data: CreateCommentRequest) => api.communities.createComment(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
       toast.success("Comment added successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -44,7 +43,7 @@ export function useCommunityComments(postId: string) {
     mutationFn: ({ commentId, content }: { commentId: string; content: string }) =>
       api.communities.updateComment(commentId, content),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
+      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
       toast.success("Comment updated successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -56,8 +55,8 @@ export function useCommunityComments(postId: string) {
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId: string) => api.communities.deleteComment(commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
       toast.success("Comment deleted successfully");
     },
     onError: (error: MentaraApiError) => {
@@ -69,7 +68,7 @@ export function useCommunityComments(postId: string) {
   const heartCommentMutation = useMutation({
     mutationFn: (commentId: string) => api.communities.heartComment(commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
+      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to heart comment");
@@ -80,7 +79,7 @@ export function useCommunityComments(postId: string) {
   const unheartCommentMutation = useMutation({
     mutationFn: (commentId: string) => api.communities.unheartComment(commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments.byPost(postId) });
+      queryClient.invalidateQueries({ queryKey: ['comments', 'byPost', postId] });
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to unheart comment");

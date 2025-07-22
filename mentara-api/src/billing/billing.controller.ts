@@ -16,11 +16,11 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { CurrentUserRole } from 'src/auth/decorators/current-user-role.decorator';
 import { PaymentStatus } from '@prisma/client';
-import {
+import type {
   CreatePaymentMethodDto,
   UpdatePaymentMethodDto,
   ProcessSessionPaymentDto,
-} from 'mentara-commons';
+} from './types';
 
 /**
  * Educational Billing Controller for Mental Health Platform

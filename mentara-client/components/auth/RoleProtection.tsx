@@ -13,7 +13,7 @@ interface RoleProtectionProps {
 
 // Define protected routes and their required roles
 const protectedRoutes: Record<string, UserRole[]> = {
-  "/user": ["client"],
+  "/client": ["client"],
   "/therapist": ["therapist"],
   "/moderator": ["moderator"],
   "/admin": ["admin"],
@@ -22,7 +22,7 @@ const protectedRoutes: Record<string, UserRole[]> = {
 // Get default dashboard path for each role
 function getDefaultPathForRole(role: UserRole): string {
   switch (role) {
-    case "client": return "/user";
+    case "client": return "/client";
     case "therapist": return "/therapist";
     case "moderator": return "/moderator";
     case "admin": return "/admin";

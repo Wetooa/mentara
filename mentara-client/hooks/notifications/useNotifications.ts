@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { io, Socket } from "socket.io-client";
 
 interface Notification {
   id: string;
@@ -61,7 +62,7 @@ export function useNotifications(params: {
     lastConnected: null,
   });
   
-  const wsRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
@@ -74,14 +75,14 @@ export function useNotifications(params: {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.notifications.list(params),
+    queryKey: ['notifications', 'list', params],
     queryFn: () => api.notifications.getMy(params),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
   // Get unread count
   const { data: unreadCount } = useQuery({
-    queryKey: queryKeys.notifications.unreadCount(),
+    queryKey: ['notifications', 'unreadCount'],
     queryFn: () => api.notifications.getUnreadCount(),
     staleTime: 1000 * 30, // 30 seconds
   });
@@ -90,7 +91,7 @@ export function useNotifications(params: {
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: string) => api.notifications.markAsRead(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     onError: (error: MentaraApiError) => {
       toast.error("Failed to mark notification as read");
@@ -101,7 +102,7 @@ export function useNotifications(params: {
   const markAllAsReadMutation = useMutation({
     mutationFn: () => api.notifications.markAllAsRead(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success("All notifications marked as read");
     },
     onError: (error: MentaraApiError) => {
@@ -113,7 +114,7 @@ export function useNotifications(params: {
   const deleteNotificationMutation = useMutation({
     mutationFn: (notificationId: string) => api.notifications.delete(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success("Notification deleted");
     },
     onError: (error: MentaraApiError) => {
@@ -121,20 +122,25 @@ export function useNotifications(params: {
     },
   });
 
-  // WebSocket connection management
+  // Socket.io connection management
   const connectWebSocket = useCallback(() => {
     if (!accessToken || !user || !config.enableRealtime) return;
-    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (socketRef.current?.connected) return;
 
     try {
       setConnectionState(prev => ({ ...prev, isReconnecting: true, error: null }));
       
-      // Build WebSocket URL with authentication
-      const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL}/notifications?token=${accessToken}`;
-      const ws = new WebSocket(wsUrl);
+      // Connect to messaging namespace with authentication
+      const socket = io(`${process.env.NEXT_PUBLIC_WS_URL}/messaging`, {
+        auth: {
+          token: accessToken,
+        },
+        transports: ['websocket', 'polling'],
+        timeout: 10000,
+      });
       
-      ws.onopen = () => {
-        console.log('Notifications WebSocket connected');
+      socket.on('connect', () => {
+        console.log('Notifications Socket.io connected');
         setConnectionState({
           isConnected: true,
           isReconnecting: false,
@@ -142,45 +148,50 @@ export function useNotifications(params: {
           lastConnected: new Date(),
         });
         reconnectAttemptsRef.current = 0;
-      };
+        
+        // Join user room for notifications
+        socket.emit('join_user_room', { userId: user.id });
+      });
 
-      ws.onmessage = (event) => {
-        try {
-          const eventData: NotificationWebSocketEvent = JSON.parse(event.data);
-          handleWebSocketEvent(eventData);
-        } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
-        }
-      };
+      // Listen for notification events
+      socket.on('notification', (data) => {
+        handleWebSocketEvent({ type: 'notification', data });
+      });
 
-      ws.onclose = (event) => {
-        console.log('Notifications WebSocket disconnected:', event.code, event.reason);
+      socket.on('unreadCount', (data) => {
+        handleWebSocketEvent({ type: 'unread_count_updated', data });
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.log('Notifications Socket.io disconnected:', reason);
         setConnectionState(prev => ({ 
           ...prev, 
           isConnected: false, 
           isReconnecting: false 
         }));
-        wsRef.current = null;
 
-        // Auto-reconnect if not intentionally closed
-        if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          scheduleReconnect();
+        // Auto-reconnect on unexpected disconnection
+        if (reason === 'io server disconnect' || reason === 'transport error') {
+          if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+            scheduleReconnect();
+          }
         }
-      };
+      });
 
-      ws.onerror = (error) => {
-        console.error('Notifications WebSocket error:', error);
+      socket.on('connect_error', (error) => {
+        console.error('Notifications Socket.io connection error:', error);
         setConnectionState(prev => ({ 
           ...prev, 
           error: 'Connection error',
           isReconnecting: false 
         }));
-      };
+        scheduleReconnect();
+      });
 
-      wsRef.current = ws;
+      socketRef.current = socket;
 
     } catch (error) {
-      console.error('Failed to connect to notifications WebSocket:', error);
+      console.error('Failed to connect to notifications Socket.io:', error);
       setConnectionState(prev => ({ 
         ...prev, 
         error: 'Failed to connect',
@@ -196,9 +207,9 @@ export function useNotifications(params: {
       reconnectTimeoutRef.current = null;
     }
     
-    if (wsRef.current) {
-      wsRef.current.close(1000, 'Intentional disconnect');
-      wsRef.current = null;
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
     }
     
     setConnectionState({
@@ -235,7 +246,7 @@ export function useNotifications(params: {
         
         // Add to cache
         queryClient.setQueryData(
-          queryKeys.notifications.list(params),
+          ['notifications', 'list', params],
           (oldData: Notification[] | undefined) => {
             if (!oldData) return [newNotification];
             return [newNotification, ...oldData];
@@ -244,7 +255,7 @@ export function useNotifications(params: {
 
         // Update unread count
         queryClient.setQueryData(
-          queryKeys.notifications.unreadCount(),
+          ['notifications', 'unreadCount'],
           (oldData: { count: number } | undefined) => ({
             count: (oldData?.count || 0) + 1
           })
@@ -262,7 +273,7 @@ export function useNotifications(params: {
         
         // Update cache
         queryClient.setQueryData(
-          queryKeys.notifications.list(params),
+          ['notifications', 'list', params],
           (oldData: Notification[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.map(notification =>
@@ -275,7 +286,7 @@ export function useNotifications(params: {
 
         // Update unread count
         queryClient.setQueryData(
-          queryKeys.notifications.unreadCount(),
+          ['notifications', 'unreadCount'],
           (oldData: { count: number } | undefined) => ({
             count: Math.max((oldData?.count || 1) - 1, 0)
           })
@@ -288,7 +299,7 @@ export function useNotifications(params: {
         
         // Remove from cache
         queryClient.setQueryData(
-          queryKeys.notifications.list(params),
+          ['notifications', 'list', params],
           (oldData: Notification[] | undefined) => {
             if (!oldData) return oldData;
             return oldData.filter(notification => notification.id !== deletedNotificationId);
@@ -299,7 +310,7 @@ export function useNotifications(params: {
       case 'unread_count_updated':
         // Unread count updated (e.g., from another client)
         queryClient.setQueryData(
-          queryKeys.notifications.unreadCount(),
+          ['notifications', 'unreadCount'],
           { count: event.data.count }
         );
         break;
@@ -356,7 +367,7 @@ export function useNotifications(params: {
   const markAsReadEnhanced = useCallback((id: string) => {
     // Optimistically update local cache
     queryClient.setQueryData(
-      queryKeys.notifications.list(params),
+      ['notifications', 'list', params],
       (oldData: Notification[] | undefined) => {
         if (!oldData) return oldData;
         return oldData.map(notification =>
@@ -369,7 +380,7 @@ export function useNotifications(params: {
 
     // Update unread count optimistically
     queryClient.setQueryData(
-      queryKeys.notifications.unreadCount(),
+      ['notifications', 'unreadCount'],
       (oldData: { count: number } | undefined) => ({
         count: Math.max((oldData?.count || 1) - 1, 0)
       })

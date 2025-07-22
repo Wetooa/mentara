@@ -57,7 +57,7 @@ export default function WorksheetsList({ tasks }: WorksheetsListProps) {
   };
 
   const handleSelectTask = (task: Task) => {
-    router.push(`/user/worksheets/${task.id}`);
+    router.push(`/client/worksheets/${task.id}`);
   };
 
   const taskGroups = groupTasksByDate();

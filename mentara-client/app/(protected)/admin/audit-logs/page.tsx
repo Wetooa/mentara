@@ -38,9 +38,9 @@ import { fadeDown } from "@/lib/animations";
 import { format, parseISO } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
 
-// Using AuditLog type from mentara-commons via service
+
+// Using AuditLog type from local API types via service
 interface DisplayAuditLog {
   id: string;
   action: string;
@@ -110,14 +110,14 @@ export default function AdminAuditLogsPage() {
     // error, // Can be uncommented for error handling if needed
     refetch 
   } = useQuery({
-    queryKey: queryKeys.auditLogs.list({
+    queryKey: ['auditLogs', 'list', {
       action: actionFilter === "all" ? undefined : actionFilter,
       resource: resourceFilter === "all" ? undefined : resourceFilter,
       success: successFilter === "all" ? undefined : (successFilter === "success"),
       userId: userFilter === "all" ? undefined : userFilter,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-    }),
+    }],
     queryFn: () => api.auditLogs.getList({
       action: actionFilter === "all" ? undefined : actionFilter,
       resource: resourceFilter === "all" ? undefined : resourceFilter,

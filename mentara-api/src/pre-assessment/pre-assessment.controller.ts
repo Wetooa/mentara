@@ -10,13 +10,13 @@ import {
   HttpStatus,
   InternalServerErrorException,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PreAssessmentService } from './pre-assessment.service';
 import { AiServiceClient } from './services/ai-service.client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
-import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator';
 import { CreatePreAssessmentDto } from '../../schema/pre-assessment';
 import { PreAssessment } from '@prisma/client';
 
@@ -85,14 +85,18 @@ export class PreAssessmentController {
   }
 
   @Get('ai-service/health')
-  @UseGuards(AdminAuthGuard)
-  @AdminOnly()
-  async checkAiServiceHealth(@CurrentUserId() currentUserId: string): Promise<{
+  async checkAiServiceHealth(
+    @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
+  ): Promise<{
     status: string;
     healthy: boolean;
     serviceInfo: any;
     timestamp: string;
   }> {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} checking AI service health`);
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -8,12 +8,14 @@ import {
   SearchCommunitiesQueryDtoSchema,
   SearchUsersQueryDtoSchema,
   GlobalSearchQueryDtoSchema,
-  type SearchTherapistsQueryDto,
-  type SearchPostsQueryDto,
-  type SearchCommunitiesQueryDto,
-  type SearchUsersQueryDto,
-  type GlobalSearchQueryDto,
-} from 'mentara-commons';
+} from './validation/search.schemas';
+import type {
+  SearchTherapistsQueryDto,
+  SearchPostsQueryDto,
+  SearchCommunitiesQueryDto,
+  SearchUsersQueryDto,
+  GlobalSearchQueryDto,
+} from './types';
 
 @Controller('search')
 @UseGuards(JwtAuthGuard)
@@ -68,12 +70,22 @@ export class SearchController {
   globalSearch(
     @Query(new ZodValidationPipe(GlobalSearchQueryDtoSchema))
     query: GlobalSearchQueryDto,
+    @Req() req: any, // Get user from request
   ) {
-    // Filter out unsupported types like 'worksheets'
+    // Include worksheets and messages in supported types
     const supportedTypes = query.types?.filter((type) =>
-      ['users', 'therapists', 'posts', 'communities'].includes(type),
-    ) as ('users' | 'therapists' | 'posts' | 'communities')[] | undefined;
+      ['users', 'therapists', 'posts', 'communities', 'worksheets', 'messages'].includes(type),
+    ) as ('users' | 'therapists' | 'posts' | 'communities' | 'worksheets' | 'messages')[] | undefined;
 
-    return this.searchService.globalSearch(query.query, supportedTypes);
+    // Extract user information from the request
+    const userId = req.userId;
+    const userRole = req.userRole;
+
+    return this.searchService.globalSearch(
+      query.query, 
+      supportedTypes, 
+      userId, 
+      userRole
+    );
   }
 }

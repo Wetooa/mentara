@@ -7,11 +7,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
-import {
+import type {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
-} from 'mentara-commons';
+} from './types';
 import { ConversationType, MessageType, ParticipantRole } from '@prisma/client';
 import { EventBusService } from '../common/events/event-bus.service';
 import {
@@ -32,15 +32,53 @@ export class MessagingService {
   ) {}
 
   // Conversation Management
+  private mapConversationType(type: string): ConversationType {
+    switch (type) {
+      case 'direct':
+        return ConversationType.DIRECT;
+      case 'group':
+        return ConversationType.GROUP;
+      case 'therapy_session':
+      case 'session':
+        return ConversationType.SESSION;
+      case 'support':
+        return ConversationType.SUPPORT;
+      default:
+        return ConversationType.DIRECT;
+    }
+  }
+
+  private mapMessageType(type: string | MessageType): MessageType {
+    if (typeof type === 'string') {
+      switch (type.toLowerCase()) {
+        case 'text':
+          return MessageType.TEXT;
+        case 'image':
+          return MessageType.IMAGE;
+        case 'audio':
+          return MessageType.AUDIO;
+        case 'video':
+          return MessageType.VIDEO;
+        case 'system':
+          return MessageType.SYSTEM;
+        default:
+          return MessageType.TEXT;
+      }
+    }
+    return type;
+  }
+
   async createConversation(
     userId: string,
     createConversationDto: CreateConversationDto,
   ) {
     const {
       participantIds,
-      type = ConversationType.DIRECT,
+      type: rawType = 'direct',
       title,
     } = createConversationDto;
+    
+    const type = this.mapConversationType(rawType);
 
     // Validate conversation type and participants
     if (type === ConversationType.DIRECT && participantIds.length !== 1) {
@@ -203,12 +241,14 @@ export class MessagingService {
 
     const {
       content,
-      messageType = MessageType.TEXT,
+      messageType: rawMessageType,
       replyToId,
       attachmentUrl,
       attachmentName,
       attachmentSize,
     } = sendMessageDto;
+
+    const messageType = this.mapMessageType(rawMessageType || 'text');
 
     // Verify conversation exists
     const conversation = await this.prisma.conversation.findUnique({

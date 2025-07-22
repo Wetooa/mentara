@@ -1,9 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
+
 import { toast } from 'sonner';
 import { MentaraApiError } from '@/lib/api/errorHandler';
-import type { TherapistDashboardData, MeetingData } from '@/types/api/therapists';
+import type { TherapistDashboardData } from '../../types/domain';
+
+import type { Meeting } from "@/types/api/meetings";
+
+// Use Meeting type from local API types
+type MeetingData = Meeting;
 
 /**
  * Hook for fetching complete therapist dashboard data
@@ -12,7 +17,7 @@ export function useTherapistDashboard() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.all.concat(['dashboard']),
+    queryKey: ['therapists', 'dashboard'],
     queryFn: () => api.therapists.dashboard.getData(),
     staleTime: 1000 * 60 * 2, // Consider fresh for 2 minutes (dashboard data changes frequently)
     retry: (failureCount, error: MentaraApiError) => {
@@ -32,7 +37,7 @@ export function useTherapistStats() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.all.concat(['dashboard', 'stats']),
+    queryKey: ['therapists', 'dashboard', 'stats'],
     queryFn: () => api.therapists.dashboard.getStats(),
     staleTime: 1000 * 60 * 5, // Stats change less frequently
   });
@@ -45,7 +50,7 @@ export function useTherapistUpcomingAppointments() {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.all.concat(['dashboard', 'appointments']),
+    queryKey: ['therapists', 'dashboard', 'appointments'],
     queryFn: () => api.therapists.dashboard.getUpcomingAppointments(),
     staleTime: 1000 * 60 * 1, // Appointments change frequently, refresh every minute
     refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes
@@ -63,7 +68,7 @@ export function useTherapistMeetings(params: {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.all.concat(['meetings', params]),
+    queryKey: ['therapists', 'meetings', params],
     queryFn: () => api.therapists.meetings.getList(params),
     staleTime: 1000 * 60 * 2,
   });
@@ -76,7 +81,7 @@ export function useTherapistMeeting(meetingId: string | null) {
   const api = useApi();
   
   return useQuery({
-    queryKey: queryKeys.therapists.all.concat(['meetings', meetingId || '']),
+    queryKey: ['therapists', 'meetings', meetingId || ''],
     queryFn: () => api.therapists.meetings.getById(meetingId!),
     enabled: !!meetingId,
     staleTime: 1000 * 60 * 5,
@@ -101,12 +106,12 @@ export function useUpdateMeetingStatus() {
     onMutate: async ({ meetingId, status }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ 
-        queryKey: queryKeys.therapists.all.concat(['meetings']) 
+        queryKey: ['therapists', 'meetings'] 
       });
       
       // Optimistically update meeting status
       queryClient.setQueriesData(
-        { queryKey: queryKeys.therapists.all.concat(['meetings']) },
+        { queryKey: ['therapists', 'meetings'] },
         (oldData: MeetingData[] | undefined) => {
           if (Array.isArray(oldData)) {
             return oldData.map(meeting => 
@@ -119,7 +124,7 @@ export function useUpdateMeetingStatus() {
       
       // Also update specific meeting query
       queryClient.setQueryData(
-        queryKeys.therapists.all.concat(['meetings', meetingId]),
+        ['therapists', 'meetings', meetingId],
         (oldMeeting: MeetingData | undefined) => oldMeeting ? { ...oldMeeting, status } : oldMeeting
       );
     },
@@ -128,7 +133,7 @@ export function useUpdateMeetingStatus() {
       
       // Invalidate queries to revert optimistic update
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.all.concat(['meetings']) 
+        queryKey: ['therapists', 'meetings'] 
       });
     },
     onSuccess: (data, { status }) => {
@@ -139,13 +144,13 @@ export function useUpdateMeetingStatus() {
       
       // Invalidate dashboard data to refresh stats
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.all.concat(['dashboard']) 
+        queryKey: ['therapists', 'dashboard'] 
       });
     },
     onSettled: () => {
       // Always refetch meetings
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.all.concat(['meetings']) 
+        queryKey: ['therapists', 'meetings'] 
       });
     },
   });
@@ -165,7 +170,7 @@ export function useStartMeeting() {
       
       // Update meeting status to 'started'
       queryClient.setQueriesData(
-        { queryKey: queryKeys.therapists.all.concat(['meetings']) },
+        { queryKey: ['therapists', 'meetings'] },
         (oldData: MeetingData[] | undefined) => {
           if (Array.isArray(oldData)) {
             return oldData.map(meeting => 
@@ -178,7 +183,7 @@ export function useStartMeeting() {
       
       // Invalidate dashboard
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.therapists.all.concat(['dashboard']) 
+        queryKey: ['therapists', 'dashboard'] 
       });
     },
     onError: (error: MentaraApiError) => {
@@ -196,11 +201,11 @@ export function useRefreshDashboard() {
   return () => {
     // Invalidate all dashboard-related queries
     queryClient.invalidateQueries({ 
-      queryKey: queryKeys.therapists.all.concat(['dashboard']) 
+      queryKey: ['therapists', 'dashboard'] 
     });
     
     queryClient.invalidateQueries({ 
-      queryKey: queryKeys.therapists.all.concat(['meetings']) 
+      queryKey: ['therapists', 'meetings'] 
     });
     
     toast.success('Dashboard refreshed!');
@@ -216,7 +221,7 @@ export function usePrefetchMeeting() {
   
   return (meetingId: string) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.therapists.all.concat(['meetings', meetingId]),
+      queryKey: ['therapists', 'meetings', meetingId],
       queryFn: () => api.therapists.meetings.getById(meetingId),
       staleTime: 1000 * 60 * 5,
     });

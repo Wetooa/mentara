@@ -11,11 +11,11 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { WebSocketAuthService } from './services/websocket-auth.service';
-import {
+import type {
   JoinConversationDto,
   LeaveConversationDto,
   TypingIndicatorDto,
-} from 'mentara-commons';
+} from './types';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;

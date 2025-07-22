@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TherapistRecommendationController } from './therapist-recommendation.controller';
 import { TherapistRecommendationService } from './therapist-recommendation.service';
-import { TherapistManagementController } from './therapist-management.controller';
+
 import { TherapistManagementService } from './therapist-management.service';
-import { TherapistApplicationService } from './therapist-application.service';
+
 import { TherapistProfileController } from './controllers/therapist-profile.controller';
 import { TherapistClientController } from './controllers/therapist-client.controller';
 import { TherapistWorksheetController } from './controllers/therapist-worksheet.controller';
@@ -12,15 +12,16 @@ import { AdvancedMatchingService } from './services/advanced-matching.service';
 import { CompatibilityAnalysisService } from './services/compatibility-analysis.service';
 import { EmailModule } from '../email/email.module';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MessagingService } from '../messaging/messaging.service';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoleUtils } from 'src/utils/role-utils';
 import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
+import { MessagingModule } from '../messaging/messaging.module';
 
 @Module({
-  imports: [PreAssessmentModule, EmailModule],
+  imports: [PreAssessmentModule, EmailModule, MessagingModule],
   controllers: [
     TherapistRecommendationController,
-    TherapistManagementController,
     TherapistProfileController,
     TherapistClientController,
     TherapistWorksheetController,
@@ -28,17 +29,17 @@ import { PreAssessmentModule } from '../pre-assessment/pre-assessment.module';
   providers: [
     TherapistRecommendationService,
     TherapistManagementService,
-    TherapistApplicationService,
     WorksheetsService,
     AdvancedMatchingService,
     CompatibilityAnalysisService,
     NotificationsService,
+    MessagingService,
     PrismaService,
     RoleUtils,
   ],
   exports: [
     TherapistManagementService,
-    TherapistApplicationService,
+
   ],
 })
 export class TherapistModule {}

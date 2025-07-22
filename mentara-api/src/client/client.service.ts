@@ -7,11 +7,17 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import {
-  User,
-  UpdateClientDto,
-  TherapistRecommendation,
-} from 'mentara-commons';
+// Client profile DTO interface
+interface ClientProfileDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+import type { UpdateClientDto, TherapistRecommendation } from './types';
 
 @Injectable()
 export class ClientService {
@@ -19,7 +25,7 @@ export class ClientService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getProfile(userId: string): Promise<User> {
+  async getProfile(userId: string): Promise<ClientProfileDto> {
     try {
       const client = await this.prisma.client.findUnique({
         where: { userId },
@@ -53,7 +59,7 @@ export class ClientService {
     }
   }
 
-  async updateProfile(userId: string, data: UpdateClientDto): Promise<User> {
+  async updateProfile(userId: string, data: UpdateClientDto): Promise<ClientProfileDto> {
     try {
       const updatedClient = await this.prisma.client.update({
         where: { userId },
@@ -147,7 +153,6 @@ export class ClientService {
     const assignment = await this.prisma.clientTherapist.findFirst({
       where: {
         clientId: userId,
-        status: 'ACTIVE',
       },
       include: {
         therapist: {
@@ -199,13 +204,11 @@ export class ClientService {
       throw new NotFoundException('Therapist not found');
     }
 
-    // Deactivate any existing assignments
-    await this.prisma.clientTherapist.updateMany({
+    // Delete any existing assignments
+    await this.prisma.clientTherapist.deleteMany({
       where: {
         clientId: userId,
-        status: 'ACTIVE',
       },
-      data: { status: 'INACTIVE' },
     });
 
     // Create new assignment
@@ -213,7 +216,6 @@ export class ClientService {
       data: {
         clientId: userId,
         therapistId: therapistId,
-        status: 'ACTIVE',
       },
     });
 
@@ -242,17 +244,15 @@ export class ClientService {
       throw new NotFoundException('Client not found');
     }
 
-    // Deactivate any existing assignments
-    await this.prisma.clientTherapist.updateMany({
+    // Delete any existing assignments
+    await this.prisma.clientTherapist.deleteMany({
       where: {
         clientId: userId,
-        status: 'ACTIVE',
       },
-      data: { status: 'INACTIVE' },
     });
   }
 
-  private transformPrismaUserToDTO(user: any): User {
+  private transformPrismaUserToDTO(user: any): ClientProfileDto {
     return {
       id: user.id,
       email: user.email,

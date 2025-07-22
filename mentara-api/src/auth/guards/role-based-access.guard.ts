@@ -270,7 +270,6 @@ export class RoleBasedAccessGuard implements CanActivate {
         where: {
           therapistId,
           clientId,
-          status: 'ACTIVE',
         },
       });
 

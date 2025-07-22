@@ -11,7 +11,7 @@ import type {
   TherapistAuthResponse
 } from "@/lib/api";
 
-// Temporary type - should come from mentara-commons
+// Local type definitions for therapist auth
 interface TherapistUser {
   id: string;
   email: string;
@@ -134,7 +134,7 @@ export function useTherapistAuth(): UseTherapistAuthReturn {
       toast.success("Logged out successfully");
       
       // Navigate to therapist sign-in
-      router.push("/therapist/sign-in");
+      router.push("/auth/sign-in");
     },
     onError: (err) => {
       // Even if logout fails on server, clear local state
@@ -146,7 +146,7 @@ export function useTherapistAuth(): UseTherapistAuthReturn {
       toast.error(message);
       
       // Still navigate to sign-in
-      router.push("/therapist/sign-in");
+      router.push("/auth/sign-in");
     },
   });
 

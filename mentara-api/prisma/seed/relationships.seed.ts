@@ -25,7 +25,6 @@ export async function seedClientTherapistRelationships(
         clientId: client.user.id,
         therapistId: therapist.user.id,
         assignedAt: faker.date.past({ years: 1 }),
-        notes: faker.lorem.paragraph(),
       },
     });
     relationships.push({ relationship, client, therapist });

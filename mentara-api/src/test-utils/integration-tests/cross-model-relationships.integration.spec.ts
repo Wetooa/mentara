@@ -114,7 +114,6 @@ describe('Cross-Model Relationships Integration', () => {
         data: {
           clientId: client.userId,
           therapistId: therapist.userId,
-          status: 'active',
           notes: 'Initial assignment for anxiety treatment',
         },
       });
@@ -144,7 +143,7 @@ describe('Cross-Model Relationships Integration', () => {
       expect(completeRelationship?.client).toBeTruthy();
       expect(completeRelationship?.client?.assignedTherapists).toHaveLength(1);
       expect(completeRelationship?.client?.assignedTherapists[0].therapist.user.email).toBe('therapist@test.com');
-      expect(assignment.status).toBe('active');
+      expect(assignment.notes).toBe('Initial assignment for anxiety treatment');
     });
 
     it('should handle cascade deletion properly', async () => {

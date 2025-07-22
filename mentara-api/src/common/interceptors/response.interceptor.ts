@@ -6,8 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse } from 'mentara-commons';
-import { ApiResponseDto } from '../dto/api-response.dto';
+import { ApiResponse, ApiResponseDto } from '../dto/api-response.dto';
 
 @Injectable()
 export class ResponseInterceptor<T>

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import { toast } from "sonner";
 import { MentaraApiError } from "@/lib/api/errorHandler";
 
@@ -39,7 +39,7 @@ export function useTherapist() {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.client.assignedTherapist(),
+    queryKey: ['client', 'assignedTherapist'],
     queryFn: () => api.client.getAssignedTherapist(),
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes
     retry: (failureCount, error: MentaraApiError) => {
@@ -59,7 +59,7 @@ export function useTherapist() {
     onSuccess: (data, therapistId) => {
       toast.success("Therapist assignment requested successfully!");
       // Invalidate and refetch the assigned therapist
-      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
       // Note: In a real implementation, this would directly assign the therapist
       // For now, it creates a change request that admin needs to approve
     },
@@ -77,7 +77,7 @@ export function useTherapist() {
     onSuccess: () => {
       toast.success("Therapist change request submitted successfully!");
       // Invalidate the assigned therapist query
-      queryClient.invalidateQueries({ queryKey: queryKeys.client.assignedTherapist() });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to submit therapist change request";
@@ -144,7 +144,7 @@ export function useAssignedTherapists() {
   const api = useApi();
 
   return useQuery({
-    queryKey: queryKeys.client.assignedTherapists(),
+    queryKey: ['client', 'assignedTherapists'],
     queryFn: () => api.client.getAssignedTherapists(),
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes
     retry: (failureCount, error: MentaraApiError) => {

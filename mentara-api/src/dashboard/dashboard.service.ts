@@ -9,7 +9,7 @@ import { PrismaService } from '../providers/prisma-client.provider';
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUserDashboardData(userId: string) {
+  async getClientDashboardData(userId: string) {
     try {
       const client = await this.prisma.client.findUnique({
         where: { userId },
@@ -156,7 +156,7 @@ export class DashboardService {
       });
 
       const totalClientsCount = await this.prisma.clientTherapist.count({
-        where: { therapistId: userId, status: 'ACTIVE' },
+        where: { therapistId: userId },
       });
 
       const pendingWorksheetsCount = await this.prisma.worksheet.count({
@@ -165,9 +165,9 @@ export class DashboardService {
 
       // Get recent completed meetings (replacing session logs)
       const recentSessions = await this.prisma.meeting.findMany({
-        where: { 
+        where: {
           therapistId: userId,
-          status: 'COMPLETED'
+          status: 'COMPLETED',
         },
         orderBy: { startTime: 'desc' },
         take: 5,
@@ -254,6 +254,129 @@ export class DashboardService {
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to get admin dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async getModeratorDashboardData(userId: string) {
+    try {
+      // Get moderator record
+      const moderator = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+        },
+      });
+
+      if (!moderator || moderator.role !== 'moderator') {
+        throw new NotFoundException('Moderator not found');
+      }
+
+      // Get pending reports/content for moderation
+      const pendingReports = await this.prisma.post.count({
+        where: {
+          reports: { some: { status: 'PENDING' } },
+        },
+      });
+
+      const pendingContent = await this.prisma.comment.count({
+        where: {
+          reports: { some: { status: 'PENDING' } },
+        },
+      });
+
+      const resolvedToday = await this.prisma.report.count({
+        where: {
+          status: { in: ['REVIEWED', 'DISMISSED'] },
+          updatedAt: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          },
+        },
+      });
+
+      const flaggedUsers = await this.prisma.user.count({
+        where: {
+          OR: [
+            { isActive: false },
+            {
+              // Add any user flagging criteria here
+              client: {
+                meetings: {
+                  some: { status: 'CANCELLED' },
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      // Get recent flagged content for review
+      const recentFlaggedPosts = await this.prisma.post.findMany({
+        where: {
+          reports: { some: { status: 'PENDING' } },
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 10,
+        include: {
+          user: { select: { firstName: true, lastName: true, email: true } },
+          room: {
+            include: {
+              roomGroup: {
+                include: { community: true },
+              },
+            },
+          },
+          _count: { select: { hearts: true, comments: true } },
+        },
+      });
+
+      const recentFlaggedComments = await this.prisma.comment.findMany({
+        where: {
+          reports: { some: { status: 'PENDING' } },
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 10,
+        include: {
+          user: { select: { firstName: true, lastName: true, email: true } },
+          post: {
+            select: { title: true, id: true },
+          },
+        },
+      });
+
+      // Community stats
+      const totalCommunities = await this.prisma.community.count();
+
+      return {
+        moderator,
+        stats: {
+          pendingReports,
+          pendingContent,
+          resolvedToday,
+          flaggedUsers,
+          systemAlerts: 0, // Placeholder for system alerts
+        },
+        communityStats: {
+          totalCommunities,
+        },
+        flaggedContent: {
+          posts: recentFlaggedPosts,
+          comments: recentFlaggedComments,
+        },
+        recentActivity: {
+          moderationActions: [], // Placeholder for moderation action history
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get moderator dashboard data: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

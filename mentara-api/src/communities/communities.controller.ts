@@ -10,62 +10,36 @@ import {
   Put,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { CommunitiesService } from './communities.service';
 import { CommunityAssignmentService } from './community-assignment.service';
 import {
+  SupabaseStorageService,
+  FileUploadResult,
+} from 'src/common/services/supabase-storage.service';
+import {
+  CommunityCreateInputDtoSchema,
+  CommunityUpdateInputDtoSchema,
+} from './validation';
+import type {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from 'mentara-commons';
-
-// Local response interfaces
-interface CommunityResponse {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  imageUrl: string;
-  isPrivate?: boolean;
-  memberCount?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface CommunityStatsResponse {
-  memberCount?: number;
-  postCount?: number;
-  activeMembers?: number;
-  totalMembers?: number;
-  totalPosts?: number;
-  activeCommunities?: number;
-  illnessCommunities?: any[];
-}
-
-interface CommunityWithMembersResponse extends CommunityResponse {
-  members: any[];
-}
-
-interface CommunityWithRoomGroupsResponse extends CommunityResponse {
-  roomGroups: Array<{
-    id: string;
-    name: string;
-    order: number;
-    communityId: string;
-    rooms: Array<{
-      id: string;
-      name: string;
-      order: number;
-      postingRole: string;
-      roomGroupId: string;
-    }>;
-  }>;
-}
+  CommunityResponse,
+  CommunityStatsResponse,
+} from './types';
+import {
+  CommunityWithMembersResponse,
+  CommunityWithRoomGroupsResponse,
+} from './communities.service';
 import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
@@ -76,6 +50,7 @@ export class CommunitiesController {
     private readonly communitiesService: CommunitiesService,
     private readonly communityAssignmentService: CommunityAssignmentService,
     private readonly prisma: PrismaService,
+    private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
   @Get()
@@ -277,6 +252,19 @@ export class CommunitiesController {
     return await this.communitiesService.findAllWithStructure();
   }
 
+  @Get('me/with-structure')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getMyCommunitiesWithStructure(@CurrentUserId() userId: string): Promise<CommunityWithRoomGroupsResponse[]> {
+    try {
+      // Use existing getJoinedCommunities which already includes full structure
+      return await this.communitiesService.getJoinedCommunities(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get communities with structure',
+      );
+    }
+  }
+
   @Get(':id/with-structure')
   async getOneWithStructure(@Param('id') id: string) {
     return await this.communitiesService.findOneWithStructure(id);
@@ -377,6 +365,158 @@ export class CommunitiesController {
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  }
+
+  // New endpoints for community posts and content management
+
+  @Get('memberships/me')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getMyMemberships(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getMyMemberships(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get memberships',
+      );
+    }
+  }
+
+  @Get('rooms/:roomId/posts')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getPostsByRoom(
+    @Param('roomId') roomId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    try {
+      const pageNum = page ? parseInt(page, 10) : 1;
+      const limitNum = limit ? parseInt(limit, 10) : 20;
+      return await this.communitiesService.getPostsByRoom(
+        roomId,
+        Math.max(1, pageNum),
+        Math.max(1, Math.min(50, limitNum)),
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get posts',
+      );
+    }
+  }
+
+  @Post('posts')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
+  async createPost(
+    @Body() postData: { title: string; content: string; roomId: string },
+    @CurrentUserId() userId: string,
+    @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
+  ) {
+    try {
+      // Validate and upload files if provided
+      const fileResults: FileUploadResult[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const validation = this.supabaseStorageService.validateFile(file);
+          if (!validation.isValid) {
+            throw new BadRequestException(
+              `File validation failed: ${validation.error}`,
+            );
+          }
+        }
+
+        // Upload files to Supabase
+        const uploadResults = await this.supabaseStorageService.uploadFiles(
+          files,
+          SupabaseStorageService.getSupportedBuckets().POST_ATTACHMENTS,
+        );
+        fileResults.push(...uploadResults);
+      }
+
+      return await this.communitiesService.createPost(
+        postData.title,
+        postData.content,
+        postData.roomId,
+        userId,
+        fileResults.map((f) => f.url),
+        fileResults.map((f) => f.filename),
+        files.map((f) => f.size),
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to create post',
+      );
+    }
+  }
+
+  @Post('posts/:postId/heart')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @HttpCode(HttpStatus.OK)
+  async heartPost(
+    @Param('postId') postId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    try {
+      await this.communitiesService.heartPost(postId, userId);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to heart post',
+      );
+    }
+  }
+
+  @Delete('posts/:postId/heart')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  @HttpCode(HttpStatus.OK)
+  async unheartPost(
+    @Param('postId') postId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    try {
+      await this.communitiesService.unheartPost(postId, userId);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to unheart post',
+      );
+    }
+  }
+
+  @Get('me/joined')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getJoinedCommunities(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getJoinedCommunities(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get joined communities',
+      );
+    }
+  }
+
+  @Get('me/recommended')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getRecommendedCommunities(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getRecommendedCommunities(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get recommended communities',
+      );
+    }
+  }
+
+  @Get('activity/recent')
+  @Roles('client', 'therapist', 'moderator', 'admin')
+  async getRecentActivity(@CurrentUserId() userId: string) {
+    try {
+      return await this.communitiesService.getRecentActivity(userId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to get recent activity',
       );
     }
   }

@@ -1,3 +1,27 @@
+/**
+ * Central export file for all application types
+ */
+
+// Export domain types (business entities and enums)
+export * from './domain';
+
+// Export API response types
+export * from './api-responses';
+
+// Export authentication types
+export * from './auth';
+
+// Export other domain-specific types
+export * from './booking';
+export * from './review';
+export * from './therapist';
+export * from './patient';
+export * from './filters';
+
+// Export API types
+export * from './api';
+
+// Legacy types - keeping for backward compatibility but should be migrated
 export interface Therapist {
   id: string;
   name: string;
@@ -57,6 +81,3 @@ export interface Patient {
   sessions: Session[];
   worksheets: Worksheet[];
 }
-
-// Export auth types
-export * from './auth';

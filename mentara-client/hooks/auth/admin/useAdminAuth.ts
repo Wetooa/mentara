@@ -11,7 +11,7 @@ import type {
   AdminAuthResponse,
 } from "@/lib/api";
 
-// Temporary type - should come from mentara-commons
+// Local type definitions for admin auth
 interface AdminUser {
   id: string;
   email: string;
@@ -86,13 +86,13 @@ export function useAdminAuth(): UseAdminAuthReturn {
       queryClient.clear();
       setError(null);
       toast.success("Logged out successfully");
-      router.push("/admin/sign-in");
+      router.push("/auth/sign-in");
     },
     onError: () => {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       queryClient.clear();
-      router.push("/admin/sign-in");
+      router.push("/auth/sign-in");
     },
   });
 

@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { ILLNESS_COMMUNITIES, ADDITIONAL_COMMUNITIES } from './config';
+import { ILLNESS_COMMUNITIES } from './config';
 
 export async function seedCommunities(prisma: PrismaClient) {
   console.log('🏘️  Creating communities...');
@@ -37,22 +37,7 @@ export async function seedCommunities(prisma: PrismaClient) {
     await createRoomStructure(prisma, community);
   }
 
-  // Create additional general communities
-  for (const type of ADDITIONAL_COMMUNITIES) {
-    const community = await prisma.community.create({
-      data: {
-        name: type.name,
-        description: type.description,
-        slug: faker.lorem.slug() + '-' + Date.now(),
-        imageUrl: faker.image.url(),
-      },
-    });
-    communities.push(community);
-    console.log(`✅ Created additional community: ${type.name}`);
-
-    // Create room groups and rooms for this community
-    await createRoomStructure(prisma, community);
-  }
+  // Only create questionnaire-based illness communities (14 total)
 
   return communities;
 }
@@ -93,7 +78,18 @@ async function createRoomStructure(prisma: PrismaClient, community: any) {
   ];
 
   // Add specialized room group based on community type
-  if (community.slug.includes('anxiety')) {
+  // Based on the 14 questionnaire disorders
+  if (community.slug.includes('stress')) {
+    roomGroupsConfig.push({
+      name: 'Stress Management',
+      order: 4,
+      rooms: [
+        { name: 'Stress Reduction Techniques', order: 1, postingRole: 'member' },
+        { name: 'Work-Life Balance', order: 2, postingRole: 'member' },
+        { name: 'Relaxation Methods', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('anxiety')) {
     roomGroupsConfig.push({
       name: 'Anxiety Specific',
       order: 4,
@@ -113,6 +109,46 @@ async function createRoomStructure(prisma: PrismaClient, community: any) {
         { name: 'Medication Support', order: 3, postingRole: 'member' },
       ],
     });
+  } else if (community.slug.includes('insomnia')) {
+    roomGroupsConfig.push({
+      name: 'Sleep Support',
+      order: 4,
+      rooms: [
+        { name: 'Sleep Hygiene Tips', order: 1, postingRole: 'member' },
+        { name: 'Sleep Tracking', order: 2, postingRole: 'member' },
+        { name: 'Bedtime Routines', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('panic-disorder')) {
+    roomGroupsConfig.push({
+      name: 'Panic Support',
+      order: 4,
+      rooms: [
+        { name: 'Panic Attack Recovery', order: 1, postingRole: 'member' },
+        { name: 'Breathing Techniques', order: 2, postingRole: 'member' },
+        { name: 'Emergency Coping', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('bipolar')) {
+    roomGroupsConfig.push({
+      name: 'Bipolar Management',
+      order: 4,
+      rooms: [
+        { name: 'Mood Stabilization', order: 1, postingRole: 'member' },
+        { name: 'Medication Management', order: 2, postingRole: 'member' },
+        { name: 'Episode Prevention', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('ocd')) {
+    roomGroupsConfig.push({
+      name: 'OCD Specific',
+      order: 4,
+      rooms: [
+        { name: 'Compulsion Management', order: 1, postingRole: 'member' },
+        { name: 'ERP (Exposure Response Prevention)', order: 2, postingRole: 'member' },
+        { name: 'Intrusive Thoughts', order: 3, postingRole: 'member' },
+      ],
+    });
   } else if (community.slug.includes('ptsd')) {
     roomGroupsConfig.push({
       name: 'PTSD Specific',
@@ -121,6 +157,46 @@ async function createRoomStructure(prisma: PrismaClient, community: any) {
         { name: 'Trauma Recovery', order: 1, postingRole: 'member' },
         { name: 'EMDR Support', order: 2, postingRole: 'member' },
         { name: 'Grounding Techniques', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('social-anxiety')) {
+    roomGroupsConfig.push({
+      name: 'Social Anxiety Support',
+      order: 4,
+      rooms: [
+        { name: 'Social Skills Practice', order: 1, postingRole: 'member' },
+        { name: 'Public Speaking Support', order: 2, postingRole: 'member' },
+        { name: 'Confidence Building', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('phobia')) {
+    roomGroupsConfig.push({
+      name: 'Phobia Management',
+      order: 4,
+      rooms: [
+        { name: 'Exposure Therapy', order: 1, postingRole: 'member' },
+        { name: 'Specific Phobias', order: 2, postingRole: 'member' },
+        { name: 'Gradual Exposure', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('burnout')) {
+    roomGroupsConfig.push({
+      name: 'Burnout Recovery',
+      order: 4,
+      rooms: [
+        { name: 'Work Boundaries', order: 1, postingRole: 'member' },
+        { name: 'Energy Management', order: 2, postingRole: 'member' },
+        { name: 'Career Transitions', order: 3, postingRole: 'member' },
+      ],
+    });
+  } else if (community.slug.includes('eating-disorders')) {
+    roomGroupsConfig.push({
+      name: 'Recovery Focused',
+      order: 4,
+      rooms: [
+        { name: 'Recovery Milestones', order: 1, postingRole: 'member' },
+        { name: 'Nutrition Support', order: 2, postingRole: 'member' },
+        { name: 'Body Positivity', order: 3, postingRole: 'member' },
       ],
     });
   } else if (community.slug.includes('adhd')) {
@@ -133,18 +209,18 @@ async function createRoomStructure(prisma: PrismaClient, community: any) {
         { name: 'Medication Management', order: 3, postingRole: 'member' },
       ],
     });
-  } else if (community.slug.includes('eating-disorder')) {
+  } else if (community.slug.includes('substance-use')) {
     roomGroupsConfig.push({
-      name: 'Recovery Focused',
+      name: 'Recovery Support',
       order: 4,
       rooms: [
-        { name: 'Recovery Milestones', order: 1, postingRole: 'member' },
-        { name: 'Nutrition Support', order: 2, postingRole: 'member' },
-        { name: 'Body Positivity', order: 3, postingRole: 'member' },
+        { name: 'Sobriety Milestones', order: 1, postingRole: 'member' },
+        { name: 'Relapse Prevention', order: 2, postingRole: 'member' },
+        { name: 'Recovery Tools', order: 3, postingRole: 'member' },
       ],
     });
   } else {
-    // Generic specialized room group for other conditions
+    // Fallback for any missed cases
     roomGroupsConfig.push({
       name: 'Specialized Support',
       order: 4,
@@ -239,12 +315,7 @@ export async function seedMemberships(
           data: {
             userId: user.id,
             communityId: community.id,
-            role: faker.helpers.arrayElement([
-              'MEMBER',
-              'MEMBER',
-              'MEMBER',
-              'MODERATOR',
-            ]), // 75% members, 25% moderators
+            // Note: Membership model doesn't have a role field
             joinedAt: faker.date.past({ years: 2 }),
           },
         });

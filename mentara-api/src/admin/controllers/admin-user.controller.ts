@@ -9,35 +9,39 @@ import {
   Query,
   Param,
   Body,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AdminService } from '../admin.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AdminAuthGuard } from '../../auth/guards/admin-auth.guard';
-import { AdminOnly } from '../../auth/decorators/admin-only.decorator';
 import { CurrentUserId } from '../../auth/decorators/current-user-id.decorator';
+import { CurrentUserRole } from '../../auth/decorators/current-user-role.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { AdminUserQuerySchema, type AdminUserQuery } from 'mentara-commons';
+import { AdminUserQuerySchema } from '../validation/admin.schemas';
+import type { AdminUserQuery } from '../types';
 
 @Controller('admin/users')
-@UseGuards(JwtAuthGuard, AdminAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AdminUserController {
   private readonly logger = new Logger(AdminUserController.name);
 
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
-  @AdminOnly()
   async getAllUsers(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
     @Query(new ZodValidationPipe(AdminUserQuerySchema)) query: AdminUserQuery,
   ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving users`);
 
       return await this.adminService.getAllUsers({
         role: query.role,
-        page: query.page,
-        limit: query.limit,
+        page: query.page || 1,
+        limit: query.limit || 10,
         search: query.search,
         status: query.status,
         sortBy: query.sortBy,
@@ -53,11 +57,14 @@ export class AdminUserController {
   }
 
   @Get(':id')
-  @AdminOnly()
   async getUser(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
     @Param('id') userId: string,
   ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} retrieving user ${userId}`);
       const user = await this.adminService.getUser(userId);
@@ -80,12 +87,15 @@ export class AdminUserController {
   }
 
   @Put(':id/suspend')
-  @AdminOnly()
   async suspendUser(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
     @Param('id') userId: string,
     @Body() suspensionData: { reason: string; duration?: number },
   ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} suspending user ${userId}`);
       return await this.adminService.suspendUser(
@@ -104,11 +114,14 @@ export class AdminUserController {
   }
 
   @Put(':id/unsuspend')
-  @AdminOnly()
   async unsuspendUser(
     @CurrentUserId() currentUserId: string,
+    @CurrentUserRole() role: string,
     @Param('id') userId: string,
   ) {
+    if (role !== 'admin') {
+      throw new ForbiddenException('Admin access required');
+    }
     try {
       this.logger.log(`Admin ${currentUserId} unsuspending user ${userId}`);
       return await this.adminService.unsuspendUser(userId, currentUserId);

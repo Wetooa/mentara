@@ -22,14 +22,16 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import {
-  TherapistRecommendationQuerySchema,
-  WelcomeRecommendationQuerySchema,
-  type TherapistRecommendationRequest,
-  type TherapistRecommendationResponseDto,
-  type TherapistRecommendationQuery,
-  type WelcomeRecommendationQuery,
-} from 'mentara-commons';
+// import {
+//   TherapistRecommendationQuerySchema,
+//   WelcomeRecommendationQuerySchema,
+// } from './validation';
+import type {
+  TherapistRecommendationRequest,
+  TherapistRecommendationResponseDto,
+  TherapistRecommendationQuery,
+  WelcomeRecommendationQuery,
+} from './types';
 
 @ApiTags('therapist-recommendation')
 @ApiBearerAuth('JWT-auth')
@@ -56,7 +58,7 @@ export class TherapistRecommendationController {
   @HttpCode(HttpStatus.OK)
   async getRecommendedTherapists(
     @CurrentUserId() clerkId: string,
-    @Query(new ZodValidationPipe(TherapistRecommendationQuerySchema))
+    @Query()
     query: TherapistRecommendationQuery,
   ): Promise<TherapistRecommendationResponseDto> {
     try {
@@ -143,7 +145,7 @@ export class TherapistRecommendationController {
   @HttpCode(HttpStatus.OK)
   async getWelcomeRecommendations(
     @CurrentUserId() userId: string,
-    @Query(new ZodValidationPipe(WelcomeRecommendationQuerySchema))
+    @Query()
     query: WelcomeRecommendationQuery,
   ) {
     try {

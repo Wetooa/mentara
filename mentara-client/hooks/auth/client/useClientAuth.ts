@@ -8,10 +8,18 @@ import { toast } from "sonner";
 import { useApi } from "@/lib/api";
 import type { 
   LoginDto as ClientLoginDto, 
-  RegisterClientDto as ClientRegisterDto, 
-  ClientAuthResponse,
-  ClientUser
+  ClientAuthResponse
 } from "@/lib/api";
+
+// Local type definitions for client auth
+interface ClientUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'client';
+  emailVerified: boolean;
+}
 
 export interface UseClientAuthReturn {
   // Auth state
@@ -22,16 +30,19 @@ export interface UseClientAuthReturn {
 
   // Auth actions
   login: (credentials: ClientLoginDto) => Promise<ClientAuthResponse>;
-  register: (credentials: ClientRegisterDto) => Promise<ClientAuthResponse>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
 
   // Profile actions
-  updateProfile: (profile: { goals?: string[]; preferences?: Record<string, any> }) => Promise<void>;
-  completeOnboarding: () => Promise<void>;
-
-  // Status checks
-  checkOnboardingStatus: () => Promise<void>;
+  updateProfile: (profile: { 
+    firstName?: string;
+    lastName?: string;
+    bio?: string; 
+    profilePicture?: string;
+  }) => Promise<void>;
+  
+  // Dashboard data
+  getDashboardData: () => Promise<void>;
   
   // Password management
   changePassword: (data: { currentPassword: string; newPassword: string }) => Promise<void>;
@@ -74,42 +85,11 @@ export function useClientAuth(): UseClientAuthReturn {
       // Show success message
       toast.success("Welcome back!");
       
-      // Navigate based on onboarding status
-      if (data.user.isOnboardingComplete) {
-        router.push("/user");
-      } else {
-        router.push("/client/onboarding");
-      }
+      // Navigate to client dashboard
+      router.push("/client");
     },
     onError: (err) => {
       const message = err instanceof Error ? err.message : "Login failed";
-      setError(message);
-      toast.error(message);
-    },
-  });
-
-  // Register mutation
-  const registerMutation = useMutation({
-    mutationFn: (credentials: ClientRegisterDto) => api.auth.client.register(credentials),
-    onSuccess: (data) => {
-      // Store tokens
-      localStorage.setItem("access_token", data.accessToken);
-      localStorage.setItem("refresh_token", data.refreshToken);
-      
-      // Update query cache
-      queryClient.setQueryData(["auth", "client", "current-user"], data.user);
-      
-      // Clear any errors
-      setError(null);
-      
-      // Show success message
-      toast.success("Account created successfully!");
-      
-      // Navigate to onboarding
-      router.push("/client/onboarding");
-    },
-    onError: (err) => {
-      const message = err instanceof Error ? err.message : "Registration failed";
       setError(message);
       toast.error(message);
     },
@@ -132,8 +112,8 @@ export function useClientAuth(): UseClientAuthReturn {
       // Show success message
       toast.success("Logged out successfully");
       
-      // Navigate to client sign-in
-      router.push("/client/sign-in");
+      // Navigate to sign-in
+      router.push("/auth/sign-in");
     },
     onError: (err) => {
       // Even if logout fails on server, clear local state
@@ -145,14 +125,18 @@ export function useClientAuth(): UseClientAuthReturn {
       toast.error(message);
       
       // Still navigate to sign-in
-      router.push("/client/sign-in");
+      router.push("/auth/sign-in");
     },
   });
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: (profile: { goals?: string[]; preferences?: Record<string, any> }) => 
-      api.auth.client.updateProfile(profile),
+    mutationFn: (profile: { 
+      firstName?: string;
+      lastName?: string;
+      bio?: string; 
+      profilePicture?: string;
+    }) => api.auth.client.updateProfile(profile),
     onSuccess: (updatedUser) => {
       // Update query cache
       queryClient.setQueryData(["auth", "client", "current-user"], updatedUser);
@@ -160,22 +144,6 @@ export function useClientAuth(): UseClientAuthReturn {
     },
     onError: (err) => {
       const message = err instanceof Error ? err.message : "Profile update failed";
-      setError(message);
-      toast.error(message);
-    },
-  });
-
-  // Complete onboarding mutation
-  const completeOnboardingMutation = useMutation({
-    mutationFn: () => api.auth.client.completeOnboarding(),
-    onSuccess: () => {
-      // Refetch user data to get updated onboarding status
-      queryClient.invalidateQueries({ queryKey: ["auth", "client", "current-user"] });
-      toast.success("Onboarding completed!");
-      router.push("/user");
-    },
-    onError: (err) => {
-      const message = err instanceof Error ? err.message : "Failed to complete onboarding";
       setError(message);
       toast.error(message);
     },
@@ -195,10 +163,10 @@ export function useClientAuth(): UseClientAuthReturn {
     },
   });
 
-  // Get onboarding status query
-  const { refetch: refetchOnboardingStatus } = useQuery({
-    queryKey: ["auth", "client", "onboarding-status"],
-    queryFn: () => api.auth.client.getOnboardingStatus(),
+  // Dashboard data query
+  const { refetch: refetchDashboardData } = useQuery({
+    queryKey: ["auth", "client", "dashboard"],
+    queryFn: () => api.auth.client.getDashboardData(),
     enabled: isAuthenticated,
   });
 
@@ -206,11 +174,6 @@ export function useClientAuth(): UseClientAuthReturn {
   const login = useCallback(
     (credentials: ClientLoginDto) => loginMutation.mutateAsync(credentials),
     [loginMutation]
-  );
-
-  const register = useCallback(
-    (credentials: ClientRegisterDto) => registerMutation.mutateAsync(credentials),
-    [registerMutation]
   );
 
   const logout = useCallback(
@@ -240,19 +203,18 @@ export function useClientAuth(): UseClientAuthReturn {
   }, [api.auth.client, queryClient, logout]);
 
   const updateProfile = useCallback(
-    (profile: { goals?: string[]; preferences?: Record<string, any> }) => 
-      updateProfileMutation.mutateAsync(profile),
+    (profile: { 
+      firstName?: string;
+      lastName?: string;
+      bio?: string; 
+      profilePicture?: string;
+    }) => updateProfileMutation.mutateAsync(profile),
     [updateProfileMutation]
   );
 
-  const completeOnboarding = useCallback(
-    () => completeOnboardingMutation.mutateAsync(),
-    [completeOnboardingMutation]
-  );
-
-  const checkOnboardingStatus = useCallback(async () => {
-    await refetchOnboardingStatus();
-  }, [refetchOnboardingStatus]);
+  const getDashboardData = useCallback(async () => {
+    await refetchDashboardData();
+  }, [refetchDashboardData]);
 
   const changePassword = useCallback(
     (data: { currentPassword: string; newPassword: string }) => 
@@ -266,22 +228,20 @@ export function useClientAuth(): UseClientAuthReturn {
     isAuthenticated,
     isLoading: isLoading || 
                loginMutation.isPending || 
-               registerMutation.isPending || 
-               logoutMutation.isPending,
+               logoutMutation.isPending ||
+               updateProfileMutation.isPending,
     error: error || (queryError instanceof Error ? queryError.message : null),
 
     // Auth actions
     login,
-    register,
     logout,
     refreshToken,
 
     // Profile actions
     updateProfile,
-    completeOnboarding,
 
-    // Status checks
-    checkOnboardingStatus,
+    // Dashboard data
+    getDashboardData,
 
     // Password management
     changePassword,

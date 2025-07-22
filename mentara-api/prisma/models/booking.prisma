@@ -6,7 +6,7 @@ model Meeting {
     endTime      DateTime? // Calculated from startTime + duration, helps with queries
     duration     Int            @default(60)
     status       MeetingStatus  @default(SCHEDULED)
-    meetingType  String         @default("video") // video, audio
+    meetingType  String         @default("video") // video only
     meetingUrl   String? // Video call URL
     meetingNotes MeetingNotes[]
 

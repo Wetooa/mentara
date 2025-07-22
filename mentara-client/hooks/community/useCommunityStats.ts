@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 import type { CommunityStats } from "@/types/api/communities";
 
 /**
@@ -15,7 +15,7 @@ export function useCommunityStats() {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.communities.stats(),
+    queryKey: ['communities', 'stats', 'general'],
     queryFn: () => api.communities.getCommunityStats(),
     staleTime: 1000 * 60 * 15, // 15 minutes - stats don't change frequently
   });

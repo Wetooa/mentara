@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
-import {
+import type {
   MeetingCreateDto,
   MeetingUpdateDto,
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
-} from 'mentara-commons';
+} from './types';
 import { EventBusService } from '../common/events/event-bus.service';
 import { SlotGeneratorService } from './services/slot-generator.service';
 import { ConflictDetectionService } from './services/conflict-detection.service';
@@ -41,7 +41,7 @@ export class BookingService {
   // Meeting Management
   async createMeeting(createMeetingDto: MeetingCreateDto, clientId: string) {
     const { startTime, therapistId, duration } = createMeetingDto;
-    const startTimeDate = new Date(startTime);
+    const startTimeDate = new Date(startTime || createMeetingDto.dateTime);
     const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
 
     // Use database transaction to prevent race conditions

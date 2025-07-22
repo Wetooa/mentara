@@ -22,7 +22,7 @@ import {
   SupabaseStorageService,
   FileUploadResult,
 } from '../common/services/supabase-storage.service';
-import {
+import type {
   CreateConversationDto,
   SendMessageDto,
   UpdateMessageDto,
@@ -30,7 +30,7 @@ import {
   BlockUserDto,
   SearchMessagesDto,
   ConversationListParams,
-} from 'mentara-commons';
+} from './types';
 
 @Controller('messaging')
 @UseGuards(JwtAuthGuard)
@@ -217,7 +217,7 @@ export class MessagingController {
     const limitNum = limit ? Number(limit) : 20;
     return this.messagingService.searchMessages(
       userId,
-      query,
+      query || '',
       conversationId,
       pageNum,
       limitNum,

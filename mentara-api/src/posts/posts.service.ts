@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Post, Prisma, User } from '@prisma/client';
-import { PostUpdateInputDto } from 'mentara-commons';
+import type { PostUpdateInputDto } from './types';
 
 @Injectable()
 export class PostsService {

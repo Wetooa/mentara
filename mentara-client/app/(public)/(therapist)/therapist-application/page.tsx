@@ -29,11 +29,11 @@ import { SidebarContent } from "@/components/therapist-application/SidebarConten
 
 // Store and API
 import useTherapistForm from "@/store/therapistform";
-import { useToast } from "@/contexts/ToastContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useSectionCompletion } from "@/hooks/useSectionCompletion";
 import { useApi } from "@/lib/api";
+import { toast } from "sonner";
 
 // Comprehensive Zod Schema for all form sections - Updated to match backend DTO
 const unifiedTherapistSchema = z
@@ -377,7 +377,6 @@ const sections: Section[] = [
 
 export default function SinglePageTherapistApplication() {
   const router = useRouter();
-  const { showToast } = useToast();
   const api = useApi();
   const {
     updateField,
@@ -404,7 +403,9 @@ export default function SinglePageTherapistApplication() {
 
   // Form setup with persisted values
   const form = useForm<UnifiedTherapistForm>({
-    resolver: zodResolver(unifiedTherapistSchema) as unknown as Resolver<UnifiedTherapistForm>,
+    resolver: zodResolver(
+      unifiedTherapistSchema
+    ) as unknown as Resolver<UnifiedTherapistForm>,
     values: {
       firstName: formValues.firstName || "",
       lastName: formValues.lastName || "",
@@ -621,12 +622,12 @@ export default function SinglePageTherapistApplication() {
       // Scroll to top
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      showToast("Form restarted successfully", "success");
+      toast.success("Form restarted successfully");
     } catch (error) {
       console.error("Error restarting form:", error);
-      showToast("Failed to restart form", "error");
+      toast.error("Failed to restart form");
     }
-  }, [form, showToast]);
+  }, [form]);
 
   // Submit handler
   const onSubmit = useCallback(
@@ -636,12 +637,13 @@ export default function SinglePageTherapistApplication() {
         // First, save the data locally
         autoSave(values);
 
-        // Transform form data to match backend DTO format
+        // Transform form data to match backend unified registration DTO format
         const transformedData = {
-          // Basic information
+          // Basic information + password required for registration
           firstName: values.firstName,
           lastName: values.lastName,
           email: values.email,
+          password: `temp_${Date.now()}_${Math.random().toString(36).substring(2)}`, // Temporary password - will be replaced by backend
           mobile: values.mobile,
           province: values.province,
           providerType: values.providerType,
@@ -650,62 +652,73 @@ export default function SinglePageTherapistApplication() {
           professionalLicenseType:
             values.professionalLicenseType_specify ||
             values.professionalLicenseType,
+          professionalLicenseType_specify:
+            values.professionalLicenseType_specify,
           isPRCLicensed: values.isPRCLicensed,
           prcLicenseNumber: values.prcLicenseNumber || "",
           isLicenseActive: values.isLicenseActive || "",
+          expirationDateOfLicense: values.expirationDateOfLicense,
           practiceStartDate: values.practiceStartDate,
+
+          // New fields from registration schema
+          yearsOfExperience: values.yearsOfExperience,
+          educationBackground: values.educationBackground,
+          practiceLocation: values.practiceLocation,
 
           // Areas and tools
           areasOfExpertise: values.areasOfExpertise,
           assessmentTools: values.assessmentTools,
-          therapeuticApproachesUsedList:
-            values.therapeuticApproachesUsedList_specify
-              ? [
-                  ...values.therapeuticApproachesUsedList.filter(
-                    (t) => t !== "other"
-                  ),
-                  values.therapeuticApproachesUsedList_specify,
-                ]
-              : values.therapeuticApproachesUsedList,
-          languagesOffered: values.languagesOffered_specify
-            ? [
-                ...values.languagesOffered.filter((l) => l !== "other"),
-                values.languagesOffered_specify,
-              ]
-            : values.languagesOffered,
+          therapeuticApproachesUsedList: values.therapeuticApproachesUsedList,
+          therapeuticApproachesUsedList_specify:
+            values.therapeuticApproachesUsedList_specify,
+          languagesOffered: values.languagesOffered,
+          languagesOffered_specify: values.languagesOffered_specify,
 
-          // Teletherapy readiness (flattened) - Convert strings to booleans
-          providedOnlineTherapyBefore:
-            values.providedOnlineTherapyBefore === "yes",
+          // Teletherapy readiness (keep as strings for unified registration)
+          providedOnlineTherapyBefore: values.providedOnlineTherapyBefore,
           comfortableUsingVideoConferencing:
-            values.comfortableUsingVideoConferencing === "yes",
-          privateConfidentialSpace: values.privateConfidentialSpace === "yes",
-          compliesWithDataPrivacyAct:
-            values.compliesWithDataPrivacyAct === "yes",
+            values.comfortableUsingVideoConferencing,
+          privateConfidentialSpace: values.privateConfidentialSpace,
+          compliesWithDataPrivacyAct: values.compliesWithDataPrivacyAct,
 
-          // Compliance (flattened) - Convert strings to booleans
+          // Compliance (keep as strings for unified registration)
           professionalLiabilityInsurance: values.professionalLiabilityInsurance,
           complaintsOrDisciplinaryActions:
             values.complaintsOrDisciplinaryActions,
+          complaintsOrDisciplinaryActions_specify:
+            values.complaintsOrDisciplinaryActions_specify,
           willingToAbideByPlatformGuidelines:
-            values.willingToAbideByPlatformGuidelines === "yes",
+            values.willingToAbideByPlatformGuidelines,
 
           // Availability and payment
           weeklyAvailability: values.weeklyAvailability,
-          preferredSessionLength:
-            values.preferredSessionLength_specify ||
-            values.preferredSessionLength,
+          preferredSessionLength: values.preferredSessionLength,
+          preferredSessionLength_specify: values.preferredSessionLength_specify,
           accepts: values.accepts,
+          accepts_hmo_specify: values.accepts_hmo_specify,
 
           // Optional fields
           bio: values.bio || "",
           hourlyRate: values.hourlyRate || 0,
+          acceptsInsurance: values.acceptsInsurance,
+          acceptedInsuranceTypes: values.acceptedInsuranceTypes,
+          sessionDuration: values.sessionDuration,
+
+          // Document upload tracking
+          documentsUploaded: values.documentsUploaded,
+          consentChecked: values.consentChecked,
         };
 
         // Validate that all required documents are uploaded
-        const requiredDocs = ["prcLicense", "nbiClearance", "resumeCV"] as const;
+        const requiredDocs = [
+          "prcLicense",
+          "nbiClearance",
+          "resumeCV",
+        ] as const;
         const missingDocs = requiredDocs.filter(
-          (doc) => !documents[doc as keyof typeof documents] || documents[doc as keyof typeof documents].length === 0
+          (doc) =>
+            !documents[doc as keyof typeof documents] ||
+            documents[doc as keyof typeof documents].length === 0
         );
 
         if (missingDocs.length > 0) {
@@ -720,11 +733,7 @@ export default function SinglePageTherapistApplication() {
             })
             .join(", ");
 
-          showToast(
-            `Please upload all required documents: ${missingNames}`,
-            "error",
-            5000
-          );
+          toast.error(`Please upload all required documents: ${missingNames}`);
           return;
         }
 
@@ -732,6 +741,12 @@ export default function SinglePageTherapistApplication() {
           "Submitting therapist application with documents:",
           transformedData
         );
+
+        // Prepare FormData for unified registration with documents
+        const formData = new FormData();
+
+        // Add application data as JSON string (required by backend)
+        formData.append("applicationDataJson", JSON.stringify(transformedData));
 
         // Prepare documents for upload - filter out deleted/missing files
         const allFiles = Object.entries(documents)
@@ -743,52 +758,38 @@ export default function SinglePageTherapistApplication() {
           );
 
         const fileTypeMap: Record<string, string> = {};
-        const filesToUpload: File[] = [];
-
-        // Map document types to backend categories
-        const docTypeMapping = {
-          prcLicense: "license",
-          nbiClearance: "certificate",
-          resumeCV: "resume",
-          liabilityInsurance: "certificate",
-          birForm: "document",
-        };
 
         allFiles.forEach(({ file, type }) => {
           // Additional safety check to ensure file is valid before processing
           if (file && file instanceof File && file.name) {
-            filesToUpload.push(file);
-            fileTypeMap[file.name] =
-              docTypeMapping[type as keyof typeof docTypeMapping] || "document";
+            formData.append("files", file);
+            fileTypeMap[file.name] = type; // Use frontend document type directly
           }
         });
 
-        showToast("Submitting application with documents...", "info");
+        // Add file type mapping as JSON string
+        if (Object.keys(fileTypeMap).length > 0) {
+          formData.append("fileTypes", JSON.stringify(fileTypeMap));
+        }
 
-        // Use consolidated API to submit application and upload documents in one atomic operation
-        const result = await api.therapistApplication.submitWithDocuments({
-          application: transformedData as unknown as Parameters<typeof api.therapistApplication.submitWithDocuments>[0]['application'],
-          files: filesToUpload,
-          fileTypes: fileTypeMap
-        });
+        toast.info("Registering therapist account with documents...");
+
+        // Use unified therapist registration endpoint
+        const result = await api.therapistAuth.register(formData);
 
         console.log(
-          "Application and documents submitted successfully:",
+          "Therapist registration with documents successful:",
           result
         );
 
-        showToast(
-          "Successfully submitted application with documents",
-          "success",
-          3000
+        toast.success(
+          "Successfully registered therapist account with documents"
         );
 
-        showToast("Application submitted successfully!", "success");
-
-        // Navigate to success page after successful submission
+        // Navigate to success page after successful registration
         setTimeout(() => {
           router.push(
-            `/therapist-application/success?id=${result.id}`
+            `/therapist-application/success?id=${result.applicationId || result.user?.id || "success"}`
           );
         }, 1500);
       } catch (error) {
@@ -850,7 +851,7 @@ export default function SinglePageTherapistApplication() {
         setIsSubmitting(false);
       }
     },
-    [autoSave, router, showToast, documents, api]
+    [autoSave, router, documents, api]
   );
 
   // Memoized sidebar content props to prevent unnecessary re-renders

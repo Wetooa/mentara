@@ -292,7 +292,7 @@ export class AnalyticsService {
         worksheetsCompleted,
       ] = await Promise.all([
         this.prisma.clientTherapist.count({
-          where: { therapistId, status: 'ACTIVE' },
+          where: { therapistId },
         }),
         this.prisma.meeting.count({
           where: { therapistId, ...whereDate },
@@ -347,7 +347,6 @@ export class AnalyticsService {
       const recentClientActivities = await this.prisma.clientTherapist.findMany({
         where: {
           therapistId,
-          status: 'ACTIVE',
         },
         include: {
           client: {

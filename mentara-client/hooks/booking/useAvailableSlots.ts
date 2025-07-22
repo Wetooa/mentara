@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
+
 
 export interface TimeSlot {
+  time: string;
   startTime: string;
+  endTime: string;
   availableDurations: {
     id: string;
     name: string;
@@ -23,7 +25,7 @@ export function useAvailableSlots(therapistId: string, date: string) {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.booking.slots(therapistId, date),
+    queryKey: ['booking', 'slots', therapistId, date],
     queryFn: () => api.booking.availability.getSlots(therapistId, date),
     enabled: !!(therapistId && date),
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -44,9 +46,10 @@ export function useAvailableSlots(therapistId: string, date: string) {
 
   const getTimeSlots = () => {
     return slots?.map(slot => ({
-      time: new Date(slot.startTime).toTimeString().slice(0, 5),
+      time: new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       startTime: slot.startTime,
-      durations: slot.availableDurations.map(d => d.duration),
+      endTime: slot.endTime || slot.startTime, // Use endTime if available, otherwise use startTime
+      availableDurations: slot.availableDurations,
     })) || [];
   };
 
@@ -75,7 +78,7 @@ export function useMultiDateSlots(therapistId: string, dates: string[]) {
   const api = useApi();
 
   const queries = dates.map(date => ({
-    queryKey: queryKeys.booking.slots(therapistId, date),
+    queryKey: ['booking', 'slots', therapistId, date],
     queryFn: () => api.booking.availability.getSlots(therapistId, date),
     enabled: !!(therapistId && date),
     staleTime: 1000 * 60 * 5,

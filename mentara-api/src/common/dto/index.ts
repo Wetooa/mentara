@@ -2,13 +2,13 @@
 export * from './api-response.dto';
 export * from './user-response.dto';
 
-// Re-export types from mentara-commons for convenience
+// Types are already exported from ./api-response.dto via export *
+
 export type {
-  ApiResponse,
-  PaginatedResponse,
-  PaginationMeta,
   UserResponse,
-  UserProfileResponse,
   AuthResponse,
-  SuccessMessageResponse
-} from 'mentara-commons';
+} from '../../auth/types';
+
+export type {
+  SuccessResponse,
+} from '../../types/global';

@@ -8,6 +8,7 @@ import { Bell, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 
+
 export default function TherapistLayout({
   children,
 }: {
@@ -19,12 +20,8 @@ export default function TherapistLayout({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   // Handle user selection from search

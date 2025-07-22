@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError } from "axios";
+import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";
 
 /**
  * Create and configure the main API client
@@ -6,10 +7,10 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
  */
 export function createApiClient(): AxiosInstance {
   const client = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
     timeout: 10000,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
@@ -17,8 +18,8 @@ export function createApiClient(): AxiosInstance {
   client.interceptors.request.use(
     (config) => {
       // Get token from localStorage (client-side only)
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('auth_token');
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem(TOKEN_STORAGE_KEY);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -28,16 +29,23 @@ export function createApiClient(): AxiosInstance {
     (error) => Promise.reject(error)
   );
 
-  // Response interceptor - handle common errors
+  // Response interceptor - extract data and handle common errors
   client.interceptors.response.use(
-    (response) => response,
+    (response) => response.data,
     (error: AxiosError) => {
-      // Handle 401 errors (unauthorized)
+      // Handle 401 errors (unauthorized) - but only for authenticated requests
       if (error.response?.status === 401) {
-        // Clear token and redirect to login
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          window.location.href = '/sign-in';
+        if (typeof window !== "undefined") {
+          const currentToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+          const currentPath = window.location.pathname;
+          
+          // Only redirect if user had a token (session expired) and not already on login page
+          if (currentToken && !currentPath.includes("/auth/sign-in")) {
+            localStorage.removeItem(TOKEN_STORAGE_KEY);
+            window.location.href = "/auth/sign-in";
+          }
+          // If no token or already on login page, let the error bubble up normally
+          // This allows login form error handling to work properly
         }
       }
       return Promise.reject(error);

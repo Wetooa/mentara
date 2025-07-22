@@ -7,9 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Mentara is a comprehensive mental health platform that connects patients with therapists. The platform includes therapy sessions, community support, worksheets, mental health assessments, and AI-driven patient evaluation.
 
 **Architecture**: Monorepo with three main components:
-- `mentara-client/` - Next.js 15.2.4 frontend with TypeScript
-- `mentara-api/` - NestJS 11.x backend with Prisma ORM
+- `mentara-client/` - Next.js 15.2.4 frontend with TypeScript (isolated island)
+- `mentara-api/` - NestJS 11.x backend with Prisma ORM (isolated island)
 - `ai-patient-evaluation/` - Python Flask service with PyTorch ML models
+
+**Note**: Each component maintains its own types and constants with no shared dependencies.
 
 ## Development Commands
 
@@ -38,14 +40,18 @@ make status          # Check service health
 make test            # Run tests for all services
 make setup-dev       # Complete development setup
 make ports           # Check port availability
+
+# Both services are now independent - no shared libraries required
 ```
 
 ### Client Development (mentara-client/)
 ```bash
-npm run dev      # Start Next.js development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Lint with Next.js ESLint
+npm run dev         # Start Next.js development server
+npm run build       # Build for production
+npm run start       # Start production server
+npm run lint        # Lint with Next.js ESLint
+npm run test:e2e    # Run Playwright E2E tests
+npm run test:e2e:ui # Run E2E tests with UI mode
 ```
 
 ### API Development (mentara-api/)
@@ -87,6 +93,12 @@ python api.py                     # Start Flask development server
 # using PyTorch neural networks for patient evaluation
 ```
 
+### Type Organization
+**Client Types**: Located in `mentara-client/types/` for frontend-specific types
+**Server Types**: Located in `mentara-api/src/types/` for backend-specific types
+
+Each service maintains its own type definitions with no cross-dependencies.
+
 ## Architecture & Technology Stack
 
 ### Frontend (mentara-client/)
@@ -94,16 +106,16 @@ python api.py                     # Start Flask development server
 - **Styling**: Tailwind CSS 4.x with shadcn/ui components
 - **State Management**: Zustand (client state) + React Query v5 (server state)
 - **HTTP Client**: Axios with interceptors for auth and error handling
-- **Authentication**: Clerk with role-based access control
+- **Authentication**: JWT-based local authentication with role-based access control
 - **Forms**: React Hook Form with Zod validation
 - **UI Components**: Radix UI primitives with shadcn/ui
 - **Error Handling**: React Error Boundary with MentaraApiError
-- **Testing**: Jest with React Testing Library
+- **Testing**: Jest with React Testing Library + Playwright for E2E
 
 ### Backend (mentara-api/)
 - **Framework**: NestJS 11.x with TypeScript
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Clerk backend integration
+- **Authentication**: JWT with Passport strategies (Google, Microsoft OAuth)
 - **Real-time Communication**: Socket.io WebSocket integration
 - **File Upload**: Multer for file handling
 - **Architecture**: Modular NestJS structure with feature-based modules
@@ -114,6 +126,13 @@ python api.py                     # Start Flask development server
 - **Purpose**: Mental health assessment processing
 - **Input**: 201-item questionnaire responses across 13 assessment scales
 - **Output**: Processed mental health evaluation results
+
+### Type Architecture (Island Pattern)
+- **Client Types**: `mentara-client/types/` - Frontend-specific interfaces and types
+- **Server Types**: `mentara-api/src/types/` - Backend DTOs and global types
+- **Module Types**: Feature-specific types in respective module directories
+- **No Shared Dependencies**: Each service maintains complete type independence
+- **ESLint Protection**: Rules prevent accidental cross-service imports
 
 ### Database Schema Structure
 Prisma uses a multi-file schema approach in `prisma/models/`:
@@ -151,11 +170,13 @@ app/
 ```
 
 ### Authentication & Authorization
-- Clerk handles authentication with JWT tokens
+- Custom JWT-based authentication with AuthContext and Passport strategies
+- HttpOnly refresh token cookies for enhanced security
 - Middleware (`middleware.ts`) enforces role-based routing
 - Four user roles: `client`, `therapist`, `moderator`, `admin`
 - Protected routes redirect unauthorized users to appropriate dashboards
 - Role-based access control implemented in both frontend and backend
+- OAuth integration with Google and Microsoft (native Passport implementation)
 
 ### Component Architecture
 - Fixed layout with static sidebar and header
@@ -206,6 +227,12 @@ NestJS modules organized by feature:
 3. Run `npm run db:generate` to update Prisma client
 4. Update seed data in `prisma/seed.ts` if needed
 
+### Type Development Workflow
+1. **Client Types**: Add/modify types in `mentara-client/types/`
+2. **Server Types**: Add/modify types in `mentara-api/src/types/` or module-specific `types/` directories
+3. **No Build Step**: Types are used directly by TypeScript compiler
+4. **ESLint Enforcement**: Automatic prevention of cross-service type imports
+
 ## Special Considerations
 
 ### File Storage
@@ -228,6 +255,13 @@ Comprehensive mock data in `data/` directory:
 - `mockPatientsData.ts` - Patient data for therapist views
 - All use TypeScript interfaces for type safety
 
+### WebRTC Infrastructure
+- TURN server configuration in `/turn-server/` for video calling support
+- Coturn server with Docker deployment on ports 3478, 5349
+- Media relay ports 49152-49252 for NAT traversal
+- Redis integration for TURN server state management
+- Supports secure video therapy sessions with therapists
+
 ## Important Development Guidelines
 
 ### Code Quality
@@ -235,7 +269,9 @@ Comprehensive mock data in `data/` directory:
   - Client: `npm run lint` (in mentara-client/)
   - API: `npm run lint` (in mentara-api/)
 - Always generate Prisma client after schema changes: `npm run db:generate`
+- Each service builds independently - no shared library dependencies
 - Use existing mock data patterns when adding new features
+- ESLint rules prevent accidental shared imports between services
 
 ### React Query + Axios Development Guidelines
 
@@ -294,8 +330,9 @@ Comprehensive mock data in `data/` directory:
 - Health check all services: `make status` or `make health`
 - Common setup issues:
   - `Cannot find module 'nest'` → Run `npm install` in mentara-api
-  - `Cannot find module 'mentara-commons'` → Build mentara-commons first: `npm run build:commons`
+  - Type errors → Check service-specific types in `types/` directories
   - Environment validation errors → Configure `.env` file with required variables
+  - Build errors → Each service builds independently, no shared dependencies needed
 
 ### Working Directory Context
 - Always specify which directory commands should run in
@@ -378,9 +415,11 @@ export function useCreateReview() {
 - **Toast Notifications**: User-friendly error messages
 
 ### Authentication Integration
-- Automatic token injection via axios interceptors
-- Server-side and client-side token handling
-- 401 error handling with potential redirect to login
+- Automatic JWT token injection via axios interceptors
+- HttpOnly refresh token cookies for enhanced security
+- Server-side and client-side token handling with AuthContext
+- 401 error handling with automatic redirect to login
+- Google and Microsoft OAuth integration via Passport strategies
 
 ### Query Configuration
 Enhanced QueryClient with smart defaults:

@@ -17,17 +17,19 @@ import { CurrentUserRole } from '../auth/decorators/current-user-role.decorator'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { BookingService } from './booking.service';
 import {
+  BookingMeetingParamsDtoSchema,
+  AvailabilityParamsDtoSchema,
+  GetAvailableSlotsQueryDtoSchema,
+} from './validation/booking.schemas';
+import type {
   TherapistAvailabilityCreateDto,
   TherapistAvailabilityUpdateDto,
   MeetingCreateDto,
   MeetingUpdateDto,
-  BookingMeetingParamsDtoSchema,
-  AvailabilityParamsDtoSchema,
-  GetAvailableSlotsQueryDtoSchema,
-  type BookingMeetingParamsDto,
-  type AvailabilityParamsDto,
-  type GetAvailableSlotsQueryDto,
-} from 'mentara-commons';
+  BookingMeetingParamsDto,
+  AvailabilityParamsDto,
+  GetAvailableSlotsQueryDto,
+} from './types';
 
 @Controller('booking')
 @UseGuards(JwtAuthGuard)

@@ -5,34 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { RoomGroup, Room } from '@prisma/client';
-import {
+import type {
   CommunityCreateInputDto,
   CommunityUpdateInputDto,
-} from 'mentara-commons';
+  CommunityResponse,
+  CommunityStatsResponse,
+} from './types';
 
-// Exported response interfaces
-export interface CommunityResponse {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  imageUrl: string;
-  isPrivate?: boolean;
-  memberCount?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CommunityStatsResponse {
-  memberCount?: number;
-  postCount?: number;
-  activeMembers?: number;
-  totalMembers?: number;
-  totalPosts?: number;
-  activeCommunities?: number;
-  illnessCommunities?: any[];
-}
-
+// Extended response interfaces for complex operations
 export interface CommunityWithMembersResponse extends CommunityResponse {
   members: any[];
 }
@@ -299,5 +279,338 @@ export class CommunitiesService {
       activeCommunities,
       illnessCommunities: [],
     };
+  }
+
+  // New methods for community posts and content management
+
+  async getMyMemberships(userId: string) {
+    return await this.prisma.membership.findMany({
+      where: { userId },
+      include: {
+        community: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            imageUrl: true,
+          },
+        },
+      },
+      orderBy: { joinedAt: 'desc' },
+    });
+  }
+
+  async getPostsByRoom(roomId: string, page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+    
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { roomId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+          hearts: {
+            select: {
+              id: true,
+              userId: true,
+              postId: true,
+            },
+          },
+          _count: {
+            select: {
+              hearts: true,
+              comments: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.post.count({ where: { roomId } }),
+    ]);
+
+    return {
+      posts,
+      pagination: {
+        total,
+        page,
+        limit,
+      },
+    };
+  }
+
+  async createPost(
+    title: string, 
+    content: string, 
+    roomId: string, 
+    userId: string,
+    attachmentUrls: string[] = [],
+    attachmentNames: string[] = [],
+    attachmentSizes: number[] = [],
+  ) {
+    // First verify the room exists and user has access
+    const room = await this.prisma.room.findUniqueOrThrow({
+      where: { id: roomId },
+      include: {
+        roomGroup: {
+          include: {
+            community: {
+              include: {
+                memberships: {
+                  where: { userId },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Check if user is a member of the community
+    if (room.roomGroup.community.memberships.length === 0) {
+      throw new ConflictException('User is not a member of this community');
+    }
+
+    // Check posting permissions based on room posting role
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    const canPost = this.checkPostingPermission(room.postingRole, user.role);
+    if (!canPost) {
+      throw new ConflictException('User does not have permission to post in this room');
+    }
+
+    return await this.prisma.post.create({
+      data: {
+        title,
+        content,
+        roomId,
+        userId,
+        attachmentUrls,
+        attachmentNames,
+        attachmentSizes,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+          },
+        },
+        hearts: {
+          select: {
+            id: true,
+            userId: true,
+            postId: true,
+          },
+        },
+        _count: {
+          select: {
+            hearts: true,
+            comments: true,
+          },
+        },
+      },
+    });
+  }
+
+  private checkPostingPermission(roomPostingRole: string, userRole: string): boolean {
+    const roleHierarchy = {
+      'client': 0,
+      'therapist': 1,
+      'moderator': 2,
+      'admin': 3,
+    };
+
+    const userRoleLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] ?? 0;
+
+    switch (roomPostingRole) {
+      case 'member':
+        return userRoleLevel >= 0;
+      case 'therapist':
+        return userRoleLevel >= 1;
+      case 'moderator':
+        return userRoleLevel >= 2;
+      case 'admin':
+        return userRoleLevel >= 3;
+      default:
+        return userRoleLevel >= 0;
+    }
+  }
+
+  async heartPost(postId: string, userId: string) {
+    // Check if heart already exists
+    const existingHeart = await this.prisma.postHeart.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId,
+        },
+      },
+    });
+
+    if (existingHeart) {
+      throw new ConflictException('Post already hearted by this user');
+    }
+
+    return await this.prisma.postHeart.create({
+      data: {
+        postId,
+        userId,
+      },
+    });
+  }
+
+  async unheartPost(postId: string, userId: string) {
+    const heart = await this.prisma.postHeart.findUnique({
+      where: {
+        postId_userId: {
+          postId,
+          userId,
+        },
+      },
+    });
+
+    if (!heart) {
+      throw new NotFoundException('Heart not found');
+    }
+
+    return await this.prisma.postHeart.delete({
+      where: {
+        postId_userId: {
+          postId,
+          userId,
+        },
+      },
+    });
+  }
+
+  async getJoinedCommunities(userId: string): Promise<CommunityWithRoomGroupsResponse[]> {
+    const memberships = await this.prisma.membership.findMany({
+      where: { userId },
+      include: {
+        community: {
+          include: {
+            roomGroups: {
+              include: {
+                rooms: true,
+              },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+      orderBy: { joinedAt: 'desc' },
+    });
+
+    return memberships.map(membership => membership.community);
+  }
+
+  async getRecommendedCommunities(userId: string): Promise<CommunityWithRoomGroupsResponse[]> {
+    // For now, return communities the user is not yet a member of
+    // This can be enhanced with actual recommendation logic later
+    const userCommunityIds = await this.prisma.membership.findMany({
+      where: { userId },
+      select: { communityId: true },
+    });
+
+    const excludeIds = userCommunityIds.map(m => m.communityId);
+
+    return await this.prisma.community.findMany({
+      where: {
+        id: {
+          notIn: excludeIds,
+        },
+      },
+      include: {
+        roomGroups: {
+          include: {
+            rooms: true,
+          },
+          orderBy: { order: 'asc' },
+        },
+      },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getRecentActivity(userId: string) {
+    // Get recent posts from communities the user is a member of
+    const userCommunityIds = await this.prisma.membership.findMany({
+      where: { userId },
+      select: { communityId: true },
+    });
+
+    const communityIds = userCommunityIds.map(m => m.communityId);
+
+    const recentPosts = await this.prisma.post.findMany({
+      where: {
+        room: {
+          roomGroup: {
+            communityId: {
+              in: communityIds,
+            },
+          },
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+          },
+        },
+        room: {
+          include: {
+            roomGroup: {
+              include: {
+                community: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            hearts: true,
+            comments: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    return recentPosts
+      .filter(post => post.room) // Filter out posts without rooms
+      .map(post => ({
+        type: 'post',
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        user: post.user,
+        community: post.room!.roomGroup.community,
+        _count: post._count,
+      }));
   }
 }

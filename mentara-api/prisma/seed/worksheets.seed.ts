@@ -102,15 +102,15 @@ export async function seedWorksheets(
           probability: isOverdue ? 0.7 : 0.4 
         });
 
-        let status: 'COMPLETED' | 'PAST_DUE' | 'ASSIGNED' | 'UPCOMING';
+        let status: 'SUBMITTED' | 'OVERDUE' | 'ASSIGNED' | 'REVIEWED';
         if (isCompleted) {
-          status = 'COMPLETED';
+          status = 'SUBMITTED';
         } else if (isOverdue) {
-          status = 'PAST_DUE';
+          status = 'OVERDUE';
         } else if (faker.datatype.boolean({ probability: 0.6 })) {
           status = 'ASSIGNED';
         } else {
-          status = 'UPCOMING';
+          status = 'REVIEWED';
         }
 
         // Create worksheet
@@ -119,18 +119,9 @@ export async function seedWorksheets(
             clientId: client.user.id,
             therapistId: therapist.user.id,
             title: template.title,
-            instructions: template.instructions,
-            description: template.description,
+            instructions: template.description, // Use description as detailed instructions
             dueDate,
             status,
-            isCompleted,
-            submittedAt: isCompleted ? faker.date.between({
-              from: assignedDate,
-              to: dueDate,
-            }) : null,
-            feedback: isCompleted && faker.datatype.boolean({ probability: 0.8 }) 
-              ? generateTherapistFeedback() 
-              : null,
             createdAt: assignedDate,
           },
         });
@@ -139,7 +130,6 @@ export async function seedWorksheets(
         // Create worksheet materials (therapist attachments) using inline arrays
         let materialUrls: string[] = [];
         let materialNames: string[] = [];
-        let materialSizes: number[] = [];
         
         if (faker.datatype.boolean({ probability: 0.6 })) {
           const materialCount = faker.number.int({ min: 1, max: 3 });
@@ -150,7 +140,6 @@ export async function seedWorksheets(
             
             materialUrls.push(url);
             materialNames.push(filename);
-            materialSizes.push(fileSize);
           }
         }
 
@@ -159,7 +148,7 @@ export async function seedWorksheets(
         let submissionNames: string[] = [];
         let submissionSizes: number[] = [];
         
-        if (status === 'COMPLETED' || (status === 'ASSIGNED' && faker.datatype.boolean({ probability: 0.4 }))) {
+        if (status === 'SUBMITTED' || (status === 'ASSIGNED' && faker.datatype.boolean({ probability: 0.4 }))) {
           const submissionCount = faker.number.int({ min: 1, max: 2 });
           for (let i = 0; i < submissionCount; i++) {
             const filename = `${template.title.toLowerCase().replace(/\s+/g, '_')}_submission_${i + 1}.pdf`;
@@ -172,17 +161,32 @@ export async function seedWorksheets(
           }
         }
         
-        // Update worksheet with file arrays
-        if (materialUrls.length > 0 || submissionUrls.length > 0) {
+        // Update worksheet with material arrays (therapist attachments)
+        if (materialUrls.length > 0) {
           await prisma.worksheet.update({
             where: { id: worksheet.id },
             data: {
               materialUrls,
               materialNames,
-              materialSizes,
-              submissionUrls,
-              submissionNames,
-              submissionSizes,
+            },
+          });
+        }
+
+        // Create worksheet submission if there are submission files
+        if (submissionUrls.length > 0) {
+          await prisma.worksheetSubmission.create({
+            data: {
+              worksheetId: worksheet.id,
+              fileUrls: submissionUrls,
+              fileNames: submissionNames,
+              fileSizes: submissionSizes,
+              submittedAt: faker.date.between({
+                from: assignedDate,
+                to: dueDate,
+              }),
+              feedback: faker.datatype.boolean({ probability: 0.7 }) 
+                ? generateTherapistFeedback() 
+                : null,
             },
           });
         }

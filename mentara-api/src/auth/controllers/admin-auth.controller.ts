@@ -15,13 +15,18 @@ import { CurrentUserId } from '../decorators/current-user-id.decorator';
 import { CurrentUserRole } from '../decorators/current-user-role.decorator';
 import { Public } from '../decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+// Import types from local auth types
+import type {
+  RegisterAdminDto,
+  LoginDto,
+  AdminAuthResponse,
+} from '../types';
+
+// Import validation schemas from local validation
 import {
   RegisterAdminDtoSchema,
   LoginDtoSchema,
-  type RegisterAdminDto,
-  type LoginDto,
-  type AdminAuthResponse,
-} from 'mentara-commons';
+} from '../validation';
 import { AdminAuthService } from '../services/admin-auth.service';
 import { Request } from 'express';
 
@@ -58,8 +63,10 @@ export class AdminAuthController {
         email: result.user.email,
         firstName: result.user.firstName,
         lastName: result.user.lastName,
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
+        role: result.user.role as any,
+        isEmailVerified: result.user.emailVerified ?? false,
+        createdAt: result.user.createdAt,
+        updatedAt: result.user.updatedAt,
       },
       message: result.message,
     };
@@ -89,8 +96,10 @@ export class AdminAuthController {
         email: result.user.email,
         firstName: result.user.firstName || '',
         lastName: result.user.lastName || '',
-        role: result.user.role,
-        emailVerified: result.user.emailVerified,
+        role: result.user.role as any,
+        isEmailVerified: result.user.emailVerified ?? false,
+        createdAt: result.user.createdAt,
+        updatedAt: result.user.updatedAt,
       },
       token: result.token, // Single JWT token
       message: 'Admin login successful',

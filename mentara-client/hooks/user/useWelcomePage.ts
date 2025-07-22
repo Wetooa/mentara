@@ -7,22 +7,138 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useApi } from "@/lib/api";
 import { TherapistRecommendation, TherapistRecommendationResponse } from "@/lib/api/services/therapists";
 
+/**
+ * LocalStorage key for welcome page state
+ */
+const WELCOME_PAGE_VISITED_KEY = "welcome_page_visited";
+
+/**
+ * Therapist card properties for welcome page display
+ */
 export interface TherapistProps {
+  /** Therapist profile photo URL */
   photo: string;
+  /** Therapist first name */
   firstName: string;
+  /** Therapist last name */
   lastName: string;
+  /** Therapist specialty tags */
   tags: string[];
+  /** Therapist description text */
   description: string;
 }
 
-export function useWelcomePage() {
+/**
+ * Match explanation data for therapist recommendations
+ */
+export interface MatchExplanation {
+  /** Match percentage as string */
+  matchPercentage: string;
+  /** Specialties that match user conditions */
+  matchingSpecialties: string[];
+  /** Years of experience */
+  experience?: number;
+  /** Hourly rate */
+  hourlyRate?: number;
+}
+
+/**
+ * User assessment summary data
+ */
+export interface AssessmentSummary {
+  /** Primary mental health conditions */
+  primaryConditions: string[];
+  /** Secondary mental health conditions */
+  secondaryConditions: string[];
+}
+
+/**
+ * Return type for the useWelcomePage hook
+ */
+export interface UseWelcomePageReturn {
+  /** User's display name */
+  userName: string;
+  /** Recommended therapists list */
+  therapists: TherapistRecommendation[];
+  /** User's mental health conditions */
+  userConditions: string[];
+  /** Matching criteria used for recommendations */
+  matchCriteria: any;
+  /** Full recommendations response */
+  recommendations: TherapistRecommendationResponse | undefined;
+  /** Whether recommendations are loading */
+  isLoading: boolean;
+  /** Error if recommendations failed to load */
+  error: Error | null;
+  
+  /** Map therapist API data to card display format */
+  mapTherapistToCard: (therapist: TherapistRecommendation) => TherapistProps;
+  /** Get match explanation for a therapist */
+  getMatchExplanation: (therapist: TherapistRecommendation) => MatchExplanation;
+  /** Get user's assessment summary */
+  getAssessmentSummary: () => AssessmentSummary | null;
+  
+  /** Navigate to user dashboard */
+  handleContinueToDashboard: () => void;
+  /** Retry loading recommendations */
+  handleRetry: () => void;
+}
+
+/**
+ * Hook for managing the welcome page experience after onboarding completion
+ * 
+ * This hook handles the welcome page functionality including personalized therapist
+ * recommendations, assessment summaries, and navigation to the main user dashboard.
+ * It automatically marks the welcome page as visited and provides utilities for
+ * displaying therapist matches and assessment data.
+ * 
+ * @returns Object containing welcome page data, utilities, and handlers
+ * 
+ * @example
+ * ```tsx
+ * function WelcomePage() {
+ *   const {
+ *     userName,
+ *     therapists,
+ *     isLoading,
+ *     mapTherapistToCard,
+ *     handleContinueToDashboard
+ *   } = useWelcomePage();
+ * 
+ *   if (isLoading) {
+ *     return <div>Loading recommendations...</div>;
+ *   }
+ * 
+ *   return (
+ *     <div>
+ *       <h1>Welcome, {userName}!</h1>
+ *       {therapists.map(therapist => (
+ *         <TherapistCard key={therapist.id} {...mapTherapistToCard(therapist)} />
+ *       ))}
+ *       <button onClick={handleContinueToDashboard}>Continue to Dashboard</button>
+ *     </div>
+ *   );
+ * }
+ * ```
+ * 
+ * Features:
+ * - Personalized therapist recommendations based on assessment
+ * - Match explanation with percentage and criteria
+ * - Assessment summary display
+ * - Automatic welcome page visit tracking
+ * - Error handling with retry functionality
+ * - Navigation to user dashboard
+ */
+export function useWelcomePage(): UseWelcomePageReturn {
   const { user } = useAuth();
   const api = useApi();
   const router = useRouter();
 
-  // Mark that user has visited welcome page
+  /**
+   * Mark that user has visited the welcome page
+   */
   useEffect(() => {
-    localStorage.setItem('welcome_page_visited', 'true');
+    localStorage.setItem(WELCOME_PAGE_VISITED_KEY, 'true');
   }, []);
 
   // Fetch personalized therapist recommendations
@@ -78,11 +194,17 @@ export function useWelcomePage() {
     };
   };
 
-  const handleContinueToDashboard = () => {
-    router.push('/user/dashboard');
+  /**
+   * Navigate to the user area after welcome page completion
+   */
+  const handleContinueToDashboard = (): void => {
+    router.push('/user');
   };
 
-  const handleRetry = () => {
+  /**
+   * Retry loading recommendations by refreshing the page
+   */
+  const handleRetry = (): void => {
     window.location.reload();
   };
 

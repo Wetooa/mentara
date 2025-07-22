@@ -17,11 +17,11 @@ import { CurrentUserId } from 'src/auth/decorators/current-user-id.decorator';
 import { SupabaseStorageService } from 'src/common/services/supabase-storage.service';
 import { WorksheetsService } from './worksheets.service';
 import { PaginationQuery, FilterQuery } from 'src/types';
-import {
+import type {
   WorksheetCreateInputDto,
   WorksheetUpdateInputDto,
   WorksheetSubmissionCreateInputDto,
-} from 'mentara-commons';
+} from './types';
 
 @Controller('worksheets')
 @UseGuards(JwtAuthGuard)

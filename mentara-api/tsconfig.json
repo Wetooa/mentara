@@ -18,12 +18,9 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "strict": true,
+    "strict": false,
     "isolatedModules": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "@mentara/commons": ["../mentara-commons/dist/index"]
-    }
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*"

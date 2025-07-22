@@ -354,3 +354,87 @@ export interface PasswordResetConfirmation {
   token: string;
   newPassword: string;
 }
+
+// Authentication-related DTOs
+export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+export interface RegisterClientDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface RegisterAdminDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: 'admin' | 'moderator';
+}
+
+export interface RegisterModeratorDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface VerifyOtpDto {
+  email: string;
+  otp: string;
+  type: OtpType;
+}
+
+export interface SendOtpDto {
+  email: string;
+  type: OtpType;
+}
+
+export interface ResendOtpDto {
+  email: string;
+  type: OtpType;
+}
+
+// OTP Types
+export type OtpType = 'email_verification' | 'password_reset' | 'login';
+
+export interface OtpEmailData {
+  otp: string;
+  email: string;
+  type: OtpType;
+  expiresAt: Date;
+}
+
+// Auth Response Types
+export interface ClientAuthResponse {
+  user: ClientUser;
+  tokens: TokenPair;
+  isFirstLogin?: boolean;
+}
+
+export interface AdminAuthResponse {
+  user: AdminUser;
+  tokens: TokenPair;
+  isFirstLogin?: boolean;
+}
+
+export interface TherapistAuthResponse {
+  user: TherapistUser;
+  tokens: TokenPair;
+  isFirstLogin?: boolean;
+}
+
+export interface EmailResponse {
+  success: boolean;
+  message: string;
+  emailSent: boolean;
+}
+
+export interface SuccessMessageResponse {
+  success: boolean;
+  message: string;
+}
