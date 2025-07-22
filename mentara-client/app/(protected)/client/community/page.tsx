@@ -157,7 +157,7 @@ export default function UserCommunity() {
               </div>
             ) : (
               // Room Content
-              <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                 {/* Room Header */}
                 <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 lg:p-6 shadow-sm">
               {breadcrumb && (
@@ -339,7 +339,7 @@ export default function UserCommunity() {
             </div>
 
             {/* Posts Content */}
-            <div className="flex-1 overflow-y-auto bg-community-warm/10 relative">
+            <div className="flex-1 min-h-0 overflow-y-auto bg-community-warm/10 relative mentara-scrollbar">
               {/* Background decoration */}
               <div className="absolute inset-0 bg-community-gradient opacity-20" />
               <div className="relative max-w-4xl mx-auto p-4 lg:p-6">
@@ -642,13 +642,13 @@ export default function UserCommunity() {
             </div>
           ) : (
             // Mobile Room Content (simplified)
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
               <div className="bg-white/90 backdrop-blur-sm border-b border-community-calm/30 p-4 shadow-sm">
                 <h1 className="text-xl font-bold text-community-calm-foreground truncate">
                   {selectedRoom?.name}
                 </h1>
               </div>
-              <div className="flex-1 overflow-y-auto bg-community-warm/10">
+              <div className="flex-1 min-h-0 overflow-y-auto bg-community-warm/10 mentara-scrollbar">
                 <div className="p-4">
                   <div className="text-center py-8">
                     <p className="text-community-soothing-foreground">Mobile room content loading...</p>
