@@ -65,15 +65,6 @@ export function createBookingService(axios: AxiosInstance) {
         return data;
       },
 
-      /**
-       * Get upcoming meetings
-       */
-      async getUpcoming(limit?: number) {
-        const { data } = await axios.get("/meetings/upcoming", { 
-          params: { limit } 
-        });
-        return data;
-      },
     },
 
     // Availability Management
