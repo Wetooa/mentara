@@ -23,6 +23,7 @@ import { UserSearchBar, User as SearchUser } from "@/components/search";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { Button } from "@/components/ui/button";
 import { cn, getProfileUrl } from "@/lib/utils";
+import { UserDisplay } from "@/components/common/UserDisplay";
 
 
 export default function TherapistLayout({
@@ -391,11 +392,13 @@ export default function TherapistLayout({
             />
 
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-sm font-medium text-gray-900">
-                  {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Therapist"}
-                </span>
-                <span className="text-xs text-gray-500 capitalize">{user?.role || "therapist"}</span>
+              <div className="hidden sm:flex">
+                <UserDisplay
+                  variant="name-only"
+                  showRole={true}
+                  textClassName="flex flex-col items-end text-gray-900"
+                  className="gap-1"
+                />
               </div>
 
               <button 
