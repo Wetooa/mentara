@@ -5,49 +5,61 @@ import {
   TherapistProfile,
   SITE_CONFIG 
 } from '@/lib/metadata';
+import { serverTherapistApi, serverProfileApi, safeServerApiCall } from '@/lib/api/server';
 import { Metadata } from 'next';
 
 interface TherapistProfilePageProps {
   params: Promise<{ id: string }>;
 }
 
-// Fetch therapist data for metadata generation
+// Fetch therapist data for metadata generation using server-side API utilities
 async function getTherapistProfile(id: string): Promise<TherapistProfile | null> {
-  try {
-    // Call the API to get therapist profile data
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/therapists/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'force-cache', // Cache for metadata generation
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
+  return await safeServerApiCall(async () => {
+    // Try to get therapist data first
+    const therapistData = await serverTherapistApi.getTherapist(id);
     
-    if (!response.ok) {
-      return null;
+    if (!therapistData) {
+      // Fallback to profile API if therapist API doesn't work
+      const profileData = await serverProfileApi.getProfile(id);
+      if (!profileData || profileData.user.role !== 'therapist') {
+        return null;
+      }
+      
+      // Transform profile data to TherapistProfile format
+      return {
+        id: profileData.user.id,
+        firstName: profileData.user.firstName || 'Therapist',
+        lastName: profileData.user.lastName || '',
+        bio: profileData.user.bio,
+        avatarUrl: profileData.user.avatarUrl,
+        role: 'therapist',
+        specializations: profileData.therapist?.specializations || [],
+        approaches: profileData.therapist?.areasOfExpertise || [],
+        languages: profileData.therapist?.languages || ['English'],
+        yearsOfExperience: profileData.therapist?.yearsOfExperience,
+        education: undefined,
+        hourlyRate: profileData.therapist?.hourlyRate,
+        sessionLength: profileData.therapist?.sessionLength,
+      };
     }
     
-    const therapist = await response.json();
-    
+    // Transform therapist API response to TherapistProfile format
     return {
-      id: therapist.userId,
-      firstName: therapist.user?.firstName || 'Therapist',
-      lastName: therapist.user?.lastName || '',
-      bio: therapist.user?.bio,
-      avatarUrl: therapist.user?.avatarUrl,
+      id: therapistData.userId,
+      firstName: therapistData.user?.firstName || 'Therapist',
+      lastName: therapistData.user?.lastName || '',
+      bio: therapistData.user?.bio,
+      avatarUrl: therapistData.user?.avatarUrl,
       role: 'therapist',
-      specializations: therapist.areasOfExpertise || therapist.expertise || [],
-      approaches: therapist.therapeuticApproachesUsedList || therapist.approaches || [],
-      languages: therapist.languagesOffered || therapist.languages || ['English'],
-      yearsOfExperience: therapist.yearsOfExperience,
-      education: therapist.educationBackground,
-      hourlyRate: therapist.hourlyRate ? parseFloat(therapist.hourlyRate.toString()) : undefined,
-      sessionLength: therapist.sessionLength,
+      specializations: therapistData.areasOfExpertise || therapistData.expertise || [],
+      approaches: therapistData.therapeuticApproachesUsedList || therapistData.approaches || [],
+      languages: therapistData.languagesOffered || therapistData.languages || ['English'],
+      yearsOfExperience: therapistData.yearsOfExperience,
+      education: therapistData.educationBackground,
+      hourlyRate: therapistData.hourlyRate ? parseFloat(therapistData.hourlyRate.toString()) : undefined,
+      sessionLength: therapistData.sessionLength,
     };
-  } catch (error) {
-    console.error('Error fetching therapist profile:', error);
-    return null;
-  }
+  });
 }
 
 export default async function TherapistProfilePage({ params }: TherapistProfilePageProps) {

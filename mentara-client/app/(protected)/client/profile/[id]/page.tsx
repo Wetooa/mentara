@@ -5,42 +5,32 @@ import {
   UserProfile,
   SITE_CONFIG 
 } from '@/lib/metadata';
+import { serverProfileApi, safeServerApiCall } from '@/lib/api/server';
 import { Metadata } from 'next';
 
 interface ClientProfilePageProps {
   params: Promise<{ id: string }>;
 }
 
-// Fetch client data for metadata generation
+// Fetch client data for metadata generation using server-side API utilities
 async function getClientProfile(id: string): Promise<UserProfile | null> {
-  try {
-    // Call the API to get client profile data
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/users/${id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'force-cache', // Cache for metadata generation
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
+  return await safeServerApiCall(async () => {
+    const profileData = await serverProfileApi.getProfile(id);
     
-    if (!response.ok) {
+    if (!profileData) {
       return null;
     }
     
-    const user = await response.json();
-    
+    // Transform server response to match UserProfile interface
     return {
-      id: user.id,
-      firstName: user.firstName || 'User',
-      lastName: user.lastName || '',
-      bio: user.bio,
-      avatarUrl: user.avatarUrl,
-      role: user.role || 'client',
+      id: profileData.user.id,
+      firstName: profileData.user.firstName || 'User',
+      lastName: profileData.user.lastName || '',
+      bio: profileData.user.bio,
+      avatarUrl: profileData.user.avatarUrl,
+      role: profileData.user.role || 'client',
     };
-  } catch (error) {
-    console.error('Error fetching client profile:', error);
-    return null;
-  }
+  });
 }
 
 export default async function ClientProfilePage({ params }: ClientProfilePageProps) {
