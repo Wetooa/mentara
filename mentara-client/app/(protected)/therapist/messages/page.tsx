@@ -2,11 +2,13 @@
 
 import React from 'react';
 import { MessengerInterface } from '@/components/messaging/MessengerInterface';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function TherapistMessagesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const targetUserId = searchParams.get('userId');
 
   const handleCallInitiate = (conversationId: string, type: 'audio' | 'video') => {
     toast.info(`${type} call functionality coming soon`);
@@ -25,6 +27,7 @@ export default function TherapistMessagesPage() {
           onCallInitiate={handleCallInitiate}
           onVideoMeetingJoin={handleVideoMeetingJoin}
           className="h-full"
+          targetUserId={targetUserId || undefined}
         />
       </div>
     </div>

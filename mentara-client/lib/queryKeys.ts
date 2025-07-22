@@ -36,5 +36,7 @@ export const queryKeys = {
     search: (query: string, conversationId?: string) => 
       [...queryKeys.messaging.all, 'search', query, conversationId] as const,
     blockedUsers: [...queryKeys.messaging.all, 'blocked'] as const,
+    // Add key for starting conversations
+    startConversation: (targetUserId: string) => [...queryKeys.messaging.all, 'startConversation', targetUserId] as const,
   },
 } as const;

@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRealtimeMessaging } from '@/hooks/messaging/useRealtimeMessaging';
+import { useStartConversation } from '@/hooks/messaging/useStartConversation';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format, isToday, isYesterday, differenceInMinutes } from 'date-fns';
@@ -57,6 +58,7 @@ interface MessengerInterfaceProps {
   className?: string;
   onCallInitiate?: (conversationId: string, type: 'audio' | 'video') => void;
   onVideoMeetingJoin?: (conversationId: string) => void;
+  targetUserId?: string;
 }
 
 const EMOJI_REACTIONS = ['❤️', '👍', '😂', '😮', '😢', '😡'];
@@ -367,7 +369,8 @@ const TypingIndicator: React.FC<{ users: string[] }> = ({ users }) => {
 export function MessengerInterface({ 
   className, 
   onCallInitiate, 
-  onVideoMeetingJoin 
+  onVideoMeetingJoin,
+  targetUserId 
 }: MessengerInterfaceProps) {
   const { user } = useAuth();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -391,6 +394,39 @@ export function MessengerInterface({
     enableTypingIndicators: true,
     enablePresence: true,
   });
+
+  // Hook for starting conversations (deep linking)
+  const { startConversation, isStarting } = useStartConversation();
+
+  // Handle targetUserId prop for deep linking
+  useEffect(() => {
+    if (targetUserId && conversations.length > 0 && !selectedConversationId && !isStarting) {
+      console.log('🔗 [DEEP LINK] Starting conversation with targetUserId:', targetUserId);
+      
+      // Check if conversation already exists
+      const existingConversation = conversations.find(conv => 
+        conv.type === 'DIRECT' && 
+        conv.participants.some(p => p.userId === targetUserId)
+      );
+      
+      if (existingConversation) {
+        console.log('🔗 [DEEP LINK] Found existing conversation:', existingConversation.id);
+        setSelectedConversationId(existingConversation.id);
+      } else {
+        console.log('🔗 [DEEP LINK] Creating new conversation with user:', targetUserId);
+        startConversation(targetUserId, {
+          onSuccess: (conversation) => {
+            console.log('🔗 [DEEP LINK] Conversation created/found:', conversation.id);
+            setSelectedConversationId(conversation.id);
+          },
+          onError: (error) => {
+            console.error('🔗 [DEEP LINK] Failed to start conversation:', error);
+            toast.error('Failed to start conversation');
+          }
+        });
+      }
+    }
+  }, [targetUserId, conversations, selectedConversationId, isStarting, startConversation]);
 
   // Debug logging for conversations data
   useEffect(() => {

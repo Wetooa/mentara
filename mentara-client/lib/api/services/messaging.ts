@@ -146,6 +146,34 @@ export function createMessagingService(axios: AxiosInstance) {
       return data;
     },
 
+    /**
+     * Start a direct conversation with another user
+     * Finds existing direct conversation or creates a new one
+     * @param targetUserId - The user ID to start conversation with
+     * @returns Promise<MessagingConversation> - The conversation (existing or newly created)
+     */
+    async startDirectConversation(targetUserId: string) {
+      // First, try to find existing direct conversation
+      const conversations = await this.getConversations();
+      
+      const existingDirectConversation = conversations.find(conv => 
+        conv.type === 'DIRECT' && 
+        conv.participants.some(p => p.userId === targetUserId)
+      );
+
+      if (existingDirectConversation) {
+        return existingDirectConversation;
+      }
+
+      // If no existing conversation, create a new direct conversation
+      const newConversation = await this.createConversation({
+        participantUserIds: [targetUserId],
+        type: 'DIRECT'
+      });
+
+      return newConversation;
+    },
+
     async getConversation(conversationId: string) {
       const { data } = await axios.get<MessagingConversation>(`/messaging/conversations/${conversationId}`);
       return data;

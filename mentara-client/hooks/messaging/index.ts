@@ -68,3 +68,7 @@ export function useMessaging() {
 export { useContacts } from './useContacts';
 export { useConversations } from './useConversations';
 export { useMessagingWebSocket } from './useWebSocket';
+export { useRealtimeMessaging } from './useRealtimeMessaging';
+
+// Export the new conversation starter hooks
+export { useStartConversation, useStartConversationSimple } from './useStartConversation';
