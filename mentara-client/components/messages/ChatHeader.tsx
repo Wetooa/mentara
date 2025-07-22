@@ -2,49 +2,15 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Settings, UserX, Trash2, X, Phone, Video } from "lucide-react";
 import { Contact } from "./types";
-import { getContactById } from "@/data/mockMessagesData";
 
 interface ChatHeaderProps {
-  contactId: string;
-  contact?: Contact;
+  contact: Contact;
 }
 
 export default function ChatHeader({
-  contactId,
-  contact: propContact,
+  contact,
 }: ChatHeaderProps) {
   const [showSettings, setShowSettings] = useState(false);
-  const [contact, setContact] = useState<Contact | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load contact info if not provided via props
-  useEffect(() => {
-    if (propContact) {
-      setContact(propContact);
-    } else {
-      const loadContact = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          // In a real app, this would be an API call
-          const fetchedContact = getContactById(contactId);
-          if (fetchedContact) {
-            setContact(fetchedContact);
-          } else {
-            setError("Contact not found");
-          }
-        } catch (err) {
-          console.error("Error fetching contact:", err);
-          setError("Failed to load contact info");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadContact();
-    }
-  }, [contactId, propContact]);
 
   // Handle outside clicks to close settings dropdown
   useEffect(() => {
@@ -62,32 +28,6 @@ export default function ChatHeader({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSettings]);
-
-  // Render loading state
-  if (isLoading) {
-    return (
-      <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-white">
-        <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
-          <div className="ml-3">
-            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
-            <div className="h-3 w-16 bg-gray-200 rounded mt-1 animate-pulse"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Render error state
-  if (error || !contact) {
-    return (
-      <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-white">
-        <div className="text-red-500 text-sm">
-          {error || "Contact information unavailable"}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-white">

@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Paperclip, Smile, Send, X } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
-import { Message, Attachment } from "./types";
+import { Message, Attachment, Contact } from "./types";
 import { useSimpleMessaging } from "@/hooks/messaging/useSimpleMessaging";
+import { createMessagingApiService } from "@/lib/messaging-api";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Import a simple emoji picker or use a library like emoji-mart
 import dynamic from "next/dynamic";
@@ -18,6 +20,8 @@ export function MessageChatArea({
   contactId,
   enableRealtime = true,
 }: MessageChatAreaProps) {
+  const { accessToken } = useAuth();
+  
   // Use the modern messaging hook
   const {
     messageGroups,
@@ -37,6 +41,8 @@ export function MessageChatArea({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [isLoadingContact, setIsLoadingContact] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +67,53 @@ export function MessageChatArea({
   useEffect(() => {
     scrollToBottom();
   }, [messageGroups]);
+
+  // Fetch contact data using real messaging API
+  useEffect(() => {
+    const fetchContact = async () => {
+      if (!accessToken || !contactId) return;
+      
+      setIsLoadingContact(true);
+      try {
+        const messagingApi = createMessagingApiService(() => Promise.resolve(accessToken));
+        const contacts = await messagingApi.fetchContacts();
+        
+        // Find the contact with the matching conversation ID
+        const foundContact = contacts.find(c => c.id === contactId);
+        if (foundContact) {
+          setContact(foundContact);
+        } else {
+          console.warn(`Contact not found for conversation ID: ${contactId}`);
+          // Create a fallback contact if not found
+          setContact({
+            id: contactId,
+            name: "Unknown Contact",
+            status: "offline",
+            lastMessage: "",
+            time: "",
+            unread: 0,
+            avatar: "/avatar-placeholder.png",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching contact:", error);
+        // Set a fallback contact on error
+        setContact({
+          id: contactId,
+          name: "Unknown Contact",
+          status: "offline", 
+          lastMessage: "",
+          time: "",
+          unread: 0,
+          avatar: "/avatar-placeholder.png",
+        });
+      } finally {
+        setIsLoadingContact(false);
+      }
+    };
+
+    fetchContact();
+  }, [accessToken, contactId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -153,7 +206,21 @@ export function MessageChatArea({
     <div className="flex flex-col h-screen w-full bg-gray-50">
       {/* Chat Header - Fixed at top with z-index to ensure it stays above content */}
       <div className="sticky top-0 z-10 bg-white shadow-sm">
-        <ChatHeader contactId={contactId} />
+        {isLoadingContact ? (
+          <div className="flex items-center px-4 py-2 border-b border-gray-200">
+            <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+            <div className="ml-3">
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-3 w-16 bg-gray-200 rounded mt-1 animate-pulse"></div>
+            </div>
+          </div>
+        ) : contact ? (
+          <ChatHeader contact={contact} />
+        ) : (
+          <div className="flex items-center px-4 py-2 border-b border-gray-200">
+            <div className="text-red-500 text-sm">Contact information unavailable</div>
+          </div>
+        )}
       </div>
 
       {/* Messages Area - Scrollable */}
