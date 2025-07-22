@@ -54,7 +54,7 @@ describe('Cross-Model Relationships Integration', () => {
           lastName: 'Client',
           role: 'client',
           isActive: true,
-          isVerified: true,
+          emailVerified: true,
         },
       });
 
@@ -75,7 +75,7 @@ describe('Cross-Model Relationships Integration', () => {
           lastName: 'Therapist',
           role: 'therapist',
           isActive: true,
-          isVerified: true,
+          emailVerified: true,
         },
       });
 

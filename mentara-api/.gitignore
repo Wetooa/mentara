@@ -78,3 +78,6 @@ bun.lockb
 
 # Environment variables
 .env
+
+# Tsbuild
+.tsbuildinfo

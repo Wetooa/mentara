@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -34,9 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useApi } from "@/lib/api";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useAvailabilityManager } from "@/hooks/therapist/useAvailabilityManager";
 
 // Animation variants
 const containerVariants = {
@@ -62,169 +60,46 @@ const itemVariants = {
   }
 };
 
-interface AvailabilitySlot {
-  id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  isAvailable: boolean;
-  isRecurring: boolean;
-  recurringPattern?: {
-    frequency: 'daily' | 'weekly' | 'monthly';
-    interval: number;
-    endDate?: string;
-  };
-}
-
-interface NewAvailabilityData {
-  date: string;
-  startTime: string;
-  endTime: string;
-  isRecurring: boolean;
-  recurringPattern?: {
-    frequency: 'daily' | 'weekly' | 'monthly';
-    interval: number;
-    endDate?: string;
-  };
-}
-
-// const WEEK_DAYS = [
-//   'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-// ];
-
-const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
-  const hour = i.toString().padStart(2, '0');
-  return [`${hour}:00`, `${hour}:30`];
-}).flat();
-
 export function AvailabilityManager() {
-  const api = useApi();
-  const queryClient = useQueryClient();
-  
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingSlot, setEditingSlot] = useState<AvailabilitySlot | null>(null);
-  const [newAvailability, setNewAvailability] = useState<NewAvailabilityData>({
-    date: new Date().toISOString().split('T')[0],
-    startTime: '09:00',
-    endTime: '17:00',
-    isRecurring: false,
-  });
-
-  // Fetch availability slots
-  const { data: availability, isLoading, error, refetch } = useQuery({
-    queryKey: ['therapist', 'availability'],
-    queryFn: () => api.booking.availability.get(),
-  });
-
-  // Create availability mutation
-  const createAvailabilityMutation = useMutation({
-    mutationFn: (data: NewAvailabilityData) => api.booking.availability.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'availability'] });
-      toast.success('Availability added successfully!');
-      setShowAddDialog(false);
-      resetForm();
-    },
-    onError: (error) => {
-      console.error('Error creating availability:', error);
-      toast.error('Failed to add availability. Please try again.');
-    },
-  });
-
-  // Update availability mutation
-  const updateAvailabilityMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<AvailabilitySlot> }) =>
-      api.booking.availability.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'availability'] });
-      toast.success('Availability updated successfully!');
-      setEditingSlot(null);
-    },
-    onError: (error) => {
-      console.error('Error updating availability:', error);
-      toast.error('Failed to update availability. Please try again.');
-    },
-  });
-
-  // Delete availability mutation
-  const deleteAvailabilityMutation = useMutation({
-    mutationFn: (id: string) => api.booking.availability.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['therapist', 'availability'] });
-      toast.success('Availability deleted successfully!');
-    },
-    onError: (error) => {
-      console.error('Error deleting availability:', error);
-      toast.error('Failed to delete availability. Please try again.');
-    },
-  });
-
-  const resetForm = () => {
-    setNewAvailability({
-      date: new Date().toISOString().split('T')[0],
-      startTime: '09:00',
-      endTime: '17:00',
-      isRecurring: false,
-    });
-  };
-
-  const handleAddAvailability = () => {
-    createAvailabilityMutation.mutate(newAvailability);
-  };
-
-  const handleUpdateAvailability = () => {
-    if (!editingSlot) return;
+  const {
+    // State
+    showAddDialog,
+    setShowAddDialog,
+    editingSlot,
+    setEditingSlot,
+    newAvailability,
+    setNewAvailability,
     
-    updateAvailabilityMutation.mutate({
-      id: editingSlot.id,
-      data: editingSlot,
-    });
-  };
-
-  const handleDeleteAvailability = (id: string) => {
-    if (confirm('Are you sure you want to delete this availability slot?')) {
-      deleteAvailabilityMutation.mutate(id);
-    }
-  };
-
-  const handleToggleAvailability = (slot: AvailabilitySlot) => {
-    updateAvailabilityMutation.mutate({
-      id: slot.id,
-      data: { isAvailable: !slot.isAvailable },
-    });
-  };
-
-  const formatTime = (time: string) => {
-    const [hour, minute] = time.split(':');
-    const hourNum = parseInt(hour);
-    const ampm = hourNum >= 12 ? 'PM' : 'AM';
-    const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
-    return `${displayHour}:${minute} ${ampm}`;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const groupAvailabilityByDate = (slots: AvailabilitySlot[]) => {
-    return slots.reduce((groups, slot) => {
-      const date = slot.date;
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(slot);
-      return groups;
-    }, {} as Record<string, AvailabilitySlot[]>);
-  };
-
-  const isProcessing = createAvailabilityMutation.isPending || 
-                     updateAvailabilityMutation.isPending || 
-                     deleteAvailabilityMutation.isPending;
+    // Data
+    availability,
+    isLoading,
+    error,
+    
+    // Stats
+    availableSlots,
+    recurringSlots,
+    totalSlots,
+    
+    // Actions
+    handleAddAvailability,
+    handleUpdateAvailability,
+    handleDeleteAvailability,
+    handleToggleAvailability,
+    refetch,
+    
+    // Loading states
+    isCreating,
+    isUpdating,
+    isProcessing,
+    
+    // Utilities
+    formatTime,
+    formatDate,
+    groupAvailabilityByDate,
+    updateNewAvailabilityPattern,
+    updateEditingSlot,
+    TIME_SLOTS,
+  } = useAvailabilityManager();
 
   if (error) {
     return (
@@ -276,7 +151,7 @@ export function AvailabilityManager() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {availability?.filter(slot => slot.isAvailable).length || 0}
+                  {availableSlots}
                 </p>
                 <p className="text-sm text-muted-foreground">Available Slots</p>
               </div>
@@ -292,7 +167,7 @@ export function AvailabilityManager() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {availability?.filter(slot => slot.isRecurring).length || 0}
+                  {recurringSlots}
                 </p>
                 <p className="text-sm text-muted-foreground">Recurring Slots</p>
               </div>
@@ -308,7 +183,7 @@ export function AvailabilityManager() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {availability?.length || 0}
+                  {totalSlots}
                 </p>
                 <p className="text-sm text-muted-foreground">Total Slots</p>
               </div>
@@ -428,7 +303,7 @@ export function AvailabilityManager() {
               <Input
                 type="date"
                 value={newAvailability.date}
-                onChange={(e) => setNewAvailability(prev => ({ ...prev, date: e.target.value }))}
+                onChange={(e) => setNewAvailability({ date: e.target.value })}
                 className="mt-1"
                 min={new Date().toISOString().split('T')[0]}
               />
@@ -439,7 +314,7 @@ export function AvailabilityManager() {
                 <Label>Start Time</Label>
                 <Select
                   value={newAvailability.startTime}
-                  onValueChange={(value) => setNewAvailability(prev => ({ ...prev, startTime: value }))}
+                  onValueChange={(value) => setNewAvailability({ startTime: value })}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -458,7 +333,7 @@ export function AvailabilityManager() {
                 <Label>End Time</Label>
                 <Select
                   value={newAvailability.endTime}
-                  onValueChange={(value) => setNewAvailability(prev => ({ ...prev, endTime: value }))}
+                  onValueChange={(value) => setNewAvailability({ endTime: value })}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -478,7 +353,7 @@ export function AvailabilityManager() {
               <Label>Make this recurring</Label>
               <Switch
                 checked={newAvailability.isRecurring}
-                onCheckedChange={(checked) => setNewAvailability(prev => ({ ...prev, isRecurring: checked }))}
+                onCheckedChange={(checked) => setNewAvailability({ isRecurring: checked })}
               />
             </div>
 
@@ -488,14 +363,9 @@ export function AvailabilityManager() {
                   <Label>Frequency</Label>
                   <Select
                     value={newAvailability.recurringPattern?.frequency || 'weekly'}
-                    onValueChange={(value) => setNewAvailability(prev => ({
-                      ...prev,
-                      recurringPattern: {
-                        ...prev.recurringPattern,
-                        frequency: value as 'daily' | 'weekly' | 'monthly',
-                        interval: 1,
-                      }
-                    }))}
+                    onValueChange={(value) => updateNewAvailabilityPattern({
+                      frequency: value as 'daily' | 'weekly' | 'monthly'
+                    })}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
@@ -513,15 +383,8 @@ export function AvailabilityManager() {
                   <Input
                     type="date"
                     value={newAvailability.recurringPattern?.endDate || ''}
-                    onChange={(e) => setNewAvailability(prev => ({
-                      ...prev,
-                      recurringPattern: {
-                        ...prev.recurringPattern,
-                        frequency: prev.recurringPattern?.frequency || 'weekly',
-                        interval: 1,
-                        endDate: e.target.value || undefined,
-                      }
-                    }))}
+                    onChange={(e) => updateNewAvailabilityPattern({ endDate: e.target.value || undefined })}
+                    
                     className="mt-1"
                     min={newAvailability.date}
                   />
@@ -536,9 +399,9 @@ export function AvailabilityManager() {
             </Button>
             <Button 
               onClick={handleAddAvailability}
-              disabled={createAvailabilityMutation.isPending}
+              disabled={isCreating}
             >
-              {createAvailabilityMutation.isPending ? (
+              {isCreating ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                   Adding...
@@ -571,7 +434,7 @@ export function AvailabilityManager() {
                 <Input
                   type="date"
                   value={editingSlot.date}
-                  onChange={(e) => setEditingSlot(prev => prev ? ({ ...prev, date: e.target.value }) : null)}
+                  onChange={(e) => updateEditingSlot({ date: e.target.value })}
                   className="mt-1"
                 />
               </div>
@@ -581,7 +444,7 @@ export function AvailabilityManager() {
                   <Label>Start Time</Label>
                   <Select
                     value={editingSlot.startTime}
-                    onValueChange={(value) => setEditingSlot(prev => prev ? ({ ...prev, startTime: value }) : null)}
+                    onValueChange={(value) => updateEditingSlot({ startTime: value })}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
@@ -600,7 +463,7 @@ export function AvailabilityManager() {
                   <Label>End Time</Label>
                   <Select
                     value={editingSlot.endTime}
-                    onValueChange={(value) => setEditingSlot(prev => prev ? ({ ...prev, endTime: value }) : null)}
+                    onValueChange={(value) => updateEditingSlot({ endTime: value })}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
@@ -620,7 +483,7 @@ export function AvailabilityManager() {
                 <Label>Available</Label>
                 <Switch
                   checked={editingSlot.isAvailable}
-                  onCheckedChange={(checked) => setEditingSlot(prev => prev ? ({ ...prev, isAvailable: checked }) : null)}
+                  onCheckedChange={(checked) => updateEditingSlot({ isAvailable: checked })}
                 />
               </div>
             </div>
@@ -632,9 +495,9 @@ export function AvailabilityManager() {
             </Button>
             <Button 
               onClick={handleUpdateAvailability}
-              disabled={updateAvailabilityMutation.isPending}
+              disabled={isUpdating}
             >
-              {updateAvailabilityMutation.isPending ? (
+              {isUpdating ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                   Updating...

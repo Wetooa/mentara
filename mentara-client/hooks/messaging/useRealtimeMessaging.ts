@@ -99,7 +99,27 @@ export function useRealtimeMessaging(params: {
     refetch: refetchConversations,
   } = useQuery({
     queryKey: queryKeys.messaging.conversations,
-    queryFn: () => api.messaging.getConversations(),
+    queryFn: async () => {
+      console.log('🔄 [FRONTEND] useRealtimeMessaging - calling getConversations API');
+      console.log('👤 [USER CONTEXT]', { userId: user?.id, email: user?.email, role: user?.role });
+      console.log('🔑 [AUTH]', { hasAccessToken: !!accessToken });
+      
+      try {
+        const result = await api.messaging.getConversations();
+        console.log('✅ [FRONTEND] getConversations API response:', result);
+        console.log('📊 [CONVERSATION COUNT]', result?.length || 0);
+        console.log('📝 [CONVERSATION DETAILS]:', result?.map(conv => ({
+          id: conv.id,
+          type: conv.type,
+          title: conv.title,
+          participantCount: conv.participants?.length || 0
+        })));
+        return result;
+      } catch (error) {
+        console.error('❌ [FRONTEND] getConversations API error:', error);
+        throw error;
+      }
+    },
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 

@@ -164,67 +164,87 @@ export class MessagingService {
   }
 
   async getUserConversations(userId: string, page = 1, limit = 20) {
+    console.log('🔍 [MESSAGING SERVICE] getUserConversations called');
+    console.log('📊 [PARAMETERS]', { userId, page, limit });
+    
     const skip = (page - 1) * limit;
-
-    const conversations = await this.prisma.conversation.findMany({
-      where: {
-        participants: {
-          some: {
-            userId,
-            isActive: true,
+    
+    try {
+      console.log('🗃️ [DATABASE] Executing conversation query...');
+      const conversations = await this.prisma.conversation.findMany({
+        where: {
+          participants: {
+            some: {
+              userId,
+              isActive: true,
+            },
           },
+          isActive: true,
         },
-        isActive: true,
-      },
-      include: {
-        participants: {
-          where: { isActive: true },
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
-                role: true,
+        include: {
+          participants: {
+            where: { isActive: true },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                  role: true,
+                },
               },
             },
           },
-        },
-        messages: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
-          where: { isDeleted: false },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatarUrl: true,
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+            where: { isDeleted: false },
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
               },
             },
           },
-        },
-        _count: {
-          select: {
-            messages: {
-              where: {
-                isDeleted: false,
-                readReceipts: {
-                  none: { userId },
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  isDeleted: false,
+                  readReceipts: {
+                    none: { userId },
+                  },
                 },
               },
             },
           },
         },
-      },
-      orderBy: { lastMessageAt: 'desc' },
-      skip,
-      take: limit,
-    });
+        orderBy: { lastMessageAt: 'desc' },
+        skip,
+        take: limit,
+      });
 
-    return conversations;
+      console.log('✅ [DATABASE RESULT] Found conversations:', conversations.length);
+      console.log('📝 [CONVERSATION DETAILS]:');
+      conversations.forEach((conv, index) => {
+        console.log(`   ${index + 1}. ${conv.type} - "${conv.title || 'Untitled'}" (ID: ${conv.id})`);
+        console.log(`      Participants: ${conv.participants.length}, Messages: ${conv.messages.length}`);
+        if (conv.participants.length > 0) {
+          const otherParticipants = conv.participants.filter(p => p.userId !== userId);
+          console.log(`      Other participants: ${otherParticipants.map(p => `${p.user.firstName} ${p.user.lastName} (${p.user.role})`).join(', ')}`);
+        }
+      });
+
+      return conversations;
+    } catch (error) {
+      console.error('❌ [DATABASE ERROR] getUserConversations failed:', error);
+      throw error;
+    }
   }
 
   // Message Management

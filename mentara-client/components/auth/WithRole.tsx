@@ -1,6 +1,6 @@
 "use client";
 
-import { useRole } from "@/hooks/useRole";
+import { useRole } from "@/hooks/user/useRole";
 import { UserRole } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

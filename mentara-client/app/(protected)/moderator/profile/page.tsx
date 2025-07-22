@@ -156,7 +156,12 @@ export default function ModeratorProfilePage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    
+    return date.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -383,11 +388,11 @@ export default function ModeratorProfilePage() {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Member Since</span>
-                      <span className="font-medium">{formatDate(profile.joinedAt).split(',')[0]}</span>
+                      <span className="font-medium">{formatDate(profile.joinedAt)?.split(',')[0] || 'N/A'}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Last Active</span>
-                      <span className="font-medium">{formatDate(profile.lastActive).split(',')[1]}</span>
+                      <span className="font-medium">{formatDate(profile.lastActive)?.split(',')[1]?.trim() || 'N/A'}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Status</span>
@@ -488,7 +493,7 @@ export default function ModeratorProfilePage() {
                     <div className="border-t pt-3 space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Last Password Change</span>
-                        <span className="font-medium">{formatDate(profile.security.lastPasswordChange).split(',')[0]}</span>
+                        <span className="font-medium">{formatDate(profile.security.lastPasswordChange)?.split(',')[0] || 'N/A'}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Last Login</span>

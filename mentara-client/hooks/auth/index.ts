@@ -1,11 +1,17 @@
 // Main auth hook
 export { useAuth } from "../../contexts/AuthContext";
 
+// Login hook
+export { useLogin } from "./useLogin";
+
 // Registration and verification hooks
 export { useClientRegistration } from "./useClientRegistration";
 export type { ClientRegistrationData, UseClientRegistrationReturn } from "./useClientRegistration";
 
 export { useEmailVerification } from "./useEmailVerification";
+
+// Password reset hook
+export { usePasswordReset } from "./usePasswordReset";
 
 // Role-specific auth hooks
 export { useClientAuth } from "./client";

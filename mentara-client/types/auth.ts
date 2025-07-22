@@ -399,6 +399,16 @@ export interface ResendOtpDto {
   type: OtpType;
 }
 
+// Password Reset DTOs
+export interface RequestPasswordResetDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  password: string;
+}
+
 // OTP Types
 export type OtpType = 'email_verification' | 'password_reset' | 'login';
 

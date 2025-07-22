@@ -3,7 +3,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { SEED_CONFIG } from './config';
+import { SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
 
 // Simple notification types that exist in the schema
 const NOTIFICATION_TYPES = [
@@ -24,12 +24,14 @@ export async function seedNotifications(
   relationships: any[],
   meetings: any[],
   worksheets: any[],
-  messages: any[]
+  messages: any[],
+  mode: 'simple' | 'comprehensive' = 'comprehensive'
 ) {
   console.log('🔔 Creating basic notifications...');
 
+  const config = mode === 'simple' ? SIMPLE_SEED_CONFIG : SEED_CONFIG;
   const notifications: any[] = [];
-  const notificationCount = users.length * SEED_CONFIG.NOTIFICATIONS.NOTIFICATIONS_PER_USER;
+  const notificationCount = users.length * config.NOTIFICATIONS.NOTIFICATIONS_PER_USER;
 
   for (const user of users) {
     const userNotificationCount = faker.number.int({ min: 1, max: 3 });
@@ -37,7 +39,7 @@ export async function seedNotifications(
     for (let i = 0; i < userNotificationCount; i++) {
       const type = faker.helpers.arrayElement(NOTIFICATION_TYPES);
       const priority = faker.helpers.arrayElement(NOTIFICATION_PRIORITIES);
-      const isRead = faker.datatype.boolean({ probability: SEED_CONFIG.NOTIFICATIONS.READ_RATE });
+      const isRead = faker.datatype.boolean({ probability: config.NOTIFICATIONS.READ_RATE });
       
       // Generate context-appropriate title and message
       const { title, message } = generateNotificationContent(type, user);

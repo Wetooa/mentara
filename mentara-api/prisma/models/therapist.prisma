@@ -1,104 +1,72 @@
-enum TherapistApplicationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 model Therapist {
-  // User relation
-  userId String @id @unique
-  user   User   @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
-
-  // Contact information
-  mobile   String
-  province String
-  timezone String @default("UTC") // Therapist's timezone for availability calculations
-
-  // Application status
-  status         TherapistApplicationStatus @default(PENDING)
-  submissionDate DateTime                   @default(now())
-  processingDate DateTime                   @default(now())
-
-  processedByAdminId String?
-  processedByAdmin   Admin?  @relation(fields: [processedByAdminId], references: [userId])
-
-  // Professional credentials
-  providerType            String
-  professionalLicenseType String
-  isPRCLicensed           String
-  prcLicenseNumber        String
-  expirationDateOfLicense DateTime
-  practiceStartDate       DateTime
-
-  // License verification
-  licenseVerified   Boolean   @default(false)
-  licenseVerifiedAt DateTime?
-  licenseVerifiedBy String? // Admin who verified
-
-  // Additional certifications
-  certifications Json? // Array of certification objects
-
-  // Document uploads (replaces FileAttachment polymorphic system)
-  certificateUrls  String[] @default([])
-  certificateNames String[] @default([])
-  licenseUrls      String[] @default([])
-  licenseNames     String[] @default([])
-  documentUrls     String[] @default([]) // For resumes, transcripts, etc.
-  documentNames    String[] @default([])
-
-  // Professional background
-  yearsOfExperience     Int?
-  educationBackground   String?  @db.Text
-  specialCertifications String[]
-
-  // Practice details
-  practiceLocation       String?
-  acceptsInsurance       Boolean  @default(false)
-  acceptedInsuranceTypes String[]
-
-  // Professional expertise
-  areasOfExpertise              String[] // @db.JsonB
-  assessmentTools               String[] // @db.JsonB
-  therapeuticApproachesUsedList String[] // @db.JsonB
-  languagesOffered              String[] // @db.JsonB
-
-  // Online therapy preferences
-  providedOnlineTherapyBefore       Boolean
-  comfortableUsingVideoConferencing Boolean
-  preferredSessionLength            Int[] // @db.JsonB
-
-  // Compliance and guidelines
+  userId                             String                     @id @unique
+  mobile                             String
+  province                           String
+  timezone                           String                     @default("UTC")
+  status                             TherapistApplicationStatus @default(PENDING)
+  submissionDate                     DateTime                   @default(now())
+  processingDate                     DateTime                   @default(now())
+  processedByAdminId                 String?
+  providerType                       String
+  professionalLicenseType            String
+  isPRCLicensed                      String
+  prcLicenseNumber                   String
+  expirationDateOfLicense            DateTime
+  practiceStartDate                  DateTime
+  licenseVerified                    Boolean                    @default(false)
+  licenseVerifiedAt                  DateTime?
+  licenseVerifiedBy                  String?
+  certifications                     Json?
+  certificateUrls                    String[]                   @default([])
+  certificateNames                   String[]                   @default([])
+  licenseUrls                        String[]                   @default([])
+  licenseNames                       String[]                   @default([])
+  documentUrls                       String[]                   @default([])
+  documentNames                      String[]                   @default([])
+  yearsOfExperience                  Int?
+  educationBackground                String?
+  specialCertifications              String[]
+  practiceLocation                   String?
+  acceptsInsurance                   Boolean                    @default(false)
+  acceptedInsuranceTypes             String[]
+  areasOfExpertise                   String[]
+  assessmentTools                    String[]
+  therapeuticApproachesUsedList      String[]
+  languagesOffered                   String[]
+  providedOnlineTherapyBefore        Boolean
+  comfortableUsingVideoConferencing  Boolean
+  preferredSessionLength             Int[]
   privateConfidentialSpace           String?
   compliesWithDataPrivacyAct         Boolean
   professionalLiabilityInsurance     String?
   complaintsOrDisciplinaryActions    String?
   willingToAbideByPlatformGuidelines Boolean
-
-  // Specializations and approaches
-  expertise              String[] // @db.JsonB
-  approaches             String[] // @db.JsonB
-  languages              String[] // @db.JsonB
-  illnessSpecializations String[] // @db.JsonB
-  acceptTypes            String[] // @db.JsonB
-  treatmentSuccessRates  Json // Record<string, number>
-
-  // Session details
-  sessionLength String // Duration description like '60 minutes'
-  hourlyRate    Decimal @db.Decimal(10, 2)
-
-  // Relations
-  meetings                Meeting[]               @relation("TherapistMeetings")
-  therapistAvailabilities TherapistAvailability[]
-  worksheets              Worksheet[]
-  assignedClients         ClientTherapist[]
-  reviews                 Review[]
-  paymentsAsTherapist     Payment[] // Payments received by this therapist
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  expertise                          String[]
+  approaches                         String[]
+  languages                          String[]
+  illnessSpecializations             String[]
+  acceptTypes                        String[]
+  treatmentSuccessRates              Json
+  sessionLength                      String
+  hourlyRate                         Decimal                    @db.Decimal(10, 2)
+  createdAt                          DateTime                   @default(now())
+  updatedAt                          DateTime                   @updatedAt
+  assignedClients                    ClientTherapist[]
+  meetings                           Meeting[]                  @relation("TherapistMeetings")
+  paymentsAsTherapist                Payment[]
+  reviews                            Review[]
+  processedByAdmin                   Admin?                     @relation(fields: [processedByAdminId], references: [userId])
+  user                               User                       @relation("UserTherapist", fields: [userId], references: [id], onDelete: Cascade)
+  therapistAvailabilities            TherapistAvailability[]
+  worksheets                         Worksheet[]
 
   @@index([userId])
   @@index([status])
   @@index([timezone])
+}
+
+enum TherapistApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

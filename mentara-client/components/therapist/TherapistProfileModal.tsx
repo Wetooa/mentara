@@ -25,7 +25,7 @@ import {
 import { TherapistCardData } from "@/types/therapist";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useFavorites } from "@/hooks/useFavorites";
+import { useFavorites } from "@/hooks/user/useFavorites";
 import { toast } from "sonner";
 import ReviewSection from "@/components/reviews/ReviewSection";
 import { ReviewForm } from "@/components/reviews/ReviewForm";

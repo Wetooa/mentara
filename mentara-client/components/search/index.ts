@@ -11,6 +11,7 @@ export type { RecentSearch } from './hooks/useRecentSearches';
 // New omnisearch components
 export { OmniSearchBar } from './OmniSearchBar';
 export { OmniSearchResults } from './OmniSearchResults';
+export { TabbedSearchResults } from './TabbedSearchResults';
 export { 
   useOmniSearch, 
   useSearchSuggestions, 
@@ -21,3 +22,4 @@ export {
 } from './hooks/useOmniSearch';
 export type { EntityType, OmniSearchFilters } from './OmniSearchBar';
 export type { SearchResult, OmniSearchResultsData } from './OmniSearchResults';
+export type { TabbedSearchResultsData } from './TabbedSearchResults';

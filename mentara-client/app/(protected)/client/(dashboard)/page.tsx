@@ -4,14 +4,14 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   useDashboardData,
-  useNotifications,
   useRecentCommunications,
 } from "@/hooks/dashboard/useClientDashboard";
+import { useNotifications } from "@/hooks/notifications/useNotifications";
 import {
   transformDashboardData,
   createFallbackDashboardData,
 } from "@/lib/transformers/dashboardTransformer";
-import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import type { UserDashboardData } from "@/types/api/dashboard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsOverview from "@/components/dashboard/StatsOverview";
 import UpcomingSessions from "@/components/dashboard/UpcomingSessions";
@@ -49,11 +49,27 @@ export default function DashboardPage() {
       return null;
     }
 
-    return transformDashboardData(
-      dashboardApiData,
-      Array.isArray(notificationsData) ? notificationsData : [],
-      Array.isArray(communicationsData) ? communicationsData : []
-    );
+    // DEBUG: Log raw API data to trace dateString.split error
+    console.log('🔍 Dashboard API Data:', {
+      dashboardApiData: JSON.stringify(dashboardApiData, null, 2),
+      notificationsData: JSON.stringify(notificationsData, null, 2),
+      communicationsData: JSON.stringify(communicationsData, null, 2),
+    });
+
+    try {
+      const transformedData = transformDashboardData(
+        dashboardApiData,
+        Array.isArray(notificationsData) ? notificationsData : [],
+        Array.isArray(communicationsData) ? communicationsData : []
+      );
+      
+      console.log('✅ Dashboard data transformed successfully:', transformedData);
+      return transformedData;
+    } catch (error) {
+      console.error('❌ Error transforming dashboard data:', error);
+      console.error('❌ Error stack:', error.stack);
+      throw error; // Re-throw to trigger error boundary
+    }
   }, [dashboardApiData, notificationsData, communicationsData]);
 
   const isLoading =

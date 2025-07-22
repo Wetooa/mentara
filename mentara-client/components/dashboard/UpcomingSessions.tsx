@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import type { UserDashboardData } from "@/types/api/dashboard";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, isToday, addMinutes } from "date-fns";
@@ -70,9 +70,14 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
   // };
 
   // Check if there are any sessions scheduled for today
-  const todaySessions = sessions.filter((session) =>
-    isToday(parseISO(session.dateTime))
-  );
+  const todaySessions = sessions.filter((session) => {
+    if (!session.dateTime) return false;
+    try {
+      return isToday(parseISO(session.dateTime));
+    } catch {
+      return false;
+    }
+  });
 
   return (
     <motion.div
@@ -134,7 +139,14 @@ export default function UpcomingSessions({ sessions }: UpcomingSessionsProps) {
                 </h3>
                 <div className="space-y-4">
                   {sessions
-                    .filter((session) => !isToday(parseISO(session.dateTime)))
+                    .filter((session) => {
+                      if (!session.dateTime) return false;
+                      try {
+                        return !isToday(parseISO(session.dateTime));
+                      } catch {
+                        return false;
+                      }
+                    })
                     .map((session, index) => (
                       <SessionCard 
                         key={session.id} 
@@ -160,8 +172,24 @@ function SessionCard({
   session: UserDashboardData["upcomingSessions"][0];
   index?: number;
 }) {
+  if (!session.dateTime) {
+    return (
+      <div className="p-4 rounded-lg border bg-red-50 border-red-200">
+        <p className="text-red-600">Invalid session data</p>
+      </div>
+    );
+  }
+  
   const dateTime = parseISO(session.dateTime);
-  const endTime = addMinutes(dateTime, session.duration);
+  if (isNaN(dateTime.getTime())) {
+    return (
+      <div className="p-4 rounded-lg border bg-red-50 border-red-200">
+        <p className="text-red-600">Invalid session date</p>
+      </div>
+    );
+  }
+  
+  const endTime = addMinutes(dateTime, session.duration || 60);
   const sessionTime = `${format(dateTime, "h:mm a")} - ${format(endTime, "h:mm a")}`;
   const sessionDate = isToday(dateTime)
     ? "Today"
@@ -169,9 +197,11 @@ function SessionCard({
 
   // Get initials for avatar fallback
   const initials = session.therapistName
-    .split(" ")
-    .map((name) => name.charAt(0))
-    .join("");
+    ? session.therapistName
+        .split(" ")
+        .map((name) => name.charAt(0))
+        .join("")
+    : "??";
 
   // Check if session is happening now
   const now = new Date();

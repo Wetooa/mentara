@@ -1,10 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/lib/api';
-
-import { toast } from 'sonner';
+import React from 'react';
+import { useCommunityDashboard } from '@/hooks/community/useCommunityDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,86 +57,35 @@ interface RecentActivity {
   postId?: string;
 }
 
-// interface CommunityStats {
-//   totalCommunities: number;
-//   joinedCommunities: number;
-//   totalPosts: number;
-//   totalComments: number;
-//   weeklyActivity: number;
-// }
-
 export function CommunityDashboard() {
-  const api = useApi();
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'overview' | 'discover' | 'activity'>('overview');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-
-  // Fetch user's communities
-  const { data: userCommunities, isLoading: communitiesLoading } = useQuery({
-    queryKey: ['communities', 'joined'],
-    queryFn: () => api.communities.getJoined(),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Fetch recommended communities
-  const { data: recommendedCommunities, isLoading: recommendedLoading } = useQuery({
-    queryKey: ['communities', 'recommended'],
-    queryFn: () => api.communities.getRecommended(),
-    staleTime: 10 * 60 * 1000,
-  });
-
-  // Fetch recent activity
-  const { data: recentActivity, isLoading: activityLoading } = useQuery({
-    queryKey: ['communities', 'activity'],
-    queryFn: () => api.communities.getRecentActivity(),
-    refetchInterval: 30 * 1000, // Refresh every 30 seconds
-    staleTime: 30 * 1000,
-  });
-
-  // Fetch community stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['communities', 'stats', 'general'],
-    queryFn: () => api.communities.getStats(),
-    staleTime: 15 * 60 * 1000, // 15 minutes - stats don't change frequently
-  });
-
-  const handleJoinCommunity = async (communityId: string) => {
-    try {
-      await api.communities.join(communityId);
-      toast.success('Successfully joined community!');
-      // Refresh communities data
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
-    } catch {
-      toast.error('Failed to join community. Please try again.');
-    }
-  };
-
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'post': return <MessageCircle className="h-4 w-4" />;
-      case 'comment': return <MessageCircle className="h-4 w-4" />;
-      case 'join': return <UserPlus className="h-4 w-4" />;
-      case 'like': return <Star className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4" />;
-    }
-  };
-
-  const getActivityText = (activity: RecentActivity) => {
-    switch (activity.type) {
-      case 'post':
-        return `posted in ${activity.community.name}`;
-      case 'comment':
-        return `commented in ${activity.community.name}`;
-      case 'join':
-        return `joined ${activity.community.name}`;
-      case 'like':
-        return `liked a post in ${activity.community.name}`;
-      default:
-        return `activity in ${activity.community.name}`;
-    }
-  };
+  const {
+    // State
+    activeTab,
+    setActiveTab,
+    searchQuery,
+    setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+    
+    // Data
+    userCommunities,
+    recommendedCommunities,
+    recentActivity,
+    stats,
+    
+    // Loading states
+    communitiesLoading,
+    recommendedLoading,
+    activityLoading,
+    statsLoading,
+    
+    // Actions
+    joinCommunity,
+    
+    // Utilities
+    getActivityIcon,
+    getActivityText,
+  } = useCommunityDashboard();
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -324,7 +270,7 @@ export function CommunityDashboard() {
                         <Button 
                           size="sm" 
                           className="w-full"
-                          onClick={() => handleJoinCommunity(community.id)}
+                          onClick={() => joinCommunity(community.id)}
                         >
                           <UserPlus className="h-4 w-4 mr-1" />
                           Join Community

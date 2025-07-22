@@ -2,15 +2,21 @@
 // Handles creation of all user types: clients, therapists, admins, moderators
 
 import { PrismaClient } from '@prisma/client';
-import { TEST_ACCOUNTS, SEED_CONFIG } from './config';
+import { v4 as uuidv4 } from 'uuid';
+import { TEST_ACCOUNTS, SEED_CONFIG, SIMPLE_SEED_CONFIG } from './config';
 import { SeedDataGenerator } from './data-generator';
 
-export async function seedUsers(prisma: PrismaClient) {
-  console.log('👥 Creating users...');
+export async function seedUsers(prisma: PrismaClient, mode: 'simple' | 'comprehensive' = 'comprehensive') {
+  console.log(`👥 Creating users (${mode} mode)...`);
 
   const users: any[] = [];
   const clients: any[] = [];
   const therapists: any[] = [];
+
+  // Simple mode: Create minimal development users
+  if (mode === 'simple') {
+    return await createSimpleUsers(prisma);
+  }
 
   // Create test accounts first with defined IDs for testing
   console.log('🧪 Creating test accounts...');
@@ -158,5 +164,160 @@ export async function seedUsers(prisma: PrismaClient) {
     );
   }
 
-  return { users, clients, therapists };
+  // Extract moderators and admins from users array
+  const moderators = users.filter(user => user.role === 'moderator');
+  const admins = users.filter(user => user.role === 'admin');
+  
+  return { users, clients, therapists, moderators, admins };
+}
+
+// Simple user creation for development
+async function createSimpleUsers(prisma: PrismaClient) {
+  const users: any[] = [];
+  const clients: any[] = [];
+  const therapists: any[] = [];
+  const admins: any[] = [];
+  const moderators: any[] = [];
+
+  // Create 3 Clients
+  console.log('🔹 Development Client Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.CLIENTS; i++) {
+    const clientId = uuidv4();
+    const clientUser = await prisma.user.create({
+      data: {
+        id: clientId,
+        email: `client${i}@mentaratest.dev`,
+        firstName: `Client`,
+        lastName: `${i}`,
+        role: 'client',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    console.log(`  Client ${i}: ${clientId} (${clientUser.email})`);
+    
+    const client = await prisma.client.create({
+      data: {
+        userId: clientUser.id,
+        hasSeenTherapistRecommendations: false,
+      },
+    });
+    
+    users.push(clientUser);
+    clients.push({ user: clientUser, client });
+  }
+
+  // Create 3 Therapists
+  console.log('🔹 Development Therapist Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.THERAPISTS; i++) {
+    const therapistId = uuidv4();
+    const therapistUser = await prisma.user.create({
+      data: {
+        id: therapistId,
+        email: `therapist${i}@mentaratest.dev`,
+        firstName: `Dr. Therapist`,
+        lastName: `${i}`,
+        role: 'therapist',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    console.log(`  Therapist ${i}: ${therapistId} (${therapistUser.email})`);
+    
+    const therapist = await prisma.therapist.create({
+      data: {
+        userId: therapistUser.id,
+        mobile: `+1555000${i}${i}${i}${i}`,
+        province: 'Test Province',
+        timezone: 'UTC',
+        status: 'APPROVED',
+        providerType: 'Licensed Psychologist',
+        professionalLicenseType: 'Clinical Psychology',
+        isPRCLicensed: 'Yes',
+        prcLicenseNumber: `PRC${i}${i}${i}${i}${i}`,
+        expirationDateOfLicense: new Date('2025-12-31'),
+        practiceStartDate: new Date('2020-01-01'),
+        providedOnlineTherapyBefore: true,
+        comfortableUsingVideoConferencing: true,
+        preferredSessionLength: [60],
+        compliesWithDataPrivacyAct: true,
+        willingToAbideByPlatformGuidelines: true,
+        sessionLength: '60 minutes',
+        hourlyRate: 100.00,
+        expertise: ['General Therapy'],
+        approaches: ['CBT'],
+        languages: ['English'],
+        illnessSpecializations: ['Anxiety', 'Depression'],
+        acceptTypes: ['Individual'],
+        treatmentSuccessRates: {},
+      },
+    });
+    
+    users.push(therapistUser);
+    therapists.push({ user: therapistUser, therapist });
+  }
+
+  // Create 3 Admins
+  console.log('🔹 Development Admin Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.ADMINS; i++) {
+    const adminId = uuidv4();
+    const adminUser = await prisma.user.create({
+      data: {
+        id: adminId,
+        email: `admin${i}@mentaratest.dev`,
+        firstName: `Admin`,
+        lastName: `${i}`,
+        role: 'admin',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    console.log(`  Admin ${i}: ${adminId} (${adminUser.email})`);
+    
+    await prisma.admin.create({
+      data: {
+        userId: adminUser.id,
+        permissions: ['user_management', 'therapist_approval', 'system_admin'],
+        adminLevel: 'admin',
+      },
+    });
+    
+    users.push(adminUser);
+    admins.push(adminUser);
+  }
+
+  // Create 3 Moderators
+  console.log('🔹 Development Moderator Accounts:');
+  for (let i = 1; i <= SIMPLE_SEED_CONFIG.USERS.MODERATORS; i++) {
+    const moderatorId = uuidv4();
+    const moderatorUser = await prisma.user.create({
+      data: {
+        id: moderatorId,
+        email: `moderator${i}@mentaratest.dev`,
+        firstName: `Moderator`,
+        lastName: `${i}`,
+        role: 'moderator',
+        isActive: true,
+        emailVerified: true,
+        password: await require('bcrypt').hash('password123', 10),
+      },
+    });
+    console.log(`  Moderator ${i}: ${moderatorId} (${moderatorUser.email})`);
+    
+    await prisma.moderator.create({
+      data: {
+        userId: moderatorUser.id,
+        permissions: ['content_moderation', 'community_management'],
+        assignedCommunities: {},
+      },
+    });
+    
+    users.push(moderatorUser);
+    moderators.push(moderatorUser);
+  }
+
+  return { users, clients, therapists, moderators, admins };
 }

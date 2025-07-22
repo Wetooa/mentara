@@ -331,3 +331,46 @@ export async function seedMemberships(
 
   return memberships;
 }
+
+export async function seedModeratorCommunityAssignments(
+  prisma: PrismaClient,
+  moderators: any[],
+  communities: any[]
+) {
+  console.log('👮 Creating moderator-community assignments...');
+
+  const assignments: any[] = [];
+
+  for (const moderator of moderators) {
+    // Each moderator gets assigned to 3-5 communities
+    const assignmentCount = faker.number.int({ min: 3, max: 5 });
+    const assignedCommunities = faker.helpers.arrayElements(
+      communities,
+      Math.min(assignmentCount, communities.length)
+    );
+
+    for (const community of assignedCommunities) {
+      try {
+        const assignment = await prisma.moderatorCommunity.create({
+          data: {
+            moderatorId: moderator.id,
+            communityId: community.id,
+            assignedAt: faker.date.past({ years: 1 }),
+          },
+        });
+        assignments.push(assignment);
+        console.log(
+          `✅ Assigned moderator ${moderator.firstName} to ${community.name}`
+        );
+      } catch (error) {
+        // Skip if assignment already exists
+        console.log(
+          `⏭️  Assignment already exists: ${moderator.firstName} -> ${community.name}`
+        );
+      }
+    }
+  }
+
+  console.log(`✅ Created ${assignments.length} moderator assignments`);
+  return assignments;
+}

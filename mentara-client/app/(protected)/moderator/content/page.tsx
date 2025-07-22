@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ModerationQueue } from "@/components/moderator";
-import { useModeratorContentQueue } from "@/hooks/useModeratorContentQueue";
+import { useModeratorContentQueue } from "@/hooks/moderator/useModeratorContentQueue";
 import { useModeratorContentStore, useModeratorUIStore } from "@/store/moderator";
 import type { Post, Comment } from "@/types/api";
 

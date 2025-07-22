@@ -169,7 +169,6 @@ export function useRealTimeMessages({
     if (conversationId && enableReadReceipts) {
       // TODO: Implement read receipts via WebSocket
       // This would require adding a markMessageAsRead method to the WebSocket service
-      console.log('Mark message as read:', messageId);
     }
   }, [conversationId, enableReadReceipts]);
 

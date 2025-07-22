@@ -11,7 +11,7 @@ export default function Logo() {
         src={"/icons/mentara/mentara-icon.png"}
         alt={"Mentara Icon"}
       />
-      <h1 className="font-[Kollektif] font-bold text-3xl leading-none -mt-1 text-primary ">
+      <h1 className="font-[Kollektif] font-bold text-3xl leading-none -mt-1 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         mentara
       </h1>
     </Link>

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar, FileCheck, FileClock, Users, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import type { UserDashboardData } from "@/lib/api/types/dashboard";
+import type { UserDashboardData } from "@/types/api/dashboard";
 
 interface StatsOverviewProps {
   stats: UserDashboardData["stats"];
