@@ -180,7 +180,14 @@ export class BookingService {
         }),
       );
 
-      return meeting;
+      // Transform the response to match frontend expectations
+      return {
+        ...meeting,
+        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
+        therapistName: meeting.therapist?.user 
+          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
     }, {
       isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
       timeout: 10000, // 10 second timeout
@@ -193,7 +200,7 @@ export class BookingService {
       const where =
         role === 'therapist' ? { therapistId: userId } : { clientId: userId };
 
-      return await this.prisma.meeting.findMany({
+      const meetings = await this.prisma.meeting.findMany({
         where,
         include: {
           client: {
@@ -221,6 +228,15 @@ export class BookingService {
         },
         orderBy: { startTime: 'desc' },
       });
+
+      // Transform the response to match frontend expectations
+      return meetings.map(meeting => ({
+        ...meeting,
+        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
+        therapistName: meeting.therapist?.user 
+          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      }));
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
@@ -270,7 +286,14 @@ export class BookingService {
         throw new ForbiddenException('Access denied');
       }
 
-      return meeting;
+      // Transform the response to match frontend expectations
+      return {
+        ...meeting,
+        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
+        therapistName: meeting.therapist?.user 
+          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
+          : 'Unknown Therapist',
+      };
     } catch (error) {
       throw new BadRequestException(
         error instanceof Error ? error.message : String(error),
