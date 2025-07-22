@@ -4,71 +4,60 @@
  */
 
 import { apiClient, createApiClient } from "./client";
-import { createAuthService, type AuthService } from "./auth";
 import {
-  createDashboardService,
-  type DashboardService,
-} from "./services/dashboard";
-import {
-  createTherapistService,
-  type TherapistService,
-} from "./services/therapists";
-import {
-  createCommunityService,
-  type CommunityService,
-} from "./services/communities";
-import {
-  createMeetingsService,
-  type MeetingsService,
-} from "./services/meetings";
+  createAdminService,
+  type AdminService,
+} from "./services/admin";
+import { createAuthService, type AuthService } from "./services/auth";
 import {
   createBookingService,
   type BookingService,
 } from "./services/booking";
 import {
-  createNotificationService,
-  type NotificationService,
-} from "./services/notifications";
+  createCommunityService,
+  type CommunityService,
+} from "./services/communities";
 import {
-  createSearchService,
-  type SearchService,
-} from "./services/search";
-import {
-  createMessagingService,
-  type MessagingService,
-} from "./services/messaging";
+  createDashboardService,
+  type DashboardService,
+} from "./services/dashboard";
 import {
   createFilesService,
   type FilesService,
 } from "./services/files";
 import {
-  createAdminService,
-  type AdminService,
-} from "./services/admin";
+  createMeetingsService,
+  type MeetingsService,
+} from "./services/meetings";
+import {
+  createMessagingService,
+  type MessagingService,
+} from "./services/messaging";
+import {
+  createNotificationService,
+  type NotificationService,
+} from "./services/notifications";
 import {
   createProfileService,
   type PublicProfileResponse,
   type UpdateProfileRequest,
   type UpdateProfileResponse,
 } from "./services/profile";
-export type { ApiResponse, ApiError } from "./types";
+import {
+  createSearchService,
+  type SearchService,
+} from "./services/search";
+import {
+  createTherapistService,
+  type TherapistService,
+} from "./services/therapists";
+export type { ApiError, ApiResponse } from "./types";
 
 // Export client utilities
 export { apiClient, createApiClient };
 
 // Export service creators
-export { createAuthService, type AuthService };
-export { createDashboardService, type DashboardService };
-export { createTherapistService, type TherapistService };
-export { createCommunityService, type CommunityService };
-export { createMeetingsService, type MeetingsService };
-export { createBookingService, type BookingService };
-export { createNotificationService, type NotificationService };
-export { createSearchService, type SearchService };
-export { createMessagingService, type MessagingService };
-export { createFilesService, type FilesService };
-export { createAdminService, type AdminService };
-export { createProfileService, type PublicProfileResponse, type UpdateProfileRequest, type UpdateProfileResponse };
+export { createAdminService, createAuthService, createBookingService, createCommunityService, createDashboardService, createFilesService, createMeetingsService, createMessagingService, createNotificationService, createProfileService, createSearchService, createTherapistService, type AdminService, type AuthService, type BookingService, type CommunityService, type DashboardService, type FilesService, type MeetingsService, type MessagingService, type NotificationService, type PublicProfileResponse, type SearchService, type TherapistService, type UpdateProfileRequest, type UpdateProfileResponse };
 
 // Create service instances
 const authService = createAuthService(apiClient);
@@ -122,19 +111,5 @@ export function createAuthServiceInstance() {
 
 // Re-export commonly used types from local type definitions
 export type {
-  LoginDto,
-  RegisterClientDto,
-  RegisterAdminDto,
-  RegisterModeratorDto,
-  VerifyOtpDto,
-  SendOtpDto,
-  ResendOtpDto,
-  ClientAuthResponse,
-  AdminAuthResponse,
-  TherapistAuthResponse,
-  EmailResponse,
-  SuccessMessageResponse,
-  ClientUser,
-  ApiResponse,
-  ApiError,
+  AdminAuthResponse, ApiError, ApiResponse, ClientAuthResponse, ClientUser, EmailResponse, LoginDto, RegisterAdminDto, RegisterClientDto, RegisterModeratorDto, ResendOtpDto, SendOtpDto, SuccessMessageResponse, TherapistAuthResponse, VerifyOtpDto
 } from "./types";

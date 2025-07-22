@@ -158,7 +158,8 @@
       "Bash(timeout 15 npm run dev)",
       "Bash(pkill:*)",
       "Bash(tail:*)",
-      "mcp__zen__chat"
+      "mcp__zen__chat",
+      "Bash(ss:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

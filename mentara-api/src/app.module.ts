@@ -131,6 +131,5 @@ import { JwtService } from '@nestjs/jwt';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
-    // Removed custom RateLimitMiddleware - using ThrottlerModule instead for better performance and less redundancy
   }
 }

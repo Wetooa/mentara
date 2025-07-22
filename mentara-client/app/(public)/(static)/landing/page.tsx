@@ -20,6 +20,12 @@ import {
   Zap,
   BookOpen,
   TrendingUp,
+  Lock,
+  Verified,
+  Eye,
+  FileCheck,
+  UserCheck,
+  Globe,
 } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 
@@ -149,6 +155,33 @@ const testimonials = [
     content: "The support groups and resources have been invaluable. I finally feel understood and supported in my mental health journey.",
     rating: 5,
     avatar: "/api/placeholder/40/40",
+  },
+];
+
+const trustElements = [
+  {
+    icon: Lock,
+    title: "End-to-End Encryption",
+    description: "All conversations and data are protected with bank-level encryption.",
+    badge: "256-bit SSL",
+  },
+  {
+    icon: Verified,
+    title: "Licensed Professionals", 
+    description: "Every therapist is vetted, licensed, and continuously monitored.",
+    badge: "100% Verified",
+  },
+  {
+    icon: Eye,
+    title: "Complete Privacy",
+    description: "Your information is never shared. You control your data.",
+    badge: "HIPAA Compliant",
+  },
+  {
+    icon: FileCheck,
+    title: "Regulatory Compliance",
+    description: "Fully compliant with healthcare data protection regulations.",
+    badge: "Certified",
   },
 ];
 
@@ -492,6 +525,112 @@ export default function LandingPage() {
                 </Card>
               </motion.div>
             ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Trust & Security Section */}
+      <section className="py-24 bg-gradient-to-br from-background to-community-calm/5 relative overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-grid-black/[0.01] bg-[size:60px_60px]" />
+        <div className="absolute top-40 left-40 w-80 h-80 bg-community-soothing/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-20 w-64 h-64 bg-community-warm/10 rounded-full blur-2xl" />
+        
+        <div className="container px-4 mx-auto relative z-10">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+            className="text-center mb-16"
+          >
+            <motion.div variants={itemVariants}>
+              <Badge variant="secondary" className="mb-4 bg-community-accent/10 text-community-accent border-community-accent/20">
+                <Lock className="w-4 h-4 mr-2" />
+                Security & Trust
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-secondary mb-6">
+                Your Safety is Our Priority
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                We implement the highest standards of security and privacy to protect your mental health journey.
+              </p>
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16"
+          >
+            {trustElements.map((element, index) => (
+              <motion.div key={index} variants={itemVariants}>
+                <Card className="h-full border-border/30 hover:border-community-accent/30 transition-all duration-500 hover:shadow-xl group relative overflow-hidden">
+                  {/* Enhanced glassmorphism background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/95 to-white/85 dark:from-gray-900/95 dark:to-gray-900/85" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-community-accent/5 to-community-calm/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <CardContent className="p-6 text-center relative z-10">
+                    <motion.div 
+                      className="w-16 h-16 bg-gradient-to-br from-community-accent/20 to-community-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-all duration-300"
+                      whileHover={{ rotate: 5 }}
+                    >
+                      <element.icon className="w-8 h-8 text-community-accent" />
+                    </motion.div>
+                    
+                    <h3 className="text-lg font-semibold text-secondary mb-2 group-hover:text-community-accent transition-colors duration-300">
+                      {element.title}
+                    </h3>
+                    
+                    <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                      {element.description}
+                    </p>
+                    
+                    <Badge 
+                      variant="outline" 
+                      className="border-community-accent/30 text-community-accent bg-community-accent/5 group-hover:bg-community-accent/10 transition-colors duration-300"
+                    >
+                      {element.badge}
+                    </Badge>
+                  </CardContent>
+                  
+                  {/* Hover glow effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-community-accent/5 to-transparent" />
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Additional trust indicators */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+            className="text-center"
+          >
+            <motion.div variants={itemVariants}>
+              <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-community-accent" />
+                  <span className="text-sm font-medium text-muted-foreground">Global Standards</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-community-accent" />
+                  <span className="text-sm font-medium text-muted-foreground">Licensed Providers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-community-accent" />
+                  <span className="text-sm font-medium text-muted-foreground">Compliance Certified</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Verified className="w-5 h-5 text-community-accent" />
+                  <span className="text-sm font-medium text-muted-foreground">Verified Platform</span>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

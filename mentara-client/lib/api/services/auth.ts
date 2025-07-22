@@ -1,21 +1,20 @@
+import { AuthResponse } from "@/types/api/auth-extensions";
 import { AxiosInstance } from "axios";
 import {
-  LoginDto,
-  RegisterClientDto,
-  RegisterAdminDto,
-  RegisterModeratorDto,
-  VerifyOtpDto,
-  SendOtpDto,
-  ResendOtpDto,
-  RequestPasswordResetDto,
-  ResetPasswordDto,
-  ClientAuthResponse,
   AdminAuthResponse,
-  TherapistAuthResponse,
+  ClientAuthResponse,
   EmailResponse,
+  LoginDto,
+  RegisterAdminDto,
+  RegisterClientDto,
+  RegisterModeratorDto,
+  RequestPasswordResetDto,
+  ResendOtpDto,
+  ResetPasswordDto,
   SuccessMessageResponse,
+  TherapistAuthResponse,
+  VerifyOtpDto
 } from "./types";
-import { AuthResponse } from "@/types/api/auth-extensions";
 
 /**
  * Unified Authentication Service
