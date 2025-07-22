@@ -362,7 +362,6 @@ async function seedUserBlocks(prisma: PrismaClient, users: any[]) {
               'Personal conflict',
               'Violation of community guidelines'
             ]),
-            createdAt: faker.date.past({ years: 1 }),
           },
         });
         blocks.push(block);
