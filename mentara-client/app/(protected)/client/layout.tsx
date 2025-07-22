@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getProfileUrl } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { UserSearchBar, User } from "@/components/search";
 import { DashboardNotificationMetadata } from "@/components/metadata/NotificationMetadata";
@@ -17,7 +18,7 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleUserSelect = (user: User) => {
@@ -27,6 +28,13 @@ export default function MainLayout({
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleAvatarClick = () => {
+    if (user) {
+      const profileUrl = getProfileUrl(user.role, user.id);
+      router.push(profileUrl);
+    }
   };
 
   const navItems = [
@@ -247,11 +255,15 @@ export default function MainLayout({
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex flex-col items-end">
                   <span className="text-sm font-medium text-foreground">
-                    John Doe
+                    {user ? `${user.firstName} ${user.lastName}` : "User"}
                   </span>
-                  <span className="text-xs text-muted-foreground">Client</span>
+                  <span className="text-xs text-muted-foreground">{user?.role || "User"}</span>
                 </div>
-                <div className="relative group">
+                <button 
+                  className="relative group cursor-pointer" 
+                  onClick={handleAvatarClick}
+                  title="View Profile"
+                >
                   <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
                     <Image
                       src="/avatar-placeholder.png"
@@ -266,7 +278,7 @@ export default function MainLayout({
                     />
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
-                </div>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="hidden md:flex items-center justify-center p-2 rounded-xl bg-background/80 backdrop-blur-sm hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-all duration-300 shadow-sm hover:shadow-md ring-1 ring-border/50 hover:ring-red-200"
