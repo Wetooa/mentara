@@ -70,7 +70,7 @@ export function createAuthService(client: AxiosInstance) {
      * GET /auth/validate-reset-token?token={token}
      */
     async validateResetToken(token: string): Promise<{ valid: boolean; message: string }> {
-      const response = await client.get(`/auth/validate-reset-token?token=${token}`);
+      const response = await client.get(`auth/validate-reset-token?token=${token}`);
       return response.data;
     },
 
@@ -87,14 +87,7 @@ export function createAuthService(client: AxiosInstance) {
         return response.data;
       },
 
-      /**
-       * Login client - uses universal login endpoint
-       * POST /auth/login
-       */
-      async login(data: LoginDto): Promise<ClientAuthResponse> {
-        const response = await client.post("auth/login", data);
-        return response.data;
-      },
+      // Use the universal login method instead
 
       /**
        * Get client profile
@@ -120,7 +113,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async markRecommendationsSeen(): Promise<SuccessMessageResponse> {
         const response = await client.post(
-          "/auth/client/mark-recommendations-seen"
+          "auth/client/mark-recommendations-seen"
         );
         return response.data;
       },
@@ -157,14 +150,7 @@ export function createAuthService(client: AxiosInstance) {
         return response.data;
       },
 
-      /**
-       * Login admin - uses universal login endpoint
-       * POST /auth/login
-       */
-      async login(data: LoginDto): Promise<AdminAuthResponse> {
-        const response = await client.post("auth/login", data);
-        return response.data;
-      },
+      // Use the universal login method instead
 
       /**
        * Get admin profile
@@ -204,20 +190,13 @@ export function createAuthService(client: AxiosInstance) {
        */
       async createAccount(data: RegisterModeratorDto): Promise<any> {
         const response = await client.post(
-          "/auth/moderator/create-account",
+          "auth/moderator/create-account",
           data
         );
         return response.data;
       },
 
-      /**
-       * Login moderator - uses universal login endpoint
-       * POST /auth/login
-       */
-      async login(data: LoginDto): Promise<AuthResponse> {
-        const response = await client.post("auth/login", data);
-        return response.data;
-      },
+      // Use the universal login method instead
 
       /**
        * Get moderator profile
@@ -243,7 +222,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getAssignedCommunities(): Promise<any> {
         const response = await client.get(
-          "/auth/moderator/assigned-communities"
+          "auth/moderator/assigned-communities"
         );
         return response.data;
       },
@@ -276,14 +255,7 @@ export function createAuthService(client: AxiosInstance) {
         return response;
       },
 
-      /**
-       * Login therapist - uses universal login endpoint
-       * POST /auth/login
-       */
-      async login(data: LoginDto): Promise<TherapistAuthResponse> {
-        const response = await client.post("auth/login", data);
-        return response.data;
-      },
+      // Use the universal login method instead
 
       /**
        * Get therapist profile
@@ -308,7 +280,7 @@ export function createAuthService(client: AxiosInstance) {
        * GET /auth/therapist/applications/:id
        */
       async getApplication(id: string): Promise<any> {
-        const response = await client.get(`/auth/therapist/applications/${id}`);
+        const response = await client.get(`auth/therapist/applications/${id}`);
         return response.data;
       },
 
@@ -318,7 +290,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async updateApplicationStatus(id: string, data: any): Promise<any> {
         const response = await client.put(
-          `/auth/therapist/applications/${id}/status`,
+          `auth/therapist/applications/${id}/status`,
           data
         );
         return response.data;
@@ -330,7 +302,7 @@ export function createAuthService(client: AxiosInstance) {
        */
       async getApplicationFiles(id: string): Promise<any> {
         const response = await client.get(
-          `/auth/therapist/applications/${id}/files`
+          `auth/therapist/applications/${id}/files`
         );
         return response.data;
       },

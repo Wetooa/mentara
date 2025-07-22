@@ -269,7 +269,7 @@ export class AdminTherapistService {
           where: { id: therapistId },
           data: {
             role: 'therapist',
-            isVerified: true, // Mark as verified when approved
+            emailVerified: true, // Mark as verified when approved
           },
         });
 

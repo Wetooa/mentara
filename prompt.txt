@@ -1,10 +1,5 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
-axios client issues. 
-- do a full review on the /lib/api/ folder. 
-- first issue is for some reason the frontend is still accessing /auth/login instead of /api/auth/login
-- this might be because of the confusing way this was setup in that folder, please refactor it and fix that issue. THE ISSUE IS NOT THE BACKEND. ITS THE FRONT
-- i also notice that there are some issues here with types. MOREOEVER, there should be no types in here. it should be moved
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
 

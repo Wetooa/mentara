@@ -200,7 +200,7 @@ export class AuthService {
   async checkUserExists(email: string): Promise<{
     exists: boolean;
     role?: string;
-    isVerified?: boolean;
+    emailVerified?: boolean;
   }> {
     try {
       const user = await this.prisma.user.findUnique({
@@ -226,7 +226,7 @@ export class AuthService {
       return {
         exists: true,
         role: user.role,
-        isVerified: user.emailVerified,
+        emailVerified: user.emailVerified,
       };
     } catch (error) {
       console.error('Error checking user existence:', error);

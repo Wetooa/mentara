@@ -20,7 +20,6 @@ model User {
     resetToken       String?   @unique
     resetTokenExpiry DateTime?
     isActive         Boolean   @default(true)
-    isVerified       Boolean   @default(false)
     failedLoginCount Int       @default(0)
     avatarUrl        String?
     coverImageUrl    String? // Cover/banner image URL

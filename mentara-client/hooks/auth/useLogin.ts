@@ -20,6 +20,8 @@ export function useLogin() {
       // Use universal login endpoint
       const response = await api.auth.login(credentials);
 
+      alert(response.data)
+
       // Store only token in localStorage (secure)
       localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
 
@@ -27,7 +29,7 @@ export function useLogin() {
       if (response.user.role === "client") {
         // Check if client has seen therapist recommendations (backend now returns this)
         const hasSeenRecommendations = response.user.client?.hasSeenTherapistRecommendations;
-        
+
         if (hasSeenRecommendations === false) {
           router.push("/client/welcome");
         } else {

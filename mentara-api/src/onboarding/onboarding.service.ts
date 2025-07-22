@@ -117,8 +117,8 @@ export class OnboardingService {
 
       case 'email_verification': {
         return {
-          completed: user.isVerified,
-          completedAt: user.isVerified ? user.updatedAt : undefined,
+          completed: user.emailVerified,
+          completedAt: user.emailVerified ? user.updatedAt : undefined,
         };
       }
 

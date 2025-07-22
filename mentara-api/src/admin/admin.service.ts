@@ -313,7 +313,7 @@ export class AdminService {
             email: true,
             role: true,
             isActive: true,
-            isVerified: true,
+            emailVerified: true,
             createdAt: true,
             lastLoginAt: true,
             suspendedAt: true,
