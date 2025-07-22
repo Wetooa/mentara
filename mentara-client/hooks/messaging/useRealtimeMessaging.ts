@@ -557,7 +557,9 @@ export function useRealtimeMessaging(params: {
   // WebSocket lifecycle management
   useEffect(() => {
     if (config.enableRealtime && accessToken && user) {
-      connectWebSocket();
+      connectWebSocket().catch(error => {
+        console.error('Failed to connect WebSocket in useEffect:', error);
+      });
     }
     
     return () => {
@@ -569,7 +571,13 @@ export function useRealtimeMessaging(params: {
   const reconnectWebSocket = useCallback(() => {
     disconnectWebSocket();
     reconnectAttemptsRef.current = 0;
-    setTimeout(connectWebSocket, 1000);
+    setTimeout(async () => {
+      try {
+        await connectWebSocket();
+      } catch (error) {
+        console.error('Failed to reconnect WebSocket:', error);
+      }
+    }, 1000);
   }, [connectWebSocket, disconnectWebSocket]);
 
   // Enhanced send message function
