@@ -67,7 +67,7 @@ export function ProfileHeader({ profile, isOwnProfile, onEditClick }: ProfileHea
           <Button
             variant="secondary"
             size="sm"
-            className="absolute top-4 right-4 bg-white/90 hover:bg-white"
+            className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-900"
             onClick={onEditClick}
           >
             <Edit className="w-4 h-4 mr-2" />
