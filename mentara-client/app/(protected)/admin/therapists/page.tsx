@@ -159,20 +159,21 @@ export default function AdminTherapistManagementPage() {
   }
 
   return (
-    <div className="container mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 px-4 sm:px-6">
+    <div className="container mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 px-4 sm:px-6 max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
             Therapist Applications
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground mt-1 leading-relaxed">
             Manage therapist applications and approvals
           </p>
         </div>
-        <div className="flex gap-2 self-start sm:self-auto">
+        <div className="flex gap-3 self-start sm:self-auto">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
+            className="h-10 px-4 text-sm font-medium hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             onClick={() => window.location.reload()}
           >
             Refresh
@@ -184,14 +185,14 @@ export default function AdminTherapistManagementPage() {
       {/* {statistics && <TherapistStatistics statistics={statistics} />} */}
 
       {/* Filters */}
-      <Card>
-        <CardHeader className="pb-3 sm:pb-6">
-          <CardTitle className="text-lg sm:text-xl">Filters</CardTitle>
+      <Card className="shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg sm:rounded-xl border border-gray-200">
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">Filters</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
             <Select value={filters.status} onValueChange={handleStatusChange}>
-              <SelectTrigger className="h-9 sm:h-10">
+              <SelectTrigger className="h-11 sm:h-10 lg:h-9 text-base sm:text-sm">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -208,7 +209,7 @@ export default function AdminTherapistManagementPage() {
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, province: e.target.value }))
               }
-              className="h-9 sm:h-10 text-sm"
+              className="h-11 sm:h-10 lg:h-9 text-base sm:text-sm"
             />
 
             <Input
@@ -221,7 +222,7 @@ export default function AdminTherapistManagementPage() {
                   submittedAfter: e.target.value,
                 }))
               }
-              className="h-9 sm:h-10 text-sm"
+              className="h-11 sm:h-10 lg:h-9 text-base sm:text-sm"
             />
 
             <Input
@@ -233,7 +234,7 @@ export default function AdminTherapistManagementPage() {
                   providerType: e.target.value,
                 }))
               }
-              className="h-9 sm:h-10 text-sm"
+              className="h-11 sm:h-10 lg:h-9 text-base sm:text-sm"
             />
           </div>
         </CardContent>
@@ -286,12 +287,12 @@ export default function AdminTherapistManagementPage() {
             />
           ))
         ) : (
-          <Card>
-            <CardContent className="p-6 sm:p-12 text-center">
-              <h3 className="text-base sm:text-lg font-semibold mb-2">
+          <Card className="shadow-sm rounded-lg sm:rounded-xl border border-gray-200">
+            <CardContent className="p-8 sm:p-12 text-center">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900">
                 No Applications Found
               </h3>
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 {filters.status === "PENDING"
                   ? "No pending therapist applications at this time."
                   : `No ${filters.status} applications found with the current filters.`}
@@ -306,14 +307,14 @@ export default function AdminTherapistManagementPage() {
         open={!!detailsTherapistId}
         onOpenChange={(open) => !open && setDetailsTherapistId(null)}
       >
-        <DialogContent className="w-[95vw] max-w-[1200px] h-[90vh] max-h-[900px] p-0 overflow-hidden">
-          <DialogHeader className="p-6 pb-2 border-b">
-            <DialogTitle className="text-xl font-semibold">
+        <DialogContent className="w-full max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-6xl xl:max-w-7xl h-[95vh] sm:h-[90vh] lg:h-[85vh] p-0 overflow-hidden rounded-lg sm:rounded-xl">
+          <DialogHeader className="sticky top-0 bg-white z-10 p-4 sm:p-6 pb-3 sm:pb-4 border-b border-gray-200 rounded-t-lg sm:rounded-t-xl">
+            <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 leading-tight pr-8">
               {selectedApplication &&
                 `${selectedApplication.user.firstName} ${selectedApplication.user.lastName} - Application Details`}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-auto p-4 sm:p-6 bg-gray-50">
             {detailsTherapistId && selectedApplication && (
               <TherapistApplicationDetails
                 application={selectedApplication}

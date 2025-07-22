@@ -72,7 +72,7 @@ export function TherapistApplicationCard({
 
   return (
     <>
-      <Card className={`transition-all ${isSelected ? 'ring-2 ring-primary' : ''} ${isProcessing ? 'opacity-60' : ''}`}>
+      <Card className={`transition-all hover:shadow-lg ${isSelected ? 'ring-2 ring-primary shadow-lg' : 'shadow-sm'} ${isProcessing ? 'opacity-60' : ''} rounded-lg sm:rounded-xl overflow-hidden`}>
         <CardHeader className="pb-3 sm:pb-6">
           {/* Mobile-first responsive layout */}
           <div className="space-y-3 sm:space-y-0">
