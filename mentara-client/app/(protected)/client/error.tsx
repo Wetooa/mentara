@@ -31,6 +31,36 @@ export default function UserError({ error, reset }: UserErrorProps) {
       };
     }
     
+    if (pathname?.includes('/therapist')) {
+      return {
+        title: 'Therapist Error',
+        description: 'Something went wrong with the therapist page. Your therapist connections are safe.',
+        icon: User,
+        backAction: () => router.push('/client/therapist'),
+        backLabel: 'Back to Therapists'
+      };
+    }
+    
+    if (pathname?.includes('/worksheets')) {
+      return {
+        title: 'Worksheets Error',
+        description: 'Something went wrong with your worksheets. Your progress is safe.',
+        icon: User,
+        backAction: () => router.push('/client/worksheets'),
+        backLabel: 'Back to Worksheets'
+      };
+    }
+    
+    if (pathname?.includes('/community')) {
+      return {
+        title: 'Community Error',
+        description: 'Something went wrong with the community page. Your posts and connections are safe.',
+        icon: User,
+        backAction: () => router.push('/client/community'),
+        backLabel: 'Back to Community'
+      };
+    }
+    
     // Default to dashboard context
     return {
       title: 'Dashboard Error', 

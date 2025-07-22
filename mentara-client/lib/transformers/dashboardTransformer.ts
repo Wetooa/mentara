@@ -45,7 +45,7 @@ export function transformDashboardData(
       avatar:
         client.user.avatarUrl || client.user.imageUrl || "/default-avatar.jpg",
       email: client.user.email,
-      joinDate: client.user.createdAt,
+      joinDate: safeDateTimeFormat(client.user.createdAt),
     },
     stats: {
       completedSessions: stats.completedMeetings,
@@ -108,7 +108,7 @@ export function transformDashboardData(
           `${meeting.therapist?.user?.firstName || ""} ${meeting.therapist?.user?.lastName || ""}`.trim() ||
           "Therapist",
         therapistAvatar: undefined, // Backend doesn't provide this yet
-        dateTime: meeting.startTime,
+        dateTime: safeDateTimeFormat(meeting.startTime),
         duration: meeting.duration,
         status: transformMeetingStatus(meeting.status),
         joinUrl: `/session/join/${meeting.id}`,
@@ -126,10 +126,10 @@ export function transformDashboardData(
       return {
         id: worksheet.id,
         title: worksheet.title,
-        assignedDate: worksheet.assignedDate,
-        dueDate:
-          worksheet.dueDate ||
-          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
+        assignedDate: safeDateTimeFormat(worksheet.assignedDate),
+        dueDate: worksheet.dueDate
+          ? safeDateTimeFormat(worksheet.dueDate)
+          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
         status: worksheet.isCompleted
           ? "completed"
           : determineWorksheetStatus(worksheet.dueDate),
@@ -153,7 +153,7 @@ export function transformDashboardData(
         type: transformNotificationType(notification.type),
         title: notification.title,
         message: notification.message,
-        dateTime: notification.createdAt || notification.dateTime,
+        dateTime: safeDateTimeFormat(notification.createdAt || notification.dateTime),
         read: notification.read || notification.isRead || false,
         actionUrl: notification.actionUrl,
       };
@@ -178,7 +178,7 @@ export function transformDashboardData(
         status: comm.status || "offline",
         lastMessage:
           comm.lastMessage || comm.lastMessageContent || "No messages yet",
-        time: comm.time || comm.lastMessageTime || comm.updatedAt,
+        time: safeDateTimeFormat(comm.time || comm.lastMessageTime || comm.updatedAt),
         unread: comm.unread || comm.unreadCount || 0,
         avatar:
           comm.avatar ||
@@ -261,13 +261,38 @@ function transformNotificationType(
 function formatDateSafely(date: Date): string {
   try {
     if (!date || isNaN(date.getTime())) {
-      return new Date().toISOString().split("T")[0];
+      const fallbackIso = new Date().toISOString();
+      return fallbackIso ? fallbackIso.split("T")[0] : new Date().toISOString().substring(0, 10);
     }
     const isoString = date.toISOString();
-    return isoString ? isoString.split("T")[0] : new Date().toISOString().split("T")[0];
+    return isoString && isoString.includes("T") ? isoString.split("T")[0] : new Date().toISOString().substring(0, 10);
   } catch (error) {
     console.warn("Error formatting date:", error);
-    return new Date().toISOString().split("T")[0];
+    const fallbackIso = new Date().toISOString();
+    return fallbackIso ? fallbackIso.split("T")[0] : new Date().toISOString().substring(0, 10);
+  }
+}
+
+/**
+ * Safely parse and format dateTime strings to avoid split errors
+ */
+function safeDateTimeFormat(dateTime: any): string {
+  if (!dateTime) return new Date().toISOString();
+  
+  try {
+    if (typeof dateTime === 'string') {
+      // Ensure the string is valid before processing
+      if (dateTime.trim() === '') return new Date().toISOString();
+      return dateTime;
+    }
+    if (dateTime instanceof Date) {
+      return dateTime.toISOString();
+    }
+    // Fallback for other types
+    return new Date(dateTime).toISOString();
+  } catch (error) {
+    console.warn('Error formatting dateTime:', error, 'Input:', dateTime);
+    return new Date().toISOString();
   }
 }
 
