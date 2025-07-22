@@ -1,18 +1,18 @@
 import { AxiosInstance } from "axios";
 
-// Types for messaging API
+// Types for messaging API - synchronized with backend
 export interface MessagingMessage {
   id: string;
-  senderId: string;
+  authorId: string; // Fixed: backend uses authorId, not senderId
   content: string;
-  messageType: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "SYSTEM";
+  type: "text" | "image" | "audio" | "video" | "system"; // Fixed: lowercase to match backend
   createdAt: string;
   updatedAt: string;
   isRead: boolean;
   isEdited: boolean;
   isDeleted: boolean;
   editedAt?: string;
-  replyToId?: string;
+  replyToMessageId?: string; // Fixed: backend uses replyToMessageId
   conversationId: string;
   attachments?: MessagingAttachment[];
   reactions?: MessagingReaction[];
@@ -45,7 +45,7 @@ export interface MessagingReadReceipt {
 
 export interface MessagingConversation {
   id: string;
-  type: "DIRECT" | "GROUP" | "SESSION" | "SUPPORT";
+  type: "direct" | "group" | "therapy_session"; // Fixed: lowercase to match backend
   title?: string;
   description?: string;
   avatarUrl?: string;
@@ -62,7 +62,7 @@ export interface MessagingParticipant {
   id: string;
   conversationId: string;
   userId: string;
-  role: "MEMBER" | "MODERATOR" | "ADMIN";
+  role: "member" | "moderator" | "admin"; // Fixed: lowercase to match backend
   joinedAt: string;
   leftAt?: string;
   isMuted: boolean;
@@ -83,15 +83,15 @@ export interface MessagingTypingIndicator {
 
 export interface CreateConversationDto {
   participantIds: string[];
-  type?: "DIRECT" | "GROUP";
+  type?: "direct" | "group"; // Fixed: lowercase to match backend
   title?: string;
   description?: string;
 }
 
 export interface SendMessageDto {
   content: string;
-  messageType?: "TEXT" | "IMAGE" | "AUDIO" | "VIDEO";
-  replyToId?: string;
+  type?: "text" | "image" | "audio" | "video"; // Fixed: lowercase to match backend
+  replyToMessageId?: string; // Fixed: backend uses replyToMessageId
   attachments?: {
     url: string;
     fileName: string;
@@ -164,7 +164,7 @@ export function createMessagingService(axios: AxiosInstance) {
 
       const existingDirectConversation = conversations.find(
         (conv) =>
-          conv.type === "DIRECT" &&
+          conv.type === "direct" && // Fixed: lowercase to match backend
           conv.participants.some((p) => p.userId === targetUserId)
       );
 
@@ -175,7 +175,7 @@ export function createMessagingService(axios: AxiosInstance) {
       // If no existing conversation, create a new direct conversation
       const newConversation = await this.createConversation({
         participantIds: [targetUserId],
-        type: "DIRECT",
+        type: "direct", // Fixed: lowercase to match backend
       });
 
       return newConversation;
@@ -372,7 +372,7 @@ export function createMessagingService(axios: AxiosInstance) {
     async updateParticipantRole(
       conversationId: string,
       userId: string,
-      role: "MEMBER" | "MODERATOR" | "ADMIN"
+      role: "member" | "moderator" | "admin" // Fixed: lowercase to match backend
     ) {
       const { data } = await axios.patch(
         `/messaging/conversations/${conversationId}/participants/${userId}`,
