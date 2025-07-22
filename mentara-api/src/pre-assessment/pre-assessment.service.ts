@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import {
-  calculateAllScores,
+  calculateAllScoresFromFlatArray,
   generateSeverityLevels,
 } from './pre-assessment.utils';
 import { PreAssessment } from '@prisma/client';
@@ -29,14 +29,14 @@ export class PreAssessmentService {
   ) {}
 
   private async getAiEstimate(
-    flatAnswers: number[],
+    answers: number[],
   ): Promise<Record<string, boolean> | null> {
     try {
       this.logger.debug(
-        `Requesting AI prediction for ${flatAnswers.length} values`,
+        `Requesting AI prediction for ${answers.length} values`,
       );
 
-      const result = await this.aiServiceClient.predict(flatAnswers);
+      const result = await this.aiServiceClient.predict(answers);
 
       if (!result.success) {
         this.logger.warn(`AI prediction failed: ${result.error}`);
@@ -56,127 +56,35 @@ export class PreAssessmentService {
     }
   }
 
-  private flattenAnswers(answers: number[][]): number[] {
-    // Input validation
+  private validateFlatAnswers(answers: number[]): void {
     if (!Array.isArray(answers)) {
-      throw new BadRequestException('Answers must be a 2D array');
+      throw new BadRequestException('Answers must be an array');
     }
 
-    // Flatten the 2D answers array
-    const flattened = answers.flat();
-
-    // Validate flattened array
-    if (!Array.isArray(flattened) || flattened.length === 0) {
-      throw new BadRequestException('Flattened answers array cannot be empty');
-    }
-
-    // Validate all values are numbers
-    if (
-      !flattened.every(
-        (value) => typeof value === 'number' && Number.isFinite(value),
-      )
-    ) {
-      throw new BadRequestException('All answer values must be finite numbers');
-    }
-
-    // Validate expected length for AI model
-    if (flattened.length !== 201) {
-      this.logger.warn(
-        `Expected 201 values for AI prediction, got ${flattened.length}`,
+    if (answers.length !== 201) {
+      throw new BadRequestException(
+        `Expected exactly 201 answer values, got ${answers.length}`,
       );
     }
 
-    this.logger.debug(
-      `Flattened ${answers.length} questionnaire arrays into ${flattened.length} values`,
-    );
-    return flattened;
-  }
-
-  private validateAnswersStructure(answers: number[][]): void {
-    if (!Array.isArray(answers)) {
-      throw new BadRequestException('Answers must be an array of arrays');
-    }
-
-    if (answers.length === 0) {
-      throw new BadRequestException('Answers array cannot be empty');
-    }
-
-    // Validate each questionnaire's answers
+    // Validate all values are numbers in reasonable range (0-10 for most scales)
     for (let i = 0; i < answers.length; i++) {
-      const questionnaire = answers[i];
+      const value = answers[i];
 
-      if (!Array.isArray(questionnaire)) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
         throw new BadRequestException(
-          `Questionnaire ${i} answers must be an array`,
+          `Invalid answer value at index ${i}: ${value}. Must be a finite number.`,
         );
       }
 
-      if (questionnaire.length === 0) {
+      if (value < 0 || value > 10) {
         throw new BadRequestException(
-          `Questionnaire ${i} cannot have empty answers`,
+          `Answer value out of range (0-10) at index ${i}: ${value}`,
         );
       }
-
-      // Validate answer values are in reasonable range (0-10 for most scales)
-      for (let j = 0; j < questionnaire.length; j++) {
-        const value = questionnaire[j];
-
-        if (typeof value !== 'number' || !Number.isFinite(value)) {
-          throw new BadRequestException(
-            `Invalid answer value at questionnaire ${i}, question ${j}: ${value}`,
-          );
-        }
-
-        if (value < 0 || value > 10) {
-          throw new BadRequestException(
-            `Answer value out of range (0-10) at questionnaire ${i}, question ${j}: ${value}`,
-          );
-        }
-      }
-    }
-  }
-
-  private validateQuestionnaires(questionnaires: string[]): void {
-    if (!Array.isArray(questionnaires)) {
-      throw new BadRequestException('Questionnaires must be an array');
     }
 
-    if (questionnaires.length === 0) {
-      throw new BadRequestException('At least one questionnaire is required');
-    }
-
-    // Define valid questionnaire types
-    const validQuestionnaires = [
-      'Stress',
-      'Anxiety',
-      'Depression',
-      'Insomnia',
-      'Panic Disorder',
-      'Bipolar Disorder',
-      'OCD',
-      'PTSD',
-      'Social Anxiety',
-      'Phobia',
-      'Burnout',
-      'Binge Eating',
-      'ADHD',
-      'Alcohol Use',
-    ];
-
-    for (const questionnaire of questionnaires) {
-      if (
-        typeof questionnaire !== 'string' ||
-        questionnaire.trim().length === 0
-      ) {
-        throw new BadRequestException(
-          'All questionnaire names must be non-empty strings',
-        );
-      }
-
-      if (!validQuestionnaires.includes(questionnaire)) {
-        this.logger.warn(`Unknown questionnaire type: ${questionnaire}`);
-      }
-    }
+    this.logger.debug('Flat answers array validation passed');
   }
 
   async createPreAssessment(
@@ -214,16 +122,8 @@ export class PreAssessmentService {
         );
       }
 
-      // Comprehensive input validation
-      this.validateQuestionnaires(data.questionnaires);
-      this.validateAnswersStructure(data.answers);
-
-      // Validate questionnaires and answers alignment
-      if (data.questionnaires.length !== data.answers.length) {
-        throw new BadRequestException(
-          'Number of questionnaires must match number of answer arrays',
-        );
-      }
+      // Validate flat answers array
+      this.validateFlatAnswers(data.answers);
 
       let scores: Record<string, number> = data.scores as Record<
         string,
@@ -234,11 +134,8 @@ export class PreAssessmentService {
 
       // Calculate scores if not provided
       if (!data.scores || !data.severityLevels) {
-        this.logger.debug('Calculating scores and severity levels');
-        const calculatedScores = calculateAllScores(
-          data.questionnaires,
-          data.answers,
-        );
+        this.logger.debug('Calculating scores and severity levels from flat answers');
+        const calculatedScores = calculateAllScoresFromFlatArray(data.answers);
         scores = Object.fromEntries(
           Object.entries(calculatedScores).map(([key, value]) => [
             key,
@@ -248,25 +145,17 @@ export class PreAssessmentService {
         severityLevels = generateSeverityLevels(calculatedScores);
       }
 
-      // Safely flatten answers and attempt AI prediction
+      // Attempt AI prediction with flat answers
       let aiEstimate: Record<string, boolean> = {};
       try {
-        const flatAnswers = this.flattenAnswers(data.answers);
-
-        if (flatAnswers.length === 201) {
-          this.logger.debug('Attempting AI prediction with validated input');
-          const aiResult = await this.getAiEstimate(flatAnswers);
-          if (aiResult) {
-            aiEstimate = aiResult;
-            this.logger.log('AI prediction successful');
-          } else {
-            this.logger.warn(
-              'AI prediction failed, continuing without AI estimate',
-            );
-          }
+        this.logger.debug('Attempting AI prediction with validated input');
+        const aiResult = await this.getAiEstimate(data.answers);
+        if (aiResult) {
+          aiEstimate = aiResult;
+          this.logger.log('AI prediction successful');
         } else {
           this.logger.warn(
-            `Cannot perform AI prediction: expected 201 values, got ${flatAnswers.length}`,
+            'AI prediction failed, continuing without AI estimate',
           );
         }
       } catch (aiError) {
@@ -277,13 +166,11 @@ export class PreAssessmentService {
         // Continue without AI estimate - don't fail the entire assessment
       }
 
-      // Create pre-assessment with validated data (flattened structure to match Prisma schema)
+      // Create pre-assessment with validated data
       const preAssessment = await this.prisma.preAssessment.create({
         data: {
           clientId: userId,
-          answers: data.answers, // Raw user answers
-          questionnaires: data.questionnaires, // Questionnaire metadata
-          answerMatrix: data.answerMatrix || [], // Processed matrix for AI (default to empty array if undefined)
+          answers: data.answers, // Flat array of 201 numeric responses
           scores, // Assessment scale scores
           severityLevels, // Severity classifications
           aiEstimate, // AI analysis results
@@ -301,7 +188,9 @@ export class PreAssessmentService {
         const questionnaireScores: QuestionnaireScores = {};
         const severityLevelsForAnalysis = severityLevels;
         
-        data.questionnaires.forEach(questionnaire => {
+        // Get all questionnaire names from the calculated scores
+        const questionnaires = Object.keys(scores);
+        questionnaires.forEach(questionnaire => {
           if (scores[questionnaire] !== undefined) {
             questionnaireScores[questionnaire] = {
               score: scores[questionnaire],
@@ -312,7 +201,7 @@ export class PreAssessmentService {
 
         const analysis = await this.generateClinicalAnalysis(
           preAssessment,
-          data.questionnaires,
+          questionnaires,
           questionnaireScores,
         );
 
@@ -429,17 +318,19 @@ export class PreAssessmentService {
         throw new NotFoundException('Pre-assessment not found');
       }
 
-      // Extract current data from answers JSON field
-      const currentAnswers = existingAssessment.answers as any || {};
+      // Extract current data from existing assessment
+      const currentScores = existingAssessment.scores as Record<string, number> || {};
+      const currentSeverityLevels = existingAssessment.severityLevels as Record<string, string> || {};
+      const currentAiEstimate = existingAssessment.aiEstimate as Record<string, boolean> || {};
       
       let scores: Record<string, number>;
       let severityLevels: Record<string, string>;
-      let aiEstimate: Record<string, boolean> = currentAnswers.aiEstimate || {};
+      let aiEstimate: Record<string, boolean> = currentAiEstimate;
 
       if (data.scores && this.isValidScores(data.scores)) {
         scores = data.scores;
       } else {
-        scores = currentAnswers.scores || {};
+        scores = currentScores;
       }
 
       if (
@@ -448,22 +339,14 @@ export class PreAssessmentService {
       ) {
         severityLevels = data.severityLevels;
       } else {
-        severityLevels = currentAnswers.severityLevels || {};
+        severityLevels = currentSeverityLevels;
       }
 
-      // Recalculate scores if new questionnaires and answers provided
-      if (
-        data.questionnaires &&
-        data.answers &&
-        (!data.scores || !data.severityLevels)
-      ) {
-        this.validateQuestionnaires(data.questionnaires);
-        this.validateAnswersStructure(data.answers);
+      // Recalculate scores if new answers provided
+      if (data.answers && (!data.scores || !data.severityLevels)) {
+        this.validateFlatAnswers(data.answers);
         
-        const calculatedScores = calculateAllScores(
-          data.questionnaires,
-          data.answers,
-        );
+        const calculatedScores = calculateAllScoresFromFlatArray(data.answers);
         scores = Object.fromEntries(
           Object.entries(calculatedScores).map(([key, value]) => [
             key,
@@ -474,30 +357,23 @@ export class PreAssessmentService {
         
         // Attempt to get new AI estimate if answers changed
         try {
-          const flatAnswers = this.flattenAnswers(data.answers);
-          if (flatAnswers.length === 201) {
-            const aiResult = await this.getAiEstimate(flatAnswers);
-            if (aiResult) {
-              aiEstimate = aiResult;
-            }
+          const aiResult = await this.getAiEstimate(data.answers);
+          if (aiResult) {
+            aiEstimate = aiResult;
           }
         } catch (aiError) {
           this.logger.warn('AI prediction failed during update:', aiError);
         }
       }
 
-      // Update pre-assessment with new data structure
+      // Update pre-assessment with new data
       const preAssessment = await this.prisma.preAssessment.update({
         where: { clientId: userId },
         data: {
-          answers: {
-            questionnaires: data.questionnaires || currentAnswers.questionnaires,
-            rawAnswers: data.answers || currentAnswers.rawAnswers,
-            answerMatrix: data.answerMatrix || currentAnswers.answerMatrix,
-            scores,
-            severityLevels,
-            aiEstimate,
-          },
+          answers: data.answers || existingAssessment.answers,
+          scores,
+          severityLevels,
+          aiEstimate,
         },
       });
 

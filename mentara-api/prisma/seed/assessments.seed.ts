@@ -68,9 +68,7 @@ export async function seedPreAssessments(
     const assessment = await prisma.preAssessment.create({
       data: {
         clientId: client.user.id,
-        questionnaires: SeedDataGenerator.generateQuestionnaires(),
-        answers: SeedDataGenerator.generateAssessmentResponses(),
-        answerMatrix: SeedDataGenerator.generateAnswerMatrix(),
+        answers: SeedDataGenerator.generateAnswerMatrix(), // Use flat array of 201 responses
         scores: SeedDataGenerator.generateAssessmentScores(),
         severityLevels: SeedDataGenerator.generateSeverityLevels(),
         aiEstimate: SeedDataGenerator.generateAiEstimate(),
