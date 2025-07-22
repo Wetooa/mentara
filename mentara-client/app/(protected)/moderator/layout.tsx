@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, getProfileUrl } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -61,11 +61,11 @@ export default function ModeratorLayout({
     localStorage.setItem('moderator-sidebar-expanded', JSON.stringify(newState));
   };
 
-  // Moderator data - can use real user data now
+  // Moderator data - uses real user data
   const moderator = {
-    name: user ? `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} User` : "Moderator",
-    email: "moderator@mentara.com",
-    avatarUrl: "/icons/user-avatar.png",
+    name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Moderator",
+    email: user?.email || "moderator@mentara.com",
+    avatarUrl: user?.avatarUrl || "/icons/user-avatar.png",
   };
 
   const navItems = [

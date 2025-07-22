@@ -6,10 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getProfileUrl } from '@/lib/utils';
 
 /**
- * Therapist Profile Page - No ID Route
+ * Client Profile Page - No ID Route
  * Redirects to the logged-in user's profile page
  */
-export default function TherapistProfileRedirectPage() {
+export default function ClientProfileRedirectPage() {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -19,8 +19,8 @@ export default function TherapistProfileRedirectPage() {
       const profileUrl = getProfileUrl(user.role, user.id);
       router.replace(profileUrl);
     } else {
-      // If no user is logged in, redirect to therapist dashboard
-      router.replace('/therapist');
+      // If no user is logged in, redirect to client dashboard
+      router.replace('/client');
     }
   }, [user, router]);
 

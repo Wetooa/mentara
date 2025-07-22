@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, getProfileUrl } from "@/lib/utils";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -61,11 +61,11 @@ export default function AdminLayout({
     localStorage.setItem('admin-sidebar-expanded', JSON.stringify(newState));
   };
 
-  // Admin data - can use real user data now
+  // Admin data - uses real user data
   const admin = {
-    name: user ? `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} User` : "Admin User",
-    email: "admin@mentara.com",
-    avatarUrl: "/icons/user-avatar.png",
+    name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Admin User",
+    email: user?.email || "admin@mentara.com",
+    avatarUrl: user?.avatarUrl || "/icons/user-avatar.png",
   };
 
   const navItems = [

@@ -22,7 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { UserSearchBar, User as SearchUser } from "@/components/search";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getProfileUrl } from "@/lib/utils";
 
 
 export default function TherapistLayout({
@@ -32,12 +32,20 @@ export default function TherapistLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
   const handleLogout = () => {
     logout();
+  };
+
+  // Handle avatar click to navigate to profile
+  const handleAvatarClick = () => {
+    if (user) {
+      const profileUrl = getProfileUrl(user.role, user.id);
+      router.push(profileUrl);
+    }
   };
 
   // Handle user selection from search
@@ -385,15 +393,19 @@ export default function TherapistLayout({
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex flex-col items-end">
                 <span className="text-sm font-medium text-gray-900">
-                  Dr. Therapist
+                  {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Therapist"}
                 </span>
-                <span className="text-xs text-gray-500">Therapist</span>
+                <span className="text-xs text-gray-500 capitalize">{user?.role || "therapist"}</span>
               </div>
 
-              <div className="relative group">
-                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-blue-100 to-blue-200 ring-2 ring-border/50 group-hover:ring-blue-300 transition-all duration-300 shadow-sm group-hover:shadow-md">
+              <button 
+                onClick={handleAvatarClick}
+                className="relative group focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 rounded-full transition-all duration-300"
+                title="Go to profile"
+              >
+                <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-blue-100 to-blue-200 ring-2 ring-border/50 group-hover:ring-blue-300 transition-all duration-300 shadow-sm group-hover:shadow-md cursor-pointer">
                   <Image
-                    src="/avatar-placeholder.png"
+                    src={user?.avatarUrl || "/avatar-placeholder.png"}
                     alt="User Avatar"
                     width={36}
                     height={36}
@@ -406,7 +418,7 @@ export default function TherapistLayout({
                 </div>
                 {/* Online status indicator */}
                 <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm" />
-              </div>
+              </button>
 
               <button
                 onClick={handleLogout}
