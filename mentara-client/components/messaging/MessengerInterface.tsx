@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
@@ -23,7 +21,6 @@ import {
 import {
   Send,
   Paperclip,
-  Smile,
   MoreVertical,
   Phone,
   Video,
@@ -32,14 +29,8 @@ import {
   Settings,
   Circle,
   Reply,
-  Heart,
-  ThumbsUp,
-  Laugh,
-  Angry,
-  Sad,
   Check,
   CheckCheck,
-  Clock,
   Edit,
   Trash2,
   Copy,
@@ -53,7 +44,7 @@ import { logger } from "@/lib/logger";
 import { ConnectionStatus } from "@/components/messaging/ConnectionStatus";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
+import { differenceInMinutes, format, isToday, isYesterday } from "date-fns";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -68,7 +59,6 @@ import { User } from "../search";
 interface MessengerInterfaceProps {
   className?: string;
   onCallInitiate?: (conversationId: string, type: "audio" | "video") => void;
-  onVideoMeetingJoin?: (conversationId: string) => void;
   targetUserId?: string;
 }
 
@@ -339,48 +329,6 @@ const MessageBubble: React.FC<{
   );
 };
 
-const UserSearchResult: React.FC<{
-  user: User;
-  onCreateConversation: () => void;
-}> = ({ user, onCreateConversation }) => {
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-      <Avatar className="h-12 w-12">
-        <AvatarImage src={user.avatarUrl} />
-        <AvatarFallback>{getInitials(`${user.firstName} ${user.lastName}`)}</AvatarFallback>
-      </Avatar>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-sm truncate">
-            {user.firstName} {user.lastName}
-          </h4>
-          <Badge variant="secondary" className="text-xs">
-            {user.role}
-          </Badge>
-        </div>
-        
-        <div className="flex items-center justify-between mt-1">
-          <p className="text-sm text-muted-foreground truncate">
-            {user.email}
-          </p>
-        </div>
-      </div>
-      
-      <Button 
-        size="sm" 
-        variant="outline"
-        onClick={(e) => {
-          e.stopPropagation();
-          onCreateConversation();
-        }}
-        className="flex-shrink-0"
-      >
-        Start Chat
-      </Button>
-    </div>
-  );
-};
 
 const ConversationItem: React.FC<{
   conversation: MessagingConversation;
@@ -478,7 +426,6 @@ const TypingIndicator: React.FC<{ users: string[] }> = ({ users }) => {
 export function MessengerInterface({
   className,
   onCallInitiate,
-  onVideoMeetingJoin,
   targetUserId,
 }: MessengerInterfaceProps) {
   const { user } = useAuth();
@@ -489,9 +436,6 @@ export function MessengerInterface({
   const [messageInput, setMessageInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [replyToMessage, setReplyToMessage] = useState<MessagingMessage | null>(
-    null
-  );
-  const [editingMessage, setEditingMessage] = useState<MessagingMessage | null>(
     null
   );
   const [isTyping, setIsTyping] = useState(false);
@@ -602,7 +546,6 @@ export function MessengerInterface({
     onlineUsers,
     connectionState,
     sendMessage,
-    markAsRead,
     addReaction,
     sendTypingIndicator,
     uploadFile,
@@ -702,7 +645,7 @@ export function MessengerInterface({
         attachments: [uploadedFile],
       });
       toast.success("File sent successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to upload file");
     }
   };

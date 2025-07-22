@@ -5,7 +5,6 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import {
   getMessagingSocket,
   connectMessagingSocket,
-  isMessagingConnected,
   disconnectSocket,
 } from "@/lib/socket";
 import { Socket } from "socket.io-client";
@@ -14,8 +13,6 @@ import type {
   MessagingConversation,
   MessagingMessage,
   SendMessageDto,
-  GetConversationsParams,
-  GetMessagesParams,
 } from "@/lib/api/services/messaging";
 
 // WebSocket connection state interface
