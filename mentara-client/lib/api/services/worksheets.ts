@@ -103,6 +103,73 @@ export function createWorksheetService(client: AxiosInstance) {
     },
 
     /**
+     * Upload file for worksheet submission
+     * POST /worksheets/:id/upload
+     */
+    async uploadFile(
+      file: File,
+      worksheetId: string,
+      type: "submission" | "material" = "submission"
+    ): Promise<{
+      id: string;
+      filename: string;
+      url: string;
+      originalName: string;
+      size: number;
+      mimeType: string;
+      uploadedAt: string;
+    }> {
+      // Validate file before upload
+      const validation = this.validateFile(file);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", type);
+
+      const response = await client.post(`worksheets/${worksheetId}/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    },
+
+    /**
+     * Validate file for worksheet upload
+     */
+    validateFile(file: File, maxSize: number = 5 * 1024 * 1024): { isValid: boolean; error?: string } {
+      // Check file size (default 5MB for worksheets)
+      if (file.size > maxSize) {
+        return {
+          isValid: false,
+          error: `File size must be less than ${Math.round(maxSize / (1024 * 1024))}MB`
+        };
+      }
+
+      // Check file type - worksheet specific allowed types
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        'image/jpeg',
+        'image/png',
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        return {
+          isValid: false,
+          error: "Invalid file type. Please upload PDF, DOC, DOCX, TXT, JPG, or PNG files only."
+        };
+      }
+
+      return { isValid: true };
+    },
+
+    /**
      * Get worksheet statistics
      * GET /worksheets/stats
      */
