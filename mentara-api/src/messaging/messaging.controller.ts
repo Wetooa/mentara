@@ -58,29 +58,41 @@ export class MessagingController {
     @CurrentUserId() userId: string,
     @Query() params: ConversationListParams,
   ) {
-    console.log('🚀 [MESSAGING CONTROLLER] getUserConversations endpoint called');
+    console.log(
+      '🚀 [MESSAGING CONTROLLER] getUserConversations endpoint called',
+    );
     console.log('👤 [USER ID]', userId);
     console.log('📊 [QUERY PARAMS]', params);
-    
+
     try {
       const result = await this.messagingService.getUserConversations(
         userId,
         params.page || 1,
         params.limit || 20,
       );
-      
-      console.log('✅ [CONTROLLER RESPONSE] Returning', result.length, 'conversations');
-      console.log('📝 [RESPONSE SUMMARY]:', result.map(conv => ({
-        id: conv.id,
-        type: conv.type,
-        title: conv.title,
-        participantCount: conv.participants?.length || 0,
-        messageCount: conv.messages?.length || 0
-      })));
-      
+
+      console.log(
+        '✅ [CONTROLLER RESPONSE] Returning',
+        result.length,
+        'conversations',
+      );
+      console.log(
+        '📝 [RESPONSE SUMMARY]:',
+        result.map((conv) => ({
+          id: conv.id,
+          type: conv.type,
+          title: conv.title,
+          participantCount: conv.participants?.length || 0,
+          messageCount: conv.messages?.length || 0,
+        })),
+      );
+
       return result;
     } catch (error) {
-      console.error('❌ [CONTROLLER ERROR] getUserConversations failed:', error);
+      console.error(
+        '❌ [CONTROLLER ERROR] getUserConversations failed:',
+        error,
+      );
       throw error;
     }
   }
