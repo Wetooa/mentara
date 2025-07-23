@@ -26,10 +26,35 @@ export function useAvailableSlots(therapistId: string, date: string) {
     refetch,
   } = useQuery({
     queryKey: ['booking', 'slots', therapistId, date],
-    queryFn: () => api.booking.availability.getSlots(therapistId, date),
+    queryFn: async () => {
+      try {
+        return await api.booking.availability.getSlots(therapistId, date);
+      } catch (error: unknown) {
+        // Add more context to error messages
+        const err = error as { response?: { status: number; data?: { message?: string } }; message?: string };
+        if (err.response?.status === 400 && err.response?.data?.message?.includes('advance')) {
+          throw new Error('Bookings must be made at least 30 minutes in advance');
+        } else if (err.response?.status === 404) {
+          throw new Error('Therapist availability not found');
+        } else if (err.response?.status === 401) {
+          throw new Error('Authentication required');
+        } else {
+          throw new Error(err.response?.data?.message || err.message || 'Failed to load available slots');
+        }
+      }
+    },
     enabled: !!(therapistId && date),
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
+    retry: (failureCount, error: Error) => {
+      // Don't retry on authentication or validation errors
+      if (error.message?.includes('Authentication') || error.message?.includes('advance')) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Helper functions

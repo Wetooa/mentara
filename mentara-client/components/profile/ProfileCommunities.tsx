@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import { Users, ExternalLink } from 'lucide-react';
 import { PublicProfileResponse } from '@/lib/api/services/profile';
+import { useCommunityNavigation } from '@/store/community';
 import Link from 'next/link';
 
 interface ProfileCommunitiesProps {
@@ -91,6 +93,9 @@ function CommunityItem({
   community: PublicProfileResponse['mutualCommunities'][0];
   userRole: string | null;
 }) {
+  const router = useRouter();
+  const { navigateToCommunity } = useCommunityNavigation();
+
   // Generate initials from community name
   const initials = community.name
     .split(' ')
@@ -98,25 +103,31 @@ function CommunityItem({
     .slice(0, 2)
     .join('');
 
+  const handleCommunityClick = () => {
+    // Use state-based navigation instead of direct URL
+    navigateToCommunity(community.id, router, userRole || 'client');
+  };
+
   return (
-    <Link href={`/${userRole}/community/${community.slug}`}>
-      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group">
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={community.imageUrl} alt={community.name} />
-          <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate">
-            {community.name}
-          </p>
-        </div>
-        
-        <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
+    <div 
+      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer"
+      onClick={handleCommunityClick}
+    >
+      <Avatar className="w-8 h-8">
+        <AvatarImage src={community.imageUrl} alt={community.name} />
+        <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
+          {initials}
+        </AvatarFallback>
+      </Avatar>
+      
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate">
+          {community.name}
+        </p>
       </div>
-    </Link>
+      
+      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
+    </div>
   );
 }
 

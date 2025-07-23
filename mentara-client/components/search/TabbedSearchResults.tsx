@@ -2,12 +2,15 @@
 
 import React, { useState } from 'react';
 import { Search, User, Users, FileText, MessageCircle, PenTool, Building } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCommunityNavigation } from '@/store/community';
+import { useAuth } from '@/contexts/AuthContext';
 import { type EntityType } from './OmniSearchBar';
 
 export interface SearchResult {
@@ -125,9 +128,11 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         subtitle: item.content ? item.content.slice(0, 150) + '...' : '',
         description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count?.hearts || 0} hearts • ${item._count?.comments || 0} comments`,
         avatarUrl: item.user.avatarUrl,
-        url: `/post/${item.id}`,
+        url: `/post/${item.id}`, // Keep as fallback, but we'll use navigation action
         metadata: {
           community: item.room?.roomGroup?.community?.name,
+          communityId: item.room?.roomGroup?.community?.id,
+          roomId: item.room?.id,
           createdAt: item.createdAt,
         },
       };
@@ -139,9 +144,10 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
         title: item.name,
         subtitle: item.description,
         description: `${item._count?.memberships || 0} members`,
-        url: `/community/${item.slug}`,
+        url: `/community/${item.slug}`, // Keep as fallback, but we'll use navigation action
         metadata: {
           imageUrl: item.imageUrl,
+          slug: item.slug,
         },
       };
     
@@ -297,6 +303,36 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
   defaultTab = 'posts', // Default to posts like Reddit
 }) => {
   const [activeTab, setActiveTab] = useState<EntityType>(defaultTab);
+  const router = useRouter();
+  const { user } = useAuth();
+  const { navigateToRoom, navigateToCommunity } = useCommunityNavigation();
+
+  // Handle search result navigation
+  const handleResultClick = (result: SearchResult) => {
+    // Call the original onResultClick if provided
+    onResultClick?.(result);
+
+    // Handle community-specific navigation
+    if (result.type === 'posts' && result.metadata?.communityId && result.metadata?.roomId) {
+      // Navigate to the room where the post is located
+      navigateToRoom(
+        result.metadata.roomId,
+        result.metadata.communityId,
+        router,
+        user?.role || 'client'
+      );
+    } else if (result.type === 'communities') {
+      // Navigate to the community
+      navigateToCommunity(
+        result.id,
+        router,
+        user?.role || 'client'
+      );
+    } else if (result.url) {
+      // Fall back to direct URL navigation for other types
+      router.push(result.url);
+    }
+  };
 
   // Convert results to unified format and calculate counts
   const allResults: SearchResult[] = [];
@@ -450,7 +486,7 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
                     <SearchResultCard
                       key={result.id}
                       result={result}
-                      onClick={onResultClick}
+                      onClick={handleResultClick}
                     />
                   ))}
                 </div>

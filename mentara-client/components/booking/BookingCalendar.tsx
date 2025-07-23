@@ -122,8 +122,25 @@ export function BookingCalendar({
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Failed to load available slots. Please try again.
+              <AlertDescription className="space-y-2">
+                <div>
+                  {error.message?.includes('advance') 
+                    ? 'Cannot book appointments for this date. Please select a time at least 30 minutes in advance.'
+                    : error.message?.includes('404') || error.message?.includes('not found')
+                    ? 'Therapist availability not found. Please try selecting a different date.'
+                    : error.message?.includes('401') || error.message?.includes('unauthorized')
+                    ? 'Please sign in again to view available slots.'
+                    : 'Failed to load available slots. Please check your connection and try again.'
+                  }
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => window.location.reload()}
+                  className="mt-2"
+                >
+                  Retry
+                </Button>
               </AlertDescription>
             </Alert>
           )}
