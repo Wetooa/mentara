@@ -141,7 +141,43 @@ export class DashboardService {
   }
 
   async getTherapistDashboardData(userId: string) {
+    console.log(`🔍 [DashboardService] Getting therapist dashboard data for userId: ${userId}`);
+    
     try {
+      // First, verify the user exists and check their role
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+        },
+      });
+
+      if (!user) {
+        console.error(`❌ [DashboardService] User not found: ${userId}`);
+        throw new NotFoundException(`User not found: ${userId}`);
+      }
+
+      console.log(`📋 [DashboardService] User found: ${user.email} (${user.firstName} ${user.lastName}), role: ${user.role}, active: ${user.isActive}`);
+
+      if (user.role !== 'therapist') {
+        console.error(`❌ [DashboardService] User ${user.email} has role '${user.role}', expected 'therapist'`);
+        throw new NotFoundException(`User ${user.email} does not have therapist role. Current role: ${user.role}`);
+      }
+
+      if (!user.isActive) {
+        console.error(`❌ [DashboardService] User ${user.email} is not active`);
+        throw new NotFoundException(`User ${user.email} is not active`);
+      }
+
+      // Now attempt to find the therapist record
+      console.log(`🔍 [DashboardService] Looking for Therapist record for userId: ${userId}`);
+      
       const therapist = await this.prisma.therapist.findUnique({
         where: { userId },
         include: {
@@ -177,7 +213,25 @@ export class DashboardService {
       });
 
       if (!therapist) {
-        throw new NotFoundException('Therapist not found');
+        console.error(`❌ [DashboardService] Therapist record not found for user: ${user.email} (${userId})`);
+        console.error(`❌ [DashboardService] User has role 'therapist' but missing Therapist table record`);
+        
+        // Additional diagnostic information
+        const allTherapistRecords = await this.prisma.therapist.count();
+        console.log(`📊 [DashboardService] Total Therapist records in database: ${allTherapistRecords}`);
+        
+        throw new NotFoundException(
+          `Therapist record not found for user ${user.email} (${userId}). ` +
+          `User has role 'therapist' but is missing corresponding Therapist table record. ` +
+          `This indicates a data consistency issue that needs to be resolved.`
+        );
+      }
+
+      console.log(`✅ [DashboardService] Therapist record found: ${therapist.user.email}, status: ${therapist.status}`);
+
+      // Validate therapist status
+      if (therapist.status !== 'APPROVED') {
+        console.warn(`⚠️ [DashboardService] Therapist ${therapist.user.email} has status: ${therapist.status}`);
       }
 
       const completedMeetingsCount = await this.prisma.meeting.count({
@@ -211,7 +265,9 @@ export class DashboardService {
         },
       });
 
-      return {
+      console.log(`📊 [DashboardService] Dashboard stats for ${therapist.user.email}: clients=${totalClientsCount}, completed_meetings=${completedMeetingsCount}, pending_worksheets=${pendingWorksheetsCount}`);
+
+      const dashboardData = {
         therapist: {
           ...therapist,
           // Map database fields to frontend-expected fields
@@ -228,12 +284,19 @@ export class DashboardService {
         pendingWorksheets: therapist.worksheets,
         recentSessions,
       };
+
+      console.log(`✅ [DashboardService] Successfully retrieved dashboard data for ${therapist.user.email}`);
+      return dashboardData;
+
     } catch (error) {
       if (error instanceof NotFoundException) {
+        // Re-throw NotFoundException with our enhanced error messages
         throw error;
       }
+      
+      console.error(`❌ [DashboardService] Unexpected error getting therapist dashboard data for userId ${userId}:`, error);
       throw new InternalServerErrorException(
-        `Failed to get therapist dashboard data: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to get therapist dashboard data for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
