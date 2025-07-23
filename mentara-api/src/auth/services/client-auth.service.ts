@@ -20,15 +20,12 @@ export class ClientAuthService {
   ) {}
 
   async registerClient(registerDto: RegisterClientDto) {
+    console.log('Registering client with preassessment data:', registerDto);
+
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
     });
-
-    console.log(
-      'Registering client with preassessment data:',
-      registerDto.preassessmentAnswers,
-    );
 
     if (existingUser) {
       throw new BadRequestException('User with this email already exists');

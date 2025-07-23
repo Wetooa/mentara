@@ -154,6 +154,12 @@ export function useClientRegistration(
           ? answersToAnswerMatrix(questionnaires, answers)
           : undefined;
 
+      console.log("Pre-assessment answers:", preassessmentAnswers);
+
+      console.log("Registration answers:", answers);
+
+      console.log("Registration data:", data);
+
       // Call real backend registration API - this will automatically send OTP
       const result = await api.auth.client.register({
         email: data.email,
