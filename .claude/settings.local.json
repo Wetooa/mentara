@@ -167,7 +167,8 @@
       "Bash(timeout 10s npm run start:dev)",
       "Bash(true)",
       "Bash(git check-ignore:*)",
-      "Bash(timeout 10 npm run dev:*)"
+      "Bash(timeout 10 npm run dev:*)",
+      "WebFetch(domain:ui.shadcn.com)"
     ]
   },
   "enableAllProjectMcpServers": true,

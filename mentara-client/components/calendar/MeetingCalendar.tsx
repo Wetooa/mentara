@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { EnhancedCalendar } from '@/components/ui/enhanced-calendar'
+import AppointmentCalendar from '@/components/calendar-02'
 import { useCalendarMeetings } from '@/hooks/calendar/useCalendarMeetings'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -181,93 +181,16 @@ export function MeetingCalendar({
           </div>
         )}
         
-        {/* Enhanced Calendar */}
+        {/* Appointment Calendar - handles meeting details automatically */}
         <div className="flex justify-center">
-          <EnhancedCalendar
+          <AppointmentCalendar
             meetings={meetings}
-            onDateSelect={handleDateSelect}
+            onSelect={handleDateSelect}
             selected={selectedDate}
-            month={currentMonth}
-            onMonthChange={setCurrentMonth}
-            hoverDelay={hoverDelay}
-            showMeetingIndicators={true}
+            showMeetingDetails={true}
             className="border-0"
           />
         </div>
-        
-        {/* Selected Date Info */}
-        {selectedDate && (
-          <div className="mt-6 pt-6 border-t">
-            <h4 className="font-medium mb-3 flex items-center gap-2">
-              <Clock className="size-4" />
-              Meetings for {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-            </h4>
-            
-            {(() => {
-              const dayMeetings = meetings.filter(meeting => 
-                new Date(meeting.startTime).toDateString() === selectedDate.toDateString()
-              )
-              
-              if (dayMeetings.length === 0) {
-                return (
-                  <div className="text-sm text-muted-foreground py-4 text-center">
-                    No meetings scheduled for this day
-                  </div>
-                )
-              }
-              
-              return (
-                <div className="space-y-3">
-                  {dayMeetings
-                    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-                    .map((meeting) => (
-                      <div 
-                        key={meeting.id}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
-                      >
-                        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                          meeting.status === 'SCHEDULED' ? 'bg-blue-500' :
-                          meeting.status === 'CONFIRMED' ? 'bg-green-500' :
-                          meeting.status === 'CANCELLED' ? 'bg-red-500' :
-                          meeting.status === 'IN_PROGRESS' ? 'bg-yellow-500' :
-                          'bg-gray-500'
-                        }`} />
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">
-                            {meeting.title}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {format(new Date(meeting.startTime), 'h:mm a')} - {format(new Date(meeting.endTime), 'h:mm a')}
-                          </div>
-                          {(meeting.therapistName || meeting.clientName) && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                              <User className="size-3" />
-                              {meeting.therapistName && `Therapist: ${meeting.therapistName}`}
-                              {meeting.therapistName && meeting.clientName && ' | '}
-                              {meeting.clientName && `Client: ${meeting.clientName}`}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Badge 
-                          variant={
-                            meeting.status === 'CONFIRMED' ? 'default' :
-                            meeting.status === 'CANCELLED' ? 'destructive' :
-                            meeting.status === 'IN_PROGRESS' ? 'secondary' :
-                            'outline'
-                          }
-                          className="text-xs"
-                        >
-                          {meeting.status.toLowerCase().replace('_', ' ')}
-                        </Badge>
-                      </div>
-                    ))}
-                </div>
-              )
-            })()}
-          </div>
-        )}
       </CardContent>
     </Card>
   )

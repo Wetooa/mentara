@@ -4,9 +4,11 @@ import {
   ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from 'src/providers/prisma-client.provider';
 import { Comment, Prisma, User } from '@prisma/client';
 import type { CommentCreateInputDto, CommentUpdateInputDto } from './types';
+import { CommentAddedEvent } from '../common/events/social-events';
 
 // Define local response type to match actual unified comment structure
 interface CommentResponse {
@@ -30,7 +32,10 @@ interface CommentResponse {
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async findUserById(id: string): Promise<User | null> {
     try {
@@ -299,6 +304,20 @@ export class CommentsService {
           },
         },
       });
+
+      // Emit CommentAddedEvent for notifications
+      await this.eventEmitter.emitAsync(
+        'CommentAddedEvent',
+        new CommentAddedEvent({
+          commentId: comment.id,
+          postId: comment.postId,
+          authorId: comment.userId,
+          content: comment.content,
+          parentCommentId: comment.parentId || undefined,
+          isAnonymous: false, // Add if available in schema
+          depth: comment.parentId ? 1 : 0, // Depth based on parent existence
+        }),
+      );
 
       return {
         ...comment,

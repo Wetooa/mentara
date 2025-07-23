@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, ChevronDown, ChevronRight, RefreshCw, AlertCircle } from "lucide-react";
 import { usePatientsList } from "@/hooks/therapist/usePatientsList";
-import { EnhancedCalendar } from "@/components/ui/enhanced-calendar";
+import AppointmentCalendar from "@/components/calendar-02";
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -112,44 +112,14 @@ export default function PatientsLayout({
             </span>
           </div>
 
-          {/* Enhanced Interactive Calendar */}
-          <div className="enhanced-calendar-container">
-            <EnhancedCalendar
+          {/* Appointment Calendar */}
+          <div className="appointment-calendar-container">
+            <AppointmentCalendar
               meetings={meetingsData?.meetings || []}
               selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              onDateSelect={setSelectedDate}
-              showMeetingIndicators={true}
+              onSelect={setSelectedDate}
+              showMeetingDetails={false}
               className="scale-75 origin-top-left w-[133%] -ml-2"
-              classNames={{
-                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                month: "space-y-2",
-                caption: "flex justify-center pt-1 relative items-center",
-                caption_label: "text-sm font-medium text-amber-800",
-                nav: "space-x-1 flex items-center",
-                nav_button: cn(
-                  buttonVariants({ variant: "outline" }),
-                  "h-6 w-6 bg-transparent p-0 text-amber-600 hover:bg-amber-50 border-amber-200"
-                ),
-                nav_button_previous: "absolute left-1",
-                nav_button_next: "absolute right-1",
-                table: "w-full border-collapse space-y-1",
-                head_row: "flex",
-                head_cell: "text-amber-600 rounded-md w-8 font-normal text-[0.6rem] uppercase tracking-wide",
-                row: "flex w-full mt-1",
-                cell: "h-8 w-8 text-center text-xs p-0 relative focus-within:relative focus-within:z-20",
-                day: cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-8 w-8 p-0 font-normal text-amber-800 hover:bg-amber-50 aria-selected:opacity-100"
-                ),
-                day_range_end: "day-range-end",
-                day_selected: "bg-amber-600 text-white hover:bg-amber-700 hover:text-white focus:bg-amber-600 focus:text-white",
-                day_today: "bg-amber-100 text-amber-900 font-semibold",
-                day_outside: "day-outside text-amber-400 opacity-50 aria-selected:bg-amber-100/50 aria-selected:text-amber-400 aria-selected:opacity-30",
-                day_disabled: "text-amber-300 opacity-50",
-                day_range_middle: "aria-selected:bg-amber-100 aria-selected:text-amber-900",
-                day_hidden: "invisible",
-              }}
             />
           </div>
         </div>

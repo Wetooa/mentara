@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { EnhancedCalendar } from '@/components/ui/enhanced-calendar'
+import AppointmentCalendar from '@/components/calendar-02'
 import { useCalendarMeetings } from '@/hooks/calendar/useCalendarMeetings'
 import { Calendar, Clock, ArrowRight, RefreshCw } from 'lucide-react'
 import { format, isToday, isTomorrow, isYesterday } from 'date-fns'
@@ -102,11 +102,11 @@ export function DashboardCalendarWidget({ className }: DashboardCalendarWidgetPr
         
         {/* Compact Calendar */}
         <div className="flex justify-center">
-          <EnhancedCalendar
+          <AppointmentCalendar
             meetings={meetings}
-            onDateSelect={handleDateSelect}
+            onSelect={handleDateSelect}
             selected={selectedDate}
-            hoverDelay={2000} // Faster hover for dashboard
+            showMeetingDetails={false}
             className="scale-90 border-0 p-0"
           />
         </div>
