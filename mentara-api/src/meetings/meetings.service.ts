@@ -55,6 +55,7 @@ export class MeetingsService {
    * Get meeting details with access validation
    */
   async getMeetingById(meetingId: string, userId: string) {
+    this.logger.debug(`getMeetingById called with meetingId: ${meetingId}, userId: ${userId}`);
     const meeting = await this.prisma.meeting.findFirst({
       where: {
         id: meetingId,
