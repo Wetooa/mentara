@@ -598,6 +598,7 @@ export function MessengerInterface({
     addReaction,
     sendTypingIndicator,
     uploadFile,
+    reconnectWebSocket,
   } = useMessaging({
     conversationId: selectedConversationId || undefined,
     enableRealtime: true,
