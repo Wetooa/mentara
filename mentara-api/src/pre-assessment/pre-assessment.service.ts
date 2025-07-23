@@ -470,7 +470,7 @@ export class PreAssessmentService {
       const severityLevels = preAssessment.severityLevels as Record<string, string>;
       
       // Use the questionnaire list from utils
-      const questionnaires = LIST_OF_QUESTIONNAIRES;
+      const questionnaires = [...LIST_OF_QUESTIONNAIRES] as string[];
 
       if (!flatAnswers || !scores || !severityLevels) {
         throw new BadRequestException('Invalid pre-assessment data structure');

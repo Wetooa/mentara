@@ -67,14 +67,25 @@ export class ClientAuthService {
         registerDto.preassessmentAnswers &&
         registerDto.preassessmentAnswers.length > 0
       ) {
+        // Import scoring utilities
+        const { calculateAllScoresFromFlatArray, generateSeverityLevels } = await import('../../pre-assessment/pre-assessment.utils');
+        
+        // Calculate scores from flat answers array
+        const calculatedScores = calculateAllScoresFromFlatArray(registerDto.preassessmentAnswers);
+        const scores = Object.fromEntries(
+          Object.entries(calculatedScores).map(([key, value]) => [key, value.score])
+        );
+        const severityLevels = generateSeverityLevels(calculatedScores);
+
         preAssessment = await tx.preAssessment.create({
           data: {
             clientId: user.id,
-            answers: registerDto.preassessmentAnswers,
-            scores: {}, // Empty until processed
-            severityLevels: {}, // Empty until processed
-            aiEstimate: {}, // Empty until processed
-            isProcessed: false, // Will be processed later
+            answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
+            scores, // Calculated scores by questionnaire
+            severityLevels, // Severity classifications
+            aiEstimate: {}, // Will be calculated later by AI service
+            isProcessed: true, // Mark as processed since we calculated scores
+            processedAt: new Date(),
           },
         });
       }
