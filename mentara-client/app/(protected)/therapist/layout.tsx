@@ -14,7 +14,6 @@ import { UserSearchBar, User as SearchUser } from "@/components/search";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { Button } from "@/components/ui/button";
 import { cn, getProfileUrl } from "@/lib/utils";
-import { UserDisplay } from "@/components/common/UserDisplay";
 
 export default function TherapistLayout({
   children,
@@ -41,7 +40,6 @@ export default function TherapistLayout({
 
   // Handle user selection from search
   const handleUserSelect = (user: SearchUser) => {
-    console.log("Selected user:", user);
     // Navigate to patient profile if it's a client, or handle other user types
     if (user.role === "client") {
       router.push(`/therapist/profile/${user.id}`);
