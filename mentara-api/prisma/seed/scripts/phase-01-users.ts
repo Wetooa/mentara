@@ -123,6 +123,16 @@ async function createComprehensiveUsers(
       moderatorData,
     );
     const user = await prisma.user.create({ data: userData });
+
+    // Create the corresponding moderator record
+    await prisma.moderator.create({
+      data: {
+        userId: user.id,
+        permissions: ['content_moderation', 'community_management'],
+        assignedCommunities: {},
+      },
+    });
+
     users.push(user);
     console.log(
       `✅ Created test moderator: ${moderatorData.firstName} ${moderatorData.lastName}`,
