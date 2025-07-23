@@ -1,21 +1,20 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
 
-Websockets is not working in the project. The error is as follows:
+Meeting API Axios Errors
 
-🔍 [SOCKET] Error details: {}
+🔍 [SOCKET] Full error object: "{\n  \"description\": {\n    \"isTrusted\": true\n  },\n  \"type\": \"TransportError\"\n}"
 
-lib/socket.ts (69:15) @ getSocket/<
+lib/socket.ts (261:15) @ getSocket/<
 
-  67 |     socket.on('connect_error', (error) => {
-  68 |       console.error('🚫 [SOCKET] Main socket connection error:', error);
-> 69 |       console.error('🔍 [SOCKET] Error details:', {
-     |               ^
-  70 |         message: error.message,
-  71 |         description: error.description,
-  72 |         type: error.type,
+  259 |         data: error.data || 'No data',
+  260 |       });
+> 261 |       console.error('🔍 [SOCKET] Full error object:', JSON.stringify(error, null, 2));
+      |               ^
+  262 |     });
+  263 |
+  264 |     socket.on('reconnect', (attemptNumber) => {
 
-im trying to test two different windows to see if the websockets are working, but it seems like the connection is not being established properly.
 
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.

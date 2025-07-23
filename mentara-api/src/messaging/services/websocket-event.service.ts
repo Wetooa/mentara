@@ -70,13 +70,30 @@ export class WebSocketEventService implements OnModuleInit {
         } = messageEvent.eventData;
 
         // Broadcast message to conversation participants via WebSocket
+        // Frontend expects MessageEventData format with 'message' property
         this.messagingGateway.broadcastMessage(conversationId, {
-          id: messageId,
-          conversationId,
-          senderId,
-          content,
-          messageType,
-          sentAt,
+          message: {
+            id: messageId,
+            conversationId,
+            senderId,
+            content,
+            messageType,
+            sentAt,
+            createdAt: sentAt,
+            updatedAt: sentAt,
+            isRead: false,
+            isEdited: false,
+            isDeleted: false,
+            replyToId: messageEvent.eventData.replyToMessageId || null,
+            attachmentUrls: messageEvent.eventData.fileAttachments || [],
+            attachmentNames: [],
+            attachmentSizes: [],
+            editedAt: null,
+            sender: null, // Will be populated by client
+            replyTo: null,
+            reactions: [],
+            readReceipts: [],
+          },
           eventType: 'message_sent',
         });
 
@@ -128,7 +145,7 @@ export class WebSocketEventService implements OnModuleInit {
           title,
         } = conversationEvent.eventData;
 
-        console.log('LOOK HERE LOL RETARD', event.eventData);
+        this.logger.debug('Conversation created event data:', event.eventData);
 
         // Notify all participants about new conversation
         for (const participantId of participantIds) {

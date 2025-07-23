@@ -726,21 +726,41 @@ export function useMessaging(
 
       // Message events - with proper backend event names
       registerEventListener("new_message", (data: MessageEventData) => {
+        if (!data || !data.message) {
+          console.error("❌ [useMessaging] Received invalid message event data:", data);
+          return;
+        }
+        
         console.log("📨 [useMessaging] Received new message:", data.message.id);
         handleNewMessage(data.message);
       });
 
       registerEventListener("message_updated", (data: MessageUpdatedEventData) => {
+        if (!data || !data.messageId) {
+          console.error("❌ [useMessaging] Received invalid message_updated event data:", data);
+          return;
+        }
+        
         console.log("✏️ [useMessaging] Message updated:", data.messageId);
         handleMessageUpdate(data);
       });
 
       registerEventListener("message_read", (data: MessageReadEventData) => {
+        if (!data || !data.messageId || !data.userId) {
+          console.error("❌ [useMessaging] Received invalid message_read event data:", data);
+          return;
+        }
+        
         console.log("👁️ [useMessaging] Message read:", data.messageId);
         handleMessageRead(data);
       });
 
       registerEventListener("message_reaction", (data: MessageReactionEventData) => {
+        if (!data || !data.messageId || !data.userId || !data.emoji) {
+          console.error("❌ [useMessaging] Received invalid message_reaction event data:", data);
+          return;
+        }
+        
         console.log("⚡ [useMessaging] Message reaction:", {
           messageId: data.messageId,
           emoji: data.emoji,

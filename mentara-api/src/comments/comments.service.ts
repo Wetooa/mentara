@@ -305,6 +305,11 @@ export class CommentsService {
         },
       });
 
+      // Validate comment data before emitting event
+      if (!comment.id || !comment.postId || !comment.userId || !comment.content) {
+        throw new InternalServerErrorException('Comment creation failed: missing required fields');
+      }
+
       // Emit CommentAddedEvent for notifications
       await this.eventEmitter.emitAsync(
         'CommentAddedEvent',

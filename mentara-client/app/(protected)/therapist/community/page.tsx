@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
@@ -90,20 +91,29 @@ export default function TherapistCommunity() {
   // Enhanced community stats for therapists
   const { stats: communityStats } = useCommunityStats();
 
+  // Mobile sidebar visibility state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const breadcrumb = getRoomBreadcrumb();
 
   return (
     <main className="w-full h-full">
       {/* Mobile overlay for sidebar */}
       <div className="lg:hidden">
-        {selectedCommunityId && (
+        {(selectedCommunityId || isSidebarOpen) && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="fixed inset-0 bg-black/50" onClick={() => handleCommunitySelect('')} />
+            <div className="fixed inset-0 bg-black/50" onClick={() => {
+              handleCommunitySelect('');
+              setIsSidebarOpen(false);
+            }} />
             <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
               <CommunitySidebar
                 selectedCommunityId={selectedCommunityId}
                 selectedRoomId={selectedRoomId}
-                onCommunitySelect={handleCommunitySelect}
+                onCommunitySelect={(communityId) => {
+                  handleCommunitySelect(communityId);
+                  setIsSidebarOpen(false);
+                }}
                 onRoomSelect={handleRoomSelect}
               />
             </div>
@@ -415,16 +425,15 @@ export default function TherapistCommunity() {
               variant="outline"
               size="sm"
               onClick={() => {
-                // Only call handleCommunitySelect if we have a valid selectedCommunityId
-                // This prevents the 'toggle' fallback that causes API errors
                 if (selectedCommunityId) {
+                  // Show sidebar to change community selection
                   handleCommunitySelect(selectedCommunityId);
+                } else {
+                  // Show sidebar for initial community selection
+                  setIsSidebarOpen(true);
                 }
-                // If no community is selected, we could potentially show a community selection modal
-                // or navigate to a communities list page in the future
               }}
               className="border-amber-300 text-amber-600"
-              disabled={!selectedCommunityId}
             >
               <Hash className="h-4 w-4 mr-1" />
               {selectedCommunityId ? 'Communities' : 'Select Community'}

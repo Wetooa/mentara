@@ -1,0 +1,106 @@
+695687918297b8a79763ad3d64355dd4
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminAuthController = void 0;
+const common_1 = require("@nestjs/common");
+const throttler_1 = require("@nestjs/throttler");
+const jwt_auth_guard_1 = require("../guards/jwt-auth.guard");
+const current_user_id_decorator_1 = require("../decorators/current-user-id.decorator");
+const current_user_role_decorator_1 = require("../decorators/current-user-role.decorator");
+const zod_validation_pipe_1 = require("../../common/pipes/zod-validation.pipe");
+// Import validation schemas from local validation
+const validation_1 = require("../validation");
+const admin_auth_service_1 = require("../services/admin-auth.service");
+let AdminAuthController = class AdminAuthController {
+    adminAuthService;
+    constructor(adminAuthService) {
+        this.adminAuthService = adminAuthService;
+    }
+    async createAdminAccount(currentUserRole, registerDto) {
+        // Only super admins can create other admins
+        if (currentUserRole !== 'admin') {
+            throw new common_1.ForbiddenException('Only admins can create admin accounts');
+        }
+        const result = await this.adminAuthService.createAdminAccount(registerDto.email, registerDto.password, registerDto.firstName, registerDto.lastName, registerDto.adminLevel || 'admin', registerDto.permissions || []);
+        return {
+            user: {
+                id: result.user.id,
+                email: result.user.email,
+                firstName: result.user.firstName,
+                lastName: result.user.lastName,
+                role: result.user.role,
+                isEmailVerified: result.user.emailVerified ?? false,
+                createdAt: result.user.createdAt,
+                updatedAt: result.user.updatedAt,
+            },
+            message: result.message,
+        };
+    }
+    // REMOVED: Duplicate login route - use universal /auth/login instead
+    // This was redundant with AuthController.login() which handles all roles
+    async getProfile(userId) {
+        // TODO: Add AdminProfileResponse schema
+        return this.adminAuthService.getAdminProfile(userId);
+    }
+    async getPermissions(userId) {
+        return this.adminAuthService.getAdminPermissions(userId);
+    }
+    async getDashboardStats(userId) {
+        return this.adminAuthService.getAdminDashboardStats(userId);
+    }
+};
+exports.AdminAuthController = AdminAuthController;
+__decorate([
+    (0, common_1.Post)('create-account'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 600000 } }) // 3 admin creations per 10 minutes
+    ,
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    __param(0, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __param(1, (0, common_1.Body)(new zod_validation_pipe_1.ZodValidationPipe(validation_1.RegisterAdminDtoSchema))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminAuthController.prototype, "createAdminAccount", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('profile'),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], AdminAuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('permissions'),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminAuthController.prototype, "getPermissions", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('dashboard-stats'),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminAuthController.prototype, "getDashboardStats", null);
+exports.AdminAuthController = AdminAuthController = __decorate([
+    (0, common_1.Controller)('auth/admin'),
+    __metadata("design:paramtypes", [typeof (_a = typeof admin_auth_service_1.AdminAuthService !== "undefined" && admin_auth_service_1.AdminAuthService) === "function" ? _a : Object])
+], AdminAuthController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvY29udHJvbGxlcnMvYWRtaW4tYXV0aC5jb250cm9sbGVyLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSwyQ0FVd0I7QUFDeEIsaURBQTZDO0FBQzdDLDZEQUF3RDtBQUN4RCx1RkFBd0U7QUFDeEUsMkZBQTRFO0FBRTVFLGdGQUEyRTtBQVEzRSxrREFBa0Q7QUFDbEQsOENBR3VCO0FBQ3ZCLHVFQUFrRTtBQUkzRCxJQUFNLG1CQUFtQixHQUF6QixNQUFNLG1CQUFtQjtJQUNEO0lBQTdCLFlBQTZCLGdCQUFrQztRQUFsQyxxQkFBZ0IsR0FBaEIsZ0JBQWdCLENBQWtCO0lBQUcsQ0FBQztJQU03RCxBQUFOLEtBQUssQ0FBQyxrQkFBa0IsQ0FDSCxlQUF1QixFQUUxQyxXQUE2QjtRQUU3Qiw0Q0FBNEM7UUFDNUMsSUFBSSxlQUFlLEtBQUssT0FBTyxFQUFFLENBQUM7WUFDaEMsTUFBTSxJQUFJLDJCQUFrQixDQUFDLHVDQUF1QyxDQUFDLENBQUM7UUFDeEUsQ0FBQztRQUVELE1BQU0sTUFBTSxHQUFHLE1BQU0sSUFBSSxDQUFDLGdCQUFnQixDQUFDLGtCQUFrQixDQUMzRCxXQUFXLENBQUMsS0FBSyxFQUNqQixXQUFXLENBQUMsUUFBUSxFQUNwQixXQUFXLENBQUMsU0FBUyxFQUNyQixXQUFXLENBQUMsUUFBUSxFQUNuQixXQUFtQixDQUFDLFVBQVUsSUFBSSxPQUFPLEVBQ3pDLFdBQW1CLENBQUMsV0FBVyxJQUFJLEVBQUUsQ0FDdkMsQ0FBQztRQUVGLE9BQU87WUFDTCxJQUFJLEVBQUU7Z0JBQ0osRUFBRSxFQUFFLE1BQU0sQ0FBQyxJQUFJLENBQUMsRUFBRTtnQkFDbEIsS0FBSyxFQUFFLE1BQU0sQ0FBQyxJQUFJLENBQUMsS0FBSztnQkFDeEIsU0FBUyxFQUFFLE1BQU0sQ0FBQyxJQUFJLENBQUMsU0FBUztnQkFDaEMsUUFBUSxFQUFFLE1BQU0sQ0FBQyxJQUFJLENBQUMsUUFBUTtnQkFDOUIsSUFBSSxFQUFFLE1BQU0sQ0FBQyxJQUFJLENBQUMsSUFBVztnQkFDN0IsZUFBZSxFQUFFLE1BQU0sQ0FBQyxJQUFJLENBQUMsYUFBYSxJQUFJLEtBQUs7Z0JBQ25ELFNBQVMsRUFBRSxNQUFNLENBQUMsSUFBSSxDQUFDLFNBQVM7Z0JBQ2hDLFNBQVMsRUFBRSxNQUFNLENBQUMsSUFBSSxDQUFDLFNBQVM7YUFDakM7WUFDRCxPQUFPLEVBQUUsTUFBTSxDQUFDLE9BQU87U0FDeEIsQ0FBQztJQUNKLENBQUM7SUFFRCxxRUFBcUU7SUFDckUseUVBQXlFO0lBSW5FLEFBQU4sS0FBSyxDQUFDLFVBQVUsQ0FBa0IsTUFBYztRQUM5Qyx3Q0FBd0M7UUFDeEMsT0FBTyxJQUFJLENBQUMsZ0JBQWdCLENBQUMsZUFBZSxDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBQ3ZELENBQUM7SUFJSyxBQUFOLEtBQUssQ0FBQyxjQUFjLENBQWtCLE1BQWM7UUFDbEQsT0FBTyxJQUFJLENBQUMsZ0JBQWdCLENBQUMsbUJBQW1CLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDM0QsQ0FBQztJQUlLLEFBQU4sS0FBSyxDQUFDLGlCQUFpQixDQUFrQixNQUFjO1FBQ3JELE9BQU8sSUFBSSxDQUFDLGdCQUFnQixDQUFDLHNCQUFzQixDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBQzlELENBQUM7Q0FDRixDQUFBO0FBOURZLGtEQUFtQjtBQU94QjtJQUpMLElBQUEsYUFBSSxFQUFDLGdCQUFnQixDQUFDO0lBQ3RCLElBQUEsa0JBQVMsRUFBQyw2QkFBWSxDQUFDO0lBQ3ZCLElBQUEsb0JBQVEsRUFBQyxFQUFFLE9BQU8sRUFBRSxFQUFFLEtBQUssRUFBRSxDQUFDLEVBQUUsR0FBRyxFQUFFLE1BQU0sRUFBRSxFQUFFLENBQUMsQ0FBQyxtQ0FBbUM7O0lBQ3BGLElBQUEsaUJBQVEsRUFBQyxtQkFBVSxDQUFDLE9BQU8sQ0FBQztJQUUxQixXQUFBLElBQUEsNkNBQWUsR0FBRSxDQUFBO0lBQ2pCLFdBQUEsSUFBQSxhQUFJLEVBQUMsSUFBSSx1Q0FBaUIsQ0FBQyxtQ0FBc0IsQ0FBQyxDQUFDLENBQUE7Ozs7NkRBOEJyRDtBQU9LO0lBRkwsSUFBQSxrQkFBUyxFQUFDLDZCQUFZLENBQUM7SUFDdkIsSUFBQSxZQUFHLEVBQUMsU0FBUyxDQUFDO0lBQ0csV0FBQSxJQUFBLHlDQUFhLEdBQUUsQ0FBQTs7O3dEQUFrQixPQUFPLG9CQUFQLE9BQU87cURBR3pEO0FBSUs7SUFGTCxJQUFBLGtCQUFTLEVBQUMsNkJBQVksQ0FBQztJQUN2QixJQUFBLFlBQUcsRUFBQyxhQUFhLENBQUM7SUFDRyxXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7O3lEQUVwQztBQUlLO0lBRkwsSUFBQSxrQkFBUyxFQUFDLDZCQUFZLENBQUM7SUFDdkIsSUFBQSxZQUFHLEVBQUMsaUJBQWlCLENBQUM7SUFDRSxXQUFBLElBQUEseUNBQWEsR0FBRSxDQUFBOzs7OzREQUV2Qzs4QkE3RFUsbUJBQW1CO0lBRC9CLElBQUEsbUJBQVUsRUFBQyxZQUFZLENBQUM7eURBRXdCLHFDQUFnQixvQkFBaEIscUNBQWdCO0dBRHBELG1CQUFtQixDQThEL0IiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2F1dGgvY29udHJvbGxlcnMvYWRtaW4tYXV0aC5jb250cm9sbGVyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7XG4gIEJvZHksXG4gIENvbnRyb2xsZXIsXG4gIEdldCxcbiAgUG9zdCxcbiAgVXNlR3VhcmRzLFxuICBIdHRwQ29kZSxcbiAgSHR0cFN0YXR1cyxcbiAgUmVxLFxuICBGb3JiaWRkZW5FeGNlcHRpb24sXG59IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IFRocm90dGxlIH0gZnJvbSAnQG5lc3Rqcy90aHJvdHRsZXInO1xuaW1wb3J0IHsgSnd0QXV0aEd1YXJkIH0gZnJvbSAnLi4vZ3VhcmRzL2p3dC1hdXRoLmd1YXJkJztcbmltcG9ydCB7IEN1cnJlbnRVc2VySWQgfSBmcm9tICcuLi9kZWNvcmF0b3JzL2N1cnJlbnQtdXNlci1pZC5kZWNvcmF0b3InO1xuaW1wb3J0IHsgQ3VycmVudFVzZXJSb2xlIH0gZnJvbSAnLi4vZGVjb3JhdG9ycy9jdXJyZW50LXVzZXItcm9sZS5kZWNvcmF0b3InO1xuaW1wb3J0IHsgUHVibGljIH0gZnJvbSAnLi4vZGVjb3JhdG9ycy9wdWJsaWMuZGVjb3JhdG9yJztcbmltcG9ydCB7IFpvZFZhbGlkYXRpb25QaXBlIH0gZnJvbSAnLi4vLi4vY29tbW9uL3BpcGVzL3pvZC12YWxpZGF0aW9uLnBpcGUnO1xuLy8gSW1wb3J0IHR5cGVzIGZyb20gbG9jYWwgYXV0aCB0eXBlc1xuaW1wb3J0IHR5cGUge1xuICBSZWdpc3RlckFkbWluRHRvLFxuICBMb2dpbkR0byxcbiAgQWRtaW5BdXRoUmVzcG9uc2UsXG59IGZyb20gJy4uL3R5cGVzJztcblxuLy8gSW1wb3J0IHZhbGlkYXRpb24gc2NoZW1hcyBmcm9tIGxvY2FsIHZhbGlkYXRpb25cbmltcG9ydCB7XG4gIFJlZ2lzdGVyQWRtaW5EdG9TY2hlbWEsXG4gIExvZ2luRHRvU2NoZW1hLFxufSBmcm9tICcuLi92YWxpZGF0aW9uJztcbmltcG9ydCB7IEFkbWluQXV0aFNlcnZpY2UgfSBmcm9tICcuLi9zZXJ2aWNlcy9hZG1pbi1hdXRoLnNlcnZpY2UnO1xuaW1wb3J0IHsgUmVxdWVzdCB9IGZyb20gJ2V4cHJlc3MnO1xuXG5AQ29udHJvbGxlcignYXV0aC9hZG1pbicpXG5leHBvcnQgY2xhc3MgQWRtaW5BdXRoQ29udHJvbGxlciB7XG4gIGNvbnN0cnVjdG9yKHByaXZhdGUgcmVhZG9ubHkgYWRtaW5BdXRoU2VydmljZTogQWRtaW5BdXRoU2VydmljZSkge31cblxuICBAUG9zdCgnY3JlYXRlLWFjY291bnQnKVxuICBAVXNlR3VhcmRzKEp3dEF1dGhHdWFyZClcbiAgQFRocm90dGxlKHsgZGVmYXVsdDogeyBsaW1pdDogMywgdHRsOiA2MDAwMDAgfSB9KSAvLyAzIGFkbWluIGNyZWF0aW9ucyBwZXIgMTAgbWludXRlc1xuICBASHR0cENvZGUoSHR0cFN0YXR1cy5DUkVBVEVEKVxuICBhc3luYyBjcmVhdGVBZG1pbkFjY291bnQoXG4gICAgQEN1cnJlbnRVc2VyUm9sZSgpIGN1cnJlbnRVc2VyUm9sZTogc3RyaW5nLFxuICAgIEBCb2R5KG5ldyBab2RWYWxpZGF0aW9uUGlwZShSZWdpc3RlckFkbWluRHRvU2NoZW1hKSlcbiAgICByZWdpc3RlckR0bzogUmVnaXN0ZXJBZG1pbkR0byxcbiAgKSB7XG4gICAgLy8gT25seSBzdXBlciBhZG1pbnMgY2FuIGNyZWF0ZSBvdGhlciBhZG1pbnNcbiAgICBpZiAoY3VycmVudFVzZXJSb2xlICE9PSAnYWRtaW4nKSB7XG4gICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKCdPbmx5IGFkbWlucyBjYW4gY3JlYXRlIGFkbWluIGFjY291bnRzJyk7XG4gICAgfVxuXG4gICAgY29uc3QgcmVzdWx0ID0gYXdhaXQgdGhpcy5hZG1pbkF1dGhTZXJ2aWNlLmNyZWF0ZUFkbWluQWNjb3VudChcbiAgICAgIHJlZ2lzdGVyRHRvLmVtYWlsLFxuICAgICAgcmVnaXN0ZXJEdG8ucGFzc3dvcmQsXG4gICAgICByZWdpc3RlckR0by5maXJzdE5hbWUsXG4gICAgICByZWdpc3RlckR0by5sYXN0TmFtZSxcbiAgICAgIChyZWdpc3RlckR0byBhcyBhbnkpLmFkbWluTGV2ZWwgfHwgJ2FkbWluJyxcbiAgICAgIChyZWdpc3RlckR0byBhcyBhbnkpLnBlcm1pc3Npb25zIHx8IFtdLFxuICAgICk7XG5cbiAgICByZXR1cm4ge1xuICAgICAgdXNlcjoge1xuICAgICAgICBpZDogcmVzdWx0LnVzZXIuaWQsXG4gICAgICAgIGVtYWlsOiByZXN1bHQudXNlci5lbWFpbCxcbiAgICAgICAgZmlyc3ROYW1lOiByZXN1bHQudXNlci5maXJzdE5hbWUsXG4gICAgICAgIGxhc3ROYW1lOiByZXN1bHQudXNlci5sYXN0TmFtZSxcbiAgICAgICAgcm9sZTogcmVzdWx0LnVzZXIucm9sZSBhcyBhbnksXG4gICAgICAgIGlzRW1haWxWZXJpZmllZDogcmVzdWx0LnVzZXIuZW1haWxWZXJpZmllZCA/PyBmYWxzZSxcbiAgICAgICAgY3JlYXRlZEF0OiByZXN1bHQudXNlci5jcmVhdGVkQXQsXG4gICAgICAgIHVwZGF0ZWRBdDogcmVzdWx0LnVzZXIudXBkYXRlZEF0LFxuICAgICAgfSxcbiAgICAgIG1lc3NhZ2U6IHJlc3VsdC5tZXNzYWdlLFxuICAgIH07XG4gIH1cblxuICAvLyBSRU1PVkVEOiBEdXBsaWNhdGUgbG9naW4gcm91dGUgLSB1c2UgdW5pdmVyc2FsIC9hdXRoL2xvZ2luIGluc3RlYWRcbiAgLy8gVGhpcyB3YXMgcmVkdW5kYW50IHdpdGggQXV0aENvbnRyb2xsZXIubG9naW4oKSB3aGljaCBoYW5kbGVzIGFsbCByb2xlc1xuXG4gIEBVc2VHdWFyZHMoSnd0QXV0aEd1YXJkKVxuICBAR2V0KCdwcm9maWxlJylcbiAgYXN5bmMgZ2V0UHJvZmlsZShAQ3VycmVudFVzZXJJZCgpIHVzZXJJZDogc3RyaW5nKTogUHJvbWlzZTxhbnk+IHtcbiAgICAvLyBUT0RPOiBBZGQgQWRtaW5Qcm9maWxlUmVzcG9uc2Ugc2NoZW1hXG4gICAgcmV0dXJuIHRoaXMuYWRtaW5BdXRoU2VydmljZS5nZXRBZG1pblByb2ZpbGUodXNlcklkKTtcbiAgfVxuXG4gIEBVc2VHdWFyZHMoSnd0QXV0aEd1YXJkKVxuICBAR2V0KCdwZXJtaXNzaW9ucycpXG4gIGFzeW5jIGdldFBlcm1pc3Npb25zKEBDdXJyZW50VXNlcklkKCkgdXNlcklkOiBzdHJpbmcpIHtcbiAgICByZXR1cm4gdGhpcy5hZG1pbkF1dGhTZXJ2aWNlLmdldEFkbWluUGVybWlzc2lvbnModXNlcklkKTtcbiAgfVxuXG4gIEBVc2VHdWFyZHMoSnd0QXV0aEd1YXJkKVxuICBAR2V0KCdkYXNoYm9hcmQtc3RhdHMnKVxuICBhc3luYyBnZXREYXNoYm9hcmRTdGF0cyhAQ3VycmVudFVzZXJJZCgpIHVzZXJJZDogc3RyaW5nKSB7XG4gICAgcmV0dXJuIHRoaXMuYWRtaW5BdXRoU2VydmljZS5nZXRBZG1pbkRhc2hib2FyZFN0YXRzKHVzZXJJZCk7XG4gIH1cbn1cbiJdLCJ2ZXJzaW9uIjozfQ==

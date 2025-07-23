@@ -759,6 +759,27 @@ export class NotificationsService implements OnModuleInit {
         parentCommentId 
       } = event.eventData;
 
+      // Validate required event data
+      if (!authorId) {
+        this.logger.error(`Missing authorId in CommentAddedEvent for comment ${commentId}`, {
+          commentId,
+          postId,
+          eventData: event.eventData
+        });
+        return;
+      }
+
+      if (!commentId || !postId || !content) {
+        this.logger.error(`Missing required data in CommentAddedEvent`, {
+          commentId,
+          postId,
+          authorId,
+          hasContent: !!content,
+          eventData: event.eventData
+        });
+        return;
+      }
+
       // Get comment author details
       const author = await this.prisma.user.findUnique({
         where: { id: authorId },
@@ -778,7 +799,13 @@ export class NotificationsService implements OnModuleInit {
       });
 
       if (!author || !post) {
-        this.logger.warn(`Author or post not found for comment notification: ${commentId}`);
+        this.logger.warn(`Author or post not found for comment notification: ${commentId}`, {
+          authorFound: !!author,
+          postFound: !!post,
+          authorId,
+          postId,
+          commentId
+        });
         return;
       }
 

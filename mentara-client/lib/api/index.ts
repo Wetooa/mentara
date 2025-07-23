@@ -106,6 +106,8 @@ export const api = {
   profile: profileService,
   preAssessment: preAssessmentService,
   worksheets: worksheetService,
+
+  therapistAuth: authService.therapist, // Backwards compatibility
 };
 
 // Export the main API type
