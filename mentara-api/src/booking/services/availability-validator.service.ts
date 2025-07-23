@@ -154,7 +154,7 @@ export class AvailabilityValidatorService {
   /**
    * Check if therapist is available at the specified time
    */
-  
+
   /**
    * Validate therapist availability with transaction support and timezone handling
    */
@@ -174,15 +174,40 @@ export class AvailabilityValidatorService {
       therapistTimezone = therapist?.timezone || 'UTC';
     }
 
-    // Convert to therapist's local timezone for day/time extraction
-    const therapistLocalStart = new Date(startTime.toLocaleString('en-US', { timeZone: therapistTimezone }));
-    const therapistLocalEnd = new Date(therapistLocalStart.getTime() + duration * 60 * 1000);
+    // Convert to therapist's timezone for day/time extraction (best practice: keep UTC, convert only for extraction)
+    // Use Intl.DateTimeFormat for proper timezone conversion without string parsing issues
+    const therapistFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: therapistTimezone,
+      weekday: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
 
-    const dayOfWeek = therapistLocalStart
-      .toLocaleDateString('en-US', { weekday: 'long' })
-      .toUpperCase();
-    const startTimeStr = this.formatTime(therapistLocalStart);
-    const endTimeStr = this.formatTime(therapistLocalEnd);
+    const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+    const endFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: therapistTimezone, 
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    // Extract day and time components in therapist's timezone
+    const startParts = therapistFormatter.formatToParts(startTime);
+    const endParts = endFormatter.formatToParts(endTime);
+    
+    // Get day name from parts (already formatted as "Monday", "Tuesday", etc.)
+    const dayOfWeek = startParts
+      .find(part => part.type === 'weekday')?.value.toUpperCase() || 'UNKNOWN';
+    
+    // Get time strings in HH:MM format from parts
+    const startHour = startParts.find(part => part.type === 'hour')?.value || '00';
+    const startMinute = startParts.find(part => part.type === 'minute')?.value || '00';
+    const endHour = endParts.find(part => part.type === 'hour')?.value || '00';
+    const endMinute = endParts.find(part => part.type === 'minute')?.value || '00';
+    
+    const startTimeStr = `${startHour}:${startMinute}`;
+    const endTimeStr = `${endHour}:${endMinute}`;
 
     const availability = await prismaClient.therapistAvailability.findFirst({
       where: {
