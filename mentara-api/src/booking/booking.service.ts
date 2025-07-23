@@ -90,46 +90,13 @@ export class BookingService {
           );
         }
 
-        // Validate therapist availability within transaction
-        // Get therapist's timezone preference
-        const therapist = await tx.therapist.findUnique({
-          where: { userId: therapistId },
-          select: { timezone: true },
-        });
-
-        const therapistTimezone = therapist?.timezone || 'UTC';
-
-        // Convert to therapist's timezone for availability check
-        const therapistLocalTime = new Date(
-          startTimeDate.toLocaleString('en-US', {
-            timeZone: therapistTimezone,
-          }),
+        // Validate therapist availability using the validator service
+        await this.availabilityValidator.validateTherapistAvailabilityWithTransaction(
+          therapistId,
+          startTimeDate,
+          duration,
+          tx, // Pass transaction client
         );
-        const therapistLocalEndTime = new Date(
-          endTimeDate.toLocaleString('en-US', { timeZone: therapistTimezone }),
-        );
-
-        const dayOfWeek = therapistLocalTime
-          .toLocaleDateString('en-US', { weekday: 'long' })
-          .toUpperCase();
-        const timeOnly = therapistLocalTime.toTimeString().slice(0, 5); // HH:MM format
-        const endTimeOnly = therapistLocalEndTime.toTimeString().slice(0, 5);
-
-        const availability = await tx.therapistAvailability.findFirst({
-          where: {
-            therapistId,
-            dayOfWeek,
-            startTime: { lte: timeOnly },
-            endTime: { gte: endTimeOnly },
-            isAvailable: true,
-          },
-        });
-
-        if (!availability) {
-          throw new BadRequestException(
-            `Therapist is not available at the requested time (${timeOnly}-${endTimeOnly} ${dayOfWeek} in ${therapistTimezone})`,
-          );
-        }
 
         // Create the meeting within the transaction
         const meeting = await tx.meeting.create({

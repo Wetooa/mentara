@@ -154,6 +154,58 @@ export class AvailabilityValidatorService {
   /**
    * Check if therapist is available at the specified time
    */
+  
+  /**
+   * Validate therapist availability with transaction support and timezone handling
+   */
+  async validateTherapistAvailabilityWithTransaction(
+    therapistId: string,
+    startTime: Date,
+    duration: number,
+    prismaClient: any, // Accept transaction client or regular prisma
+    therapistTimezone?: string,
+  ): Promise<boolean> {
+    // Get therapist timezone if not provided
+    if (!therapistTimezone) {
+      const therapist = await prismaClient.therapist.findUnique({
+        where: { userId: therapistId },
+        select: { timezone: true },
+      });
+      therapistTimezone = therapist?.timezone || 'UTC';
+    }
+
+    // Convert to therapist's local timezone for day/time extraction
+    const therapistLocalStart = new Date(startTime.toLocaleString('en-US', { timeZone: therapistTimezone }));
+    const therapistLocalEnd = new Date(therapistLocalStart.getTime() + duration * 60 * 1000);
+
+    const dayOfWeek = therapistLocalStart
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toUpperCase();
+    const startTimeStr = this.formatTime(therapistLocalStart);
+    const endTimeStr = this.formatTime(therapistLocalEnd);
+
+    const availability = await prismaClient.therapistAvailability.findFirst({
+      where: {
+        therapistId,
+        dayOfWeek,
+        startTime: { lte: startTimeStr },
+        endTime: { gte: endTimeStr },
+        isAvailable: true,
+      },
+    });
+
+    if (!availability) {
+      throw new BadRequestException(
+        `Therapist is not available at the requested time (${startTimeStr}-${endTimeStr} ${dayOfWeek} in ${therapistTimezone})`,
+      );
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if therapist is available at the specified time
+   */
   async validateTherapistAvailability(
     therapistId: string,
     startTime: Date,
