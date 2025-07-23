@@ -3,6 +3,7 @@ import { AxiosInstance } from "axios";
 import {
   AdminAuthResponse,
   ClientAuthResponse,
+  ClientProfileResponse,
   EmailResponse,
   LoginDto,
   RegisterAdminDto,
@@ -101,7 +102,7 @@ export function createAuthService(client: AxiosInstance) {
        * Get client profile
        * GET /auth/client/profile
        */
-      async getProfile(): Promise<any> {
+      async getProfile(): Promise<ClientProfileResponse> {
         const response = await client.get("auth/client/profile");
         return response.data;
       },

@@ -22,6 +22,8 @@ export default function MainLayout({
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  console.log("Current user:", user);
+
   const handleUserSelect = (user: User) => {
     console.log("Selected user:", user);
     router.push(`/client/profile/${user.id}`);
@@ -99,22 +101,25 @@ export default function MainLayout({
                 <Link
                   key={item.id}
                   href={item.path}
-                  className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out ${isActive
+                  className={`relative group flex h-14 w-14 flex-col items-center justify-center transition-all duration-300 ease-in-out ${
+                    isActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-primary"
-                    }`}
+                  }`}
                 >
                   <div
-                    className={`absolute inset-0 transition-all duration-400 ease-in-out ${isActive
+                    className={`absolute inset-0 transition-all duration-400 ease-in-out ${
+                      isActive
                         ? "bg-primary/15 rounded-2xl scale-100"
                         : "bg-transparent rounded-full scale-75 group-hover:bg-primary/10 group-hover:rounded-2xl group-hover:scale-100"
-                      }`}
+                    }`}
                   />
                   <div
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-in-out ${isActive
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-primary rounded-r-full transition-all duration-300 ease-in-out ${
+                      isActive
                         ? "h-8 opacity-100"
                         : "h-0 opacity-0 group-hover:h-5 group-hover:opacity-100"
-                      }`}
+                    }`}
                   />
                   <div className="relative z-10 flex flex-col items-center justify-center">
                     <Image
@@ -122,16 +127,18 @@ export default function MainLayout({
                       alt={item.name}
                       width={24}
                       height={24}
-                      className={`transition-all duration-300 ${isActive
+                      className={`transition-all duration-300 ${
+                        isActive
                           ? "text-primary scale-110"
                           : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
-                        }`}
+                      }`}
                     />
                     <span
-                      className={`mt-1 text-center text-[9px] font-medium transition-all duration-300 ${isActive
+                      className={`mt-1 text-center text-[9px] font-medium transition-all duration-300 ${
+                        isActive
                           ? "text-primary opacity-100"
                           : "text-muted-foreground opacity-75 group-hover:text-primary group-hover:opacity-100"
-                        }`}
+                      }`}
                     >
                       {item.name}
                     </span>
@@ -175,26 +182,29 @@ export default function MainLayout({
                         key={item.id}
                         href={item.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${isActive
+                        className={`relative group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${
+                          isActive
                             ? "bg-primary/15 text-primary"
                             : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                          }`}
+                        }`}
                       >
                         <Image
                           src={item.icon}
                           alt={item.name}
                           width={20}
                           height={20}
-                          className={`transition-all duration-300 ${isActive
+                          className={`transition-all duration-300 ${
+                            isActive
                               ? "text-primary scale-110"
                               : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                            }`}
+                          }`}
                         />
                         <span
-                          className={`font-medium transition-all duration-300 ${isActive
+                          className={`font-medium transition-all duration-300 ${
+                            isActive
                               ? "text-primary"
                               : "text-muted-foreground group-hover:text-primary"
-                            }`}
+                          }`}
                         >
                           {item.name}
                         </span>
@@ -268,7 +278,7 @@ export default function MainLayout({
                 >
                   <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 shadow-sm group-hover:shadow-md">
                     <Image
-                      src="/avatar-placeholder.png"
+                      src={user?.avatarUrl || "/icons/avatar-placeholder.svg"}
                       alt="User Avatar"
                       width={36}
                       height={36}
@@ -321,26 +331,29 @@ export default function MainLayout({
                   <Link
                     key={item.id}
                     href={item.path}
-                    className={`relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0 ${isActive
+                    className={`relative group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0 ${
+                      isActive
                         ? "text-primary"
                         : "text-muted-foreground hover:text-primary"
-                      }`}
+                    }`}
                   >
                     <Image
                       src={item.icon}
                       alt={item.name}
                       width={20}
                       height={20}
-                      className={`transition-all duration-300 ${isActive
+                      className={`transition-all duration-300 ${
+                        isActive
                           ? "text-primary scale-110"
                           : "text-muted-foreground group-hover:text-primary group-hover:scale-105"
-                        }`}
+                      }`}
                     />
                     <span
-                      className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${isActive
+                      className={`text-[10px] mt-1 truncate max-w-[60px] transition-all duration-300 ${
+                        isActive
                           ? "text-primary font-medium"
                           : "text-muted-foreground group-hover:text-primary"
-                        }`}
+                      }`}
                     >
                       {item.name}
                     </span>

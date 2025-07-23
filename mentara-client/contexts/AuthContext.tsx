@@ -142,6 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // const currentUserProfile = useCurrentUserProfile();
+
   const userRole = (authData as any)?.role as UserRole | null;
   const userId = (authData as any)?.userId || null;
 
@@ -194,6 +196,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return failureCount < 2;
     },
   });
+
+  console.log("Auth Data:", authData);
+  console.log("Profile Data:", profileData);
 
   // Create user object with profile data when available
   const user: User | null =

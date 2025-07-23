@@ -77,7 +77,10 @@ export class ClientAuthService {
         );
 
         // Generate realistic AI evaluation data based on assessment results
-        const aiEvaluationData = generateAIEvaluationData(scores, severityLevels);
+        const aiEvaluationData = generateAIEvaluationData(
+          scores,
+          severityLevels,
+        );
 
         preAssessment = await tx.preAssessment.create({
           data: {
@@ -179,14 +182,7 @@ export class ClientAuthService {
   async getClientProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        birthDate: true,
-        createdAt: true,
-        role: true,
+      include: {
         client: {
           include: {
             assignedTherapists: {
@@ -222,6 +218,7 @@ export class ClientAuthService {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       role: 'client' as const,
+      avatarUrl: user.avatarUrl || undefined,
       dateOfBirth: user.birthDate ? user.birthDate.toISOString() : undefined,
       phoneNumber: undefined, // Phone number not stored in User model for clients
       profileComplete: !!(user.firstName && user.lastName && user.birthDate),
