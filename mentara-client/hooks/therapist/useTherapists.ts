@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { useAllTherapists } from "@/hooks/therapist/useAllTherapists";
 
 import type {
   TherapistRecommendationResponse,
@@ -98,36 +99,10 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
 }
 
 /**
- * Hook for fetching all approved therapists (simple listing)
- * Best for: Main therapist page, browse all functionality
+ * @deprecated Duplicate function removed - use useAllTherapists from @/hooks/therapist/useAllTherapists instead
+ * This duplicate implementation has been consolidated into the new useAllTherapists hook
+ * which provides better filtering, pagination, and React Query patterns.
  */
-export function useAllTherapists(params: TherapistSearchParams = {}) {
-  const api = useApi();
-
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ['therapists', 'all', params],
-    queryFn: (): Promise<any> => {
-      return api.therapists.getAllTherapists(params);
-    },
-    select: (response) => response.data || { therapists: [], totalCount: 0 },
-    enabled: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  const therapistCards: TherapistCardData[] = data?.therapists?.map(transformTherapistForCard) || [];
-
-  return {
-    therapists: therapistCards,
-    totalCount: data?.totalCount || 0,
-    currentPage: data?.currentPage || 1,
-    totalPages: data?.totalPages || 1,
-    hasNextPage: data?.hasNextPage || false,
-    hasPreviousPage: data?.hasPreviousPage || false,
-    isLoading,
-    error,
-    refetch,
-  };
-}
 
 /**
  * @deprecated This hook has been replaced by useAllTherapists and useAllTherapistsWithFilters
