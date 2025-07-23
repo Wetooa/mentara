@@ -16,7 +16,7 @@ import {
 import BookingCalendar from "@/components/booking/BookingCalendar";
 import { ClientBookingInterface } from "@/components/client/ClientBookingInterface";
 import { useBooking, useMeetings } from "@/hooks/booking/useBooking";
-import { useTherapist } from "@/hooks/therapist/useTherapist";
+import { useAssignedTherapists } from "@/hooks/therapist/useTherapist";
 import { MeetingStatus } from "@/types/booking";
 import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 import { toast } from "sonner";
@@ -28,9 +28,11 @@ export default function BookingPage() {
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Get user's assigned therapists
-  const { therapist } = useTherapist();
-  const therapists = therapist ? [therapist] : [];
-  const therapistsLoading = false;
+  const { 
+    data: therapists = [], 
+    isLoading: therapistsLoading, 
+    error: therapistsError 
+  } = useAssignedTherapists();
 
   // Get user's meetings
   const { meetings, isLoading: meetingsLoading } = useMeetings({
@@ -110,6 +112,13 @@ export default function BookingPage() {
                     <Skeleton key={i} className="h-16 w-full" />
                   ))}
                 </div>
+              ) : therapistsError ? (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to load assigned therapists. Please try refreshing the page.
+                  </AlertDescription>
+                </Alert>
               ) : therapists.length === 0 ? (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
@@ -118,9 +127,9 @@ export default function BookingPage() {
                   </AlertDescription>
                 </Alert>
               ) : (
-                therapists.map((therapist) => (
+                therapists.map((therapist, index) => (
                   <Card
-                    key={therapist.id}
+                    key={`therapist-${therapist.id}-${index}`}
                     className={`cursor-pointer transition-colors ${
                       selectedTherapistId === therapist.id
                         ? "ring-2 ring-blue-500 bg-blue-50"
@@ -169,8 +178,8 @@ export default function BookingPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {(Array.isArray(meetings) ? meetings : meetings?.meetings || []).slice(0, 5).map((meeting) => (
-                    <Card key={meeting.id} className="border border-gray-200">
+                  {(Array.isArray(meetings) ? meetings : meetings?.meetings || []).slice(0, 5).map((meeting, index) => (
+                    <Card key={`meeting-${meeting.id}-${index}`} className="border border-gray-200">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">

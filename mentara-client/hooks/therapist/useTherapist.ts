@@ -56,8 +56,11 @@ export function useTherapist() {
     },
     onSuccess: (data, therapistId) => {
       toast.success("Therapist assigned successfully!");
-      // Invalidate and refetch the assigned therapist
+      // Invalidate both single and multiple therapist queries
       queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      // Also invalidate booking-related queries
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to assign therapist";
@@ -72,8 +75,11 @@ export function useTherapist() {
     },
     onSuccess: () => {
       toast.success("Therapist removed successfully!");
-      // Invalidate the assigned therapist query
+      // Invalidate both single and multiple therapist queries
       queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapist'] });
+      queryClient.invalidateQueries({ queryKey: ['client', 'assignedTherapists'] });
+      // Also invalidate booking-related queries
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
     },
     onError: (error: MentaraApiError) => {
       const message = error?.response?.data?.message || error?.message || "Failed to remove therapist";
@@ -141,7 +147,10 @@ export function useAssignedTherapists() {
 
   return useQuery({
     queryKey: ['client', 'assignedTherapists'],
-    queryFn: () => api.client.getAssignedTherapists(),
+    queryFn: async () => {
+      const response = await api.client.getAssignedTherapists();
+      return response.therapists;
+    },
     staleTime: 1000 * 60 * 10, // Cache for 10 minutes
     retry: (failureCount, error: MentaraApiError) => {
       // Don't retry on 404 (no therapists assigned)

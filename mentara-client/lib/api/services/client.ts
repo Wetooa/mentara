@@ -90,6 +90,15 @@ export function createClientService(client: AxiosInstance) {
       const response = await client.delete("client/therapist");
       return response.data;
     },
+
+    /**
+     * Get all assigned therapists
+     * GET /client/therapists
+     */
+    async getAssignedTherapists(): Promise<{ therapists: TherapistRecommendation[] }> {
+      const response = await client.get("client/therapists");
+      return response.data;
+    },
   };
 }
 
