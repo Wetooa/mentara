@@ -104,14 +104,12 @@ export class TherapistRecommendationService {
         clinicalAnalysis = null;
       }
 
-      // Extract user conditions and severity levels
+      // Extract user conditions and AI evaluation data
       const userConditions = this.extractUserConditions(user.preAssessment);
-      // Extract severity levels from the answers JSON field
-      const answers = user.preAssessment.answers as any;
-      const severityLevels = answers?.severityLevels as Record<
-        string,
-        string
-      >;
+      const aiEvaluation = this.extractAiEvaluation(user.preAssessment);
+      
+      // Extract severity levels from the database field (not from answers)
+      const severityLevels = user.preAssessment.severityLevels as Record<string, string>;
 
       // Enhanced therapist filtering based on clinical insights
       const therapistWhere: any = {
@@ -439,22 +437,39 @@ export class TherapistRecommendationService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     const conditions: Record<string, string> = {};
-    // Extract data from the answers JSON field
-    const answers = preAssessment.answers as any;
-    const severityLevels = answers?.severityLevels as Record<
-      string,
-      string
-    >;
-    const questionnaires = answers?.questionnaires as string[];
     
-    if (questionnaires && severityLevels) {
-      questionnaires.forEach((q) => {
-        if (severityLevels[q]) {
-          conditions[q] = severityLevels[q];
+    // Extract data from the separate database fields (corrected approach)
+    const severityLevels = preAssessment.severityLevels as Record<string, string>;
+    const scores = preAssessment.scores as Record<string, number>;
+    
+    if (severityLevels && scores) {
+      // Use questionnaire names from the scores object
+      Object.keys(scores).forEach((questionnaire) => {
+        if (severityLevels[questionnaire]) {
+          conditions[questionnaire] = severityLevels[questionnaire];
         }
       });
     }
+    
     return conditions;
+  }
+
+  /**
+   * Extract AI evaluation data from pre-assessment for enhanced matching
+   */
+  private extractAiEvaluation(preAssessment: PreAssessment): any {
+    const aiEstimate = preAssessment.aiEstimate as any;
+    
+    if (!aiEstimate || typeof aiEstimate !== 'object') {
+      return null;
+    }
+
+    return {
+      confidence: aiEstimate.confidence || 0,
+      riskFactors: aiEstimate.risk_factors || [],
+      recommendations: aiEstimate.recommendations || [],
+      estimatedSeverity: aiEstimate.estimated_severity || {},
+    };
   }
 
   private calculateMatchScore(

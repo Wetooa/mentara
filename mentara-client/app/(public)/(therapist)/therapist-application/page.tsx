@@ -775,7 +775,7 @@ export default function SinglePageTherapistApplication() {
         toast.info("Registering therapist account with documents...");
 
         // Use unified therapist registration endpoint
-        const result = await api.therapistAuth.register(formData);
+        const result = await api.auth.therapist.register(formData);
 
         console.log(
           "Therapist registration with documents successful:",
@@ -789,7 +789,7 @@ export default function SinglePageTherapistApplication() {
         // Navigate to success page after successful registration
         setTimeout(() => {
           router.push(
-            `/therapist-application/success?id=${result.applicationId || result.user?.id || "success"}`
+            `/therapist-application/success?id=${result.user?.id || "success"}`
           );
         }, 1500);
       } catch (error) {
