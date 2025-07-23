@@ -60,8 +60,6 @@ export function ClientBookingInterface({
   const {
     // Form state
     currentStep,
-    selectedDate,
-    setSelectedDate,
     selectedTimeSlot,
     selectedDuration,
     setSelectedDuration,
@@ -75,12 +73,10 @@ export function ClientBookingInterface({
     // Data
     therapist,
     paymentMethods,
-    durations,
     
     // Loading states
     therapistLoading,
     paymentMethodsLoading,
-    durationsLoading,
     isBooking,
     
     // Error states
@@ -394,7 +390,7 @@ export function ClientBookingInterface({
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Session Notes</h3>
                   <p className="text-muted-foreground mb-4">
-                    Add notes about what you'd like to discuss in your session
+                    Add notes about what you&apos;d like to discuss in your session
                   </p>
                 </div>
 
@@ -468,7 +464,7 @@ export function ClientBookingInterface({
                           <SelectValue placeholder="Select payment method" />
                         </SelectTrigger>
                         <SelectContent>
-                          {paymentMethods.map((method: any) => (
+                          {paymentMethods.map((method: { id: string; cardBrand: string; cardLast4: string; isDefault?: boolean }) => (
                             <SelectItem key={method.id} value={method.id}>
                               <div className="flex items-center gap-2">
                                 <CreditCard className="h-4 w-4" />
