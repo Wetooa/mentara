@@ -274,7 +274,7 @@ export function ClientBookingInterface({
                   <div className="border-t pt-3">
                     <div className="text-sm text-muted-foreground">Total Cost</div>
                     <div className="text-lg font-bold text-green-600">
-                      ${((therapist.hourlyRate * selectedDuration.duration) / 60).toFixed(2)}
+                      ${((therapist.hourlyRate || 0) * selectedDuration.duration / 60).toFixed(2)}
                     </div>
                   </div>
                 </CardContent>
@@ -349,7 +349,7 @@ export function ClientBookingInterface({
                                 {duration.duration} minutes
                               </div>
                               <div className="text-sm font-medium text-green-600">
-                                ${((therapist.hourlyRate * duration.duration) / 60).toFixed(2)}
+                                ${((therapist.hourlyRate || 0) * duration.duration / 60).toFixed(2)}
                               </div>
                             </CardContent>
                           </Card>
@@ -516,7 +516,7 @@ export function ClientBookingInterface({
                       <div className="flex items-center justify-between text-lg font-semibold">
                         <span>Total Amount:</span>
                         <span className="text-green-600">
-                          ${selectedDuration ? ((therapist.hourlyRate * selectedDuration.duration) / 60).toFixed(2) : '0.00'}
+                          ${selectedDuration ? (((therapist.hourlyRate || 0) * selectedDuration.duration) / 60).toFixed(2) : '0.00'}
                         </span>
                       </div>
                     </div>
