@@ -24,7 +24,7 @@ import { toast } from "sonner";
 export default function BookingPage() {
   const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Get user's assigned therapists
@@ -250,15 +250,19 @@ export default function BookingPage() {
       </div>
 
       {/* Booking Interface */}
-      <ClientBookingInterface
-        therapistId={selectedTherapistId}
-        isOpen={showBookingModal}
-        onClose={() => {
-          setShowBookingModal(false);
-          setSelectedTimeSlot(null);
-        }}
-        onSuccess={handleBookingSuccess}
-      />
+      {selectedTimeSlot && selectedDate && (
+        <ClientBookingInterface
+          therapistId={selectedTherapistId}
+          selectedSlot={selectedTimeSlot}
+          selectedDate={selectedDate}
+          isOpen={showBookingModal}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedTimeSlot(null);
+          }}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
     </div>
   );
 }

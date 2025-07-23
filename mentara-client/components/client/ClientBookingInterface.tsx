@@ -35,13 +35,14 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
-import { BookingCalendar } from "@/components/booking/BookingCalendar";
 import { useClientBooking } from "@/hooks/booking";
 import { TimezoneUtils } from "@/lib/utils/timezone";
-
+import { TimeSlot } from "@/hooks/booking/useAvailableSlots";
 
 interface ClientBookingInterfaceProps {
   therapistId: string;
+  selectedSlot: TimeSlot;
+  selectedDate: Date;
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
@@ -49,6 +50,8 @@ interface ClientBookingInterfaceProps {
 
 export function ClientBookingInterface({
   therapistId,
+  selectedSlot,
+  selectedDate,
   isOpen,
   onClose,
   onSuccess,
@@ -85,7 +88,6 @@ export function ClientBookingInterface({
     bookingError,
     
     // Actions
-    handleSlotSelect,
     handleNextStep,
     handlePrevStep,
     handleConfirmBooking,
@@ -99,6 +101,8 @@ export function ClientBookingInterface({
     BOOKING_STEPS,
   } = useClientBooking({
     therapistId,
+    selectedSlot,
+    selectedDate,
     enabled: isOpen,
     onSuccess,
     onClose,
@@ -144,7 +148,7 @@ export function ClientBookingInterface({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -189,7 +193,7 @@ export function ClientBookingInterface({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Therapist Info Sidebar */}
           <div className="lg:col-span-1">
             <Card>
@@ -284,24 +288,46 @@ export function ClientBookingInterface({
 
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Step 1: Date & Time Selection */}
+            {/* Step 1: Session Details */}
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Select Date & Time
-                  </h3>
+                  <h3 className="text-lg font-semibold mb-2">Session Details</h3>
                   <p className="text-muted-foreground mb-4">
-                    Choose a convenient time slot for your therapy session
+                    Confirm your selected time and session preferences
                   </p>
                 </div>
 
-                <BookingCalendar
-                  therapistId={therapistId}
-                  onSlotSelect={handleSlotSelect}
-                  selectedDate={selectedDate}
-                  onDateSelect={setSelectedDate}
-                />
+                {/* Selected Time Confirmation */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Selected Appointment Time
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-lg">
+                            {TimezoneUtils.format(selectedDate, 'EEEE, MMMM do, yyyy')}
+                          </div>
+                          <div className="text-blue-600 font-medium">
+                            {selectedTimeSlot?.time}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">Session Type</div>
+                          <div className="flex items-center gap-1 font-medium">
+                            <Video className="h-4 w-4" />
+                            Video Call
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Duration Selection */}
                 {selectedTimeSlot && selectedTimeSlot.availableDurations.length > 1 && (
@@ -336,16 +362,39 @@ export function ClientBookingInterface({
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Session Type Confirmation */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Session Preferences</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Video className="h-5 w-5 text-blue-500" />
+                          <div>
+                            <div className="font-medium">Video Session</div>
+                            <div className="text-sm text-muted-foreground">
+                              High-quality video call with your therapist
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant="default">Selected</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
-            {/* Step 2: Session Details */}
+            {/* Step 2: Session Notes */}
             {currentStep === 2 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Session Details</h3>
+                  <h3 className="text-lg font-semibold mb-2">Session Notes</h3>
                   <p className="text-muted-foreground mb-4">
-                    Add information about what you'd like to discuss
+                    Add notes about what you'd like to discuss in your session
                   </p>
                 </div>
 

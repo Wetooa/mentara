@@ -24,23 +24,25 @@ interface BookingStep {
 export const BOOKING_STEPS: BookingStep[] = [
   {
     step: 1,
-    title: "Select Date & Time",
-    description: "Choose when you'd like to meet with your therapist",
+    title: "Session Details",
+    description: "Confirm your selected time and session preferences",
   },
   {
     step: 2,
-    title: "Session Details",
-    description: "Add session information and preferences",
+    title: "Session Notes",
+    description: "Add notes about what you'd like to discuss",
   },
   {
     step: 3,
     title: "Payment & Confirmation",
-    description: "Review and confirm your booking",
+    description: "Review and complete your booking",
   },
 ];
 
 interface UseClientBookingProps {
   therapistId: string;
+  selectedSlot: TimeSlot;
+  selectedDate: Date;
   enabled?: boolean;
   onSuccess?: () => void;
   onClose?: () => void;
@@ -51,6 +53,8 @@ interface UseClientBookingProps {
  */
 export function useClientBooking({ 
   therapistId, 
+  selectedSlot,
+  selectedDate: initialSelectedDate,
   enabled = true, 
   onSuccess, 
   onClose 
@@ -58,15 +62,20 @@ export function useClientBooking({
   const api = useApi();
   const queryClient = useQueryClient();
 
-  // Form state
+  // Form state - initialize with pre-selected data
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(initialSelectedDate);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(selectedSlot);
   const [selectedDuration, setSelectedDuration] = useState<{
     id: string;
     name: string;
     duration: number;
-  } | null>(null);
+  } | null>(
+    // Auto-select duration if only one option available
+    selectedSlot.availableDurations.length === 1 
+      ? selectedSlot.availableDurations[0] 
+      : null
+  );
   const [sessionTitle, setSessionTitle] = useState("");
   const [sessionDescription, setSessionDescription] = useState("");
   const [paymentMethodId, setPaymentMethodId] = useState("");
@@ -174,14 +183,6 @@ export function useClientBooking({
     setPaymentMethodId("");
   };
 
-  const handleSlotSelect = (date: string, timeSlot: TimeSlot) => {
-    setSelectedTimeSlot(timeSlot);
-    // Auto-select first duration if only one available
-    if (timeSlot.availableDurations.length === 1) {
-      setSelectedDuration(timeSlot.availableDurations[0]);
-    }
-    setCurrentStep(2);
-  };
 
   const handleNextStep = () => {
     if (currentStep < 3) {
@@ -237,7 +238,6 @@ export function useClientBooking({
     bookingError: createBookingMutation.error,
 
     // Actions
-    handleSlotSelect,
     handleNextStep,
     handlePrevStep,
     handleConfirmBooking,
