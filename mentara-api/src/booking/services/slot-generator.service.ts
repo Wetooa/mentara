@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
+import { ACTIVE_MEETING_STATUSES } from '../constants/meeting-status.constants';
 
 export interface TimeSlot {
   startTime: string;

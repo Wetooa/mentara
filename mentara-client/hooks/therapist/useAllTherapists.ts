@@ -44,7 +44,7 @@ export function useAllTherapists(params: TherapistSearchParams & {
   }, [searchParams, advancedFilters, page, pageSize]);
 
   const { data, error, isLoading, refetch } = useQuery({
-    queryKey: queryKeys.therapists.all(apiParams),
+    queryKey: queryKeys.therapists.list(apiParams),
     queryFn: async () => {
       const response = await api.therapists.getAllTherapists(apiParams);
       return response.data || { therapists: [], totalCount: 0, currentPage: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false };

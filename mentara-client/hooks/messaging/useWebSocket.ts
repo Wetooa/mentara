@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSocketConnection } from '@/hooks/useSocketConnection';
+import { useAuth } from '@/contexts/auth-context';
+import { 
+  connectWebSocket, 
+  disconnectWebSocket, 
+  emitEvent, 
+  onEvent, 
+  onStateChange, 
+  getConnectionState,
+  type ConnectionState 
+} from '@/lib/websocket';
 import type { Message } from '@/components/messages/types';
 
 interface TypingData {
@@ -16,70 +25,72 @@ interface UserStatusData {
   timestamp: string;
 }
 
+/**
+ * Simplified WebSocket hook for messaging
+ * Uses the new simple WebSocket client instead of complex useSocketConnection
+ */
 export function useMessagingWebSocket() {
-  // Use centralized socket connection
-  const {
-    connectionState,
-    isConnected,
-    error: connectionError,
-    subscribeToEvent,
-    emit,
-    reconnect
-  } = useSocketConnection({
-    subscriberId: 'messaging-websocket',
-    enableRealtime: true,
-  });
-
-  const [error, setError] = useState<string | null>(connectionError);
+  const { accessToken } = useAuth();
+  const [connectionState, setConnectionState] = useState<ConnectionState>(getConnectionState());
+  const [error, setError] = useState<string | null>(null);
 
   const connect = useCallback(async () => {
-    if (isConnected) return;
+    if (connectionState.isConnected || !accessToken) return;
 
     try {
       setError(null);
-      await reconnect();
+      await connectWebSocket(accessToken);
     } catch (err) {
       setError('Failed to connect to messaging service');
     }
-  }, [isConnected, reconnect]);
+  }, [connectionState.isConnected, accessToken]);
 
   const disconnect = useCallback(() => {
-    // Socket manager handles disconnection automatically
-    // when no more subscribers are active
+    disconnectWebSocket();
   }, []);
 
   const joinConversation = useCallback((conversationId: string) => {
-    emit('join_conversation', { conversationId });
-  }, [emit]);
+    emitEvent('join_conversation', { conversationId });
+  }, []);
 
   const leaveConversation = useCallback((conversationId: string) => {
-    emit('leave_conversation', { conversationId });
-  }, [emit]);
+    emitEvent('leave_conversation', { conversationId });
+  }, []);
 
   const sendTypingIndicator = useCallback((conversationId: string, isTyping: boolean = true) => {
-    emit('typing_indicator', { conversationId, isTyping });
-  }, [emit]);
+    emitEvent('typing_indicator', { conversationId, isTyping });
+  }, []);
 
   const subscribeToMessages = useCallback((callback: (message: Message) => void) => {
-    return subscribeToEvent('new_message', callback);
-  }, [subscribeToEvent]);
+    return onEvent('new_message', (data: { message: Message }) => {
+      callback(data.message);
+    });
+  }, []);
 
   const subscribeToTyping = useCallback((callback: (data: TypingData) => void) => {
-    return subscribeToEvent('typing_indicator', callback);
-  }, [subscribeToEvent]);
+    return onEvent('typing_indicator', callback);
+  }, []);
 
   const subscribeToUserStatus = useCallback((callback: (data: UserStatusData) => void) => {
-    return subscribeToEvent('user_status_changed', callback);
-  }, [subscribeToEvent]);
+    return onEvent('user_status_changed', callback);
+  }, []);
 
-  // Sync error state with connection error
+  // Monitor connection state
   useEffect(() => {
-    setError(connectionError);
-  }, [connectionError]);
+    const unsubscribe = onStateChange(setConnectionState);
+    return unsubscribe;
+  }, []);
+
+  // Auto-connect when token is available
+  useEffect(() => {
+    if (accessToken && !connectionState.isConnected) {
+      connect();
+    }
+  }, [accessToken, connectionState.isConnected, connect]);
 
   return {
-    isConnected,
-    error,
+    isConnected: connectionState.isConnected,
+    error: error || connectionState.error,
     connect,
     disconnect,
     joinConversation,
