@@ -5,7 +5,7 @@ import TherapistCard from "@/components/therapist/listing/TherapistCard";
 import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
 import BookingModal from "@/components/booking/BookingModal";
 import Pagination from "@/components/ui/pagination";
-import { useAllTherapistsWithFilters } from "@/hooks/therapist/useAllTherapists";
+import { useAllTherapistsWithClientFilters } from "@/hooks/therapist/useAllTherapists";
 import { useFilters } from "@/hooks/utils/useFilters";
 import FilterBar from "@/components/therapist/filters/FilterBar";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -24,7 +24,7 @@ function TherapistCardSkeleton() {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 overflow-hidden relative">
       {/* Animated shimmer overlay */}
       <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
-      
+
       {/* Status and Price Section */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
@@ -100,7 +100,7 @@ export default function TherapistListing() {
   const [componentError, setComponentError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
-  
+
   // Search and filter state (moved from page)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -112,26 +112,29 @@ export default function TherapistListing() {
     resetFilters,
   } = useFilters();
 
-  // Use new clean useAllTherapistsWithFilters hook that always fetches all therapists
-  const { 
-    therapists, 
+  // Use the new simple hook that fetches ALL therapists and filters client-side
+  const {
+    therapists: allFilteredTherapists,
     totalCount,
-    totalPages,
-    hasNextPage,
-    hasPreviousPage,
-    currentPage: apiCurrentPage,
-    isLoading, 
-    error, 
-    refetch 
-  } = useAllTherapistsWithFilters(searchQuery, selectedFilter, filters, { 
-    page: currentPage, 
-    pageSize: 12,
-  });
+    totalTherapists,
+    isLoading,
+    error,
+    refetch
+  } = useAllTherapistsWithClientFilters(searchQuery, selectedFilter);
+
+  // Client-side pagination
+  const pageSize = 12;
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const therapists = allFilteredTherapists.slice(startIndex, endIndex);
+  const hasNextPage = currentPage < totalPages;
+  const hasPreviousPage = currentPage > 1;
 
   // Reset page when search/filter changes
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedFilter, filters]);
+  }, [searchQuery, selectedFilter]);
 
   // Enhanced retry logic with exponential backoff
   const handleSmartRetry = async () => {
@@ -183,19 +186,19 @@ export default function TherapistListing() {
         toast.error("Invalid therapist selection. Please try again.");
         return;
       }
-      
+
       // Ensure therapists array exists and find therapist safely
       if (!Array.isArray(therapists)) {
         toast.error("Therapist data is not available. Please refresh the page.");
         return;
       }
-      
+
       const therapist = therapists.find(t => t?.id === therapistId);
       if (!therapist) {
         toast.error("Selected therapist not found. Please try again.");
         return;
       }
-      
+
       setSelectedTherapist(therapist);
       setIsBookingModalOpen(true);
       // Close profile modal if it's open
@@ -231,7 +234,7 @@ export default function TherapistListing() {
         toast.error("Invalid therapist selection. Please try again.");
         return;
       }
-      
+
       router.push(`/client/messages?contact=${encodeURIComponent(therapistId)}`);
       toast.success("Opening messages...");
     } catch (error) {
@@ -263,9 +266,9 @@ export default function TherapistListing() {
               {componentError}
             </span>
           </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               setComponentError(null);
               window.location.reload();
@@ -279,7 +282,7 @@ export default function TherapistListing() {
       </Alert>
     );
   }
-  
+
   // Enhanced API error state with smart retry
   if (error) {
     return (
@@ -295,14 +298,14 @@ export default function TherapistListing() {
               </div>
               <div className="text-red-700 mb-3">
                 {error instanceof Error ? (
-                  error.message.includes('network') || error.message.includes('fetch') ? 
+                  error.message.includes('network') || error.message.includes('fetch') ?
                     "It looks like there's a connection issue. Please check your internet connection." :
                     "We're having trouble loading therapist data right now."
                 ) : (
                   "Something went wrong while loading therapists."
                 )}
               </div>
-              
+
               {/* Retry suggestions */}
               <div className="bg-white/60 rounded-lg p-3 mb-4">
                 <div className="text-sm font-medium text-gray-900 mb-2">Try these steps:</div>
@@ -323,7 +326,7 @@ export default function TherapistListing() {
               </div>
 
               <div className="flex gap-3">
-                <Button 
+                <Button
                   onClick={handleSmartRetry}
                   disabled={isRetrying}
                   className="bg-red-600 hover:bg-red-700 text-white"
@@ -340,7 +343,7 @@ export default function TherapistListing() {
                     </>
                   )}
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => window.location.reload()}
                   className="border-red-200 text-red-700 hover:bg-red-50"
@@ -348,7 +351,7 @@ export default function TherapistListing() {
                   Refresh Page
                 </Button>
               </div>
-              
+
               {retryCount > 0 && (
                 <div className="text-xs text-gray-500 mt-2">
                   Retry attempts: {retryCount}/3
@@ -372,13 +375,13 @@ export default function TherapistListing() {
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No therapists found</h3>
         <p className="text-gray-500 mb-4">
-          {searchQuery || selectedFilter !== "All" 
-            ? "Try adjusting your search or filter criteria" 
+          {searchQuery || selectedFilter !== "All"
+            ? "Try adjusting your search or filter criteria"
             : "No therapists are currently available"}
         </p>
         {(searchQuery || selectedFilter !== "All") && (
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => {
               try {
                 window.location.reload();
@@ -422,79 +425,82 @@ export default function TherapistListing() {
           className="mb-6"
         />
 
-      <div className="space-y-6">
-        {/* Results count with safe calculations */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            {(() => {
-              try {
-                const startItem = Math.max(1, ((currentPage - 1) * 12) + 1);
-                const endItem = Math.min(currentPage * 12, totalCount || 0);
-                const total = totalCount || 0;
-                return `Showing ${startItem}-${endItem} of ${total} recommended therapists`;
-              } catch (error) {
-                console.error('Error calculating results count:', error);
-                return `Showing results`;
-              }
-            })()} 
+        <div className="space-y-6">
+          {/* Results count with safe calculations */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              {(() => {
+                try {
+                  const startItem = Math.max(1, ((currentPage - 1) * pageSize) + 1);
+                  const endItem = Math.min(currentPage * pageSize, totalCount || 0);
+                  const total = totalCount || 0;
+                  const showingFiltered = searchQuery || selectedFilter !== "All";
+                  return showingFiltered
+                    ? `Showing ${startItem}-${endItem} of ${total} filtered therapists (${totalTherapists} total)`
+                    : `Showing ${startItem}-${endItem} of ${total} therapists`;
+                } catch (error) {
+                  console.error('Error calculating results count:', error);
+                  return `Showing results`;
+                }
+              })()}
+            </div>
+            {totalPages > 1 && (
+              <div className="text-sm text-gray-500">
+                Page {currentPage || 1} of {totalPages || 1}
+              </div>
+            )}
           </div>
-          {totalPages > 1 && (
-            <div className="text-sm text-gray-500">
-              Page {currentPage || 1} of {totalPages || 1}
-            </div>
-          )}
-        </div>
-        
-        {/* Therapist grid with error boundary protection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.isArray(therapists) ? therapists.map((therapist) => {
-            try {
-              // Validate each therapist before rendering
-              if (!therapist?.id) {
-                console.warn('Skipping therapist with missing ID:', therapist);
-                return null;
-              }
-              
-              return (
-                <TherapistCard 
-                  key={therapist.id} 
-                  therapist={therapist}
-                  onViewProfile={handleViewProfile}
-                  onBooking={handleBooking}
-                  onMessage={handleMessage}
-                />
-              );
-            } catch (error) {
-              console.error('Error rendering therapist card:', error, therapist);
-              // Return error placeholder for this specific card
-              return (
-                <div key={therapist?.id || Math.random()} className="bg-red-50 border border-red-200 rounded-xl p-6">
-                  <div className="text-sm text-red-600">
-                    Error loading therapist data
-                  </div>
-                </div>
-              );
-            }
-          }).filter(Boolean) : (
-            <div className="col-span-full text-center text-gray-500 py-8">
-              No therapist data available
-            </div>
-          )}
-        </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              hasNextPage={hasNextPage}
-              hasPreviousPage={hasPreviousPage}
-              onPageChange={setCurrentPage}
-            />
+          {/* Therapist grid with error boundary protection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.isArray(therapists) ? therapists.map((therapist) => {
+              try {
+                // Validate each therapist before rendering
+                if (!therapist?.id) {
+                  console.warn('Skipping therapist with missing ID:', therapist);
+                  return null;
+                }
+
+                return (
+                  <TherapistCard
+                    key={therapist.id}
+                    therapist={therapist}
+                    onViewProfile={handleViewProfile}
+                    onBooking={handleBooking}
+                    onMessage={handleMessage}
+                  />
+                );
+              } catch (error) {
+                console.error('Error rendering therapist card:', error, therapist);
+                // Return error placeholder for this specific card
+                return (
+                  <div key={therapist?.id || Math.random()} className="bg-red-50 border border-red-200 rounded-xl p-6">
+                    <div className="text-sm text-red-600">
+                      Error loading therapist data
+                    </div>
+                  </div>
+                );
+              }
+            }).filter(Boolean) : (
+              <div className="col-span-full text-center text-gray-500 py-8">
+                No therapist data available
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                hasNextPage={hasNextPage}
+                hasPreviousPage={hasPreviousPage}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Therapist Profile Modal */}

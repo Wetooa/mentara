@@ -11,12 +11,12 @@ export default function RecommendedSection() {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
-  
+
   // Use clean hook for carousel recommendations with fallback to therapist cards
-  const { 
-    therapists, 
+  const {
+    therapists,
     therapistCards,
-    isLoading, 
+    isLoading,
     error,
     refetch
   } = useCarouselRecommendations();
@@ -87,7 +87,7 @@ export default function RecommendedSection() {
           </div>
           <div className="h-8 w-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
         </div>
-        
+
         {/* Enhanced skeleton carousel */}
         <div className="relative flex-grow">
           <div className="flex overflow-x-hidden h-full pb-2 pt-2 gap-4">
@@ -100,10 +100,10 @@ export default function RecommendedSection() {
                 <Card className="relative overflow-hidden h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
                   {/* Animated shimmer overlay */}
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
-                  
+
                   {/* Background image placeholder */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 animate-pulse"></div>
-                  
+
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
@@ -174,10 +174,10 @@ export default function RecommendedSection() {
               <p className="text-red-700 text-sm mb-4">
                 We're having trouble loading personalized recommendations right now.
               </p>
-              
+
               {/* Retry options */}
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <Button 
+                <Button
                   onClick={handleRecommendationRetry}
                   disabled={isRetrying}
                   size="sm"
@@ -195,8 +195,8 @@ export default function RecommendedSection() {
                     </>
                   )}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => window.location.href = '/client/therapists'}
                   className="border-red-200 text-red-700 hover:bg-red-50"
@@ -204,7 +204,7 @@ export default function RecommendedSection() {
                   Browse All Therapists
                 </Button>
               </div>
-              
+
               {retryCount > 0 && (
                 <div className="text-xs text-red-500 mt-2">
                   Retry attempts: {retryCount}/3
@@ -296,8 +296,8 @@ export default function RecommendedSection() {
                 {/* Background image */}
                 <div
                   className="absolute inset-0 bg-cover bg-center"
-                  style={{ 
-                    backgroundImage: `url(${therapist.profileImage || '/placeholder-therapist.jpg'})` 
+                  style={{
+                    backgroundImage: `url(${therapist.imageUrl || '/placeholder-therapist.jpg'})`
                   }}
                 />
                 {/* Overlay */}
@@ -307,7 +307,7 @@ export default function RecommendedSection() {
                 <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
                   <div className="w-full">
                     <div className="flex gap-2 flex-wrap mb-3">
-                      {therapist.specialties?.map((specialty, i) => (
+                      {therapist.specialties?.slice(0, 3).map((specialty, i) => (
                         <div
                           key={i}
                           className="bg-white rounded-sm px-2 py-0.5"
@@ -318,25 +318,27 @@ export default function RecommendedSection() {
                           </span>
                         </div>
                       ))}
-                      <div className="bg-white rounded-sm px-2 py-0.5">
-                        <span className="text-primary text-xs font-medium">
-                          {therapist.experience} years experience
-                        </span>
-                      </div>
+                      {therapist.experience > 0 && (
+                        <div className="bg-white rounded-sm px-2 py-0.5">
+                          <span className="text-primary text-xs font-medium">
+                            {therapist.experience} years experience
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="bg-amber-900/90 rounded-lg p-3 w-full">
                     <h3 className="font-semibold mb-1" data-testid="therapist-name">
-                      {therapist.firstName} {therapist.lastName}
+                      {therapist.name}
                     </h3>
                     <p className="text-sm text-white/90 line-clamp-2">
                       {therapist.bio || 'Experienced therapist dedicated to helping you achieve your mental health goals.'}
                     </p>
-                    {therapist.rating && (
+                    {therapist.rating > 0 && (
                       <div className="flex items-center gap-1 mt-2" data-testid="therapist-rating">
                         <span className="text-xs">⭐ {therapist.rating.toFixed(1)}</span>
-                        {therapist.totalReviews && (
+                        {therapist.totalReviews && therapist.totalReviews > 0 && (
                           <span className="text-xs text-white/70">
                             ({therapist.totalReviews} reviews)
                           </span>

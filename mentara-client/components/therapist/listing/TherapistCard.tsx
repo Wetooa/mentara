@@ -20,7 +20,7 @@ export default function TherapistCard({
   onBooking, 
   onMessage 
 }: TherapistCardProps) {
-  const nextAvailableTime = therapist.availableTimes[0];
+  const nextAvailableTime = therapist.availableTimes?.[0];
   const { isFavorite, toggleFavorite } = useFavorites();
   const isTherapistFavorited = isFavorite(therapist.id);
   
@@ -76,7 +76,7 @@ export default function TherapistCard({
               </Button>
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-3 py-1.5 rounded-full border border-blue-100">
                 <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  ${therapist.sessionPrice}
+                  {therapist.sessionPrice}
                 </span>
                 <span className="text-xs text-gray-500 ml-1">
                   / {therapist.sessionDuration}min

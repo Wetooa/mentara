@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
 import { Socket } from "socket.io-client";
 import { RealTimeEventManager, BaseEvent, EventHandlerConfig } from "@/lib/realtime/realtime-event-manager";
-import { getNamespacedSocket } from "@/lib/socket";
+import { getNamespacedSocket } from "@/lib/websocket";
 import type {
   MessageSentEvent,
   MessageUpdatedEvent,

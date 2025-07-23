@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
-import { useSubscriptionStatus } from '@/hooks/billing';
+// import { useSubscriptionStatus } from '@/hooks/billing'; // Removed - subscriptions are outdated
 import { toast } from 'sonner';
 import { TherapistCardData } from '@/types/therapist';
 
@@ -29,7 +29,6 @@ interface CreateMeetingRequest {
   title?: string;
   description?: string;
   meetingType: MeetingType;
-  requestId?: string;
 }
 
 interface UseBookingModalReturn {
@@ -100,15 +99,14 @@ export function useBookingModal(
   const MINIMUM_BOOKING_INTERVAL = 2000; // 2 seconds minimum between booking attempts
   const COOLDOWN_PERIOD = 3000; // 3 seconds cooldown after successful booking
 
-  // Payment verification
-  const {
-    isActive,
-    isTrial,
-    isPastDue,
-    hasPaymentIssue,
-    needsPaymentMethod,
-    isLoading: subscriptionLoading
-  } = useSubscriptionStatus();
+  // Payment verification - removed subscription dependency since subscriptions are outdated
+  // For now, we'll allow all bookings without subscription checks
+  const isActive = true; // Allow all users to book
+  const isTrial = false;
+  const isPastDue = false;
+  const hasPaymentIssue = false;
+  const needsPaymentMethod = false;
+  const subscriptionLoading = false;
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -145,27 +143,8 @@ export function useBookingModal(
 
   // Create meeting mutation with deduplication
   const createMeetingMutation = useMutation({
-    mutationFn: (meetingData: CreateMeetingRequest & { requestId?: string }) => {
-      // Generate unique request ID for tracking if not provided
-      const requestId = meetingData.requestId || crypto.randomUUID();
-      const timestamp = new Date().toISOString();
-      
-      console.log(`🔄 [BOOKING-DEBUG] Starting API call`, {
-        requestId,
-        timestamp,
-        therapistId: meetingData.therapistId,
-        startTime: meetingData.startTime,
-        stackTrace: new Error().stack,
-        mutationKey: 'createMeeting'
-      });
-      
-      // Add request ID to the data for backend tracking
-      const requestWithId = {
-        ...meetingData,
-        requestId
-      };
-      
-      return api.booking.meetings.create(requestWithId);
+    mutationFn: (meetingData: CreateMeetingRequest) => {
+      return api.booking.meetings.create(meetingData);
     },
     // Use mutation scope to serialize booking mutations for the same therapist
     scope: {
@@ -182,11 +161,6 @@ export function useBookingModal(
       }
     },
     onSuccess: (data) => {
-      console.log(`✅ [BOOKING-DEBUG] API call succeeded`, {
-        meetingId: data?.id,
-        timestamp: new Date().toISOString()
-      });
-      
       toast.success("Session booked successfully!");
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
       queryClient.invalidateQueries({ queryKey: ["available-slots"] });
@@ -199,12 +173,6 @@ export function useBookingModal(
       }, COOLDOWN_PERIOD);
     },
     onError: (error: any) => {
-      console.error(`❌ [BOOKING-DEBUG] API call failed`, {
-        error: error?.message,
-        timestamp: new Date().toISOString(),
-        errorDetails: error
-      });
-      
       // Release lock on error but with a small delay to prevent spam
       setTimeout(() => {
         setIsLocked(false);
@@ -228,105 +196,42 @@ export function useBookingModal(
 
   // Enhanced validation including deduplication states
   const canBook = !!(
-    (isActive || isTrial) && 
-    !hasPaymentIssue && 
-    !needsPaymentMethod &&
     !isLocked &&
     !createMeetingMutation.isPending
   );
 
   const handleBooking = useCallback(() => {
-    // Generate unique call ID for this handleBooking call
-    const callId = crypto.randomUUID();
-    const timestamp = new Date().toISOString();
-    const currentTime = Date.now();
-    
-    console.log(`🎯 [BOOKING-DEBUG] handleBooking called`, {
-      callId,
-      timestamp,
-      therapistId: therapist?.id,
-      isCreatingMeeting: createMeetingMutation.isPending,
-      isLocked: isLocked,
-      timeSinceLastAttempt: currentTime - lastBookingAttemptRef.current,
-      stackTrace: new Error().stack,
-      formData: {
-        selectedDate: selectedDate?.toISOString(),
-        selectedSlot: selectedSlot?.id,
-        selectedDuration: selectedDuration?.id,
-        title: title,
-      }
-    });
-
-    // First check: basic validation
+    // Basic validation
     if (!therapist || !selectedSlot || !selectedDuration || !selectedDate) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - missing required data`, { callId });
       return;
     }
 
-    // Second check: mutation state
-    if (createMeetingMutation.isPending) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - mutation already pending`, { callId });
-      toast.error("Booking in progress, please wait...");
+    // Prevent duplicate calls
+    if (createMeetingMutation.isPending || isLocked) {
       return;
     }
 
-    // Third check: deduplication lock
-    if (isLocked) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - locked due to recent booking attempt`, { callId });
-      toast.error("Please wait before trying to book again.");
-      return;
-    }
-
-    // Fourth check: rate limiting
+    // Rate limiting
+    const currentTime = Date.now();
     const timeSinceLastAttempt = currentTime - lastBookingAttemptRef.current;
     if (timeSinceLastAttempt < MINIMUM_BOOKING_INTERVAL) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - rate limited`, { 
-        callId, 
-        timeSinceLastAttempt,
-        minimumInterval: MINIMUM_BOOKING_INTERVAL 
-      });
-      toast.error("Please wait a moment before trying again.");
       return;
     }
 
-    // Payment verification
-    if (!isActive && !isTrial) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - no active subscription`, { callId });
-      toast.error("Active subscription required to book sessions. Please upgrade your plan.");
-      return;
-    }
-
-    if (hasPaymentIssue) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - payment issue`, { callId });
-      toast.error("Please resolve payment issues before booking sessions. Check your billing settings.");
-      return;
-    }
-
-    if (needsPaymentMethod) {
-      console.log(`⚠️ [BOOKING-DEBUG] Early return - needs payment method`, { callId });
-      toast.error("Please add a payment method to book sessions.");
-      return;
-    }
+    // Payment verification - removed subscription checks since subscriptions are outdated
+    // All users can now book sessions without subscription requirements
+    // TODO: If payment verification is needed in the future, implement it here
 
     const startTime = new Date(selectedSlot.startTime);
-    const requestId = crypto.randomUUID();
 
-    const meetingData: CreateMeetingRequest & { requestId: string } = {
+    const meetingData: CreateMeetingRequest = {
       therapistId: therapist.id,
       startTime: startTime.toISOString(),
       duration: selectedDuration.duration,
       title: title || `Session with ${therapist.name}`,
       description,
       meetingType,
-      requestId,
     };
-
-    console.log(`🚀 [BOOKING-DEBUG] Calling mutation.mutate`, {
-      callId,
-      requestId,
-      timestamp: new Date().toISOString(),
-      meetingData
-    });
 
     createMeetingMutation.mutate(meetingData);
   }, [
@@ -336,10 +241,6 @@ export function useBookingModal(
     selectedDate,
     createMeetingMutation,
     isLocked,
-    isActive,
-    isTrial,
-    hasPaymentIssue,
-    needsPaymentMethod,
     title,
     description,
     meetingType

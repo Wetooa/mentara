@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { TherapistRecommendation } from "@/lib/api/services/therapists";
-import { TherapistCardData, transformTherapistForCard } from "@/types/therapist";
+import { TherapistCardData, transformTherapistForCard, transformApiTherapistForCard, ApiTherapistResponse } from "@/types/therapist";
 
 export interface UseTherapistRecommendationsOptions {
   /** Maximum number of therapists to fetch */
@@ -100,7 +100,7 @@ export function useTherapistRecommendations(
     enabled: true,
   });
 
-  // Transform and memoize the data
+  // Transform and memoize the data - handle actual API response structure
   const transformedData = useMemo(() => {
     if (!recommendationsData) {
       return {
@@ -112,14 +112,16 @@ export function useTherapistRecommendations(
       };
     }
 
-    const therapists = recommendationsData.therapists || [];
-    const totalCount = recommendationsData.totalCount || 0;
-    const userConditions = recommendationsData.userConditions || [];
-    const matchCriteria = recommendationsData.matchCriteria;
+    // Handle the actual API response structure: { success, data: { therapists, totalCount, ... }, timestamp }
+    const dataPayload = recommendationsData.data || recommendationsData;
+    const therapists = dataPayload.therapists || [];
+    const totalCount = dataPayload.totalCount || 0;
+    const userConditions = dataPayload.userConditions || [];
+    const matchCriteria = dataPayload.matchCriteria;
     
-    // Calculate average match score
+    // Calculate average match score from actual API structure
     const averageMatchScore = therapists.length > 0
-      ? therapists.reduce((sum: number, therapist: any) => sum + (therapist.matchScore || therapist.score || 0), 0) / therapists.length
+      ? therapists.reduce((sum: number, therapist: any) => sum + (therapist.matchScore || 0), 0) / therapists.length
       : 0;
 
     return {
@@ -232,9 +234,24 @@ export function useCarouselRecommendations(
     ...options,
   });
 
-  // Transform therapists to card format for UI compatibility
+  // Transform therapists to card format for UI compatibility using the correct API structure
   const therapistCards = useMemo(() => {
-    return recommendationsData.therapists.map(transformTherapistForCard);
+    try {
+      // Handle both the API response and the transformed therapists
+      const therapists = recommendationsData.therapists || [];
+      
+      // Check if we have the actual API structure (with user nested object)
+      if (therapists.length > 0 && therapists[0].user) {
+        // Use the new transform function for actual API data
+        return therapists.map((therapist: ApiTherapistResponse) => transformApiTherapistForCard(therapist));
+      } else {
+        // Fallback to the old transform function for backward compatibility
+        return therapists.map(transformTherapistForCard);
+      }
+    } catch (error) {
+      console.error('Error transforming therapist data for cards:', error);
+      return [];
+    }
   }, [recommendationsData.therapists]);
 
   return {

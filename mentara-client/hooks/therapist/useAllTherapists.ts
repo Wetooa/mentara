@@ -4,7 +4,9 @@ import { useApi } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { 
   TherapistCardData,
-  transformTherapistForCard 
+  transformTherapistForCard,
+  transformApiTherapistForCard,
+  ApiTherapistResponse
 } from "@/types/therapist";
 
 /**
@@ -23,7 +25,10 @@ export function useAllTherapists() {
         limit: 1000, // High limit to get all therapists
         offset: 0 
       });
-      return response.data || { therapists: [], totalCount: 0 };
+      
+      // Handle the actual API response structure (may have .data wrapper or be direct)
+      const responseData = response.data || response;
+      return responseData || { therapists: [], totalCount: 0 };
     },
     enabled: true,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -39,7 +44,25 @@ export function useAllTherapists() {
 
   // Transform API data to card format for UI compatibility
   const therapistCards: TherapistCardData[] = React.useMemo(() => {
-    return data?.therapists?.map(transformTherapistForCard) || [];
+    try {
+      const therapists = data?.therapists || [];
+      
+      if (therapists.length === 0) {
+        return [];
+      }
+      
+      // Check if we have the actual API structure (with user nested object)
+      if (therapists[0]?.user) {
+        // Use the new transform function for actual API data
+        return therapists.map((therapist: ApiTherapistResponse) => transformApiTherapistForCard(therapist));
+      } else {
+        // Fallback to the old transform function for backward compatibility
+        return therapists.map(transformTherapistForCard);
+      }
+    } catch (error) {
+      console.error('Error transforming all therapists data:', error);
+      return [];
+    }
   }, [data?.therapists]);
 
   return {

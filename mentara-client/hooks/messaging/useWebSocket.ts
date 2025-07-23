@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/AuthContext';
+import { getAuthToken } from '@/lib/constants/auth';
 import { 
   connectWebSocket, 
   disconnectWebSocket, 
@@ -30,20 +31,21 @@ interface UserStatusData {
  * Uses the new simple WebSocket client instead of complex useSocketConnection
  */
 export function useMessagingWebSocket() {
-  const { accessToken } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [connectionState, setConnectionState] = useState<ConnectionState>(getConnectionState());
   const [error, setError] = useState<string | null>(null);
 
   const connect = useCallback(async () => {
-    if (connectionState.isConnected || !accessToken) return;
+    const token = getAuthToken();
+    if (connectionState.isConnected || !token) return;
 
     try {
       setError(null);
-      await connectWebSocket(accessToken);
+      await connectWebSocket(token);
     } catch (err) {
       setError('Failed to connect to messaging service');
     }
-  }, [connectionState.isConnected, accessToken]);
+  }, [connectionState.isConnected]);
 
   const disconnect = useCallback(() => {
     disconnectWebSocket();
@@ -81,12 +83,12 @@ export function useMessagingWebSocket() {
     return unsubscribe;
   }, []);
 
-  // Auto-connect when token is available
+  // Auto-connect when authenticated and not connected
   useEffect(() => {
-    if (accessToken && !connectionState.isConnected) {
+    if (isAuthenticated && !connectionState.isConnected) {
       connect();
     }
-  }, [accessToken, connectionState.isConnected, connect]);
+  }, [isAuthenticated, connectionState.isConnected, connect]);
 
   return {
     isConnected: connectionState.isConnected,

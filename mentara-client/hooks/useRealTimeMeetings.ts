@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRealTimeEvents } from "./useRealTimeEvents";
-import { getNamespacedSocket } from "@/lib/socket";
+import { getNamespacedSocket } from "@/lib/websocket";
 
 interface UseRealTimeMeetingsConfig {
   userId: string;

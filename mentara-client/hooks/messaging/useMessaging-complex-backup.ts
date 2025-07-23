@@ -10,7 +10,7 @@ import {
   getConnectionStats,
   getConnectionQuality,
   monitorConnectionHealth,
-} from "@/lib/socket";
+} from "@/lib/websocket";
 import { Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { TOKEN_STORAGE_KEY } from "@/lib/constants/auth";

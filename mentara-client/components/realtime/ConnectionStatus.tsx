@@ -306,7 +306,7 @@ export function useGlobalConnectionStatus() {
   // Import socket functions dynamically to avoid SSR issues
   const initializeSocket = React.useCallback(async () => {
     try {
-      const { getSocket, connectSocket, isSocketConnected } = await import('@/lib/socket');
+      const { getSocket, connectSocket, isSocketConnected } = await import('@/lib/websocket');
       
       if (isSocketConnected()) {
         setConnectionState("connected");
@@ -372,7 +372,7 @@ export function useGlobalConnectionStatus() {
     setLastError(null);
     
     try {
-      const { connectSocket } = await import('@/lib/socket');
+      const { connectSocket } = await import('@/lib/websocket');
       await connectSocket();
     } catch (error) {
       setConnectionState("error");
