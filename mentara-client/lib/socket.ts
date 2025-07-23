@@ -47,6 +47,9 @@ export const getSocket = (namespace?: string, token?: string): Socket => {
     if (token) {
       socketOptions.auth = { token };
       console.log('🔐 [SOCKET] Adding authentication token to socket options');
+      console.log('🔑 [SOCKET] Token preview:', token.substring(0, 20) + '...');
+    } else {
+      console.warn('⚠️ [SOCKET] No authentication token provided!');
     }
     
     socket = io(SOCKET_URL, socketOptions);
@@ -67,11 +70,16 @@ export const getSocket = (namespace?: string, token?: string): Socket => {
     socket.on('connect_error', (error) => {
       console.error('🚫 [SOCKET] Main socket connection error:', error);
       console.error('🔍 [SOCKET] Error details:', {
-        message: error.message,
-        description: error.description,
-        type: error.type,
-        transport: error.transport,
+        message: error.message || 'No message',
+        description: error.description || 'No description',
+        type: error.type || 'No type',
+        transport: error.transport || 'No transport',
+        stack: error.stack || 'No stack',
+        code: error.code || 'No code',
+        context: error.context || 'No context',
+        data: error.data || 'No data',
       });
+      console.error('🔍 [SOCKET] Full error object:', JSON.stringify(error, null, 2));
     });
 
     socket.on('reconnect', (attemptNumber) => {
@@ -117,6 +125,9 @@ export const getNamespacedSocket = (namespace: string, token?: string): Socket =
     if (token) {
       socketOptions.auth = { token };
       console.log(`🔐 [SOCKET] Adding authentication token to namespace [${namespace}] options`);
+      console.log(`🔑 [SOCKET] Token preview [${namespace}]:`, token.substring(0, 20) + '...');
+    } else {
+      console.warn(`⚠️ [SOCKET] No authentication token provided for namespace [${namespace}]!`);
     }
     
     sockets[namespace] = io(`${SOCKET_URL}${namespace}`, socketOptions);
@@ -137,11 +148,16 @@ export const getNamespacedSocket = (namespace: string, token?: string): Socket =
     sockets[namespace].on('connect_error', (error) => {
       console.error(`🚫 [SOCKET] Namespaced socket connection error [${namespace}]:`, error);
       console.error(`🔍 [SOCKET] Error details [${namespace}]:`, {
-        message: error.message,
-        description: error.description,
-        type: error.type,
-        transport: error.transport,
+        message: error.message || 'No message',
+        description: error.description || 'No description',
+        type: error.type || 'No type',
+        transport: error.transport || 'No transport',
+        stack: error.stack || 'No stack',
+        code: error.code || 'No code',
+        context: error.context || 'No context',
+        data: error.data || 'No data',
       });
+      console.error(`🔍 [SOCKET] Full error object [${namespace}]:`, JSON.stringify(error, null, 2));
     });
 
     sockets[namespace].on('reconnect', (attemptNumber) => {

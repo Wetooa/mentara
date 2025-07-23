@@ -124,32 +124,34 @@ export default function AppointmentCalendar({
   }
 
   return (
-    <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${className}`}>
+    <div className={`${showMeetingDetails ? 'grid grid-cols-1 lg:grid-cols-3 gap-6' : 'w-full'} ${className}`}>
       {/* Calendar Section */}
-      <div className="lg:col-span-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-lg">
+      <div className={showMeetingDetails ? "lg:col-span-2" : "w-full"}>
+        <Card className="shadow-sm border-0 bg-gradient-to-br from-white to-gray-50/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">
               {format(currentMonth, 'MMMM yyyy')}
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1))}
+                className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-teal-50 hover:border-teal-200 transition-colors"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1))}
+                className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-teal-50 hover:border-teal-200 transition-colors"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -157,7 +159,7 @@ export default function AppointmentCalendar({
               onDayClick={handleDayClick}
               month={currentMonth}
               onMonthChange={setCurrentMonth}
-              className="w-full"
+              className="w-full [--cell-size:2.8rem] sm:[--cell-size:3.5rem]"
               showOutsideDays={true}
               fixedWeeks
               components={{
@@ -171,25 +173,44 @@ export default function AppointmentCalendar({
                       <button
                         {...props}
                         className={`
-                          w-full h-full min-h-[2.5rem] flex flex-col items-center justify-center
-                          hover:bg-accent hover:text-accent-foreground
-                          ${modifiers.selected ? 'bg-primary text-primary-foreground' : ''}
-                          ${modifiers.today ? 'bg-accent text-accent-foreground' : ''}
-                          ${modifiers.outside ? 'text-muted-foreground opacity-50' : ''}
-                          ${modifiers.disabled ? 'text-muted-foreground opacity-30 cursor-not-allowed' : 'cursor-pointer'}
+                          w-full h-full min-h-[2.8rem] sm:min-h-[3.5rem] flex flex-col items-center justify-center rounded-lg
+                          font-medium transition-all duration-200 ease-in-out
+                          hover:bg-teal-50 hover:text-teal-900 hover:shadow-md sm:hover:scale-105
+                          ${modifiers.selected 
+                            ? 'bg-teal-600 text-white shadow-lg ring-2 ring-teal-200' 
+                            : 'hover:bg-teal-50'
+                          }
+                          ${modifiers.today 
+                            ? 'bg-teal-100 text-teal-900 font-semibold ring-1 ring-teal-300' 
+                            : ''
+                          }
+                          ${modifiers.outside 
+                            ? 'text-gray-400 opacity-50' 
+                            : 'text-gray-700'
+                          }
+                          ${modifiers.disabled 
+                            ? 'text-gray-300 opacity-30 cursor-not-allowed' 
+                            : 'cursor-pointer'
+                          }
                         `}
                       >
-                        <span className="text-sm">{day.date.getDate()}</span>
+                        <span className="text-xs sm:text-sm font-medium">{day.date.getDate()}</span>
                         {hasEvents && (
-                          <div className="flex gap-0.5 flex-wrap justify-center mt-0.5">
-                            {dayMeetings.slice(0, 3).map((_, i) => (
+                          <div className="flex gap-0.5 sm:gap-1 flex-wrap justify-center mt-0.5 sm:mt-1">
+                            {dayMeetings.slice(0, 3).map((meeting, i) => (
                               <div 
                                 key={i}
-                                className="w-1 h-1 bg-primary rounded-full"
+                                className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${
+                                  meeting.status === 'CONFIRMED' ? 'bg-green-500' :
+                                  meeting.status === 'SCHEDULED' ? 'bg-blue-500' :
+                                  meeting.status === 'CANCELLED' ? 'bg-red-500' :
+                                  'bg-teal-500'
+                                }`}
+                                title={`${meeting.title} - ${meeting.status}`}
                               />
                             ))}
                             {dayMeetings.length > 3 && (
-                              <span className="text-xs text-primary">+</span>
+                              <span className="text-[10px] sm:text-xs text-teal-600 font-semibold">+{dayMeetings.length - 3}</span>
                             )}
                           </div>
                         )}

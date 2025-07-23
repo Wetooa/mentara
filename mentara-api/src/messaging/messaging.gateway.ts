@@ -25,8 +25,14 @@ interface AuthenticatedSocket extends Socket {
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'http://localhost:3000',  // Explicit fallback
+      'http://127.0.0.1:3000',  // Alternative localhost
+    ],
+    methods: ['GET', 'POST'],
     credentials: true,
+    allowedHeaders: ['authorization', 'content-type'],
   },
   namespace: '/messaging',
 })
@@ -47,13 +53,19 @@ export class MessagingGateway
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
-      this.logger.log(`New WebSocket connection attempt: ${client.id}`);
+      this.logger.log(`🔌 [MessagingGateway] New WebSocket connection attempt: ${client.id}`);
+      this.logger.debug(`🔍 [MessagingGateway] Client handshake:`, {
+        headers: Object.keys(client.handshake.headers),
+        auth: client.handshake.auth,
+        query: client.handshake.query,
+        url: client.handshake.url,
+      });
 
       // Authenticate the socket connection using the new auth service
       const authResult = await this.webSocketAuth.authenticateSocket(client);
 
       if (!authResult) {
-        this.logger.warn(`Client ${client.id} authentication failed`);
+        this.logger.warn(`❌ [MessagingGateway] Client ${client.id} authentication failed`);
         client.emit('auth_error', {
           message: 'Authentication failed. Please provide a valid token.',
           code: 'AUTH_FAILED',
@@ -61,6 +73,8 @@ export class MessagingGateway
         client.disconnect(true);
         return;
       }
+
+      this.logger.log(`✅ [MessagingGateway] Client ${client.id} authenticated as user ${authResult.userId}`);
 
       // Attach authenticated user info to socket
       client.userId = authResult.userId;

@@ -1,12 +1,21 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
 
-Notification System Audit and Review
-- i want a full notification system audit and review. check if each type of event is being handled correctly, if the notifications are being sent to the right users, and if the notifications are being displayed correctly in the UI.
+Websockets is not working in the project. The error is as follows:
 
-- for example, there should be notifications when someone messages you, and this should be in real time
-- another example is when someone comments on your post, you should receive a notification
+🔍 [SOCKET] Error details: {}
 
+lib/socket.ts (69:15) @ getSocket/<
+
+  67 |     socket.on('connect_error', (error) => {
+  68 |       console.error('🚫 [SOCKET] Main socket connection error:', error);
+> 69 |       console.error('🔍 [SOCKET] Error details:', {
+     |               ^
+  70 |         message: error.message,
+  71 |         description: error.description,
+  72 |         type: error.type,
+
+im trying to test two different windows to see if the websockets are working, but it seems like the connection is not being established properly.
 
 
 use brave-search mcp to look up the internet for implementations, use context7 mcp for latest docs. Commit your changes along the way (DONT CREATE A NEW BRANCH) and the nextjs and nestjs servers are already running (:3001) for nestjs and (:3000) for nextjs. Use Serena for asking questions in the codebase or searching or anything to do with the codebase.
