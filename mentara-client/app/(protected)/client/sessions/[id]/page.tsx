@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { use } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,10 +98,13 @@ const getStatusConfig = (status: string) => {
   }
 };
 
-export default function SessionDetailsPage() {
+interface SessionDetailsPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function SessionDetailsPage({ params }: SessionDetailsPageProps) {
   const router = useRouter();
-  const params = useParams();
-  const sessionId = params?.id as string;
+  const { id: sessionId } = use(params);
 
   const { 
     data: session, 
