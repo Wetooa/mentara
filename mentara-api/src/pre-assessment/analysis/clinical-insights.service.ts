@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PreAssessment } from '@prisma/client';
-import { QuestionnaireScores } from '../pre-assessment.utils';
+import { QuestionnaireScores, processPreAssessmentAnswers } from '../pre-assessment.utils';
 
 export interface ClinicalInsight {
   condition: string;
@@ -127,17 +127,25 @@ export class ClinicalInsightsService {
     preAssessment: PreAssessment,
   ): Record<string, string> {
     try {
-      // Access severityLevels from the answers JSON field
-      const answers = preAssessment.answers as any;
-      const severityLevels = answers?.severityLevels as Record<
+      // Access severityLevels from the dedicated field
+      const severityLevels = preAssessment.severityLevels as Record<
         string,
         string
       >;
-      if (!severityLevels || typeof severityLevels !== 'object') {
-        this.logger.warn('Invalid severity levels data, using empty object');
-        return {};
+      
+      if (severityLevels && typeof severityLevels === 'object') {
+        return severityLevels;
       }
-      return severityLevels;
+      
+      // Fallback: If severityLevels is empty, calculate from answers array
+      const answers = preAssessment.answers as number[];
+      if (Array.isArray(answers) && answers.length === 201) {
+        const { severityLevels: calculatedLevels } = this.processAnswersArray(answers);
+        return calculatedLevels;
+      }
+      
+      this.logger.warn('No severity levels data available, using empty object');
+      return {};
     } catch (error) {
       this.logger.error('Error extracting severity levels:', error);
       return {};
@@ -151,17 +159,33 @@ export class ClinicalInsightsService {
     preAssessment: PreAssessment,
   ): Record<string, boolean> {
     try {
-      // Access aiEstimate from the answers JSON field
-      const answers = preAssessment.answers as any;
-      const aiEstimate = answers?.aiEstimate as Record<string, boolean>;
-      if (!aiEstimate || typeof aiEstimate !== 'object') {
-        this.logger.warn('No valid AI predictions available');
-        return {};
+      // Access aiEstimate from the dedicated field
+      const aiEstimate = preAssessment.aiEstimate as Record<string, boolean>;
+      
+      if (aiEstimate && typeof aiEstimate === 'object') {
+        return aiEstimate;
       }
-      return aiEstimate;
+      
+      this.logger.warn('No valid AI predictions available');
+      return {};
     } catch (error) {
       this.logger.error('Error extracting AI predictions:', error);
       return {};
+    }
+  }
+
+  /**
+   * Process flat answers array using utility functions
+   */
+  private processAnswersArray(answers: number[]): {
+    scores: Record<string, number>;
+    severityLevels: Record<string, string>;
+  } {
+    try {
+      return processPreAssessmentAnswers(answers);
+    } catch (error) {
+      this.logger.error('Error processing answers array:', error);
+      return { scores: {}, severityLevels: {} };
     }
   }
 
