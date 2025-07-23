@@ -1,32 +1,31 @@
 // Pre-assessment DTOs matching backend exactly
 
 export interface CreatePreAssessmentDto {
-  answerMatrix: number[][]; // 201-item questionnaire responses
-  metadata?: {
-    source?: string;
-    sessionId?: string;
-    startedAt?: string;
-    completedAt?: string;
-    [key: string]: any;
-  };
+  answers: number[]; // Flat array of exactly 201 numeric responses
+  scores?: Record<string, number>;
+  severityLevels?: Record<string, string>;
 }
 
 export interface PreAssessment {
   id: string;
-  userId: string;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  answerMatrix: number[][];
-  metadata: Record<string, any>;
-  aiAnalysisResult?: PreAssessmentAnalysis;
+  clientId: string;
+  answers: number[]; // Flat array of 201 numeric responses
+  scores: Record<string, number>;
+  severityLevels: Record<string, string>;
+  aiEstimate: Record<string, boolean>;
   isProcessed: boolean;
   processedAt?: string;
   createdAt: string;
   updatedAt: string;
+  client?: {
+    userId: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  };
 }
 
 export interface PreAssessmentAnalysis {
@@ -49,8 +48,10 @@ export interface PreAssessmentAnalysis {
 }
 
 export interface UpdatePreAssessmentDto {
-  answerMatrix?: number[][];
-  metadata?: Record<string, any>;
+  answers?: number[]; // Flat array of exactly 201 numeric responses
+  scores?: Record<string, number>;
+  severityLevels?: Record<string, string>;
+  aiEstimate?: Record<string, boolean>;
 }
 
 export interface PreAssessmentListParams {
