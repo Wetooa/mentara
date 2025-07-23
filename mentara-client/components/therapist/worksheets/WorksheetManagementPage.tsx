@@ -55,10 +55,7 @@ export function WorksheetManagementPage() {
   const { data: worksheets, isLoading: worksheetsLoading } = useQuery({
     queryKey: ['therapist', 'worksheets', statusFilter],
     queryFn: async () => {
-      const response = await api.apiClient.get('/therapist/worksheets', {
-        params: statusFilter !== 'all' ? { status: statusFilter } : {},
-      });
-      return response.data;
+      return await api.worksheets.getAssigned(statusFilter !== 'all' ? { status: statusFilter } : {});
     },
   });
 

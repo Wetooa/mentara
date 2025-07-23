@@ -7,14 +7,22 @@ import WorksheetsSidebar from "@/components/worksheets/TherapistWorksheetsSideba
 import TherapistWorksheetsList from "@/components/worksheets/TherapistWorksheetsList";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
+import CreateWorksheetModal from "@/components/worksheets/CreateWorksheetModal";
 
 export default function TherapistWorksheetsPage() {
   const [viewMode, setViewMode] = useState<'enhanced' | 'classic'>('enhanced');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Handler for worksheet creation (for now, just log)
+  const handleCreateWorksheet = (data: any) => {
+    console.log("Worksheet created:", data);
+    setIsCreateModalOpen(false);
+  };
 
   if (viewMode === 'enhanced') {
     return (
       <div className="min-h-screen">
-        {/* View Toggle */}
+        {/* View Toggle & Create Button */}
         <div className="bg-white border-b px-6 py-3">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold">Worksheet Management</h1>
@@ -35,22 +43,30 @@ export default function TherapistWorksheetsPage() {
                 <List className="h-4 w-4 mr-2" />
                 Classic View
               </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                + Create Worksheet
+              </Button>
             </div>
           </div>
         </div>
-        
         {/* Enhanced Worksheet Management */}
         <WorksheetManagementPage />
+        {/* Modal */}
+        <CreateWorksheetModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
       </div>
     );
   }
 
   // Classic view - use existing implementation
-  return <ClassicWorksheetView onSwitchView={() => setViewMode('enhanced')} />;
+  return <ClassicWorksheetView onSwitchView={() => setViewMode('enhanced')} onOpenCreateModal={() => setIsCreateModalOpen(true)} isCreateModalOpen={isCreateModalOpen} onCloseCreateModal={() => setIsCreateModalOpen(false)} />;
 }
 
 // Separate component for classic view to keep existing functionality
-function ClassicWorksheetView({ onSwitchView }: { onSwitchView: () => void }) {
+function ClassicWorksheetView({ onSwitchView, onOpenCreateModal, isCreateModalOpen, onCloseCreateModal }: { onSwitchView: () => void, onOpenCreateModal: () => void, isCreateModalOpen: boolean, onCloseCreateModal: () => void }) {
   const [activeFilter, setActiveFilter] = useState<string>("everything");
   const [patientFilter, setPatientFilter] = useState<string>("");
   const [tasks, setTasks] = useState<any[]>([]);
@@ -59,7 +75,7 @@ function ClassicWorksheetView({ onSwitchView }: { onSwitchView: () => void }) {
   
   return (
     <div className="min-h-screen">
-      {/* View Toggle */}
+      {/* View Toggle & Create Button */}
       <div className="bg-white border-b px-6 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold">Worksheet Management</h1>
@@ -79,10 +95,16 @@ function ClassicWorksheetView({ onSwitchView }: { onSwitchView: () => void }) {
               <List className="h-4 w-4 mr-2" />
               Classic View
             </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onOpenCreateModal}
+            >
+              + Create Worksheet
+            </Button>
           </div>
         </div>
       </div>
-      
       {/* Classic Interface */}
       <div className="flex h-full min-h-screen overflow-hidden">
         <WorksheetsSidebar
@@ -91,7 +113,6 @@ function ClassicWorksheetView({ onSwitchView }: { onSwitchView: () => void }) {
           patientFilter={patientFilter}
           setPatientFilter={setPatientFilter}
         />
-
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center p-8">
             <LayoutGrid className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -105,6 +126,8 @@ function ClassicWorksheetView({ onSwitchView }: { onSwitchView: () => void }) {
           </div>
         </div>
       </div>
+      {/* Modal */}
+      <CreateWorksheetModal isOpen={isCreateModalOpen} onClose={onCloseCreateModal} />
     </div>
   );
 }
