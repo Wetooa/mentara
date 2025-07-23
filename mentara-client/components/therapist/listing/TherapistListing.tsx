@@ -206,10 +206,12 @@ export default function TherapistListing({
   // Loading state
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <TherapistCardSkeleton key={index} />
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <TherapistCardSkeleton key={index} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -281,33 +283,39 @@ export default function TherapistListing({
   // Empty state
   if (therapists.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-500 mb-4">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="text-blue-500 mb-6">
+          <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.196-2.121M9 11a3 3 0 00-3 3v6c0 1.657 1.343 3 3 3h6c0-1.657-1.343-3-3-3v-3a3 3 0 00-3-3z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 11V7a3 3 0 116 0v4" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No therapists found</h3>
-        <p className="text-gray-500 mb-4">
+        <h3 className="text-xl font-semibold text-gray-900 mb-3">No matching therapists found</h3>
+        <p className="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
           {searchQuery || filter !== "All" 
-            ? "Try adjusting your search or filter criteria" 
-            : "No therapists are currently available"}
+            ? "We couldn't find any therapists matching your criteria. Try adjusting your search or filters to see more options." 
+            : "No therapists are currently available. Please check back later or contact support."}
         </p>
         {(searchQuery || filter !== "All") && (
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              try {
-                window.location.reload();
-              } catch (error) {
-                console.error('Error reloading page:', error);
-                // Fallback: try to navigate to base therapist listing
-                router.push('/client/therapists');
-              }
-            }}
-          >
-            Clear filters
-          </Button>
+          <div className="space-y-3">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                try {
+                  window.location.reload();
+                } catch (error) {
+                  console.error('Error reloading page:', error);
+                  router.push('/client/therapists');
+                }
+              }}
+              className="border-blue-200 text-blue-700 hover:bg-blue-50"
+            >
+              Clear all filters
+            </Button>
+            <p className="text-sm text-gray-500">
+              or try searching for different specialties or locations
+            </p>
+          </div>
         )}
       </div>
     );
@@ -317,29 +325,29 @@ export default function TherapistListing({
     <>
       <div className="space-y-6">
         {/* Results count with safe calculations */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-sm text-gray-700 font-medium">
             {(() => {
               try {
                 const startItem = Math.max(1, ((currentPage - 1) * 12) + 1);
                 const endItem = Math.min(currentPage * 12, totalCount || 0);
                 const total = totalCount || 0;
-                return `Showing ${startItem}-${endItem} of ${total} recommended therapists`;
+                return `${total} ${total === 1 ? 'therapist' : 'therapists'} found${total > 12 ? ` (showing ${startItem}-${endItem})` : ''}`;
               } catch (error) {
                 console.error('Error calculating results count:', error);
-                return `Showing results`;
+                return `Therapists found`;
               }
             })()} 
           </div>
           {totalPages > 1 && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded">
               Page {currentPage || 1} of {totalPages || 1}
             </div>
           )}
         </div>
         
-        {/* Therapist grid with error boundary protection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Therapist grid with error boundary protection - 2 column layout for better healthcare UI */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {Array.isArray(therapists) ? therapists.map((therapist) => {
             try {
               // Validate each therapist before rendering
@@ -377,7 +385,7 @@ export default function TherapistListing({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
