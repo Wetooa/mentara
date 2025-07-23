@@ -1,5 +1,4 @@
-import { zonedTimeToUtc, utcToZonedTime, format } from 'date-fns-tz';
-import { format as formatDate } from 'date-fns';
+import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 
 // Asia/Manila timezone
 export const MANILA_TIMEZONE = 'Asia/Manila';
@@ -9,7 +8,7 @@ export const MANILA_TIMEZONE = 'Asia/Manila';
  */
 export function toManilaTime(date: Date | string): Date {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return utcToZonedTime(dateObj, MANILA_TIMEZONE);
+  return toZonedTime(dateObj, MANILA_TIMEZONE);
 }
 
 /**
@@ -17,7 +16,7 @@ export function toManilaTime(date: Date | string): Date {
  */
 export function fromManilaTime(date: Date | string): Date {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return zonedTimeToUtc(dateObj, MANILA_TIMEZONE);
+  return fromZonedTime(dateObj, MANILA_TIMEZONE);
 }
 
 /**
@@ -25,7 +24,7 @@ export function fromManilaTime(date: Date | string): Date {
  */
 export function formatManilaTime(date: Date | string, formatString: string = 'yyyy-MM-dd HH:mm:ss'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return format(dateObj, formatString, { timeZone: MANILA_TIMEZONE });
+  return formatInTimeZone(dateObj, MANILA_TIMEZONE, formatString);
 }
 
 /**
@@ -91,7 +90,7 @@ export function normalizeToManilaTime(date: Date | string): Date {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
   // Assume user input is intended for Manila timezone
-  return zonedTimeToUtc(dateObj, MANILA_TIMEZONE);
+  return fromZonedTime(dateObj, MANILA_TIMEZONE);
 }
 
 /**
