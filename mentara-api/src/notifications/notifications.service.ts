@@ -13,6 +13,8 @@ import {
   NotificationPriority,
 } from '@prisma/client';
 import { MessagingGateway } from '../messaging/messaging.gateway';
+import { MessageSentEvent } from '../common/events/messaging-events';
+import { PostCreatedEvent, CommentAddedEvent } from '../common/events/social-events';
 
 interface WebSocketServer {
   to(room: string): {
@@ -590,6 +592,248 @@ export class NotificationsService implements OnModuleInit {
     } catch (error) {
       this.logger.error(
         `Error handling recommendations refreshed event:`,
+        error,
+      );
+    }
+  }
+
+  // ===== MESSAGING EVENT LISTENERS =====
+
+  /**
+   * Handle message sent events to create MESSAGE_RECEIVED notifications
+   */
+  @OnEvent('MessageSentEvent')
+  async handleMessageSent(event: MessageSentEvent) {
+    try {
+      const { 
+        senderId, 
+        conversationId, 
+        content, 
+        recipientIds 
+      } = event.eventData;
+
+      // Get sender details
+      const sender = await this.prisma.user.findUnique({
+        where: { id: senderId },
+        select: { firstName: true, lastName: true },
+      });
+
+      if (!sender) {
+        this.logger.warn(`Sender not found for message notification: ${senderId}`);
+        return;
+      }
+
+      const senderName = `${sender.firstName} ${sender.lastName}`;
+
+      // Create notifications for each recipient
+      for (const recipientId of recipientIds) {
+        await this.create(
+          {
+            userId: recipientId,
+            title: 'New Message',
+            message: `You have a new message from ${senderName}.`,
+            type: NotificationType.MESSAGE_RECEIVED,
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/messages/${conversationId}`,
+            data: {
+              senderId,
+              conversationId,
+              messagePreview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+              senderName,
+            },
+          },
+          {
+            realTime: true,
+            email: false,
+            push: true,
+          },
+        );
+      }
+
+      this.logger.log(
+        `Message notifications sent to ${recipientIds.length} recipients for conversation ${conversationId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error handling message sent event:`,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Handle post created events to create COMMUNITY_POST notifications for community members
+   */
+  @OnEvent('PostCreatedEvent')
+  async handlePostCreated(event: PostCreatedEvent) {
+    try {
+      const { 
+        postId, 
+        authorId, 
+        communityId, 
+        title, 
+        content, 
+        isAnonymous 
+      } = event.eventData;
+
+      // Skip notifications for anonymous posts or posts without community
+      if (isAnonymous || !communityId) {
+        return;
+      }
+
+      // Get post author details
+      const author = await this.prisma.user.findUnique({
+        where: { id: authorId },
+        select: { firstName: true, lastName: true },
+      });
+
+      // Get community details and members
+      const community = await this.prisma.community.findUnique({
+        where: { id: communityId },
+        select: {
+          name: true,
+          memberships: {
+            where: {
+              userId: { not: authorId }, // Don't notify the author
+            },
+            select: { userId: true },
+          },
+        },
+      });
+
+      if (!author || !community) {
+        this.logger.warn(`Author or community not found for post notification: ${postId}`);
+        return;
+      }
+
+      const authorName = `${author.firstName} ${author.lastName}`;
+
+      // Create notifications for community members
+      const notifications = community.memberships
+        .filter((member) => member.userId !== null)
+        .map((member) => ({
+          userId: member.userId!,
+          title: `New Post in ${community.name}`,
+          message: `${authorName} posted: "${title || content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+          type: NotificationType.COMMUNITY_POST,
+          priority: NotificationPriority.LOW,
+          actionUrl: `/communities/posts/${postId}`,
+          data: {
+            postId,
+            authorId,
+            authorName,
+            communityId,
+            communityName: community.name,
+            postTitle: title,
+          },
+        }));
+
+      await this.createBatch(notifications, {
+        realTime: true,
+        email: false,
+        push: false,
+      });
+
+      this.logger.log(
+        `Post notification sent to ${notifications.length} community members for post ${postId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error handling post created event:`,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Handle comment added events to create COMMUNITY_REPLY notifications for post author and parent comment author
+   */
+  @OnEvent('CommentAddedEvent')
+  async handleCommentAdded(event: CommentAddedEvent) {
+    try {
+      const { 
+        commentId, 
+        postId, 
+        authorId, 
+        content, 
+        parentCommentId 
+      } = event.eventData;
+
+      // Get comment author details
+      const author = await this.prisma.user.findUnique({
+        where: { id: authorId },
+        select: { firstName: true, lastName: true },
+      });
+
+      // Get post details and author
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+        select: {
+          title: true,
+          userId: true,
+          user: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      });
+
+      if (!author || !post) {
+        this.logger.warn(`Author or post not found for comment notification: ${commentId}`);
+        return;
+      }
+
+      const authorName = `${author.firstName} ${author.lastName}`;
+      const recipients = new Set<string>();
+
+      // Notify post author (if not the commenter)
+      if (post.userId !== authorId) {
+        recipients.add(post.userId);
+      }
+
+      // If this is a reply to another comment, notify the parent comment author
+      if (parentCommentId) {
+        const parentComment = await this.prisma.comment.findUnique({
+          where: { id: parentCommentId },
+          select: { userId: true },
+        });
+
+        if (parentComment && parentComment.userId !== authorId && parentComment.userId !== post.userId) {
+          recipients.add(parentComment.userId);
+        }
+      }
+
+      // Create notifications for all recipients
+      const notifications = Array.from(recipients).map((recipientId) => ({
+        userId: recipientId,
+        title: parentCommentId ? 'New Reply to Your Comment' : 'New Comment on Your Post',
+        message: `${authorName} ${parentCommentId ? 'replied to your comment' : 'commented on your post'}: "${content.substring(0, 100)}${content.length > 100 ? '...' : ''}"`,
+        type: NotificationType.COMMUNITY_REPLY,
+        priority: NotificationPriority.NORMAL,
+        actionUrl: `/communities/posts/${postId}#comment-${commentId}`,
+        data: {
+          commentId,
+          postId,
+          authorId,
+          authorName,
+          parentCommentId,
+          postTitle: post.title,
+        },
+      }));
+
+      if (notifications.length > 0) {
+        await this.createBatch(notifications, {
+          realTime: true,
+          email: false,
+          push: true,
+        });
+
+        this.logger.log(
+          `Comment notifications sent to ${notifications.length} users for comment ${commentId}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error handling comment added event:`,
         error,
       );
     }
