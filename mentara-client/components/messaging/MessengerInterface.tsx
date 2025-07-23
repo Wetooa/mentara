@@ -931,23 +931,24 @@ export function MessengerInterface({
                 {/* Messages Area */}
                 <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                   <ScrollArea className="flex-1 h-0 p-4">
-                    {isLoadingMessages ? (
-                      <div className="flex items-center justify-center h-32">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                      </div>
-                    ) : messagesError ? (
-                      <div className="flex items-center justify-center h-32 text-red-500">
-                        Failed to load messages
-                      </div>
-                    ) : messages.length === 0 ? (
-                      <div className="flex items-center justify-center h-32 text-muted-foreground">
-                        <div className="text-center">
-                          <h4 className="font-medium mb-1">No messages yet</h4>
-                          <p className="text-sm">Start the conversation with {displayName}</p>
+                    <div className="min-h-full flex flex-col">
+                      {isLoadingMessages ? (
+                        <div className="flex items-center justify-center flex-1 min-h-[200px]">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
+                      ) : messagesError ? (
+                        <div className="flex items-center justify-center flex-1 min-h-[200px] text-red-500">
+                          Failed to load messages
+                        </div>
+                      ) : messages.length === 0 ? (
+                        <div className="flex items-center justify-center flex-1 min-h-[200px] text-muted-foreground">
+                          <div className="text-center">
+                            <h4 className="font-medium mb-1">No messages yet</h4>
+                            <p className="text-sm">Start the conversation with {displayName}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-1 flex-1">
                         {messages.map((message, index) => {
                           const isOwn = message.senderId === user?.id;
                           const prevMessage = messages[index - 1];
@@ -996,16 +997,17 @@ export function MessengerInterface({
                             </div>
                           );
                         })}
-                      </div>
-                    )}
-                    
-                    {/* Typing Indicators */}
-                    {currentTypingUsers.length > 0 && (
-                      <TypingIndicator users={currentTypingUsers} />
-                    )}
+                        </div>
+                      )}
                       
-                    {/* Auto-scroll anchor */}
-                    <div ref={messagesEndRef} />
+                      {/* Typing Indicators */}
+                      {currentTypingUsers.length > 0 && (
+                        <TypingIndicator users={currentTypingUsers} />
+                      )}
+                        
+                      {/* Auto-scroll anchor */}
+                      <div ref={messagesEndRef} />
+                    </div>
                   </ScrollArea>
 
                   {/* Reply indicator */}
