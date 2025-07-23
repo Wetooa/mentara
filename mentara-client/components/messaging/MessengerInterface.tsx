@@ -608,8 +608,26 @@ export function MessengerInterface({
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "smooth",
+        block: "end"
+      });
+    }
   }, [messages]);
+
+  // Auto-scroll to bottom when conversation changes
+  useEffect(() => {
+    if (selectedConversationId && messagesEndRef.current) {
+      // Small delay to ensure messages are rendered
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: "smooth",
+          block: "end"
+        });
+      }, 100);
+    }
+  }, [selectedConversationId]);
 
   // Auto-focus message input when conversation is selected
   useEffect(() => {
@@ -724,11 +742,11 @@ export function MessengerInterface({
   return (
     <div
       className={cn(
-        "h-full bg-white rounded-lg shadow-lg overflow-hidden",
+        "h-full bg-white rounded-lg shadow-lg overflow-hidden flex",
         className
       )}
     >
-      <ResizablePanelGroup direction="horizontal" className="h-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
         <ResizablePanel
           defaultSize={25}
           minSize={20}
@@ -833,12 +851,12 @@ export function MessengerInterface({
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle className="w-1.5 bg-gray-200/60 hover:bg-blue-400/40 transition-colors duration-200" />
-        <ResizablePanel defaultSize={75}>
-          <div className="flex-1 flex flex-col h-full">
+        <ResizablePanel defaultSize={75} className="h-full">
+          <div className="h-full flex flex-col">
             {selectedConversationId ? (
               <>
                 {/* Chat Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white flex-shrink-0">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={otherParticipant?.user.avatarUrl} />
@@ -911,8 +929,9 @@ export function MessengerInterface({
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <ScrollArea className="flex-1 p-4">
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <ScrollArea className="flex-1 h-full">
+                    <div className="p-4">
                     {isLoadingMessages ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -985,14 +1004,15 @@ export function MessengerInterface({
                     {currentTypingUsers.length > 0 && (
                       <TypingIndicator users={currentTypingUsers} />
                     )}
-                    
-                    {/* Auto-scroll anchor */}
-                    <div ref={messagesEndRef} />
+                      
+                      {/* Auto-scroll anchor */}
+                      <div ref={messagesEndRef} />
+                    </div>
                   </ScrollArea>
 
                   {/* Reply indicator */}
                   {replyToMessage && (
-                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center justify-between flex-shrink-0">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Reply className="h-4 w-4" />
                         <span>Replying to: {replyToMessage.content.substring(0, 50)}...</span>
@@ -1008,7 +1028,7 @@ export function MessengerInterface({
                   )}
 
                   {/* Message Input Area */}
-                  <div className="p-4 border-t border-gray-200 bg-white">
+                  <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
                     <div className="flex items-end gap-2">
                       {/* File Upload */}
                       <TooltipProvider>
