@@ -43,6 +43,7 @@ import { useStartConversation } from "@/hooks/messaging/useStartConversation";
 import { logger } from "@/lib/logger";
 import { ConnectionStatus } from "@/components/messaging/ConnectionStatus";
 import { useAuth } from "@/contexts/AuthContext";
+import { getInitials } from "@/lib/utils/common";
 import { toast } from "sonner";
 import { differenceInMinutes, format, isToday, isYesterday } from "date-fns";
 import {
@@ -85,16 +86,8 @@ const formatMessageTime = (dateString: string) => {
   return format(date, "MMM d");
 };
 
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
 
-const MessageBubble: React.FC<{
+interface MessageBubbleProps {
   message: MessagingMessage;
   isOwn: boolean;
   showAvatar: boolean;
@@ -107,7 +100,9 @@ const MessageBubble: React.FC<{
   onCopy: () => void;
   onForward: () => void;
   onReport: () => void;
-}> = ({
+}
+
+const MessageBubble = ({
   message,
   isOwn,
   showAvatar,
@@ -120,7 +115,7 @@ const MessageBubble: React.FC<{
   onCopy,
   onForward,
   onReport,
-}) => {
+}: MessageBubbleProps) => {
   const [showReactions, setShowReactions] = useState(false);
 
   const getMessageStatus = () => {
@@ -148,12 +143,7 @@ const MessageBubble: React.FC<{
   };
 
   return (
-    <div
-      className={cn(
-        "flex gap-3 group",
-        isOwn ? "flex-row-reverse" : "flex-row"
-      )}
-    >
+    <div className="flex gap-3 group">
       {/* Avatar */}
       {!isOwn && (
         showAvatar ? (
@@ -162,7 +152,7 @@ const MessageBubble: React.FC<{
             <AvatarFallback className="text-xs">U</AvatarFallback>
           </Avatar>
         ) : (
-          <div className="w-8 flex-shrink-0" /> {/* Spacer for consecutive messages */}
+          <div className="w-8 flex-shrink-0" />
         )
       )}
       {isOwn && <div className="w-8 flex-shrink-0" />}
@@ -191,9 +181,7 @@ const MessageBubble: React.FC<{
         <div
           className={cn(
             "relative px-3 py-2 text-sm",
-            // Base styling
             isOwn ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900",
-            // Dynamic border radius based on message position
             messagePosition === 'single' && (isOwn ? "rounded-2xl rounded-br-md" : "rounded-2xl rounded-bl-md"),
             messagePosition === 'first' && (isOwn ? "rounded-2xl rounded-br-sm" : "rounded-2xl rounded-bl-sm"),
             messagePosition === 'middle' && (isOwn ? "rounded-l-2xl rounded-r-sm" : "rounded-r-2xl rounded-l-sm"),
@@ -341,17 +329,27 @@ const MessageBubble: React.FC<{
       </div>
     </div>
   );
-};
+};;
 
 
-const ConversationItem: React.FC<{
+
+interface ConversationItemProps {
   conversation: MessagingConversation;
   isSelected: boolean;
   onSelect: () => void;
   isOnline?: boolean;
   isTyping?: boolean;
   user: User;
-}> = ({ conversation, isSelected, onSelect, isOnline, isTyping, user }) => {
+}
+
+const ConversationItem = ({ 
+  conversation, 
+  isSelected, 
+  onSelect, 
+  isOnline, 
+  isTyping, 
+  user 
+}: ConversationItemProps) => {
   const otherParticipant = getOtherParticipant(conversation, user.id); // Assuming direct conversation
   const displayName = otherParticipant
     ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
@@ -409,7 +407,11 @@ const ConversationItem: React.FC<{
   );
 };
 
-const TypingIndicator: React.FC<{ users: string[] }> = ({ users }) => {
+interface TypingIndicatorProps {
+  users: string[];
+}
+
+const TypingIndicator = ({ users }: TypingIndicatorProps) => {
   if (users.length === 0) return null;
 
   return (
@@ -1041,4 +1043,4 @@ export function MessengerInterface({
       </ResizablePanelGroup>
     </div>
   );
-}
+};
