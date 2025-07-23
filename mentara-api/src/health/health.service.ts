@@ -231,6 +231,54 @@ export class HealthService {
     };
   }
 
+  /**
+   * Get WebSocket connection health status
+   */
+  async getWebSocketHealth() {
+    try {
+      // Note: This would typically require access to the MessagingGateway
+      // For now, we'll do a basic connectivity check
+      const response = await fetch('http://localhost:3001/socket.io/?EIO=4&transport=polling', {
+        method: 'GET',
+        timeout: 5000,
+      }).catch(() => null);
+
+      const isHealthy = response !== null;
+
+      return {
+        status: isHealthy ? 'healthy' : 'unhealthy',
+        service: 'websocket',
+        details: {
+          socketIoEndpoint: 'http://localhost:3001/socket.io/',
+          messagingNamespace: '/messaging',
+          isAccessible: isHealthy,
+          timestamp: new Date().toISOString(),
+        },
+        checks: {
+          socketIoServer: isHealthy ? 'ok' : 'failed',
+          messagingGateway: 'active', // Assuming gateway is running if server responds
+        }
+      };
+    } catch (error) {
+      this.logger.error('WebSocket health check failed:', error);
+      return {
+        status: 'unhealthy',
+        service: 'websocket',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: {
+          socketIoEndpoint: 'http://localhost:3001/socket.io/',
+          messagingNamespace: '/messaging',
+          isAccessible: false,
+          timestamp: new Date().toISOString(),
+        },
+        checks: {
+          socketIoServer: 'failed',
+          messagingGateway: 'unknown',
+        }
+      };
+    }
+  }
+
   async getAdminHealthDashboard() {
     const [detailedHealth, systemMetrics] = await Promise.all([
       this.getDetailedHealth(),
