@@ -32,13 +32,14 @@ interface OmniSearchBarProps {
 }
 
 const DEFAULT_ENTITY_TYPES: EntityType[] = [
-  'users', 'therapists', 'posts', 'communities', 'worksheets', 'messages'
+  'users', 'therapists', 'posts', 'comments', 'communities', 'worksheets', 'messages'
 ];
 
 const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   users: 'Users',
   therapists: 'Therapists', 
   posts: 'Posts',
+  comments: 'Comments',
   communities: 'Communities',
   worksheets: 'Worksheets',
   messages: 'Messages',

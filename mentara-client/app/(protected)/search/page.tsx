@@ -20,7 +20,7 @@ export default function SearchPage() {
   
   const [query, setQuery] = useState(initialQuery);
   const [filters, setFilters] = useState<OmniSearchFilters>({
-    entityTypes: initialTypes.length > 0 ? initialTypes : ['users', 'therapists', 'posts', 'communities', 'worksheets', 'messages'],
+    entityTypes: initialTypes.length > 0 ? initialTypes : ['users', 'therapists', 'posts', 'comments', 'communities', 'worksheets', 'messages'],
     showFilters: false,
   });
 
@@ -53,7 +53,7 @@ export default function SearchPage() {
   const handleClear = () => {
     setQuery('');
     setFilters({
-      entityTypes: ['users', 'therapists', 'posts', 'communities', 'worksheets', 'messages'],
+      entityTypes: ['users', 'therapists', 'posts', 'comments', 'communities', 'worksheets', 'messages'],
       showFilters: false,
     });
   };
