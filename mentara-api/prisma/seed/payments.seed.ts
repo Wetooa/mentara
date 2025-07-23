@@ -173,7 +173,7 @@ export async function seedPayments(
   const standaloneCount = Math.floor(payments.length * 0.2); // 20% of meeting payments
   
   // Filter payment methods to only those belonging to actual clients
-  const clientPaymentMethods = [];
+  const clientPaymentMethods: any[] = [];
   for (const method of paymentMethods) {
     const client = await prisma.client.findUnique({
       where: { userId: method.userId }
