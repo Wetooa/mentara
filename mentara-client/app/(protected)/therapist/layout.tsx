@@ -10,7 +10,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserSearchBar, User as SearchUser } from "@/components/search";
+import { LayoutOmniSearchBar } from "@/components/search";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { Button } from "@/components/ui/button";
 import { cn, getProfileUrl } from "@/lib/utils";
@@ -38,13 +38,6 @@ export default function TherapistLayout({
     }
   };
 
-  // Handle user selection from search
-  const handleUserSelect = (user: SearchUser) => {
-    // Navigate to patient profile if it's a client, or handle other user types
-    if (user.role === "client") {
-      router.push(`/therapist/profile/${user.id}`);
-    }
-  };
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -277,17 +270,12 @@ export default function TherapistLayout({
             </h1>
           </div>
 
-          {/* Search Bar - Hidden on mobile */}
+          {/* Omnisearch Bar - Hidden on mobile */}
           <div className="relative mx-4 hidden flex-1 max-w-md md:block">
-            <div className="relative">
-              <UserSearchBar
-                placeholder="Search patients, colleagues..."
-                onUserSelect={handleUserSelect}
-                showRoleFilter={false}
-                className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-amber-300 focus-within:shadow-xl transition-all duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 rounded-xl pointer-events-none" />
-            </div>
+            <LayoutOmniSearchBar
+              placeholder="Search patients, colleagues, posts..."
+              className="w-full"
+            />
           </div>
 
           {/* User Area */}
@@ -344,17 +332,12 @@ export default function TherapistLayout({
           </div>
         </header>
 
-        {/* Mobile Search Bar - Shows below header on mobile */}
+        {/* Mobile Omnisearch Bar - Shows below header on mobile */}
         <div className="md:hidden fixed top-16 left-0 right-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/50 px-4 py-3 shadow-sm">
-          <div className="relative">
-            <UserSearchBar
-              placeholder="Search patients..."
-              onUserSelect={handleUserSelect}
-              showRoleFilter={false}
-              className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-md ring-1 ring-border/50 rounded-xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-amber-300 focus-within:shadow-lg transition-all duration-300"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 rounded-xl pointer-events-none" />
-          </div>
+          <LayoutOmniSearchBar
+            placeholder="Search patients, posts..."
+            className="w-full"
+          />
         </div>
 
         {/* Main Content - Responsive padding */}
