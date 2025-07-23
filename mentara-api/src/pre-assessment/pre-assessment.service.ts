@@ -28,28 +28,171 @@ export class PreAssessmentService {
     private readonly therapeuticRecommendationsService: TherapeuticRecommendationsService,
   ) {}
 
+  /**
+   * Generate realistic mock AI evaluation based on user's assessment scores
+   * Produces data structure matching: {confidence, risk_factors, recommendations, estimated_severity}
+   */
+  private generateMockAiEstimate(
+    scores: Record<string, number>,
+    severityLevels: Record<string, string>,
+  ): any {
+    // Convert severity levels to numeric weights for calculations
+    const severityWeights: Record<string, number> = {
+      'Minimal': 0.1,
+      'Mild': 0.25,
+      'Moderate': 0.5,
+      'Moderately Severe': 0.7,
+      'Severe': 0.85,
+      'Very Severe': 0.95,
+      'Extreme': 1.0,
+      'Low': 0.2,
+      'High': 0.8,
+      'Substantial': 0.75,
+      'Subclinical': 0.15,
+      'Clinical': 0.8,
+      'None': 0.0,
+      'Subthreshold': 0.3,
+      'Positive': 0.7,
+      'Negative': 0.0,
+    };
+
+    // Calculate overall confidence based on assessment completion and severity distribution
+    const severityValues = Object.values(severityLevels).map(level => severityWeights[level] || 0.5);
+    const avgSeverity = severityValues.reduce((sum, val) => sum + val, 0) / severityValues.length;
+    
+    // Higher severity = higher confidence (more clear patterns)
+    const baseConfidence = 0.6 + (avgSeverity * 0.3);
+    const confidence = Math.round((baseConfidence + Math.random() * 0.15) * 1000) / 1000;
+
+    // Identify risk factors from high-severity conditions
+    const riskFactors: string[] = [];
+    const riskFactorMap: Record<string, string[]> = {
+      'Stress': ['chronic_stress', 'work_burnout'],
+      'Anxiety': ['generalized_anxiety', 'social_isolation'],
+      'Depression': ['major_depression', 'social_withdrawal'],
+      'Drug Abuse': ['substance_dependency', 'addiction_risk'],
+      'Insomnia': ['sleep_disorders', 'chronic_fatigue'],
+      'Panic': ['panic_attacks', 'agoraphobia'],
+      'Bipolar disorder (BD)': ['mood_instability', 'manic_episodes'],
+      'Obsessive compulsive disorder (OCD)': ['compulsive_behaviors', 'intrusive_thoughts'],
+      'Post-traumatic stress disorder (PTSD)': ['trauma_response', 'hypervigilance'],
+      'Social anxiety': ['social_isolation', 'avoidance_behaviors'],
+      'Phobia': ['specific_phobias', 'avoidance_behaviors'],
+      'Burnout': ['work_burnout', 'chronic_stress'],
+      'Binge eating / Eating disorders': ['eating_disorders', 'body_image_issues'],
+      'ADD / ADHD': ['attention_deficits', 'impulse_control'],
+      'Substance or Alcohol Use Issues': ['substance_dependency', 'addiction_risk'],
+    };
+
+    Object.entries(severityLevels).forEach(([condition, severity]) => {
+      const weight = severityWeights[severity] || 0;
+      if (weight >= 0.5 && riskFactorMap[condition]) { // Moderate+ severity
+        const factors = riskFactorMap[condition];
+        const selectedFactor = factors[Math.floor(Math.random() * factors.length)];
+        if (!riskFactors.includes(selectedFactor)) {
+          riskFactors.push(selectedFactor);
+        }
+      }
+    });
+
+    // Generate recommendations based on identified risk factors and severity
+    const allRecommendations = [
+      'medication_evaluation',
+      'lifestyle_changes',
+      'support_group',
+      'therapy_sessions',
+      'stress_management',
+      'sleep_hygiene',
+      'exercise_program',
+      'mindfulness_practice',
+      'social_support',
+      'professional_counseling',
+      'crisis_intervention',
+      'family_therapy',
+    ];
+
+    const recommendations: string[] = [];
+    
+    // Always include basic recommendations
+    recommendations.push('therapy_sessions');
+    
+    // Add specific recommendations based on severity
+    if (avgSeverity >= 0.7) {
+      recommendations.push('medication_evaluation', 'professional_counseling');
+    }
+    if (avgSeverity >= 0.5) {
+      recommendations.push('lifestyle_changes', 'stress_management');
+    }
+    if (riskFactors.includes('social_isolation')) {
+      recommendations.push('support_group', 'social_support');
+    }
+    if (riskFactors.includes('chronic_stress') || riskFactors.includes('work_burnout')) {
+      recommendations.push('stress_management', 'mindfulness_practice');
+    }
+
+    // Add 1-2 random additional recommendations for variety
+    const additionalRecs = allRecommendations.filter(rec => !recommendations.includes(rec));
+    const numAdditional = Math.min(2, Math.floor(Math.random() * 3));
+    for (let i = 0; i < numAdditional; i++) {
+      const randomRec = additionalRecs[Math.floor(Math.random() * additionalRecs.length)];
+      if (randomRec && !recommendations.includes(randomRec)) {
+        recommendations.push(randomRec);
+      }
+    }
+
+    // Generate estimated severity for key conditions
+    const estimatedSeverity: any = {};
+    
+    // Include the top 3-4 most relevant conditions
+    const keyConditions = ['Stress', 'Anxiety', 'Depression'];
+    keyConditions.forEach(condition => {
+      if (scores[condition] !== undefined) {
+        // Convert score to 0-1 scale with some randomization
+        const normalizedScore = Math.min(1.0, scores[condition] / 100);
+        const adjustedScore = Math.round((normalizedScore + Math.random() * 0.1) * 100) / 100;
+        estimatedSeverity[condition.toLowerCase()] = Math.max(0.0, Math.min(1.0, adjustedScore));
+      }
+    });
+
+    // Add overall severity assessment
+    const overallSeverityLevels = ['low', 'moderate', 'high', 'severe'];
+    let overallLevel: string;
+    if (avgSeverity < 0.3) overallLevel = 'low';
+    else if (avgSeverity < 0.6) overallLevel = 'moderate'; 
+    else if (avgSeverity < 0.8) overallLevel = 'high';
+    else overallLevel = 'severe';
+    
+    estimatedSeverity.overall = overallLevel;
+
+    return {
+      confidence,
+      risk_factors: riskFactors.slice(0, 5), // Limit to top 5 risk factors
+      recommendations: recommendations.slice(0, 6), // Limit to top 6 recommendations
+      estimated_severity: estimatedSeverity,
+    };
+  }
+
   private async getAiEstimate(
     answers: number[],
-  ): Promise<Record<string, boolean> | null> {
+    scores: Record<string, number>,
+    severityLevels: Record<string, string>,
+  ): Promise<any | null> {
     try {
       this.logger.debug(
-        `Requesting AI prediction for ${answers.length} values`,
+        `Generating AI evaluation for ${answers.length} assessment responses`,
       );
 
-      const result = await this.aiServiceClient.predict(answers);
-
-      if (!result.success) {
-        this.logger.warn(`AI prediction failed: ${result.error}`);
-        return null;
-      }
+      // Generate mock AI evaluation based on actual assessment data
+      const aiEstimate = this.generateMockAiEstimate(scores, severityLevels);
 
       this.logger.log(
-        `AI prediction completed successfully in ${result.responseTime}ms`,
+        `AI evaluation generated: confidence ${aiEstimate.confidence}, ${aiEstimate.risk_factors.length} risk factors identified`,
       );
-      return result.predictions || null;
+      
+      return aiEstimate;
     } catch (error) {
       this.logger.error(
-        'AI model prediction error:',
+        'AI evaluation generation error:',
         error instanceof Error ? error.message : error,
       );
       return null;
@@ -142,22 +285,22 @@ export class PreAssessmentService {
         severityLevels = result.severityLevels;
       }
 
-      // Attempt AI prediction with flat answers
-      let aiEstimate: Record<string, boolean> = {};
+      // Generate AI evaluation with mock data based on assessment results
+      let aiEstimate: any = {};
       try {
-        this.logger.debug('Attempting AI prediction with validated input');
-        const aiResult = await this.getAiEstimate(data.answers);
+        this.logger.debug('Generating AI evaluation based on assessment scores');
+        const aiResult = await this.getAiEstimate(data.answers, scores, severityLevels);
         if (aiResult) {
           aiEstimate = aiResult;
-          this.logger.log('AI prediction successful');
+          this.logger.log('AI evaluation generated successfully');
         } else {
           this.logger.warn(
-            'AI prediction failed, continuing without AI estimate',
+            'AI evaluation generation failed, continuing without AI estimate',
           );
         }
       } catch (aiError) {
         this.logger.error(
-          'AI prediction error, continuing without AI estimate:',
+          'AI evaluation generation error, continuing without AI estimate:',
           aiError,
         );
         // Continue without AI estimate - don't fail the entire assessment
@@ -352,12 +495,12 @@ export class PreAssessmentService {
 
         // Attempt to get new AI estimate if answers changed
         try {
-          const aiResult = await this.getAiEstimate(data.answers);
+          const aiResult = await this.getAiEstimate(data.answers, scores, severityLevels);
           if (aiResult) {
             aiEstimate = aiResult;
           }
         } catch (aiError) {
-          this.logger.warn('AI prediction failed during update:', aiError);
+          this.logger.warn('AI evaluation generation failed during update:', aiError);
         }
       }
 
