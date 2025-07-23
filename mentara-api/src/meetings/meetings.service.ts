@@ -87,6 +87,11 @@ export class MeetingsService {
             },
           },
         },
+        meetingNotes: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
       },
     });
 
@@ -94,7 +99,65 @@ export class MeetingsService {
       throw new NotFoundException('Meeting not found or access denied');
     }
 
-    return meeting;
+    return this.transformSingleMeeting(meeting);
+  }
+
+  /**
+   * Transform a single meeting to match frontend interface expectations
+   */
+  private transformSingleMeeting(meeting: any) {
+    // Get the latest meeting notes
+    const latestNotes = meeting.meetingNotes?.[0];
+    let notes = null;
+    let feedback = null;
+
+    // Parse notes if they exist
+    if (latestNotes?.notes) {
+      try {
+        const parsedNotes = JSON.parse(latestNotes.notes);
+        notes = parsedNotes.sessionNotes || parsedNotes.notes || latestNotes.notes;
+        feedback = parsedNotes.feedback || parsedNotes.clientProgress;
+      } catch {
+        // If parsing fails, use raw notes
+        notes = latestNotes.notes;
+      }
+    }
+
+    // Compute therapist name
+    const therapistName = meeting.therapist?.user ? 
+      `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`.trim() : 
+      undefined;
+
+    return {
+      id: meeting.id,
+      title: meeting.title,
+      description: meeting.description,
+      startTime: meeting.startTime,
+      endTime: meeting.endTime,
+      dateTime: meeting.startTime, // Alias for startTime
+      duration: meeting.duration,
+      status: meeting.status,
+      meetingType: meeting.meetingType,
+      type: meeting.meetingType, // Alias for meetingType
+      meetingUrl: meeting.meetingUrl,
+      clientId: meeting.clientId,
+      therapistId: meeting.therapistId,
+      notes,
+      feedback,
+      client: meeting.client ? {
+        userId: meeting.client.userId,
+        user: meeting.client.user
+      } : null,
+      therapist: meeting.therapist ? {
+        userId: meeting.therapist.userId,
+        name: therapistName,
+        specialization: meeting.therapist.specialization,
+        experience: meeting.therapist.experience,
+        user: meeting.therapist.user
+      } : null,
+      createdAt: meeting.createdAt,
+      updatedAt: meeting.updatedAt,
+    };
   }
 
   /**
