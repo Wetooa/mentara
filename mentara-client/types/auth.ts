@@ -174,7 +174,11 @@ export interface AuditLogEntry {
 
 export interface SecurityEvent {
   id: string;
-  type: "failed_login" | "suspicious_activity" | "data_breach" | "unauthorized_access";
+  type:
+    | "failed_login"
+    | "suspicious_activity"
+    | "data_breach"
+    | "unauthorized_access";
   severity: "low" | "medium" | "high" | "critical";
   userId?: string;
   ipAddress: string;
@@ -317,14 +321,21 @@ export interface ModerationQueueQueryParams {
 }
 
 // Union types for role-based operations
-export type RoleSpecificUser = ClientUser | TherapistUser | AdminUser | ModeratorUser;
+export type RoleSpecificUser =
+  | ClientUser
+  | TherapistUser
+  | AdminUser
+  | ModeratorUser;
 
-export type UserByRole<T extends UserRole> = 
-  T extends "client" ? ClientUser :
-  T extends "therapist" ? TherapistUser :
-  T extends "admin" ? AdminUser :
-  T extends "moderator" ? ModeratorUser :
-  never;
+export type UserByRole<T extends UserRole> = T extends "client"
+  ? ClientUser
+  : T extends "therapist"
+    ? TherapistUser
+    : T extends "admin"
+      ? AdminUser
+      : T extends "moderator"
+        ? ModeratorUser
+        : never;
 
 // Error types
 export interface AuthError {
@@ -366,6 +377,12 @@ export interface RegisterClientDto {
   password: string;
   firstName: string;
   lastName: string;
+  middleName?: string;
+  birthDate?: string; // ISO date string
+  address?: string;
+  avatarUrl?: string;
+  hasSeenTherapistRecommendations?: boolean;
+  preassessmentAnswers?: any; // Pre-assessment responses
 }
 
 export interface RegisterAdminDto {
@@ -373,7 +390,7 @@ export interface RegisterAdminDto {
   password: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'moderator';
+  role: "admin" | "moderator";
 }
 
 export interface RegisterModeratorDto {
@@ -385,8 +402,7 @@ export interface RegisterModeratorDto {
 
 export interface VerifyOtpDto {
   email: string;
-  otp: string;
-  type: OtpType;
+  otpCode: string;
 }
 
 export interface SendOtpDto {
@@ -410,7 +426,7 @@ export interface ResetPasswordDto {
 }
 
 // OTP Types
-export type OtpType = 'email_verification' | 'password_reset' | 'login';
+export type OtpType = "email_verification" | "password_reset" | "login";
 
 export interface OtpEmailData {
   otp: string;

@@ -155,12 +155,12 @@ export function useClientRegistration(
           : undefined;
 
       // Call real backend registration API - this will automatically send OTP
-      const result = await api.clientAuth.register({
+      const result = await api.auth.client.register({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
-        dateOfBirth: new Date().toISOString(), // You may want to collect this from the user
+        birthDate: new Date().toISOString(), // You may want to collect this from the user
         preassessmentAnswers,
       });
 
@@ -197,12 +197,12 @@ export function useClientRegistration(
 
     try {
       // Call backend OTP verification API
-      const result = await api.clientAuth.verifyOtp({
+      const result = await api.auth.client.verifyOtp({
         email: registrationData.email,
         otpCode: code,
       });
 
-      if (result.status === "success") {
+      if (result.success === true) {
         setRegistrationStatus("verified");
         toast.success("Email verified successfully! Welcome to Mentara!");
 
