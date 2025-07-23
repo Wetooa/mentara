@@ -99,16 +99,8 @@ export function useAvailableSlots(therapistId: string, date: string) {
 /**
  * Hook for getting available slots for multiple dates
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useMultiDateSlots(therapistId: string, dates: string[]) {
-  const api = useApi();
-
-  const queries = dates.map(date => ({
-    queryKey: ['booking', 'slots', therapistId, date],
-    queryFn: () => api.booking.availability.getSlots(therapistId, date),
-    enabled: !!(therapistId && date),
-    staleTime: 1000 * 60 * 5,
-  }));
-
   // This would need useQueries from React Query
   // For now, let's return a simpler implementation
   return {

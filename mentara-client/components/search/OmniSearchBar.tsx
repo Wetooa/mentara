@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
-export type EntityType = 'users' | 'therapists' | 'posts' | 'communities' | 'worksheets' | 'messages';
+export type EntityType = 'users' | 'therapists' | 'posts' | 'comments' | 'communities' | 'worksheets' | 'messages';
 
 export interface OmniSearchFilters {
   entityTypes: EntityType[];

@@ -54,8 +54,15 @@ export class BookingController {
   async getMeetings(
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
+    @Query('status') status?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ) {
-    return this.bookingService.getMeetings(userId, role);
+    return this.bookingService.getMeetings(userId, role, {
+      status,
+      limit,
+      offset,
+    });
   }
 
   @Get('meetings/:id')

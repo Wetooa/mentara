@@ -45,160 +45,187 @@ export class BookingService {
     const endTimeDate = new Date(startTimeDate.getTime() + duration * 60000);
 
     // Use database transaction to prevent race conditions
-    return this.prisma.$transaction(async (tx) => {
-      // First, acquire locks on both therapist and client schedules
-      // This prevents concurrent bookings from interfering
-      const [therapistLock, clientLock] = await Promise.all([
-        tx.user.findUnique({
-          where: { id: therapistId },
-          select: { id: true }
-        }),
-        tx.user.findUnique({
-          where: { id: clientId },
-          select: { id: true }
-        })
-      ]);
+    return this.prisma.$transaction(
+      async (tx) => {
+        // First, acquire locks on both therapist and client schedules
+        // This prevents concurrent bookings from interfering
+        const [therapistLock, clientLock] = await Promise.all([
+          tx.user.findUnique({
+            where: { id: therapistId },
+            select: { id: true },
+          }),
+          tx.user.findUnique({
+            where: { id: clientId },
+            select: { id: true },
+          }),
+        ]);
 
-      if (!therapistLock || !clientLock) {
-        throw new BadRequestException('Therapist or client not found');
-      }
+        if (!therapistLock || !clientLock) {
+          throw new BadRequestException('Therapist or client not found');
+        }
 
-      // Check for conflicts within transaction (atomic operation)
-      const conflictingMeetings = await tx.meeting.findMany({
-        where: {
-          OR: [
-            {
-              therapistId,
-              startTime: { lt: endTimeDate },
-              endTime: { gt: startTimeDate },
-              status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
-            },
-            {
-              clientId,
-              startTime: { lt: endTimeDate },
-              endTime: { gt: startTimeDate },
-              status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
-            },
-          ],
-        },
-      });
+        // Check for conflicts within transaction (atomic operation)
+        const conflictingMeetings = await tx.meeting.findMany({
+          where: {
+            OR: [
+              {
+                therapistId,
+                startTime: { lt: endTimeDate },
+                endTime: { gt: startTimeDate },
+                status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
+              },
+              {
+                clientId,
+                startTime: { lt: endTimeDate },
+                endTime: { gt: startTimeDate },
+                status: { in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] },
+              },
+            ],
+          },
+        });
 
-      if (conflictingMeetings.length > 0) {
-        throw new BadRequestException(
-          `Schedule conflict detected: ${conflictingMeetings.length} conflicting meetings found`
+        if (conflictingMeetings.length > 0) {
+          throw new BadRequestException(
+            `Schedule conflict detected: ${conflictingMeetings.length} conflicting meetings found`,
+          );
+        }
+
+        // Validate therapist availability within transaction
+        // Get therapist's timezone preference
+        const therapist = await tx.therapist.findUnique({
+          where: { userId: therapistId },
+          select: { timezone: true },
+        });
+
+        const therapistTimezone = therapist?.timezone || 'UTC';
+
+        // Convert to therapist's timezone for availability check
+        const therapistLocalTime = new Date(
+          startTimeDate.toLocaleString('en-US', {
+            timeZone: therapistTimezone,
+          }),
         );
-      }
-
-      // Validate therapist availability within transaction
-      // Get therapist's timezone preference
-      const therapist = await tx.therapist.findUnique({
-        where: { userId: therapistId },
-        select: { timezone: true },
-      });
-      
-      const therapistTimezone = therapist?.timezone || 'UTC';
-      
-      // Convert to therapist's timezone for availability check
-      const therapistLocalTime = new Date(startTimeDate.toLocaleString('en-US', { timeZone: therapistTimezone }));
-      const therapistLocalEndTime = new Date(endTimeDate.toLocaleString('en-US', { timeZone: therapistTimezone }));
-      
-      const dayOfWeek = therapistLocalTime.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
-      const timeOnly = therapistLocalTime.toTimeString().slice(0, 5); // HH:MM format
-      const endTimeOnly = therapistLocalEndTime.toTimeString().slice(0, 5);
-
-      const availability = await tx.therapistAvailability.findFirst({
-        where: {
-          therapistId,
-          dayOfWeek,
-          startTime: { lte: timeOnly },
-          endTime: { gte: endTimeOnly },
-          isAvailable: true,
-        },
-      });
-
-      if (!availability) {
-        throw new BadRequestException(
-          `Therapist is not available at the requested time (${timeOnly}-${endTimeOnly} ${dayOfWeek} in ${therapistTimezone})`
+        const therapistLocalEndTime = new Date(
+          endTimeDate.toLocaleString('en-US', { timeZone: therapistTimezone }),
         );
-      }
 
-      // Create the meeting within the transaction
-      const meeting = await tx.meeting.create({
-        data: {
-          ...createMeetingDto,
-          startTime: startTimeDate,
-          endTime: endTimeDate,
-          status: 'SCHEDULED',
-          clientId,
-        },
-        include: {
-          client: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
+        const dayOfWeek = therapistLocalTime
+          .toLocaleDateString('en-US', { weekday: 'long' })
+          .toUpperCase();
+        const timeOnly = therapistLocalTime.toTimeString().slice(0, 5); // HH:MM format
+        const endTimeOnly = therapistLocalEndTime.toTimeString().slice(0, 5);
+
+        const availability = await tx.therapistAvailability.findFirst({
+          where: {
+            therapistId,
+            dayOfWeek,
+            startTime: { lte: timeOnly },
+            endTime: { gte: endTimeOnly },
+            isAvailable: true,
+          },
+        });
+
+        if (!availability) {
+          throw new BadRequestException(
+            `Therapist is not available at the requested time (${timeOnly}-${endTimeOnly} ${dayOfWeek} in ${therapistTimezone})`,
+          );
+        }
+
+        // Create the meeting within the transaction
+        const meeting = await tx.meeting.create({
+          data: {
+            ...createMeetingDto,
+            startTime: startTimeDate,
+            endTime: endTimeDate,
+            status: 'SCHEDULED',
+            clientId,
+          },
+          include: {
+            client: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            therapist: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                  },
                 },
               },
             },
           },
-          therapist: {
-            select: {
-              user: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  email: true,
-                },
-              },
-            },
-          },
-        },
-      });
+        });
 
-      // NOTE: Payment processing now handled separately when client pays for session
-      // The meeting is created first, then payment is processed via billing controller
-      // This allows for better payment flow and error handling
+        // NOTE: Payment processing now handled separately when client pays for session
+        // The meeting is created first, then payment is processed via billing controller
+        // This allows for better payment flow and error handling
 
-      // Publish appointment booked event
-      await this.eventBus.emit(
-        new AppointmentBookedEvent({
-          appointmentId: meeting.id,
-          clientId: meeting.clientId,
-          therapistId: meeting.therapistId,
-          startTime: meeting.startTime,
-          meetingType: meeting.meetingType as
-            | 'video'
-            | 'audio'
-            | 'in_person'
-            | 'chat',
-          duration: meeting.duration,
-          title: meeting.title || 'Therapy Session',
-          description: meeting.description || undefined,
-          isInitialConsultation: false,
-        }),
-      );
+        // Publish appointment booked event
+        await this.eventBus.emit(
+          new AppointmentBookedEvent({
+            appointmentId: meeting.id,
+            clientId: meeting.clientId,
+            therapistId: meeting.therapistId,
+            startTime: meeting.startTime,
+            meetingType: meeting.meetingType as
+              | 'video'
+              | 'audio'
+              | 'in_person'
+              | 'chat',
+            duration: meeting.duration,
+            title: meeting.title || 'Therapy Session',
+            description: meeting.description || undefined,
+            isInitialConsultation: false,
+          }),
+        );
 
-      // Transform the response to match frontend expectations
-      return {
-        ...meeting,
-        dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user 
-          ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
-          : 'Unknown Therapist',
-      };
-    }, {
-      isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
-      timeout: 10000, // 10 second timeout
-      maxWait: 5000, // Max wait time for transaction lock
-    });
+        // Transform the response to match frontend expectations
+        return {
+          ...meeting,
+          dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
+          therapistName: meeting.therapist?.user
+            ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
+            : 'Unknown Therapist',
+        };
+      },
+      {
+        isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
+        timeout: 10000, // 10 second timeout
+        maxWait: 5000, // Max wait time for transaction lock
+      },
+    );
   }
 
-  async getMeetings(userId: string, role: string) {
+  async getMeetings(
+    userId: string,
+    role: string,
+    queryOptions?: {
+      status?: string;
+      limit?: number;
+      offset?: number;
+    },
+  ) {
     try {
-      const where =
+      const where: any =
         role === 'therapist' ? { therapistId: userId } : { clientId: userId };
+
+      // Handle status filtering
+      if (queryOptions?.status) {
+        const statusValues = queryOptions.status
+          .split(',')
+          .map((s) => s.trim().toUpperCase());
+        where.status = { in: statusValues };
+      }
 
       const meetings = await this.prisma.meeting.findMany({
         where,
@@ -227,13 +254,15 @@ export class BookingService {
           },
         },
         orderBy: { startTime: 'desc' },
+        take: queryOptions?.limit,
+        skip: queryOptions?.offset,
       });
 
       // Transform the response to match frontend expectations
-      return meetings.map(meeting => ({
+      return meetings.map((meeting) => ({
         ...meeting,
         dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user 
+        therapistName: meeting.therapist?.user
           ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
           : 'Unknown Therapist',
       }));
@@ -290,7 +319,7 @@ export class BookingService {
       return {
         ...meeting,
         dateTime: meeting.startTime, // Map startTime to dateTime for frontend compatibility
-        therapistName: meeting.therapist?.user 
+        therapistName: meeting.therapist?.user
           ? `${meeting.therapist.user.firstName} ${meeting.therapist.user.lastName}`
           : 'Unknown Therapist',
       };
@@ -476,20 +505,26 @@ export class BookingService {
       // Handle payment refund for cancelled sessions
       try {
         // Find payment record associated with this meeting using the updated API
-        const payments = await this.billingService.getUserPayments(userId, { 
-          limit: 100 
+        const payments = await this.billingService.getUserPayments(userId, {
+          limit: 100,
         });
-        const meetingPayment = payments.find(p => p.meetingId === meeting.id);
-        
-        if (meetingPayment && cancellationNotice >= 24) { // 24-hour cancellation policy
+        const meetingPayment = payments.find((p) => p.meetingId === meeting.id);
+
+        if (meetingPayment && cancellationNotice >= 24) {
+          // 24-hour cancellation policy
           // NOTE: Refund logic would need to be implemented in billing service
           // For now, we'll emit an event that a refund is needed
-          this.logger.log(`Refund needed for cancelled session ${meeting.id} - ${cancellationNotice}h notice`);
+          this.logger.log(
+            `Refund needed for cancelled session ${meeting.id} - ${cancellationNotice}h notice`,
+          );
           // TODO: Implement refund processing in billing service
         }
       } catch (refundError) {
         // Log refund error but don't fail the cancellation
-        console.error('Failed to process refund for cancelled meeting:', refundError);
+        console.error(
+          'Failed to process refund for cancelled meeting:',
+          refundError,
+        );
       }
 
       // Publish cancellation event

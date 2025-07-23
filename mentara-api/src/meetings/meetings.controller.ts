@@ -14,7 +14,6 @@ import {
 import { MeetingsService } from './meetings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 // TODO: Add validation schemas when needed
 import type {
   CreateVideoRoomDto,
@@ -30,6 +29,39 @@ import type {
 @UseGuards(JwtAuthGuard)
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
+
+  // Specific routes must come before parameterized routes
+  @Get('upcoming')
+  async getUpcomingMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getUpcomingMeetings(userId, limit);
+  }
+
+  @Get('completed')
+  async getCompletedMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getCompletedMeetings(userId, limit);
+  }
+
+  @Get('cancelled')
+  async getCancelledMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getCancelledMeetings(userId, limit);
+  }
+
+  @Get('in-progress')
+  async getInProgressMeetings(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.meetingsService.getInProgressMeetings(userId, limit);
+  }
 
   @Get(':id')
   async getMeeting(
@@ -121,38 +153,6 @@ export class MeetingsController {
       userId,
       defaultCreateDto,
     );
-  }
-
-  @Get('upcoming')
-  async getUpcomingMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getUpcomingMeetings(userId, limit);
-  }
-
-  @Get('completed')
-  async getCompletedMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getCompletedMeetings(userId, limit);
-  }
-
-  @Get('cancelled')
-  async getCancelledMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getCancelledMeetings(userId, limit);
-  }
-
-  @Get('in-progress')
-  async getInProgressMeetings(
-    @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
-  ) {
-    return this.meetingsService.getInProgressMeetings(userId, limit);
   }
 
   @Get()

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, User, Users, FileText, MessageCircle, PenTool, Building } from 'lucide-react';
+import { Search, User, Users, FileText, MessageCircle, PenTool, Building, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ export interface TabbedSearchResultsData {
   users?: any[];
   therapists?: any[];
   posts?: any[];
+  comments?: any[];
   communities?: any[];
   worksheets?: any[];
   messages?: any[];
@@ -54,6 +55,12 @@ const TAB_CONFIG: Array<{
     label: 'Posts',
     icon: FileText,
     color: 'text-purple-600 dark:text-purple-400',
+  },
+  {
+    key: 'comments',
+    label: 'Comments',
+    icon: MessageSquare,
+    color: 'text-indigo-600 dark:text-indigo-400',
   },
   {
     key: 'communities',
@@ -91,6 +98,7 @@ const ENTITY_COLORS = {
   users: 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800',
   therapists: 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800',
   posts: 'bg-purple-50 border-purple-200 dark:bg-purple-950 dark:border-purple-800',
+  comments: 'bg-indigo-50 border-indigo-200 dark:bg-indigo-950 dark:border-indigo-800',
   communities: 'bg-orange-50 border-orange-200 dark:bg-orange-950 dark:border-orange-800',
   worksheets: 'bg-pink-50 border-pink-200 dark:bg-pink-950 dark:border-pink-800',
   messages: 'bg-cyan-50 border-cyan-200 dark:bg-cyan-950 dark:border-cyan-800',
@@ -133,6 +141,24 @@ function formatSearchResult(item: any, type: EntityType): SearchResult {
           community: item.room?.roomGroup?.community?.name,
           communityId: item.room?.roomGroup?.community?.id,
           roomId: item.room?.id,
+          createdAt: item.createdAt,
+        },
+      };
+    
+    case 'comments':
+      return {
+        id: item.id,
+        type: 'comments',
+        title: item.content.slice(0, 100) + (item.content.length > 100 ? '...' : ''),
+        subtitle: `On post: ${item.post?.title || 'Untitled Post'}`,
+        description: `By ${item.user.firstName} ${item.user.lastName} • ${item._count?.hearts || 0} hearts • ${new Date(item.createdAt).toLocaleDateString()}`,
+        avatarUrl: item.user.avatarUrl,
+        url: `/post/${item.post?.id}#comment-${item.id}`, // Keep as fallback
+        metadata: {
+          community: item.post?.room?.roomGroup?.community?.name,
+          communityId: item.post?.room?.roomGroup?.community?.id,
+          roomId: item.post?.room?.id,
+          postId: item.post?.id,
           createdAt: item.createdAt,
         },
       };
@@ -321,6 +347,14 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
         router,
         user?.role || 'client'
       );
+    } else if (result.type === 'comments' && result.metadata?.communityId && result.metadata?.roomId) {
+      // Navigate to the room where the comment's post is located
+      navigateToRoom(
+        result.metadata.roomId,
+        result.metadata.communityId,
+        router,
+        user?.role || 'client'
+      );
     } else if (result.type === 'communities') {
       // Navigate to the community
       navigateToCommunity(
@@ -340,6 +374,7 @@ export const TabbedSearchResults: React.FC<TabbedSearchResultsProps> = ({
     users: 0,
     therapists: 0,
     posts: 0,
+    comments: 0,
     communities: 0,
     worksheets: 0,
     messages: 0,

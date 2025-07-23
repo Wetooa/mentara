@@ -21,7 +21,7 @@ export class SlotGeneratorService {
   private readonly defaultConfig: SlotGenerationConfig = {
     slotInterval: 30,
     maxAdvanceBooking: 90,
-    minAdvanceBooking: 2,
+    minAdvanceBooking: 0.5,
   };
 
   constructor(private readonly prisma: PrismaService) {}
