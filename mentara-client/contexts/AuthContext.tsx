@@ -25,6 +25,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
+  hasSeenTherapistRecommendations?: boolean;
 }
 
 export interface AuthContextType {
@@ -180,6 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firstName: profileResponse.user?.firstName || profileResponse.firstName || "",
         lastName: profileResponse.user?.lastName || profileResponse.lastName || "",
         avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
+        hasSeenTherapistRecommendations: profileResponse.hasSeenTherapistRecommendations,
       };
     },
     enabled: isClient && !!userId && !!userRole && hasToken === true,
@@ -202,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           firstName: profileData?.firstName,
           lastName: profileData?.lastName,
           avatarUrl: profileData?.avatarUrl,
+          hasSeenTherapistRecommendations: profileData?.hasSeenTherapistRecommendations,
         }
       : null;
 
@@ -355,6 +358,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Client welcome redirect logic - ensure clients see welcome page if they haven't seen recommendations
+      if (isAuthenticated && userRole === 'client' && user?.hasSeenTherapistRecommendations === false) {
+        if (!pathname.startsWith('/client/welcome')) {
+          router.push('/client/welcome');
+          return;
+        }
+      }
+
       // Authenticated user on protected route
       if (isAuthenticated && isAnyRoleRoute(pathname)) {
         // Check if user has correct role for this route
@@ -378,6 +389,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     isAuthenticated,
     userRole,
+    user,
     pathname,
     router,
     toast,
