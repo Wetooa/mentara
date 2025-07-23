@@ -1,0 +1,87 @@
+18e6067c52d020fdf90a8bb302821f0b
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var ProfileController_1;
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProfileController = void 0;
+const common_1 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const current_user_id_decorator_1 = require("../auth/decorators/current-user-id.decorator");
+const zod_validation_pipe_1 = require("../common/pipes/zod-validation.pipe");
+const validation_1 = require("./validation");
+const profile_service_1 = require("./profile.service");
+/**
+ * Public profile controller for viewing user/therapist profiles
+ */
+let ProfileController = ProfileController_1 = class ProfileController {
+    profileService;
+    logger = new common_1.Logger(ProfileController_1.name);
+    constructor(profileService) {
+        this.profileService = profileService;
+    }
+    /**
+     * Get public profile by user ID
+     * Anyone can view public profiles
+     */
+    async getPublicProfile(params, currentUserId) {
+        try {
+            this.logger.log(`User ${currentUserId} viewing profile ${params.id}`);
+            return await this.profileService.getPublicProfile(params.id, currentUserId);
+        }
+        catch (error) {
+            this.logger.error(`Failed to fetch profile ${params.id}:`, error);
+            throw new common_1.HttpException(`Failed to fetch profile: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    /**
+     * Update own profile
+     * Users can only update their own profile
+     */
+    async updateOwnProfile(currentUserId, profileData) {
+        try {
+            this.logger.log(`User ${currentUserId} updating their profile`);
+            return await this.profileService.updateProfile(currentUserId, profileData);
+        }
+        catch (error) {
+            this.logger.error(`Failed to update profile for user ${currentUserId}:`, error);
+            throw new common_1.HttpException(`Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+};
+exports.ProfileController = ProfileController;
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)(new zod_validation_pipe_1.ZodValidationPipe(validation_1.UserIdParamSchema))),
+    __param(1, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], ProfileController.prototype, "getPublicProfile", null);
+__decorate([
+    (0, common_1.Put)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ProfileController.prototype, "updateOwnProfile", null);
+exports.ProfileController = ProfileController = ProfileController_1 = __decorate([
+    (0, common_1.Controller)('profile'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof profile_service_1.ProfileService !== "undefined" && profile_service_1.ProfileService) === "function" ? _a : Object])
+], ProfileController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3VzZXJzL3Byb2ZpbGUuY29udHJvbGxlci50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLDJDQUErSTtBQUMvSSxrRUFBNkQ7QUFDN0QsNEZBQTZFO0FBQzdFLDZFQUF3RTtBQUN4RSw2Q0FBaUQ7QUFFakQsdURBQW1EO0FBRW5EOztHQUVHO0FBR0ksSUFBTSxpQkFBaUIseUJBQXZCLE1BQU0saUJBQWlCO0lBSVQ7SUFIRixNQUFNLEdBQUcsSUFBSSxlQUFNLENBQUMsbUJBQWlCLENBQUMsSUFBSSxDQUFDLENBQUM7SUFFN0QsWUFDbUIsY0FBOEI7UUFBOUIsbUJBQWMsR0FBZCxjQUFjLENBQWdCO0lBQzlDLENBQUM7SUFFSjs7O09BR0c7SUFHRyxBQUFOLEtBQUssQ0FBQyxnQkFBZ0IsQ0FDNkIsTUFBbUIsRUFDbkQsYUFBcUI7UUFFdEMsSUFBSSxDQUFDO1lBQ0gsSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsUUFBUSxhQUFhLG9CQUFvQixNQUFNLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBQztZQUN0RSxPQUFPLE1BQU0sSUFBSSxDQUFDLGNBQWMsQ0FBQyxnQkFBZ0IsQ0FBQyxNQUFNLENBQUMsRUFBRSxFQUFFLGFBQWEsQ0FBQyxDQUFDO1FBQzlFLENBQUM7UUFBQyxPQUFPLEtBQUssRUFBRSxDQUFDO1lBQ2YsSUFBSSxDQUFDLE1BQU0sQ0FBQyxLQUFLLENBQUMsMkJBQTJCLE1BQU0sQ0FBQyxFQUFFLEdBQUcsRUFBRSxLQUFLLENBQUMsQ0FBQztZQUNsRSxNQUFNLElBQUksc0JBQWEsQ0FDckIsNEJBQTRCLEtBQUssWUFBWSxLQUFLLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDLGVBQWUsRUFBRSxFQUN0RixtQkFBVSxDQUFDLHFCQUFxQixDQUNqQyxDQUFDO1FBQ0osQ0FBQztJQUNILENBQUM7SUFFRDs7O09BR0c7SUFHRyxBQUFOLEtBQUssQ0FBQyxnQkFBZ0IsQ0FDSCxhQUFxQixFQUM5QixXQUFnQjtRQUV4QixJQUFJLENBQUM7WUFDSCxJQUFJLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxRQUFRLGFBQWEseUJBQXlCLENBQUMsQ0FBQztZQUNoRSxPQUFPLE1BQU0sSUFBSSxDQUFDLGNBQWMsQ0FBQyxhQUFhLENBQUMsYUFBYSxFQUFFLFdBQVcsQ0FBQyxDQUFDO1FBQzdFLENBQUM7UUFBQyxPQUFPLEtBQUssRUFBRSxDQUFDO1lBQ2YsSUFBSSxDQUFDLE1BQU0sQ0FBQyxLQUFLLENBQUMscUNBQXFDLGFBQWEsR0FBRyxFQUFFLEtBQUssQ0FBQyxDQUFDO1lBQ2hGLE1BQU0sSUFBSSxzQkFBYSxDQUNyQiw2QkFBNkIsS0FBSyxZQUFZLEtBQUssQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUMsZUFBZSxFQUFFLEVBQ3ZGLG1CQUFVLENBQUMscUJBQXFCLENBQ2pDLENBQUM7UUFDSixDQUFDO0lBQ0gsQ0FBQztDQUNGLENBQUE7QUFsRFksOENBQWlCO0FBYXRCO0lBRkwsSUFBQSxZQUFHLEVBQUMsS0FBSyxDQUFDO0lBQ1YsSUFBQSxpQkFBUSxFQUFDLG1CQUFVLENBQUMsRUFBRSxDQUFDO0lBRXJCLFdBQUEsSUFBQSxjQUFLLEVBQUMsSUFBSSx1Q0FBaUIsQ0FBQyw4QkFBaUIsQ0FBQyxDQUFDLENBQUE7SUFDL0MsV0FBQSxJQUFBLHlDQUFhLEdBQUUsQ0FBQTs7Ozt5REFZakI7QUFRSztJQUZMLElBQUEsWUFBRyxHQUFFO0lBQ0wsSUFBQSxpQkFBUSxFQUFDLG1CQUFVLENBQUMsRUFBRSxDQUFDO0lBRXJCLFdBQUEsSUFBQSx5Q0FBYSxHQUFFLENBQUE7SUFDZixXQUFBLElBQUEsYUFBSSxHQUFFLENBQUE7Ozs7eURBWVI7NEJBakRVLGlCQUFpQjtJQUY3QixJQUFBLG1CQUFVLEVBQUMsU0FBUyxDQUFDO0lBQ3JCLElBQUEsa0JBQVMsRUFBQyw2QkFBWSxDQUFDO3lEQUthLGdDQUFjLG9CQUFkLGdDQUFjO0dBSnRDLGlCQUFpQixDQWtEN0IiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3VzZXJzL3Byb2ZpbGUuY29udHJvbGxlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBDb250cm9sbGVyLCBHZXQsIFB1dCwgUGFyYW0sIEJvZHksIEh0dHBDb2RlLCBIdHRwU3RhdHVzLCBVc2VHdWFyZHMsIEZvcmJpZGRlbkV4Y2VwdGlvbiwgSHR0cEV4Y2VwdGlvbiwgTG9nZ2VyIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgSnd0QXV0aEd1YXJkIH0gZnJvbSAnLi4vYXV0aC9ndWFyZHMvand0LWF1dGguZ3VhcmQnO1xuaW1wb3J0IHsgQ3VycmVudFVzZXJJZCB9IGZyb20gJy4uL2F1dGgvZGVjb3JhdG9ycy9jdXJyZW50LXVzZXItaWQuZGVjb3JhdG9yJztcbmltcG9ydCB7IFpvZFZhbGlkYXRpb25QaXBlIH0gZnJvbSAnLi4vY29tbW9uL3BpcGVzL3pvZC12YWxpZGF0aW9uLnBpcGUnO1xuaW1wb3J0IHsgVXNlcklkUGFyYW1TY2hlbWEgfSBmcm9tICcuL3ZhbGlkYXRpb24nO1xuaW1wb3J0IHR5cGUgeyBVc2VySWRQYXJhbSB9IGZyb20gJy4vdHlwZXMnO1xuaW1wb3J0IHsgUHJvZmlsZVNlcnZpY2UgfSBmcm9tICcuL3Byb2ZpbGUuc2VydmljZSc7XG5cbi8qKlxuICogUHVibGljIHByb2ZpbGUgY29udHJvbGxlciBmb3Igdmlld2luZyB1c2VyL3RoZXJhcGlzdCBwcm9maWxlc1xuICovXG5AQ29udHJvbGxlcigncHJvZmlsZScpXG5AVXNlR3VhcmRzKEp3dEF1dGhHdWFyZClcbmV4cG9ydCBjbGFzcyBQcm9maWxlQ29udHJvbGxlciB7XG4gIHByaXZhdGUgcmVhZG9ubHkgbG9nZ2VyID0gbmV3IExvZ2dlcihQcm9maWxlQ29udHJvbGxlci5uYW1lKTtcblxuICBjb25zdHJ1Y3RvcihcbiAgICBwcml2YXRlIHJlYWRvbmx5IHByb2ZpbGVTZXJ2aWNlOiBQcm9maWxlU2VydmljZSxcbiAgKSB7fVxuXG4gIC8qKlxuICAgKiBHZXQgcHVibGljIHByb2ZpbGUgYnkgdXNlciBJRFxuICAgKiBBbnlvbmUgY2FuIHZpZXcgcHVibGljIHByb2ZpbGVzXG4gICAqL1xuICBAR2V0KCc6aWQnKVxuICBASHR0cENvZGUoSHR0cFN0YXR1cy5PSylcbiAgYXN5bmMgZ2V0UHVibGljUHJvZmlsZShcbiAgICBAUGFyYW0obmV3IFpvZFZhbGlkYXRpb25QaXBlKFVzZXJJZFBhcmFtU2NoZW1hKSkgcGFyYW1zOiBVc2VySWRQYXJhbSxcbiAgICBAQ3VycmVudFVzZXJJZCgpIGN1cnJlbnRVc2VySWQ6IHN0cmluZyxcbiAgKSB7XG4gICAgdHJ5IHtcbiAgICAgIHRoaXMubG9nZ2VyLmxvZyhgVXNlciAke2N1cnJlbnRVc2VySWR9IHZpZXdpbmcgcHJvZmlsZSAke3BhcmFtcy5pZH1gKTtcbiAgICAgIHJldHVybiBhd2FpdCB0aGlzLnByb2ZpbGVTZXJ2aWNlLmdldFB1YmxpY1Byb2ZpbGUocGFyYW1zLmlkLCBjdXJyZW50VXNlcklkKTtcbiAgICB9IGNhdGNoIChlcnJvcikge1xuICAgICAgdGhpcy5sb2dnZXIuZXJyb3IoYEZhaWxlZCB0byBmZXRjaCBwcm9maWxlICR7cGFyYW1zLmlkfTpgLCBlcnJvcik7XG4gICAgICB0aHJvdyBuZXcgSHR0cEV4Y2VwdGlvbihcbiAgICAgICAgYEZhaWxlZCB0byBmZXRjaCBwcm9maWxlOiAke2Vycm9yIGluc3RhbmNlb2YgRXJyb3IgPyBlcnJvci5tZXNzYWdlIDogJ1Vua25vd24gZXJyb3InfWAsXG4gICAgICAgIEh0dHBTdGF0dXMuSU5URVJOQUxfU0VSVkVSX0VSUk9SLFxuICAgICAgKTtcbiAgICB9XG4gIH1cblxuICAvKipcbiAgICogVXBkYXRlIG93biBwcm9maWxlXG4gICAqIFVzZXJzIGNhbiBvbmx5IHVwZGF0ZSB0aGVpciBvd24gcHJvZmlsZVxuICAgKi9cbiAgQFB1dCgpXG4gIEBIdHRwQ29kZShIdHRwU3RhdHVzLk9LKVxuICBhc3luYyB1cGRhdGVPd25Qcm9maWxlKFxuICAgIEBDdXJyZW50VXNlcklkKCkgY3VycmVudFVzZXJJZDogc3RyaW5nLFxuICAgIEBCb2R5KCkgcHJvZmlsZURhdGE6IGFueSwgLy8gVE9ETzogQWRkIHByb3BlciBEVE8gdmFsaWRhdGlvblxuICApIHtcbiAgICB0cnkge1xuICAgICAgdGhpcy5sb2dnZXIubG9nKGBVc2VyICR7Y3VycmVudFVzZXJJZH0gdXBkYXRpbmcgdGhlaXIgcHJvZmlsZWApO1xuICAgICAgcmV0dXJuIGF3YWl0IHRoaXMucHJvZmlsZVNlcnZpY2UudXBkYXRlUHJvZmlsZShjdXJyZW50VXNlcklkLCBwcm9maWxlRGF0YSk7XG4gICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgIHRoaXMubG9nZ2VyLmVycm9yKGBGYWlsZWQgdG8gdXBkYXRlIHByb2ZpbGUgZm9yIHVzZXIgJHtjdXJyZW50VXNlcklkfTpgLCBlcnJvcik7XG4gICAgICB0aHJvdyBuZXcgSHR0cEV4Y2VwdGlvbihcbiAgICAgICAgYEZhaWxlZCB0byB1cGRhdGUgcHJvZmlsZTogJHtlcnJvciBpbnN0YW5jZW9mIEVycm9yID8gZXJyb3IubWVzc2FnZSA6ICdVbmtub3duIGVycm9yJ31gLFxuICAgICAgICBIdHRwU3RhdHVzLklOVEVSTkFMX1NFUlZFUl9FUlJPUixcbiAgICAgICk7XG4gICAgfVxuICB9XG59Il0sInZlcnNpb24iOjN9

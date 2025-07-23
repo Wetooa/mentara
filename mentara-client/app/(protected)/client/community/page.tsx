@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import CommunitySidebar from "@/components/community/Sidebar";
 import CommentSection from "@/components/community/CommentSection";
@@ -87,6 +88,9 @@ export default function UserCommunity() {
 
   const { user } = useAuth();
 
+  // Mobile sidebar visibility state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Enhanced community data with new hooks
   // const { stats: communityStats } = useCommunityStats();
 
@@ -96,14 +100,20 @@ export default function UserCommunity() {
     <main className="w-full h-full">
       {/* Mobile overlay for sidebar */}
       <div className="lg:hidden">
-        {selectedCommunityId && (
+        {(selectedCommunityId || isSidebarOpen) && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="fixed inset-0 bg-black/50" onClick={() => handleCommunitySelect('')} />
+            <div className="fixed inset-0 bg-black/50" onClick={() => {
+              handleCommunitySelect('');
+              setIsSidebarOpen(false);
+            }} />
             <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
               <CommunitySidebar
                 selectedCommunityId={selectedCommunityId}
                 selectedRoomId={selectedRoomId}
-                onCommunitySelect={handleCommunitySelect}
+                onCommunitySelect={(communityId) => {
+                  handleCommunitySelect(communityId);
+                  setIsSidebarOpen(false);
+                }}
                 onRoomSelect={handleRoomSelect}
               />
             </div>
@@ -709,11 +719,19 @@ export default function UserCommunity() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
+              onClick={() => {
+                if (selectedCommunityId) {
+                  // Show sidebar to change community selection
+                  handleCommunitySelect(selectedCommunityId);
+                } else {
+                  // Show sidebar for initial community selection
+                  setIsSidebarOpen(true);
+                }
+              }}
               className="border-community-accent/30 text-community-accent"
             >
               <Hash className="h-4 w-4 mr-1" />
-              Communities
+              {selectedCommunityId ? 'Communities' : 'Select Community'}
             </Button>
             {selectedRoom && (
               <div className="flex items-center gap-2 text-sm text-community-soothing-foreground">

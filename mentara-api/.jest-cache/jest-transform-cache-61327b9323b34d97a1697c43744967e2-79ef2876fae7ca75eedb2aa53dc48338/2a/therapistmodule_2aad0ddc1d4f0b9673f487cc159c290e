@@ -1,0 +1,57 @@
+c45826c69ebca29c9e981beff0b732ea
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TherapistModule = void 0;
+const common_1 = require("@nestjs/common");
+const therapist_recommendation_controller_1 = require("./therapist-recommendation.controller");
+const therapist_recommendation_service_1 = require("./therapist-recommendation.service");
+const therapist_management_service_1 = require("./therapist-management.service");
+const therapist_profile_controller_1 = require("./controllers/therapist-profile.controller");
+const therapist_client_controller_1 = require("./controllers/therapist-client.controller");
+const therapist_worksheet_controller_1 = require("./controllers/therapist-worksheet.controller");
+const worksheets_service_1 = require("../worksheets/worksheets.service");
+const advanced_matching_service_1 = require("./services/advanced-matching.service");
+const compatibility_analysis_service_1 = require("./services/compatibility-analysis.service");
+const email_module_1 = require("../email/email.module");
+const notifications_service_1 = require("../notifications/notifications.service");
+const messaging_service_1 = require("../messaging/messaging.service");
+const prisma_client_provider_1 = require("src/providers/prisma-client.provider");
+const role_utils_1 = require("src/utils/role-utils");
+const pre_assessment_module_1 = require("../pre-assessment/pre-assessment.module");
+const messaging_module_1 = require("../messaging/messaging.module");
+const communities_module_1 = require("../communities/communities.module");
+let TherapistModule = class TherapistModule {
+};
+exports.TherapistModule = TherapistModule;
+exports.TherapistModule = TherapistModule = __decorate([
+    (0, common_1.Module)({
+        imports: [pre_assessment_module_1.PreAssessmentModule, email_module_1.EmailModule, messaging_module_1.MessagingModule, communities_module_1.CommunitiesModule],
+        controllers: [
+            therapist_recommendation_controller_1.TherapistRecommendationController,
+            therapist_profile_controller_1.TherapistProfileController,
+            therapist_client_controller_1.TherapistClientController,
+            therapist_worksheet_controller_1.TherapistWorksheetController,
+        ],
+        providers: [
+            therapist_recommendation_service_1.TherapistRecommendationService,
+            therapist_management_service_1.TherapistManagementService,
+            worksheets_service_1.WorksheetsService,
+            advanced_matching_service_1.AdvancedMatchingService,
+            compatibility_analysis_service_1.CompatibilityAnalysisService,
+            notifications_service_1.NotificationsService,
+            messaging_service_1.MessagingService,
+            prisma_client_provider_1.PrismaService,
+            role_utils_1.RoleUtils,
+        ],
+        exports: [
+            therapist_management_service_1.TherapistManagementService,
+        ],
+    })
+], TherapistModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3RoZXJhcGlzdC90aGVyYXBpc3QubW9kdWxlLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQUFBLDJDQUF3QztBQUN4QywrRkFBMEY7QUFDMUYseUZBQW9GO0FBRXBGLGlGQUE0RTtBQUU1RSw2RkFBd0Y7QUFDeEYsMkZBQXNGO0FBQ3RGLGlHQUE0RjtBQUM1Rix5RUFBcUU7QUFDckUsb0ZBQStFO0FBQy9FLDhGQUF5RjtBQUN6Rix3REFBb0Q7QUFDcEQsa0ZBQThFO0FBQzlFLHNFQUFrRTtBQUNsRSxpRkFBcUU7QUFDckUscURBQWlEO0FBQ2pELG1GQUE4RTtBQUM5RSxvRUFBZ0U7QUFDaEUsMEVBQXNFO0FBMEIvRCxJQUFNLGVBQWUsR0FBckIsTUFBTSxlQUFlO0NBQUcsQ0FBQTtBQUFsQiwwQ0FBZTswQkFBZixlQUFlO0lBeEIzQixJQUFBLGVBQU0sRUFBQztRQUNOLE9BQU8sRUFBRSxDQUFDLDJDQUFtQixFQUFFLDBCQUFXLEVBQUUsa0NBQWUsRUFBRSxzQ0FBaUIsQ0FBQztRQUMvRSxXQUFXLEVBQUU7WUFDWCx1RUFBaUM7WUFDakMseURBQTBCO1lBQzFCLHVEQUF5QjtZQUN6Qiw2REFBNEI7U0FDN0I7UUFDRCxTQUFTLEVBQUU7WUFDVCxpRUFBOEI7WUFDOUIseURBQTBCO1lBQzFCLHNDQUFpQjtZQUNqQixtREFBdUI7WUFDdkIsNkRBQTRCO1lBQzVCLDRDQUFvQjtZQUNwQixvQ0FBZ0I7WUFDaEIsc0NBQWE7WUFDYixzQkFBUztTQUNWO1FBQ0QsT0FBTyxFQUFFO1lBQ1AseURBQTBCO1NBRTNCO0tBQ0YsQ0FBQztHQUNXLGVBQWUsQ0FBRyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvdGhlcmFwaXN0L3RoZXJhcGlzdC5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgVGhlcmFwaXN0UmVjb21tZW5kYXRpb25Db250cm9sbGVyIH0gZnJvbSAnLi90aGVyYXBpc3QtcmVjb21tZW5kYXRpb24uY29udHJvbGxlcic7XG5pbXBvcnQgeyBUaGVyYXBpc3RSZWNvbW1lbmRhdGlvblNlcnZpY2UgfSBmcm9tICcuL3RoZXJhcGlzdC1yZWNvbW1lbmRhdGlvbi5zZXJ2aWNlJztcblxuaW1wb3J0IHsgVGhlcmFwaXN0TWFuYWdlbWVudFNlcnZpY2UgfSBmcm9tICcuL3RoZXJhcGlzdC1tYW5hZ2VtZW50LnNlcnZpY2UnO1xuXG5pbXBvcnQgeyBUaGVyYXBpc3RQcm9maWxlQ29udHJvbGxlciB9IGZyb20gJy4vY29udHJvbGxlcnMvdGhlcmFwaXN0LXByb2ZpbGUuY29udHJvbGxlcic7XG5pbXBvcnQgeyBUaGVyYXBpc3RDbGllbnRDb250cm9sbGVyIH0gZnJvbSAnLi9jb250cm9sbGVycy90aGVyYXBpc3QtY2xpZW50LmNvbnRyb2xsZXInO1xuaW1wb3J0IHsgVGhlcmFwaXN0V29ya3NoZWV0Q29udHJvbGxlciB9IGZyb20gJy4vY29udHJvbGxlcnMvdGhlcmFwaXN0LXdvcmtzaGVldC5jb250cm9sbGVyJztcbmltcG9ydCB7IFdvcmtzaGVldHNTZXJ2aWNlIH0gZnJvbSAnLi4vd29ya3NoZWV0cy93b3Jrc2hlZXRzLnNlcnZpY2UnO1xuaW1wb3J0IHsgQWR2YW5jZWRNYXRjaGluZ1NlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL2FkdmFuY2VkLW1hdGNoaW5nLnNlcnZpY2UnO1xuaW1wb3J0IHsgQ29tcGF0aWJpbGl0eUFuYWx5c2lzU2VydmljZSB9IGZyb20gJy4vc2VydmljZXMvY29tcGF0aWJpbGl0eS1hbmFseXNpcy5zZXJ2aWNlJztcbmltcG9ydCB7IEVtYWlsTW9kdWxlIH0gZnJvbSAnLi4vZW1haWwvZW1haWwubW9kdWxlJztcbmltcG9ydCB7IE5vdGlmaWNhdGlvbnNTZXJ2aWNlIH0gZnJvbSAnLi4vbm90aWZpY2F0aW9ucy9ub3RpZmljYXRpb25zLnNlcnZpY2UnO1xuaW1wb3J0IHsgTWVzc2FnaW5nU2VydmljZSB9IGZyb20gJy4uL21lc3NhZ2luZy9tZXNzYWdpbmcuc2VydmljZSc7XG5pbXBvcnQgeyBQcmlzbWFTZXJ2aWNlIH0gZnJvbSAnc3JjL3Byb3ZpZGVycy9wcmlzbWEtY2xpZW50LnByb3ZpZGVyJztcbmltcG9ydCB7IFJvbGVVdGlscyB9IGZyb20gJ3NyYy91dGlscy9yb2xlLXV0aWxzJztcbmltcG9ydCB7IFByZUFzc2Vzc21lbnRNb2R1bGUgfSBmcm9tICcuLi9wcmUtYXNzZXNzbWVudC9wcmUtYXNzZXNzbWVudC5tb2R1bGUnO1xuaW1wb3J0IHsgTWVzc2FnaW5nTW9kdWxlIH0gZnJvbSAnLi4vbWVzc2FnaW5nL21lc3NhZ2luZy5tb2R1bGUnO1xuaW1wb3J0IHsgQ29tbXVuaXRpZXNNb2R1bGUgfSBmcm9tICcuLi9jb21tdW5pdGllcy9jb21tdW5pdGllcy5tb2R1bGUnO1xuXG5ATW9kdWxlKHtcbiAgaW1wb3J0czogW1ByZUFzc2Vzc21lbnRNb2R1bGUsIEVtYWlsTW9kdWxlLCBNZXNzYWdpbmdNb2R1bGUsIENvbW11bml0aWVzTW9kdWxlXSxcbiAgY29udHJvbGxlcnM6IFtcbiAgICBUaGVyYXBpc3RSZWNvbW1lbmRhdGlvbkNvbnRyb2xsZXIsXG4gICAgVGhlcmFwaXN0UHJvZmlsZUNvbnRyb2xsZXIsXG4gICAgVGhlcmFwaXN0Q2xpZW50Q29udHJvbGxlcixcbiAgICBUaGVyYXBpc3RXb3Jrc2hlZXRDb250cm9sbGVyLFxuICBdLFxuICBwcm92aWRlcnM6IFtcbiAgICBUaGVyYXBpc3RSZWNvbW1lbmRhdGlvblNlcnZpY2UsXG4gICAgVGhlcmFwaXN0TWFuYWdlbWVudFNlcnZpY2UsXG4gICAgV29ya3NoZWV0c1NlcnZpY2UsXG4gICAgQWR2YW5jZWRNYXRjaGluZ1NlcnZpY2UsXG4gICAgQ29tcGF0aWJpbGl0eUFuYWx5c2lzU2VydmljZSxcbiAgICBOb3RpZmljYXRpb25zU2VydmljZSxcbiAgICBNZXNzYWdpbmdTZXJ2aWNlLFxuICAgIFByaXNtYVNlcnZpY2UsXG4gICAgUm9sZVV0aWxzLFxuICBdLFxuICBleHBvcnRzOiBbXG4gICAgVGhlcmFwaXN0TWFuYWdlbWVudFNlcnZpY2UsXG5cbiAgXSxcbn0pXG5leHBvcnQgY2xhc3MgVGhlcmFwaXN0TW9kdWxlIHt9XG4iXSwidmVyc2lvbiI6M30=

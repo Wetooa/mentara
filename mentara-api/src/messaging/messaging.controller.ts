@@ -40,6 +40,20 @@ export class MessagingController {
     private readonly supabaseStorageService: SupabaseStorageService,
   ) {}
 
+  // Health check endpoint for WebSocket connectivity
+  @Get('health')
+  @HttpCode(HttpStatus.OK)
+  async checkHealth(@CurrentUserId() userId: string) {
+    return {
+      success: true,
+      message: 'Messaging service is healthy',
+      timestamp: new Date().toISOString(),
+      userId,
+      environment: process.env.NODE_ENV || 'unknown',
+      frontendUrl: process.env.FRONTEND_URL || 'not_configured',
+    };
+  }
+
   // Conversation endpoints
   @Post('conversations')
   @HttpCode(HttpStatus.CREATED)

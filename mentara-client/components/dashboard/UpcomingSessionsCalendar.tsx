@@ -66,65 +66,73 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
   }
   
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <CalendarDays className="h-4 w-4" />
-          Sessions Calendar
-        </CardTitle>
+    <div className={`space-y-4 ${className}`}>
+      {/* Modern Header with Stats - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-teal-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Sessions Calendar</h2>
+          </div>
+          <div className="flex items-center gap-2 bg-teal-50 px-3 py-1.5 rounded-full self-start">
+            <div className="w-2 h-2 rounded-full bg-teal-500" />
+            <span className="text-sm text-teal-700 font-medium">Today: {todaysSessions.length}</span>
+          </div>
+          {isLoading && (
+            <div className="text-teal-600 text-sm flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+              Loading...
+            </div>
+          )}
+        </div>
+        
         <div className="flex items-center gap-2">
           <CalendarModal
             trigger={
-              <Button variant="ghost" size="sm" className="text-xs">
-                <Maximize2 className="h-3 w-3 mr-1" />
-                Full View
+              <Button variant="outline" size="sm" className="text-sm hover:bg-teal-50 hover:border-teal-200">
+                <Maximize2 className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Full View</span>
+                <span className="sm:hidden">Full</span>
               </Button>
             }
           />
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm"
             onClick={handleViewAllSessions}
-            className="text-xs"
+            className="text-sm hover:bg-teal-50 hover:border-teal-200"
           >
-            View All
-            <ArrowRight className="h-3 w-3 ml-1" />
+            <span className="hidden sm:inline">View All</span>
+            <span className="sm:hidden">All</span>
+            <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="space-y-4">
-        {/* Quick Stats */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-muted-foreground">Today:</span>
-            <span className="font-medium">{todaysSessions.length}</span>
-          </div>
-          {isLoading && (
-            <div className="text-muted-foreground text-xs">Loading...</div>
-          )}
+      {/* Full-Width Appointment Calendar */}
+      <AppointmentCalendar
+        meetings={meetings}
+        selected={selectedDate}
+        onSelect={handleDateSelect}
+        showMeetingDetails={false}
+        className="w-full"
+      />
+      
+      {/* No sessions state */}
+      {!isLoading && meetings.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <CalendarDays className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">No sessions scheduled</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleViewAllSessions}
+            className="mt-3 hover:bg-teal-50 hover:border-teal-200"
+          >
+            Schedule a Session
+          </Button>
         </div>
-        
-        {/* Appointment Calendar */}
-        <div className="w-full">
-          <AppointmentCalendar
-            meetings={meetings}
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            showMeetingDetails={false}
-            className="scale-90 origin-center"
-          />
-        </div>
-        
-        {/* No sessions state */}
-        {!isLoading && meetings.length === 0 && (
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            <CalendarDays className="h-8 w-8 mx-auto mb-2 opacity-30" />
-            <p>No sessions scheduled</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

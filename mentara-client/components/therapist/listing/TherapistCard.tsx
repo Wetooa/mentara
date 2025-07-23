@@ -86,11 +86,15 @@ export default function TherapistCard({
 
             {/* Specialties */}
             <div className="flex flex-wrap gap-1 mb-3">
-              {therapist.specialties.map((specialty, index) => (
+              {therapist.specialties?.map((specialty, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   {specialty}
                 </Badge>
-              ))}
+              )) || (
+                <Badge variant="outline" className="text-xs">
+                  General Therapy
+                </Badge>
+              )}
             </div>
 
             {/* Available Time */}

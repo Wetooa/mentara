@@ -1,11 +1,19 @@
 ULTRATHINK and use sequential-thinking-mcp to plan/fix/add the issue below
 
 
-Notification System Audit and Review
-- i want a full notification system audit and review. check if each type of event is being handled correctly, if the notifications are being sent to the right users, and if the notifications are being displayed correctly in the UI.
+Meeting API Axios Errors
 
-- for example, there should be notifications when someone messages you, and this should be in real time
-- another example is when someone comments on your post, you should receive a notification
+🔍 [SOCKET] Full error object: "{\n  \"description\": {\n    \"isTrusted\": true\n  },\n  \"type\": \"TransportError\"\n}"
+
+lib/socket.ts (261:15) @ getSocket/<
+
+  259 |         data: error.data || 'No data',
+  260 |       });
+> 261 |       console.error('🔍 [SOCKET] Full error object:', JSON.stringify(error, null, 2));
+      |               ^
+  262 |     });
+  263 |
+  264 |     socket.on('reconnect', (attemptNumber) => {
 
 
 

@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { PublicProfileResponse } from '@/lib/api/services/profile';
 import { format, parseISO } from 'date-fns';
 import {
@@ -53,7 +53,7 @@ export function ProfileActivity({ recentActivity, stats }: ProfileActivityProps)
         {hasActivity ? (
           <div className="space-y-4">
             {recentActivity.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
+              <ActivityItem key={activity.id} activity={activity} userRole={userRole} />
             ))}
 
             {recentActivity.length >= 20 && (
@@ -79,9 +79,11 @@ export function ProfileActivity({ recentActivity, stats }: ProfileActivityProps)
 }
 
 function ActivityItem({
-  activity
+  activity,
+  userRole
 }: {
-  activity: PublicProfileResponse['recentActivity'][0]
+  activity: PublicProfileResponse['recentActivity'][0];
+  userRole: UserRole | null;
 }) {
   const formattedDate = format(parseISO(activity.createdAt), 'MMM d, yyyy');
   const isPost = activity.type === 'post';

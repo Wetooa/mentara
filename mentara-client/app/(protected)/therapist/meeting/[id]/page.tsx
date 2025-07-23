@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState, use } from 'react';
+import { useRouter } from 'next/navigation';
 import { MeetingRoom } from '@/components/meeting/MeetingRoom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,13 +52,16 @@ interface Meeting {
   meetingNotes?: string;
 }
 
-export default function TherapistMeetingPage() {
-  const params = useParams();
+interface TherapistMeetingPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function TherapistMeetingPage({ params }: TherapistMeetingPageProps) {
+  const { id: meetingId } = use(params);
   const router = useRouter();
   const api = useApi();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const meetingId = params.id as string;
 
   const [accessGranted, setAccessGranted] = useState(false);
   const [isJoining, setIsJoining] = useState(false);

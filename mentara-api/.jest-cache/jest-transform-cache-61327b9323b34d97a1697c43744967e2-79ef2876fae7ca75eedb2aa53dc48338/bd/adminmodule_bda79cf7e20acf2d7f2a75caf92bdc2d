@@ -1,0 +1,48 @@
+39ca023e8d87e1f280edc970f96ded91
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminModule = void 0;
+const common_1 = require("@nestjs/common");
+const admin_controller_1 = require("./admin.controller");
+const admin_service_1 = require("./admin.service");
+const admin_therapist_service_1 = require("./services/admin-therapist.service");
+const admin_account_controller_1 = require("./controllers/admin-account.controller");
+const admin_therapist_controller_1 = require("./controllers/admin-therapist.controller");
+const admin_user_controller_1 = require("./controllers/admin-user.controller");
+const admin_moderation_controller_1 = require("./controllers/admin-moderation.controller");
+const prisma_client_provider_1 = require("../providers/prisma-client.provider");
+const notifications_service_1 = require("../notifications/notifications.service");
+const role_utils_1 = require("../utils/role-utils");
+const messaging_module_1 = require("../messaging/messaging.module");
+const email_service_1 = require("src/email/email.service");
+let AdminModule = class AdminModule {
+};
+exports.AdminModule = AdminModule;
+exports.AdminModule = AdminModule = __decorate([
+    (0, common_1.Module)({
+        imports: [messaging_module_1.MessagingModule],
+        controllers: [
+            admin_controller_1.AdminController,
+            admin_account_controller_1.AdminAccountController,
+            admin_therapist_controller_1.AdminTherapistController,
+            admin_user_controller_1.AdminUserController,
+            admin_moderation_controller_1.AdminModerationController,
+        ],
+        providers: [
+            admin_service_1.AdminService,
+            admin_therapist_service_1.AdminTherapistService,
+            prisma_client_provider_1.PrismaService,
+            notifications_service_1.NotificationsService,
+            role_utils_1.RoleUtils,
+            email_service_1.EmailService,
+        ],
+        exports: [admin_service_1.AdminService],
+    })
+], AdminModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2FkbWluL2FkbWluLm1vZHVsZS50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQSwyQ0FBd0M7QUFDeEMseURBQXFEO0FBQ3JELG1EQUErQztBQUMvQyxnRkFBMkU7QUFDM0UscUZBQWdGO0FBQ2hGLHlGQUFvRjtBQUNwRiwrRUFBMEU7QUFDMUUsMkZBQXNGO0FBQ3RGLGdGQUFvRTtBQUNwRSxrRkFBOEU7QUFDOUUsb0RBQWdEO0FBQ2hELG9FQUFnRTtBQUNoRSwyREFBdUQ7QUFxQmhELElBQU0sV0FBVyxHQUFqQixNQUFNLFdBQVc7Q0FBRyxDQUFBO0FBQWQsa0NBQVc7c0JBQVgsV0FBVztJQW5CdkIsSUFBQSxlQUFNLEVBQUM7UUFDTixPQUFPLEVBQUUsQ0FBQyxrQ0FBZSxDQUFDO1FBQzFCLFdBQVcsRUFBRTtZQUNYLGtDQUFlO1lBQ2YsaURBQXNCO1lBQ3RCLHFEQUF3QjtZQUN4QiwyQ0FBbUI7WUFDbkIsdURBQXlCO1NBQzFCO1FBQ0QsU0FBUyxFQUFFO1lBQ1QsNEJBQVk7WUFDWiwrQ0FBcUI7WUFDckIsc0NBQWE7WUFDYiw0Q0FBb0I7WUFDcEIsc0JBQVM7WUFDVCw0QkFBWTtTQUNiO1FBQ0QsT0FBTyxFQUFFLENBQUMsNEJBQVksQ0FBQztLQUN4QixDQUFDO0dBQ1csV0FBVyxDQUFHIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9hZG1pbi9hZG1pbi5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgQWRtaW5Db250cm9sbGVyIH0gZnJvbSAnLi9hZG1pbi5jb250cm9sbGVyJztcbmltcG9ydCB7IEFkbWluU2VydmljZSB9IGZyb20gJy4vYWRtaW4uc2VydmljZSc7XG5pbXBvcnQgeyBBZG1pblRoZXJhcGlzdFNlcnZpY2UgfSBmcm9tICcuL3NlcnZpY2VzL2FkbWluLXRoZXJhcGlzdC5zZXJ2aWNlJztcbmltcG9ydCB7IEFkbWluQWNjb3VudENvbnRyb2xsZXIgfSBmcm9tICcuL2NvbnRyb2xsZXJzL2FkbWluLWFjY291bnQuY29udHJvbGxlcic7XG5pbXBvcnQgeyBBZG1pblRoZXJhcGlzdENvbnRyb2xsZXIgfSBmcm9tICcuL2NvbnRyb2xsZXJzL2FkbWluLXRoZXJhcGlzdC5jb250cm9sbGVyJztcbmltcG9ydCB7IEFkbWluVXNlckNvbnRyb2xsZXIgfSBmcm9tICcuL2NvbnRyb2xsZXJzL2FkbWluLXVzZXIuY29udHJvbGxlcic7XG5pbXBvcnQgeyBBZG1pbk1vZGVyYXRpb25Db250cm9sbGVyIH0gZnJvbSAnLi9jb250cm9sbGVycy9hZG1pbi1tb2RlcmF0aW9uLmNvbnRyb2xsZXInO1xuaW1wb3J0IHsgUHJpc21hU2VydmljZSB9IGZyb20gJy4uL3Byb3ZpZGVycy9wcmlzbWEtY2xpZW50LnByb3ZpZGVyJztcbmltcG9ydCB7IE5vdGlmaWNhdGlvbnNTZXJ2aWNlIH0gZnJvbSAnLi4vbm90aWZpY2F0aW9ucy9ub3RpZmljYXRpb25zLnNlcnZpY2UnO1xuaW1wb3J0IHsgUm9sZVV0aWxzIH0gZnJvbSAnLi4vdXRpbHMvcm9sZS11dGlscyc7XG5pbXBvcnQgeyBNZXNzYWdpbmdNb2R1bGUgfSBmcm9tICcuLi9tZXNzYWdpbmcvbWVzc2FnaW5nLm1vZHVsZSc7XG5pbXBvcnQgeyBFbWFpbFNlcnZpY2UgfSBmcm9tICdzcmMvZW1haWwvZW1haWwuc2VydmljZSc7XG5cbkBNb2R1bGUoe1xuICBpbXBvcnRzOiBbTWVzc2FnaW5nTW9kdWxlXSxcbiAgY29udHJvbGxlcnM6IFtcbiAgICBBZG1pbkNvbnRyb2xsZXIsXG4gICAgQWRtaW5BY2NvdW50Q29udHJvbGxlcixcbiAgICBBZG1pblRoZXJhcGlzdENvbnRyb2xsZXIsXG4gICAgQWRtaW5Vc2VyQ29udHJvbGxlcixcbiAgICBBZG1pbk1vZGVyYXRpb25Db250cm9sbGVyLFxuICBdLFxuICBwcm92aWRlcnM6IFtcbiAgICBBZG1pblNlcnZpY2UsXG4gICAgQWRtaW5UaGVyYXBpc3RTZXJ2aWNlLFxuICAgIFByaXNtYVNlcnZpY2UsXG4gICAgTm90aWZpY2F0aW9uc1NlcnZpY2UsXG4gICAgUm9sZVV0aWxzLFxuICAgIEVtYWlsU2VydmljZSxcbiAgXSxcbiAgZXhwb3J0czogW0FkbWluU2VydmljZV0sXG59KVxuZXhwb3J0IGNsYXNzIEFkbWluTW9kdWxlIHt9XG4iXSwidmVyc2lvbiI6M30=

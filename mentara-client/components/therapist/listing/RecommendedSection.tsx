@@ -18,7 +18,7 @@ export default function RecommendedSection() {
     isLoading, 
     error 
   } = useQuery({
-    queryKey: ['therapist-recommendations', 'personalized'],
+    queryKey: ['therapists', 'recommendations', 'personalized'],
     queryFn: () => api.therapists.getPersonalizedRecommendations(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -183,7 +183,7 @@ export default function RecommendedSection() {
                 <CardContent className="p-4 relative z-20 flex flex-col items-center justify-end h-full text-white mt-auto">
                   <div className="w-full">
                     <div className="flex gap-2 flex-wrap mb-3">
-                      {therapist.specialties.map((specialty, i) => (
+                      {therapist.specialties?.map((specialty, i) => (
                         <div
                           key={i}
                           className="bg-white rounded-sm px-2 py-0.5"

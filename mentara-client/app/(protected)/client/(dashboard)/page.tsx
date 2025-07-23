@@ -197,21 +197,22 @@ export default function DashboardPage() {
         onTherapistsClick={handleTherapistsClick}
       />
 
-      {/* Main Dashboard Content - Redesigned for better above-fold visibility */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Column - Sessions and Worksheets */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Sessions Calendar - Full Width for Better Visibility */}
-          <UpcomingSessionsCalendar />
+      {/* Main Dashboard Content - Responsive layout with calendar prominence */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Primary Column - Full-Width Sessions Calendar */}
+        <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+          {/* Sessions Calendar - Full Width Modern Design */}
+          <UpcomingSessionsCalendar className="h-full" />
           
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Secondary Content - Sessions and Worksheets */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
             <UpcomingSessions sessions={dashboardData.upcomingSessions} />
             <WorksheetStatus worksheets={dashboardData.worksheets} />
           </div>
         </div>
 
-        {/* Right Column 1 - Therapist and Communications */}
-        <div className="space-y-6">
+        {/* Right Sidebar - Therapist, Communications, Progress, and Notifications */}
+        <div className="space-y-4 lg:space-y-6">
           <AssignedTherapist
             assignedTherapists={dashboardApiData?.assignedTherapists || []}
             isLoading={isDashboardLoading}
@@ -223,10 +224,6 @@ export default function DashboardPage() {
             onViewAllMessages={handleViewAllMessages}
             onContactSelect={handleContactSelect}
           />
-        </div>
-
-        {/* Right Column 2 - Progress and Notifications (Always Visible) */}
-        <div className="space-y-6">
           <ProgressTracking progress={dashboardData.progress} />
           <NotificationsCenter notifications={dashboardData.notifications} />
         </div>

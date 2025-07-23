@@ -212,7 +212,11 @@ export class DashboardService {
       });
 
       return {
-        therapist,
+        therapist: {
+          ...therapist,
+          // Map database fields to frontend-expected fields
+          specialties: therapist.areasOfExpertise || [],
+        },
         stats: {
           totalClients: totalClientsCount,
           completedMeetings: completedMeetingsCount,

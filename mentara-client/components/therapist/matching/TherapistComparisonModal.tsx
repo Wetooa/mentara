@@ -170,14 +170,16 @@ export function TherapistComparisonModal({
       case 'specialties':
         return (
           <div className="space-y-1">
-            {therapist.specialties.slice(0, 3).map((specialty, index) => (
+            {therapist.specialties?.slice(0, 3).map((specialty, index) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {specialty}
               </Badge>
-            ))}
-            {therapist.specialties.length > 3 && (
+            )) || (
+              <span className="text-xs text-muted-foreground">No specialties listed</span>
+            )}
+            {(therapist.specialties?.length || 0) > 3 && (
               <span className="text-xs text-muted-foreground">
-                +{therapist.specialties.length - 3} more
+                +{(therapist.specialties?.length || 0) - 3} more
               </span>
             )}
           </div>

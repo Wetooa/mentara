@@ -1,0 +1,33 @@
+57f79be0c09ee97018575cd596957e11
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CommonModule = void 0;
+const common_1 = require("@nestjs/common");
+const event_emitter_1 = require("@nestjs/event-emitter");
+const config_1 = require("@nestjs/config");
+const event_bus_service_1 = require("./events/event-bus.service");
+const supabase_storage_service_1 = require("./services/supabase-storage.service");
+const prisma_client_provider_1 = require("../providers/prisma-client.provider");
+let CommonModule = class CommonModule {
+};
+exports.CommonModule = CommonModule;
+exports.CommonModule = CommonModule = __decorate([
+    (0, common_1.Global)(),
+    (0, common_1.Module)({
+        imports: [config_1.ConfigModule],
+        providers: [
+            event_bus_service_1.EventBusService,
+            supabase_storage_service_1.SupabaseStorageService,
+            prisma_client_provider_1.PrismaService,
+            event_emitter_1.EventEmitter2,
+        ],
+        exports: [event_bus_service_1.EventBusService, supabase_storage_service_1.SupabaseStorageService],
+    })
+], CommonModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2NvbW1vbi9jb21tb24ubW9kdWxlLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7OztBQUFBLDJDQUFnRDtBQUNoRCx5REFBc0Q7QUFDdEQsMkNBQThDO0FBQzlDLGtFQUE2RDtBQUM3RCxrRkFBNkU7QUFDN0UsZ0ZBQW9FO0FBYTdELElBQU0sWUFBWSxHQUFsQixNQUFNLFlBQVk7Q0FBRyxDQUFBO0FBQWYsb0NBQVk7dUJBQVosWUFBWTtJQVh4QixJQUFBLGVBQU0sR0FBRTtJQUNSLElBQUEsZUFBTSxFQUFDO1FBQ04sT0FBTyxFQUFFLENBQUMscUJBQVksQ0FBQztRQUN2QixTQUFTLEVBQUU7WUFDVCxtQ0FBZTtZQUNmLGlEQUFzQjtZQUN0QixzQ0FBYTtZQUNiLDZCQUFhO1NBQ2Q7UUFDRCxPQUFPLEVBQUUsQ0FBQyxtQ0FBZSxFQUFFLGlEQUFzQixDQUFDO0tBQ25ELENBQUM7R0FDVyxZQUFZLENBQUciLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2NvbW1vbi9jb21tb24ubW9kdWxlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IE1vZHVsZSwgR2xvYmFsIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgRXZlbnRFbWl0dGVyMiB9IGZyb20gJ0BuZXN0anMvZXZlbnQtZW1pdHRlcic7XG5pbXBvcnQgeyBDb25maWdNb2R1bGUgfSBmcm9tICdAbmVzdGpzL2NvbmZpZyc7XG5pbXBvcnQgeyBFdmVudEJ1c1NlcnZpY2UgfSBmcm9tICcuL2V2ZW50cy9ldmVudC1idXMuc2VydmljZSc7XG5pbXBvcnQgeyBTdXBhYmFzZVN0b3JhZ2VTZXJ2aWNlIH0gZnJvbSAnLi9zZXJ2aWNlcy9zdXBhYmFzZS1zdG9yYWdlLnNlcnZpY2UnO1xuaW1wb3J0IHsgUHJpc21hU2VydmljZSB9IGZyb20gJy4uL3Byb3ZpZGVycy9wcmlzbWEtY2xpZW50LnByb3ZpZGVyJztcblxuQEdsb2JhbCgpXG5ATW9kdWxlKHtcbiAgaW1wb3J0czogW0NvbmZpZ01vZHVsZV0sXG4gIHByb3ZpZGVyczogW1xuICAgIEV2ZW50QnVzU2VydmljZSxcbiAgICBTdXBhYmFzZVN0b3JhZ2VTZXJ2aWNlLFxuICAgIFByaXNtYVNlcnZpY2UsXG4gICAgRXZlbnRFbWl0dGVyMixcbiAgXSxcbiAgZXhwb3J0czogW0V2ZW50QnVzU2VydmljZSwgU3VwYWJhc2VTdG9yYWdlU2VydmljZV0sXG59KVxuZXhwb3J0IGNsYXNzIENvbW1vbk1vZHVsZSB7fVxuIl0sInZlcnNpb24iOjN9
