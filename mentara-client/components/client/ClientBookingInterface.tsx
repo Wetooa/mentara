@@ -107,7 +107,7 @@ export function ClientBookingInterface({
   if (therapistLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-7xl lg:max-w-[95vw] xl:max-w-[90vw] max-h-[95vh] overflow-y-auto">
           <VisuallyHidden.Root asChild>
             <DialogTitle>Loading Booking Interface</DialogTitle>
           </VisuallyHidden.Root>
@@ -144,7 +144,7 @@ export function ClientBookingInterface({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-7xl lg:max-w-[95vw] xl:max-w-[90vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
