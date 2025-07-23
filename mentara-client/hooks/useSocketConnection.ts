@@ -9,12 +9,19 @@ interface SocketConnectionState {
   lastConnected: Date | null;
   connectionCount: number;
   subscribers: Set<string>;
+  lastHeartbeat: Date | null;
+  isStale: boolean;
+  readyState: number;
 }
 
 interface UseSocketConnectionOptions {
   subscriberId: string;
   enableRealtime?: boolean;
   autoConnect?: boolean;
+  enableHeartbeat?: boolean;
+  heartbeatInterval?: number;
+  heartbeatTimeout?: number;
+  enableTabVisibilityHandling?: boolean;
 }
 
 interface EventSubscription {
@@ -29,7 +36,11 @@ interface EventSubscription {
 export function useSocketConnection({ 
   subscriberId, 
   enableRealtime = true,
-  autoConnect = true 
+  autoConnect = true,
+  enableHeartbeat = true,
+  heartbeatInterval = 30000, // 30 seconds
+  heartbeatTimeout = 10000,  // 10 seconds
+  enableTabVisibilityHandling = true
 }: UseSocketConnectionOptions) {
   const { accessToken, user } = useAuth();
   const [connectionState, setConnectionState] = useState<SocketConnectionState>({
@@ -39,18 +50,152 @@ export function useSocketConnection({
     lastConnected: null,
     connectionCount: 0,
     subscribers: new Set(),
+    lastHeartbeat: null,
+    isStale: false,
+    readyState: 0,
   });
   
   const eventSubscriptionsRef = useRef<EventSubscription[]>([]);
   const isSubscribedRef = useRef(false);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastPingTimeRef = useRef<Date | null>(null);
+  const isTabVisibleRef = useRef(true);
+
+  // Heartbeat functions
+  const startHeartbeat = useCallback(() => {
+    if (!enableHeartbeat || !enableRealtime) return;
+    
+    console.log(`💓 [USE-SOCKET] Starting heartbeat for ${subscriberId}`);
+    
+    const pingSocket = () => {
+      if (!connectionState.isConnected) return;
+      
+      lastPingTimeRef.current = new Date();
+      
+      // Set timeout to detect if pong doesn't come back
+      heartbeatTimeoutRef.current = setTimeout(() => {
+        console.warn(`💔 [USE-SOCKET] Heartbeat timeout for ${subscriberId} - connection may be stale`);
+        setConnectionState(prev => ({ 
+          ...prev, 
+          isStale: true,
+          error: 'Connection appears stale - no heartbeat response'
+        }));
+      }, heartbeatTimeout);
+      
+      // Emit ping
+      socketManager.emit('ping', { subscriberId, timestamp: lastPingTimeRef.current });
+    };
+    
+    // Start interval
+    heartbeatIntervalRef.current = setInterval(pingSocket, heartbeatInterval);
+    
+    // Send first ping immediately
+    pingSocket();
+  }, [subscriberId, enableHeartbeat, enableRealtime, heartbeatInterval, heartbeatTimeout, connectionState.isConnected]);
+
+  const stopHeartbeat = useCallback(() => {
+    console.log(`💔 [USE-SOCKET] Stopping heartbeat for ${subscriberId}`);
+    
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+    
+    if (heartbeatTimeoutRef.current) {
+      clearTimeout(heartbeatTimeoutRef.current);
+      heartbeatTimeoutRef.current = null;
+    }
+    
+    lastPingTimeRef.current = null;
+  }, [subscriberId]);
+
+  const handlePong = useCallback((data: any) => {
+    if (data?.subscriberId === subscriberId) {
+      console.log(`💚 [USE-SOCKET] Received pong for ${subscriberId}`);
+      
+      // Clear timeout
+      if (heartbeatTimeoutRef.current) {
+        clearTimeout(heartbeatTimeoutRef.current);
+        heartbeatTimeoutRef.current = null;
+      }
+      
+      // Update state
+      setConnectionState(prev => ({ 
+        ...prev, 
+        lastHeartbeat: new Date(),
+        isStale: false,
+        error: prev.error === 'Connection appears stale - no heartbeat response' ? null : prev.error
+      }));
+    }
+  }, [subscriberId]);
+
+  // Tab visibility handling
+  const handleVisibilityChange = useCallback(() => {
+    if (!enableTabVisibilityHandling) return;
+    
+    const isVisible = document.visibilityState === 'visible';
+    isTabVisibleRef.current = isVisible;
+    
+    console.log(`👁️ [USE-SOCKET] Tab visibility changed for ${subscriberId}: ${isVisible ? 'visible' : 'hidden'}`);
+    
+    if (isVisible && connectionState.isConnected) {
+      // Tab became visible - restart heartbeat to check connection health
+      stopHeartbeat();
+      startHeartbeat();
+    } else if (!isVisible) {
+      // Tab became hidden - stop heartbeat to save resources
+      stopHeartbeat();
+    }
+  }, [subscriberId, enableTabVisibilityHandling, connectionState.isConnected, stopHeartbeat, startHeartbeat]);
 
   // Subscribe to connection state changes
   useEffect(() => {
     if (!enableRealtime) return;
 
-    const unsubscribe = socketManager.subscribeToConnectionState(setConnectionState);
+    const unsubscribe = socketManager.subscribeToConnectionState((state) => {
+      setConnectionState(prev => ({
+        ...prev,
+        ...state,
+        // Preserve heartbeat-specific fields
+        lastHeartbeat: prev.lastHeartbeat,
+        isStale: prev.isStale,
+        readyState: state.isConnected ? 1 : 0,
+      }));
+    });
     return unsubscribe;
   }, [enableRealtime]);
+
+  // Setup heartbeat when connected
+  useEffect(() => {
+    if (connectionState.isConnected && enableHeartbeat && isTabVisibleRef.current) {
+      startHeartbeat();
+    } else {
+      stopHeartbeat();
+    }
+
+    return () => {
+      stopHeartbeat();
+    };
+  }, [connectionState.isConnected, enableHeartbeat, startHeartbeat, stopHeartbeat]);
+
+  // Setup pong event listener
+  useEffect(() => {
+    if (!enableHeartbeat || !enableRealtime) return;
+
+    const unsubscribePong = subscribeToEvent('pong', handlePong);
+    return unsubscribePong;
+  }, [enableHeartbeat, enableRealtime, handlePong, subscribeToEvent]);
+
+  // Setup tab visibility handling
+  useEffect(() => {
+    if (!enableTabVisibilityHandling) return;
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [enableTabVisibilityHandling, handleVisibilityChange]);
 
   // Subscribe to socket manager
   useEffect(() => {
@@ -165,10 +310,16 @@ export function useSocketConnection({
   return {
     // Connection state
     connectionState,
-    isConnected: connectionState.isConnected,
+    isConnected: connectionState.isConnected && !connectionState.isStale,
     isReconnecting: connectionState.isReconnecting,
     error: connectionState.error,
     lastConnected: connectionState.lastConnected,
+    
+    // Enhanced connection health
+    isStale: connectionState.isStale,
+    lastHeartbeat: connectionState.lastHeartbeat,
+    readyState: connectionState.readyState,
+    isHealthy: connectionState.isConnected && !connectionState.isStale,
     
     // Event management
     subscribeToEvent,
@@ -179,8 +330,14 @@ export function useSocketConnection({
     disconnect,
     reconnect,
     
+    // Heartbeat management
+    startHeartbeat,
+    stopHeartbeat,
+    
     // Utilities
     isSubscribed: isSubscribedRef.current,
     enableRealtime,
+    enableHeartbeat,
+    isTabVisible: isTabVisibleRef.current,
   };
 }

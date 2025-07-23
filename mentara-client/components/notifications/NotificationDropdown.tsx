@@ -125,6 +125,8 @@ export function NotificationDropdown({
     isLoading,
     error,
     connectionState,
+    isConnected,
+    isHealthy,
     markAsRead,
     markAllAsRead,
     deleteNotification,
@@ -199,10 +201,10 @@ export function NotificationDropdown({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <h3 className="font-semibold text-sm">Notifications</h3>
-              {showConnectionStatus && !connectionState.isConnected && (
+              {showConnectionStatus && !isHealthy && (
                 <Badge variant="outline" className="text-xs shrink-0">
                   <AlertCircle className="h-3 w-3 mr-1" />
-                  Offline
+                  {connectionState.isStale ? "Stale" : "Offline"}
                 </Badge>
               )}
             </div>
@@ -256,7 +258,7 @@ export function NotificationDropdown({
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   Failed to load notifications.
-                  {!connectionState.isConnected && (
+                  {!isHealthy && (
                     <Button
                       variant="link"
                       size="sm"
