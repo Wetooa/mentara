@@ -23,7 +23,6 @@ export default function TherapistLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuth();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Handle logout
   const handleLogout = () => {
