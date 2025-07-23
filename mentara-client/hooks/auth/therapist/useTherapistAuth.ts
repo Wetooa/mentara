@@ -72,7 +72,7 @@ export function useTherapistAuth(): UseTherapistAuthReturn {
     error: queryError 
   } = useQuery({
     queryKey: ["auth", "therapist", "current-user"],
-    queryFn: () => api.auth.therapist.getCurrentUser(),
+    queryFn: () => api.auth.therapist.getProfile(),
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

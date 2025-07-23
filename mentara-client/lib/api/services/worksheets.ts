@@ -22,7 +22,7 @@ export function createWorksheetService(client: AxiosInstance) {
      * Get all worksheets with optional filtering
      * GET /worksheets
      */
-    async getAll(params?: WorksheetListParams): Promise<WorksheetListResponse> {
+    async getAll(params?: WorksheetListParams) : Promise<WorksheetListResponse> {
       const response = await client.get("worksheets", { params });
       return response.data;
     },

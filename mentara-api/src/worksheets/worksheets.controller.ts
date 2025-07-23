@@ -33,7 +33,7 @@ export class WorksheetsController {
 
   @Get()
   findAll(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Query() query: PaginationQuery & FilterQuery & { isCompleted?: boolean; limit?: number },
   ) {
     // Convert isCompleted boolean to status string for service compatibility
@@ -58,17 +58,18 @@ export class WorksheetsController {
   @Post()
   @UseInterceptors(FilesInterceptor('files', 5)) // Support up to 5 files
   create(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Body()
     createWorksheetDto: WorksheetCreateInputDto & {
-      clientId: string;
+      userId: string;
       therapistId: string;
     },
     @UploadedFiles() files: Express.Multer.File[] = [], // Optional files
   ) {
+    console.log(createWorksheetDto)
     return this.worksheetsService.create(
       createWorksheetDto,
-      createWorksheetDto.clientId,
+      createWorksheetDto.userId,
       createWorksheetDto.therapistId,
       files,
     );
@@ -76,7 +77,7 @@ export class WorksheetsController {
 
   @Put(':id')
   update(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') id: string,
     @Body() updateWorksheetDto: WorksheetUpdateInputDto,
   ) {
@@ -84,33 +85,33 @@ export class WorksheetsController {
   }
 
   @Delete(':id')
-  delete(@CurrentUserId() clerkId: string, @Param('id') id: string) {
+  delete(@CurrentUserId() userId: string, @Param('id') id: string) {
     return this.worksheetsService.delete(id);
   }
 
   @Post('submissions')
   addSubmission(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Body() createSubmissionDto: WorksheetSubmissionCreateInputDto,
   ) {
-    return this.worksheetsService.addSubmission(createSubmissionDto, clerkId);
+    return this.worksheetsService.addSubmission(createSubmissionDto, userId);
   }
 
   @Post(':id/submit')
   submitWorksheet(
-    @CurrentUserId() clerkId: string,
+    @CurrentUserId() userId: string,
     @Param('id') id: string,
     @Body() submitWorksheetDto: WorksheetSubmissionCreateInputDto,
   ) {
     return this.worksheetsService.submitWorksheet(
       id,
       submitWorksheetDto,
-      clerkId,
+      userId,
     );
   }
 
   @Delete('submissions/:id')
-  deleteSubmission(@CurrentUserId() clerkId: string, @Param('id') id: string) {
+  deleteSubmission(@CurrentUserId() userId: string, @Param('id') id: string) {
     return this.worksheetsService.deleteSubmission(id);
   }
 }
