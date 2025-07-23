@@ -1,51 +1,22 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 import TherapistCard from "@/components/therapist/listing/TherapistCard";
 import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
 import BookingModal from "@/components/booking/BookingModal";
 import Pagination from "@/components/ui/pagination";
-import { useFilteredTherapists, useAllTherapists } from "@/hooks/therapist/useTherapists";
+import { useFilteredTherapists } from "@/hooks/therapist/useTherapists";
+import { useFilters } from "@/hooks/utils/useFilters";
+import FilterBar from "@/components/therapist/filters/FilterBar";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TherapistCardData } from "@/types/therapist";
 import { TherapistFilters } from "@/types/filters";
 import { toast } from "sonner";
 
-interface TherapistListingProps {
-  searchQuery: string;
-  filter: string;
-  advancedFilters?: TherapistFilters;
-}
-
-// Input validation helper
-function validateProps(props: TherapistListingProps): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  
-  if (typeof props.searchQuery !== 'string') {
-    errors.push('searchQuery must be a string');
-  }
-  
-  if (typeof props.filter !== 'string') {
-    errors.push('filter must be a string');
-  }
-  
-  // Validate advancedFilters structure if provided
-  if (props.advancedFilters) {
-    const filters = props.advancedFilters;
-    if (filters.specialties && !Array.isArray(filters.specialties)) {
-      errors.push('advancedFilters.specialties must be an array');
-    }
-    if (filters.languages && !Array.isArray(filters.languages)) {
-      errors.push('advancedFilters.languages must be an array');
-    }
-    if (filters.rating && (typeof filters.rating !== 'number' || filters.rating < 0 || filters.rating > 5)) {
-      errors.push('advancedFilters.rating must be a number between 0 and 5');
-    }
-  }
-  
-  return { isValid: errors.length === 0, errors };
-}
+// TherapistListing is now self-contained with no props needed
 
 // Enhanced modern loading skeleton component
 function TherapistCardSkeleton() {
@@ -119,11 +90,7 @@ function TherapistCardSkeleton() {
   );
 }
 
-export default function TherapistListing({
-  searchQuery,
-  filter,
-  advancedFilters,
-}: TherapistListingProps) {
+export default function TherapistListing() {
   // All hooks must be called before any conditional returns
   const router = useRouter();
   const [selectedTherapist, setSelectedTherapist] = useState<TherapistCardData | null>(null);
@@ -133,22 +100,19 @@ export default function TherapistListing({
   const [componentError, setComponentError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
+  
+  // Search and filter state (moved from page)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
-  // Use clean hook architecture: simple all therapists vs filtered/searched
-  const hasAnyFilters = 
-    searchQuery?.trim() ||
-    filter !== "All" || 
-    (advancedFilters && (
-      advancedFilters.specialties?.length > 0 ||
-      advancedFilters.location ||
-      advancedFilters.rating > 0 ||
-      advancedFilters.priceRange ||
-      advancedFilters.experienceLevel ||
-      advancedFilters.languages?.length > 0 ||
-      (advancedFilters.availability && Object.values(advancedFilters.availability).some(Boolean))
-    ));
+  const {
+    filters,
+    updateFilters,
+    resetFilters,
+  } = useFilters();
 
-  // Choose appropriate hook based on whether filters are applied
+  // Simplified to use only useFilteredTherapists (it handles empty filters internally)
   const { 
     therapists, 
     totalCount,
@@ -159,21 +123,16 @@ export default function TherapistListing({
     isLoading, 
     error, 
     refetch 
-  } = hasAnyFilters 
-    ? useFilteredTherapists(searchQuery, filter, { 
-        page: currentPage, 
-        pageSize: 12,
-        advancedFilters 
-      })
-    : useAllTherapists({ 
-        limit: 12,
-        offset: (currentPage - 1) * 12
-      });
+  } = useFilteredTherapists(searchQuery, selectedFilter, { 
+    page: currentPage, 
+    pageSize: 12,
+    advancedFilters: filters 
+  });
 
   // Reset page when search/filter changes
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filter, advancedFilters]);
+  }, [searchQuery, selectedFilter, filters]);
 
   // Enhanced retry logic with exponential backoff
   const handleSmartRetry = async () => {
@@ -196,19 +155,7 @@ export default function TherapistListing({
     }
   };
 
-  // Input validation (after hooks)
-  const validation = validateProps({ searchQuery, filter, advancedFilters });
-  if (!validation.isValid) {
-    console.error('TherapistListing: Invalid props:', validation.errors);
-    return (
-      <Alert className="max-w-2xl mx-auto">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Invalid configuration. Please refresh the page and try again.
-        </AlertDescription>
-      </Alert>
-    );
-  }
+
 
   const handleViewProfile = (therapist: TherapistCardData) => {
     try {
@@ -426,11 +373,11 @@ export default function TherapistListing({
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No therapists found</h3>
         <p className="text-gray-500 mb-4">
-          {searchQuery || filter !== "All" 
+          {searchQuery || selectedFilter !== "All" 
             ? "Try adjusting your search or filter criteria" 
             : "No therapists are currently available"}
         </p>
-        {(searchQuery || filter !== "All") && (
+        {(searchQuery || selectedFilter !== "All") && (
           <Button 
             variant="outline" 
             onClick={() => {
@@ -452,6 +399,30 @@ export default function TherapistListing({
 
   return (
     <>
+      <div className="space-y-8">
+        {/* Page Header */}
+        <h1 className="text-2xl font-bold">My Therapists</h1>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Search therapists by name or specialty..."
+            className="pl-10 pr-4"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Modern Filter Bar */}
+        <FilterBar
+          filters={filters}
+          onChange={updateFilters}
+          onFiltersChange={setHasActiveFilters}
+          className="mb-6"
+        />
+
       <div className="space-y-6">
         {/* Results count with safe calculations */}
         <div className="flex items-center justify-between">
@@ -524,6 +495,7 @@ export default function TherapistListing({
             />
           </div>
         )}
+      </div>
       </div>
 
       {/* Therapist Profile Modal */}
