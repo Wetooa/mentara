@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../providers/prisma-client.provider';
 import { MeetingStatus } from '@prisma/client';
-import { ACTIVE_MEETING_STATUSES } from './constants/meeting-status.constants';
+import { ACTIVE_MEETING_STATUSES_ARRAY } from './constants/meeting-status.constants';
 import type {
   MeetingCreateDto,
   MeetingUpdateDto,
@@ -73,13 +73,13 @@ export class BookingService {
                 therapistId,
                 startTime: { lt: endTimeDate },
                 endTime: { gt: startTimeDate },
-                status: { in: ACTIVE_MEETING_STATUSES },
+                status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
               },
               {
                 clientId,
                 startTime: { lt: endTimeDate },
                 endTime: { gt: startTimeDate },
-                status: { in: ACTIVE_MEETING_STATUSES },
+                status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
               },
             ],
           },
@@ -134,9 +134,16 @@ export class BookingService {
           },
         });
 
-        // NOTE: Payment processing now handled separately when client pays for session
-        // The meeting is created first, then payment is processed via billing controller
-        // This allows for better payment flow and error handling
+        // Create automatic mock payment for the meeting
+        const sessionPrice = 100; // Mock session price - should come from therapist rates or duration
+        await this.billingService.createAutomaticMockPayment({
+          clientId: meeting.clientId,
+          therapistId: meeting.therapistId,
+          meetingId: meeting.id,
+          amount: sessionPrice,
+          currency: 'USD',
+          description: `Payment for therapy session: ${meeting.title || 'Therapy Session'}`,
+        }, tx);
 
         // Publish appointment booked event
         await this.eventBus.emit(

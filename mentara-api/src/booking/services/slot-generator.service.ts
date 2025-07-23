@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma-client.provider';
-import { ACTIVE_MEETING_STATUSES } from '../constants/meeting-status.constants';
+import { ACTIVE_MEETING_STATUSES_ARRAY } from '../constants/meeting-status.constants';
 
 export interface TimeSlot {
   startTime: string;
@@ -133,7 +133,7 @@ export class SlotGeneratorService {
       where: {
         therapistId,
         startTime: { gte: startOfDay, lte: endOfDay },
-        status: { in: ACTIVE_MEETING_STATUSES },
+        status: { in: ACTIVE_MEETING_STATUSES_ARRAY },
       },
       orderBy: { startTime: 'asc' },
     });

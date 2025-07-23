@@ -14,6 +14,11 @@ export const ACTIVE_MEETING_STATUSES = [
 ] as const;
 
 /**
+ * Mutable version for use in Prisma queries
+ */
+export const ACTIVE_MEETING_STATUSES_ARRAY = [...ACTIVE_MEETING_STATUSES];
+
+/**
  * All possible meeting statuses
  */
 export const ALL_MEETING_STATUSES = [

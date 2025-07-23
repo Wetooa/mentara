@@ -24,6 +24,7 @@ import {
  * - Educational payment flows
  * - Realistic payment failures and retries
  */
+
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
@@ -159,6 +160,59 @@ export class BillingService {
     });
 
     return { success: true };
+  }
+
+  /**
+   * Create automatic mock payment for booking (used when payment is mocked/automatic)
+   * This creates a COMPLETED payment record without requiring payment method validation
+   */
+  async createAutomaticMockPayment(data: {
+    clientId: string;
+    therapistId: string;
+    meetingId: string;
+    amount: number;
+    currency?: string;
+    description?: string;
+  }, tx?: any) {
+    this.logger.log(
+      `Creating automatic mock payment: ${data.amount} ${data.currency || 'USD'} for meeting ${data.meetingId}`
+    );
+
+    const prismaClient = tx || this.prisma;
+
+    // Create completed payment record (mock payment is always successful)
+    const payment = await prismaClient.payment.create({
+      data: {
+        amount: data.amount,
+        currency: data.currency || 'USD',
+        status: 'COMPLETED', // Mock payment is always successful
+        clientId: data.clientId,
+        therapistId: data.therapistId,
+        meetingId: data.meetingId,
+        paymentMethodId: null, // No payment method needed for mock
+        processedAt: new Date(),
+        failureReason: null,
+      },
+      include: {
+        client: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+        therapist: {
+          select: { 
+            user: {
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        },
+      },
+    });
+
+    this.logger.log(`Mock payment created successfully: ${payment.id}`);
+    return payment;
   }
 
   // ===== PAYMENT PROCESSING =====
