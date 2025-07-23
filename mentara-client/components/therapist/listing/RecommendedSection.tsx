@@ -9,12 +9,16 @@ export default function RecommendedSection() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   
-  // Use unified hook instead of direct API calls
+  // Use clean hook for carousel recommendations with fallback to therapist cards
   const { 
     therapists, 
+    therapistCards,
     isLoading, 
     error 
   } = useCarouselRecommendations();
+
+  // Get the appropriate therapist data to display
+  const displayTherapists = therapistCards || therapists;
 
   const checkScrollButtons = useCallback(() => {
     if (!carouselRef.current) return;
@@ -27,7 +31,7 @@ export default function RecommendedSection() {
   // Initialize scroll buttons visibility when component mounts and when data changes
   useEffect(() => {
     checkScrollButtons();
-  }, [therapists, checkScrollButtons]);
+  }, [displayTherapists, checkScrollButtons]);
 
   const scroll = (direction: "left" | "right") => {
     if (!carouselRef.current) return;
@@ -85,7 +89,7 @@ export default function RecommendedSection() {
   }
 
   // Handle empty state
-  if (therapists.length === 0) {
+  if (displayTherapists.length === 0) {
     return (
       <div className="space-y-4 h-full flex flex-col">
         <div className="flex justify-between items-center">
@@ -144,7 +148,7 @@ export default function RecommendedSection() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           onScroll={checkScrollButtons}
         >
-          {therapists.map((therapist) => (
+          {displayTherapists.map((therapist) => (
             <div
               key={therapist.id}
               className="relative flex-none w-[300px] h-full snap-start"

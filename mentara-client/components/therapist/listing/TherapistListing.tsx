@@ -4,7 +4,7 @@ import TherapistCard from "@/components/therapist/listing/TherapistCard";
 import { TherapistProfileModal } from "@/components/therapist/TherapistProfileModal";
 import BookingModal from "@/components/booking/BookingModal";
 import Pagination from "@/components/ui/pagination";
-import { useFilteredTherapists } from "@/hooks/therapist/useTherapists";
+import { useFilteredTherapists, useAllTherapists } from "@/hooks/therapist/useTherapists";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -85,20 +85,41 @@ export default function TherapistListing({
   const [currentPage, setCurrentPage] = useState(1);
   const [componentError, setComponentError] = useState<string | null>(null);
 
+  // Use clean hook architecture: simple all therapists vs filtered/searched
+  const hasAnyFilters = 
+    searchQuery?.trim() ||
+    filter !== "All" || 
+    (advancedFilters && (
+      advancedFilters.specialties?.length > 0 ||
+      advancedFilters.location ||
+      advancedFilters.rating > 0 ||
+      advancedFilters.priceRange ||
+      advancedFilters.experienceLevel ||
+      advancedFilters.languages?.length > 0 ||
+      (advancedFilters.availability && Object.values(advancedFilters.availability).some(Boolean))
+    ));
+
+  // Choose appropriate hook based on whether filters are applied
   const { 
     therapists, 
     totalCount,
     totalPages,
     hasNextPage,
     hasPreviousPage,
+    currentPage: apiCurrentPage,
     isLoading, 
     error, 
     refetch 
-  } = useFilteredTherapists(searchQuery, filter, { 
-    page: currentPage, 
-    pageSize: 12,
-    advancedFilters 
-  });
+  } = hasAnyFilters 
+    ? useFilteredTherapists(searchQuery, filter, { 
+        page: currentPage, 
+        pageSize: 12,
+        advancedFilters 
+      })
+    : useAllTherapists({ 
+        limit: 12,
+        offset: (currentPage - 1) * 12
+      });
 
   // Reset page when search/filter changes
   React.useEffect(() => {

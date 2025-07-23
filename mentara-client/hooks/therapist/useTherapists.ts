@@ -98,15 +98,16 @@ export function useTherapistCards(params: TherapistSearchParams = {}) {
 }
 
 /**
- * Hook for fetching all therapists (when no filters applied)
+ * Hook for fetching all approved therapists (simple listing)
+ * Best for: Main therapist page, browse all functionality
  */
 export function useAllTherapists(params: TherapistSearchParams = {}) {
   const api = useApi();
 
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['therapists', 'all', params],
-    queryFn: (): Promise<TherapistRecommendationResponse> => {
-      return api.therapists.getTherapistList(params);
+    queryFn: (): Promise<any> => {
+      return api.therapists.getAllTherapists(params);
     },
     select: (response) => response.data || { therapists: [], totalCount: 0 },
     enabled: true,
@@ -118,8 +119,10 @@ export function useAllTherapists(params: TherapistSearchParams = {}) {
   return {
     therapists: therapistCards,
     totalCount: data?.totalCount || 0,
-    userConditions: data?.userConditions || [],
-    matchCriteria: data?.matchCriteria,
+    currentPage: data?.currentPage || 1,
+    totalPages: data?.totalPages || 1,
+    hasNextPage: data?.hasNextPage || false,
+    hasPreviousPage: data?.hasPreviousPage || false,
     isLoading,
     error,
     refetch,
