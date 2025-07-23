@@ -10,6 +10,7 @@ import { EmailService } from '../../email/email.service';
 import { EmailVerificationService } from './email-verification.service';
 import * as bcrypt from 'bcrypt';
 import { processPreAssessmentAnswers } from '../../pre-assessment/pre-assessment.utils';
+import { generateAIEvaluationData } from '../../pre-assessment/ai-evaluation.utils';
 
 @Injectable()
 export class ClientAuthService {
@@ -75,13 +76,16 @@ export class ClientAuthService {
           registerDto.preassessmentAnswers,
         );
 
+        // Generate realistic AI evaluation data based on assessment results
+        const aiEvaluationData = generateAIEvaluationData(scores, severityLevels);
+
         preAssessment = await tx.preAssessment.create({
           data: {
             clientId: user.id,
             answers: registerDto.preassessmentAnswers, // Flat array of 201 responses
             scores, // Calculated scores by questionnaire
             severityLevels, // Severity classifications
-            aiEstimate: {}, // Will be calculated later by AI service
+            aiEstimate: aiEvaluationData, // Realistic AI evaluation data
             isProcessed: true, // Mark as processed since we calculated scores
             processedAt: new Date(),
           },
