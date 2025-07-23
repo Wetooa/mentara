@@ -414,11 +414,20 @@ export default function TherapistCommunity() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleCommunitySelect(selectedCommunityId || 'toggle')}
+              onClick={() => {
+                // Only call handleCommunitySelect if we have a valid selectedCommunityId
+                // This prevents the 'toggle' fallback that causes API errors
+                if (selectedCommunityId) {
+                  handleCommunitySelect(selectedCommunityId);
+                }
+                // If no community is selected, we could potentially show a community selection modal
+                // or navigate to a communities list page in the future
+              }}
               className="border-amber-300 text-amber-600"
+              disabled={!selectedCommunityId}
             >
               <Hash className="h-4 w-4 mr-1" />
-              Communities
+              {selectedCommunityId ? 'Communities' : 'Select Community'}
             </Button>
             {selectedRoom && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
