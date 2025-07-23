@@ -196,9 +196,14 @@ export class AvailabilityValidatorService {
     const startParts = therapistFormatter.formatToParts(startTime);
     const endParts = endFormatter.formatToParts(endTime);
     
-    // Get day name from parts (already formatted as "Monday", "Tuesday", etc.)
-    const dayOfWeek = startParts
-      .find(part => part.type === 'weekday')?.value.toUpperCase() || 'UNKNOWN';
+    // Get day name from parts and convert to numeric string to match database format
+    // Database stores dayOfWeek as numeric strings: "0"=Sunday, "1"=Monday, etc.
+    const dayName = startParts.find(part => part.type === 'weekday')?.value || 'unknown';
+    const dayMap = {
+      'Sunday': '0', 'Monday': '1', 'Tuesday': '2', 'Wednesday': '3',
+      'Thursday': '4', 'Friday': '5', 'Saturday': '6'
+    };
+    const dayOfWeek = dayMap[dayName as keyof typeof dayMap] || '0';
     
     // Get time strings in HH:MM format from parts
     const startHour = startParts.find(part => part.type === 'hour')?.value || '00';
@@ -236,10 +241,8 @@ export class AvailabilityValidatorService {
     startTime: Date,
     duration: number,
   ): Promise<boolean> {
-    // Convert numeric day to day name string to match database schema
-    const dayOfWeek = startTime
-      .toLocaleDateString('en-US', { weekday: 'long' })
-      .toUpperCase();
+    // Convert to numeric day string to match database schema (0=Sunday, 1=Monday, etc.)
+    const dayOfWeek = startTime.getDay().toString();
     const startTimeStr = this.formatTime(startTime);
     const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
     const endTimeStr = this.formatTime(endTime);
