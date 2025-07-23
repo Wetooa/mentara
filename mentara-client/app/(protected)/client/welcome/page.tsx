@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/lib/api';
+import { useWelcomeRecommendations } from '@/hooks/therapist/useRecommendedTherapists';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,17 +36,17 @@ export default function ClientWelcomePage() {
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState<'loading' | 'recommendations' | 'selection' | 'sending' | 'communities' | 'joining' | 'complete'>('loading');
 
-  // Fetch personalized recommendations
+  // Use unified hook for recommendations
   const { 
-    data: recommendations, 
+    therapists: recommendedTherapists,
+    communities: recommendedCommunities,
     isLoading: recommendationsLoading, 
     error: recommendationsError,
-    refetch: refetchRecommendations 
-  } = useQuery({
-    queryKey: ['therapist-recommendations', 'personalized'],
-    queryFn: () => api.therapists.getPersonalizedRecommendations(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+    refetch: refetchRecommendations,
+    welcomeMessage,
+    isFirstTime,
+    averageMatchScore
+  } = useWelcomeRecommendations();
 
   // Communities are now included in the main recommendations response
 
@@ -92,17 +93,16 @@ export default function ClientWelcomePage() {
   });
 
   useEffect(() => {
-    if (!recommendationsLoading && recommendations) {
+    if (!recommendationsLoading && recommendedTherapists) {
       // Debug logging for received recommendations
       console.log('[DEBUG] Welcome page received recommendations:', {
-        recommendationsCount: recommendations?.recommendations?.length || 0,
-        communitiesCount: recommendations?.communities?.length || 0,
-        hasWelcomeMessage: !!recommendations?.welcomeMessage,
-        fullData: recommendations
+        recommendationsCount: recommendedTherapists?.length || 0,
+        communitiesCount: recommendedCommunities?.length || 0,
+        hasWelcomeMessage: !!welcomeMessage,
       });
       setCurrentStep('recommendations');
     }
-  }, [recommendationsLoading, recommendations]);
+  }, [recommendationsLoading, recommendedTherapists, recommendedCommunities, welcomeMessage]);
 
   const handleTherapistSelect = (therapistId: string, selected: boolean) => {
     if (selected) {
@@ -327,7 +327,7 @@ export default function ClientWelcomePage() {
           </div>
 
         {/* Community Recommendations */}
-        {(recommendations?.communities?.length ?? 0) > 0 ? (
+        {(recommendedCommunities?.length ?? 0) > 0 ? (
           <div className="space-y-6">
             {/* Enhanced Community Match Summary */}
             <Card className="bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/80 border-emerald-200/50 shadow-xl backdrop-blur-sm">
@@ -340,7 +340,7 @@ export default function ClientWelcomePage() {
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">Personalized Community Matches</h3>
                       <p className="text-gray-600 font-medium">
-                        Found {recommendations?.communities?.length || 0} meaningful communities based on your unique assessment
+                        Found {recommendedCommunities?.length || 0} meaningful communities based on your unique assessment
                       </p>
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export default function ClientWelcomePage() {
 
             {/* Community Recommendation Cards */}
             <div className="grid gap-6">
-              {(recommendations?.communities || []).map((community, index) => (
+              {(recommendedCommunities || []).map((community, index) => (
                 <CommunityRecommendationCard
                   key={community.id}
                   community={community}
@@ -532,7 +532,7 @@ export default function ClientWelcomePage() {
         </div>
 
       {/* Recommendations */}
-      {(recommendations?.recommendations?.length ?? 0) > 0 ? (
+      {(recommendedTherapists?.length ?? 0) > 0 ? (
         <div className="space-y-6">
           {/* Enhanced Match Summary */}
           <Card className="bg-gradient-to-br from-blue-50/80 via-white to-purple-50/80 border-blue-200/50 shadow-xl backdrop-blur-sm">
@@ -545,12 +545,12 @@ export default function ClientWelcomePage() {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">Personalized Matches</h3>
                     <p className="text-gray-600 font-medium">
-                      Found {recommendations?.recommendations?.length || 0} exceptional therapists matching your unique preferences
+                      Found {recommendedTherapists?.length || 0} exceptional therapists matching your unique preferences
                     </p>
                   </div>
                 </div>
                 <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-sm font-bold shadow-lg">
-                  {Math.round(recommendations?.averageMatchScore || 0)}% Match Score
+                  {Math.round(averageMatchScore || 0)}% Match Score
                 </Badge>
               </div>
               
@@ -573,7 +573,7 @@ export default function ClientWelcomePage() {
 
           {/* Therapist Recommendations */}
           <div className="grid gap-6">
-            {(recommendations?.recommendations || []).map((therapist, index) => (
+            {(recommendedTherapists || []).map((therapist, index) => (
               <TherapistRecommendationCard
                 key={therapist.id}
                 therapist={therapist}
@@ -593,7 +593,7 @@ export default function ClientWelcomePage() {
           {selectedTherapists.length > 0 && (
             <TherapistSelectionSummary
               selectedTherapists={selectedTherapists}
-              therapists={recommendations?.recommendations || []}
+              therapists={recommendedTherapists || []}
               onSendRequests={handleCreateMatches}
               onSkipForNow={handleSkipForNow}
               isLoading={createMatchesMutation.isPending || currentStep === 'sending'}

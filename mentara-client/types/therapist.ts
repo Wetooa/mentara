@@ -2,37 +2,49 @@
 
 export interface TherapistUser {
   id: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string | null;
-  profileImageUrl: string | null;
-}
-
-export interface TherapistRecommendation {
-  userId: string;
-  user: TherapistUser;
   firstName: string;
   lastName: string;
   email: string;
-  mobile: string;
-  province: string;
-  providerType: string;
-  professionalLicenseType: string;
-  practiceStartDate: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  createdAt: string;
+}
+
+export interface TherapistRecommendation {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  profileImage: string | null;
+  bio: string | null;
+  title: string;
+  specialties: string[];
   areasOfExpertise: string[];
-  therapeuticApproachesUsedList: string[];
-  languagesOffered: string[];
-  expertise?: string[];
-  approaches?: string[];
-  languages?: string[];
-  sessionDuration?: number;
-  hourlyRate?: number;
-  bio?: string;
-  profileImageUrl?: string;
+  approaches: string[];
+  languages: string[];
+  illnessSpecializations: string[];
+  experience: number;
+  yearsOfExperience: number;
+  sessionPrice: string;
+  hourlyRate: number;
+  rating: number;
+  totalReviews: number;
+  location: string;
+  province: string;
+  timezone: string;
   isActive: boolean;
-  patientSatisfaction?: number;
-  totalPatients: number;
+  acceptsInsurance: boolean;
+  acceptedInsuranceTypes: string[];
+  sessionLength: string | null;
+  preferredSessionLength: number[];
+  createdAt: string;
+  updatedAt: string;
   matchScore?: number;
+  score?: number;
+  rank?: number;
 }
 
 export interface TherapistRecommendationResponse {
@@ -70,28 +82,30 @@ export interface TherapistCardData {
   bio: string;
   imageUrl: string;
   rating: number;
-  sessionPrice: number;
+  sessionPrice: string; // Changed to string to match backend "$120" format
   sessionDuration: number;
+  location?: string;
+  languages?: string[];
+  totalReviews?: number;
 }
 
 // Helper function to transform API response to frontend format
 export function transformTherapistForCard(therapist: TherapistRecommendation): TherapistCardData {
-  const currentYear = new Date().getFullYear();
-  const practiceStartYear = new Date(therapist.practiceStartDate).getFullYear();
-  const experience = currentYear - practiceStartYear;
-
   return {
-    id: therapist.userId,
-    name: `${therapist.firstName} ${therapist.lastName}`,
-    title: therapist.professionalLicenseType || 'Licensed Therapist',
-    specialties: therapist.expertise || therapist.areasOfExpertise || [],
-    experience,
+    id: therapist.id || therapist.userId,
+    name: therapist.name || `${therapist.firstName} ${therapist.lastName}`,
+    title: therapist.title || 'Licensed Therapist',
+    specialties: therapist.specialties || therapist.areasOfExpertise || [],
+    experience: therapist.experience || therapist.yearsOfExperience || 0,
     availableTimes: [], // This would need to come from a separate availability API
     isActive: therapist.isActive,
     bio: therapist.bio || '',
-    imageUrl: therapist.profileImageUrl || therapist.user.profileImageUrl || '/team/default-therapist.jpg',
-    rating: therapist.patientSatisfaction ? Number(therapist.patientSatisfaction) : 4.0,
-    sessionPrice: therapist.hourlyRate ? Number(therapist.hourlyRate) : 120,
-    sessionDuration: therapist.sessionDuration || 45,
+    imageUrl: therapist.profileImage || therapist.avatarUrl || '/team/default-therapist.jpg',
+    rating: therapist.rating || 0,
+    sessionPrice: therapist.sessionPrice || `$${therapist.hourlyRate || 120}`,
+    sessionDuration: 45, // Default session duration
+    location: therapist.location || therapist.province,
+    languages: therapist.languages,
+    totalReviews: therapist.totalReviews,
   };
 }

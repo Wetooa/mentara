@@ -59,7 +59,7 @@ export function createTherapistService(axios: AxiosInstance) {
     },
 
     /**
-     * Get list of therapists with filters
+     * Get list of all approved therapists
      */
     async getTherapistList(params?: TherapistSearchParams) {
       const { data } = await axios.get("/therapists", { params });
@@ -72,6 +72,13 @@ export function createTherapistService(axios: AxiosInstance) {
     async getTherapistProfile(therapistId: string) {
       const { data } = await axios.get(`/therapists/${therapistId}`);
       return data;
+    },
+
+    /**
+     * Get all approved therapists (alias for compatibility)
+     */
+    async getProfile(therapistId: string) {
+      return this.getTherapistProfile(therapistId);
     },
 
     /**

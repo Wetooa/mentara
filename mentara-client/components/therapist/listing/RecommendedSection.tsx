@@ -1,29 +1,20 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
+import { useCarouselRecommendations } from "@/hooks/therapist/useRecommendedTherapists";
 
 export default function RecommendedSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   
-  const api = useApi();
-  
-  // Fetch therapist recommendations using React Query
+  // Use unified hook instead of direct API calls
   const { 
-    data: recommendationsData, 
+    therapists, 
     isLoading, 
     error 
-  } = useQuery({
-    queryKey: ['therapists', 'recommendations', 'personalized'],
-    queryFn: () => api.therapists.getPersonalizedRecommendations(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-  
-  const therapists = useMemo(() => recommendationsData?.recommendations || [], [recommendationsData]);
+  } = useCarouselRecommendations();
 
   const checkScrollButtons = useCallback(() => {
     if (!carouselRef.current) return;
