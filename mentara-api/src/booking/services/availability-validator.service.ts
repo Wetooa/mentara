@@ -156,63 +156,20 @@ export class AvailabilityValidatorService {
    */
 
   /**
-   * Validate therapist availability with transaction support and timezone handling
+   * Validate therapist availability with transaction support (simplified UTC-only version)
    */
   async validateTherapistAvailabilityWithTransaction(
     therapistId: string,
     startTime: Date,
     duration: number,
     prismaClient: any, // Accept transaction client or regular prisma
-    therapistTimezone?: string,
   ): Promise<boolean> {
-    // Get therapist timezone if not provided
-    if (!therapistTimezone) {
-      const therapist = await prismaClient.therapist.findUnique({
-        where: { userId: therapistId },
-        select: { timezone: true },
-      });
-      therapistTimezone = therapist?.timezone || 'UTC';
-    }
-
-    // Convert to therapist's timezone for day/time extraction (best practice: keep UTC, convert only for extraction)
-    // Use Intl.DateTimeFormat for proper timezone conversion without string parsing issues
-    const therapistFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: therapistTimezone,
-      weekday: 'long',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
+    // Simple UTC-based validation (no timezone conversion)
+    // Convert to numeric day string to match database schema (0=Sunday, 1=Monday, etc.)
+    const dayOfWeek = startTime.getDay().toString();
+    const startTimeStr = this.formatTime(startTime);
     const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
-    const endFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: therapistTimezone, 
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
-    // Extract day and time components in therapist's timezone
-    const startParts = therapistFormatter.formatToParts(startTime);
-    const endParts = endFormatter.formatToParts(endTime);
-    
-    // Get day name from parts and convert to numeric string to match database format
-    // Database stores dayOfWeek as numeric strings: "0"=Sunday, "1"=Monday, etc.
-    const dayName = startParts.find(part => part.type === 'weekday')?.value || 'unknown';
-    const dayMap = {
-      'Sunday': '0', 'Monday': '1', 'Tuesday': '2', 'Wednesday': '3',
-      'Thursday': '4', 'Friday': '5', 'Saturday': '6'
-    };
-    const dayOfWeek = dayMap[dayName as keyof typeof dayMap] || '0';
-    
-    // Get time strings in HH:MM format from parts
-    const startHour = startParts.find(part => part.type === 'hour')?.value || '00';
-    const startMinute = startParts.find(part => part.type === 'minute')?.value || '00';
-    const endHour = endParts.find(part => part.type === 'hour')?.value || '00';
-    const endMinute = endParts.find(part => part.type === 'minute')?.value || '00';
-    
-    const startTimeStr = `${startHour}:${startMinute}`;
-    const endTimeStr = `${endHour}:${endMinute}`;
+    const endTimeStr = this.formatTime(endTime);
 
     const availability = await prismaClient.therapistAvailability.findFirst({
       where: {
@@ -226,7 +183,7 @@ export class AvailabilityValidatorService {
 
     if (!availability) {
       throw new BadRequestException(
-        `Therapist is not available at the requested time (${startTimeStr}-${endTimeStr} ${dayOfWeek} in ${therapistTimezone})`,
+        `Therapist is not available at the requested time (${startTimeStr}-${endTimeStr} on day ${dayOfWeek} UTC)`,
       );
     }
 

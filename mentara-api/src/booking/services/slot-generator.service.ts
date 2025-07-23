@@ -24,31 +24,7 @@ export class SlotGeneratorService {
     minAdvanceBooking: 0.5,
   };
 
-  // Asia/Manila timezone offset (UTC+8)
-  private readonly MANILA_TIMEZONE_OFFSET = 8 * 60 * 60 * 1000;
-
   constructor(private readonly prisma: PrismaService) {}
-
-  /**
-   * Convert UTC date to Asia/Manila timezone
-   */
-  private convertToManilaTime(utcDate: Date): Date {
-    return new Date(utcDate.getTime() + this.MANILA_TIMEZONE_OFFSET);
-  }
-
-  /**
-   * Convert Asia/Manila date to UTC timezone
-   */
-  private convertFromManilaTime(manilaDate: Date): Date {
-    return new Date(manilaDate.getTime() - this.MANILA_TIMEZONE_OFFSET);
-  }
-
-  /**
-   * Get current time in Asia/Manila timezone
-   */
-  private getCurrentManilaTime(): Date {
-    return this.convertToManilaTime(new Date());
-  }
 
   private getDurations() {
     return [
@@ -108,28 +84,26 @@ export class SlotGeneratorService {
   }
 
   private validateBookingDate(date: Date, config: SlotGenerationConfig): void {
-    const nowInManila = this.getCurrentManilaTime();
+    const now = new Date();
     
-    // Calculate min and max dates using Manila time
+    // Calculate min and max dates using UTC
     const maxDate = new Date(
-      nowInManila.getTime() + config.maxAdvanceBooking * 24 * 60 * 60 * 1000,
+      now.getTime() + config.maxAdvanceBooking * 24 * 60 * 60 * 1000,
     );
     const minDate = new Date(
-      nowInManila.getTime() + config.minAdvanceBooking * 60 * 60 * 1000,
+      now.getTime() + config.minAdvanceBooking * 60 * 60 * 1000,
     );
 
-    // Convert the target date to Manila time for comparison
-    const targetDateInManila = this.convertToManilaTime(date);
-
-    if (targetDateInManila < minDate) {
+    // Compare target date with UTC times
+    if (date < minDate) {
       throw new BadRequestException(
-        `Bookings must be made at least ${config.minAdvanceBooking} hours in advance (Asia/Manila timezone)`,
+        `Bookings must be made at least ${config.minAdvanceBooking} hours in advance`,
       );
     }
 
-    if (targetDateInManila > maxDate) {
+    if (date > maxDate) {
       throw new BadRequestException(
-        `Bookings can only be made up to ${config.maxAdvanceBooking} days in advance (Asia/Manila timezone)`,
+        `Bookings can only be made up to ${config.maxAdvanceBooking} days in advance`,
       );
     }
   }
