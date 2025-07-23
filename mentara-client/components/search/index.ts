@@ -10,6 +10,7 @@ export type { RecentSearch } from './hooks/useRecentSearches';
 
 // New omnisearch components
 export { OmniSearchBar } from './OmniSearchBar';
+export { LayoutOmniSearchBar } from './LayoutOmniSearchBar';
 export { OmniSearchResults } from './OmniSearchResults';
 export { TabbedSearchResults } from './TabbedSearchResults';
 export { 
