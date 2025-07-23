@@ -309,7 +309,7 @@ export function TherapistShortlist({
                         Limited Availability
                       </Badge>
                     )}
-                    {therapist.specialties.slice(0, 2).map((specialty, index) => (
+                    {therapist.specialties?.slice(0, 2).map((specialty, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
                         {specialty}
                       </Badge>

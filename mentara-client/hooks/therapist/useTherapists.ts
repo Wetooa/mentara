@@ -215,21 +215,21 @@ export function useFilteredTherapists(
         searchQuery === "" ||
         therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         therapist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        therapist.specialties.some((specialty) =>
+        therapist.specialties?.some((specialty) =>
           specialty.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
       // Basic category filter
       const matchesFilter =
         filter === "All" ||
-        therapist.specialties.some((specialty) => specialty === filter);
+        therapist.specialties?.some((specialty) => specialty === filter);
 
       // Advanced filters application (only those not handled server-side)
       if (advancedFilters) {
         // Specialties filter (client-side)
         if (advancedFilters.specialties.length > 0) {
           const hasMatchingSpecialty = advancedFilters.specialties.some(filterSpecialty =>
-            therapist.specialties.some(therapistSpecialty =>
+            therapist.specialties?.some(therapistSpecialty =>
               therapistSpecialty.toLowerCase().includes(filterSpecialty.toLowerCase())
             )
           );
