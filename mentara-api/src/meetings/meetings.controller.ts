@@ -10,6 +10,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -34,7 +35,7 @@ export class MeetingsController {
   @Get('upcoming')
   async getUpcomingMeetings(
     @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     return this.meetingsService.getUpcomingMeetings(userId, limit);
   }
@@ -42,7 +43,7 @@ export class MeetingsController {
   @Get('completed')
   async getCompletedMeetings(
     @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     return this.meetingsService.getCompletedMeetings(userId, limit);
   }
@@ -50,7 +51,7 @@ export class MeetingsController {
   @Get('cancelled')
   async getCancelledMeetings(
     @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     return this.meetingsService.getCancelledMeetings(userId, limit);
   }
@@ -58,7 +59,7 @@ export class MeetingsController {
   @Get('in-progress')
   async getInProgressMeetings(
     @CurrentUserId() userId: string,
-    @Query('limit') limit?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     return this.meetingsService.getInProgressMeetings(userId, limit);
   }
@@ -160,16 +161,16 @@ export class MeetingsController {
     @CurrentUserId() userId: string,
     @Query('status') status?: string,
     @Query('type') type?: string,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
     const queryOptions = {
       status,
       type,
-      limit: limit ? Number(limit) : undefined,
-      offset: offset ? Number(offset) : undefined,
+      limit,
+      offset,
       dateFrom,
       dateTo,
     };

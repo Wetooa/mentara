@@ -10,6 +10,7 @@ import {
   UseGuards,
   UnauthorizedException,
   ForbiddenException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
@@ -55,8 +56,8 @@ export class BookingController {
     @CurrentUserId() userId: string,
     @CurrentUserRole() role: string,
     @Query('status') status?: string,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
   ) {
     return this.bookingService.getMeetings(userId, role, {
       status,
