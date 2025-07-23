@@ -1,111 +1,82 @@
-import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
-
-// Asia/Manila timezone
-export const MANILA_TIMEZONE = 'Asia/Manila';
+/**
+ * Simplified UTC-only timezone utilities (replacing Asia/Manila logic)
+ */
 
 /**
- * Convert a date to Asia/Manila timezone
+ * Get current time in UTC
  */
-export function toManilaTime(date: Date | string): Date {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return toZonedTime(dateObj, MANILA_TIMEZONE);
+export function getCurrentUTCTime(): Date {
+  return new Date();
 }
 
 /**
- * Convert a Manila time date to UTC
+ * Format a date in UTC (simple format)
  */
-export function fromManilaTime(date: Date | string): Date {
+export function formatUTCDate(date: Date | string, format: string = 'yyyy-MM-dd'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return fromZonedTime(dateObj, MANILA_TIMEZONE);
+  
+  if (format === 'yyyy-MM-dd') {
+    return dateObj.toISOString().split('T')[0];
+  }
+  
+  // For display format like "MMM d, yyyy h:mm a", use user's local time
+  if (format === 'MMM d, yyyy h:mm a') {
+    return dateObj.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+  
+  return dateObj.toISOString();
 }
 
 /**
- * Format a date in Asia/Manila timezone
+ * Check if a date is in the past (UTC time)
  */
-export function formatManilaTime(date: Date | string, formatString: string = 'yyyy-MM-dd HH:mm:ss'): string {
+export function isPastUTC(date: Date | string): boolean {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return formatInTimeZone(dateObj, MANILA_TIMEZONE, formatString);
+  const now = new Date();
+  return dateObj < now;
 }
 
 /**
- * Get current time in Asia/Manila timezone
+ * Check if booking can be made (respects minimum advance time in UTC)
  */
-export function getCurrentManilaTime(): Date {
-  return toManilaTime(new Date());
-}
-
-/**
- * Check if a date is in the past (Manila time)
- */
-export function isPastInManila(date: Date | string): boolean {
+export function canBookInAdvanceUTC(date: Date | string, minAdvanceHours: number = 0.5): boolean {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const now = getCurrentManilaTime();
-  const targetDate = toManilaTime(dateObj);
-  return targetDate < now;
-}
-
-/**
- * Check if booking can be made (respects minimum advance time in Manila timezone)
- */
-export function canBookInAdvance(date: Date | string, minAdvanceHours: number = 0.5): boolean {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const now = getCurrentManilaTime();
-  const targetDate = toManilaTime(dateObj);
+  const now = new Date();
   const minAdvanceTime = new Date(now.getTime() + (minAdvanceHours * 60 * 60 * 1000));
   
-  return targetDate >= minAdvanceTime;
+  return dateObj >= minAdvanceTime;
 }
 
 /**
- * Format time for display in Manila timezone
+ * Format time for display (using user's local timezone for display)
  */
-export function formatManilaTimeForDisplay(date: Date | string): string {
-  return formatManilaTime(date, 'MMM d, yyyy h:mm a');
+export function formatForDisplay(date: Date | string): string {
+  return formatUTCDate(date, 'MMM d, yyyy h:mm a');
 }
 
 /**
- * Format date for API calls (ISO string but considering Manila timezone)
+ * Format date for API calls (ISO string UTC)
  */
 export function formatForApi(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return fromManilaTime(dateObj).toISOString();
+  return dateObj.toISOString();
 }
 
 /**
- * Get timezone offset for Manila (in minutes)
- */
-export function getManilaTimezoneOffset(): number {
-  const now = new Date();
-  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const manilaTime = new Date(utcTime + (8 * 60 * 60 * 1000)); // UTC+8
-  return -480; // Manila is UTC+8, so offset is -480 minutes
-}
-
-/**
- * Convert user's local time input to Manila time for consistent handling
- */
-export function normalizeToManilaTime(date: Date | string): Date {
-  // If user is in Manila timezone, this will be the same
-  // If user is in different timezone, convert their input to Manila time
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  // Assume user input is intended for Manila timezone
-  return fromZonedTime(dateObj, MANILA_TIMEZONE);
-}
-
-/**
- * Timezone utilities object for easier importing
+ * Simplified timezone utilities object (UTC-only)
  */
 export const TimezoneUtils = {
-  toManila: toManilaTime,
-  fromManila: fromManilaTime,
-  format: formatManilaTime,
-  formatForDisplay: formatManilaTimeForDisplay,
+  format: formatUTCDate,
+  formatForDisplay: formatForDisplay,
   formatForApi: formatForApi,
-  getCurrent: getCurrentManilaTime,
-  isPast: isPastInManila,
-  canBook: canBookInAdvance,
-  normalize: normalizeToManilaTime,
-  getOffset: getManilaTimezoneOffset,
-  TIMEZONE: MANILA_TIMEZONE,
+  getCurrent: getCurrentUTCTime,
+  isPast: isPastUTC,
+  canBook: canBookInAdvanceUTC,
 };
