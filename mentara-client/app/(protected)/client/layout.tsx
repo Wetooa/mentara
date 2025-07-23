@@ -8,7 +8,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProfileUrl } from "@/lib/utils";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { UserSearchBar, User } from "@/components/search";
+import { LayoutOmniSearchBar } from "@/components/search";
 import { DashboardPageMetadata } from "@/components/metadata/SimplePageMetadata";
 import { UserDisplay } from "@/components/common/UserDisplay";
 
@@ -22,10 +22,6 @@ export default function MainLayout({
   const { logout, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleUserSelect = (user: User) => {
-    console.log("Selected user:", user);
-    router.push(`/client/profile/${user.id}`);
-  };
 
   const handleLogout = () => {
     logout();
@@ -235,15 +231,10 @@ export default function MainLayout({
               />
             </div>
             <div className="relative mx-4 hidden flex-1 md:block">
-              <div className="relative">
-                <UserSearchBar
-                  placeholder="Search users (clients, therapists, moderators)..."
-                  onUserSelect={handleUserSelect}
-                  showRoleFilter={false}
-                  className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-lg ring-1 ring-border/50 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-primary/30 focus-within:shadow-xl transition-all duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-2xl pointer-events-none" />
-              </div>
+              <LayoutOmniSearchBar
+                placeholder="Search therapists, posts, communities..."
+                className="w-full"
+              />
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
               <NotificationDropdown
@@ -292,17 +283,12 @@ export default function MainLayout({
             </div>
           </header>
 
-          {/* Mobile Search Bar - Shows below header on mobile */}
+          {/* Mobile Omnisearch Bar - Shows below header on mobile */}
           <div className="md:hidden fixed top-[60px] left-0 right-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/50 px-4 py-3 shadow-sm">
-            <div className="relative">
-              <UserSearchBar
-                placeholder="Search users..."
-                onUserSelect={handleUserSelect}
-                showRoleFilter={false}
-                className="w-full h-10 bg-background/80 backdrop-blur-sm border-0 shadow-md ring-1 ring-border/50 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/70 focus-within:ring-2 focus-within:ring-primary/30 focus-within:shadow-lg transition-all duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-2xl pointer-events-none" />
-            </div>
+            <LayoutOmniSearchBar
+              placeholder="Search therapists, posts..."
+              className="w-full"
+            />
           </div>
 
           {/* Main Content - Responsive padding */}
