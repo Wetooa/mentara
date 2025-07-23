@@ -29,12 +29,26 @@ interface AuthenticatedSocket extends Socket {
       process.env.FRONTEND_URL || 'http://localhost:3000',
       'http://localhost:3000',  // Explicit fallback
       'http://127.0.0.1:3000',  // Alternative localhost
+      'https://localhost:3000', // HTTPS fallback (for dev SSL)
     ],
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['authorization', 'content-type'],
+    allowedHeaders: [
+      'authorization', 
+      'content-type', 
+      'accept',
+      'origin',
+      'x-requested-with',
+      'access-control-allow-origin',
+      'access-control-allow-headers',
+      'access-control-allow-methods',
+      'access-control-allow-credentials'
+    ],
+    optionsSuccessStatus: 200,
   },
   namespace: '/messaging',
+  transports: ['websocket', 'polling'],
+  allowEIO3: true, // Allow Engine.IO v3 clients (compatibility)
 })
 export class MessagingGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -45,6 +59,9 @@ export class MessagingGateway
   private readonly logger = new Logger(MessagingGateway.name);
   private userSockets = new Map<string, Set<string>>(); // userId -> Set of socket IDs
   private conversationParticipants = new Map<string, Set<string>>(); // conversationId -> Set of user IDs
+  
+  // Connection limits
+  private readonly MAX_CONNECTIONS_PER_USER = 3; // Limit to 3 concurrent connections per user
 
   constructor(
     private readonly prisma: PrismaService,
@@ -53,45 +70,45 @@ export class MessagingGateway
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
-      this.logger.log(`🔌 [MessagingGateway] New WebSocket connection attempt: ${client.id}`);
-      this.logger.log(`🔍 [MessagingGateway] Connection details:`, {
-        ip: client.handshake.address,
-        userAgent: client.handshake.headers['user-agent'] || 'unknown',
-        origin: client.handshake.headers.origin || 'unknown',
-        referer: client.handshake.headers.referer || 'unknown'
-      });
-      this.logger.debug(`🔍 [MessagingGateway] Client handshake:`, {
-        headers: Object.keys(client.handshake.headers),
-        auth: client.handshake.auth ? 'present' : 'missing',
-        authToken: client.handshake.auth?.token ? 'present' : 'missing',
-        query: client.handshake.query,
-        url: client.handshake.url,
+      this.logger.log(`🔗 New WebSocket connection: ${client.id} from ${client.handshake.address}`);
+      
+      // Log connection details for debugging
+      this.logger.debug(`🔍 Connection details for ${client.id}:`, {
+        origin: client.handshake.headers.origin,
+        userAgent: client.handshake.headers['user-agent'],
+        transport: client.conn.transport.name,
+        protocol: client.conn.protocol,
+        hasAuth: !!client.handshake.auth?.token,
         hasAuthHeader: !!client.handshake.headers.authorization,
-        transport: client.conn.transport.name
+        query: client.handshake.query,
       });
 
       // Authenticate the socket connection using the new auth service
       const authResult = await this.webSocketAuth.authenticateSocket(client);
 
       if (!authResult) {
-        this.logger.warn(`❌ [MessagingGateway] Client ${client.id} authentication failed`);
-        this.logger.warn(`🔍 [MessagingGateway] Auth failure details:`, {
-          hasToken: !!client.handshake.auth?.token,
-          hasAuthHeader: !!client.handshake.headers.authorization,
-          origin: client.handshake.headers.origin,
-          transport: client.conn.transport.name,
-          ip: client.handshake.address
-        });
-        client.emit('auth_error', {
-          message: 'Authentication failed. Please provide a valid token.',
+        this.logger.warn(`❌ Authentication failed for client ${client.id}`);
+        
+        // Provide more detailed error information
+        const errorDetails = {
+          message: 'Authentication failed. Please sign in again.',
           code: 'AUTH_FAILED',
           timestamp: new Date().toISOString(),
-        });
+          debug: {
+            socketId: client.id,
+            hasToken: !!client.handshake.auth?.token,
+            hasAuthHeader: !!client.handshake.headers.authorization,
+            origin: client.handshake.headers.origin,
+          }
+        };
+        
+        client.emit('auth_error', errorDetails);
+        this.logger.debug(`🔍 Auth error details sent to client ${client.id}:`, errorDetails);
         client.disconnect(true);
         return;
       }
 
-      this.logger.log(`✅ [MessagingGateway] Client ${client.id} authenticated as user ${authResult.userId}`);
+      this.logger.log(`✅ Socket ${client.id} authenticated as user ${authResult.userId} (${authResult.role})`);
 
       // Attach authenticated user info to socket
       client.userId = authResult.userId;
@@ -104,18 +121,24 @@ export class MessagingGateway
           id: authResult.userId,
           isActive: true, // Only allow active users
         },
-        select: { id: true, role: true, isActive: true },
+        select: { id: true, role: true, isActive: true, email: true },
       });
 
       if (!user) {
-        this.logger.warn(`User ${authResult.userId} not found or inactive`);
+        this.logger.warn(`❌ User ${authResult.userId} not found or inactive in database`);
         client.emit('auth_error', {
           message: 'User account not found or inactive',
           code: 'USER_NOT_FOUND',
+          timestamp: new Date().toISOString(),
         });
         client.disconnect(true);
         return;
       }
+
+      this.logger.log(`👤 User ${user.id} (${user.email}) verified in database`);
+
+      // Handle connection limits and deduplication
+      await this.handleConnectionLimits(client, authResult.userId);
 
       // Add socket to user's socket set
       if (!this.userSockets.has(authResult.userId)) {
@@ -130,24 +153,37 @@ export class MessagingGateway
       await this.subscribeUserToPersonalRoom(client, authResult.userId);
 
       // Notify successful connection
-      client.emit('authenticated', {
+      const successResponse = {
         userId: authResult.userId,
         role: user.role,
         message: 'Successfully authenticated and connected',
         timestamp: new Date().toISOString(),
-      });
+        connectionInfo: {
+          socketId: client.id,
+          transport: client.conn.transport.name,
+          totalConnections: this.userSockets.get(authResult.userId)?.size || 1,
+        }
+      };
+      
+      client.emit('authenticated', successResponse);
+      this.logger.log(`🎉 Socket ${client.id} connection completed successfully for user ${authResult.userId}`);
 
       // Emit user online status to their contacts
       await this.broadcastUserStatus(authResult.userId, 'online');
-
-      this.logger.log(
-        `User ${authResult.userId} successfully authenticated and connected with socket ${client.id}`,
-      );
     } catch (error) {
-      this.logger.error(`Connection error for client ${client.id}:`, error);
+      this.logger.error(`💥 Connection error for client ${client.id}:`, {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        socketId: client.id,
+        origin: client.handshake.headers.origin,
+        transport: client.conn.transport.name,
+      });
+      
       client.emit('connection_error', {
         message: 'Internal server error during connection',
         code: 'INTERNAL_ERROR',
+        timestamp: new Date().toISOString(),
+        socketId: client.id,
       });
       client.disconnect(true);
     }
@@ -156,43 +192,29 @@ export class MessagingGateway
   async handleDisconnect(client: AuthenticatedSocket) {
     try {
       if (client.userId) {
-        const userSockets = this.userSockets.get(client.userId);
-        if (userSockets) {
-          userSockets.delete(client.id);
-
-          // If no more sockets for this user, remove from tracking
-          if (userSockets.size === 0) {
-            this.userSockets.delete(client.userId);
-
-            // Clean up conversation participants tracking
-            for (const [
-              conversationId,
-              participants,
-            ] of this.conversationParticipants.entries()) {
-              participants.delete(client.userId);
-              // Remove empty conversation sets
-              if (participants.size === 0) {
-                this.conversationParticipants.delete(conversationId);
-              }
-            }
-
-            // Broadcast user offline status to their contacts
-            await this.broadcastUserStatus(client.userId, 'offline');
-          }
-        }
-
-        this.logger.log(
-          `User ${client.userId} disconnected socket ${client.id}`,
-        );
+        await this.cleanupUserConnection(client.userId, client.id);
       }
 
       // Clean up authentication tracking
       this.webSocketAuth.cleanupConnection(client.id);
     } catch (error) {
-      this.logger.error(
-        `Error during disconnect cleanup for socket ${client.id}:`,
-        error,
-      );
+      this.logger.error(`Error during disconnect cleanup for socket ${client.id}:`, error);
+      
+      // Force cleanup even if there are errors
+      try {
+        if (client.userId) {
+          const userSockets = this.userSockets.get(client.userId);
+          if (userSockets) {
+            userSockets.delete(client.id);
+            if (userSockets.size === 0) {
+              this.userSockets.delete(client.userId);
+            }
+          }
+        }
+        this.webSocketAuth.cleanupConnection(client.id);
+      } catch (forceError) {
+        this.logger.error(`Force cleanup failed for socket ${client.id}:`, forceError);
+      }
     }
   }
 
@@ -244,8 +266,7 @@ export class MessagingGateway
       client.emit('conversation_joined', { conversationId });
       this.logger.log(`User ${userId} joined conversation ${conversationId}`);
     } catch (error) {
-      this.logger.error('Error joining conversation:', error);
-      client.emit('error', { message: 'Failed to join conversation' });
+      this.handleSubscriptionError(client, error, 'join_conversation');
     }
   }
 
@@ -259,28 +280,32 @@ export class MessagingGateway
       return;
     }
 
-    const { conversationId } = data;
-    const userId = client.userId!;
+    try {
+      const { conversationId } = data;
+      const userId = client.userId!;
 
-    void client.leave(conversationId);
+      void client.leave(conversationId);
 
-    // Remove user from conversation participants tracking
-    const participants = this.conversationParticipants.get(conversationId);
-    if (participants) {
-      participants.delete(userId);
-      if (participants.size === 0) {
-        this.conversationParticipants.delete(conversationId);
+      // Remove user from conversation participants tracking
+      const participants = this.conversationParticipants.get(conversationId);
+      if (participants) {
+        participants.delete(userId);
+        if (participants.size === 0) {
+          this.conversationParticipants.delete(conversationId);
+        }
       }
+
+      // Notify other participants that user left
+      client.to(conversationId).emit('user_left_conversation', {
+        conversationId,
+        userId,
+      });
+
+      client.emit('conversation_left', { conversationId });
+      this.logger.log(`User ${userId} left conversation ${conversationId}`);
+    } catch (error) {
+      this.handleSubscriptionError(client, error, 'leave_conversation');
     }
-
-    // Notify other participants that user left
-    client.to(conversationId).emit('user_left_conversation', {
-      conversationId,
-      userId,
-    });
-
-    client.emit('conversation_left', { conversationId });
-    this.logger.log(`User ${userId} left conversation ${conversationId}`);
   }
 
   @SubscribeMessage('typing_indicator')
@@ -293,43 +318,47 @@ export class MessagingGateway
       return;
     }
 
-    const { conversationId, isTyping = true } = data;
-    const userId = client.userId!;
+    try {
+      const { conversationId, isTyping = true } = data;
+      const userId = client.userId!;
 
-    // Update typing indicator in database for persistence
-    if (isTyping) {
-      await this.prisma.typingIndicator.upsert({
-        where: {
-          conversationId_userId: {
+      // Update typing indicator in database for persistence
+      if (isTyping) {
+        await this.prisma.typingIndicator.upsert({
+          where: {
+            conversationId_userId: {
+              conversationId,
+              userId,
+            },
+          },
+          create: {
+            conversationId,
+            userId,
+            lastTypingAt: new Date(),
+          },
+          update: {
+            lastTypingAt: new Date(),
+          },
+        });
+      } else {
+        // Remove typing indicator when user stops typing
+        await this.prisma.typingIndicator.deleteMany({
+          where: {
             conversationId,
             userId,
           },
-        },
-        create: {
-          conversationId,
-          userId,
-          lastTypingAt: new Date(),
-        },
-        update: {
-          lastTypingAt: new Date(),
-        },
-      });
-    } else {
-      // Remove typing indicator when user stops typing
-      await this.prisma.typingIndicator.deleteMany({
-        where: {
-          conversationId,
-          userId,
-        },
-      });
-    }
+        });
+      }
 
-    // Broadcast typing indicator to other participants in the conversation
-    client.to(conversationId).emit('typing_indicator', {
-      conversationId,
-      userId,
-      isTyping,
-    });
+      // Broadcast typing indicator to other participants in the conversation
+      client.to(conversationId).emit('typing_indicator', {
+        conversationId,
+        userId,
+        isTyping,
+      });
+    } catch (error) {
+      this.handleSubscriptionError(client, error, 'typing_indicator');
+    }
   }
 
   // Broadcast new message to conversation participants
@@ -626,8 +655,7 @@ export class MessagingGateway
       client.emit('community_joined', { communityId });
       this.logger.log(`User ${userId} joined community room ${communityId}`);
     } catch (error) {
-      this.logger.error('Error joining community:', error);
-      client.emit('error', { message: 'Failed to join community' });
+      this.handleSubscriptionError(client, error, 'join_community');
     }
   }
 
@@ -640,14 +668,18 @@ export class MessagingGateway
       return;
     }
 
-    const { communityId } = data;
-    const userId = client.userId!;
+    try {
+      const { communityId } = data;
+      const userId = client.userId!;
 
-    const communityRoom = `community_${communityId}`;
-    await client.leave(communityRoom);
+      const communityRoom = `community_${communityId}`;
+      await client.leave(communityRoom);
 
-    client.emit('community_left', { communityId });
-    this.logger.log(`User ${userId} left community room ${communityId}`);
+      client.emit('community_left', { communityId });
+      this.logger.log(`User ${userId} left community room ${communityId}`);
+    } catch (error) {
+      this.handleSubscriptionError(client, error, 'leave_community');
+    }
   }
 
   @SubscribeMessage('join_post')
@@ -692,8 +724,7 @@ export class MessagingGateway
       client.emit('post_joined', { postId });
       this.logger.log(`User ${userId} joined post room ${postId}`);
     } catch (error) {
-      this.logger.error('Error joining post:', error);
-      client.emit('error', { message: 'Failed to join post' });
+      this.handleSubscriptionError(client, error, 'join_post');
     }
   }
 
@@ -706,18 +737,95 @@ export class MessagingGateway
       return;
     }
 
-    const { postId } = data;
-    const userId = client.userId!;
+    try {
+      const { postId } = data;
+      const userId = client.userId!;
 
-    const postRoom = `post_${postId}`;
-    await client.leave(postRoom);
+      const postRoom = `post_${postId}`;
+      await client.leave(postRoom);
 
-    client.emit('post_left', { postId });
-    this.logger.log(`User ${userId} left post room ${postId}`);
+      client.emit('post_left', { postId });
+      this.logger.log(`User ${userId} left post room ${postId}`);
+    } catch (error) {
+      this.handleSubscriptionError(client, error, 'leave_post');
+    }
   }
 
   // Utility method to get server instance for event broadcasting
   getServer(): Server {
     return this.server;
+  }
+
+  // Private helper method for connection limits and deduplication
+  private async handleConnectionLimits(client: AuthenticatedSocket, userId: string) {
+    const userSocketSet = this.userSockets.get(userId);
+    
+    if (userSocketSet && userSocketSet.size >= this.MAX_CONNECTIONS_PER_USER) {
+      this.logger.warn(`User ${userId} exceeded connection limit (${this.MAX_CONNECTIONS_PER_USER})`);
+      
+      // Close oldest connections to make room for new one
+      const socketsToClose = Array.from(userSocketSet).slice(0, userSocketSet.size - this.MAX_CONNECTIONS_PER_USER + 1);
+      
+      for (const socketId of socketsToClose) {
+        const socketToClose = this.server.sockets.sockets.get(socketId);
+        if (socketToClose) {
+          socketToClose.emit('connection_limit_exceeded', {
+            message: 'Connection closed due to too many concurrent connections',
+            maxConnections: this.MAX_CONNECTIONS_PER_USER,
+          });
+          socketToClose.disconnect(true);
+        }
+        userSocketSet.delete(socketId);
+      }
+    }
+  }
+
+  // Private helper method for user connection cleanup
+  private async cleanupUserConnection(userId: string, socketId: string) {
+    try {
+      const userSockets = this.userSockets.get(userId);
+      if (userSockets) {
+        userSockets.delete(socketId);
+
+        // If no more sockets for this user, remove from tracking
+        if (userSockets.size === 0) {
+          this.userSockets.delete(userId);
+
+          // Clean up conversation participants tracking
+          for (const [conversationId, participants] of this.conversationParticipants.entries()) {
+            participants.delete(userId);
+            // Remove empty conversation sets
+            if (participants.size === 0) {
+              this.conversationParticipants.delete(conversationId);
+            }
+          }
+
+          // Broadcast user offline status to their contacts
+          await this.broadcastUserStatus(userId, 'offline');
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error in cleanupUserConnection for user ${userId}:`, error);
+      throw error; // Re-throw to let handleDisconnect handle it
+    }
+  }
+
+  // Enhanced error handling for message subscriptions
+  private handleSubscriptionError(client: AuthenticatedSocket, error: any, action: string) {
+    this.logger.error(`${action} error for client ${client.id}:`, error);
+    
+    // Send structured error response to client
+    client.emit('subscription_error', {
+      action,
+      error: error.message || 'Unknown error',
+      code: error.code || 'SUBSCRIPTION_ERROR',
+      timestamp: new Date().toISOString(),
+    });
+    
+    // If it's a critical error, disconnect the client
+    if (error.name === 'DatabaseError' || error.code === 'ECONNRESET') {
+      this.logger.warn(`Critical error detected, disconnecting client ${client.id}`);
+      client.disconnect(true);
+    }
   }
 }
