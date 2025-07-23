@@ -83,7 +83,7 @@ export class SearchService {
     }
   }
 
-  async searchPosts(query: string, communityId?: string) {
+  async searchPosts(query: string, communityId?: string, userId?: string) {
     try {
       const where: any = {
         OR: [
@@ -93,8 +93,34 @@ export class SearchService {
         ],
       };
 
+      // If userId is provided, filter posts to only include those from communities the user is a member of
+      if (userId) {
+        where.room = {
+          roomGroup: {
+            community: {
+              memberships: {
+                some: {
+                  userId: userId,
+                },
+              },
+            },
+          },
+        };
+      }
+
+      // If specific communityId is provided, further filter by that community
       if (communityId) {
-        where.communityId = communityId;
+        if (where.room) {
+          where.room.roomGroup.community.id = communityId;
+        } else {
+          where.room = {
+            roomGroup: {
+              community: {
+                id: communityId,
+              },
+            },
+          };
+        }
       }
 
       return this.prisma.post.findMany({
@@ -136,6 +162,97 @@ export class SearchService {
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to search posts: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async searchComments(query: string, communityId?: string, userId?: string) {
+    try {
+      const where: any = {
+        content: { contains: query, mode: 'insensitive' },
+      };
+
+      // If userId is provided, filter comments to only include those from posts in communities the user is a member of
+      if (userId) {
+        where.post = {
+          room: {
+            roomGroup: {
+              community: {
+                memberships: {
+                  some: {
+                    userId: userId,
+                  },
+                },
+              },
+            },
+          },
+        };
+      }
+
+      // If specific communityId is provided, further filter by that community
+      if (communityId) {
+        if (where.post) {
+          where.post.room.roomGroup.community.id = communityId;
+        } else {
+          where.post = {
+            room: {
+              roomGroup: {
+                community: {
+                  id: communityId,
+                },
+              },
+            },
+          };
+        }
+      }
+
+      return this.prisma.comment.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+              role: true,
+            },
+          },
+          post: {
+            select: {
+              id: true,
+              title: true,
+              userId: true,
+              room: {
+                include: {
+                  roomGroup: {
+                    include: {
+                      community: {
+                        select: {
+                          id: true,
+                          name: true,
+                          slug: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              hearts: true,
+              children: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to search comments: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -336,7 +453,12 @@ export class SearchService {
       }
 
       if (typesArray.includes('posts')) {
-        results.posts = await this.searchPosts(query);
+        results.posts = await this.searchPosts(query, undefined, userId);
+      }
+
+      // Add comments search (always filtered by user communities if userId is provided)
+      if (userId) {
+        results.comments = await this.searchComments(query, undefined, userId);
       }
 
       if (typesArray.includes('communities')) {

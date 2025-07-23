@@ -46,8 +46,20 @@ export class SearchController {
   searchPosts(
     @Query(new ZodValidationPipe(SearchPostsQueryDtoSchema))
     query: SearchPostsQueryDto,
+    @Req() req: any,
   ) {
-    return this.searchService.searchPosts(query.query, query.communityId);
+    const userId = req.userId;
+    return this.searchService.searchPosts(query.query, query.communityId, userId);
+  }
+
+  @Get('comments')
+  searchComments(
+    @Query(new ZodValidationPipe(SearchPostsQueryDtoSchema)) // Reuse PostsQueryDto for now
+    query: SearchPostsQueryDto,
+    @Req() req: any,
+  ) {
+    const userId = req.userId;
+    return this.searchService.searchComments(query.query, query.communityId, userId);
   }
 
   @Get('communities')
