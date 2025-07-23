@@ -142,25 +142,33 @@ const MessageBubble = ({
     onCopy();
   };
 
+  // Modern messenger-style layout
   return (
-    <div className="flex gap-3 group">
-      {/* Avatar */}
+    <div className={cn(
+      "flex w-full group mb-1",
+      isOwn ? "justify-end" : "justify-start"
+    )}>
+      {/* Avatar for other person's messages - only show on first message of group */}
       {!isOwn && (
-        showAvatar ? (
-          <Avatar className="h-8 w-8 flex-shrink-0 self-end">
-            <AvatarImage src="/avatar-placeholder.png" />
-            <AvatarFallback className="text-xs">U</AvatarFallback>
-          </Avatar>
-        ) : (
-          <div className="w-8 flex-shrink-0" />
-        )
+        <div className="flex-shrink-0 w-8 mr-2">
+          {showAvatar ? (
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={message.sender?.avatar || "/avatar-placeholder.png"} />
+              <AvatarFallback className="text-xs bg-gray-200 text-gray-600">
+                {getInitials(message.sender?.firstName || "User", message.sender?.lastName || "")}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            // Empty space to maintain alignment for grouped messages
+            <div className="w-8 h-8" />
+          )}
+        </div>
       )}
-      {isOwn && <div className="w-8 flex-shrink-0" />}
 
-      {/* Message Content */}
+      {/* Message Content Container */}
       <div
         className={cn(
-          "flex flex-col gap-1 max-w-[70%]",
+          "flex flex-col max-w-[75%] sm:max-w-[60%]",
           isOwn ? "items-end" : "items-start"
         )}
       >
@@ -180,13 +188,35 @@ const MessageBubble = ({
         {/* Message bubble */}
         <div
           className={cn(
-            "relative px-3 py-2 text-sm",
-            isOwn ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900",
-            messagePosition === 'single' && (isOwn ? "rounded-2xl rounded-br-md" : "rounded-2xl rounded-bl-md"),
-            messagePosition === 'first' && (isOwn ? "rounded-2xl rounded-br-sm" : "rounded-2xl rounded-bl-sm"),
-            messagePosition === 'middle' && (isOwn ? "rounded-l-2xl rounded-r-sm" : "rounded-r-2xl rounded-l-sm"),
-            messagePosition === 'last' && (isOwn ? "rounded-2xl rounded-tr-sm rounded-br-md" : "rounded-2xl rounded-tl-sm rounded-bl-md"),
-            message.isEdited && "opacity-90"
+            "relative px-4 py-2.5 text-sm shadow-sm",
+            // Modern messenger colors and styling
+            isOwn 
+              ? "bg-blue-500 text-white" 
+              : "bg-white text-gray-900 border border-gray-200",
+            // Improved bubble shapes for better visual hierarchy
+            messagePosition === 'single' && (
+              isOwn 
+                ? "rounded-[18px] rounded-br-[6px]" 
+                : "rounded-[18px] rounded-bl-[6px]"
+            ),
+            messagePosition === 'first' && (
+              isOwn 
+                ? "rounded-[18px] rounded-br-[6px]" 
+                : "rounded-[18px] rounded-bl-[6px]"
+            ),
+            messagePosition === 'middle' && (
+              isOwn 
+                ? "rounded-l-[18px] rounded-r-[6px]" 
+                : "rounded-r-[18px] rounded-l-[6px]"
+            ),
+            messagePosition === 'last' && (
+              isOwn 
+                ? "rounded-[18px] rounded-tr-[6px] rounded-br-[6px]" 
+                : "rounded-[18px] rounded-tl-[6px] rounded-bl-[6px]"
+            ),
+            // Subtle visual feedback
+            message.isEdited && "opacity-95",
+            "transition-all duration-150 hover:shadow-md"
           )}
           onMouseEnter={() => setShowReactions(true)}
           onMouseLeave={() => setShowReactions(false)}
@@ -717,6 +747,7 @@ export function MessengerInterface({
                     isReconnecting={connectionState.isReconnecting}
                     error={connectionState.error}
                     lastConnected={connectionState.lastConnected}
+                    onReconnect={reconnectWebSocket}
                     showDetails={false}
                     className="scale-75"
                   />

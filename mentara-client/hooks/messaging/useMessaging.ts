@@ -317,49 +317,77 @@ export function useMessaging(
       console.log(
         "⏭️ [useMessaging] WebSocket connection skipped - missing auth or realtime disabled"
       );
+      setConnectionState({
+        isConnected: false,
+        isReconnecting: false,
+        error: null,
+        lastConnected: null,
+      });
       return;
     }
 
     if (socketRef.current?.connected) {
       console.log("✅ [useMessaging] WebSocket already connected");
+      setConnectionState((prev) => ({
+        ...prev,
+        isConnected: true,
+        isReconnecting: false,
+        error: null,
+        lastConnected: prev.lastConnected || new Date(),
+      }));
       return;
     }
 
     try {
       console.log("🔄 [useMessaging] Connecting to messaging WebSocket...");
 
+      // Set connecting state (not reconnecting for first attempt)
       setConnectionState((prev) => ({
         ...prev,
-        isReconnecting: true,
+        isConnected: false,
+        isReconnecting: reconnectAttemptsRef.current > 0,
         error: null,
       }));
 
       // Use the centralized socket system with proper namespace
-      const socket = getMessagingSocket();
+      const socket = getMessagingSocket(accessToken);
 
-      // Setup authentication manually since we need the token
-      socket.auth = { token: accessToken };
-
+      // Setup event handlers before connecting
       setupWebSocketEventHandlers(socket);
 
-      await connectMessagingSocket();
-
+      // Store socket reference before connection attempt
       socketRef.current = socket;
 
-      console.log("✅ [useMessaging] WebSocket connected successfully");
+      // Attempt connection with timeout handling
+      await connectMessagingSocket(accessToken);
+
+      console.log("✅ [useMessaging] WebSocket connection initiated successfully");
+      
+      // Note: Final connection state will be set in the 'connect' event handler
+      // to ensure we only mark as connected when the socket is actually ready
+      
     } catch (error) {
       console.error("❌ [useMessaging] Failed to connect WebSocket:", error);
+      
+      // Clear socket reference on connection failure
+      socketRef.current = null;
+      
       setConnectionState((prev) => ({
         ...prev,
-        error: "Failed to connect",
+        isConnected: false,
+        error: error instanceof Error ? error.message : "Failed to connect",
         isReconnecting: false,
       }));
+      
       scheduleReconnect();
     }
   }, [accessToken, user, config.enableRealtime]);
 
   const setupWebSocketEventHandlers = useCallback(
     (socket: Socket) => {
+      // Remove any existing listeners to prevent duplicates
+      socket.removeAllListeners();
+
       // Connection events
       socket.on("connect", () => {
         console.log("✅ [useMessaging] WebSocket connected:", socket.id);
@@ -391,8 +419,9 @@ export function useMessaging(
           isReconnecting: false,
         }));
 
-        // Auto-reconnect unless it was a server disconnect
-        if (reason !== "io server disconnect") {
+        // Auto-reconnect unless it was a manual disconnect or server shutdown
+        if (reason !== "io server disconnect" && reason !== "io client disconnect") {
+          console.log("🔄 [useMessaging] Auto-reconnect triggered for reason:", reason);
           scheduleReconnect();
         }
       });
@@ -401,7 +430,8 @@ export function useMessaging(
         console.error("🚫 [useMessaging] WebSocket connection error:", error);
         setConnectionState((prev) => ({
           ...prev,
-          error: "Connection error",
+          isConnected: false,
+          error: error instanceof Error ? error.message : "Connection error",
           isReconnecting: false,
         }));
         scheduleReconnect();
@@ -497,6 +527,7 @@ export function useMessaging(
   const disconnectWebSocket = useCallback(() => {
     console.log("🔌 [useMessaging] Disconnecting WebSocket...");
 
+    // Clear all timers
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -507,9 +538,19 @@ export function useMessaging(
       typingTimeoutRef.current = null;
     }
 
+    // Remove event listeners from current socket before disconnecting
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+    }
+
+    // Disconnect the socket
     disconnectSocket("/messaging");
     socketRef.current = null;
 
+    // Reset reconnection attempts
+    reconnectAttemptsRef.current = 0;
+
+    // Clear all state
     setConnectionState({
       isConnected: false,
       isReconnecting: false,
@@ -525,18 +566,30 @@ export function useMessaging(
       console.error("❌ [useMessaging] Max reconnection attempts reached");
       setConnectionState((prev) => ({
         ...prev,
+        isConnected: false,
+        isReconnecting: false,
         error: "Max reconnection attempts reached",
       }));
       return;
     }
 
     reconnectAttemptsRef.current++;
-    const delay =
-      reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+    const delay = Math.min(
+      reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1),
+      30000 // Cap at 30 seconds
+    );
 
     console.log(
-      `🔄 [useMessaging] Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current})`
+      `🔄 [useMessaging] Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
     );
+
+    // Set reconnecting state immediately
+    setConnectionState((prev) => ({
+      ...prev,
+      isConnected: false,
+      isReconnecting: true,
+      error: null,
+    }));
 
     reconnectTimeoutRef.current = setTimeout(() => {
       connectWebSocket();
