@@ -146,10 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userId = (authData as any)?.userId || null;
 
   // Fetch profile data if user is authenticated
-  const {
-    data: profileData,
-    refetch: refetchProfile,
-  } = useQuery({
+  const { data: profileData, refetch: refetchProfile } = useQuery({
     queryKey: ["auth", "current-user-profile", userId, userRole],
     queryFn: async () => {
       if (!userRole) {
@@ -178,10 +175,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Normalize the profile data structure
       return {
-        firstName: profileResponse.user?.firstName || profileResponse.firstName || "",
-        lastName: profileResponse.user?.lastName || profileResponse.lastName || "",
+        firstName:
+          profileResponse.user?.firstName || profileResponse.firstName || "",
+        lastName:
+          profileResponse.user?.lastName || profileResponse.lastName || "",
         avatarUrl: profileResponse.user?.avatarUrl || profileResponse.avatarUrl,
-        hasSeenTherapistRecommendations: profileResponse.hasSeenTherapistRecommendations,
+        hasSeenTherapistRecommendations:
+          profileResponse.hasSeenTherapistRecommendations,
       };
     },
     enabled: isClient && !!userId && !!userRole && hasToken === true,
@@ -204,7 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           firstName: profileData?.firstName,
           lastName: profileData?.lastName,
           avatarUrl: profileData?.avatarUrl,
-          hasSeenTherapistRecommendations: profileData?.hasSeenTherapistRecommendations,
+          hasSeenTherapistRecommendations:
+            profileData?.hasSeenTherapistRecommendations,
         }
       : null;
 
@@ -298,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     // Clear React Query cache to prevent stale authentication data
     queryClient.clear();
-    
+
     if (isClient) {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
@@ -359,9 +360,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Client welcome redirect logic - ensure clients see welcome page if they haven't seen recommendations
-      if (isAuthenticated && userRole === 'client' && user?.hasSeenTherapistRecommendations === false) {
-        if (!pathname.startsWith('/client/welcome')) {
-          router.push('/client/welcome');
+      if (
+        isAuthenticated &&
+        userRole === "client" &&
+        user?.hasSeenTherapistRecommendations === false
+      ) {
+        if (!pathname.startsWith("/client/welcome")) {
+          router.push("/client/welcome");
           return;
         }
       }
