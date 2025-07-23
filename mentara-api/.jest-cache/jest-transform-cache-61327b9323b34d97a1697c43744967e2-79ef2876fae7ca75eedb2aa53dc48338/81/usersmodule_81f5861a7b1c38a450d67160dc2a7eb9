@@ -1,0 +1,37 @@
+2261da5f145d47d81b459cab58487a47
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UsersModule = void 0;
+const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
+const users_controller_1 = require("./users.controller");
+const users_service_1 = require("./users.service");
+const profile_controller_1 = require("./profile.controller");
+const profile_service_1 = require("./profile.service");
+const prisma_client_provider_1 = require("src/providers/prisma-client.provider");
+const role_utils_1 = require("src/utils/role-utils");
+const event_bus_service_1 = require("../common/events/event-bus.service");
+let UsersModule = class UsersModule {
+};
+exports.UsersModule = UsersModule;
+exports.UsersModule = UsersModule = __decorate([
+    (0, common_1.Module)({
+        imports: [config_1.ConfigModule],
+        controllers: [users_controller_1.UsersController, profile_controller_1.ProfileController],
+        providers: [
+            users_service_1.UsersService,
+            profile_service_1.ProfileService,
+            prisma_client_provider_1.PrismaService,
+            role_utils_1.RoleUtils,
+            event_bus_service_1.EventBusService,
+        ],
+        exports: [users_service_1.UsersService, profile_service_1.ProfileService],
+    })
+], UsersModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3VzZXJzL3VzZXJzLm1vZHVsZS50cyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7QUFBQSwyQ0FBd0M7QUFDeEMsMkNBQThDO0FBQzlDLHlEQUFxRDtBQUNyRCxtREFBK0M7QUFDL0MsNkRBQXlEO0FBQ3pELHVEQUFtRDtBQUNuRCxpRkFBcUU7QUFDckUscURBQWlEO0FBQ2pELDBFQUFxRTtBQWM5RCxJQUFNLFdBQVcsR0FBakIsTUFBTSxXQUFXO0NBQUcsQ0FBQTtBQUFkLGtDQUFXO3NCQUFYLFdBQVc7SUFadkIsSUFBQSxlQUFNLEVBQUM7UUFDTixPQUFPLEVBQUUsQ0FBQyxxQkFBWSxDQUFDO1FBQ3ZCLFdBQVcsRUFBRSxDQUFDLGtDQUFlLEVBQUUsc0NBQWlCLENBQUM7UUFDakQsU0FBUyxFQUFFO1lBQ1QsNEJBQVk7WUFDWixnQ0FBYztZQUNkLHNDQUFhO1lBQ2Isc0JBQVM7WUFDVCxtQ0FBZTtTQUNoQjtRQUNELE9BQU8sRUFBRSxDQUFDLDRCQUFZLEVBQUUsZ0NBQWMsQ0FBQztLQUN4QyxDQUFDO0dBQ1csV0FBVyxDQUFHIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy91c2Vycy91c2Vycy5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgQ29uZmlnTW9kdWxlIH0gZnJvbSAnQG5lc3Rqcy9jb25maWcnO1xuaW1wb3J0IHsgVXNlcnNDb250cm9sbGVyIH0gZnJvbSAnLi91c2Vycy5jb250cm9sbGVyJztcbmltcG9ydCB7IFVzZXJzU2VydmljZSB9IGZyb20gJy4vdXNlcnMuc2VydmljZSc7XG5pbXBvcnQgeyBQcm9maWxlQ29udHJvbGxlciB9IGZyb20gJy4vcHJvZmlsZS5jb250cm9sbGVyJztcbmltcG9ydCB7IFByb2ZpbGVTZXJ2aWNlIH0gZnJvbSAnLi9wcm9maWxlLnNlcnZpY2UnO1xuaW1wb3J0IHsgUHJpc21hU2VydmljZSB9IGZyb20gJ3NyYy9wcm92aWRlcnMvcHJpc21hLWNsaWVudC5wcm92aWRlcic7XG5pbXBvcnQgeyBSb2xlVXRpbHMgfSBmcm9tICdzcmMvdXRpbHMvcm9sZS11dGlscyc7XG5pbXBvcnQgeyBFdmVudEJ1c1NlcnZpY2UgfSBmcm9tICcuLi9jb21tb24vZXZlbnRzL2V2ZW50LWJ1cy5zZXJ2aWNlJztcblxuQE1vZHVsZSh7XG4gIGltcG9ydHM6IFtDb25maWdNb2R1bGVdLFxuICBjb250cm9sbGVyczogW1VzZXJzQ29udHJvbGxlciwgUHJvZmlsZUNvbnRyb2xsZXJdLFxuICBwcm92aWRlcnM6IFtcbiAgICBVc2Vyc1NlcnZpY2UsXG4gICAgUHJvZmlsZVNlcnZpY2UsXG4gICAgUHJpc21hU2VydmljZSxcbiAgICBSb2xlVXRpbHMsXG4gICAgRXZlbnRCdXNTZXJ2aWNlLFxuICBdLFxuICBleHBvcnRzOiBbVXNlcnNTZXJ2aWNlLCBQcm9maWxlU2VydmljZV0sXG59KVxuZXhwb3J0IGNsYXNzIFVzZXJzTW9kdWxlIHt9XG4iXSwidmVyc2lvbiI6M30=

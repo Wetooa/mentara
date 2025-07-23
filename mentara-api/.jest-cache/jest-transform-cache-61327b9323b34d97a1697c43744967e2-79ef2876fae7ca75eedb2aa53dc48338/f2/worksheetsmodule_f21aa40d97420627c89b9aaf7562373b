@@ -1,0 +1,33 @@
+bd663fe76bf420443eb168b233aecf7d
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WorksheetsModule = void 0;
+const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
+const worksheets_controller_1 = require("./worksheets.controller");
+const worksheets_service_1 = require("./worksheets.service");
+const prisma_client_provider_1 = require("../providers/prisma-client.provider");
+const worksheet_uploads_controller_1 = require("./worksheet-uploads.controller");
+let WorksheetsModule = class WorksheetsModule {
+};
+exports.WorksheetsModule = WorksheetsModule;
+exports.WorksheetsModule = WorksheetsModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            jwt_1.JwtModule.register({
+                secret: process.env.JWT_SECRET || 'fallback-secret',
+                signOptions: { expiresIn: '1d' },
+            }),
+        ],
+        controllers: [worksheets_controller_1.WorksheetsController, worksheet_uploads_controller_1.WorksheetUploadsController],
+        providers: [worksheets_service_1.WorksheetsService, prisma_client_provider_1.PrismaService],
+        exports: [worksheets_service_1.WorksheetsService],
+    })
+], WorksheetsModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL3dvcmtzaGVldHMvd29ya3NoZWV0cy5tb2R1bGUudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUEsMkNBQXdDO0FBQ3hDLHFDQUF3QztBQUN4QyxtRUFBK0Q7QUFDL0QsNkRBQXlEO0FBQ3pELGdGQUFvRTtBQUNwRSxpRkFBNEU7QUFhckUsSUFBTSxnQkFBZ0IsR0FBdEIsTUFBTSxnQkFBZ0I7Q0FBRyxDQUFBO0FBQW5CLDRDQUFnQjsyQkFBaEIsZ0JBQWdCO0lBWDVCLElBQUEsZUFBTSxFQUFDO1FBQ04sT0FBTyxFQUFFO1lBQ1AsZUFBUyxDQUFDLFFBQVEsQ0FBQztnQkFDakIsTUFBTSxFQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsVUFBVSxJQUFJLGlCQUFpQjtnQkFDbkQsV0FBVyxFQUFFLEVBQUUsU0FBUyxFQUFFLElBQUksRUFBRTthQUNqQyxDQUFDO1NBQ0g7UUFDRCxXQUFXLEVBQUUsQ0FBQyw0Q0FBb0IsRUFBRSx5REFBMEIsQ0FBQztRQUMvRCxTQUFTLEVBQUUsQ0FBQyxzQ0FBaUIsRUFBRSxzQ0FBYSxDQUFDO1FBQzdDLE9BQU8sRUFBRSxDQUFDLHNDQUFpQixDQUFDO0tBQzdCLENBQUM7R0FDVyxnQkFBZ0IsQ0FBRyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvaG9tZS93ZXRvb2EvRG9jdW1lbnRzL2NvZGUvcHJvamVjdHMvbWVudGFyYS9tZW50YXJhLWFwaS9zcmMvd29ya3NoZWV0cy93b3Jrc2hlZXRzLm1vZHVsZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBNb2R1bGUgfSBmcm9tICdAbmVzdGpzL2NvbW1vbic7XG5pbXBvcnQgeyBKd3RNb2R1bGUgfSBmcm9tICdAbmVzdGpzL2p3dCc7XG5pbXBvcnQgeyBXb3Jrc2hlZXRzQ29udHJvbGxlciB9IGZyb20gJy4vd29ya3NoZWV0cy5jb250cm9sbGVyJztcbmltcG9ydCB7IFdvcmtzaGVldHNTZXJ2aWNlIH0gZnJvbSAnLi93b3Jrc2hlZXRzLnNlcnZpY2UnO1xuaW1wb3J0IHsgUHJpc21hU2VydmljZSB9IGZyb20gJy4uL3Byb3ZpZGVycy9wcmlzbWEtY2xpZW50LnByb3ZpZGVyJztcbmltcG9ydCB7IFdvcmtzaGVldFVwbG9hZHNDb250cm9sbGVyIH0gZnJvbSAnLi93b3Jrc2hlZXQtdXBsb2Fkcy5jb250cm9sbGVyJztcblxuQE1vZHVsZSh7XG4gIGltcG9ydHM6IFtcbiAgICBKd3RNb2R1bGUucmVnaXN0ZXIoe1xuICAgICAgc2VjcmV0OiBwcm9jZXNzLmVudi5KV1RfU0VDUkVUIHx8ICdmYWxsYmFjay1zZWNyZXQnLFxuICAgICAgc2lnbk9wdGlvbnM6IHsgZXhwaXJlc0luOiAnMWQnIH0sXG4gICAgfSksXG4gIF0sXG4gIGNvbnRyb2xsZXJzOiBbV29ya3NoZWV0c0NvbnRyb2xsZXIsIFdvcmtzaGVldFVwbG9hZHNDb250cm9sbGVyXSxcbiAgcHJvdmlkZXJzOiBbV29ya3NoZWV0c1NlcnZpY2UsIFByaXNtYVNlcnZpY2VdLFxuICBleHBvcnRzOiBbV29ya3NoZWV0c1NlcnZpY2VdLFxufSlcbmV4cG9ydCBjbGFzcyBXb3Jrc2hlZXRzTW9kdWxlIHt9XG4iXSwidmVyc2lvbiI6M30=

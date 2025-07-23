@@ -1,0 +1,28 @@
+0baf8d290b9bf0822b80acac8eaf3972
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NotificationsModule = void 0;
+const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
+const notifications_service_1 = require("./notifications.service");
+const notifications_controller_1 = require("./notifications.controller");
+const prisma_client_provider_1 = require("src/providers/prisma-client.provider");
+const messaging_module_1 = require("../messaging/messaging.module");
+let NotificationsModule = class NotificationsModule {
+};
+exports.NotificationsModule = NotificationsModule;
+exports.NotificationsModule = NotificationsModule = __decorate([
+    (0, common_1.Module)({
+        imports: [config_1.ConfigModule, messaging_module_1.MessagingModule],
+        controllers: [notifications_controller_1.NotificationsController],
+        providers: [notifications_service_1.NotificationsService, prisma_client_provider_1.PrismaService],
+        exports: [notifications_service_1.NotificationsService],
+    })
+], NotificationsModule);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL25vdGlmaWNhdGlvbnMvbm90aWZpY2F0aW9ucy5tb2R1bGUudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUEsMkNBQXdDO0FBQ3hDLDJDQUE4QztBQUM5QyxtRUFBK0Q7QUFDL0QseUVBQXFFO0FBQ3JFLGlGQUFxRTtBQUNyRSxvRUFBZ0U7QUFRekQsSUFBTSxtQkFBbUIsR0FBekIsTUFBTSxtQkFBbUI7Q0FBRyxDQUFBO0FBQXRCLGtEQUFtQjs4QkFBbkIsbUJBQW1CO0lBTi9CLElBQUEsZUFBTSxFQUFDO1FBQ04sT0FBTyxFQUFFLENBQUMscUJBQVksRUFBRSxrQ0FBZSxDQUFDO1FBQ3hDLFdBQVcsRUFBRSxDQUFDLGtEQUF1QixDQUFDO1FBQ3RDLFNBQVMsRUFBRSxDQUFDLDRDQUFvQixFQUFFLHNDQUFhLENBQUM7UUFDaEQsT0FBTyxFQUFFLENBQUMsNENBQW9CLENBQUM7S0FDaEMsQ0FBQztHQUNXLG1CQUFtQixDQUFHIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9ub3RpZmljYXRpb25zL25vdGlmaWNhdGlvbnMubW9kdWxlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IE1vZHVsZSB9IGZyb20gJ0BuZXN0anMvY29tbW9uJztcbmltcG9ydCB7IENvbmZpZ01vZHVsZSB9IGZyb20gJ0BuZXN0anMvY29uZmlnJztcbmltcG9ydCB7IE5vdGlmaWNhdGlvbnNTZXJ2aWNlIH0gZnJvbSAnLi9ub3RpZmljYXRpb25zLnNlcnZpY2UnO1xuaW1wb3J0IHsgTm90aWZpY2F0aW9uc0NvbnRyb2xsZXIgfSBmcm9tICcuL25vdGlmaWNhdGlvbnMuY29udHJvbGxlcic7XG5pbXBvcnQgeyBQcmlzbWFTZXJ2aWNlIH0gZnJvbSAnc3JjL3Byb3ZpZGVycy9wcmlzbWEtY2xpZW50LnByb3ZpZGVyJztcbmltcG9ydCB7IE1lc3NhZ2luZ01vZHVsZSB9IGZyb20gJy4uL21lc3NhZ2luZy9tZXNzYWdpbmcubW9kdWxlJztcblxuQE1vZHVsZSh7XG4gIGltcG9ydHM6IFtDb25maWdNb2R1bGUsIE1lc3NhZ2luZ01vZHVsZV0sXG4gIGNvbnRyb2xsZXJzOiBbTm90aWZpY2F0aW9uc0NvbnRyb2xsZXJdLFxuICBwcm92aWRlcnM6IFtOb3RpZmljYXRpb25zU2VydmljZSwgUHJpc21hU2VydmljZV0sXG4gIGV4cG9ydHM6IFtOb3RpZmljYXRpb25zU2VydmljZV0sXG59KVxuZXhwb3J0IGNsYXNzIE5vdGlmaWNhdGlvbnNNb2R1bGUge31cbiJdLCJ2ZXJzaW9uIjozfQ==

@@ -1,0 +1,170 @@
+6b460303c7da029090754f2416b267bc
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var AdminTherapistController_1;
+var _a, _b, _c, _d, _e, _f, _g, _h;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AdminTherapistController = void 0;
+const common_1 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
+const current_user_id_decorator_1 = require("../../auth/decorators/current-user-id.decorator");
+const current_user_role_decorator_1 = require("../../auth/decorators/current-user-role.decorator");
+const zod_validation_pipe_1 = require("../../common/pipes/zod-validation.pipe");
+const admin_schemas_1 = require("../validation/admin.schemas");
+const admin_therapist_service_1 = require("../services/admin-therapist.service");
+const admin_response_transformer_1 = require("../transformers/admin-response.transformer");
+let AdminTherapistController = AdminTherapistController_1 = class AdminTherapistController {
+    adminTherapistService;
+    logger = new common_1.Logger(AdminTherapistController_1.name);
+    constructor(adminTherapistService) {
+        this.adminTherapistService = adminTherapistService;
+    }
+    async getPendingApplications(filters, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} fetching pending therapist applications`);
+        const serviceResponse = await this.adminTherapistService.getPendingApplications(filters);
+        return admin_response_transformer_1.AdminResponseTransformer.transformTherapistList(serviceResponse);
+    }
+    async getAllApplications(filters, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} fetching all therapist applications`);
+        const serviceResponse = await this.adminTherapistService.getApplications(filters);
+        return admin_response_transformer_1.AdminResponseTransformer.transformTherapistList(serviceResponse);
+    }
+    async getApplicationDetails(therapistId, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} viewing therapist application ${therapistId}`);
+        const serviceResponse = await this.adminTherapistService.getApplicationDetails(therapistId);
+        return admin_response_transformer_1.AdminResponseTransformer.transformApplicationDetails(serviceResponse);
+    }
+    async approveTherapist(therapistId, approvalDto, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} approving therapist ${therapistId}`);
+        const serviceResponse = await this.adminTherapistService.approveTherapist(therapistId, adminId, approvalDto);
+        return admin_response_transformer_1.AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
+    }
+    async rejectTherapist(therapistId, rejectionDto, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} rejecting therapist ${therapistId}`);
+        const serviceResponse = await this.adminTherapistService.rejectTherapist(therapistId, adminId, rejectionDto);
+        return admin_response_transformer_1.AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
+    }
+    async updateTherapistStatus(therapistId, statusDto, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} updating therapist ${therapistId} status to ${statusDto.status}`);
+        const serviceResponse = await this.adminTherapistService.updateTherapistStatus(therapistId, adminId, statusDto);
+        return admin_response_transformer_1.AdminResponseTransformer.transformActionResponse(serviceResponse, therapistId);
+    }
+    async getTherapistApplicationMetrics(startDate, endDate, adminId, role) {
+        if (role !== 'admin') {
+            throw new common_1.ForbiddenException('Admin access required');
+        }
+        this.logger.log(`Admin ${adminId} fetching therapist application metrics`);
+        const serviceResponse = await this.adminTherapistService.getTherapistApplicationMetrics(startDate, endDate);
+        return admin_response_transformer_1.AdminResponseTransformer.transformApplicationMetrics(serviceResponse);
+    }
+};
+exports.AdminTherapistController = AdminTherapistController;
+__decorate([
+    (0, common_1.Get)('pending'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Query)(new zod_validation_pipe_1.ZodValidationPipe(admin_schemas_1.TherapistFiltersDtoSchema))),
+    __param(1, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(2, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], AdminTherapistController.prototype, "getPendingApplications", null);
+__decorate([
+    (0, common_1.Get)('applications'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Query)(new zod_validation_pipe_1.ZodValidationPipe(admin_schemas_1.TherapistFiltersDtoSchema))),
+    __param(1, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(2, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], AdminTherapistController.prototype, "getAllApplications", null);
+__decorate([
+    (0, common_1.Get)(':id/details'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(2, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], AdminTherapistController.prototype, "getApplicationDetails", null);
+__decorate([
+    (0, common_1.Post)(':id/approve'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)(new zod_validation_pipe_1.ZodValidationPipe(admin_schemas_1.ApproveTherapistDtoSchema))),
+    __param(2, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(3, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, String, String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], AdminTherapistController.prototype, "approveTherapist", null);
+__decorate([
+    (0, common_1.Post)(':id/reject'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)(new zod_validation_pipe_1.ZodValidationPipe(admin_schemas_1.RejectTherapistDtoSchema))),
+    __param(2, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(3, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, String, String]),
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
+], AdminTherapistController.prototype, "rejectTherapist", null);
+__decorate([
+    (0, common_1.Put)(':id/status'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)(new zod_validation_pipe_1.ZodValidationPipe(admin_schemas_1.UpdateTherapistStatusDtoSchema))),
+    __param(2, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(3, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, String, String]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
+], AdminTherapistController.prototype, "updateTherapistStatus", null);
+__decorate([
+    (0, common_1.Get)('metrics'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
+    __param(2, (0, current_user_id_decorator_1.CurrentUserId)()),
+    __param(3, (0, current_user_role_decorator_1.CurrentUserRole)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], AdminTherapistController.prototype, "getTherapistApplicationMetrics", null);
+exports.AdminTherapistController = AdminTherapistController = AdminTherapistController_1 = __decorate([
+    (0, common_1.Controller)('admin/therapists'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof admin_therapist_service_1.AdminTherapistService !== "undefined" && admin_therapist_service_1.AdminTherapistService) === "function" ? _a : Object])
+], AdminTherapistController);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL2hvbWUvd2V0b29hL0RvY3VtZW50cy9jb2RlL3Byb2plY3RzL21lbnRhcmEvbWVudGFyYS1hcGkvc3JjL2FkbWluL2NvbnRyb2xsZXJzL2FkbWluLXRoZXJhcGlzdC5jb250cm9sbGVyLnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsMkNBYXdCO0FBQ3hCLHFFQUFnRTtBQUNoRSwrRkFBZ0Y7QUFDaEYsbUdBQW9GO0FBQ3BGLGdGQUEyRTtBQUMzRSwrREFLcUM7QUFXckMsaUZBQTRFO0FBQzVFLDJGQUFzRjtBQUkvRSxJQUFNLHdCQUF3QixnQ0FBOUIsTUFBTSx3QkFBd0I7SUFHTjtJQUZaLE1BQU0sR0FBRyxJQUFJLGVBQU0sQ0FBQywwQkFBd0IsQ0FBQyxJQUFJLENBQUMsQ0FBQztJQUVwRSxZQUE2QixxQkFBNEM7UUFBNUMsMEJBQXFCLEdBQXJCLHFCQUFxQixDQUF1QjtJQUFHLENBQUM7SUFJdkUsQUFBTixLQUFLLENBQUMsc0JBQXNCLENBRTFCLE9BQW1DLEVBQ2xCLE9BQWUsRUFDYixJQUFZO1FBRS9CLElBQUksSUFBSSxLQUFLLE9BQU8sRUFBRSxDQUFDO1lBQ3JCLE1BQU0sSUFBSSwyQkFBa0IsQ0FBQyx1QkFBdUIsQ0FBQyxDQUFDO1FBQ3hELENBQUM7UUFDRCxJQUFJLENBQUMsTUFBTSxDQUFDLEdBQUcsQ0FBQyxTQUFTLE9BQU8sMENBQTBDLENBQUMsQ0FBQztRQUM1RSxNQUFNLGVBQWUsR0FDbkIsTUFBTSxJQUFJLENBQUMscUJBQXFCLENBQUMsc0JBQXNCLENBQUMsT0FBTyxDQUFDLENBQUM7UUFDbkUsT0FBTyxxREFBd0IsQ0FBQyxzQkFBc0IsQ0FBQyxlQUFlLENBQUMsQ0FBQztJQUMxRSxDQUFDO0lBSUssQUFBTixLQUFLLENBQUMsa0JBQWtCLENBRXRCLE9BQW1DLEVBQ2xCLE9BQWUsRUFDYixJQUFZO1FBRS9CLElBQUksSUFBSSxLQUFLLE9BQU8sRUFBRSxDQUFDO1lBQ3JCLE1BQU0sSUFBSSwyQkFBa0IsQ0FBQyx1QkFBdUIsQ0FBQyxD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Q0FBQyxDQUFBO0lBRTNELFdBQUEsSUFBQSx5Q0FBYSxHQUFFLENBQUE7SUFDZixXQUFBLElBQUEsNkNBQWUsR0FBRSxDQUFBOzs7d0RBQ2pCLE9BQU8sb0JBQVAsT0FBTztxRUFpQlQ7QUFJSztJQUZMLElBQUEsWUFBRyxFQUFDLFNBQVMsQ0FBQztJQUNkLElBQUEsaUJBQVEsRUFBQyxtQkFBVSxDQUFDLEVBQUUsQ0FBQztJQUVyQixXQUFBLElBQUEsY0FBSyxFQUFDLFdBQVcsQ0FBQyxDQUFBO0lBQ2xCLFdBQUEsSUFBQSxjQUFLLEVBQUMsU0FBUyxDQUFDLENBQUE7SUFDaEIsV0FBQSxJQUFBLHlDQUFhLEdBQUUsQ0FBQTtJQUNmLFdBQUEsSUFBQSw2Q0FBZSxHQUFFLENBQUE7Ozt3REFDakIsT0FBTyxvQkFBUCxPQUFPOzhFQWFUO21DQTFKVSx3QkFBd0I7SUFGcEMsSUFBQSxtQkFBVSxFQUFDLGtCQUFrQixDQUFDO0lBQzlCLElBQUEsa0JBQVMsRUFBQyw2QkFBWSxDQUFDO3lEQUk4QiwrQ0FBcUIsb0JBQXJCLCtDQUFxQjtHQUg5RCx3QkFBd0IsQ0EySnBDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9ob21lL3dldG9vYS9Eb2N1bWVudHMvY29kZS9wcm9qZWN0cy9tZW50YXJhL21lbnRhcmEtYXBpL3NyYy9hZG1pbi9jb250cm9sbGVycy9hZG1pbi10aGVyYXBpc3QuY29udHJvbGxlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge1xuICBDb250cm9sbGVyLFxuICBHZXQsXG4gIFBvc3QsXG4gIFB1dCxcbiAgUGFyYW0sXG4gIEJvZHksXG4gIFF1ZXJ5LFxuICBVc2VHdWFyZHMsXG4gIEh0dHBDb2RlLFxuICBIdHRwU3RhdHVzLFxuICBMb2dnZXIsXG4gIEZvcmJpZGRlbkV4Y2VwdGlvbixcbn0gZnJvbSAnQG5lc3Rqcy9jb21tb24nO1xuaW1wb3J0IHsgSnd0QXV0aEd1YXJkIH0gZnJvbSAnLi4vLi4vYXV0aC9ndWFyZHMvand0LWF1dGguZ3VhcmQnO1xuaW1wb3J0IHsgQ3VycmVudFVzZXJJZCB9IGZyb20gJy4uLy4uL2F1dGgvZGVjb3JhdG9ycy9jdXJyZW50LXVzZXItaWQuZGVjb3JhdG9yJztcbmltcG9ydCB7IEN1cnJlbnRVc2VyUm9sZSB9IGZyb20gJy4uLy4uL2F1dGgvZGVjb3JhdG9ycy9jdXJyZW50LXVzZXItcm9sZS5kZWNvcmF0b3InO1xuaW1wb3J0IHsgWm9kVmFsaWRhdGlvblBpcGUgfSBmcm9tICcuLi8uLi9jb21tb24vcGlwZXMvem9kLXZhbGlkYXRpb24ucGlwZSc7XG5pbXBvcnQge1xuICBBcHByb3ZlVGhlcmFwaXN0RHRvU2NoZW1hLFxuICBSZWplY3RUaGVyYXBpc3REdG9TY2hlbWEsXG4gIFVwZGF0ZVRoZXJhcGlzdFN0YXR1c0R0b1NjaGVtYSxcbiAgVGhlcmFwaXN0RmlsdGVyc0R0b1NjaGVtYSxcbn0gZnJvbSAnLi4vdmFsaWRhdGlvbi9hZG1pbi5zY2hlbWFzJztcbmltcG9ydCB0eXBlIHtcbiAgQXBwcm92ZVRoZXJhcGlzdER0byxcbiAgUmVqZWN0VGhlcmFwaXN0RHRvLFxuICBVcGRhdGVUaGVyYXBpc3RTdGF0dXNEdG8sXG4gIFBlbmRpbmdUaGVyYXBpc3RGaWx0ZXJzRHRvLFxuICBUaGVyYXBpc3RBcHBsaWNhdGlvbkRldGFpbHNSZXNwb25zZSxcbiAgVGhlcmFwaXN0QWN0aW9uUmVzcG9uc2UsXG4gIFRoZXJhcGlzdEFwcGxpY2F0aW9uTWV0cmljc1Jlc3BvbnNlLFxuICBUaGVyYXBpc3RMaXN0UmVzcG9uc2UsXG59IGZyb20gJy4uL3R5cGVzJztcbmltcG9ydCB7IEFkbWluVGhlcmFwaXN0U2VydmljZSB9IGZyb20gJy4uL3NlcnZpY2VzL2FkbWluLXRoZXJhcGlzdC5zZXJ2aWNlJztcbmltcG9ydCB7IEFkbWluUmVzcG9uc2VUcmFuc2Zvcm1lciB9IGZyb20gJy4uL3RyYW5zZm9ybWVycy9hZG1pbi1yZXNwb25zZS50cmFuc2Zvcm1lcic7XG5cbkBDb250cm9sbGVyKCdhZG1pbi90aGVyYXBpc3RzJylcbkBVc2VHdWFyZHMoSnd0QXV0aEd1YXJkKVxuZXhwb3J0IGNsYXNzIEFkbWluVGhlcmFwaXN0Q29udHJvbGxlciB7XG4gIHByaXZhdGUgcmVhZG9ubHkgbG9nZ2VyID0gbmV3IExvZ2dlcihBZG1pblRoZXJhcGlzdENvbnRyb2xsZXIubmFtZSk7XG5cbiAgY29uc3RydWN0b3IocHJpdmF0ZSByZWFkb25seSBhZG1pblRoZXJhcGlzdFNlcnZpY2U6IEFkbWluVGhlcmFwaXN0U2VydmljZSkge31cblxuICBAR2V0KCdwZW5kaW5nJylcbiAgQEh0dHBDb2RlKEh0dHBTdGF0dXMuT0spXG4gIGFzeW5jIGdldFBlbmRpbmdBcHBsaWNhdGlvbnMoXG4gICAgQFF1ZXJ5KG5ldyBab2RWYWxpZGF0aW9uUGlwZShUaGVyYXBpc3RGaWx0ZXJzRHRvU2NoZW1hKSlcbiAgICBmaWx0ZXJzOiBQZW5kaW5nVGhlcmFwaXN0RmlsdGVyc0R0byxcbiAgICBAQ3VycmVudFVzZXJJZCgpIGFkbWluSWQ6IHN0cmluZyxcbiAgICBAQ3VycmVudFVzZXJSb2xlKCkgcm9sZTogc3RyaW5nLFxuICApOiBQcm9taXNlPFRoZXJhcGlzdExpc3RSZXNwb25zZT4ge1xuICAgIGlmIChyb2xlICE9PSAnYWRtaW4nKSB7XG4gICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKCdBZG1pbiBhY2Nlc3MgcmVxdWlyZWQnKTtcbiAgICB9XG4gICAgdGhpcy5sb2dnZXIubG9nKGBBZG1pbiAke2FkbWluSWR9IGZldGNoaW5nIHBlbmRpbmcgdGhlcmFwaXN0IGFwcGxpY2F0aW9uc2ApO1xuICAgIGNvbnN0IHNlcnZpY2VSZXNwb25zZSA9XG4gICAgICBhd2FpdCB0aGlzLmFkbWluVGhlcmFwaXN0U2VydmljZS5nZXRQZW5kaW5nQXBwbGljYXRpb25zKGZpbHRlcnMpO1xuICAgIHJldHVybiBBZG1pblJlc3BvbnNlVHJhbnNmb3JtZXIudHJhbnNmb3JtVGhlcmFwaXN0TGlzdChzZXJ2aWNlUmVzcG9uc2UpO1xuICB9XG5cbiAgQEdldCgnYXBwbGljYXRpb25zJylcbiAgQEh0dHBDb2RlKEh0dHBTdGF0dXMuT0spXG4gIGFzeW5jIGdldEFsbEFwcGxpY2F0aW9ucyhcbiAgICBAUXVlcnkobmV3IFpvZFZhbGlkYXRpb25QaXBlKFRoZXJhcGlzdEZpbHRlcnNEdG9TY2hlbWEpKVxuICAgIGZpbHRlcnM6IFBlbmRpbmdUaGVyYXBpc3RGaWx0ZXJzRHRvLFxuICAgIEBDdXJyZW50VXNlcklkKCkgYWRtaW5JZDogc3RyaW5nLFxuICAgIEBDdXJyZW50VXNlclJvbGUoKSByb2xlOiBzdHJpbmcsXG4gICk6IFByb21pc2U8VGhlcmFwaXN0TGlzdFJlc3BvbnNlPiB7XG4gICAgaWYgKHJvbGUgIT09ICdhZG1pbicpIHtcbiAgICAgIHRocm93IG5ldyBGb3JiaWRkZW5FeGNlcHRpb24oJ0FkbWluIGFjY2VzcyByZXF1aXJlZCcpO1xuICAgIH1cbiAgICB0aGlzLmxvZ2dlci5sb2coYEFkbWluICR7YWRtaW5JZH0gZmV0Y2hpbmcgYWxsIHRoZXJhcGlzdCBhcHBsaWNhdGlvbnNgKTtcbiAgICBjb25zdCBzZXJ2aWNlUmVzcG9uc2UgPVxuICAgICAgYXdhaXQgdGhpcy5hZG1pblRoZXJhcGlzdFNlcnZpY2UuZ2V0QXBwbGljYXRpb25zKGZpbHRlcnMpO1xuICAgIHJldHVybiBBZG1pblJlc3BvbnNlVHJhbnNmb3JtZXIudHJhbnNmb3JtVGhlcmFwaXN0TGlzdChzZXJ2aWNlUmVzcG9uc2UpO1xuICB9XG5cbiAgQEdldCgnOmlkL2RldGFpbHMnKVxuICBASHR0cENvZGUoSHR0cFN0YXR1cy5PSylcbiAgYXN5bmMgZ2V0QXBwbGljYXRpb25EZXRhaWxzKFxuICAgIEBQYXJhbSgnaWQnKSB0aGVyYXBpc3RJZDogc3RyaW5nLFxuICAgIEBDdXJyZW50VXNlcklkKCkgYWRtaW5JZDogc3RyaW5nLFxuICAgIEBDdXJyZW50VXNlclJvbGUoKSByb2xlOiBzdHJpbmcsXG4gICk6IFByb21pc2U8VGhlcmFwaXN0QXBwbGljYXRpb25EZXRhaWxzUmVzcG9uc2U+IHtcbiAgICBpZiAocm9sZSAhPT0gJ2FkbWluJykge1xuICAgICAgdGhyb3cgbmV3IEZvcmJpZGRlbkV4Y2VwdGlvbignQWRtaW4gYWNjZXNzIHJlcXVpcmVkJyk7XG4gICAgfVxuICAgIHRoaXMubG9nZ2VyLmxvZyhcbiAgICAgIGBBZG1pbiAke2FkbWluSWR9IHZpZXdpbmcgdGhlcmFwaXN0IGFwcGxpY2F0aW9uICR7dGhlcmFwaXN0SWR9YCxcbiAgICApO1xuICAgIGNvbnN0IHNlcnZpY2VSZXNwb25zZSA9XG4gICAgICBhd2FpdCB0aGlzLmFkbWluVGhlcmFwaXN0U2VydmljZS5nZXRBcHBsaWNhdGlvbkRldGFpbHModGhlcmFwaXN0SWQpO1xuICAgIHJldHVybiBBZG1pblJlc3BvbnNlVHJhbnNmb3JtZXIudHJhbnNmb3JtQXBwbGljYXRpb25EZXRhaWxzKFxuICAgICAgc2VydmljZVJlc3BvbnNlLFxuICAgICk7XG4gIH1cblxuICBAUG9zdCgnOmlkL2FwcHJvdmUnKVxuICBASHR0cENvZGUoSHR0cFN0YXR1cy5PSylcbiAgYXN5bmMgYXBwcm92ZVRoZXJhcGlzdChcbiAgICBAUGFyYW0oJ2lkJykgdGhlcmFwaXN0SWQ6IHN0cmluZyxcbiAgICBAQm9keShuZXcgWm9kVmFsaWRhdGlvblBpcGUoQXBwcm92ZVRoZXJhcGlzdER0b1NjaGVtYSkpXG4gICAgYXBwcm92YWxEdG86IEFwcHJvdmVUaGVyYXBpc3REdG8sXG4gICAgQEN1cnJlbnRVc2VySWQoKSBhZG1pbklkOiBzdHJpbmcsXG4gICAgQEN1cnJlbnRVc2VyUm9sZSgpIHJvbGU6IHN0cmluZyxcbiAgKTogUHJvbWlzZTxUaGVyYXBpc3RBY3Rpb25SZXNwb25zZT4ge1xuICAgIGlmIChyb2xlICE9PSAnYWRtaW4nKSB7XG4gICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKCdBZG1pbiBhY2Nlc3MgcmVxdWlyZWQnKTtcbiAgICB9XG4gICAgdGhpcy5sb2dnZXIubG9nKGBBZG1pbiAke2FkbWluSWR9IGFwcHJvdmluZyB0aGVyYXBpc3QgJHt0aGVyYXBpc3RJZH1gKTtcbiAgICBjb25zdCBzZXJ2aWNlUmVzcG9uc2UgPSBhd2FpdCB0aGlzLmFkbWluVGhlcmFwaXN0U2VydmljZS5hcHByb3ZlVGhlcmFwaXN0KFxuICAgICAgdGhlcmFwaXN0SWQsXG4gICAgICBhZG1pbklkLFxuICAgICAgYXBwcm92YWxEdG8sXG4gICAgKTtcbiAgICByZXR1cm4gQWRtaW5SZXNwb25zZVRyYW5zZm9ybWVyLnRyYW5zZm9ybUFjdGlvblJlc3BvbnNlKFxuICAgICAgc2VydmljZVJlc3BvbnNlLFxuICAgICAgdGhlcmFwaXN0SWQsXG4gICAgKTtcbiAgfVxuXG4gIEBQb3N0KCc6aWQvcmVqZWN0JylcbiAgQEh0dHBDb2RlKEh0dHBTdGF0dXMuT0spXG4gIGFzeW5jIHJlamVjdFRoZXJhcGlzdChcbiAgICBAUGFyYW0oJ2lkJykgdGhlcmFwaXN0SWQ6IHN0cmluZyxcbiAgICBAQm9keShuZXcgWm9kVmFsaWRhdGlvblBpcGUoUmVqZWN0VGhlcmFwaXN0RHRvU2NoZW1hKSlcbiAgICByZWplY3Rpb25EdG86IFJlamVjdFRoZXJhcGlzdER0byxcbiAgICBAQ3VycmVudFVzZXJJZCgpIGFkbWluSWQ6IHN0cmluZyxcbiAgICBAQ3VycmVudFVzZXJSb2xlKCkgcm9sZTogc3RyaW5nLFxuICApOiBQcm9taXNlPFRoZXJhcGlzdEFjdGlvblJlc3BvbnNlPiB7XG4gICAgaWYgKHJvbGUgIT09ICdhZG1pbicpIHtcbiAgICAgIHRocm93IG5ldyBGb3JiaWRkZW5FeGNlcHRpb24oJ0FkbWluIGFjY2VzcyByZXF1aXJlZCcpO1xuICAgIH1cbiAgICB0aGlzLmxvZ2dlci5sb2coYEFkbWluICR7YWRtaW5JZH0gcmVqZWN0aW5nIHRoZXJhcGlzdCAke3RoZXJhcGlzdElkfWApO1xuICAgIGNvbnN0IHNlcnZpY2VSZXNwb25zZSA9IGF3YWl0IHRoaXMuYWRtaW5UaGVyYXBpc3RTZXJ2aWNlLnJlamVjdFRoZXJhcGlzdChcbiAgICAgIHRoZXJhcGlzdElkLFxuICAgICAgYWRtaW5JZCxcbiAgICAgIHJlamVjdGlvbkR0byxcbiAgICApO1xuICAgIHJldHVybiBBZG1pblJlc3BvbnNlVHJhbnNmb3JtZXIudHJhbnNmb3JtQWN0aW9uUmVzcG9uc2UoXG4gICAgICBzZXJ2aWNlUmVzcG9uc2UsXG4gICAgICB0aGVyYXBpc3RJZCxcbiAgICApO1xuICB9XG5cbiAgQFB1dCgnOmlkL3N0YXR1cycpXG4gIEBIdHRwQ29kZShIdHRwU3RhdHVzLk9LKVxuICBhc3luYyB1cGRhdGVUaGVyYXBpc3RTdGF0dXMoXG4gICAgQFBhcmFtKCdpZCcpIHRoZXJhcGlzdElkOiBzdHJpbmcsXG4gICAgQEJvZHkobmV3IFpvZFZhbGlkYXRpb25QaXBlKFVwZGF0ZVRoZXJhcGlzdFN0YXR1c0R0b1NjaGVtYSkpXG4gICAgc3RhdHVzRHRvOiBVcGRhdGVUaGVyYXBpc3RTdGF0dXNEdG8sXG4gICAgQEN1cnJlbnRVc2VySWQoKSBhZG1pbklkOiBzdHJpbmcsXG4gICAgQEN1cnJlbnRVc2VyUm9sZSgpIHJvbGU6IHN0cmluZyxcbiAgKTogUHJvbWlzZTxUaGVyYXBpc3RBY3Rpb25SZXNwb25zZT4ge1xuICAgIGlmIChyb2xlICE9PSAnYWRtaW4nKSB7XG4gICAgICB0aHJvdyBuZXcgRm9yYmlkZGVuRXhjZXB0aW9uKCdBZG1pbiBhY2Nlc3MgcmVxdWlyZWQnKTtcbiAgICB9XG4gICAgdGhpcy5sb2dnZXIubG9nKFxuICAgICAgYEFkbWluICR7YWRtaW5JZH0gdXBkYXRpbmcgdGhlcmFwaXN0ICR7dGhlcmFwaXN0SWR9IHN0YXR1cyB0byAke3N0YXR1c0R0by5zdGF0dXN9YCxcbiAgICApO1xuICAgIGNvbnN0IHNlcnZpY2VSZXNwb25zZSA9XG4gICAgICBhd2FpdCB0aGlzLmFkbWluVGhlcmFwaXN0U2VydmljZS51cGRhdGVUaGVyYXBpc3RTdGF0dXMoXG4gICAgICAgIHRoZXJhcGlzdElkLFxuICAgICAgICBhZG1pbklkLFxuICAgICAgICBzdGF0dXNEdG8sXG4gICAgICApO1xuICAgIHJldHVybiBBZG1pblJlc3BvbnNlVHJhbnNmb3JtZXIudHJhbnNmb3JtQWN0aW9uUmVzcG9uc2UoXG4gICAgICBzZXJ2aWNlUmVzcG9uc2UsXG4gICAgICB0aGVyYXBpc3RJZCxcbiAgICApO1xuICB9XG5cbiAgQEdldCgnbWV0cmljcycpXG4gIEBIdHRwQ29kZShIdHRwU3RhdHVzLk9LKVxuICBhc3luYyBnZXRUaGVyYXBpc3RBcHBsaWNhdGlvbk1ldHJpY3MoXG4gICAgQFF1ZXJ5KCdzdGFydERhdGUnKSBzdGFydERhdGU/OiBzdHJpbmcsXG4gICAgQFF1ZXJ5KCdlbmREYXRlJykgZW5kRGF0ZT86IHN0cmluZyxcbiAgICBAQ3VycmVudFVzZXJJZCgpIGFkbWluSWQ/OiBzdHJpbmcsXG4gICAgQEN1cnJlbnRVc2VyUm9sZSgpIHJvbGU/OiBzdHJpbmcsXG4gICk6IFByb21pc2U8VGhlcmFwaXN0QXBwbGljYXRpb25NZXRyaWNzUmVzcG9uc2U+IHtcbiAgICBpZiAocm9sZSAhPT0gJ2FkbWluJykge1xuICAgICAgdGhyb3cgbmV3IEZvcmJpZGRlbkV4Y2VwdGlvbignQWRtaW4gYWNjZXNzIHJlcXVpcmVkJyk7XG4gICAgfVxuICAgIHRoaXMubG9nZ2VyLmxvZyhgQWRtaW4gJHthZG1pbklkfSBmZXRjaGluZyB0aGVyYXBpc3QgYXBwbGljYXRpb24gbWV0cmljc2ApO1xuICAgIGNvbnN0IHNlcnZpY2VSZXNwb25zZSA9XG4gICAgICBhd2FpdCB0aGlzLmFkbWluVGhlcmFwaXN0U2VydmljZS5nZXRUaGVyYXBpc3RBcHBsaWNhdGlvbk1ldHJpY3MoXG4gICAgICAgIHN0YXJ0RGF0ZSxcbiAgICAgICAgZW5kRGF0ZSxcbiAgICAgICk7XG4gICAgcmV0dXJuIEFkbWluUmVzcG9uc2VUcmFuc2Zvcm1lci50cmFuc2Zvcm1BcHBsaWNhdGlvbk1ldHJpY3MoXG4gICAgICBzZXJ2aWNlUmVzcG9uc2UsXG4gICAgKTtcbiAgfVxufVxuIl0sInZlcnNpb24iOjN9
