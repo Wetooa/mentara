@@ -172,8 +172,22 @@ export async function seedPayments(
   // Create some standalone payments (not linked to meetings - could be consultations, etc.)
   const standaloneCount = Math.floor(payments.length * 0.2); // 20% of meeting payments
   
-  for (let i = 0; i < standaloneCount; i++) {
-    const clientMethod = faker.helpers.arrayElement(paymentMethods);
+  // Filter payment methods to only those belonging to actual clients
+  const clientPaymentMethods = [];
+  for (const method of paymentMethods) {
+    const client = await prisma.client.findUnique({
+      where: { userId: method.userId }
+    });
+    if (client) {
+      clientPaymentMethods.push(method);
+    }
+  }
+  
+  if (clientPaymentMethods.length === 0) {
+    console.log('⚠️ No payment methods from actual clients found, skipping standalone payments');
+  } else {
+    for (let i = 0; i < standaloneCount; i++) {
+      const clientMethod = faker.helpers.arrayElement(clientPaymentMethods);
     
     // Find a therapist (any therapist) for standalone payment
     const therapists = await prisma.therapist.findMany({
@@ -190,7 +204,7 @@ export async function seedPayments(
         amount,
         currency: 'USD',
         status: 'COMPLETED',
-        clientId: clientMethod.userId,
+        clientId: clientMethod.userId, // This is now guaranteed to be a valid Client.userId
         therapistId: therapist.userId,
         meetingId: null, // Standalone payment
         paymentMethodId: clientMethod.id,
@@ -199,6 +213,7 @@ export async function seedPayments(
     });
 
     payments.push(payment);
+    }
   }
 
   console.log(`✅ Created ${payments.length} payment transactions`);
