@@ -9,7 +9,7 @@ import {
   useRef,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { TOKEN_STORAGE_KEY, hasAuthToken } from "@/lib/constants/auth";
@@ -89,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
   const api = useApi();
+  const queryClient = useQueryClient();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [isClient, setIsClient] = useState(false);
 
@@ -292,6 +293,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function
   const logout = () => {
+    // Clear React Query cache to prevent stale authentication data
+    queryClient.clear();
+    
     if (isClient) {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
     }
