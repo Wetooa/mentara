@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SessionsList, SessionStats } from "@/components/sessions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Calendar, ArrowLeft, Bell, Video } from "lucide-react";
+import { CalendarModal } from "@/components/calendar/CalendarModal";
 import { motion } from "framer-motion";
 import type { Meeting } from "@/lib/api/services/meetings";
 
@@ -46,9 +48,10 @@ export default function UpcomingSessionsPage() {
     router.push('/client/booking');
   };
 
+  const [calendarModalOpen, setCalendarModalOpen] = useState(false);
+
   const handleViewCalendar = () => {
-    // This could link to a calendar view in the future
-    router.push('/client/booking');
+    setCalendarModalOpen(true);
   };
 
   return (
@@ -174,6 +177,12 @@ export default function UpcomingSessionsPage() {
           />
         </div>
       </motion.div>
+
+      {/* Calendar Modal */}
+      <CalendarModal
+        isOpen={calendarModalOpen}
+        onOpenChange={setCalendarModalOpen}
+      />
     </motion.div>
   );
 }

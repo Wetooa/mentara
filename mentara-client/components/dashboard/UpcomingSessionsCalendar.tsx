@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EnhancedCalendar } from "@/components/ui/enhanced-calendar";
 import { useCalendarMeetings } from "@/hooks/calendar/useCalendarMeetings";
-import { CalendarDays, ArrowRight, RefreshCw } from "lucide-react";
+import { CalendarDays, ArrowRight, RefreshCw, Maximize2 } from "lucide-react";
 import { format, isToday, isTomorrow, isYesterday } from "date-fns";
 import { useRouter } from "next/navigation";
+import { CalendarModal } from "@/components/calendar/CalendarModal";
 
 interface UpcomingSessionsCalendarProps {
   className?: string;
@@ -67,15 +68,25 @@ export default function UpcomingSessionsCalendar({ className }: UpcomingSessions
           <CalendarDays className="h-4 w-4" />
           Sessions Calendar
         </CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={handleViewAllSessions}
-          className="text-xs"
-        >
-          View All
-          <ArrowRight className="h-3 w-3 ml-1" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <CalendarModal
+            trigger={
+              <Button variant="ghost" size="sm" className="text-xs">
+                <Maximize2 className="h-3 w-3 mr-1" />
+                Full View
+              </Button>
+            }
+          />
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleViewAllSessions}
+            className="text-xs"
+          >
+            View All
+            <ArrowRight className="h-3 w-3 ml-1" />
+          </Button>
+        </div>
       </CardHeader>
       
       <CardContent className="space-y-4">
